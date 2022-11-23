@@ -1,0 +1,9 @@
+## Interface: 100002
+## Title: Frame Sort
+## Notes: Places the player frame at the top or bottom (configurable).
+## Author: Vers - Dath'Remar
+## Version: 0.2
+## SavedVariables: Options
+
+Core.lua
+Options.lua
