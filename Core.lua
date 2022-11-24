@@ -20,16 +20,10 @@ function addon:OnLoadAddon(_, addOnName)
     addon:InitOptions()
 end
 
--- invoked when configuration changes which will then perform a resort
-function addon:ConfigChanged()
-    addon.NeedsSort = true
-    addon:TrySort()
-end
-
 -- listens for events where we should refresh the party frames
 function addon:OnEvent(eventName, _)
     if eventName == "GROUP_ROSTER_UPDATE" then
-        -- group has changed, flag that we need to resort
+        -- group has changed, flag that we need to re-sort
         addon.NeedsSort = true
     end
 
@@ -49,19 +43,26 @@ function addon:TrySort()
     if InCombatLockdown() then return false end
     -- don't try if edit mode is active
     if EditModeManagerFrame.editModeActive then return false end
-    -- if for any other reason we can't touch the frame
-    if CompactPartyFrame:IsForbidden() or CompactRaidFrameContainer:IsForbidden() then return false end
 
-    if addon.Options.PartySortEnabled then
-        CompactPartyFrame_SetFlowSortFunction(function(x, y) return addon:CompareParty(x, y) end)
+    local maxPartySize = 5
+    local partySize = GetNumGroupMembers()
+
+    if partySize <= maxPartySize then
+        -- we're in a party
+        if not addon.Options.PartySortEnabled then return false end
+        if CompactPartyFrame:IsForbidden() then return false end
+
+        CompactPartyFrame_SetFlowSortFunction((function(x, y) return addon:CompareParty(x, y) end))
         -- immediately after sorting, unset the sort function
         -- might help with avoiding taint issues
         -- this shouldn't be necessary and can be removed once blizzard fix their side
         CompactPartyFrame.flowSortFunc = nil
-    end
+    else
+        -- we're in a raid
+        if not addon.Options.RaidSortEnabled then return false end
+        if CompactRaidFrameContainer:IsForbidden() then return false end
 
-    if addon.Options.RaidSortEnabled then
-        CompactRaidFrameContainer:SetFlowSortFunction(function(x, y) return addon:CompareRaid(x, y) end)
+        CompactRaidFrameContainer:SetFlowSortFunction((function(x, y) return addon:CompareRaid(x, y) end))
         CompactRaidFrameContainer.flowSortFunc = nil
     end
 
@@ -81,7 +82,6 @@ function addon:CompareRaid(leftToken, rightToken)
     else return leftToken < rightToken end
 end
 
--- compares player tokens (e.g. "player", "party1", "party2") according to the configured sorting mode
 function addon:CompareParty(leftToken, rightToken)
     if not UnitExists(leftToken) then return false
     elseif not UnitExists(rightToken) then return true
