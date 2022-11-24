@@ -146,6 +146,12 @@ function builder:BuildRaidSortMode(panel)
     end)
 end
 
+-- invoked when configuration changes which will then perform a re-sort
+function addon:ConfigChanged()
+    addon.NeedsSort = true
+    addon:TrySort()
+end
+
 function addon:InitOptions()
     local panel = CreateFrame("Frame")
     panel.name = addonName
