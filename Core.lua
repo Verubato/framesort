@@ -107,6 +107,6 @@ addon.EventLoop:RegisterEvent("GROUP_ROSTER_UPDATE")
 -- Useful for determining when a player has left combat.
 -- This occurs when you are not on the hate list of any NPC, or a few seconds after the latest pvp attack that you were involved with.
 addon.EventLoop:RegisterEvent("PLAYER_REGEN_ENABLED")
---Fires when the player logs in, /reloads the UI or zones between map instances.
+-- Fires when the player logs in, /reloads the UI or zones between map instances.
 -- Basically whenever the loading screen appears.
 addon.EventLoop:RegisterEvent("PLAYER_ENTERING_WORLD")
