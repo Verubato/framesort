@@ -87,6 +87,9 @@ function addon:CompareParty(leftToken, rightToken)
     elseif not UnitExists(rightToken) then return true
     elseif UnitIsUnit(leftToken, "player") then return addon.Options.PlayerSortMode == "Top"
     elseif UnitIsUnit(rightToken, "player") then return addon.Options.PlayerSortMode == "Bottom"
+    elseif addon.Options.PartySortMode == "Group" then return CRFSort_Group(leftToken, rightToken)
+    elseif addon.Options.PartySortMode == "Role" then return CRFSort_Role(leftToken, rightToken)
+    elseif addon.Options.PartySortMode == "Alphabetical" then return CRFSort_Alphabetical(leftToken, rightToken)
     else return leftToken < rightToken end
 end
 
