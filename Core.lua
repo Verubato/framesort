@@ -1,15 +1,6 @@
 ---@diagnostic disable: undefined-global
 local addonName, addon = ...
 
--- default configuration
-addon.Defaults = {
-    PlayerSortMode = "Top",
-    RaidSortMode = "Role",
-    PartySortMode = "Group",
-    RaidSortEnabled = false,
-    PartySortEnabled = true
-}
-
 -- listens for addon onload events
 function addon:OnLoadAddon(_, addOnName)
     if addOnName ~= addonName then return end
@@ -52,7 +43,7 @@ function addon:TrySort()
         if not addon.Options.PartySortEnabled then return false end
         if CompactPartyFrame:IsForbidden() then return false end
 
-        CompactPartyFrame_SetFlowSortFunction((function(x, y) return addon:CompareParty(x, y) end))
+        CompactPartyFrame_SetFlowSortFunction((function(x, y) return addon:Compare(x, y, addon.Options.PlayerSortMode, addon.Options.PartySortMode) end))
         -- immediately after sorting, unset the sort function
         -- might help with avoiding taint issues
         -- this shouldn't be necessary and can be removed once blizzard fix their side
@@ -62,7 +53,7 @@ function addon:TrySort()
         if not addon.Options.RaidSortEnabled then return false end
         if CompactRaidFrameContainer:IsForbidden() then return false end
 
-        CompactRaidFrameContainer:SetFlowSortFunction((function(x, y) return addon:CompareRaid(x, y) end))
+        CompactRaidFrameContainer:SetFlowSortFunction((function(x, y) return addon:Compare(x, y, addon.Options.PlayerSortMode, addon.Options.RaidSortMode) end))
         CompactRaidFrameContainer.flowSortFunc = nil
     end
 
@@ -71,25 +62,14 @@ function addon:TrySort()
     return true
 end
 
-function addon:CompareRaid(leftToken, rightToken)
+function addon:Compare(leftToken, rightToken, playerSortMode, groupSortMode)
     if not UnitExists(leftToken) then return false
     elseif not UnitExists(rightToken) then return true
-    elseif UnitIsUnit(leftToken, "player") then return addon.Options.PlayerSortMode == "Top"
-    elseif UnitIsUnit(rightToken, "player") then return addon.Options.PlayerSortMode == "Bottom"
-    elseif addon.Options.RaidSortMode == "Group" then return CRFSort_Group(leftToken, rightToken)
-    elseif addon.Options.RaidSortMode == "Role" then return CRFSort_Role(leftToken, rightToken)
-    elseif addon.Options.RaidSortMode == "Alphabetical" then return CRFSort_Alphabetical(leftToken, rightToken)
-    else return leftToken < rightToken end
-end
-
-function addon:CompareParty(leftToken, rightToken)
-    if not UnitExists(leftToken) then return false
-    elseif not UnitExists(rightToken) then return true
-    elseif UnitIsUnit(leftToken, "player") then return addon.Options.PlayerSortMode == "Top"
-    elseif UnitIsUnit(rightToken, "player") then return addon.Options.PlayerSortMode == "Bottom"
-    elseif addon.Options.PartySortMode == "Group" then return CRFSort_Group(leftToken, rightToken)
-    elseif addon.Options.PartySortMode == "Role" then return CRFSort_Role(leftToken, rightToken)
-    elseif addon.Options.PartySortMode == "Alphabetical" then return CRFSort_Alphabetical(leftToken, rightToken)
+    elseif UnitIsUnit(leftToken, "player") then return playerSortMode == addon.SortMode.Top
+    elseif UnitIsUnit(rightToken, "player") then return playerSortMode == addon.SortMode.Bottom
+    elseif groupSortMode == addon.SortMode.Group then return CRFSort_Group(leftToken, rightToken)
+    elseif groupSortMode == addon.SortMode.Role then return CRFSort_Role(leftToken, rightToken)
+    elseif groupSortMode == addon.SortMode.Alphabetical then return CRFSort_Alphabetical(leftToken, rightToken)
     else return leftToken < rightToken end
 end
 
