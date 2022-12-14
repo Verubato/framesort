@@ -1,14 +1,25 @@
 ---@diagnostic disable: undefined-global
 local addonName, addon = ...
-
 local builder = {}
-local sortModeGroup = "Group"
-local sortModeRole = "Role"
-local sortModeAlphabetical = "Alphabetical"
-local sortModeTop = "Top"
-local sortModeBottom = "Bottom"
 local verticalSpacing = -16
 local horizontalSpacing = 50
+
+-- default configuration
+addon.Defaults = {
+    PlayerSortMode = "Top",
+    RaidSortMode = "Role",
+    PartySortMode = "Group",
+    RaidSortEnabled = false,
+    PartySortEnabled = true
+}
+
+addon.SortMode = {
+    Group = "Group",
+    Role = "Role",
+    Alphabetical = "Alphabetical",
+    Top = "Top",
+    Bottom = "Bottom"
+}
 
 function builder:BuiltTitle(panel)
     local title = panel:CreateFontString("lblTitle", "ARTWORK", "GameFontNormalLarge")
@@ -30,8 +41,9 @@ function builder.BuildSortEnabled(panel)
     party.Text:SetText("Sort Party Frames?")
     party:SetChecked(addon.Options.PartySortEnabled)
     party:HookScript("OnClick", function(_, _, _)
-        addon.Options.PartySortEnabled = party:GetChecked()
-        addon:ConfigChanged()
+        local enabled = party:GetChecked()
+        addon.Options.PartySortEnabled = enabled
+        addon:ConfigChanged(enabled)
     end)
 
     local raid = CreateFrame("CheckButton", "chkEnableRaidSort", panel, "UICheckButtonTemplate")
@@ -39,8 +51,9 @@ function builder.BuildSortEnabled(panel)
     raid.Text:SetText("Sort Raid Frames?")
     raid:SetChecked(addon.Options.RaidSortEnabled)
     raid:HookScript("OnClick", function(_, _, _)
-        addon.Options.RaidSortEnabled = raid:GetChecked()
-        addon:ConfigChanged()
+        local enabled = raid:GetChecked()
+        addon.Options.RaidSortEnabled = enabled
+        addon:ConfigChanged(enabled)
     end)
 end
 
@@ -51,29 +64,29 @@ function builder:BuildPlayerSortMode(panel)
 
     -- why use checkboxes instead of a uidropdown?
     -- because the uidropdown has so many taint issues for years that still haven't been fixed
-    -- and seem to have become much worse in dragonflight
+    -- also seems to have become much worse in dragonflight
     -- so while a dropdown would be better ui design, it's too buggy to use
     local top = CreateFrame("CheckButton", "chkPlayerSortModeTop", panel, "UICheckButtonTemplate")
     local bottom = CreateFrame("CheckButton", "chkPlayerSortModeBottom", panel, "UICheckButtonTemplate")
 
     top:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, verticalSpacing)
-    top.Text:SetText(sortModeTop)
-    top:SetChecked(addon.Options.PlayerSortMode == sortModeTop)
+    top.Text:SetText(addon.SortMode.Top)
+    top:SetChecked(addon.Options.PlayerSortMode == addon.SortMode.Top)
     top:HookScript("OnClick", function(_, _, _)
         if not top:GetChecked() then return end
 
-        addon.Options.PlayerSortMode = sortModeTop
+        addon.Options.PlayerSortMode = addon.SortMode.Top
         bottom:SetChecked(false)
         addon:ConfigChanged()
     end)
 
     bottom:SetPoint("LEFT", top, "RIGHT", horizontalSpacing, 0)
-    bottom.Text:SetText(sortModeBottom)
-    bottom:SetChecked(addon.Options.PlayerSortMode == sortModeBottom)
+    bottom.Text:SetText(addon.SortMode.Bottom)
+    bottom:SetChecked(addon.Options.PlayerSortMode == addon.SortMode.Bottom)
     bottom:HookScript("OnClick", function(_, _, _)
         if not bottom:GetChecked() then return end
 
-        addon.Options.PlayerSortMode = sortModeBottom
+        addon.Options.PlayerSortMode = addon.SortMode.Bottom
         top:SetChecked(false)
         addon:ConfigChanged()
     end)
@@ -89,36 +102,36 @@ function builder:BuildPartySortMode(panel)
     local alpha = CreateFrame("CheckButton", "chkPartySortModeAlpha", panel, "UICheckButtonTemplate")
 
     group:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, verticalSpacing)
-    group.Text:SetText(sortModeGroup)
-    group:SetChecked(addon.Options.PartySortMode == sortModeGroup)
+    group.Text:SetText(addon.SortMode.Group)
+    group:SetChecked(addon.Options.PartySortMode == addon.SortMode.Group)
     group:HookScript("OnClick", function(_, _, _)
         if not group:GetChecked() then return end
 
-        addon.Options.PartySortMode = sortModeGroup
+        addon.Options.PartySortMode = addon.SortMode.Group
         role:SetChecked(false)
         alpha:SetChecked(false)
         addon:ConfigChanged()
     end)
 
     role:SetPoint("LEFT", group, "RIGHT", horizontalSpacing, 0)
-    role.Text:SetText(sortModeRole)
-    role:SetChecked(addon.Options.PartySortMode == sortModeRole)
+    role.Text:SetText(addon.SortMode.Role)
+    role:SetChecked(addon.Options.PartySortMode == addon.SortMode.Role)
     role:HookScript("OnClick", function(_, _, _)
         if not role:GetChecked() then return end
 
-        addon.Options.PartySortMode = sortModeRole
+        addon.Options.PartySortMode = addon.SortMode.Role
         group:SetChecked(false)
         alpha:SetChecked(false)
         addon:ConfigChanged()
     end)
 
     alpha:SetPoint("LEFT", role, "RIGHT", horizontalSpacing, 0)
-    alpha.Text:SetText(sortModeAlphabetical)
-    alpha:SetChecked(addon.Options.PartySortMode == sortModeAlphabetical)
+    alpha.Text:SetText(addon.SortMode.Alphabetical)
+    alpha:SetChecked(addon.Options.PartySortMode == addon.SortMode.Alphabetical)
     alpha:HookScript("OnClick", function(_, _, _)
         if not alpha:GetChecked() then return end
 
-        addon.Options.PartySortMode = sortModeAlphabetical
+        addon.Options.PartySortMode = addon.SortMode.Alphabetical
         group:SetChecked(false)
         role:SetChecked(false)
         addon:ConfigChanged()
@@ -135,36 +148,36 @@ function builder:BuildRaidSortMode(panel)
     local alpha = CreateFrame("CheckButton", "chkRaidSortModeAlpha", panel, "UICheckButtonTemplate")
 
     group:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, verticalSpacing)
-    group.Text:SetText(sortModeGroup)
-    group:SetChecked(addon.Options.RaidSortMode == sortModeGroup)
+    group.Text:SetText(addon.SortMode.Group)
+    group:SetChecked(addon.Options.RaidSortMode == addon.SortMode.Group)
     group:HookScript("OnClick", function(_, _, _)
         if not group:GetChecked() then return end
 
-        addon.Options.RaidSortMode = sortModeGroup
+        addon.Options.RaidSortMode = addon.SortMode.Group
         role:SetChecked(false)
         alpha:SetChecked(false)
         addon:ConfigChanged()
     end)
 
     role:SetPoint("LEFT", group, "RIGHT", horizontalSpacing, 0)
-    role.Text:SetText(sortModeRole)
-    role:SetChecked(addon.Options.RaidSortMode == sortModeRole)
+    role.Text:SetText(addon.SortMode.Role)
+    role:SetChecked(addon.Options.RaidSortMode == addon.SortMode.Role)
     role:HookScript("OnClick", function(_, _, _)
         if not role:GetChecked() then return end
 
-        addon.Options.RaidSortMode = sortModeRole
+        addon.Options.RaidSortMode = addon.SortMode.Role
         group:SetChecked(false)
         alpha:SetChecked(false)
         addon:ConfigChanged()
     end)
 
     alpha:SetPoint("LEFT", role, "RIGHT", horizontalSpacing, 0)
-    alpha.Text:SetText(sortModeAlphabetical)
-    alpha:SetChecked(addon.Options.RaidSortMode == sortModeAlphabetical)
+    alpha.Text:SetText(addon.SortMode.Alphabetical)
+    alpha:SetChecked(addon.Options.RaidSortMode == addon.SortMode.Alphabetical)
     alpha:HookScript("OnClick", function(_, _, _)
         if not alpha:GetChecked() then return end
 
-        addon.Options.RaidSortMode = sortModeAlphabetical
+        addon.Options.RaidSortMode = addon.SortMode.Alphabetical
         group:SetChecked(false)
         role:SetChecked(false)
         addon:ConfigChanged()
@@ -172,9 +185,13 @@ function builder:BuildRaidSortMode(panel)
 end
 
 -- invoked when configuration changes which will then perform a resort
-function addon:ConfigChanged()
-    addon.NeedsSort = true
-    addon:TrySort()
+function addon:ConfigChanged(needsSort)
+    needsSort = needsSort or true
+    addon.NeedsSort = needsSort
+
+    if needsSort then
+        addon:TrySort()
+    end
 end
 
 function addon:InitOptions()
@@ -196,4 +213,3 @@ function addon:InitOptions()
         InterfaceOptionsFrame_OpenToCategory(addonName)
     end
 end
-
