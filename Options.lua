@@ -185,13 +185,8 @@ function builder:BuildRaidSortMode(panel)
 end
 
 -- invoked when configuration changes which will then perform a resort
-function addon:ConfigChanged(needsSort)
-    needsSort = needsSort or true
-    addon.NeedsSort = needsSort
-
-    if needsSort then
-        addon:TrySort()
-    end
+function addon:ConfigChanged(needsResort)
+    addon:TrySort(needsResort or true)
 end
 
 function addon:InitOptions()
