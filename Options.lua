@@ -43,7 +43,7 @@ function builder.BuildSortEnabled(panel)
     party:HookScript("OnClick", function(_, _, _)
         local enabled = party:GetChecked()
         addon.Options.PartySortEnabled = enabled
-        addon:ConfigChanged(enabled)
+        addon:ConfigChanged()
     end)
 
     local raid = CreateFrame("CheckButton", "chkEnableRaidSort", panel, "UICheckButtonTemplate")
@@ -53,7 +53,7 @@ function builder.BuildSortEnabled(panel)
     raid:HookScript("OnClick", function(_, _, _)
         local enabled = raid:GetChecked()
         addon.Options.RaidSortEnabled = enabled
-        addon:ConfigChanged(enabled)
+        addon:ConfigChanged()
     end)
 end
 
@@ -185,8 +185,8 @@ function builder:BuildRaidSortMode(panel)
 end
 
 -- invoked when configuration changes which will then perform a resort
-function addon:ConfigChanged(needsResort)
-    addon:TrySort(needsResort or true)
+function addon:ConfigChanged()
+    addon:TrySort()
 end
 
 function addon:InitOptions()
