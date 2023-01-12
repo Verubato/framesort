@@ -4,15 +4,6 @@ local builder = {}
 local verticalSpacing = -16
 local horizontalSpacing = 50
 
--- default configuration
-addon.Defaults = {
-    PlayerSortMode = "Top",
-    RaidSortMode = "Role",
-    PartySortMode = "Group",
-    RaidSortEnabled = false,
-    PartySortEnabled = true
-}
-
 addon.SortMode = {
     Group = "Group",
     Role = "Role",
@@ -21,183 +12,269 @@ addon.SortMode = {
     Bottom = "Bottom"
 }
 
+-- default configuration
+addon.Defaults = {
+    Version = 2,
+
+    ArenaEnabled = true,
+    ArenaPlayerSortMode = addon.SortMode.Top,
+    ArenaSortMode = addon.SortMode.Group,
+
+    DungeonEnabled = true,
+    DungeonPlayerSortMode = addon.SortMode.Top,
+    DungeonSortMode = addon.SortMode.Role,
+
+    WorldEnabled = true,
+    WorldPlayerSortMode = addon.SortMode.Top,
+    WorldSortMode = addon.SortMode.Role,
+
+    RaidEnabled = false,
+    RaidPlayerSortMode = addon.SortMode.Top,
+    RaidSortMode = addon.SortMode.Role
+}
+
 function builder:BuiltTitle(panel)
     local title = panel:CreateFontString("lblTitle", "ARTWORK", "GameFontNormalLarge")
-    title:SetPoint("TOPLEFT", 16, verticalSpacing)
+    title:SetPoint("TOPLEFT", verticalSpacing * -1, verticalSpacing)
     title:SetText("Frame Sort")
 
     local description = panel:CreateFontString("lblDescription", "ARTWORK", "GameFontWhite")
     description:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, verticalSpacing)
     description:SetText("Sorts party/raid frames.")
-
-    local note = panel:CreateFontString("lblNote", "ARTWORK", "GameFontWhite")
-    note:SetPoint("TOPLEFT", description, "BOTTOMLEFT", 0, verticalSpacing)
-    note:SetText("Note: the weird usage of checkboxes here instead of dropdowns are to help avoiding taint issues.")
 end
 
-function builder.BuildSortEnabled(panel)
-    local party = CreateFrame("CheckButton", "chkEnablePartySort", panel, "UICheckButtonTemplate")
-    party:SetPoint("TOPLEFT", lblNote, "BOTTOMLEFT", 0, verticalSpacing)
-    party.Text:SetText("Sort Party Frames?")
-    party:SetChecked(addon.Options.PartySortEnabled)
-    party:HookScript("OnClick", function(_, _, _)
-        local enabled = party:GetChecked()
-        addon.Options.PartySortEnabled = enabled
-        addon:ConfigChanged()
-    end)
+function builder:BuildSortModeCheckboxes(
+    parentPanel,
+    pointOffset,
+    labelText,
+    uniqueGroupName,
+    sortingEnabled,
+    playerSortMode,
+    sortMode,
+    onEnabledChanged,
+    onPlayerSortModeChanged,
+    onSortModeChanged)
+    local enabled = CreateFrame("CheckButton", "chk" .. uniqueGroupName .. "Enabled", parentPanel, "UICheckButtonTemplate")
+    -- not sure why, but checkbox left seems to be off by about 4 units by default
+    enabled:SetPoint("TOPLEFT", pointOffset, "BOTTOMLEFT", -4, verticalSpacing)
+    enabled.Text:SetText(" " .. labelText)
+    enabled.Text:SetFontObject("GameFontNormalLarge")
+    enabled:SetChecked(sortingEnabled)
+    enabled:HookScript("OnClick", function() onEnabledChanged(enabled:GetChecked()) end)
 
-    local raid = CreateFrame("CheckButton", "chkEnableRaidSort", panel, "UICheckButtonTemplate")
-    raid:SetPoint("LEFT", party, "RIGHT", 120, 0)
-    raid.Text:SetText("Sort Raid Frames?")
-    raid:SetChecked(addon.Options.RaidSortEnabled)
-    raid:HookScript("OnClick", function(_, _, _)
-        local enabled = raid:GetChecked()
-        addon.Options.RaidSortEnabled = enabled
-        addon:ConfigChanged()
-    end)
-end
+    local playerLabel = parentPanel:CreateFontString("lbl" .. uniqueGroupName .. "PlayerSortMode", "ARTWORK", "GameFontNormal")
+    playerLabel:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, verticalSpacing)
+    playerLabel:SetText("Player: ")
 
-function builder:BuildPlayerSortMode(panel)
-    local label = panel:CreateFontString("lblPlayerSort", "ARTWORK", "GameFontNormal")
-    label:SetPoint("TOPLEFT", chkEnablePartySort, "BOTTOMLEFT", 0, verticalSpacing)
-    label:SetText("Player sort mode: ")
+    local top = CreateFrame("CheckButton", "chk" .. uniqueGroupName .. "PlayerSortTop", parentPanel, "UICheckButtonTemplate")
+    top.Text:SetText("Top")
+    top:SetPoint("LEFT", playerLabel, "RIGHT", horizontalSpacing / 2, 0)
+    top:SetChecked(playerSortMode == addon.SortMode.Top)
 
-    -- why use checkboxes instead of a uidropdown?
-    -- because the uidropdown has so many taint issues for years that still haven't been fixed
-    -- also seems to have become much worse in dragonflight
-    -- so while a dropdown would be better ui design, it's too buggy to use
-    local top = CreateFrame("CheckButton", "chkPlayerSortModeTop", panel, "UICheckButtonTemplate")
-    local bottom = CreateFrame("CheckButton", "chkPlayerSortModeBottom", panel, "UICheckButtonTemplate")
-
-    top:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, verticalSpacing)
-    top.Text:SetText(addon.SortMode.Top)
-    top:SetChecked(addon.Options.PlayerSortMode == addon.SortMode.Top)
-    top:HookScript("OnClick", function(_, _, _)
-        if not top:GetChecked() then return end
-
-        addon.Options.PlayerSortMode = addon.SortMode.Top
-        bottom:SetChecked(false)
-        addon:ConfigChanged()
-    end)
-
+    local bottom = CreateFrame("CheckButton", "chk" .. uniqueGroupName .. "PlayerSortBottom", parentPanel, "UICheckButtonTemplate")
+    bottom.Text:SetText("Bottom")
     bottom:SetPoint("LEFT", top, "RIGHT", horizontalSpacing, 0)
-    bottom.Text:SetText(addon.SortMode.Bottom)
-    bottom:SetChecked(addon.Options.PlayerSortMode == addon.SortMode.Bottom)
-    bottom:HookScript("OnClick", function(_, _, _)
-        if not bottom:GetChecked() then return end
+    bottom:SetChecked(playerSortMode == addon.SortMode.Bottom)
 
-        addon.Options.PlayerSortMode = addon.SortMode.Bottom
-        top:SetChecked(false)
-        addon:ConfigChanged()
-    end)
-end
+    local function onPlayerClick(sender)
+        local mode = nil
 
-function builder:BuildPartySortMode(panel)
-    local label = panel:CreateFontString("lblPartySort", "ARTWORK", "GameFontNormal")
-    label:SetPoint("TOPLEFT", chkPlayerSortModeTop, "BOTTOMLEFT", 0, verticalSpacing)
-    label:SetText("Party sort mode: ")
+        if sender == top then
+            bottom:SetChecked(false)
+            mode = addon.SortMode.Top
+        else
+            assert(sender == bottom)
 
-    local group = CreateFrame("CheckButton", "chkPartySortModeGroup", panel, "UICheckButtonTemplate")
-    local role = CreateFrame("CheckButton", "chkPartySortModeRole", panel, "UICheckButtonTemplate")
-    local alpha = CreateFrame("CheckButton", "chkPartySortModeAlpha", panel, "UICheckButtonTemplate")
+            top:SetChecked(false)
+            mode = addon.SortMode.Bottom
+        end
 
-    group:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, verticalSpacing)
+        if not sender:GetChecked() then
+            sender:SetChecked(true)
+        end
+
+        onPlayerSortModeChanged(mode)
+    end
+
+    top:HookScript("OnClick", onPlayerClick)
+    bottom:HookScript("OnClick", onPlayerClick)
+
+    local modeLabel = parentPanel:CreateFontString("lbl" .. uniqueGroupName .. "SortMode", "ARTWORK", "GameFontNormal")
+    modeLabel:SetPoint("TOPLEFT", playerLabel, "BOTTOMLEFT", 0, verticalSpacing * 1.5)
+    modeLabel:SetText("Sort: ")
+
+    -- why use checkboxes instead of a dropdown box?
+    -- because the dropdown box control has taint issues that haven't been fixed for years
+    -- also it seems to have become much worse in dragonflight
+    -- so while a dropdown would be better ui design, it's too buggy to use at the moment
+    local group = CreateFrame("CheckButton", "chk" .. uniqueGroupName .. "SortGroup", parentPanel, "UICheckButtonTemplate")
+    group:SetPoint("LEFT", top, "LEFT")
+    -- TODO: not sure why this doesn't align well even when aligning TOP/BOTTOM, so just hacking in a +10 to fix it for now
+    group:SetPoint("TOP", modeLabel, "TOP", 0, 10)
     group.Text:SetText(addon.SortMode.Group)
-    group:SetChecked(addon.Options.PartySortMode == addon.SortMode.Group)
-    group:HookScript("OnClick", function(_, _, _)
-        if not group:GetChecked() then return end
+    group:SetChecked(sortMode == addon.SortMode.Group)
 
-        addon.Options.PartySortMode = addon.SortMode.Group
-        role:SetChecked(false)
-        alpha:SetChecked(false)
-        addon:ConfigChanged()
-    end)
-
+    local role = CreateFrame("CheckButton", "chk" .. uniqueGroupName .. "SortRole", parentPanel, "UICheckButtonTemplate")
     role:SetPoint("LEFT", group, "RIGHT", horizontalSpacing, 0)
     role.Text:SetText(addon.SortMode.Role)
-    role:SetChecked(addon.Options.PartySortMode == addon.SortMode.Role)
-    role:HookScript("OnClick", function(_, _, _)
-        if not role:GetChecked() then return end
+    role:SetChecked(sortMode == addon.SortMode.Role)
 
-        addon.Options.PartySortMode = addon.SortMode.Role
-        group:SetChecked(false)
-        alpha:SetChecked(false)
-        addon:ConfigChanged()
-    end)
-
+    local alpha = CreateFrame("CheckButton", "chk" .. uniqueGroupName .. "SortAlpha", parentPanel, "UICheckButtonTemplate")
     alpha:SetPoint("LEFT", role, "RIGHT", horizontalSpacing, 0)
     alpha.Text:SetText(addon.SortMode.Alphabetical)
-    alpha:SetChecked(addon.Options.PartySortMode == addon.SortMode.Alphabetical)
-    alpha:HookScript("OnClick", function(_, _, _)
-        if not alpha:GetChecked() then return end
+    alpha:SetChecked(sortMode == addon.SortMode.Alphabetical)
 
-        addon.Options.PartySortMode = addon.SortMode.Alphabetical
-        group:SetChecked(false)
-        role:SetChecked(false)
-        addon:ConfigChanged()
-    end)
+    local function onModeClick(sender)
+        local mode = nil
+
+        if sender == group then
+            role:SetChecked(false)
+            alpha:SetChecked(false)
+            mode = addon.SortMode.Group
+        elseif sender == role then
+            group:SetChecked(false)
+            alpha:SetChecked(false)
+            mode = addon.SortMode.Role
+        else
+            assert(sender == alpha)
+            role:SetChecked(false)
+            group:SetChecked(false)
+            mode = addon.SortMode.Alphabetical
+        end
+
+        if not sender:GetChecked() then
+            sender:SetChecked(true)
+        end
+
+        onSortModeChanged(mode)
+    end
+
+    group:HookScript("OnClick", onModeClick)
+    role:HookScript("OnClick", onModeClick)
+    alpha:HookScript("OnClick", onModeClick)
 end
 
-function builder:BuildRaidSortMode(panel)
-    local label = panel:CreateFontString("lblRaidSort", "ARTWORK", "GameFontNormal")
-    label:SetPoint("TOPLEFT", chkPartySortModeGroup, "BOTTOMLEFT", 0, verticalSpacing)
-    label:SetText("Raid sort mode: ")
+function addon:UpgradeOptions()
+    if addon.Options.Version == nil then
+        print("Upgrading options")
+        addon.Options.Version = addon.Defaults.Version
 
-    local group = CreateFrame("CheckButton", "chkRaidSortModeGroup", panel, "UICheckButtonTemplate")
-    local role = CreateFrame("CheckButton", "chkRaidSortModeRole", panel, "UICheckButtonTemplate")
-    local alpha = CreateFrame("CheckButton", "chkRaidSortModeAlpha", panel, "UICheckButtonTemplate")
+        addon.Options.ArenaEnabled = addon.Options.PartySortEnabled
+        addon.Options.ArenaPlayerSortMode = addon.Options.PlayerSortMode
+        addon.Options.ArenaSortMode = addon.Options.PartySortMode
 
-    group:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, verticalSpacing)
-    group.Text:SetText(addon.SortMode.Group)
-    group:SetChecked(addon.Options.RaidSortMode == addon.SortMode.Group)
-    group:HookScript("OnClick", function(_, _, _)
-        if not group:GetChecked() then return end
+        addon.Options.DungeonEnabled = addon.Options.PartySortEnabled
+        addon.Options.DungeonPlayerSortMode = addon.Options.PlayerSortMode
+        addon.Options.DungeonSortMode = addon.Options.PartySortMode
 
-        addon.Options.RaidSortMode = addon.SortMode.Group
-        role:SetChecked(false)
-        alpha:SetChecked(false)
-        addon:ConfigChanged()
-    end)
+        addon.Options.WorldEnabled = addon.Options.PartySortEnabled
+        addon.Options.WorldPlayerSortMode = addon.Options.PlayerSortMode
+        addon.Options.WorldSortMode = addon.Options.PartySortMode
 
-    role:SetPoint("LEFT", group, "RIGHT", horizontalSpacing, 0)
-    role.Text:SetText(addon.SortMode.Role)
-    role:SetChecked(addon.Options.RaidSortMode == addon.SortMode.Role)
-    role:HookScript("OnClick", function(_, _, _)
-        if not role:GetChecked() then return end
+        addon.Options.RaidEnabled = addon.Options.RaidSortEnabled
+        addon.Options.RaidPlayerSortMode = addon.Options.PlayerSortMode
 
-        addon.Options.RaidSortMode = addon.SortMode.Role
-        group:SetChecked(false)
-        alpha:SetChecked(false)
-        addon:ConfigChanged()
-    end)
-
-    alpha:SetPoint("LEFT", role, "RIGHT", horizontalSpacing, 0)
-    alpha.Text:SetText(addon.SortMode.Alphabetical)
-    alpha:SetChecked(addon.Options.RaidSortMode == addon.SortMode.Alphabetical)
-    alpha:HookScript("OnClick", function(_, _, _)
-        if not alpha:GetChecked() then return end
-
-        addon.Options.RaidSortMode = addon.SortMode.Alphabetical
-        group:SetChecked(false)
-        role:SetChecked(false)
-        addon:ConfigChanged()
-    end)
-end
-
--- invoked when configuration changes which will then perform a resort
-function addon:ConfigChanged()
-    addon:TrySort()
+        -- remove old values
+        addon.Options.PartySortEnabled = nil
+        addon.Options.PlayerSortMode = nil
+        addon.Options.RaidSortEnabled = nil
+    end
 end
 
 function addon:InitOptions()
+    addon:UpgradeOptions()
+
     local panel = CreateFrame("Frame")
     panel.name = addonName
 
     builder:BuiltTitle(panel)
-    builder.BuildSortEnabled(panel)
-    builder:BuildPlayerSortMode(panel)
-    builder:BuildPartySortMode(panel)
-    builder:BuildRaidSortMode(panel)
+    builder:BuildSortModeCheckboxes(
+        panel,
+        lblDescription,
+        "Arena",
+        "Arena",
+        addon.Options.ArenaEnabled,
+        addon.Options.ArenaPlayerSortMode,
+        addon.Options.ArenaSortMode,
+        function(enabled)
+            addon.Options.ArenaEnabled = enabled
+            addon:TrySort()
+        end,
+        function(mode)
+            addon.Options.ArenaPlayerSortMode = mode
+            addon:TrySort()
+        end,
+        function(mode)
+            addon.Options.ArenaSortMode = mode
+            addon:TrySort()
+        end
+    )
+
+    builder:BuildSortModeCheckboxes(
+        panel,
+        lblArenaSortMode,
+        "Dungeon (mythics, 5-mans)",
+        "Dungeon",
+        addon.Options.DungeonEnabled,
+        addon.Options.DungeonPlayerSortMode,
+        addon.Options.DungeonSortMode,
+        function(enabled)
+            addon.Options.DungeonEnabled = enabled
+            addon:TrySort()
+        end,
+        function(mode)
+            addon.Options.DungeonPlayerSortMode = mode
+            addon:TrySort()
+        end,
+        function(mode)
+            addon.Options.DungeonSortMode = mode
+            addon:TrySort()
+        end
+    )
+
+    builder:BuildSortModeCheckboxes(
+        panel,
+        lblDungeonSortMode,
+        "Raid (battlegrounds, raids)",
+        "Raid",
+        addon.Options.RaidEnabled,
+        addon.Options.RaidPlayerSortMode,
+        addon.Options.RaidSortMode,
+        function(enabled)
+            addon.Options.RaidEnabled = enabled
+            addon:TrySort()
+        end,
+        function(mode)
+            addon.Options.RaidPlayerSortMode = mode
+            addon:TrySort()
+        end,
+        function(mode)
+            addon.Options.RaidSortMode = mode
+            addon:TrySort()
+        end
+    )
+
+    builder:BuildSortModeCheckboxes(
+        panel,
+        lblRaidSortMode,
+        "World (non-instance groups)",
+        "World",
+        addon.Options.WorldEnabled,
+        addon.Options.WorldPlayerSortMode,
+        addon.Options.WorldSortMode,
+        function(enabled)
+            addon.Options.WorldEnabled = enabled
+            addon:TrySort()
+        end,
+        function(mode)
+            addon.Options.WorldPlayerSortMode = mode
+            addon:TrySort()
+        end,
+        function(mode)
+            addon.Options.WorldSortMode = mode
+            addon:TrySort()
+        end
+    )
 
     InterfaceOptions_AddCategory(panel)
 
