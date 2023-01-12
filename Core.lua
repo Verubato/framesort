@@ -18,8 +18,6 @@ end
 
 -- invokes sorting of the party frames
 function addon:TrySort()
-    -- don't sort if addon is essentially disabled
-    if not addon.Options.PartySortEnabled and not addon.Options.RaidSortEnabled then return false end
     -- nothing to sort if we're not in a group
     if not IsInGroup() then return false end
     -- can't make changes during combat
@@ -29,23 +27,42 @@ function addon:TrySort()
 
     local maxPartySize = 5
     local groupSize = GetNumGroupMembers()
+    local playerSortMode = addon.Options.WorldPlayerSortMode
+    local groupSortMode = addon.Options.WorldSortMode
+    local inInstance, instanceType = IsInInstance()
+
+    if inInstance and instanceType == "arena" then
+        if not addon.Options.ArenaEnabled then return false end
+
+        playerSortMode = addon.Options.ArenaPlayerSortMode
+        groupSortMode = addon.Options.ArenaSortMode
+    elseif inInstance and instanceType == "party" then
+        if not addon.Options.DungeonEnabled then return false end
+
+        playerSortMode = addon.Options.DungeonPlayerSortMode
+        groupSortMode = addon.Options.DungeonSortMode
+    elseif inInstance and instanceType == "raid" then
+        if not addon.Options.RaidEnabled then return false end
+
+        playerSortMode = addon.Options.RaidPlayerSortMode
+        groupSortMode = addon.Options.RaidSortMode
+    else if not addon.Options.WorldEnabled then return false end
+    end
 
     if groupSize > maxPartySize then
-        if not addon.Options.RaidSortEnabled then return false end
         if CompactRaidFrameContainer:IsForbidden() then return false end
 
         CompactRaidFrameContainer:SetFlowSortFunction((
-            function(x, y) return addon:Compare(x, y, addon.Options.PlayerSortMode, addon.Options.RaidSortMode) end))
+            function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode) end))
         -- immediately after sorting, unset the sort function
         -- this might help with avoiding taint issues
         -- but shouldn't be necessary and can be removed once blizzard fix their side
         CompactRaidFrameContainer.flowSortFunc = nil
     else
-        if not addon.Options.PartySortEnabled then return false end
         if CompactPartyFrame:IsForbidden() then return false end
 
         CompactPartyFrame_SetFlowSortFunction((
-            function(x, y) return addon:Compare(x, y, addon.Options.PlayerSortMode, addon.Options.PartySortMode) end))
+            function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode) end))
         CompactPartyFrame.flowSortFunc = nil
     end
 
