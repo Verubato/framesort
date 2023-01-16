@@ -156,7 +156,6 @@ end
 
 function addon:UpgradeOptions()
     if addon.Options.Version == nil then
-        print("Upgrading options")
         addon.Options.Version = addon.Defaults.Version
 
         addon.Options.ArenaEnabled = addon.Options.PartySortEnabled
