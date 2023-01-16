@@ -76,28 +76,29 @@ function builder:BuildSortModeCheckboxes(
     bottom:SetPoint("LEFT", top, "RIGHT", horizontalSpacing, 0)
     bottom:SetChecked(playerSortMode == addon.SortMode.Bottom)
 
+    local playerModes = {
+        [top] = addon.SortMode.Top,
+        [bottom] = addon.SortMode.Bottom
+    }
+
     local function onPlayerClick(sender)
-        local mode = nil
-
-        if sender == top then
-            bottom:SetChecked(false)
-            mode = addon.SortMode.Top
-        else
-            assert(sender == bottom)
-
-            top:SetChecked(false)
-            mode = addon.SortMode.Bottom
+        -- uncheck the others
+        for chkbox, _ in pairs(playerModes) do
+            if chkbox ~= sender then chkbox:SetChecked(false) end
         end
 
+        -- at least 1 must be checked
         if not sender:GetChecked() then
             sender:SetChecked(true)
         end
 
+        local mode = playerModes[sender]
         onPlayerSortModeChanged(mode)
     end
 
-    top:HookScript("OnClick", onPlayerClick)
-    bottom:HookScript("OnClick", onPlayerClick)
+    for chkbox, _ in pairs(playerModes) do
+        chkbox:HookScript("OnClick", onPlayerClick)
+    end
 
     local modeLabel = parentPanel:CreateFontString("lbl" .. uniqueGroupName .. "SortMode", "ARTWORK", "GameFontNormal")
     modeLabel:SetPoint("TOPLEFT", playerLabel, "BOTTOMLEFT", 0, verticalSpacing * 1.5)
@@ -124,34 +125,30 @@ function builder:BuildSortModeCheckboxes(
     alpha.Text:SetText(addon.SortMode.Alphabetical)
     alpha:SetChecked(sortMode == addon.SortMode.Alphabetical)
 
-    local function onModeClick(sender)
-        local mode = nil
+    local modes = {
+        [group] = addon.SortMode.Group,
+        [role] = addon.SortMode.Role,
+        [alpha] = addon.SortMode.Alphabetical
+    }
 
-        if sender == group then
-            role:SetChecked(false)
-            alpha:SetChecked(false)
-            mode = addon.SortMode.Group
-        elseif sender == role then
-            group:SetChecked(false)
-            alpha:SetChecked(false)
-            mode = addon.SortMode.Role
-        else
-            assert(sender == alpha)
-            role:SetChecked(false)
-            group:SetChecked(false)
-            mode = addon.SortMode.Alphabetical
+    local function onModeClick(sender)
+        -- uncheck the others
+        for chkbox, _ in pairs(modes) do
+            if chkbox ~= sender then chkbox:SetChecked(false) end
         end
 
+        -- at least 1 must be checked
         if not sender:GetChecked() then
             sender:SetChecked(true)
         end
 
+        local mode = modes[sender]
         onSortModeChanged(mode)
     end
 
-    group:HookScript("OnClick", onModeClick)
-    role:HookScript("OnClick", onModeClick)
-    alpha:HookScript("OnClick", onModeClick)
+    for chkbox, _ in pairs(modes) do
+        chkbox:HookScript("OnClick", onModeClick)
+    end
 end
 
 function addon:UpgradeOptions()
@@ -186,6 +183,11 @@ function addon:InitOptions()
     local panel = CreateFrame("Frame")
     panel.name = addonName
 
+    local function setOption(name, value)
+        addon.Options[name] = value
+        addon:TrySort()
+    end
+
     builder:BuiltTitle(panel)
     builder:BuildSortModeCheckboxes(
         panel,
@@ -195,18 +197,9 @@ function addon:InitOptions()
         addon.Options.ArenaEnabled,
         addon.Options.ArenaPlayerSortMode,
         addon.Options.ArenaSortMode,
-        function(enabled)
-            addon.Options.ArenaEnabled = enabled
-            addon:TrySort()
-        end,
-        function(mode)
-            addon.Options.ArenaPlayerSortMode = mode
-            addon:TrySort()
-        end,
-        function(mode)
-            addon.Options.ArenaSortMode = mode
-            addon:TrySort()
-        end
+        function(enabled) setOption("ArenaEnabled", enabled) end,
+        function(mode) setOption("ArenaPlayerSortMode", mode) end,
+        function(mode) setOption("ArenaSortMode", mode) end
     )
 
     builder:BuildSortModeCheckboxes(
@@ -217,18 +210,9 @@ function addon:InitOptions()
         addon.Options.DungeonEnabled,
         addon.Options.DungeonPlayerSortMode,
         addon.Options.DungeonSortMode,
-        function(enabled)
-            addon.Options.DungeonEnabled = enabled
-            addon:TrySort()
-        end,
-        function(mode)
-            addon.Options.DungeonPlayerSortMode = mode
-            addon:TrySort()
-        end,
-        function(mode)
-            addon.Options.DungeonSortMode = mode
-            addon:TrySort()
-        end
+        function(enabled) setOption("DungeonEnabled", enabled) end,
+        function(mode) setOption("DungeonPlayerSortMode", mode) end,
+        function(mode) setOption("DungeonSortMode", mode) end
     )
 
     builder:BuildSortModeCheckboxes(
@@ -239,18 +223,9 @@ function addon:InitOptions()
         addon.Options.RaidEnabled,
         addon.Options.RaidPlayerSortMode,
         addon.Options.RaidSortMode,
-        function(enabled)
-            addon.Options.RaidEnabled = enabled
-            addon:TrySort()
-        end,
-        function(mode)
-            addon.Options.RaidPlayerSortMode = mode
-            addon:TrySort()
-        end,
-        function(mode)
-            addon.Options.RaidSortMode = mode
-            addon:TrySort()
-        end
+        function(enabled) setOption("RaidEnabled", enabled) end,
+        function(mode) setOption("RaidPlayerSortMode", mode) end,
+        function(mode) setOption("RaidSortMode", mode) end
     )
 
     builder:BuildSortModeCheckboxes(
@@ -261,18 +236,9 @@ function addon:InitOptions()
         addon.Options.WorldEnabled,
         addon.Options.WorldPlayerSortMode,
         addon.Options.WorldSortMode,
-        function(enabled)
-            addon.Options.WorldEnabled = enabled
-            addon:TrySort()
-        end,
-        function(mode)
-            addon.Options.WorldPlayerSortMode = mode
-            addon:TrySort()
-        end,
-        function(mode)
-            addon.Options.WorldSortMode = mode
-            addon:TrySort()
-        end
+        function(enabled) setOption("WorldEnabled", enabled) end,
+        function(mode) setOption("WorldPlayerSortMode", mode) end,
+        function(mode) setOption("WorldSortMode", mode) end
     )
 
     InterfaceOptions_AddCategory(panel)
