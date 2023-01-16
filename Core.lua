@@ -25,35 +25,18 @@ function addon:TrySort()
     -- don't try if edit mode is active
     if EditModeManagerFrame.editModeActive then return false end
 
+    local inInstance, instanceType = IsInInstance()
+    local enabled, playerSortMode, groupSortMode = addon:GetSortMode(inInstance, instanceType)
+
+    if not enabled then return false end
+
     local maxPartySize = 5
     local groupSize = GetNumGroupMembers()
-    local playerSortMode = addon.Options.WorldPlayerSortMode
-    local groupSortMode = addon.Options.WorldSortMode
-    local inInstance, instanceType = IsInInstance()
-
-    if inInstance and instanceType == "arena" then
-        if not addon.Options.ArenaEnabled then return false end
-
-        playerSortMode = addon.Options.ArenaPlayerSortMode
-        groupSortMode = addon.Options.ArenaSortMode
-    elseif inInstance and instanceType == "party" then
-        if not addon.Options.DungeonEnabled then return false end
-
-        playerSortMode = addon.Options.DungeonPlayerSortMode
-        groupSortMode = addon.Options.DungeonSortMode
-    elseif inInstance and instanceType == "raid" then
-        if not addon.Options.RaidEnabled then return false end
-
-        playerSortMode = addon.Options.RaidPlayerSortMode
-        groupSortMode = addon.Options.RaidSortMode
-    else if not addon.Options.WorldEnabled then return false end
-    end
 
     if groupSize > maxPartySize then
         if CompactRaidFrameContainer:IsForbidden() then return false end
 
-        CompactRaidFrameContainer:SetFlowSortFunction((
-            function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode) end))
+        CompactRaidFrameContainer:SetFlowSortFunction((function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode) end))
         -- immediately after sorting, unset the sort function
         -- this might help with avoiding taint issues
         -- but shouldn't be necessary and can be removed once blizzard fix their side
@@ -61,12 +44,24 @@ function addon:TrySort()
     else
         if CompactPartyFrame:IsForbidden() then return false end
 
-        CompactPartyFrame_SetFlowSortFunction((
-            function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode) end))
+        CompactPartyFrame_SetFlowSortFunction((function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode) end))
         CompactPartyFrame.flowSortFunc = nil
     end
 
     return true
+end
+
+-- returns (enabled, playerMode, groupMode)
+function addon:GetSortMode(inInstance, instanceType)
+    if inInstance and instanceType == "arena" then
+        return addon.Options.ArenaEnabled, addon.Options.ArenaPlayerSortMode, addon.Options.ArenaSortMode
+    elseif inInstance and instanceType == "party" then
+        return addon.Options.DungeonEnabled, addon.Options.DungeonPlayerSortMode, addon.Options.DungeonSortMode
+    elseif inInstance and instanceType == "raid" then
+        return addon.Options.RaidEnabled, addon.Options.RaidPlayerSortMode, addon.Options.RaidSortMode
+    else if not addon.Options.WorldEnabled then return false end
+        return addon.Options.WorldEnabled, addon.Options.WorldPlayerSortMode, addon.Options.WorldSortMode
+    end
 end
 
 function addon:Compare(leftToken, rightToken, playerSortMode, groupSortMode)
