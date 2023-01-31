@@ -37,15 +37,10 @@ function addon:TrySort()
         if CompactRaidFrameContainer:IsForbidden() then return false end
 
         CompactRaidFrameContainer:SetFlowSortFunction((function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode) end))
-        -- immediately after sorting, unset the sort function
-        -- this might help with avoiding taint issues
-        -- but shouldn't be necessary and can be removed once blizzard fix their side
-        CompactRaidFrameContainer.flowSortFunc = nil
     else
         if CompactPartyFrame:IsForbidden() then return false end
 
         CompactPartyFrame_SetFlowSortFunction((function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode) end))
-        CompactPartyFrame.flowSortFunc = nil
     end
 
     return true
