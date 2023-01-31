@@ -1,4 +1,11 @@
 local addonName, addon = ...
+local logPrefix = addonName .. ": "
+
+function addon:Debug(msg)
+    if addon.Options.DebugEnabled then
+        print(logPrefix .. msg)
+    end
+end
 
 -- listens for addon onload events
 function addon:OnLoadAddon(_, addOnName)
@@ -8,21 +15,47 @@ function addon:OnLoadAddon(_, addOnName)
     Options = Options or CopyTable(addon.Defaults)
     addon.Options = Options
     addon:InitOptions()
+    addon:HookEvents()
+end
+
+function addon:HookEvents()
+    addon.EventLoop = CreateFrame("Frame")
+    addon.EventLoop:HookScript("OnEvent", addon.OnEvent)
+    -- Fired whenever a group or raid is formed or disbanded, players are leaving or joining the group or raid.
+    addon.EventLoop:RegisterEvent("GROUP_ROSTER_UPDATE")
+    -- Fired after ending combat, as regen rates return to normal.
+    -- Useful for determining when a player has left combat.
+    -- This occurs when you are not on the hate list of any NPC, or a few seconds after the latest pvp attack that you were involved with.
+    addon.EventLoop:RegisterEvent("PLAYER_REGEN_ENABLED")
+    -- Fires when the player logs in, /reloads the UI or zones between map instances.
+    -- Basically whenever the loading screen appears.
+    addon.EventLoop:RegisterEvent("PLAYER_ENTERING_WORLD")
 end
 
 -- listens for events where we should refresh the frames
-function addon:OnEvent(_, _)
+function addon:OnEvent(eventName)
+    addon:Debug("Event: " .. eventName)
     addon:TrySort()
 end
 
--- invokes sorting of the party frames
 function addon:TrySort()
     -- nothing to sort if we're not in a group
-    if not IsInGroup() then return false end
+    if not IsInGroup() then
+        addon:Debug("Can't sort because not in group.")
+        return false
+    end
+
     -- can't make changes during combat
-    if InCombatLockdown() then return false end
+    if InCombatLockdown() then
+        addon:Debug("Can't sort during combat.")
+        return false
+    end
+
     -- don't try if edit mode is active
-    if EditModeManagerFrame.editModeActive then return false end
+    if EditModeManagerFrame.editModeActive then
+        addon:Debug("Can't sort while edit mode active.")
+        return false
+    end
 
     local inInstance, instanceType = IsInInstance()
     local enabled, playerSortMode, groupSortMode = addon:GetSortMode(inInstance, instanceType)
@@ -35,10 +68,12 @@ function addon:TrySort()
     if groupSize > maxPartySize then
         if CompactRaidFrameContainer:IsForbidden() then return false end
 
+        addon:Debug("Sorting raid frames.")
         CompactRaidFrameContainer:SetFlowSortFunction((function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode) end))
     else
         if CompactPartyFrame:IsForbidden() then return false end
 
+        addon:Debug("Sorting party frames.")
         CompactPartyFrame_SetFlowSortFunction((function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode) end))
     end
 
@@ -73,16 +108,3 @@ end
 addon.Loader = CreateFrame("Frame")
 addon.Loader:HookScript("OnEvent", addon.OnLoadAddon)
 addon.Loader:RegisterEvent("ADDON_LOADED")
-
--- listen for events where we should trigger our sorting function
-addon.EventLoop = CreateFrame("Frame")
-addon.EventLoop:HookScript("OnEvent", addon.OnEvent)
--- Fired whenever a group or raid is formed or disbanded, players are leaving or joining the group or raid.
-addon.EventLoop:RegisterEvent("GROUP_ROSTER_UPDATE")
--- Fired after ending combat, as regen rates return to normal.
--- Useful for determining when a player has left combat.
--- This occurs when you are not on the hate list of any NPC, or a few seconds after the latest pvp attack that you were involved with.
-addon.EventLoop:RegisterEvent("PLAYER_REGEN_ENABLED")
--- Fires when the player logs in, /reloads the UI or zones between map instances.
--- Basically whenever the loading screen appears.
-addon.EventLoop:RegisterEvent("PLAYER_ENTERING_WORLD")
