@@ -1,4 +1,3 @@
----@diagnostic disable: undefined-global
 local addonName, addon = ...
 local builder = {}
 local verticalSpacing = -16

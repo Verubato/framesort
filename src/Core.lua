@@ -1,4 +1,3 @@
----@diagnostic disable: undefined-global
 local addonName, addon = ...
 
 -- listens for addon onload events
