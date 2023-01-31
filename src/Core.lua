@@ -41,7 +41,7 @@ end
 function addon:TrySort()
     -- nothing to sort if we're not in a group
     if not IsInGroup() then
-        addon:Debug("Can't sort because not in group.")
+        addon:Debug("Not sorting because not in a group.")
         return false
     end
 
@@ -61,6 +61,8 @@ function addon:TrySort()
     local enabled, playerSortMode, groupSortMode = addon:GetSortMode(inInstance, instanceType)
 
     if not enabled then return false end
+
+    addon:Debug("In instance: " .. tostring(inInstance) .. ", type: " .. instanceType)
 
     local maxPartySize = 5
     local groupSize = GetNumGroupMembers()
