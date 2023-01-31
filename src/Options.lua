@@ -14,6 +14,7 @@ addon.SortMode = {
 -- default configuration
 addon.Defaults = {
     Version = 2,
+    DebugEnabled = false,
 
     ArenaEnabled = true,
     ArenaPlayerSortMode = addon.SortMode.Top,
@@ -150,6 +151,19 @@ function builder:BuildSortModeCheckboxes(
     end
 end
 
+function builder:BuildDebugOptions(parentPanel, pointOffset)
+    local enabled = CreateFrame("CheckButton", "chkDebugEnabled", parentPanel, "UICheckButtonTemplate")
+    enabled:SetPoint("TOPLEFT", pointOffset, "BOTTOMLEFT", -4, verticalSpacing)
+    enabled.Text:SetText("Debug mode")
+    enabled.Text:SetFontObject("GameFontNormalLarge")
+    enabled:SetChecked(addon.Options.DebugEnabled or false)
+    enabled:HookScript("OnClick", function() addon.Options.DebugEnabled = enabled:GetChecked() end)
+
+    local description = parentPanel:CreateFontString("lblDescription", "ARTWORK", "GameFontWhite")
+    description:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, verticalSpacing)
+    description:SetText("Logs messages to the chat panel which is useful for diagnosing bugs.")
+end
+
 function addon:UpgradeOptions()
     if addon.Options.Version == nil then
         addon.Options.Version = addon.Defaults.Version
@@ -179,8 +193,14 @@ end
 function addon:InitOptions()
     addon:UpgradeOptions()
 
-    local panel = CreateFrame("Frame")
+    local panel = CreateFrame("ScrollFrame", nil, nil, "UIPanelScrollFrameTemplate")
     panel.name = addonName
+
+    local parent = CreateFrame("Frame")
+    panel:SetScrollChild(parent)
+
+    parent:SetWidth(SettingsPanel.Container:GetWidth())
+    parent:SetHeight(SettingsPanel.Container:GetHeight())
 
     local function setOption(name, value)
         addon.Options[name] = value
@@ -189,7 +209,7 @@ function addon:InitOptions()
 
     builder:BuiltTitle(panel)
     builder:BuildSortModeCheckboxes(
-        panel,
+        parent,
         lblDescription,
         "Arena",
         "Arena",
@@ -202,7 +222,7 @@ function addon:InitOptions()
     )
 
     builder:BuildSortModeCheckboxes(
-        panel,
+        parent,
         lblArenaSortMode,
         "Dungeon (mythics, 5-mans)",
         "Dungeon",
@@ -215,7 +235,7 @@ function addon:InitOptions()
     )
 
     builder:BuildSortModeCheckboxes(
-        panel,
+        parent,
         lblDungeonSortMode,
         "Raid (battlegrounds, raids)",
         "Raid",
@@ -228,7 +248,7 @@ function addon:InitOptions()
     )
 
     builder:BuildSortModeCheckboxes(
-        panel,
+        parent,
         lblRaidSortMode,
         "World (non-instance groups)",
         "World",
@@ -239,6 +259,8 @@ function addon:InitOptions()
         function(mode) setOption("WorldPlayerSortMode", mode) end,
         function(mode) setOption("WorldSortMode", mode) end
     )
+
+    builder:BuildDebugOptions(parent, lblWorldSortMode)
 
     InterfaceOptions_AddCategory(panel)
 
