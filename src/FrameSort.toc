@@ -7,3 +7,4 @@
 
 Options.lua
 Core.lua
+Loader.lua
