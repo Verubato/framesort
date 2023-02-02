@@ -157,7 +157,7 @@ function builder:BuildDebugOptions(parentPanel, pointOffset)
     enabled.Text:SetText("Debug mode")
     enabled.Text:SetFontObject("GameFontNormalLarge")
     enabled:SetChecked(addon.Options.DebugEnabled or false)
-    enabled:HookScript("OnClick", function() addon.Options.DebugEnabled = enabled:GetChecked() end)
+    enabled:HookScript("OnClick", function() addon:SetOption("DebugEnabled", enabled:GetChecked()) end)
 
     local description = parentPanel:CreateFontString("lblDescription", "ARTWORK", "GameFontWhite")
     description:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, verticalSpacing)
@@ -166,6 +166,8 @@ end
 
 function addon:UpgradeOptions()
     if addon.Options.Version == nil then
+        addon:Debug("Upgrading options.")
+
         addon.Options.Version = addon.Defaults.Version
 
         addon.Options.ArenaEnabled = addon.Options.PartySortEnabled
@@ -190,6 +192,15 @@ function addon:UpgradeOptions()
     end
 end
 
+function addon:SetOption(name, value)
+    addon:Debug("Setting option - " .. name .. " = " .. tostring(value))
+    addon.Options[name] = value
+
+    if name ~= "DebugEnabled" then
+        addon:TrySort()
+    end
+end
+
 function addon:InitOptions()
     addon:UpgradeOptions()
 
@@ -202,11 +213,6 @@ function addon:InitOptions()
     parent:SetWidth(SettingsPanel.Container:GetWidth())
     parent:SetHeight(SettingsPanel.Container:GetHeight())
 
-    local function setOption(name, value)
-        addon.Options[name] = value
-        addon:TrySort()
-    end
-
     builder:BuiltTitle(panel)
     builder:BuildSortModeCheckboxes(
         parent,
@@ -216,9 +222,9 @@ function addon:InitOptions()
         addon.Options.ArenaEnabled,
         addon.Options.ArenaPlayerSortMode,
         addon.Options.ArenaSortMode,
-        function(enabled) setOption("ArenaEnabled", enabled) end,
-        function(mode) setOption("ArenaPlayerSortMode", mode) end,
-        function(mode) setOption("ArenaSortMode", mode) end
+        function(enabled) addon:SetOption("ArenaEnabled", enabled) end,
+        function(mode) addon:SetOption("ArenaPlayerSortMode", mode) end,
+        function(mode) addon:SetOption("ArenaSortMode", mode) end
     )
 
     builder:BuildSortModeCheckboxes(
@@ -229,9 +235,9 @@ function addon:InitOptions()
         addon.Options.DungeonEnabled,
         addon.Options.DungeonPlayerSortMode,
         addon.Options.DungeonSortMode,
-        function(enabled) setOption("DungeonEnabled", enabled) end,
-        function(mode) setOption("DungeonPlayerSortMode", mode) end,
-        function(mode) setOption("DungeonSortMode", mode) end
+        function(enabled) addon:SetOption("DungeonEnabled", enabled) end,
+        function(mode) addon:SetOption("DungeonPlayerSortMode", mode) end,
+        function(mode) addon:SetOption("DungeonSortMode", mode) end
     )
 
     builder:BuildSortModeCheckboxes(
@@ -242,9 +248,9 @@ function addon:InitOptions()
         addon.Options.RaidEnabled,
         addon.Options.RaidPlayerSortMode,
         addon.Options.RaidSortMode,
-        function(enabled) setOption("RaidEnabled", enabled) end,
-        function(mode) setOption("RaidPlayerSortMode", mode) end,
-        function(mode) setOption("RaidSortMode", mode) end
+        function(enabled) addon:SetOption("RaidEnabled", enabled) end,
+        function(mode) addon:SetOption("RaidPlayerSortMode", mode) end,
+        function(mode) addon:SetOption("RaidSortMode", mode) end
     )
 
     builder:BuildSortModeCheckboxes(
@@ -255,9 +261,9 @@ function addon:InitOptions()
         addon.Options.WorldEnabled,
         addon.Options.WorldPlayerSortMode,
         addon.Options.WorldSortMode,
-        function(enabled) setOption("WorldEnabled", enabled) end,
-        function(mode) setOption("WorldPlayerSortMode", mode) end,
-        function(mode) setOption("WorldSortMode", mode) end
+        function(enabled) addon:SetOption("WorldEnabled", enabled) end,
+        function(mode) addon:SetOption("WorldPlayerSortMode", mode) end,
+        function(mode) addon:SetOption("WorldSortMode", mode) end
     )
 
     builder:BuildDebugOptions(parent, lblWorldSortMode)
