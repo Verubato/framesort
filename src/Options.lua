@@ -26,7 +26,7 @@ addon.Defaults = {
 
     WorldEnabled = true,
     WorldPlayerSortMode = addon.SortMode.Top,
-    WorldSortMode = addon.SortMode.Role,
+    WorldSortMode = addon.SortMode.Group,
 
     RaidEnabled = false,
     RaidPlayerSortMode = addon.SortMode.Top,
