@@ -1,8 +1,8 @@
 ## Interface: 100005
 ## Title: Frame Sort
-## Notes: Places the player frame at the top or bottom (configurable) of party/raid frames.
+## Notes: Places the player frame at the top/middle/bottom (configurable) of party/raid frames.
 ## Author: Vers - Dath'Remar
-## Version: 1.5.3
+## Version: 1.6.0
 ## SavedVariables: Options
 
 Options.lua
