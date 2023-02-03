@@ -3,11 +3,13 @@ local builder = {}
 local verticalSpacing = -16
 local horizontalSpacing = 50
 
+-- the player and group sort modes
 addon.SortMode = {
     Group = "Group",
     Role = "Role",
     Alphabetical = "Alphabetical",
     Top = "Top",
+    Middle = "Middle",
     Bottom = "Bottom"
 }
 
@@ -33,6 +35,7 @@ addon.Defaults = {
     RaidSortMode = addon.SortMode.Role
 }
 
+-- adds the title ui components
 function builder:BuiltTitle(panel)
     local title = panel:CreateFontString("lblTitle", "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", verticalSpacing * -1, verticalSpacing)
@@ -43,6 +46,7 @@ function builder:BuiltTitle(panel)
     description:SetText("Sorts party/raid frames.")
 end
 
+-- adds a row of the player and group sort mode checkboxes
 function builder:BuildSortModeCheckboxes(
     parentPanel,
     pointOffset,
@@ -71,13 +75,19 @@ function builder:BuildSortModeCheckboxes(
     top:SetPoint("LEFT", playerLabel, "RIGHT", horizontalSpacing / 2, 0)
     top:SetChecked(playerSortMode == addon.SortMode.Top)
 
+    local middle = CreateFrame("CheckButton", "chk" .. uniqueGroupName .. "PlayerSortMiddle", parentPanel, "UICheckButtonTemplate")
+    middle.Text:SetText("Middle")
+    middle:SetPoint("LEFT", top, "RIGHT", horizontalSpacing, 0)
+    middle:SetChecked(playerSortMode == addon.SortMode.Middle)
+
     local bottom = CreateFrame("CheckButton", "chk" .. uniqueGroupName .. "PlayerSortBottom", parentPanel, "UICheckButtonTemplate")
     bottom.Text:SetText("Bottom")
-    bottom:SetPoint("LEFT", top, "RIGHT", horizontalSpacing, 0)
+    bottom:SetPoint("LEFT", middle, "RIGHT", horizontalSpacing, 0)
     bottom:SetChecked(playerSortMode == addon.SortMode.Bottom)
 
     local playerModes = {
         [top] = addon.SortMode.Top,
+        [middle] = addon.SortMode.Middle,
         [bottom] = addon.SortMode.Bottom
     }
 
@@ -151,6 +161,7 @@ function builder:BuildSortModeCheckboxes(
     end
 end
 
+-- adds the debug options ui components
 function builder:BuildDebugOptions(parentPanel, pointOffset)
     local enabled = CreateFrame("CheckButton", "chkDebugEnabled", parentPanel, "UICheckButtonTemplate")
     enabled:SetPoint("TOPLEFT", pointOffset, "BOTTOMLEFT", -4, verticalSpacing)
@@ -164,6 +175,7 @@ function builder:BuildDebugOptions(parentPanel, pointOffset)
     description:SetText("Logs messages to the chat panel which is useful for diagnosing bugs.")
 end
 
+-- upgrades the saved options to the current version
 function addon:UpgradeOptions()
     if addon.Options.Version == nil then
         addon:Debug("Upgrading options.")
@@ -192,6 +204,7 @@ function addon:UpgradeOptions()
     end
 end
 
+-- sets the specified option and re-sorts the party/raid frames if applicable
 function addon:SetOption(name, value)
     addon:Debug("Setting option - " .. name .. " = " .. tostring(value))
     addon.Options[name] = value
@@ -201,6 +214,8 @@ function addon:SetOption(name, value)
     end
 end
 
+-- adds the options interface to the wow addons section
+-- and enables the slash commands
 function addon:InitOptions()
     addon:UpgradeOptions()
 
