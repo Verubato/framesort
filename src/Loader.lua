@@ -11,6 +11,7 @@ function addon:OnLoadAddon(_, addOnName)
     addon:HookEvents()
 end
 
+-- hooks events that we should perform a re-sort on
 function addon:HookEvents()
     addon.EventLoop = CreateFrame("Frame")
     addon.EventLoop:HookScript("OnEvent", addon.OnEvent)
