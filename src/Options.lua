@@ -15,7 +15,7 @@ addon.SortMode = {
 
 -- default configuration
 addon.Defaults = {
-    Version = 2,
+    Version = 3,
     DebugEnabled = false,
 
     ArenaEnabled = true,
@@ -32,7 +32,9 @@ addon.Defaults = {
 
     RaidEnabled = false,
     RaidPlayerSortMode = addon.SortMode.Top,
-    RaidSortMode = addon.SortMode.Role
+    RaidSortMode = addon.SortMode.Role,
+
+    ExperimentalEnabled = false
 }
 
 -- adds the title ui components
@@ -170,9 +172,41 @@ function builder:BuildDebugOptions(parentPanel, pointOffset)
     enabled:SetChecked(addon.Options.DebugEnabled or false)
     enabled:HookScript("OnClick", function() addon:SetOption("DebugEnabled", enabled:GetChecked()) end)
 
-    local description = parentPanel:CreateFontString("lblDescription", "ARTWORK", "GameFontWhite")
+    local description = parentPanel:CreateFontString("lblDebugDescription", "ARTWORK", "GameFontWhite")
     description:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, verticalSpacing)
     description:SetText("Logs messages to the chat panel which is useful for diagnosing bugs.")
+end
+
+-- adds the experimental ui components
+function builder:BuildExperimentalOptions(parentPanel, pointOffset)
+    local enabled = CreateFrame("CheckButton", "chkExperimentalEnabled", parentPanel, "UICheckButtonTemplate")
+    enabled:SetPoint("TOPLEFT", pointOffset, "BOTTOMLEFT", -4, verticalSpacing)
+    enabled.Text:SetText("Experimental (requires reload)")
+    enabled.Text:SetFontObject("GameFontNormalLarge")
+    enabled:SetChecked(addon.Options.ExperimentalEnabled or false)
+    enabled:HookScript("OnClick", function() addon:SetOption("ExperimentalEnabled", enabled:GetChecked()) end)
+
+    local lines = {
+        "Experimental new sorting mode that shouldn't bug/lock/taint the UI.",
+        "Hasn't been fully tested yet so hence why it's still experimental.",
+        "Please reload after changing this setting."
+    }
+
+    local previous = enabled
+    for i, line in ipairs(lines) do
+        local description = parentPanel:CreateFontString("lblExperimentalDescription" .. tostring(i), "ARTWORK",
+            "GameFontWhite")
+        description:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", i == 1 and 4 or 0, verticalSpacing)
+        description:SetText(line)
+        previous = description
+    end
+end
+
+-- adds a blank line spacer
+function builder:BuildSpacer(parentPanel, pointOffset)
+    local spacer = parentPanel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+    spacer:SetPoint("TOPLEFT", pointOffset, "BOTTOMLEFT", 0, verticalSpacing)
+    spacer:SetText("")
 end
 
 -- upgrades the saved options to the current version
@@ -202,6 +236,8 @@ function addon:UpgradeOptions()
         addon.Options.PlayerSortMode = nil
         addon.Options.RaidSortEnabled = nil
     end
+
+    addon.Options.ExperimentalEnabled = addon.Options.ExperimentalEnabled or false
 end
 
 -- sets the specified option and re-sorts the party/raid frames if applicable
@@ -222,15 +258,14 @@ function addon:InitOptions()
     local panel = CreateFrame("ScrollFrame", nil, nil, "UIPanelScrollFrameTemplate")
     panel.name = addonName
 
-    local parent = CreateFrame("Frame")
-    panel:SetScrollChild(parent)
+    local child = CreateFrame("Frame")
+    child:SetWidth(SettingsPanel.Container:GetWidth())
+    child:SetHeight(SettingsPanel.Container:GetHeight())
+    panel:SetScrollChild(child)
 
-    parent:SetWidth(SettingsPanel.Container:GetWidth())
-    parent:SetHeight(SettingsPanel.Container:GetHeight())
-
-    builder:BuiltTitle(panel)
+    builder:BuiltTitle(child)
     builder:BuildSortModeCheckboxes(
-        parent,
+        child,
         lblDescription,
         "Arena",
         "Arena",
@@ -243,7 +278,7 @@ function addon:InitOptions()
     )
 
     builder:BuildSortModeCheckboxes(
-        parent,
+        child,
         lblArenaSortMode,
         "Dungeon (mythics, 5-mans)",
         "Dungeon",
@@ -256,7 +291,7 @@ function addon:InitOptions()
     )
 
     builder:BuildSortModeCheckboxes(
-        parent,
+        child,
         lblDungeonSortMode,
         "Raid (battlegrounds, raids)",
         "Raid",
@@ -269,7 +304,7 @@ function addon:InitOptions()
     )
 
     builder:BuildSortModeCheckboxes(
-        parent,
+        child,
         lblRaidSortMode,
         "World (non-instance groups)",
         "World",
@@ -281,7 +316,9 @@ function addon:InitOptions()
         function(mode) addon:SetOption("WorldSortMode", mode) end
     )
 
-    builder:BuildDebugOptions(parent, lblWorldSortMode)
+    builder:BuildExperimentalOptions(child, lblWorldSortMode)
+    builder:BuildDebugOptions(child, lblExperimentalDescription3)
+    builder:BuildSpacer(child, lblDebugDescription)
 
     InterfaceOptions_AddCategory(panel)
 
