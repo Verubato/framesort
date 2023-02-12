@@ -28,72 +28,85 @@ function addon:TrySort()
         return false
     end
 
-    -- don't try if edit mode is active
-    if EditModeManagerFrame.editModeActive then
-        addon:Debug("Can't sort while edit mode active.")
-        return false
-    end
-
-    local inInstance, instanceType = IsInInstance()
-    local enabled, playerSortMode, groupSortMode = addon:GetSortMode(inInstance, instanceType)
-
-    if not enabled then return false end
-
-    addon:Debug("In instance: " .. tostring(inInstance) .. ", type: " .. instanceType)
-
     local groupSize = GetNumGroupMembers()
     if groupSize <= 0 then
         addon:Debug("Can't sort because group has 0 members.")
     end
 
-    local sortFunc = nil
-
-    if playerSortMode == addon.SortMode.Middle then
-        -- we need to pre-sort to determine where the middle actually is
-        local units = addon:GetUnits()
-        table.sort(units, function(x, y) return addon:Compare(x, y, addon.SortMode.Top, groupSortMode) end)
-
-        sortFunc = function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode, units) end
-    else
-        sortFunc = function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode) end
+    -- don't try if edit mode is active
+    if EditModeManagerFrame.editModeActive then
+        addon:Debug("Not sorting while edit mode active.")
+        return false
     end
+
+    local sortFunc = addon:GetSortFunction()
+    if sortFunc == nil then return false end
 
     local maxPartySize = 5
     if groupSize > maxPartySize then
         if CompactRaidFrameContainer:IsForbidden() then return false end
 
         addon:Debug("Sorting raid frames.")
-        CompactRaidFrameContainer:SetFlowSortFunction(sortFunc)
+        if addon.Options.ExperimentalEnabled then
+            CompactRaidGroup_UpdateLayout(CompactRaidFrameContainer)
+        else
+            CompactRaidFrameContainer:SetFlowSortFunction(sortFunc)
+        end
     else
         if CompactPartyFrame:IsForbidden() then return false end
 
         addon:Debug("Sorting party frames.")
-        CompactPartyFrame_SetFlowSortFunction(sortFunc)
+        if addon.Options.ExperimentalEnabled then
+            CompactRaidGroup_UpdateLayout(CompactPartyFrame)
+        else
+            CompactPartyFrame_SetFlowSortFunction(sortFunc)
+        end
     end
 
     return true
 end
 
+function addon:GetSortFunction()
+    local inInstance, instanceType = IsInInstance()
+    local enabled, playerSortMode, groupSortMode = addon:GetSortMode(inInstance, instanceType)
+
+    if not enabled then return nil end
+
+    if playerSortMode == addon.SortMode.Middle then
+        -- we need to pre-sort to determine where the middle actually is
+        local units = addon:GetUnits()
+        table.sort(units, function(x, y) return addon:Compare(x, y, addon.SortMode.Top, groupSortMode) end)
+
+        return function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode, units) end
+    else
+        return function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode) end
+    end
+end
+
 -- returns a table of group member unit tokens that exist (UnitExists())
+-- the second return value is the total count of units
 function addon:GetUnits()
     local isRaid = IsInRaid()
     local prefix = isRaid and "raid" or "party"
     local toGenerate = isRaid and MEMBERS_PER_RAID_GROUP or (MEMBERS_PER_RAID_GROUP - 1)
     local members = {}
+    local count = 0
 
     -- raids don't have the "player" token
     if not isRaid then
         table.insert(members, "player")
+        count = 1
     end
 
     for i = 1, toGenerate do
         local unit = prefix .. i
         if UnitExists(unit) then
             table.insert(members, unit)
+            count = count + 1
         end
     end
 
-    return members
+    return members, count
 end
 
 -- returns (enabled, playerMode, groupMode)
@@ -149,4 +162,49 @@ function addon:CompareMiddle(token, sortedUnits)
 
     local mid = math.floor(total / 2)
     return index > mid
+end
+
+function addon:Layout(container)
+    -- list of the party member frames
+    local frames = { container:GetChildren() }
+    -- true if using horizontal layout, otherwise false
+    local useHorizontalGroups = EditModeManagerFrame:ShouldRaidFrameUseHorizontalRaidGroups(container.isParty)
+    -- lookup of frame by unit token
+    local frameByUnit = {}
+
+    for _, frame in ipairs(frames) do
+        -- remove all current anchors
+        if frame.unit then
+            frame:ClearAllPoints()
+            frameByUnit[frame.unit] = frame
+        end
+    end
+
+    -- calculate the desired order
+    local sortFunction = addon:GetSortFunction()
+    -- sorting may be disabled in the player's current instance
+    if sortFunction == nil then return end
+
+    local units, unitsCount = addon:GetUnits()
+    table.sort(units, sortFunction)
+
+    -- place the first frame at the beginning of the container
+    local firstUnit = units[1]
+    local firstFrame = frameByUnit[firstUnit]
+    local firstFrameRelativePoint = useHorizontalGroups and "TOPLEFT" or "TOP"
+    firstFrame:SetPoint(firstFrameRelativePoint, container, firstFrameRelativePoint, 0, -container.title:GetHeight());
+
+    -- all other frames are placed relative to the frame before it
+    local previous = firstFrame
+    for i = 2, unitsCount do
+        local unit = units[i]
+        local next = frameByUnit[unit]
+
+        next:SetPoint(
+            useHorizontalGroups and "LEFT" or "TOP",
+            previous,
+            useHorizontalGroups and "RIGHT" or "BOTTOM")
+
+        previous = next
+    end
 end

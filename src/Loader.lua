@@ -8,22 +8,29 @@ function addon:OnLoadAddon(_, addOnName)
     Options = Options or CopyTable(addon.Defaults)
     addon.Options = Options
     addon:InitOptions()
-    addon:HookEvents()
+    addon:Hook()
 end
 
 -- hooks events that we should perform a re-sort on
-function addon:HookEvents()
-    addon.EventLoop = CreateFrame("Frame")
-    addon.EventLoop:HookScript("OnEvent", addon.OnEvent)
-    -- Fired whenever a group or raid is formed or disbanded, players are leaving or joining the group or raid.
-    addon.EventLoop:RegisterEvent("GROUP_ROSTER_UPDATE")
-    -- Fired after ending combat, as regen rates return to normal.
-    -- Useful for determining when a player has left combat.
-    -- This occurs when you are not on the hate list of any NPC, or a few seconds after the latest pvp attack that you were involved with.
-    addon.EventLoop:RegisterEvent("PLAYER_REGEN_ENABLED")
-    -- Fires when the player logs in, /reloads the UI or zones between map instances.
-    -- Basically whenever the loading screen appears.
-    addon.EventLoop:RegisterEvent("PLAYER_ENTERING_WORLD")
+function addon:Hook()
+    if addon.Options.ExperimentalEnabled then
+        addon:Debug("Initialising using experimental mode.")
+        -- called when raid frames are positioned
+        hooksecurefunc("CompactRaidGroup_UpdateLayout", function(frame) addon:Layout(frame) end)
+    else
+        addon:Debug("Initialising using normal (not experimental) mode.")
+        addon.EventLoop = CreateFrame("Frame")
+        addon.EventLoop:HookScript("OnEvent", addon.OnEvent)
+        -- Fired whenever a group or raid is formed or disbanded, players are leaving or joining the group or raid.
+        addon.EventLoop:RegisterEvent("GROUP_ROSTER_UPDATE")
+        -- Fired after ending combat, as regen rates return to normal.
+        -- Useful for determining when a player has left combat.
+        -- This occurs when you are not on the hate list of any NPC, or a few seconds after the latest pvp attack that you were involved with.
+        addon.EventLoop:RegisterEvent("PLAYER_REGEN_ENABLED")
+        -- Fires when the player logs in, /reloads the UI or zones between map instances.
+        -- Basically whenever the loading screen appears.
+        addon.EventLoop:RegisterEvent("PLAYER_ENTERING_WORLD")
+    end
 end
 
 addon.Loader = CreateFrame("Frame")
