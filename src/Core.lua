@@ -14,8 +14,7 @@ function addon:OnEvent(eventName)
     addon:TrySort()
 end
 
--- attempts to sort the party/raid frames, returns true if sorted, otherwise false
-function addon:TrySort()
+function addon:CanSort()
     -- nothing to sort if we're not in a group
     if not IsInGroup() then
         addon:Debug("Not sorting because not in a group.")
@@ -39,16 +38,25 @@ function addon:TrySort()
         return false
     end
 
+    return true
+end
+
+-- attempts to sort the party/raid frames, returns true if sorted, otherwise false
+function addon:TrySort()
+    if not addon:CanSort() then return false end
+
     local sortFunc = addon:GetSortFunction()
     if sortFunc == nil then return false end
 
+    local groupSize = GetNumGroupMembers()
     local maxPartySize = 5
+
     if groupSize > maxPartySize then
         if CompactRaidFrameContainer:IsForbidden() then return false end
 
         addon:Debug("Sorting raid frames.")
         if addon.Options.ExperimentalEnabled then
-            CompactRaidGroup_UpdateLayout(CompactRaidFrameContainer)
+            addon:Debug("TODO: haven't figured out how to sort raids with experimental mode yet.")
         else
             CompactRaidFrameContainer:SetFlowSortFunction(sortFunc)
         end
@@ -165,6 +173,10 @@ function addon:CompareMiddle(token, sortedUnits)
 end
 
 function addon:Layout(container)
+    if not addon:CanSort() then return end
+
+    addon:Debug("Sorting frames (experimental).")
+
     -- list of the party member frames
     local frames = { container:GetChildren() }
     -- true if using horizontal layout, otherwise false
