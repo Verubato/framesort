@@ -30,6 +30,7 @@ function addon:CanSort()
     local groupSize = GetNumGroupMembers()
     if groupSize <= 0 then
         addon:Debug("Can't sort because group has 0 members.")
+        return false
     end
 
     -- don't try if edit mode is active
