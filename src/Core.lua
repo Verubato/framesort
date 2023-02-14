@@ -11,7 +11,11 @@ end
 -- listens for events where we should refresh the frames
 function addon:OnEvent(eventName)
     addon:Debug("Event: " .. eventName)
-    addon:TrySort()
+
+    -- only attempt a sort after combat ends if one is pending
+    if eventName == "PLAYER_REGEN_ENABLED" and not addon.SortPending then return end
+
+    addon.SortPending = not addon:TrySort()
 end
 
 function addon:CanSort()
@@ -49,6 +53,9 @@ function addon:TrySort()
     local sortFunc = addon:GetSortFunction()
     if sortFunc == nil then return false end
 
+    -- TODO: need better method for determining if should sort party or raid frames
+    -- not as simple as just IsInRaid() because you are in a raid in arena but with only 3 party members
+    -- you could also be in a pve raid with 3 members, but raid frames are being shown instead of party
     local groupSize = GetNumGroupMembers()
     local maxPartySize = 5
 
