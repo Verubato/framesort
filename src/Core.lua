@@ -53,31 +53,21 @@ function addon:TrySort()
     local sortFunc = addon:GetSortFunction()
     if sortFunc == nil then return false end
 
-    -- TODO: need better method for determining if should sort party or raid frames
-    -- not as simple as just IsInRaid() because you are in a raid in arena but with only 3 party members
-    -- you could also be in a pve raid with 3 members, but raid frames are being shown instead of party
-    local groupSize = GetNumGroupMembers()
-    local maxPartySize = 5
-
-    if groupSize > maxPartySize then
-        if CompactRaidFrameContainer:IsForbidden() then return false end
-
+    if not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
         addon:Debug("Sorting raid frames.")
         if addon.Options.ExperimentalEnabled then
             addon:Debug("TODO: haven't figured out how to sort raids with experimental mode yet.")
         else
             CompactRaidFrameContainer:SetFlowSortFunction(sortFunc)
         end
-    else
-        if CompactPartyFrame:IsForbidden() then return false end
-
+    elseif not CompactPartyFrame:IsForbidden() and CompactPartyFrame:IsVisible() then
         addon:Debug("Sorting party frames.")
         if addon.Options.ExperimentalEnabled then
             CompactRaidGroup_UpdateLayout(CompactPartyFrame)
         else
             CompactPartyFrame_SetFlowSortFunction(sortFunc)
         end
-    end
+    else return false end
 
     return true
 end
