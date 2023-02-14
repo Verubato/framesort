@@ -81,15 +81,15 @@ function addon:GetSortFunction()
 
     if not enabled then return nil end
 
-    if playerSortMode == addon.SortMode.Middle then
-        -- we need to pre-sort to determine where the middle actually is
-        local units = addon:GetUnits()
-        table.sort(units, function(x, y) return addon:Compare(x, y, addon.SortMode.Top, groupSortMode) end)
-
-        return function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode, units) end
-    else
+    if playerSortMode ~= addon.SortMode.Middle then
         return function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode) end
     end
+
+    -- we need to pre-sort to determine where the middle actually is
+    local units = addon:GetUnits()
+    table.sort(units, function(x, y) return addon:Compare(x, y, addon.SortMode.Top, groupSortMode) end)
+
+    return function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode, units) end
 end
 
 -- returns a table of group member unit tokens that exist (UnitExists())
