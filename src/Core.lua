@@ -74,6 +74,58 @@ function addon:TrySort()
     return true
 end
 
+function addon:Layout(container)
+    if not addon:CanSort() then
+        addon.SortPending = true
+        return
+    end
+
+    addon:Debug("Sorting frames (experimental).")
+
+    -- list of the party member frames
+    local frames = { container:GetChildren() }
+    -- true if using horizontal layout, otherwise false
+    local useHorizontalGroups = EditModeManagerFrame:ShouldRaidFrameUseHorizontalRaidGroups(container.isParty)
+    -- lookup of frame by unit token
+    local frameByUnit = {}
+
+    for _, frame in ipairs(frames) do
+        -- remove all current anchors
+        if frame.unit then
+            frame:ClearAllPoints()
+            frameByUnit[frame.unit] = frame
+        end
+    end
+
+    -- calculate the desired order
+    local sortFunction = addon:GetSortFunction()
+    -- sorting may be disabled in the player's current instance
+    if sortFunction == nil then return end
+
+    local units, unitsCount = addon:GetUnits()
+    table.sort(units, sortFunction)
+
+    -- place the first frame at the beginning of the container
+    local firstUnit = units[1]
+    local firstFrame = frameByUnit[firstUnit]
+    local firstFrameRelativePoint = useHorizontalGroups and "TOPLEFT" or "TOP"
+    firstFrame:SetPoint(firstFrameRelativePoint, container, firstFrameRelativePoint, 0, -container.title:GetHeight());
+
+    -- all other frames are placed relative to the frame before it
+    local previous = firstFrame
+    for i = 2, unitsCount do
+        local unit = units[i]
+        local next = frameByUnit[unit]
+
+        next:SetPoint(
+            useHorizontalGroups and "LEFT" or "TOP",
+            previous,
+            useHorizontalGroups and "RIGHT" or "BOTTOM")
+
+        previous = next
+    end
+end
+
 function addon:GetSortFunction()
     local inInstance, instanceType = IsInInstance()
     local enabled, playerSortMode, groupSortMode = addon:GetSortMode(inInstance, instanceType)
@@ -184,56 +236,4 @@ function addon:CompareMiddle(token, sortedUnits)
 
     local mid = math.floor(total / 2)
     return index > mid
-end
-
-function addon:Layout(container)
-    if not addon:CanSort() then
-        addon.SortPending = true
-        return
-    end
-
-    addon:Debug("Sorting frames (experimental).")
-
-    -- list of the party member frames
-    local frames = { container:GetChildren() }
-    -- true if using horizontal layout, otherwise false
-    local useHorizontalGroups = EditModeManagerFrame:ShouldRaidFrameUseHorizontalRaidGroups(container.isParty)
-    -- lookup of frame by unit token
-    local frameByUnit = {}
-
-    for _, frame in ipairs(frames) do
-        -- remove all current anchors
-        if frame.unit then
-            frame:ClearAllPoints()
-            frameByUnit[frame.unit] = frame
-        end
-    end
-
-    -- calculate the desired order
-    local sortFunction = addon:GetSortFunction()
-    -- sorting may be disabled in the player's current instance
-    if sortFunction == nil then return end
-
-    local units, unitsCount = addon:GetUnits()
-    table.sort(units, sortFunction)
-
-    -- place the first frame at the beginning of the container
-    local firstUnit = units[1]
-    local firstFrame = frameByUnit[firstUnit]
-    local firstFrameRelativePoint = useHorizontalGroups and "TOPLEFT" or "TOP"
-    firstFrame:SetPoint(firstFrameRelativePoint, container, firstFrameRelativePoint, 0, -container.title:GetHeight());
-
-    -- all other frames are placed relative to the frame before it
-    local previous = firstFrame
-    for i = 2, unitsCount do
-        local unit = units[i]
-        local next = frameByUnit[unit]
-
-        next:SetPoint(
-            useHorizontalGroups and "LEFT" or "TOP",
-            previous,
-            useHorizontalGroups and "RIGHT" or "BOTTOM")
-
-        previous = next
-    end
 end
