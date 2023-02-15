@@ -17,23 +17,18 @@ addon.SortMode = {
 addon.Defaults = {
     Version = 3,
     DebugEnabled = false,
-
     ArenaEnabled = true,
     ArenaPlayerSortMode = addon.SortMode.Top,
     ArenaSortMode = addon.SortMode.Group,
-
     DungeonEnabled = true,
     DungeonPlayerSortMode = addon.SortMode.Top,
     DungeonSortMode = addon.SortMode.Role,
-
     WorldEnabled = true,
     WorldPlayerSortMode = addon.SortMode.Top,
     WorldSortMode = addon.SortMode.Group,
-
     RaidEnabled = false,
     RaidPlayerSortMode = addon.SortMode.Top,
     RaidSortMode = addon.SortMode.Role,
-
     ExperimentalEnabled = false
 }
 

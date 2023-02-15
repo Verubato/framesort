@@ -1,3 +1,3 @@
 [*.lua]
-
 max_line_length = 200
+quote_style = double
