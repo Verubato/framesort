@@ -171,7 +171,10 @@ function addon:CompareMiddle(token, sortedUnits)
 end
 
 function addon:Layout(container)
-    if not addon:CanSort() then return end
+    if not addon:CanSort() then
+        addon.SortPending = true
+        return
+    end
 
     addon:Debug("Sorting frames (experimental).")
 
