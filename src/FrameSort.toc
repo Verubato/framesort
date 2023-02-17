@@ -5,6 +5,8 @@
 ## Version: 1.7.3
 ## SavedVariables: Options
 
-Options.lua
+Unit.lua
+Compare.lua
 Core.lua
+Options.lua
 Loader.lua

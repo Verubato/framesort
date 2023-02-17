@@ -1,12 +1,14 @@
-local subject = loadfile("..\\src\\Core.lua")
-if subject == nil then error('Failed to load Core.lua') end
-
-local options = loadfile("..\\src\\Options.lua")
-if options == nil then error('Failed to load Options.lua') end
+local deps = {
+    "Compare.lua"
+}
 
 local addon = {}
-subject("UnitTest", addon)
-options("UnitTest", addon)
+for _, fileName in ipairs(deps) do
+    print(fileName)
+    local module = loadfile("..\\src\\" .. fileName)
+    if module == nil then error("Failed to load " .. fileName) end
+    module("UnitTest", addon)
+end
 
 local mock = require("Mock")
 local M = {}

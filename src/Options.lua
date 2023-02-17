@@ -3,16 +3,6 @@ local builder = {}
 local verticalSpacing = -16
 local horizontalSpacing = 50
 
--- the player and group sort modes
-addon.SortMode = {
-    Group = "Group",
-    Role = "Role",
-    Alphabetical = "Alphabetical",
-    Top = "Top",
-    Middle = "Middle",
-    Bottom = "Bottom"
-}
-
 -- default configuration
 addon.Defaults = {
     Version = 3,
