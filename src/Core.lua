@@ -21,7 +21,7 @@ end
 function addon:CanSort()
     -- nothing to sort if we're not in a group
     if not IsInGroup() then
-        addon:Debug("Not sorting because not in a group.")
+        -- not worth logging anything here
         return false
     end
 
@@ -54,17 +54,17 @@ function addon:TrySort()
     if sortFunc == nil then return false end
 
     if not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
-        addon:Debug("Sorting raid frames.")
         if addon.Options.ExperimentalEnabled then
-            addon:Debug("TODO: haven't figured out how to sort raids with experimental mode yet.")
+            return CompactRaidFrameContainer:TryUpdate()
         else
+            addon:Debug("Sorting raid frames.")
             CompactRaidFrameContainer:SetFlowSortFunction(sortFunc)
         end
     elseif not CompactPartyFrame:IsForbidden() and CompactPartyFrame:IsVisible() then
-        addon:Debug("Sorting party frames.")
         if addon.Options.ExperimentalEnabled then
-            CompactRaidGroup_UpdateLayout(CompactPartyFrame)
+            addon:LayoutParty(CompactPartyFrame)
         else
+            addon:Debug("Sorting party frames.")
             CompactPartyFrame_SetFlowSortFunction(sortFunc)
         end
     else
@@ -74,13 +74,16 @@ function addon:TrySort()
     return true
 end
 
-function addon:Layout(container)
-    if not addon:CanSort() then
+function addon:LayoutParty(container)
+    if not addon:CanSort() or container:IsForbidden() then
         addon.SortPending = true
         return
     end
 
-    addon:Debug("Sorting frames (experimental).")
+    -- nothing to sort
+    if not container:IsVisible() then return end
+
+    addon:Debug("Sorting party frames (experimental).")
 
     -- list of the party member frames
     local frames = { container:GetChildren() }
@@ -102,7 +105,7 @@ function addon:Layout(container)
     -- sorting may be disabled in the player's current instance
     if sortFunction == nil then return end
 
-    local units, unitsCount = addon:GetUnits()
+    local units = addon:GetUnits()
     table.sort(units, sortFunction)
 
     -- place the first frame at the beginning of the container
@@ -113,7 +116,7 @@ function addon:Layout(container)
 
     -- all other frames are placed relative to the frame before it
     local previous = firstFrame
-    for i = 2, unitsCount do
+    for i = 2, #units do
         local unit = units[i]
         local next = frameByUnit[unit]
 
@@ -123,6 +126,84 @@ function addon:Layout(container)
             useHorizontalGroups and "RIGHT" or "BOTTOM")
 
         previous = next
+    end
+end
+
+function addon:LayoutRaid(container)
+    if not addon:CanSort() or container:IsForbidden() then
+        addon.SortPending = true
+        return
+    end
+
+    -- nothing to sort
+    if not container:IsVisible() then return end
+
+    addon:Debug("Sorting raid frames (experimental).")
+
+    -- existing frames
+    local flowFrames = {}
+    local framesByUnit = {}
+
+    -- probably too complicated to calculate positions due to the whole flow container layout logic
+    -- so instead we can just store the existing positions and re-use them
+    -- probably safer and better supported this way anyway
+    for i = 1, #container.flowFrames do
+        local object = container.flowFrames[i]
+        local objectType = type(object)
+
+        if objectType == "table" and object.unit then
+            local data = {
+                frame = object,
+                points = {},
+            }
+
+            local pointsCount = object:GetNumPoints()
+
+            for j = 1, pointsCount do
+                data.points[j] = { object:GetPoint(j) }
+            end
+
+            flowFrames[#flowFrames + 1] = data
+            framesByUnit[object.unit] = data
+        end
+    end
+
+    -- calculate the desired order
+    local sortFunction = addon:GetSortFunction()
+    -- sorting may be disabled in the player's current instance
+    if sortFunction == nil then return end
+
+    local units = addon:GetUnits()
+
+    if #units ~= #flowFrames then
+        -- this can happen in edit mode where fake raid frames are placed
+        -- but we shouldn't actually get here anyway as CanSort() would return false
+        addon:Debug("Unsupported: Not sorting as the number of raid frames is not equal to the number of raid units.")
+        return
+    end
+
+    table.sort(units, sortFunction)
+
+    for i = 1, #units do
+        local sourceUnit = units[i]
+        -- the current frame/position
+        local source = framesByUnit[sourceUnit]
+        -- the target frame/position
+        local target = flowFrames[i]
+
+        source.frame:ClearAllPoints()
+
+        for j = 1, #target.points do
+            local point = target.points[j]
+
+            -- move the source frame to the target
+            source.frame:SetPoint(
+                point[1],
+                point[2],
+                point[3],
+                point[4],
+                point[5])
+        end
     end
 end
 
@@ -144,11 +225,10 @@ function addon:GetSortFunction()
 end
 
 -- returns a table of group member unit tokens that exist (UnitExists())
--- the second return value is the total count of units
 function addon:GetUnits()
     local isRaid = IsInRaid()
     local prefix = isRaid and "raid" or "party"
-    local toGenerate = isRaid and MEMBERS_PER_RAID_GROUP or (MEMBERS_PER_RAID_GROUP - 1)
+    local toGenerate = isRaid and MAX_RAID_MEMBERS or (MEMBERS_PER_RAID_GROUP - 1)
     local members = {}
     local count = 0
 
@@ -166,7 +246,7 @@ function addon:GetUnits()
         end
     end
 
-    return members, count
+    return members
 end
 
 -- returns (enabled, playerMode, groupMode)
