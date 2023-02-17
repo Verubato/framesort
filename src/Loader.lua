@@ -1,6 +1,8 @@
 local addonName, addon = ...
 
--- listens for addon onload events
+---Listens for addon onload events.
+---@param _ any
+---@param name string
 function addon:OnLoadAddon(_, name)
     if name ~= addonName then return end
 
@@ -11,7 +13,7 @@ function addon:OnLoadAddon(_, name)
     addon:Hook()
 end
 
--- hooks events that we should perform a re-sort on
+---Hooks events that we should perform a re-sort on.
 function addon:Hook()
     addon.EventLoop = CreateFrame("Frame")
     addon.EventLoop:HookScript("OnEvent", addon.OnEvent)

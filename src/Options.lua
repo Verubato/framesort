@@ -3,7 +3,7 @@ local builder = {}
 local verticalSpacing = -16
 local horizontalSpacing = 50
 
--- default configuration
+---Default configuration.
 addon.Defaults = {
     Version = 3,
     DebugEnabled = false,
@@ -22,7 +22,8 @@ addon.Defaults = {
     ExperimentalEnabled = false
 }
 
--- adds the title ui components
+---Adds the title UI components.
+---@param panel table the parent UI panel.
 function builder:BuiltTitle(panel)
     local title = panel:CreateFontString("lblTitle", "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", verticalSpacing * -1, verticalSpacing)
@@ -33,7 +34,17 @@ function builder:BuiltTitle(panel)
     description:SetText("Sorts party/raid frames.")
 end
 
--- adds a row of the player and group sort mode checkboxes
+---Adds a row of the player and group sort mode checkboxes.
+---@param parentPanel table the parent UI panel.
+---@param pointOffset table a UI component used as a relative position anchor for the new components.
+---@param labelText string the text to display on the enabled checkbox.
+---@param uniqueGroupName string a unique string used for the component names.
+---@param sortingEnabled boolean whether sorting is currently enabled.
+---@param playerSortMode string current player sort mode.
+---@param sortMode string current group sort mode.
+---@param onEnabledChanged function function(enabled) callback function when enabled changes.
+---@param onPlayerSortModeChanged function function(mode) callback function when the player sort mode changes.
+---@param onSortModeChanged function function(mode) callback function when the group sort mode changes.
 function builder:BuildSortModeCheckboxes(
     parentPanel,
     pointOffset,
@@ -148,7 +159,9 @@ function builder:BuildSortModeCheckboxes(
     end
 end
 
--- adds the debug options ui components
+---Adds the debug option UI components.
+---@param parentPanel table the parent UI panel.
+---@param pointOffset table a UI component used as a relative position anchor for the new components.
 function builder:BuildDebugOptions(parentPanel, pointOffset)
     local enabled = CreateFrame("CheckButton", "chkDebugEnabled", parentPanel, "UICheckButtonTemplate")
     enabled:SetPoint("TOPLEFT", pointOffset, "BOTTOMLEFT", -4, verticalSpacing)
@@ -162,7 +175,9 @@ function builder:BuildDebugOptions(parentPanel, pointOffset)
     description:SetText("Logs messages to the chat panel which is useful for diagnosing bugs.")
 end
 
--- adds the experimental ui components
+---Adds the experimental option UI components.
+---@param parentPanel table the parent UI panel.
+---@param pointOffset table a UI component used as a relative position anchor for the new components.
 function builder:BuildExperimentalOptions(parentPanel, pointOffset)
     local enabled = CreateFrame("CheckButton", "chkExperimentalEnabled", parentPanel, "UICheckButtonTemplate")
     enabled:SetPoint("TOPLEFT", pointOffset, "BOTTOMLEFT", -4, verticalSpacing)
@@ -187,14 +202,16 @@ function builder:BuildExperimentalOptions(parentPanel, pointOffset)
     end
 end
 
--- adds a blank line spacer
+---Adds a blank line spacer.
+---@param parentPanel table the parent UI panel.
+---@param pointOffset table a UI component used as a relative position anchor for the new components.
 function builder:BuildSpacer(parentPanel, pointOffset)
     local spacer = parentPanel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
     spacer:SetPoint("TOPLEFT", pointOffset, "BOTTOMLEFT", 0, verticalSpacing)
     spacer:SetText("")
 end
 
--- upgrades the saved options to the current version
+---Upgrades saved options to the current version.
 function addon:UpgradeOptions()
     if addon.Options.Version == nil then
         addon:Debug("Upgrading options.")
@@ -225,7 +242,7 @@ function addon:UpgradeOptions()
     addon.Options.ExperimentalEnabled = addon.Options.ExperimentalEnabled or false
 end
 
--- sets the specified option and re-sorts the party/raid frames if applicable
+---Sets the specified option and re-sorts the party/raid frames if applicable.
 function addon:SetOption(name, value)
     addon:Debug("Setting option - '" .. name .. "' = '" .. tostring(value) .. "'")
     addon.Options[name] = value
@@ -235,8 +252,7 @@ function addon:SetOption(name, value)
     end
 end
 
--- adds the options interface to the wow addons section
--- and enables the slash commands
+---Adds the options interface to the wow addons section and enables slash commands.
 function addon:InitOptions()
     addon:UpgradeOptions()
 
