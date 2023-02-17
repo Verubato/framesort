@@ -4,7 +4,6 @@ local deps = {
 
 local addon = {}
 for _, fileName in ipairs(deps) do
-    print(fileName)
     local module = loadfile("..\\src\\" .. fileName)
     if module == nil then error("Failed to load " .. fileName) end
     module("UnitTest", addon)
