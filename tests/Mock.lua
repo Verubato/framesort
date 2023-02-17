@@ -1,13 +1,14 @@
 local M = {}
 
-function M:GenerateUnits(size)
-    local maxPartySize = 5
-    local prefix = size > maxPartySize and "raid" or "party"
-    local toGenerate = size > maxPartySize and size or (size - 1)
+function M:GenerateUnits(count, isRaid)
+    isRaid = isRaid or count > 5
+
+    local prefix = isRaid and "raid" or "party"
+    local toGenerate = isRaid and count or count - 1
     local members = {}
 
     -- raids don't have the "player" token
-    if size <= maxPartySize then
+    if not isRaid then
         table.insert(members, "player")
     end
 
