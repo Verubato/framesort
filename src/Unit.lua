@@ -1,6 +1,7 @@
 local _, addon = ...
 
--- returns a table of group member unit tokens that exist (UnitExists())
+---Gets a table of group member unit tokens that exist (UnitExists()).
+---@return table
 function addon:GetUnits()
     local isRaid = IsInRaid()
     local prefix = isRaid and "raid" or "party"

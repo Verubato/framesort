@@ -1,6 +1,6 @@
 local _, addon = ...
 
--- the player and group sort modes
+---Player and group sort modes.
 addon.SortMode = {
     Group = "Group",
     Role = "Role",
@@ -10,11 +10,18 @@ addon.SortMode = {
     Bottom = "Bottom"
 }
 
+---Returns a function that accepts two parameters of unit tokens and returns true if the left token should be ordered before the right.
+---Sorting is based on the player's instance and configured options.
+---Nil may be returned if sorting is not enabled for the player's current instance.
+---@return function?
 function addon:GetSortFunction()
     local inInstance, instanceType = IsInInstance()
     local enabled, playerSortMode, groupSortMode = addon:GetSortMode(inInstance, instanceType)
 
     if not enabled then return nil end
+
+    assert(playerSortMode ~= nil)
+    assert(groupSortMode ~= nil)
 
     if playerSortMode ~= addon.SortMode.Middle then
         return function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode) end
@@ -27,7 +34,12 @@ function addon:GetSortFunction()
     return function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode, units) end
 end
 
--- returns (enabled, playerMode, groupMode)
+---Returns the sort mode from the configured options for the specified instance type.
+---@param inInstance boolean
+---@param instanceType string
+---@return boolean enabled whether sorting is enabled.
+---@return string? playerMode the player sort mode.
+---@return string? groupMode the group sort mode.
 function addon:GetSortMode(inInstance, instanceType)
     if inInstance and instanceType == "arena" then
         return addon.Options.ArenaEnabled, addon.Options.ArenaPlayerSortMode, addon.Options.ArenaSortMode
@@ -36,28 +48,34 @@ function addon:GetSortMode(inInstance, instanceType)
     elseif inInstance and (instanceType == "raid" or "pvp") then
         return addon.Options.RaidEnabled, addon.Options.RaidPlayerSortMode, addon.Options.RaidSortMode
     else
-        if not addon.Options.WorldEnabled then return false end
+        if not addon.Options.WorldEnabled then return false, nil, nil end
         return addon.Options.WorldEnabled, addon.Options.WorldPlayerSortMode, addon.Options.WorldSortMode
     end
 end
 
--- returns true if the left token should be ordered before the right token
--- preSortedUnits is required if playerSortMode == Middle
+---Returns true if the left token should be ordered before the right token.
+---preSortedUnits is required if playerSortMode == Middle.
+---@param leftToken string
+---@param rightToken string
+---@param playerSortMode string
+---@param groupSortMode string
+---@param preSortedUnits table?
+---@return boolean
 function addon:Compare(leftToken, rightToken, playerSortMode, groupSortMode, preSortedUnits)
-    assert(playerSortMode ~= addon.SortMode.Middle or preSortedUnits ~= nil)
-
     if not UnitExists(leftToken) then
         return false
     elseif not UnitExists(rightToken) then
         return true
     elseif UnitIsUnit(leftToken, "player") then
         if playerSortMode == addon.SortMode.Middle then
+            assert(preSortedUnits ~= nil)
             return addon:CompareMiddle(rightToken, preSortedUnits)
         else
             return playerSortMode == addon.SortMode.Top
         end
     elseif UnitIsUnit(rightToken, "player") then
         if playerSortMode == addon.SortMode.Middle then
+            assert(preSortedUnits ~= nil)
             return not addon:CompareMiddle(leftToken, preSortedUnits)
         else
             return playerSortMode == addon.SortMode.Bottom
@@ -73,7 +91,10 @@ function addon:Compare(leftToken, rightToken, playerSortMode, groupSortMode, pre
     end
 end
 
--- returns true if the specified token is ordered after the mid point
+---Returns true if the specified token is ordered after the mid point.
+---@param token string
+---@param sortedUnits table
+---@return boolean
 function addon:CompareMiddle(token, sortedUnits)
     -- total number of members in the group
     local total = 0

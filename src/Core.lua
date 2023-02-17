@@ -1,14 +1,16 @@
 local addonName, addon = ...
 local logPrefix = addonName .. ": "
 
--- prints a debug message to the chat window if DebugMode is enabled
+---Prints a debug message to the chat window if DebugMode is enabled.
+---@param msg string
 function addon:Debug(msg)
     if addon.Options.DebugEnabled then
         print(logPrefix .. msg)
     end
 end
 
--- listens for events where we should refresh the frames
+---Listens for events where we should refresh the frames.
+---@param eventName string
 function addon:OnEvent(eventName)
     addon:Debug("Event: " .. eventName)
 
@@ -18,6 +20,8 @@ function addon:OnEvent(eventName)
     addon.SortPending = not addon:TrySort()
 end
 
+---Determines whether sorting can be performed.
+---@return boolean
 function addon:CanSort()
     -- nothing to sort if we're not in a group
     if not IsInGroup() then
@@ -46,7 +50,8 @@ function addon:CanSort()
     return true
 end
 
--- attempts to sort the party/raid frames, returns true if sorted, otherwise false
+---Attempts to sort the party/raid frames.
+---@return boolean sorted true if sorted, otherwise false.
 function addon:TrySort()
     if not addon:CanSort() then return false end
 
@@ -74,14 +79,17 @@ function addon:TrySort()
     return true
 end
 
+---Sorts and positions the party frames.
+---@param container table CompactPartyFrame.
+---@return boolean sorted true if frames were sorted, otherwise false.
 function addon:LayoutParty(container)
     if not addon:CanSort() or container:IsForbidden() then
         addon.SortPending = true
-        return
+        return false
     end
 
     -- nothing to sort
-    if not container:IsVisible() then return end
+    if not container:IsVisible() then return false end
 
     addon:Debug("Sorting party frames (experimental).")
 
@@ -103,7 +111,7 @@ function addon:LayoutParty(container)
     -- calculate the desired order
     local sortFunction = addon:GetSortFunction()
     -- sorting may be disabled in the player's current instance
-    if sortFunction == nil then return end
+    if sortFunction == nil then return false end
 
     local units = addon:GetUnits()
     table.sort(units, sortFunction)
@@ -127,16 +135,21 @@ function addon:LayoutParty(container)
 
         previous = next
     end
+
+    return true
 end
 
+---Sorts and positions the raid frames.
+---@param container table CompactRaidFrameContainer.
+---@return boolean sorted true if frames were sorted, otherwise false.
 function addon:LayoutRaid(container)
     if not addon:CanSort() or container:IsForbidden() then
         addon.SortPending = true
-        return
+        return false
     end
 
     -- nothing to sort
-    if not container:IsVisible() then return end
+    if not container:IsVisible() then return false end
 
     addon:Debug("Sorting raid frames (experimental).")
 
@@ -171,7 +184,7 @@ function addon:LayoutRaid(container)
     -- calculate the desired order
     local sortFunction = addon:GetSortFunction()
     -- sorting may be disabled in the player's current instance
-    if sortFunction == nil then return end
+    if sortFunction == nil then return false end
 
     local units = addon:GetUnits()
 
@@ -179,7 +192,7 @@ function addon:LayoutRaid(container)
         -- this can happen in edit mode where fake raid frames are placed
         -- but we shouldn't actually get here anyway as CanSort() would return false
         addon:Debug("Unsupported: Not sorting as the number of raid frames is not equal to the number of raid units.")
-        return
+        return false
     end
 
     table.sort(units, sortFunction)
@@ -205,4 +218,6 @@ function addon:LayoutRaid(container)
                 point[5])
         end
     end
+
+    return true
 end
