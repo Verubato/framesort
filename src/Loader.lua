@@ -23,8 +23,8 @@ function addon:Hook()
 
     if addon.Options.ExperimentalEnabled then
         addon:Debug("Initialising using experimental mode.")
-        -- called when raid frames are positioned
-        hooksecurefunc("CompactRaidGroup_UpdateLayout", function(frame) addon:Layout(frame) end)
+        hooksecurefunc("CompactRaidGroup_UpdateLayout", function(frame) addon:LayoutParty(frame) end)
+        hooksecurefunc(CompactRaidFrameContainer, "LayoutFrames", function() addon:LayoutRaid(CompactRaidFrameContainer) end)
     else
         addon:Debug("Initialising using normal (not experimental) mode.")
         -- Fired whenever a group or raid is formed or disbanded, players are leaving or joining the group or raid.

@@ -237,7 +237,7 @@ end
 
 -- sets the specified option and re-sorts the party/raid frames if applicable
 function addon:SetOption(name, value)
-    addon:Debug("Setting option - " .. name .. " = " .. tostring(value))
+    addon:Debug("Setting option - '" .. name .. "' = '" .. tostring(value) .. "'")
     addon.Options[name] = value
 
     if name ~= "DebugEnabled" then
