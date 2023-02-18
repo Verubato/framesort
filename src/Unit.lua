@@ -8,7 +8,7 @@ function addon:GetUnits()
     local toGenerate = isRaid and MAX_RAID_MEMBERS or (MEMBERS_PER_RAID_GROUP - 1)
     local members = {}
 
-    -- raids don't have the "player" token frane
+    -- raids don't have the "player" token frame
     if not isRaid then
         table.insert(members, "player")
     end
