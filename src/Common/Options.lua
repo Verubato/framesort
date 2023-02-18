@@ -271,11 +271,7 @@ function addon:InitOptions()
     InterfaceOptions_AddCategory(panel)
 
     builder:BuildHealthCheck(panel)
-
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        builder:BuildExperimentalOptions(panel)
-    end
-
+    builder:BuildExperimentalOptions(panel)
     builder:BuildDebugOptions(panel)
 
     SLASH_FRAMESORT1 = "/fs"
