@@ -197,18 +197,6 @@ function builder:BuildExperimentalOptions(parentPanel, pointOffset)
     return previous
 end
 
----Adds a blank line spacer.
----@param parentPanel table the parent UI panel.
----@param pointOffset table a UI component used as a relative position anchor for the new components.
----@return table The bottom left most control to use for anchoring subsequent UI components.
-function builder:BuildSpacer(parentPanel, pointOffset)
-    local spacer = parentPanel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-    spacer:SetPoint("TOPLEFT", pointOffset, "BOTTOMLEFT", 0, verticalSpacing)
-    spacer:SetText("")
-
-    return spacer
-end
-
 ---Upgrades saved options to the current version.
 function addon:UpgradeOptions()
     if addon.Options.Version == nil then
