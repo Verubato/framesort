@@ -9,5 +9,6 @@ Common\Log.lua
 Common\Unit.lua
 Common\Compare.lua
 Common\Options.lua
+Common\HealthCheck.lua
 Retail\Core.lua
 Retail\Loader.lua

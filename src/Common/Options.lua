@@ -1,5 +1,6 @@
 local addonName, addon = ...
-local builder = {}
+addon.OptionsBuilder = {}
+local builder = addon.OptionsBuilder
 local verticalSpacing = -16
 local horizontalSpacing = 50
 
@@ -347,6 +348,8 @@ function addon:InitOptions()
     anchor = builder:BuildSpacer(child, anchor)
 
     InterfaceOptions_AddCategory(panel)
+
+    builder:BuildHealthCheck(panel)
 
     SLASH_FRAMESORT1 = "/fs"
     SLASH_FRAMESORT2 = "/framesort"
