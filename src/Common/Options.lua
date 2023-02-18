@@ -167,25 +167,6 @@ function builder:BuildSortModeCheckboxes(
     return modeLabel
 end
 
----Adds the debug option UI components.
----@param parentPanel table the parent UI panel.
----@param pointOffset table a UI component used as a relative position anchor for the new components.
----@return table The bottom left most control to use for anchoring subsequent UI components.
-function builder:BuildDebugOptions(parentPanel, pointOffset)
-    local enabled = CreateFrame("CheckButton", "chkDebugEnabled", parentPanel, "UICheckButtonTemplate")
-    enabled:SetPoint("TOPLEFT", pointOffset, "BOTTOMLEFT", -4, verticalSpacing)
-    enabled.Text:SetText("Debug mode")
-    enabled.Text:SetFontObject("GameFontNormalLarge")
-    enabled:SetChecked(addon.Options.DebugEnabled or false)
-    enabled:HookScript("OnClick", function() addon:SetOption("DebugEnabled", enabled:GetChecked()) end)
-
-    local description = parentPanel:CreateFontString("lblDebugDescription", "ARTWORK", "GameFontWhite")
-    description:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, verticalSpacing)
-    description:SetText("Logs messages to the chat panel which is useful for diagnosing bugs.")
-
-    return description
-end
-
 ---Adds the experimental option UI components.
 ---@param parentPanel table the parent UI panel.
 ---@param pointOffset table a UI component used as a relative position anchor for the new components.
@@ -273,23 +254,12 @@ end
 function addon:InitOptions()
     addon:UpgradeOptions()
 
-    local panel = CreateFrame("ScrollFrame", nil, nil, "UIPanelScrollFrameTemplate")
+    local panel = CreateFrame("Frame")
     panel.name = addonName
 
-    local child = CreateFrame("Frame")
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        child:SetWidth(SettingsPanel.Container:GetWidth())
-        child:SetHeight(SettingsPanel.Container:GetHeight())
-    else
-        child:SetWidth(InterfaceOptionsFramePanelContainer:GetWidth())
-        child:SetHeight(InterfaceOptionsFramePanelContainer:GetHeight())
-    end
-
-    panel:SetScrollChild(child)
-
-    local anchor = builder:BuiltTitle(child)
+    local anchor = builder:BuiltTitle(panel)
     anchor = builder:BuildSortModeCheckboxes(
-        child,
+        panel,
         anchor,
         "Arena",
         "Arena",
@@ -302,7 +272,7 @@ function addon:InitOptions()
     )
 
     anchor = builder:BuildSortModeCheckboxes(
-        child,
+        panel,
         anchor,
         "Dungeon (mythics, 5-mans)",
         "Dungeon",
@@ -315,7 +285,7 @@ function addon:InitOptions()
     )
 
     anchor = builder:BuildSortModeCheckboxes(
-        child,
+        panel,
         anchor,
         "Raid (battlegrounds, raids)",
         "Raid",
@@ -328,7 +298,7 @@ function addon:InitOptions()
     )
 
     anchor = builder:BuildSortModeCheckboxes(
-        child,
+        panel,
         anchor,
         "World (non-instance groups)",
         "World",
@@ -340,16 +310,15 @@ function addon:InitOptions()
         function(mode) addon:SetOption("WorldSortMode", mode) end
     )
 
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        anchor = builder:BuildExperimentalOptions(child, anchor)
-    end
-
-    anchor = builder:BuildDebugOptions(child, anchor)
-    anchor = builder:BuildSpacer(child, anchor)
-
     InterfaceOptions_AddCategory(panel)
 
     builder:BuildHealthCheck(panel)
+
+    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+        anchor = builder:BuildExperimentalOptions(panel, anchor)
+    end
+
+    builder:BuildDebugOptions(panel)
 
     SLASH_FRAMESORT1 = "/fs"
     SLASH_FRAMESORT2 = "/framesort"

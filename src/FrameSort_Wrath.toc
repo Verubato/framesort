@@ -9,6 +9,8 @@ Common\Log.lua
 Common\Unit.lua
 Common\Compare.lua
 Common\Options.lua
-Common\HealthCheck.lua
+Common\ExperimentalOptions.lua
+Common\HealthCheckOptions.lua
+Common\DebugOptions.lua
 Wotlk\Core.lua
 Wotlk\Loader.lua
