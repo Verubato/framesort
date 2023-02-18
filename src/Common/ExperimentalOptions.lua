@@ -10,7 +10,7 @@ function builder:BuildExperimentalOptions(parentPanel)
     panel.parent = parentPanel.name
 
     local enabled = CreateFrame("CheckButton", "chkExperimentalEnabled", panel, "UICheckButtonTemplate")
-    enabled:SetPoint("TOPLEFT", panel, 0, verticalSpacing)
+    enabled:SetPoint("TOPLEFT", panel, -verticalSpacing, verticalSpacing)
     enabled.Text:SetText("Experimental (requires reload)")
     enabled.Text:SetFontObject("GameFontNormalLarge")
     enabled:SetChecked(addon.Options.ExperimentalEnabled or false)

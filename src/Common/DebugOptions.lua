@@ -10,7 +10,7 @@ function builder:BuildDebugOptions(parentPanel)
     panel.parent = parentPanel.name
 
     local enabled = CreateFrame("CheckButton", "chkDebugEnabled", panel, "UICheckButtonTemplate")
-    enabled:SetPoint("TOPLEFT", panel, 0, verticalSpacing)
+    enabled:SetPoint("TOPLEFT", panel, -verticalSpacing, verticalSpacing)
     enabled.Text:SetText("Debug mode")
     enabled.Text:SetFontObject("GameFontNormalLarge")
     enabled:SetChecked(addon.Options.DebugEnabled or false)

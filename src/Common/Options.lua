@@ -28,7 +28,7 @@ addon.Defaults = {
 ---@return table The bottom left most control to use for anchoring subsequent UI components.
 function builder:BuiltTitle(panel)
     local title = panel:CreateFontString("lblTitle", "ARTWORK", "GameFontNormalLarge")
-    title:SetPoint("TOPLEFT", verticalSpacing * -1, verticalSpacing)
+    title:SetPoint("TOPLEFT", -verticalSpacing, verticalSpacing)
     title:SetText("Frame Sort")
 
     local description = panel:CreateFontString("lblDescription", "ARTWORK", "GameFontWhite")
