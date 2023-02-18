@@ -24,6 +24,7 @@ addon.Defaults = {
 
 ---Adds the title UI components.
 ---@param panel table the parent UI panel.
+---@return table The bottom left most control to use for anchoring subsequent UI components.
 function builder:BuiltTitle(panel)
     local title = panel:CreateFontString("lblTitle", "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", verticalSpacing * -1, verticalSpacing)
@@ -32,6 +33,8 @@ function builder:BuiltTitle(panel)
     local description = panel:CreateFontString("lblDescription", "ARTWORK", "GameFontWhite")
     description:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, verticalSpacing)
     description:SetText("Sorts party/raid frames.")
+
+    return description
 end
 
 ---Adds a row of the player and group sort mode checkboxes.
@@ -45,6 +48,7 @@ end
 ---@param onEnabledChanged function function(enabled) callback function when enabled changes.
 ---@param onPlayerSortModeChanged function function(mode) callback function when the player sort mode changes.
 ---@param onSortModeChanged function function(mode) callback function when the group sort mode changes.
+---@return table The bottom left most control to use for anchoring subsequent UI components.
 function builder:BuildSortModeCheckboxes(
     parentPanel,
     pointOffset,
@@ -128,7 +132,8 @@ function builder:BuildSortModeCheckboxes(
     role.Text:SetText(addon.SortMode.Role)
     role:SetChecked(sortMode == addon.SortMode.Role)
 
-    local alpha = CreateFrame("CheckButton", "chk" .. uniqueGroupName .. "SortAlpha", parentPanel, "UICheckButtonTemplate")
+    local alpha = CreateFrame("CheckButton", "chk" .. uniqueGroupName .. "SortAlpha", parentPanel,
+        "UICheckButtonTemplate")
     alpha:SetPoint("LEFT", role, "RIGHT", horizontalSpacing, 0)
     alpha.Text:SetText(addon.SortMode.Alphabetical)
     alpha:SetChecked(sortMode == addon.SortMode.Alphabetical)
@@ -157,11 +162,14 @@ function builder:BuildSortModeCheckboxes(
     for chkbox, _ in pairs(modes) do
         chkbox:HookScript("OnClick", onModeClick)
     end
+
+    return modeLabel
 end
 
 ---Adds the debug option UI components.
 ---@param parentPanel table the parent UI panel.
 ---@param pointOffset table a UI component used as a relative position anchor for the new components.
+---@return table The bottom left most control to use for anchoring subsequent UI components.
 function builder:BuildDebugOptions(parentPanel, pointOffset)
     local enabled = CreateFrame("CheckButton", "chkDebugEnabled", parentPanel, "UICheckButtonTemplate")
     enabled:SetPoint("TOPLEFT", pointOffset, "BOTTOMLEFT", -4, verticalSpacing)
@@ -173,11 +181,14 @@ function builder:BuildDebugOptions(parentPanel, pointOffset)
     local description = parentPanel:CreateFontString("lblDebugDescription", "ARTWORK", "GameFontWhite")
     description:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, verticalSpacing)
     description:SetText("Logs messages to the chat panel which is useful for diagnosing bugs.")
+
+    return description
 end
 
 ---Adds the experimental option UI components.
 ---@param parentPanel table the parent UI panel.
 ---@param pointOffset table a UI component used as a relative position anchor for the new components.
+---@return table The bottom left most control to use for anchoring subsequent UI components.
 function builder:BuildExperimentalOptions(parentPanel, pointOffset)
     local enabled = CreateFrame("CheckButton", "chkExperimentalEnabled", parentPanel, "UICheckButtonTemplate")
     enabled:SetPoint("TOPLEFT", pointOffset, "BOTTOMLEFT", -4, verticalSpacing)
@@ -200,15 +211,20 @@ function builder:BuildExperimentalOptions(parentPanel, pointOffset)
         description:SetText(line)
         previous = description
     end
+
+    return previous
 end
 
 ---Adds a blank line spacer.
 ---@param parentPanel table the parent UI panel.
 ---@param pointOffset table a UI component used as a relative position anchor for the new components.
+---@return table The bottom left most control to use for anchoring subsequent UI components.
 function builder:BuildSpacer(parentPanel, pointOffset)
     local spacer = parentPanel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
     spacer:SetPoint("TOPLEFT", pointOffset, "BOTTOMLEFT", 0, verticalSpacing)
     spacer:SetText("")
+
+    return spacer
 end
 
 ---Upgrades saved options to the current version.
@@ -260,14 +276,20 @@ function addon:InitOptions()
     panel.name = addonName
 
     local child = CreateFrame("Frame")
-    child:SetWidth(SettingsPanel.Container:GetWidth())
-    child:SetHeight(SettingsPanel.Container:GetHeight())
+    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+        child:SetWidth(SettingsPanel.Container:GetWidth())
+        child:SetHeight(SettingsPanel.Container:GetHeight())
+    else
+        child:SetWidth(InterfaceOptionsFramePanelContainer:GetWidth())
+        child:SetHeight(InterfaceOptionsFramePanelContainer:GetHeight())
+    end
+
     panel:SetScrollChild(child)
 
-    builder:BuiltTitle(child)
-    builder:BuildSortModeCheckboxes(
+    local anchor = builder:BuiltTitle(child)
+    anchor = builder:BuildSortModeCheckboxes(
         child,
-        lblDescription,
+        anchor,
         "Arena",
         "Arena",
         addon.Options.ArenaEnabled,
@@ -278,9 +300,9 @@ function addon:InitOptions()
         function(mode) addon:SetOption("ArenaSortMode", mode) end
     )
 
-    builder:BuildSortModeCheckboxes(
+    anchor = builder:BuildSortModeCheckboxes(
         child,
-        lblArenaSortMode,
+        anchor,
         "Dungeon (mythics, 5-mans)",
         "Dungeon",
         addon.Options.DungeonEnabled,
@@ -291,9 +313,9 @@ function addon:InitOptions()
         function(mode) addon:SetOption("DungeonSortMode", mode) end
     )
 
-    builder:BuildSortModeCheckboxes(
+    anchor = builder:BuildSortModeCheckboxes(
         child,
-        lblDungeonSortMode,
+        anchor,
         "Raid (battlegrounds, raids)",
         "Raid",
         addon.Options.RaidEnabled,
@@ -304,9 +326,9 @@ function addon:InitOptions()
         function(mode) addon:SetOption("RaidSortMode", mode) end
     )
 
-    builder:BuildSortModeCheckboxes(
+    anchor = builder:BuildSortModeCheckboxes(
         child,
-        lblRaidSortMode,
+        anchor,
         "World (non-instance groups)",
         "World",
         addon.Options.WorldEnabled,
@@ -317,9 +339,12 @@ function addon:InitOptions()
         function(mode) addon:SetOption("WorldSortMode", mode) end
     )
 
-    builder:BuildExperimentalOptions(child, lblWorldSortMode)
-    builder:BuildDebugOptions(child, lblExperimentalDescription3)
-    builder:BuildSpacer(child, lblDebugDescription)
+    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+        anchor = builder:BuildExperimentalOptions(child, anchor)
+    end
+
+    anchor = builder:BuildDebugOptions(child, anchor)
+    anchor = builder:BuildSpacer(child, anchor)
 
     InterfaceOptions_AddCategory(panel)
 
@@ -328,5 +353,11 @@ function addon:InitOptions()
 
     SlashCmdList.FRAMESORT = function()
         InterfaceOptionsFrame_OpenToCategory(addonName)
+
+        -- workaround the classic bug where the first call opens the Game interface
+        -- and a second call is required
+        if WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE then
+            InterfaceOptionsFrame_OpenToCategory(addonName)
+        end
     end
 end

@@ -1,4 +1,4 @@
-## Interface: 100005
+## Interface: 30401
 ## Title: Frame Sort
 ## Notes: Places the player frame at the top/middle/bottom (configurable) of party/raid frames.
 ## Author: Vers - Dath'Remar
@@ -9,5 +9,5 @@ Common\Log.lua
 Common\Unit.lua
 Common\Compare.lua
 Common\Options.lua
-Retail\Core.lua
-Retail\Loader.lua
+Wotlk\Core.lua
+Wotlk\Loader.lua

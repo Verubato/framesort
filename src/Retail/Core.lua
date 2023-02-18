@@ -1,13 +1,4 @@
-local addonName, addon = ...
-local logPrefix = addonName .. ": "
-
----Prints a debug message to the chat window if DebugMode is enabled.
----@param msg string
-function addon:Debug(msg)
-    if addon.Options.DebugEnabled then
-        print(logPrefix .. msg)
-    end
-end
+local _, addon = ...
 
 ---Listens for events where we should refresh the frames.
 ---@param eventName string
@@ -97,6 +88,7 @@ function addon:LayoutParty(container)
     local frames = { container:GetChildren() }
     -- true if using horizontal layout, otherwise false
     local useHorizontalGroups = EditModeManagerFrame:ShouldRaidFrameUseHorizontalRaidGroups(container.isParty)
+
     -- lookup of frame by unit token
     local frameByUnit = {}
 
