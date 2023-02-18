@@ -9,8 +9,7 @@ Remove-Item -Recurse $addonFolderName -ErrorAction SilentlyContinue
 New-Item -ItemType Directory $addonFolderName | Out-Null
 
 # copy the addon files
-cp ..\src\*.lua $addonFolderName
-cp ..\src\*.toc $addonFolderName
+cp ..\src\* $addonFolderName -Recurse
 
 # extract the version number
 $regex = Get-Content "$($addonFolderName)\FrameSort.toc" | sls "(?<=Version: ).*" 
