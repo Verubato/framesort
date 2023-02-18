@@ -167,36 +167,6 @@ function builder:BuildSortModeCheckboxes(
     return modeLabel
 end
 
----Adds the experimental option UI components.
----@param parentPanel table the parent UI panel.
----@param pointOffset table a UI component used as a relative position anchor for the new components.
----@return table The bottom left most control to use for anchoring subsequent UI components.
-function builder:BuildExperimentalOptions(parentPanel, pointOffset)
-    local enabled = CreateFrame("CheckButton", "chkExperimentalEnabled", parentPanel, "UICheckButtonTemplate")
-    enabled:SetPoint("TOPLEFT", pointOffset, "BOTTOMLEFT", -4, verticalSpacing)
-    enabled.Text:SetText("Experimental (requires reload)")
-    enabled.Text:SetFontObject("GameFontNormalLarge")
-    enabled:SetChecked(addon.Options.ExperimentalEnabled or false)
-    enabled:HookScript("OnClick", function() addon:SetOption("ExperimentalEnabled", enabled:GetChecked()) end)
-
-    local lines = {
-        "Experimental new sorting mode that shouldn't bug/lock/taint the UI.",
-        "Hasn't been fully tested yet so hence why it's still experimental.",
-        "Please reload after changing this setting."
-    }
-
-    local previous = enabled
-    for i, line in ipairs(lines) do
-        local description = parentPanel:CreateFontString("lblExperimentalDescription" .. tostring(i), "ARTWORK",
-            "GameFontWhite")
-        description:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", i == 1 and 4 or 0, verticalSpacing)
-        description:SetText(line)
-        previous = description
-    end
-
-    return previous
-end
-
 ---Upgrades saved options to the current version.
 function addon:UpgradeOptions()
     if addon.Options.Version == nil then
@@ -303,7 +273,7 @@ function addon:InitOptions()
     builder:BuildHealthCheck(panel)
 
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        anchor = builder:BuildExperimentalOptions(panel, anchor)
+        builder:BuildExperimentalOptions(panel)
     end
 
     builder:BuildDebugOptions(panel)
