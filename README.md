@@ -9,6 +9,7 @@ A simple World of Warcraft (Retail) add-on that places the player frame (you) at
 * Sort the remaining frames by group/role/alphabetical.
 * Setup different sorting rules for arena, bgs, world, and raids.
 * Supports both Retail and Wrath of the Lich King.
+* Experimental mode to avoid taint/UI issues (note: still in development/testing).
 
 ## Install ##
 
