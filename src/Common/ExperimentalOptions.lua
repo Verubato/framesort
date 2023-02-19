@@ -18,7 +18,7 @@ function builder:BuildExperimentalOptions(parentPanel)
 
     local lines = {
         "Experimental new sorting mode that shouldn't bug/lock/taint the UI.",
-        "Hasn't been fully tested yet so hence why it's still experimental.",
+        "Hasn't been fully tested yet hence why it's still experimental.",
         "Please reload after changing this setting."
     }
 
