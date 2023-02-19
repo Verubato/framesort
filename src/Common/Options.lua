@@ -31,11 +31,28 @@ function builder:BuiltTitle(panel)
     title:SetPoint("TOPLEFT", -verticalSpacing, verticalSpacing)
     title:SetText("Frame Sort")
 
-    local description = panel:CreateFontString("lblDescription", "ARTWORK", "GameFontWhite")
-    description:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, verticalSpacing)
-    description:SetText("Sorts party/raid frames.")
+    local lines = {
+        Group = "party1 > party2 > partyN > partyN+1",
+        Role  = "tank > healer > dps",
+        Alpha = "NameA > NameB > NameZ"
+    }
 
-    return description
+    local anchor = title
+    local keyWidth = 50
+    for k, v in pairs(lines) do
+        local keyText = panel:CreateFontString("lblDescriptionKey" .. tostring(i), "ARTWORK", "GameFontWhite")
+        keyText:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, verticalSpacing)
+        keyText:SetText(k .. ": ")
+        keyText:SetWidth(keyWidth)
+        keyText:SetJustifyH("LEFT")
+        anchor = keyText
+
+        local valueText = panel:CreateFontString("lblDescriptionValue" .. tostring(i), "ARTWORK", "GameFontWhite")
+        valueText:SetPoint("LEFT", keyText, "RIGHT")
+        valueText:SetText(v)
+    end
+
+    return anchor
 end
 
 ---Adds a row of the player and group sort mode checkboxes.
