@@ -1,15 +1,5 @@
 local _, addon = ...
 
----Player and group sort modes.
-addon.SortMode = {
-    Group = "Group",
-    Role = "Role",
-    Alphabetical = "Alphabetical",
-    Top = "Top",
-    Middle = "Middle",
-    Bottom = "Bottom"
-}
-
 ---Returns a function that accepts two parameters of unit tokens and returns true if the left token should be ordered before the right.
 ---Sorting is based on the player's instance and configured options.
 ---Nil may be returned if sorting is not enabled for the player's current instance.

@@ -155,8 +155,7 @@ function builder:BuildSortModeCheckboxes(
     role.Text:SetText(addon.SortMode.Role)
     role:SetChecked(sortMode == addon.SortMode.Role)
 
-    local alpha = CreateFrame("CheckButton", "chk" .. uniqueGroupName .. "SortAlpha", parentPanel,
-        "UICheckButtonTemplate")
+    local alpha = CreateFrame("CheckButton", "chk" .. uniqueGroupName .. "SortAlpha", parentPanel, "UICheckButtonTemplate")
     alpha:SetPoint("LEFT", role, "RIGHT", horizontalSpacing, 0)
     alpha.Text:SetText(addon.SortMode.Alphabetical)
     alpha:SetChecked(sortMode == addon.SortMode.Alphabetical)

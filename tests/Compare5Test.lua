@@ -1,10 +1,11 @@
 local deps = {
-    "Compare.lua"
+    "Config\\SortMode.lua",
+    "Core\\Compare.lua"
 }
 
 local addon = {}
 for _, fileName in ipairs(deps) do
-    local module = loadfile("..\\src\\Common\\" .. fileName)
+    local module = loadfile("..\\src\\" .. fileName)
     if module == nil then error("Failed to load " .. fileName) end
     module("UnitTest", addon)
 end

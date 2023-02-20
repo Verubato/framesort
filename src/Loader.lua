@@ -36,6 +36,16 @@ function addon:Init()
     end
 end
 
+---Hooks functions that we should perform a re-sort on.
+function addon:HookExperimental()
+    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+        hooksecurefunc("CompactRaidGroup_UpdateLayout", function(frame) addon:LayoutParty(frame) end)
+        hooksecurefunc(CompactRaidFrameContainer, "LayoutFrames", function() addon:LayoutRaid(CompactRaidFrameContainer) end)
+    else
+        hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", function() addon:LayoutRaid(CompactRaidFrameContainer) end)
+    end
+end
+
 addon.Loader = CreateFrame("Frame")
 addon.Loader:HookScript("OnEvent", addon.OnLoadAddon)
 addon.Loader:RegisterEvent("ADDON_LOADED")
