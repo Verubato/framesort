@@ -114,12 +114,8 @@ function addon:LayoutRaid(container)
             local point = target.points[j]
 
             -- move the source frame to the target
-            source.frame:SetPoint(
-                point[1],
-                point[2],
-                point[3],
-                point[4],
-                point[5])
+            ---@diagnostic disable-next-line: deprecated
+            source.frame:SetPoint(unpack(point))
         end
     end
 
