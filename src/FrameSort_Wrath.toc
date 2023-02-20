@@ -2,7 +2,7 @@
 ## Title: Frame Sort
 ## Notes: Places the player frame at the top/middle/bottom (configurable) of party/raid frames.
 ## Author: Vers - Dath'Remar
-## Version: 2.1.1
+## Version: 2.1.2
 ## SavedVariables: Options
 
 Common\Log.lua
