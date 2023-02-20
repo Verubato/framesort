@@ -12,5 +12,7 @@ Common\Options.lua
 Common\ExperimentalOptions.lua
 Common\HealthCheckOptions.lua
 Common\DebugOptions.lua
+Common\Core.lua
 Wotlk\Core.lua
 Wotlk\Loader.lua
+Common\Loader.lua

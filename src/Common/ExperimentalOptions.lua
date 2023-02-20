@@ -24,8 +24,7 @@ function builder:BuildExperimentalOptions(parentPanel)
 
     local previous = enabled
     for i, line in ipairs(lines) do
-        local description = panel:CreateFontString("lblExperimentalDescription" .. tostring(i), "ARTWORK",
-            "GameFontWhite")
+        local description = panel:CreateFontString("lblExperimentalDescription" .. tostring(i), "ARTWORK", "GameFontWhite")
         description:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", i == 1 and 4 or 0, verticalSpacing)
         description:SetText(line)
         previous = description
