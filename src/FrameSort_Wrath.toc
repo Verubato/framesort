@@ -5,14 +5,13 @@
 ## Version: 2.1.2
 ## SavedVariables: Options
 
-Common\Log.lua
-Common\Unit.lua
-Common\Compare.lua
-Common\Options.lua
-Common\ExperimentalOptions.lua
-Common\HealthCheckOptions.lua
-Common\DebugOptions.lua
-Common\Core.lua
-Wotlk\Core.lua
-Wotlk\Loader.lua
-Common\Loader.lua
+Util\Log.lua
+Util\Unit.lua
+Config\SortMode.lua
+Config\Options.lua
+Config\Experimental.lua
+Config\HealthCheck.lua
+Config\Debug.lua
+Core\Compare.lua
+Core\Core.lua
+Loader.lua
