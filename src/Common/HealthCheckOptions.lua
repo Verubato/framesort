@@ -1,6 +1,6 @@
 local addonName, addon = ...
 local builder = addon.OptionsBuilder
-local verticalSpacing = -16
+local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
 
 ---Returns true if using raid-style party frames.
 local function IsUsingRaidStyleFrames()
@@ -60,26 +60,26 @@ function builder:BuildHealthCheck(parent)
     panel.parent = parent.name
 
     local title = panel:CreateFontString("lblHealthCheck", "ARTWORK", "GameFontNormalLarge")
-    title:SetPoint("TOPLEFT", verticalSpacing * -1, verticalSpacing)
+    title:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
     title:SetText("Health Check")
 
     local description = panel:CreateFontString("lblHealthCheck", "ARTWORK", "GameFontWhite")
-    description:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, verticalSpacing)
+    description:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -verticalSpacing)
     description:SetText("Any known issues with configuration or conflicting addons will be shown below.")
 
     local raidStyleWarning = panel:CreateFontString("lblRaidStyleFramesWarning", "ARTWORK", "GameFontRed")
-    raidStyleWarning:SetPoint("TOPLEFT", description, "BOTTOMLEFT", 0, verticalSpacing)
+    raidStyleWarning:SetPoint("TOPLEFT", description, "BOTTOMLEFT", 0, -verticalSpacing)
     raidStyleWarning:SetText("Please enable 'Use Raid-Style Party Frames' in the Blizzard settings.")
 
     local tamperedWarning = panel:CreateFontString("lblInBuiltSortingWarning", "ARTWORK", "GameFontRed")
-    tamperedWarning:SetPoint("TOPLEFT", raidStyleWarning, "BOTTOMLEFT", 0, verticalSpacing)
+    tamperedWarning:SetPoint("TOPLEFT", raidStyleWarning, "BOTTOMLEFT", 0, -verticalSpacing)
     tamperedWarning:SetText("Blizzard sorting functions have been tampered with, please disable other frame sorting macro/addons.")
 
     local conflictWarning = panel:CreateFontString("lblConflictingAddonsWarning", "ARTWORK", "GameFontRed")
-    conflictWarning:SetPoint("TOPLEFT", tamperedWarning, "BOTTOMLEFT", 0, verticalSpacing)
+    conflictWarning:SetPoint("TOPLEFT", tamperedWarning, "BOTTOMLEFT", 0, -verticalSpacing)
 
     local healthyMessage = panel:CreateFontString("lblHealthy", "ARTWORK", "GameFontGreen")
-    healthyMessage:SetPoint("TOPLEFT", description, "BOTTOMLEFT", 0, verticalSpacing)
+    healthyMessage:SetPoint("TOPLEFT", description, "BOTTOMLEFT", 0, -verticalSpacing)
     healthyMessage:SetText("All health checks have passed!")
 
     local controls = {
@@ -96,7 +96,7 @@ function builder:BuildHealthCheck(parent)
 
         tamperedWarning:SetShown(sortingTampered)
         if sortingTampered then
-            tamperedWarning:SetPoint("TOPLEFT", description, "BOTTOMLEFT", 0, verticalSpacing)
+            tamperedWarning:SetPoint("TOPLEFT", description, "BOTTOMLEFT", 0, -verticalSpacing)
         end
 
         local conflictingAddons = ConflictingAddons()
@@ -112,7 +112,7 @@ function builder:BuildHealthCheck(parent)
         local anchor = description
         for _, control in ipairs(controls) do
             if control:IsShown() then
-                control:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, verticalSpacing)
+                control:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
                 anchor = control
             end
         end

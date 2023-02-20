@@ -1,8 +1,11 @@
 local addonName, addon = ...
 addon.OptionsBuilder = {}
+addon.OptionsBuilder.VerticalSpacing = 15
+addon.OptionsBuilder.HorizontalSpacing = 50
+
 local builder = addon.OptionsBuilder
-local verticalSpacing = -16
-local horizontalSpacing = 50
+local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
+local horizontalSpacing= addon.OptionsBuilder.HorizontalSpacing
 
 ---Default configuration.
 addon.Defaults = {
@@ -28,7 +31,7 @@ addon.Defaults = {
 ---@return table The bottom left most control to use for anchoring subsequent UI components.
 function builder:BuiltTitle(panel)
     local title = panel:CreateFontString("lblTitle", "ARTWORK", "GameFontNormalLarge")
-    title:SetPoint("TOPLEFT", -verticalSpacing, verticalSpacing)
+    title:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
     title:SetText("Frame Sort")
 
     local lines = {
@@ -39,9 +42,10 @@ function builder:BuiltTitle(panel)
 
     local anchor = title
     local keyWidth = 50
+    local i = 1
     for k, v in pairs(lines) do
         local keyText = panel:CreateFontString("lblDescriptionKey" .. tostring(i), "ARTWORK", "GameFontWhite")
-        keyText:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, verticalSpacing)
+        keyText:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
         keyText:SetText(k .. ": ")
         keyText:SetWidth(keyWidth)
         keyText:SetJustifyH("LEFT")
@@ -50,6 +54,7 @@ function builder:BuiltTitle(panel)
         local valueText = panel:CreateFontString("lblDescriptionValue" .. tostring(i), "ARTWORK", "GameFontWhite")
         valueText:SetPoint("LEFT", keyText, "RIGHT")
         valueText:SetText(v)
+        i = i + 1
     end
 
     return anchor
@@ -80,14 +85,14 @@ function builder:BuildSortModeCheckboxes(
     onSortModeChanged)
     local enabled = CreateFrame("CheckButton", "chk" .. uniqueGroupName .. "Enabled", parentPanel, "UICheckButtonTemplate")
     -- not sure why, but checkbox left seems to be off by about 4 units by default
-    enabled:SetPoint("TOPLEFT", pointOffset, "BOTTOMLEFT", -4, verticalSpacing)
+    enabled:SetPoint("TOPLEFT", pointOffset, "BOTTOMLEFT", -4, -verticalSpacing)
     enabled.Text:SetText(" " .. labelText)
     enabled.Text:SetFontObject("GameFontNormalLarge")
     enabled:SetChecked(sortingEnabled)
     enabled:HookScript("OnClick", function() onEnabledChanged(enabled:GetChecked()) end)
 
     local playerLabel = parentPanel:CreateFontString("lbl" .. uniqueGroupName .. "PlayerSortMode", "ARTWORK", "GameFontNormal")
-    playerLabel:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, verticalSpacing)
+    playerLabel:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, -verticalSpacing)
     playerLabel:SetText("Player: ")
 
     local top = CreateFrame("CheckButton", "chk" .. uniqueGroupName .. "PlayerSortTop", parentPanel, "UICheckButtonTemplate")
@@ -131,7 +136,7 @@ function builder:BuildSortModeCheckboxes(
     end
 
     local modeLabel = parentPanel:CreateFontString("lbl" .. uniqueGroupName .. "SortMode", "ARTWORK", "GameFontNormal")
-    modeLabel:SetPoint("TOPLEFT", playerLabel, "BOTTOMLEFT", 0, verticalSpacing * 1.5)
+    modeLabel:SetPoint("TOPLEFT", playerLabel, "BOTTOMLEFT", 0, -verticalSpacing * 1.5)
     modeLabel:SetText("Sort: ")
 
     -- why use checkboxes instead of a dropdown box?
