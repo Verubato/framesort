@@ -22,17 +22,30 @@ local function SortingFunctionsTampered()
         not issecurevariable("CRFSort_Alphabetical")
 end
 
+---Returns the friendly name of an addon from issecurevariable.
+---@param name string the addon name from issecurevariable.
+---@return string
+local function AddonFriendlyName(name)
+    if not name then
+        return "(unknown)"
+    elseif name == "" then
+        return "(user macro)"
+    else
+        return name
+    end
+end
+
 ---Returns a string of conflicting addons that are enabled.
 local function ConflictingAddons()
-    local issecure, addon = issecurevariable(CompactRaidFrameContainer, "flowSortFunc")
-    if not issecure and addon ~= addonName then
-        return addon
+    local issecure, taintedAddon = issecurevariable(CompactRaidFrameContainer, "flowSortFunc")
+    if not issecure and taintedAddon ~= addonName then
+        return AddonFriendlyName(taintedAddon)
     end
 
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        issecure, addon = issecurevariable(CompactPartyFrame, "flowSortFunc")
-        if not issecure and addon ~= addonName then
-            return addon
+        issecure, taintedAddon = issecurevariable(CompactPartyFrame, "flowSortFunc")
+        if not issecure and taintedAddon ~= addonName then
+            return AddonFriendlyName(taintedAddon)
         end
     end
 
@@ -89,7 +102,7 @@ function builder:BuildHealthCheck(parent)
         local conflictingAddons = ConflictingAddons()
         conflictWarning:SetShown(conflictingAddons ~= nil)
         conflictWarning:SetText(conflictingAddons
-        and "The '" .. conflictingAddons .. "' addon may cause conflicts, consider disabling it."
+        and "'" .. conflictingAddons .. "' may cause conflicts, consider disabling it."
         or "")
 
         local healthy = usingRaidStyle and not sortingTampered and not conflictingAddons
