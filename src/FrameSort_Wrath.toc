@@ -10,7 +10,7 @@ Util\Unit.lua
 Util\Frame.lua
 Config\SortMode.lua
 Config\Options.lua
-Config\Experimental.lua
+Config\Method.lua
 Config\HealthCheck.lua
 Config\Debug.lua
 Core\Compare.lua

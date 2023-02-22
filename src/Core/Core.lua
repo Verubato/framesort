@@ -46,16 +46,16 @@ end
 ---Attempts to sort the party/raid frames.
 ---@return boolean sorted true if sorted, otherwise false.
 function addon:TrySort()
-    if addon.Options.ExperimentalEnabled then
-        return addon:TrySortExperimental()
+    if addon.Options.SortingMethod.TaintlessEnabled then
+        return addon:TrySortTaintless()
     else
-        return addon:TrySortNormal()
+        return addon:TrySortTraditional()
     end
 end
 
----Attempts to sort the party/raid frames using the normal method.
+---Attempts to sort the party/raid frames using the traditional method.
 ---@return boolean sorted true if sorted, otherwise false.
-function addon:TrySortNormal()
+function addon:TrySortTraditional()
     if not addon:CanSort() then return false end
 
     local sortFunc = addon:GetSortFunction()
@@ -63,17 +63,17 @@ function addon:TrySortNormal()
 
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         if not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
-            addon:Debug("Sorting raid frames.")
+            addon:Debug("Sorting raid frames (traditional).")
             CompactRaidFrameContainer:SetFlowSortFunction(sortFunc)
         elseif not CompactPartyFrame:IsForbidden() and CompactPartyFrame:IsVisible() then
-            addon:Debug("Sorting party frames.")
+            addon:Debug("Sorting party frames (traditional).")
             CompactPartyFrame_SetFlowSortFunction(sortFunc)
         else
             return false
         end
     else
         if not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
-            addon:Debug("Sorting raid frames.")
+            addon:Debug("Sorting raid frames (traditional).")
             CompactRaidFrameContainer_SetFlowSortFunction(CompactRaidFrameContainer, sortFunc)
         else
             return false
@@ -83,9 +83,9 @@ function addon:TrySortNormal()
     return true
 end
 
----Attempts to sort the party/raid frames using the experimental method.
+---Attempts to sort the party/raid frames using the taintless method.
 ---@return boolean sorted true if sorted, otherwise false.
-function addon:TrySortExperimental()
+function addon:TrySortTaintless()
     if not addon:CanSort() then return false end
 
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
@@ -158,7 +158,7 @@ function addon:LayoutRaid()
 
     table.sort(units, sortFunction)
 
-    addon:Debug("Sorting raid frames (experimental).")
+    addon:Debug("Sorting raid frames (taintless).")
 
     for i = 1, #units do
         local sourceUnit = units[i]
@@ -218,7 +218,7 @@ if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         local units = addon:GetUnits()
         table.sort(units, sortFunction)
 
-        addon:Debug("Sorting party frames (experimental).")
+        addon:Debug("Sorting party frames (taintless).")
 
         -- place the first frame at the beginning of the container
         local firstUnit = units[1]

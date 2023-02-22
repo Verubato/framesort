@@ -5,11 +5,11 @@ addon.OptionsBuilder.HorizontalSpacing = 50
 
 local builder = addon.OptionsBuilder
 local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
-local horizontalSpacing= addon.OptionsBuilder.HorizontalSpacing
+local horizontalSpacing = addon.OptionsBuilder.HorizontalSpacing
 
 ---Default configuration.
 addon.Defaults = {
-    Version = 3,
+    Version = 4,
     DebugEnabled = false,
     ArenaEnabled = true,
     ArenaPlayerSortMode = addon.SortMode.Top,
@@ -23,7 +23,11 @@ addon.Defaults = {
     RaidEnabled = false,
     RaidPlayerSortMode = addon.SortMode.Top,
     RaidSortMode = addon.SortMode.Role,
-    ExperimentalEnabled = false
+    ExperimentalEnabled = false,
+    SortingMethod = {
+        TaintlessEnabled = true,
+        TraditionalEnabled = false
+    }
 }
 
 ---Adds the title UI components.
@@ -45,7 +49,7 @@ function builder:BuiltTitle(panel)
     local i = 1
     for k, v in pairs(lines) do
         local keyText = panel:CreateFontString("lblDescriptionKey" .. tostring(i), "ARTWORK", "GameFontWhite")
-        keyText:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
+        keyText:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing * 0.75)
         keyText:SetText(k .. ": ")
         keyText:SetWidth(keyWidth)
         keyText:SetJustifyH("LEFT")
@@ -191,7 +195,7 @@ end
 ---Upgrades saved options to the current version.
 function addon:UpgradeOptions()
     if addon.Options.Version == nil then
-        addon:Debug("Upgrading options.")
+        addon:Debug("Upgrading options to version 2.")
 
         addon.Options.Version = addon.Defaults.Version
 
@@ -214,9 +218,28 @@ function addon:UpgradeOptions()
         addon.Options.PartySortEnabled = nil
         addon.Options.PlayerSortMode = nil
         addon.Options.RaidSortEnabled = nil
+
+        addon.Options.Version = 2
     end
 
-    addon.Options.ExperimentalEnabled = addon.Options.ExperimentalEnabled or false
+    if addon.Options.Version == 2 then
+        addon:Debug("Upgrading options to version 3.")
+        addon.Options.ExperimentalEnabled = false
+        addon.Options.Version = 3
+    end
+
+    if addon.Options.Version == 3 then
+        addon:Debug("Upgrading options to version 4")
+
+        addon.Options.SortingMethod = {
+            TaintlessEnabled = true,
+            TraditionalEnabled = false
+        }
+
+        -- remove old values
+        addon.Options.ExperimentalEnabled = nil
+        addon.Options.Version = 4
+    end
 end
 
 ---Sets the specified option and re-sorts the party/raid frames if applicable.
@@ -292,7 +315,7 @@ function addon:InitOptions()
     InterfaceOptions_AddCategory(panel)
 
     builder:BuildHealthCheck(panel)
-    builder:BuildExperimentalOptions(panel)
+    builder:BuildSortingMethodOptions(panel)
     builder:BuildDebugOptions(panel)
 
     SLASH_FRAMESORT1 = "/fs"
