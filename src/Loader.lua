@@ -23,11 +23,11 @@ function addon:Init()
     -- It seems Blizzard do an update layout after combat ends, so even for the experimental mode we also need to re-sort.
     addon.EventLoop:RegisterEvent("PLAYER_REGEN_ENABLED")
 
-    if addon.Options.ExperimentalEnabled then
-        addon:Debug("Initialising using experimental mode.")
+    if addon.Options.SortingMethod.TaintlessEnabled then
+        addon:Debug("Initialising using taintless method.")
         addon:HookExperimental()
     else
-        addon:Debug("Initialising using normal (not experimental) mode.")
+        addon:Debug("Initialising using traditional method.")
         -- Fired whenever a group or raid is formed or disbanded, players are leaving or joining the group or raid.
         addon.EventLoop:RegisterEvent("GROUP_ROSTER_UPDATE")
         -- Fires when the player logs in, /reloads the UI or zones between map instances.
