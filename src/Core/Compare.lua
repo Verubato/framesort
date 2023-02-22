@@ -106,3 +106,26 @@ function addon:CompareMiddle(token, sortedUnits)
     local mid = math.floor(total / 2)
     return index > mid
 end
+
+---Returns true if the left frame is "earlier" than the right frame.
+---Earlier = more top left
+---e.g. in raid frames where the top left most frame is first, and the bottom right most frame is last.
+---@param leftFrame table a wow frame
+---@param rightFrame table a wow frame
+---@return boolean
+function addon:CompareTopLeft(leftFrame, rightFrame)
+    -- example with screen resolution of 2560x1440
+    -- top of 0 = bottom of screen
+    -- top of 1440 = top of screen
+    -- left of 0 = leftmost of screen
+    -- left of 2560 = rightmost of screen
+    local leftY = leftFrame:GetTop()
+    local rightY = rightFrame:GetTop()
+
+    if leftY ~= rightY then return leftY > rightY end
+
+    local leftX = leftFrame:GetLeft()
+    local rightX = rightFrame:GetLeft()
+
+    return leftX < rightX
+end

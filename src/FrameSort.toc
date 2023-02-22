@@ -7,6 +7,7 @@
 
 Util\Log.lua
 Util\Unit.lua
+Util\Frame.lua
 Config\SortMode.lua
 Config\Options.lua
 Config\Experimental.lua
