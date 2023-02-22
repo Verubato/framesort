@@ -3,8 +3,6 @@ local _, addon = ...
 ---Listens for events where we should refresh the frames.
 ---@param eventName string
 function addon:OnEvent(eventName)
-    addon:Debug("Event: " .. eventName)
-
     -- only attempt a sort after combat ends if one is pending
     if eventName == "PLAYER_REGEN_ENABLED" and not addon.SortPending then return end
 
