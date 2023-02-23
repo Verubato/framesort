@@ -257,7 +257,7 @@ function addon:InitOptions()
     addon:UpgradeOptions()
 
     local panel = CreateFrame("Frame")
-    panel.name = addonName
+    panel.name = "Frame Sort"
 
     local anchor = builder:BuiltTitle(panel)
     anchor = builder:BuildSortModeCheckboxes(
@@ -322,12 +322,12 @@ function addon:InitOptions()
     SLASH_FRAMESORT2 = "/framesort"
 
     SlashCmdList.FRAMESORT = function()
-        InterfaceOptionsFrame_OpenToCategory(addonName)
+        InterfaceOptionsFrame_OpenToCategory(panel.name)
 
         -- workaround the classic bug where the first call opens the Game interface
         -- and a second call is required
         if WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE then
-            InterfaceOptionsFrame_OpenToCategory(addonName)
+            InterfaceOptionsFrame_OpenToCategory(panel.name)
         end
     end
 end
