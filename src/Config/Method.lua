@@ -25,7 +25,7 @@ local function BuildDottedList(panel, anchor, uniqueName, titleText, lines)
     return anchor
 end
 
----Adds the experimental options panel.
+---Adds the sorting mode options panel.
 ---@param parentPanel table the parent UI panel.
 function builder:BuildSortingMethodOptions(parentPanel)
     local panel = CreateFrame("Frame", addonName .. "SortingMethod", parent)
@@ -40,7 +40,7 @@ function builder:BuildSortingMethodOptions(parentPanel)
 
     local taintlessLines = {
         "Formerly Experimental mode.",
-        "Brand new sorting mode only that shouldn't bug/lock/taint the UI.",
+        "A brand new sorting mode that shouldn't bug/lock/taint the UI.",
     }
 
     local anchor = taintless
@@ -54,7 +54,7 @@ function builder:BuildSortingMethodOptions(parentPanel)
     anchor = BuildDottedList(panel, anchor, "TaintlessPros", "Pros: ", {
         "No taint (technical term for addons interfering with Blizzard's UI code).",
         "No Lua errors.",
-        "No UI locking."
+        "No UI lockups."
     })
 
     anchor = BuildDottedList(panel, anchor, "TaintlessCons", "Cons: ", {
@@ -70,7 +70,7 @@ function builder:BuildSortingMethodOptions(parentPanel)
     traditional:SetChecked(addon.Options.SortingMethod.TraditionalEnabled)
 
     local traditionalLines = {
-        "The standard sorting method that addons and macros have used for 10+ years.",
+        "This is the standard sorting mode that addons and macros have used for 10+ years.",
         "However it seems since DragonFlight the Blizzard UI has become quite fragile."
     }
 
@@ -84,13 +84,13 @@ function builder:BuildSortingMethodOptions(parentPanel)
 
     anchor = BuildDottedList(panel, anchor, "TraditionalPros", "Pros: ", {
         "Probably more reliable as it leverages Blizzard's internal sorting methods.",
-        "If Blizzard were to resolve their UI issues, this would likely become the recommended method."
+        "If Blizzard were to resolve their UI issues, this would likely become the recommended mode."
     })
 
     anchor = BuildDottedList(panel, anchor, "TraditionalCons", "Cons: ", {
         "Will cause Lua errors, this is normal and can be ignored in most cases.",
-        "BugSack will report the occasional ADDON_ACTION_FORBIDDEN error from FrameSort.",
-        "May randomly lockup certain parts of the UI."
+        "BugSack will report the occasional ADDON_ACTION_BLOCKED error from FrameSort.",
+        "May sporadically lockup certain parts of the UI."
     })
 
     local reloadReminder = panel:CreateFontString("lblReload", "ARTWORK", "GameFontRed")
