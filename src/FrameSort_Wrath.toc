@@ -9,10 +9,12 @@ Type\SortMode.lua
 Util\Log.lua
 Util\Unit.lua
 Util\Frame.lua
+Config\Bindings.lua
 Config\Options.lua
 Config\SortingMethod.lua
 Config\HealthCheck.lua
 Config\Debug.lua
 Core\Compare.lua
+Core\Target.lua
 Core\Core.lua
 Loader.lua

@@ -44,11 +44,19 @@ end
 ---Attempts to sort the party/raid frames.
 ---@return boolean sorted true if sorted, otherwise false.
 function addon:TrySort()
+    local sorted = false
+
     if addon.Options.SortingMethod.TaintlessEnabled then
-        return addon:TrySortTaintless()
+        sorted = addon:TrySortTaintless()
     else
-        return addon:TrySortTraditional()
+        sorted = addon:TrySortTraditional()
     end
+
+    if sorted then
+        addon:UpdateTargets()
+    end
+
+    return sorted
 end
 
 ---Attempts to sort the party/raid frames using the traditional method.
@@ -155,7 +163,7 @@ function addon:LayoutRaid()
     end
 
     table.sort(units, sortFunction)
-
+    addon:SetTargets(units)
     addon:Debug("Sorting raid frames (taintless).")
 
     for i = 1, #units do
@@ -214,8 +222,9 @@ if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         end
 
         local units = addon:GetUnits()
-        table.sort(units, sortFunction)
 
+        table.sort(units, sortFunction)
+        addon:SetTargets(units)
         addon:Debug("Sorting party frames (taintless).")
 
         -- place the first frame at the beginning of the container
