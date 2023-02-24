@@ -1,4 +1,4 @@
-local addonName, addon = ...
+local _, addon = ...
 addon.OptionsBuilder = {}
 addon.OptionsBuilder.VerticalSpacing = 15
 addon.OptionsBuilder.HorizontalSpacing = 50
@@ -314,8 +314,9 @@ function addon:InitOptions()
 
     InterfaceOptions_AddCategory(panel)
 
-    builder:BuildHealthCheck(panel)
     builder:BuildSortingMethodOptions(panel)
+    builder:BuildKeybindingOptions(panel)
+    builder:BuildHealthCheck(panel)
     builder:BuildDebugOptions(panel)
 
     SLASH_FRAMESORT1 = "/fs"
