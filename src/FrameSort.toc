@@ -5,12 +5,12 @@
 ## Version: 3.0.1
 ## SavedVariables: Options
 
+Type\SortMode.lua
 Util\Log.lua
 Util\Unit.lua
 Util\Frame.lua
-Config\SortMode.lua
 Config\Options.lua
-Config\Method.lua
+Config\SortingMethod.lua
 Config\HealthCheck.lua
 Config\Debug.lua
 Core\Compare.lua
