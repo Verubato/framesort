@@ -1,5 +1,5 @@
 local deps = {
-    "Config\\SortMode.lua",
+    "Type\\SortMode.lua",
     "Core\\Compare.lua"
 }
 
