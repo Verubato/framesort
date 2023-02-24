@@ -9,11 +9,13 @@ function addon:OnLoadAddon(_, name)
     addon:Init()
 end
 
+---Initialises the addon.
 function addon:Init()
     -- load our saved variables or init them if this is the first run
     Options = Options or CopyTable(addon.Defaults)
     addon.Options = Options
     addon:InitOptions()
+    addon:InitTargeting()
 
     addon.EventLoop = CreateFrame("Frame")
     addon.EventLoop:HookScript("OnEvent", addon.OnEvent)
