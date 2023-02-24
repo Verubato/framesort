@@ -21,7 +21,7 @@ function builder:BuildKeybindingOptions(parentPanel)
     title:SetText("Keybindings")
 
     local lines = {
-        "You can find FrameSort keybindings in the standard WoW keybindings area.",
+        "You can find the FrameSort keybindings in the standard WoW keybindings area.",
         "",
         "What are the keybindings useful for?",
         "They are useful for targeting players by their visually ordered representation rather than their",
@@ -39,7 +39,7 @@ function builder:BuildKeybindingOptions(parentPanel)
         "If you were to /target party1, it would target the DPS player in position 3 rather than the tank.",
         "",
         "The FrameSort keybindings will target based on the visual frame position rather than the party position.",
-        "So targeting 'Frame 1' will target the Tank, 'Frame 2' the healer, 'Frame 3' the 3rd DPS, and so on.",
+        "So targeting 'Frame 1' will target the Tank, 'Frame 2' the healer, 'Frame 3' the DPS in spot 3, and so on.",
         "",
         "Hope that helps some people out there, and enjoy."
     }
