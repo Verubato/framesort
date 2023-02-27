@@ -35,7 +35,7 @@ function addon:GetSortMode(inInstance, instanceType)
         return addon.Options.ArenaEnabled, addon.Options.ArenaPlayerSortMode, addon.Options.ArenaSortMode
     elseif inInstance and instanceType == "party" then
         return addon.Options.DungeonEnabled, addon.Options.DungeonPlayerSortMode, addon.Options.DungeonSortMode
-    elseif inInstance and (instanceType == "raid" or "pvp") then
+    elseif inInstance and (instanceType == "raid" or instanceType == "pvp") then
         return addon.Options.RaidEnabled, addon.Options.RaidPlayerSortMode, addon.Options.RaidSortMode
     else
         if not addon.Options.WorldEnabled then return false, nil, nil end
