@@ -121,56 +121,56 @@ function addon:LayoutRaid()
 
     if not sortFunction or #memberFrames == 0 then return false end
     if #unknownFrames ~= 0 then
-        addon:Debug("Warning: " .. #unknownFrames .. " unknown raid frames detected.")
+        addon:Warning("Warning: " .. #unknownFrames .. " unknown raid frames detected.")
     end
 
-    local units = addon:GetUnits()
-    if #units == 0 then return false end
+    local units = {}
+    for _, frame in pairs(memberFrames) do
+        units[#units + 1] = SecureButton_GetUnit(frame)
+    end
 
     table.sort(units, sortFunction)
-
-    if #units ~= #memberFrames then
-        addon:Debug("Unsupported: Not sorting as the number of member frames " .. #memberFrames .. " is not equal to the number of member units " .. #units .. ".")
-        return false
-    end
-
-    local memberFramesWithPoints = {}
-    local memberFramesByUnit = {}
-
-    for i = 1, #memberFrames do
-        local data = addon:ToFrameWithPosition(memberFrames[i])
-        memberFramesWithPoints[i] = data
-        memberFramesByUnit[memberFrames[i].unit] = data
-    end
-
     addon:SetTargets(units)
-    addon:Debug("Sorting raid frames (taintless).")
-    addon:ShuffleFrames(units, memberFramesByUnit, memberFramesWithPoints)
 
-    local pets = addon:GetPets(units)
+    local framesByUnit = {}
+    local memberFramesByIndex = {}
+    local petFramesByIndex = {}
 
-    if #petFrames == 0 or #pets == 0 then return true end
-    if #pets ~= #petFrames then
-        addon:Debug("Unsupported: Not sorting pets as the number of pet frames " .. #petFrames .. " is not equal to the number of pet units " .. #pets .. ".")
-        return false
+    -- add players to the lookup table
+    for i, frame in ipairs(memberFrames) do
+        local data = addon:ToFrameWithPosition(frame)
+        local unit = SecureButton_GetUnit(frame)
+        framesByUnit[unit] = data
+        memberFramesByIndex[i] = data
     end
 
-    local petFramesWithPoints = {}
-    local petFramesByUnit = {}
+    addon:Debug("Sorting raid frames (taintless).")
+    addon:ShuffleFrames(units, framesByUnit, memberFramesByIndex)
 
-    for i = 1, #petFrames do
-        local data = addon:ToFrameWithPosition(petFrames[i])
-        petFramesWithPoints[i] = data
+    if #petFrames == 0 then return true end
 
-        -- pets can be partyXpet or partypetX
-        local aliases = addon:GetUnitAliases(petFrames[i].unit)
+    -- add pets to the lookup table
+    for i, frame in ipairs(petFrames) do
+        local data = addon:ToFrameWithPosition(frame)
+        local unit = SecureButton_GetUnit(frame)
+        petFramesByIndex[i] = data
+
+        -- TODO: see if there is a way we can do without the need for aliases
+        -- we can get the pet units from the pet frames, but we'd then need to sort them separately
+        local aliases = addon:GetUnitAliases(unit)
         for j = 1, #aliases do
-            petFramesByUnit[aliases[j]] = data
+            framesByUnit[aliases[j]] = data
         end
     end
 
+    -- get pets based off the sorted units instead of the frames
+    -- as this comes with the benefit that the pets will also be sorted
+    local pets = addon:GetPets(units)
+
+    assert(#pets > 0)
+
     addon:Debug("Sorting pet frames (taintless).")
-    addon:ShuffleFrames(pets, petFramesByUnit, petFramesWithPoints)
+    addon:ShuffleFrames(pets, framesByUnit, petFramesByIndex)
 
     return true
 end
@@ -178,15 +178,15 @@ end
 ---Rearranges frames in order of the specified units.
 ---@param orderedUnits table<string>
 ---@param framesByUnit table<string, table>
----@param framesWithPoints table<FrameWithPosition>
-function addon:ShuffleFrames(orderedUnits, framesByUnit, framesWithPoints)
+---@param framesByIndex table<FrameWithPosition>
+function addon:ShuffleFrames(orderedUnits, framesByUnit, framesByIndex)
     -- probably too complicated to calculate positions due to the whole flow container layout logic
     -- so instead we can just re-use the existing positions and shuffle them
     -- probably safer and better supported this way anyway
     for i = 1, #orderedUnits do
         local sourceUnit = orderedUnits[i]
         local source = framesByUnit[sourceUnit]
-        local target = framesWithPoints[i]
+        local target = framesByIndex[i]
 
         assert(source ~= nil)
         assert(target ~= nil)
@@ -213,31 +213,23 @@ if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         end
 
         local sortFunction = addon:GetSortFunction()
-
-        -- sorting may be disabled in the player's current instance
-        if not sortFunction then return false end
-
-        -- list of the party member frames
         local frames = addon:GetPartyFrames()
 
-        -- no frames, nothing to do
-        if #frames == 0 then return false end
+        if not sortFunction or #frames == 0 then return false end
 
-        -- true if using horizontal layout, otherwise false
         local useHorizontalGroups = EditModeManagerFrame:ShouldRaidFrameUseHorizontalRaidGroups(CompactPartyFrame.isParty)
-
-        -- lookup of frame by unit token
         local frameByUnit = {}
+        local units = {}
 
         for _, frame in ipairs(frames) do
-            -- remove all current anchors
-            if frame.unit then
+            local unit = SecureButton_GetUnit(frame)
+
+            if unit then
+                units[#units + 1] = unit
                 frame:ClearAllPoints()
-                frameByUnit[frame.unit] = frame
+                frameByUnit[unit] = frame
             end
         end
-
-        local units = addon:GetUnits()
 
         table.sort(units, sortFunction)
         addon:SetTargets(units)

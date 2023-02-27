@@ -14,7 +14,11 @@ local M = {}
 function M:test_get_alias_non_pets()
     assertEquals(addon:GetUnitAliases("player"), { "player" })
     assertEquals(addon:GetUnitAliases("none"), { "none" })
-    assertEquals(addon:GetUnitAliases("pet"), { "pet" })
+end
+
+function M:test_get_alias_player_pet()
+    assertEquals(addon:GetUnitAliases("pet"), { "pet", "playerpet" })
+    assertEquals(addon:GetUnitAliases("playerpet"), { "pet", "playerpet" })
 end
 
 function M:test_get_alias_party_pets()
