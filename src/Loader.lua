@@ -1,12 +1,12 @@
 local addonName, addon = ...
 
----Listens for addon onload events.
----@param _ any
----@param name string
-function addon:OnLoadAddon(_, name)
+---Listens for our to be loaded and then initialises it.
+---@param name string the name of the addon being loaded.
+function addon:OnLoadAddon(name)
     if name ~= addonName then return end
 
     addon:Init()
+    addon.Loader:UnregisterEvent("ADDON_LOADED")
 end
 
 ---Initialises the addon.
@@ -18,7 +18,7 @@ function addon:Init()
     addon:InitTargeting()
 
     addon.EventLoop = CreateFrame("Frame")
-    addon.EventLoop:HookScript("OnEvent", addon.OnEvent)
+    addon.EventLoop:HookScript("OnEvent", function(_, name) addon:OnEvent(name) end)
     -- Fired after ending combat, as regen rates return to normal.
     -- Useful for determining when a player has left combat.
     -- This occurs when you are not on the hate list of any NPC, or a few seconds after the latest pvp attack that you were involved with.
@@ -27,7 +27,13 @@ function addon:Init()
 
     if addon.Options.SortingMethod.TaintlessEnabled then
         addon:Debug("Initialising using taintless method.")
-        addon:HookExperimental()
+
+        if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+            hooksecurefunc("CompactRaidGroup_UpdateLayout", function(_) addon:LayoutParty() end)
+            hooksecurefunc(CompactRaidFrameContainer, "LayoutFrames", function() addon:LayoutRaid() end)
+        else
+            hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", function() addon:LayoutRaid() end)
+        end
     else
         addon:Debug("Initialising using traditional method.")
         -- Fired whenever a group or raid is formed or disbanded, players are leaving or joining the group or raid.
@@ -38,16 +44,6 @@ function addon:Init()
     end
 end
 
----Hooks functions that we should perform a re-sort on.
-function addon:HookExperimental()
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        hooksecurefunc("CompactRaidGroup_UpdateLayout", function(frame) addon:LayoutParty(frame) end)
-        hooksecurefunc(CompactRaidFrameContainer, "LayoutFrames", function() addon:LayoutRaid(CompactRaidFrameContainer) end)
-    else
-        hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", function() addon:LayoutRaid(CompactRaidFrameContainer) end)
-    end
-end
-
 addon.Loader = CreateFrame("Frame")
-addon.Loader:HookScript("OnEvent", addon.OnLoadAddon)
+addon.Loader:HookScript("OnEvent", function(_, _, name) addon:OnLoadAddon(name) end)
 addon.Loader:RegisterEvent("ADDON_LOADED")
