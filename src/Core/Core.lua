@@ -161,7 +161,12 @@ function addon:LayoutRaid()
     for i = 1, #petFrames do
         local data = addon:ToFrameWithPosition(petFrames[i])
         petFramesWithPoints[i] = data
-        petFramesByUnit[petFrames[i].unit] = data
+
+        -- pets can be partyXpet or partypetX
+        local aliases = addon:GetUnitAliases(petFrames[i].unit)
+        for j = 1, #aliases do
+            petFramesByUnit[aliases[j]] = data
+        end
     end
 
     addon:Debug("Sorting pet frames (taintless).")
@@ -182,6 +187,9 @@ function addon:ShuffleFrames(orderedUnits, framesByUnit, framesWithPoints)
         local sourceUnit = orderedUnits[i]
         local source = framesByUnit[sourceUnit]
         local target = framesWithPoints[i]
+
+        assert(source ~= nil)
+        assert(target ~= nil)
 
         source.Frame:ClearAllPoints()
 

@@ -39,6 +39,34 @@ function addon:GetUnits()
     return members
 end
 
+---Returns a list of unit aliases.
+---Only used for pets at this point, as raid1pet and raidpet1 are both the same unit.
+---@param unit string the unit token
+---@return table<string> aliases
+function addon:GetUnitAliases(unit)
+    if not string.match(unit, "pet") then
+        return { unit }
+    end
+
+    local isRaid = nil
+
+    if string.match(unit, "raid") then
+        isRaid = true
+    elseif string.match(unit, "party") then
+        isRaid = false
+    else
+        return { unit }
+    end
+
+    local prefix = isRaid and "raid" or "party"
+    local index = string.match(unit, "%d%d") or string.match(unit, "%d")
+
+    return {
+        prefix .. index .. "pet",
+        prefix .. "pet" .. index
+    }
+end
+
 ---Gets the pet units for the specified player units.
 ---@param units table<string>
 ---@return table<string> pet unit tokens
