@@ -16,7 +16,7 @@ local function BuildDottedList(panel, anchor, uniqueName, titleText, lines)
 
     anchor = title
     for i, line in ipairs(lines) do
-        local lineItem = panel:CreateFontString("lbl" .. uniqueName .. tostring(i), "ARTWORK", "GameFontWhite")
+        local lineItem = panel:CreateFontString("lbl" .. uniqueName .. i, "ARTWORK", "GameFontWhite")
         lineItem:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing / 2)
         lineItem:SetText(" - " .. line)
         anchor = lineItem
@@ -45,7 +45,7 @@ function builder:BuildSortingMethodOptions(parentPanel)
 
     local anchor = taintless
     for i, line in ipairs(taintlessLines) do
-        local description = panel:CreateFontString("lblTaintlessDescription" .. tostring(i), "ARTWORK", "GameFontWhite")
+        local description = panel:CreateFontString("lblTaintlessDescription" .. i, "ARTWORK", "GameFontWhite")
         description:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", i == 1 and 4 or 0, -verticalSpacing / 2)
         description:SetText(line)
         anchor = description
@@ -76,7 +76,7 @@ function builder:BuildSortingMethodOptions(parentPanel)
 
     anchor = traditional
     for i, line in ipairs(traditionalLines) do
-        local description = panel:CreateFontString("lblTraditionalDescription" .. tostring(i), "ARTWORK", "GameFontWhite")
+        local description = panel:CreateFontString("lblTraditionalDescription" .. i, "ARTWORK", "GameFontWhite")
         description:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", i == 1 and 4 or 0, -verticalSpacing / 2)
         description:SetText(line)
         anchor = description

@@ -1,10 +1,10 @@
 local _, addon = ...
-
 local prefix = "FSTarget"
+local keybindingsCount = 5
 
 ---Initialises the targeting frames feature.
 function addon:InitTargeting()
-    for i = 1, 5 do
+    for i = 1, keybindingsCount do
         local target = CreateFrame("Button", prefix .. i, UIParent, "SecureActionButtonTemplate")
         target:RegisterForClicks("AnyDown")
         target:SetAttribute("type", "target")
@@ -28,7 +28,8 @@ end
 function addon:SetTargets(units)
     addon:Debug("Updating frame targets.")
 
-    for i = 1, 5 do
+    -- if units has less than 5 items it's still fine as units[i] will just be nil
+    for i = 1, keybindingsCount do
         local unit = units[i]
         local btn = _G[prefix .. i]
 

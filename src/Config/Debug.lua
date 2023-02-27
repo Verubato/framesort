@@ -13,7 +13,7 @@ function builder:BuildDebugOptions(parentPanel)
     enabled:SetPoint("TOPLEFT", panel, verticalSpacing, -verticalSpacing)
     enabled.Text:SetText("Debug mode")
     enabled.Text:SetFontObject("GameFontNormalLarge")
-    enabled:SetChecked(addon.Options.DebugEnabled or false)
+    enabled:SetChecked(addon.Options.DebugEnabled)
     enabled:HookScript("OnClick", function() addon:SetOption("DebugEnabled", enabled:GetChecked()) end)
 
     local description = panel:CreateFontString("lblDebugDescription", "ARTWORK", "GameFontWhite")

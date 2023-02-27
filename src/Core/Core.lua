@@ -71,22 +71,21 @@ function addon:TrySortTraditional()
         if not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
             addon:Debug("Sorting raid frames (traditional).")
             CompactRaidFrameContainer:SetFlowSortFunction(sortFunc)
+            return true
         elseif not CompactPartyFrame:IsForbidden() and CompactPartyFrame:IsVisible() then
             addon:Debug("Sorting party frames (traditional).")
             CompactPartyFrame_SetFlowSortFunction(sortFunc)
-        else
-            return false
+            return true
         end
     else
         if not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
             addon:Debug("Sorting raid frames (traditional).")
             CompactRaidFrameContainer_SetFlowSortFunction(CompactRaidFrameContainer, sortFunc)
-        else
-            return false
+            return true
         end
     end
 
-    return true
+    return false
 end
 
 ---Attempts to sort the party/raid frames using the taintless method.
@@ -99,16 +98,14 @@ function addon:TrySortTaintless()
             return addon:LayoutRaid()
         elseif not CompactPartyFrame:IsForbidden() and CompactPartyFrame:IsVisible() then
             return addon:LayoutParty()
-        else
-            return false
         end
     else
         if not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
             return addon:LayoutRaid()
-        else
-            return false
         end
     end
+
+    return false
 end
 
 ---Sorts raid frames.
@@ -122,7 +119,7 @@ function addon:LayoutRaid()
     local sortFunction = addon:GetSortFunction()
 
     -- sorting may be disabled in the player's current instance
-    if sortFunction == nil then return false end
+    if not sortFunction then return false end
 
     -- collection of all visible raid frames where the unit exists
     local frames = addon:GetRaidFrames()
@@ -158,7 +155,7 @@ function addon:LayoutRaid()
         -- this can happen in edit mode where fake raid frames are placed
         -- but we shouldn't actually get here anyway as CanSort() would return false
         -- seems to happen some other way as well, unsure how/why yet
-        addon:Debug("Unsupported: Not sorting as the number of raid frames " .. tostring(#frames) .. " is not equal to the number of raid units " .. tostring(#units) .. ".")
+        addon:Debug("Unsupported: Not sorting as the number of raid frames " .. #frames .. " is not equal to the number of raid units " .. #units .. ".")
         return false
     end
 
@@ -199,7 +196,7 @@ if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         local sortFunction = addon:GetSortFunction()
 
         -- sorting may be disabled in the player's current instance
-        if sortFunction == nil then return false end
+        if not sortFunction then return false end
 
         -- list of the party member frames
         local frames = addon:GetPartyFrames()

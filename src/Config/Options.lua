@@ -1,7 +1,8 @@
 local _, addon = ...
-addon.OptionsBuilder = {}
-addon.OptionsBuilder.VerticalSpacing = 15
-addon.OptionsBuilder.HorizontalSpacing = 50
+addon.OptionsBuilder = {
+    VerticalSpacing = 15,
+    HorizontalSpacing = 50
+}
 
 local builder = addon.OptionsBuilder
 local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
@@ -48,14 +49,14 @@ function builder:BuiltTitle(panel)
     local keyWidth = 50
     local i = 1
     for k, v in pairs(lines) do
-        local keyText = panel:CreateFontString("lblDescriptionKey" .. tostring(i), "ARTWORK", "GameFontWhite")
+        local keyText = panel:CreateFontString("lblDescriptionKey" .. i, "ARTWORK", "GameFontWhite")
         keyText:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing * 0.75)
         keyText:SetText(k .. ": ")
         keyText:SetWidth(keyWidth)
         keyText:SetJustifyH("LEFT")
         anchor = keyText
 
-        local valueText = panel:CreateFontString("lblDescriptionValue" .. tostring(i), "ARTWORK", "GameFontWhite")
+        local valueText = panel:CreateFontString("lblDescriptionValue" .. i, "ARTWORK", "GameFontWhite")
         valueText:SetPoint("LEFT", keyText, "RIGHT")
         valueText:SetText(v)
         i = i + 1
@@ -214,6 +215,8 @@ function addon:UpgradeOptions()
         addon.Options.RaidEnabled = addon.Options.RaidSortEnabled
         addon.Options.RaidPlayerSortMode = addon.Options.PlayerSortMode
 
+        addon.Options.DebugEnabled = false
+
         -- remove old values
         addon.Options.PartySortEnabled = nil
         addon.Options.PlayerSortMode = nil
@@ -229,7 +232,7 @@ function addon:UpgradeOptions()
     end
 
     if addon.Options.Version == 3 then
-        addon:Debug("Upgrading options to version 4")
+        addon:Debug("Upgrading options to version 4.")
 
         addon.Options.SortingMethod = {
             TaintlessEnabled = true,
