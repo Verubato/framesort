@@ -6,5 +6,6 @@ Test8Members = require("Compare8Test")
 TestGetUnits = require("GetUnitsTest")
 TestIsPet = require("IsPetTest")
 TestIsMember = require("IsMemberTest")
+TestGetUnitAliases = require("UnitAliasesTest")
 
 os.exit(luaunit:run())
