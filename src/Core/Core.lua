@@ -117,57 +117,70 @@ function addon:LayoutRaid()
     end
 
     local sortFunction = addon:GetSortFunction()
+    local memberFrames, petFrames, unknownFrames = addon:GetRaidFrames()
 
-    -- sorting may be disabled in the player's current instance
-    if not sortFunction then return false end
-
-    -- collection of all visible raid frames where the unit exists
-    local frames = addon:GetRaidFrames()
-
-    -- no frames, nothing to do
-    if #frames == 0 then return false end
-
-    local framesWithPoints = {}
-    local framesByUnit = {}
-
-    -- probably too complicated to calculate positions due to the whole flow container layout logic
-    -- so instead we can just store the existing positions and re-use them
-    -- probably safer and better supported this way anyway
-    for i = 1, #frames do
-        local frame = frames[i]
-        local data = {
-            frame = frame,
-            points = {}
-        }
-
-        local pointsCount = frame:GetNumPoints()
-        for j = 1, pointsCount do
-            data.points[j] = { frame:GetPoint(j) }
-        end
-
-        framesWithPoints[i] = data
-        framesByUnit[frame.unit] = data
+    if not sortFunction or #memberFrames == 0 then return false end
+    if #unknownFrames ~= 0 then
+        addon:Debug("Warning: " .. #unknownFrames .. " unknown raid frames detected.")
     end
 
     local units = addon:GetUnits()
+    if #units == 0 then return false end
 
-    if #units ~= #frames then
-        -- this can happen in edit mode where fake raid frames are placed
-        -- but we shouldn't actually get here anyway as CanSort() would return false
-        -- seems to happen some other way as well, unsure how/why yet
-        addon:Debug("Unsupported: Not sorting as the number of raid frames " .. #frames .. " is not equal to the number of raid units " .. #units .. ".")
+    table.sort(units, sortFunction)
+
+    if #units ~= #memberFrames then
+        addon:Debug("Unsupported: Not sorting as the number of member frames " .. #memberFrames .. " is not equal to the number of member units " .. #units .. ".")
         return false
     end
 
-    table.sort(units, sortFunction)
+    local memberFramesWithPoints = {}
+    local memberFramesByUnit = {}
+
+    for i = 1, #memberFrames do
+        local data = addon:ToFrameWithPosition(memberFrames[i])
+        memberFramesWithPoints[i] = data
+        memberFramesByUnit[memberFrames[i].unit] = data
+    end
+
     addon:SetTargets(units)
     addon:Debug("Sorting raid frames (taintless).")
+    addon:ShuffleFrames(units, memberFramesByUnit, memberFramesWithPoints)
 
-    for i = 1, #units do
-        local sourceUnit = units[i]
-        -- the current frame/position
+    local pets = addon:GetPets(units)
+
+    if #petFrames == 0 or #pets == 0 then return true end
+    if #pets ~= #petFrames then
+        addon:Debug("Unsupported: Not sorting pets as the number of pet frames " .. #petFrames .. " is not equal to the number of pet units " .. #pets .. ".")
+        return false
+    end
+
+    local petFramesWithPoints = {}
+    local petFramesByUnit = {}
+
+    for i = 1, #petFrames do
+        local data = addon:ToFrameWithPosition(petFrames[i])
+        petFramesWithPoints[i] = data
+        petFramesByUnit[petFrames[i].unit] = data
+    end
+
+    addon:Debug("Sorting pet frames (taintless).")
+    addon:ShuffleFrames(pets, petFramesByUnit, petFramesWithPoints)
+
+    return true
+end
+
+---Rearranges frames in order of the specified units.
+---@param orderedUnits table<string>
+---@param framesByUnit table<string, table>
+---@param framesWithPoints table<FrameWithPosition>
+function addon:ShuffleFrames(orderedUnits, framesByUnit, framesWithPoints)
+    -- probably too complicated to calculate positions due to the whole flow container layout logic
+    -- so instead we can just re-use the existing positions and shuffle them
+    -- probably safer and better supported this way anyway
+    for i = 1, #orderedUnits do
+        local sourceUnit = orderedUnits[i]
         local source = framesByUnit[sourceUnit]
-        -- the target frame/position
         local target = framesWithPoints[i]
 
         source.frame:ClearAllPoints()
@@ -180,8 +193,6 @@ function addon:LayoutRaid()
             source.frame:SetPoint(unpack(point))
         end
     end
-
-    return true
 end
 
 if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then

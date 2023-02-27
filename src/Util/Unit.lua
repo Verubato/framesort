@@ -1,7 +1,23 @@
 local _, addon = ...
+local memberUnitPatterns = {
+    "^player$",
+    "^party%d$",
+    "^raid%d$",
+    "^raid%d%d$",
+}
+local petUnitPatterns = {
+    "^pet$",
+    "^playerpet$",
+    "^party%dpet$",
+    "^partypet%d$",
+    "^raidpet%d$",
+    "^raidpet%d%d$",
+    "^raid%dpet$",
+    "^raid%d%dpet$"
+}
 
 ---Gets a table of group member unit tokens that exist (UnitExists()).
----@return table
+---@return table<string>
 function addon:GetUnits()
     local isRaid = IsInRaid()
     local prefix = isRaid and "raid" or "party"
@@ -21,4 +37,45 @@ function addon:GetUnits()
     end
 
     return members
+end
+
+---Gets the pet units for the specified player units.
+---@param units table<string>
+---@return table<string> pet unit tokens
+function addon:GetPets(units)
+    local pets = {}
+    for _, unit in ipairs(units) do
+        local petUnit = unit .. "pet"
+        if UnitExists(petUnit) then
+            pets[#pets + 1] = petUnit
+        end
+    end
+
+    return pets
+end
+
+---Determines if the unit token is a pet.
+---@param unit string
+---@return boolean true if the unit is a pet, otherwise false.
+function addon:IsPet(unit)
+    for _, pattern in pairs(petUnitPatterns) do
+        if string.match(unit, pattern) ~= nil then
+            return true
+        end
+    end
+
+    return false
+end
+
+---Determines if the unit token is a person/member/human.
+---@param unit string
+---@return boolean true if the unit is a member, otherwise false.
+function addon:IsMember(unit)
+    for _, pattern in pairs(memberUnitPatterns) do
+        if string.match(unit, pattern) ~= nil then
+            return true
+        end
+    end
+
+    return false
 end
