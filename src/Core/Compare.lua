@@ -98,7 +98,7 @@ function addon:CompareMiddle(token, sortedUnits)
     end
 
     -- most likely a non-existant unit
-    if (index == nil) then return false end
+    if index == nil then return false end
 
     -- 0 based
     index = index - 1
