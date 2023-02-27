@@ -6,6 +6,7 @@
 ## SavedVariables: Options
 
 Type\SortMode.lua
+Type\FrameWithPosition.lua
 Util\Log.lua
 Util\Unit.lua
 Util\Frame.lua
