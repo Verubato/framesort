@@ -48,6 +48,10 @@ function addon:GetUnitAliases(unit)
         return { unit }
     end
 
+    if unit == "pet" or unit == "playerpet" then
+        return { "pet", "playerpet" }
+    end
+
     local isRaid = nil
 
     if string.match(unit, "raid") then
