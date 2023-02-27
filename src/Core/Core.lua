@@ -183,14 +183,14 @@ function addon:ShuffleFrames(orderedUnits, framesByUnit, framesWithPoints)
         local source = framesByUnit[sourceUnit]
         local target = framesWithPoints[i]
 
-        source.frame:ClearAllPoints()
+        source.Frame:ClearAllPoints()
 
-        for j = 1, #target.points do
-            local point = target.points[j]
+        for j = 1, #target.Points do
+            local point = target.Points[j]
 
             -- move the source frame to the target
             ---@diagnostic disable-next-line: deprecated
-            source.frame:SetPoint(unpack(point))
+            source.Frame:SetPoint(unpack(point))
         end
     end
 end
