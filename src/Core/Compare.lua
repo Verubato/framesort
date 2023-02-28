@@ -13,13 +13,13 @@ function addon:GetSortFunction()
     assert(playerSortMode ~= nil)
     assert(groupSortMode ~= nil)
 
-    if playerSortMode ~= addon.SortMode.Middle then
+    if playerSortMode ~= addon.PlayerSortMode.Middle then
         return function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode) end
     end
 
     -- we need to pre-sort to determine where the middle actually is
     local units = addon:GetUnits()
-    table.sort(units, function(x, y) return addon:Compare(x, y, addon.SortMode.Top, groupSortMode) end)
+    table.sort(units, function(x, y) return addon:Compare(x, y, addon.PlayerSortMode.Top, groupSortMode) end)
 
     return function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode, units) end
 end
@@ -28,8 +28,8 @@ end
 ---@param inInstance boolean
 ---@param instanceType string
 ---@return boolean enabled whether sorting is enabled.
----@return string? playerMode the player sort mode.
----@return string? groupMode the group sort mode.
+---@return PlayerSortMode? playerMode the player sort mode.
+---@return GroupSortMode? groupMode the group sort mode.
 function addon:GetSortMode(inInstance, instanceType)
     if inInstance and instanceType == "arena" then
         return addon.Options.ArenaEnabled, addon.Options.ArenaPlayerSortMode, addon.Options.ArenaSortMode
@@ -57,24 +57,24 @@ function addon:Compare(leftToken, rightToken, playerSortMode, groupSortMode, pre
     elseif not UnitExists(rightToken) then
         return true
     elseif UnitIsUnit(leftToken, "player") then
-        if playerSortMode == addon.SortMode.Middle then
+        if playerSortMode == addon.PlayerSortMode.Middle then
             assert(preSortedUnits ~= nil)
             return addon:CompareMiddle(rightToken, preSortedUnits)
         else
-            return playerSortMode == addon.SortMode.Top
+            return playerSortMode == addon.PlayerSortMode.Top
         end
     elseif UnitIsUnit(rightToken, "player") then
-        if playerSortMode == addon.SortMode.Middle then
+        if playerSortMode == addon.PlayerSortMode.Middle then
             assert(preSortedUnits ~= nil)
             return not addon:CompareMiddle(leftToken, preSortedUnits)
         else
-            return playerSortMode == addon.SortMode.Bottom
+            return playerSortMode == addon.PlayerSortMode.Bottom
         end
-    elseif groupSortMode == addon.SortMode.Group then
+    elseif groupSortMode == addon.GroupSortMode.Group then
         return CRFSort_Group(leftToken, rightToken)
-    elseif groupSortMode == addon.SortMode.Role then
+    elseif groupSortMode == addon.GroupSortMode.Role then
         return CRFSort_Role(leftToken, rightToken)
-    elseif groupSortMode == addon.SortMode.Alphabetical then
+    elseif groupSortMode == addon.GroupSortMode.Alphabetical then
         return CRFSort_Alphabetical(leftToken, rightToken)
     else
         return leftToken < rightToken
