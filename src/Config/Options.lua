@@ -13,17 +13,17 @@ addon.Defaults = {
     Version = 4,
     DebugEnabled = false,
     ArenaEnabled = true,
-    ArenaPlayerSortMode = addon.SortMode.Top,
-    ArenaSortMode = addon.SortMode.Group,
+    ArenaPlayerSortMode = addon.PlayerSortMode.Top,
+    ArenaSortMode = addon.GroupSortMode.Group,
     DungeonEnabled = true,
-    DungeonPlayerSortMode = addon.SortMode.Top,
-    DungeonSortMode = addon.SortMode.Role,
+    DungeonPlayerSortMode = addon.PlayerSortMode.Top,
+    DungeonSortMode = addon.GroupSortMode.Role,
     WorldEnabled = true,
-    WorldPlayerSortMode = addon.SortMode.Top,
-    WorldSortMode = addon.SortMode.Group,
+    WorldPlayerSortMode = addon.PlayerSortMode.Top,
+    WorldSortMode = addon.GroupSortMode.Group,
     RaidEnabled = false,
-    RaidPlayerSortMode = addon.SortMode.Top,
-    RaidSortMode = addon.SortMode.Role,
+    RaidPlayerSortMode = addon.PlayerSortMode.Top,
+    RaidSortMode = addon.GroupSortMode.Role,
     ExperimentalEnabled = false,
     SortingMethod = {
         TaintlessEnabled = true,
@@ -103,22 +103,22 @@ function builder:BuildSortModeCheckboxes(
     local top = CreateFrame("CheckButton", "chk" .. uniqueGroupName .. "PlayerSortTop", parentPanel, "UICheckButtonTemplate")
     top.Text:SetText("Top")
     top:SetPoint("LEFT", playerLabel, "RIGHT", horizontalSpacing / 2, 0)
-    top:SetChecked(playerSortMode == addon.SortMode.Top)
+    top:SetChecked(playerSortMode == addon.PlayerSortMode.Top)
 
     local middle = CreateFrame("CheckButton", "chk" .. uniqueGroupName .. "PlayerSortMiddle", parentPanel, "UICheckButtonTemplate")
     middle.Text:SetText("Middle")
     middle:SetPoint("LEFT", top, "RIGHT", horizontalSpacing, 0)
-    middle:SetChecked(playerSortMode == addon.SortMode.Middle)
+    middle:SetChecked(playerSortMode == addon.PlayerSortMode.Middle)
 
     local bottom = CreateFrame("CheckButton", "chk" .. uniqueGroupName .. "PlayerSortBottom", parentPanel, "UICheckButtonTemplate")
     bottom.Text:SetText("Bottom")
     bottom:SetPoint("LEFT", middle, "RIGHT", horizontalSpacing, 0)
-    bottom:SetChecked(playerSortMode == addon.SortMode.Bottom)
+    bottom:SetChecked(playerSortMode == addon.PlayerSortMode.Bottom)
 
     local playerModes = {
-        [top] = addon.SortMode.Top,
-        [middle] = addon.SortMode.Middle,
-        [bottom] = addon.SortMode.Bottom
+        [top] = addon.PlayerSortMode.Top,
+        [middle] = addon.PlayerSortMode.Middle,
+        [bottom] = addon.PlayerSortMode.Bottom
     }
 
     local function onPlayerClick(sender)
@@ -152,23 +152,23 @@ function builder:BuildSortModeCheckboxes(
     group:SetPoint("LEFT", top, "LEFT")
     -- TODO: not sure why this doesn't align well even when aligning TOP/BOTTOM, so just hacking in a +10 to fix it for now
     group:SetPoint("TOP", modeLabel, "TOP", 0, 10)
-    group.Text:SetText(addon.SortMode.Group)
-    group:SetChecked(sortMode == addon.SortMode.Group)
+    group.Text:SetText(addon.GroupSortMode.Group)
+    group:SetChecked(sortMode == addon.GroupSortMode.Group)
 
     local role = CreateFrame("CheckButton", "chk" .. uniqueGroupName .. "SortRole", parentPanel, "UICheckButtonTemplate")
     role:SetPoint("LEFT", group, "RIGHT", horizontalSpacing, 0)
-    role.Text:SetText(addon.SortMode.Role)
-    role:SetChecked(sortMode == addon.SortMode.Role)
+    role.Text:SetText(addon.GroupSortMode.Role)
+    role:SetChecked(sortMode == addon.GroupSortMode.Role)
 
     local alpha = CreateFrame("CheckButton", "chk" .. uniqueGroupName .. "SortAlpha", parentPanel, "UICheckButtonTemplate")
     alpha:SetPoint("LEFT", role, "RIGHT", horizontalSpacing, 0)
-    alpha.Text:SetText(addon.SortMode.Alphabetical)
-    alpha:SetChecked(sortMode == addon.SortMode.Alphabetical)
+    alpha.Text:SetText(addon.GroupSortMode.Alphabetical)
+    alpha:SetChecked(sortMode == addon.GroupSortMode.Alphabetical)
 
     local modes = {
-        [group] = addon.SortMode.Group,
-        [role] = addon.SortMode.Role,
-        [alpha] = addon.SortMode.Alphabetical
+        [group] = addon.GroupSortMode.Group,
+        [role] = addon.GroupSortMode.Role,
+        [alpha] = addon.GroupSortMode.Alphabetical
     }
 
     local function onModeClick(sender)
