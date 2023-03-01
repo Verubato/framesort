@@ -32,15 +32,16 @@ end
 ---@return GroupSortMode? groupMode the group sort mode.
 function addon:GetSortMode(inInstance, instanceType)
     if inInstance and instanceType == "arena" then
-        return addon.Options.ArenaEnabled, addon.Options.ArenaPlayerSortMode, addon.Options.ArenaSortMode
+        return addon.Options.Arena.Enabled, addon.Options.Arena.PlayerSortMode, addon.Options.Arena.GroupSortMode
     elseif inInstance and instanceType == "party" then
-        return addon.Options.DungeonEnabled, addon.Options.DungeonPlayerSortMode, addon.Options.DungeonSortMode
+        return addon.Options.Dungeon.Enabled, addon.Options.Dungeon.PlayerSortMode, addon.Options.Dungeon.GroupSortMode
     elseif inInstance and (instanceType == "raid" or instanceType == "pvp") then
-        return addon.Options.RaidEnabled, addon.Options.RaidPlayerSortMode, addon.Options.RaidSortMode
-    else
-        if not addon.Options.WorldEnabled then return false, nil, nil end
-        return addon.Options.WorldEnabled, addon.Options.WorldPlayerSortMode, addon.Options.WorldSortMode
+        return addon.Options.Raid.Enabled, addon.Options.Raid.PlayerSortMode, addon.Options.Raid.GroupSortMode
+    elseif not inInstance and addon.Options.World.Enabled then
+        return addon.Options.World.Enabled, addon.Options.World.PlayerSortMode, addon.Options.World.GroupSortMode
     end
+
+    return false, nil, nil
 end
 
 ---Returns true if the left token should be ordered before the right token.

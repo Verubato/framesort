@@ -8,29 +8,6 @@ local builder = addon.OptionsBuilder
 local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
 local horizontalSpacing = addon.OptionsBuilder.HorizontalSpacing
 
----Default configuration.
-addon.Defaults = {
-    Version = 4,
-    DebugEnabled = false,
-    ArenaEnabled = true,
-    ArenaPlayerSortMode = addon.PlayerSortMode.Top,
-    ArenaSortMode = addon.GroupSortMode.Group,
-    DungeonEnabled = true,
-    DungeonPlayerSortMode = addon.PlayerSortMode.Top,
-    DungeonSortMode = addon.GroupSortMode.Role,
-    WorldEnabled = true,
-    WorldPlayerSortMode = addon.PlayerSortMode.Top,
-    WorldSortMode = addon.GroupSortMode.Group,
-    RaidEnabled = false,
-    RaidPlayerSortMode = addon.PlayerSortMode.Top,
-    RaidSortMode = addon.GroupSortMode.Role,
-    ExperimentalEnabled = false,
-    SortingMethod = {
-        TaintlessEnabled = true,
-        TraditionalEnabled = false
-    }
-}
-
 ---Adds the title UI components.
 ---@param panel table the parent UI panel.
 ---@return table The bottom left most control to use for anchoring subsequent UI components.
@@ -134,6 +111,7 @@ function builder:BuildSortModeCheckboxes(
 
         local mode = playerModes[sender]
         onPlayerSortModeChanged(mode)
+        addon:TrySort()
     end
 
     for chkbox, _ in pairs(playerModes) do
@@ -184,6 +162,7 @@ function builder:BuildSortModeCheckboxes(
 
         local mode = modes[sender]
         onSortModeChanged(mode)
+        addon:TrySort()
     end
 
     for chkbox, _ in pairs(modes) do
@@ -191,68 +170,6 @@ function builder:BuildSortModeCheckboxes(
     end
 
     return modeLabel
-end
-
----Upgrades saved options to the current version.
-function addon:UpgradeOptions()
-    if addon.Options.Version == nil then
-        addon:Debug("Upgrading options to version 2.")
-
-        addon.Options.Version = addon.Defaults.Version
-
-        addon.Options.ArenaEnabled = addon.Options.PartySortEnabled
-        addon.Options.ArenaPlayerSortMode = addon.Options.PlayerSortMode
-        addon.Options.ArenaSortMode = addon.Options.PartySortMode
-
-        addon.Options.DungeonEnabled = addon.Options.PartySortEnabled
-        addon.Options.DungeonPlayerSortMode = addon.Options.PlayerSortMode
-        addon.Options.DungeonSortMode = addon.Options.PartySortMode
-
-        addon.Options.WorldEnabled = addon.Options.PartySortEnabled
-        addon.Options.WorldPlayerSortMode = addon.Options.PlayerSortMode
-        addon.Options.WorldSortMode = addon.Options.PartySortMode
-
-        addon.Options.RaidEnabled = addon.Options.RaidSortEnabled
-        addon.Options.RaidPlayerSortMode = addon.Options.PlayerSortMode
-
-        addon.Options.DebugEnabled = false
-
-        -- remove old values
-        addon.Options.PartySortEnabled = nil
-        addon.Options.PlayerSortMode = nil
-        addon.Options.RaidSortEnabled = nil
-
-        addon.Options.Version = 2
-    end
-
-    if addon.Options.Version == 2 then
-        addon:Debug("Upgrading options to version 3.")
-        addon.Options.ExperimentalEnabled = false
-        addon.Options.Version = 3
-    end
-
-    if addon.Options.Version == 3 then
-        addon:Debug("Upgrading options to version 4.")
-
-        addon.Options.SortingMethod = {
-            TaintlessEnabled = true,
-            TraditionalEnabled = false
-        }
-
-        -- remove old values
-        addon.Options.ExperimentalEnabled = nil
-        addon.Options.Version = 4
-    end
-end
-
----Sets the specified option and re-sorts the party/raid frames if applicable.
-function addon:SetOption(name, value)
-    addon:Debug("Setting option - '" .. name .. "' = '" .. tostring(value) .. "'")
-    addon.Options[name] = value
-
-    if name ~= "DebugEnabled" then
-        addon:TrySort()
-    end
 end
 
 ---Adds the options interface to the wow addons section and enables slash commands.
@@ -268,12 +185,12 @@ function addon:InitOptions()
         anchor,
         "Arena",
         "Arena",
-        addon.Options.ArenaEnabled,
-        addon.Options.ArenaPlayerSortMode,
-        addon.Options.ArenaSortMode,
-        function(enabled) addon:SetOption("ArenaEnabled", enabled) end,
-        function(mode) addon:SetOption("ArenaPlayerSortMode", mode) end,
-        function(mode) addon:SetOption("ArenaSortMode", mode) end
+        addon.Options.Arena.Enabled,
+        addon.Options.Arena.PlayerSortMode,
+        addon.Options.Arena.GroupSortMode,
+        function(enabled) addon.Options.Arena.Enabled = enabled end,
+        function(mode) addon.Options.Arena.PlayerSortMode = mode end,
+        function(mode) addon.Options.Arena.GroupSortMode = mode end
     )
 
     anchor = builder:BuildSortModeCheckboxes(
@@ -281,12 +198,12 @@ function addon:InitOptions()
         anchor,
         "Dungeon (mythics, 5-mans)",
         "Dungeon",
-        addon.Options.DungeonEnabled,
-        addon.Options.DungeonPlayerSortMode,
-        addon.Options.DungeonSortMode,
-        function(enabled) addon:SetOption("DungeonEnabled", enabled) end,
-        function(mode) addon:SetOption("DungeonPlayerSortMode", mode) end,
-        function(mode) addon:SetOption("DungeonSortMode", mode) end
+        addon.Options.Dungeon.Enabled,
+        addon.Options.Dungeon.PlayerSortMode,
+        addon.Options.Dungeon.GroupSortMode,
+        function(enabled) addon.Options.Dungeon.Enabled = enabled end,
+        function(mode) addon.Options.Dungeon.PlayerSortMode = mode end,
+        function(mode) addon.Options.Dungeon.GroupSortMode = mode end
     )
 
     anchor = builder:BuildSortModeCheckboxes(
@@ -294,12 +211,12 @@ function addon:InitOptions()
         anchor,
         "Raid (battlegrounds, raids)",
         "Raid",
-        addon.Options.RaidEnabled,
-        addon.Options.RaidPlayerSortMode,
-        addon.Options.RaidSortMode,
-        function(enabled) addon:SetOption("RaidEnabled", enabled) end,
-        function(mode) addon:SetOption("RaidPlayerSortMode", mode) end,
-        function(mode) addon:SetOption("RaidSortMode", mode) end
+        addon.Options.Raid.Enabled,
+        addon.Options.Raid.PlayerSortMode,
+        addon.Options.Raid.GroupSortMode,
+        function(enabled) addon.Options.Raid.Enabled = enabled end,
+        function(mode) addon.Options.Raid.PlayerSortMode = mode end,
+        function(mode) addon.Options.Raid.GroupSortMode = mode end
     )
 
     anchor = builder:BuildSortModeCheckboxes(
@@ -307,12 +224,12 @@ function addon:InitOptions()
         anchor,
         "World (non-instance groups)",
         "World",
-        addon.Options.WorldEnabled,
-        addon.Options.WorldPlayerSortMode,
-        addon.Options.WorldSortMode,
-        function(enabled) addon:SetOption("WorldEnabled", enabled) end,
-        function(mode) addon:SetOption("WorldPlayerSortMode", mode) end,
-        function(mode) addon:SetOption("WorldSortMode", mode) end
+        addon.Options.World.Enabled,
+        addon.Options.World.PlayerSortMode,
+        addon.Options.World.GroupSortMode,
+        function(enabled) addon.Options.World.Enabled = enabled end,
+        function(mode) addon.Options.World.PlayerSortMode = mode end,
+        function(mode) addon.Options.World.GroupSortMode = mode end
     )
 
     InterfaceOptions_AddCategory(panel)
