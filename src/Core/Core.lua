@@ -121,7 +121,7 @@ function addon:LayoutRaid()
 
     if not sortFunction or #memberFrames == 0 then return false end
     if #unknownFrames ~= 0 then
-        addon:Warning("Warning: " .. #unknownFrames .. " unknown raid frames detected.")
+        addon:Warning(#unknownFrames .. " unknown raid frames detected.")
     end
 
     local units = {}
