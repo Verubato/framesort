@@ -145,7 +145,7 @@ function addon:LayoutRaid()
     end
 
     addon:Debug("Sorting raid frames (taintless).")
-    addon:ShuffleFrames(units, framesByUnit, memberFramesByIndex)
+    addon:RearrangeFrames(units, framesByUnit, memberFramesByIndex)
 
     if #petFrames == 0 then return true end
 
@@ -170,7 +170,7 @@ function addon:LayoutRaid()
     assert(#pets > 0)
 
     addon:Debug("Sorting pet frames (taintless).")
-    addon:ShuffleFrames(pets, framesByUnit, petFramesByIndex)
+    addon:RearrangeFrames(pets, framesByUnit, petFramesByIndex)
 
     return true
 end
@@ -179,7 +179,7 @@ end
 ---@param orderedUnits table<string>
 ---@param framesByUnit table<string, table>
 ---@param framesByIndex table<FrameWithPosition>
-function addon:ShuffleFrames(orderedUnits, framesByUnit, framesByIndex)
+function addon:RearrangeFrames(orderedUnits, framesByUnit, framesByIndex)
     -- probably too complicated to calculate positions due to the whole flow container layout logic
     -- so instead we can just re-use the existing positions and shuffle them
     -- probably safer and better supported this way anyway
