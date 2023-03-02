@@ -70,13 +70,15 @@ end
 function addon:ApplySpacing()
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         if not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
-            return addon:ApplyRaidFrameSpacing()
-        elseif not CompactPartyFrame:IsForbidden() and CompactPartyFrame:IsVisible() then
-            return addon:ApplyPartyFrameSpacing()
+            addon:ApplyRaidFrameSpacing()
+        end
+
+        if not CompactPartyFrame:IsForbidden() and CompactPartyFrame:IsVisible() then
+            addon:ApplyPartyFrameSpacing()
         end
     else
         if not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
-            return addon:ApplyRaidFrameSpacing()
+            addon:ApplyRaidFrameSpacing()
         end
     end
 end
