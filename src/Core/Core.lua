@@ -187,10 +187,10 @@ function addon:LayoutRaid()
         end
     end
 
-    -- get pets based off the sorted units instead of the frames
-    -- as this comes with the benefit that the pets will also be sorted
-    local pets = addon:GetPets(units)
-    if #pets > 0 then
+    if #petFrames > 0 then
+        -- get pets based off the sorted units instead of the frames
+        -- as this comes with the benefit that the pets will also be sorted
+        local pets = addon:GetPets(units)
         assert(#pets == #petFrames)
 
         addon:Debug("Sorting pet frames (taintless).")
