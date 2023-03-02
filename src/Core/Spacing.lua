@@ -66,7 +66,7 @@ local function UpdateRaidSpacing(frames, spacing)
     end
 end
 
----Applies spacing to raid frames.
+---Applies spacing to party/raid frames (depending on which are shown).
 function addon:ApplySpacing()
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         if not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
