@@ -3,11 +3,11 @@ local logPrefix = addonName .. ": "
 local warningPrefix = addonName .. " - Warning: "
 
 local function Enabled()
-    if addon.Options.Version == 5 then
-        return addon.Options.Debug.Enabled
+    if addon.Options.Version < 5 then
+        return addon.Options.DebugEnabled or false
     end
 
-    return addon.Options.DebugEnabled or false
+    return addon.Options.Debug.Enabled
 end
 
 ---Prints a debug message to the chat window if DebugMode is enabled.

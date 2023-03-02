@@ -9,6 +9,24 @@ function addon:OnEvent(eventName)
     addon.SortPending = not addon:TrySort()
 end
 
+---Event hook on blizzard updating party frames.
+function addon:OnUpdatePartyFrames()
+    if addon.Options.SortingMethod.TaintlessEnabled then
+        addon:LayoutParty()
+    end
+
+    addon:ApplySpacing()
+end
+
+---Event hook on blizzard updating raid frames.
+function addon:OnUpdateRaidFrames()
+    if addon.Options.SortingMethod.TaintlessEnabled then
+        addon:LayoutRaid()
+    end
+
+    addon:ApplySpacing()
+end
+
 ---Determines whether sorting can be performed.
 ---@return boolean
 function addon:CanSort()
@@ -147,8 +165,6 @@ function addon:LayoutRaid()
     addon:Debug("Sorting raid frames (taintless).")
     addon:RearrangeFrames(units, framesByUnit, memberFramesByIndex)
 
-    if #petFrames == 0 then return true end
-
     -- add pets to the lookup table
     for i, frame in ipairs(petFrames) do
         local data = addon:ToFrameWithPosition(frame)
@@ -166,11 +182,12 @@ function addon:LayoutRaid()
     -- get pets based off the sorted units instead of the frames
     -- as this comes with the benefit that the pets will also be sorted
     local pets = addon:GetPets(units)
+    if #pets > 0 then
+        assert(#pets == #petFrames)
 
-    assert(#pets > 0)
-
-    addon:Debug("Sorting pet frames (taintless).")
-    addon:RearrangeFrames(pets, framesByUnit, petFramesByIndex)
+        addon:Debug("Sorting pet frames (taintless).")
+        addon:RearrangeFrames(pets, framesByUnit, petFramesByIndex)
+    end
 
     return true
 end
@@ -243,6 +260,7 @@ if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
 
         -- all other frames are placed relative to the frame before it
         local previous = firstFrame
+
         for i = 2, #units do
             local unit = units[i]
             local next = frameByUnit[unit]

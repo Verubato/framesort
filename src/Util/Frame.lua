@@ -29,8 +29,9 @@ function addon:GetRaidFrames()
     return members, pets, unknown
 end
 
----Returns the set of party frames which may or may not be in order.
+---Returns the set of party frames ordered by their display order.
 ---Will only return frames that are visible and have a unit attached.
+---@return table<table> frames party frames
 function addon:GetPartyFrames()
     local frames = {}
     local children = { CompactPartyFrame:GetChildren() }
@@ -40,6 +41,8 @@ function addon:GetPartyFrames()
             frames[#frames + 1] = frame
         end
     end
+
+    table.sort(frames, function(x, y) return addon:CompareTopLeft(x, y) end)
 
     return frames
 end

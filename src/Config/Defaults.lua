@@ -2,7 +2,7 @@ local _, addon = ...
 
 ---Default configuration.
 addon.Defaults = {
-    Version = 5,
+    Version = 6,
     Debug = {
         Enabled = false
     },
@@ -29,5 +29,19 @@ addon.Defaults = {
     SortingMethod = {
         TaintlessEnabled = true,
         TraditionalEnabled = false
+    },
+    Appearance = {
+        Party = {
+            Spacing = {
+                Horizontal = 0,
+                Vertical = 0
+            },
+        },
+        Raid = {
+            Spacing = {
+                Horizontal = 0,
+                Vertical = 0
+            }
+        }
     }
 }
