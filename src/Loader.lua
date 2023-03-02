@@ -29,10 +29,10 @@ function addon:Init()
         addon:Debug("Initialising using taintless method.")
 
         if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-            hooksecurefunc("CompactRaidGroup_UpdateLayout", function(_) addon:LayoutParty() end)
-            hooksecurefunc(CompactRaidFrameContainer, "LayoutFrames", function() addon:LayoutRaid() end)
+            hooksecurefunc("CompactRaidGroup_UpdateLayout", function(_) addon:OnUpdatePartyFrames() end)
+            hooksecurefunc(CompactRaidFrameContainer, "LayoutFrames", function() addon:OnUpdateRaidFrames() end)
         else
-            hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", function() addon:LayoutRaid() end)
+            hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", function() addon:OnUpdateRaidFrames() end)
         end
     else
         addon:Debug("Initialising using traditional method.")

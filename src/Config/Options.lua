@@ -236,6 +236,7 @@ function addon:InitOptions()
 
     builder:BuildSortingMethodOptions(panel)
     builder:BuildKeybindingOptions(panel)
+    builder:BuildAppearanceOptions(panel)
     builder:BuildHealthCheck(panel)
     builder:BuildDebugOptions(panel)
 
