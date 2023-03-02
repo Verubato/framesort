@@ -50,7 +50,7 @@ function addon:CanSort()
 
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         -- don't try if edit mode is active
-        if EditModeManagerFrame.editModeActive then
+        if EditModeManagerFrame.editModeActive and not addon.Options.SortingMethod.TaintlessEnabled then
             addon:Debug("Not sorting while edit mode active.")
             return false
         end
