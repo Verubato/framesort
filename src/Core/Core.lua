@@ -85,25 +85,29 @@ function addon:TrySortTraditional()
     local sortFunc = addon:GetSortFunction()
     if sortFunc == nil then return false end
 
+    local sorted = false
+
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         if not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
             addon:Debug("Sorting raid frames (traditional).")
             CompactRaidFrameContainer:SetFlowSortFunction(sortFunc)
-            return true
-        elseif not CompactPartyFrame:IsForbidden() and CompactPartyFrame:IsVisible() then
+            sorted = true
+        end
+
+        if not CompactPartyFrame:IsForbidden() and CompactPartyFrame:IsVisible() then
             addon:Debug("Sorting party frames (traditional).")
             CompactPartyFrame_SetFlowSortFunction(sortFunc)
-            return true
+            sorted = sorted or true
         end
     else
         if not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
             addon:Debug("Sorting raid frames (traditional).")
             CompactRaidFrameContainer_SetFlowSortFunction(CompactRaidFrameContainer, sortFunc)
-            return true
+            sorted = true
         end
     end
 
-    return false
+    return sorted
 end
 
 ---Attempts to sort the party/raid frames using the taintless method.
@@ -111,19 +115,23 @@ end
 function addon:TrySortTaintless()
     if not addon:CanSort() then return false end
 
+    local sorted = false
+
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         if not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
-            return addon:LayoutRaid()
-        elseif not CompactPartyFrame:IsForbidden() and CompactPartyFrame:IsVisible() then
-            return addon:LayoutParty()
+            sorted = addon:LayoutRaid()
+        end
+
+        if not CompactPartyFrame:IsForbidden() and CompactPartyFrame:IsVisible() then
+            sorted = sorted or addon:LayoutParty()
         end
     else
         if not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
-            return addon:LayoutRaid()
+            sorted = addon:LayoutRaid()
         end
     end
 
-    return false
+    return sorted
 end
 
 ---Sorts raid frames.
