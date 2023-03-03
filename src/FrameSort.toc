@@ -20,6 +20,6 @@ Config\HealthCheck.lua
 Config\Debug.lua
 Core\Compare.lua
 Core\Target.lua
-Core\Spacing.lua
+Core\SpacingRetail.lua
 Core\Core.lua
 Loader.lua

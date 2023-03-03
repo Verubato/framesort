@@ -69,8 +69,14 @@ function builder:BuildAppearanceOptions(parentPanel)
     spacingDescription:SetPoint("TOPLEFT", spacingTitle, "BOTTOMLEFT", 0, -verticalSpacing)
     spacingDescription:SetText("Add some spacing between party/raid frames.")
 
-    local anchor = BuildSpacingOptions(panel, spacingDescription, "Party", addon.Options.Appearance.Party.Spacing, 0, function() addon:ApplyPartyFrameSpacing() end)
-    anchor = BuildSpacingOptions(panel, anchor, "Raid", addon.Options.Appearance.Raid.Spacing, verticalSpacing, function() addon:ApplyRaidFrameSpacing() end)
+    local anchor = spacingDescription
+    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+        -- for retail
+        anchor = BuildSpacingOptions(panel, anchor, "Party", addon.Options.Appearance.Party.Spacing, 0, function() addon:ApplyPartyFrameSpacing() end)
+    end
+
+    local title = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and "Raid" or "Group"
+    anchor = BuildSpacingOptions(panel, anchor, title, addon.Options.Appearance.Raid.Spacing, verticalSpacing, function() addon:ApplyRaidFrameSpacing() end)
 
     InterfaceOptions_AddCategory(panel)
 end

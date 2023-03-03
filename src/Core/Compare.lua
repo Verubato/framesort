@@ -115,6 +115,12 @@ end
 ---@param rightFrame table a wow frame
 ---@return boolean
 function addon:CompareTopLeft(leftFrame, rightFrame)
+    if not leftFrame then
+        return false
+    elseif not rightFrame then
+        return true
+    end
+
     -- example with screen resolution of 2560x1440
     -- top of 0 = bottom of screen
     -- top of 1440 = top of screen
@@ -123,10 +129,17 @@ function addon:CompareTopLeft(leftFrame, rightFrame)
     local leftY = leftFrame:GetTop()
     local rightY = rightFrame:GetTop()
 
+    -- TODO: I don't know why sometimes this happens, is it normal/safe?
+    if leftY == nil then return false end
+    if rightY == nil then return true end
+
     if leftY ~= rightY then return leftY > rightY end
 
     local leftX = leftFrame:GetLeft()
     local rightX = rightFrame:GetLeft()
+
+    if leftY == nil then return false end
+    if rightY == nil then return true end
 
     return leftX < rightX
 end
