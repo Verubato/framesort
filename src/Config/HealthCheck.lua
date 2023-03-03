@@ -68,15 +68,12 @@ function builder:BuildHealthCheck(parent)
     description:SetText("Any known issues with configuration or conflicting addons will be shown below.")
 
     local raidStyleWarning = panel:CreateFontString("lblRaidStyleFramesWarning", "ARTWORK", "GameFontRed")
-    raidStyleWarning:SetPoint("TOPLEFT", description, "BOTTOMLEFT", 0, -verticalSpacing)
     raidStyleWarning:SetText("Please enable 'Use Raid-Style Party Frames' in the Blizzard settings.")
 
     local tamperedWarning = panel:CreateFontString("lblInBuiltSortingWarning", "ARTWORK", "GameFontRed")
-    tamperedWarning:SetPoint("TOPLEFT", raidStyleWarning, "BOTTOMLEFT", 0, -verticalSpacing)
     tamperedWarning:SetText("Blizzard sorting functions have been tampered with, please disable other frame sorting macro/addons.")
 
     local conflictWarning = panel:CreateFontString("lblConflictingAddonsWarning", "ARTWORK", "GameFontRed")
-    conflictWarning:SetPoint("TOPLEFT", tamperedWarning, "BOTTOMLEFT", 0, -verticalSpacing)
 
     local healthyMessage = panel:CreateFontString("lblHealthy", "ARTWORK", "GameFontGreen")
     healthyMessage:SetPoint("TOPLEFT", description, "BOTTOMLEFT", 0, -verticalSpacing)

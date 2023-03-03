@@ -49,7 +49,7 @@ function addon:CanSort()
     end
 
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        -- don't try if edit mode is active
+        -- don't use traditional mode if edit mode is active as it'll spread taint everywhere
         if EditModeManagerFrame.editModeActive and not addon.Options.SortingMethod.TaintlessEnabled then
             addon:Debug("Not sorting while edit mode active.")
             return false
@@ -143,12 +143,9 @@ function addon:LayoutRaid()
     end
 
     local sortFunction = addon:GetSortFunction()
-    local memberFrames, petFrames, unknownFrames = addon:GetRaidFrames()
+    local memberFrames, petFrames = addon:GetRaidFrames()
 
     if not sortFunction or #memberFrames == 0 then return false end
-    if #unknownFrames ~= 0 then
-        addon:Warning(#unknownFrames .. " unknown raid frames detected.")
-    end
 
     local units = {}
     for _, frame in pairs(memberFrames) do

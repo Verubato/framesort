@@ -2,23 +2,39 @@ local _, addon = ...
 
 ---Returns the set of raid frames ordered by their display order.
 ---Will only return frames that are visible and have a unit attached.
----@return table<table>,table<table>,table<table> frames member frames, pet frames, unknown frames
+---@return table<table>,table<table>,table<table> frames member frames, pet frames, member and pet frames combined
 function addon:GetRaidFrames()
+    local frames = {}
     local members = {}
     local pets = {}
-    local unknown = {}
+    local combined = {}
+    local children = { CompactRaidFrameContainer:GetChildren() }
 
-    for i = 1, MAX_RAID_MEMBERS do
-        local frame = _G["CompactRaidFrame" .. i]
-
+    for _, frame in pairs(children) do
         if frame and not frame:IsForbidden() and frame:IsVisible() and frame.unitExists then
-            if addon:IsMember(frame.unit) then
-                members[#members + 1] = frame
-            elseif addon:IsPet(frame.unit) then
-                pets[#pets + 1] = frame
-            else
-                unknown[#unknown + 1] = frame
+            frames[#frames + 1] = frame
+        elseif string.match(frame:GetName() or "", "CompactRaidGroup") then
+            -- if the raid frames are separated by group
+            -- then the member frames are further nested
+            local groupChildren = { frame:GetChildren() }
+
+            for _, sub in pairs(groupChildren) do
+                if sub and not sub:IsForbidden() and sub:IsVisible() and sub.unitExists then
+                    frames[#frames + 1] = sub
+                end
             end
+        end
+    end
+
+    for _, frame in pairs(frames) do
+        if addon:IsMember(frame.unit) then
+            members[#members + 1] = frame
+            combined[#combined + 1] = frame
+        elseif addon:IsPet(frame.unit) then
+            pets[#pets + 1] = frame
+            combined[#combined + 1] = frame
+        else
+            addon:Debug("Unknown unit type: " .. frame.unit)
         end
     end
 
@@ -26,7 +42,40 @@ function addon:GetRaidFrames()
     -- so we need to sort them
     table.sort(members, function(x, y) return addon:CompareTopLeft(x, y) end)
     table.sort(pets, function(x, y) return addon:CompareTopLeft(x, y) end)
-    return members, pets, unknown
+    table.sort(combined, function(x, y) return addon:CompareTopLeft(x, y) end)
+
+    return members, pets, combined
+end
+
+---Returns the raid frame group frames.
+---@return table<table> frames group frames
+function addon:GetRaidFrameGroups()
+    local frames = {}
+    local children = { CompactRaidFrameContainer:GetChildren() }
+
+    for _, frame in pairs(children) do
+        if string.match(frame:GetName() or "", "CompactRaidGroup") then
+            frames[#frames + 1] = frame
+        end
+    end
+
+    table.sort(frames, function(x, y) return addon:CompareTopLeft(x, y) end)
+    return frames
+end
+
+---Returns the member frames within a raid group frame.
+---@return table<table> frames group frames
+function addon:GetRaidFrameGroupMembers(group)
+    local frames = { group:GetChildren() }
+    local members = {}
+
+    for _, frame in ipairs(frames) do
+        if frame.unitExists then
+            members[#members + 1] = frame
+        end
+    end
+
+    return members
 end
 
 ---Returns the set of party frames ordered by their display order.
