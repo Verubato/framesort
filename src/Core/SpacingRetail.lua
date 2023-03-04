@@ -127,6 +127,10 @@ end
 
 ---Applies spacing to party/raid frames (depending on which are shown).
 function addon:ApplySpacing()
+    if InCombatLockdown() then
+        return
+    end
+
     if not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
         addon:ApplyRaidFrameSpacing()
     end

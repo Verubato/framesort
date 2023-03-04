@@ -7,6 +7,7 @@ function addon:OnEvent(eventName)
     if eventName == "PLAYER_REGEN_ENABLED" and not addon.SortPending then return end
 
     addon.SortPending = not addon:TrySort()
+    addon:ApplySpacing()
 end
 
 ---Event hook on blizzard updating party frames.
