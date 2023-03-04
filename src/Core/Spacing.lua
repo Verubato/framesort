@@ -130,10 +130,8 @@ function addon:ApplySpacing()
         addon:ApplyRaidFrameSpacing()
     end
 
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        if not CompactPartyFrame:IsForbidden() and CompactPartyFrame:IsVisible() then
-            addon:ApplyPartyFrameSpacing()
-        end
+    if not CompactPartyFrame:IsForbidden() and CompactPartyFrame:IsVisible() then
+        addon:ApplyPartyFrameSpacing()
     end
 end
 
@@ -147,8 +145,15 @@ function addon:ApplyPartyFrameSpacing()
 
     addon:Debug("Applying party frame spacing.")
 
-    local horizontalLayout = EditModeManagerFrame:ShouldRaidFrameUseHorizontalRaidGroups(CompactPartyFrame.isParty)
+    local horizontal = false
     local spacing = addon.Options.Appearance.Party.Spacing
+
+    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+        horizontal = EditModeManagerFrame:ShouldRaidFrameUseHorizontalRaidGroups(CompactPartyFrame.isParty)
+    else
+        spacing = addon.Options.Appearance.Raid.Spacing
+        horizontal = CompactRaidFrameManager_GetSetting("HorizontalGroups")
+    end
 
     -- iterate over the frames from top left to bottom right
     for i = 2, #frames do
@@ -160,7 +165,7 @@ function addon:ApplyPartyFrameSpacing()
         local xDelta = 0
         local yDelta = 0
 
-        if horizontalLayout then
+        if horizontal then
             xDelta = spacing.Horizontal - (offsetX or 0)
         else
             yDelta = spacing.Vertical + (offsetY or 0)
@@ -174,7 +179,6 @@ end
 ---Applies spacing to the raid frames.
 function addon:ApplyRaidFrameSpacing()
     -- TODO: Pets spacing not working properly in Wotlk when "Keep Groups Together" == true
-    -- TODO: Spacing not working in Wotlk when in a party (not raid) and "Keep Groups Together" == true
     local flat = nil
     local horizontal = nil
     local rowBased = nil

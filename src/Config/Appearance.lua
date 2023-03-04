@@ -34,7 +34,7 @@ local function BuildSpacingOptions(panel, anchor, name, spacing, additionalTopSp
     xSlider:SetScript("OnValueChanged", function(_, value, _)
         _G[xSlider:GetName() .. "Text"]:SetText(tostring(value))
         spacing.Horizontal = value
-        applySpacingFunc()
+        addon:ApplySpacing()
     end)
 
     local yLabel = panel:CreateFontString("lbl" .. name .. "YSpacing", "ARTWORK", "GameFontWhite")
@@ -48,7 +48,7 @@ local function BuildSpacingOptions(panel, anchor, name, spacing, additionalTopSp
     ySlider:SetScript("OnValueChanged", function(_, value, _)
         _G[ySlider:GetName() .. "Text"]:SetText(tostring(value))
         spacing.Vertical = value
-        applySpacingFunc()
+        addon:ApplySpacing()
     end)
 
     return ySlider
@@ -72,11 +72,11 @@ function builder:BuildAppearanceOptions(parentPanel)
     local anchor = spacingDescription
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         -- for retail
-        anchor = BuildSpacingOptions(panel, anchor, "Party", addon.Options.Appearance.Party.Spacing, 0, function() addon:ApplyPartyFrameSpacing() end)
+        anchor = BuildSpacingOptions(panel, anchor, "Party", addon.Options.Appearance.Party.Spacing, 0)
     end
 
     local title = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and "Raid" or "Group"
-    anchor = BuildSpacingOptions(panel, anchor, title, addon.Options.Appearance.Raid.Spacing, verticalSpacing, function() addon:ApplyRaidFrameSpacing() end)
+    anchor = BuildSpacingOptions(panel, anchor, title, addon.Options.Appearance.Raid.Spacing, verticalSpacing)
 
     InterfaceOptions_AddCategory(panel)
 end
