@@ -126,11 +126,11 @@ function addon:ApplySpacing()
         return
     end
 
-    if not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
+    if CompactRaidFrameContainer and not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
         addon:ApplyRaidFrameSpacing()
     end
 
-    if not CompactPartyFrame:IsForbidden() and CompactPartyFrame:IsVisible() then
+    if CompactPartyFrame and not CompactPartyFrame:IsForbidden() and CompactPartyFrame:IsVisible() then
         addon:ApplyPartyFrameSpacing()
     end
 end
