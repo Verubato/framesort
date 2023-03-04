@@ -48,13 +48,14 @@ function addon:GetRaidFrames()
 end
 
 ---Returns the raid frame group frames.
+---Will only return frames thar are visible.
 ---@return table<table> frames group frames
 function addon:GetRaidFrameGroups()
     local frames = {}
     local children = { CompactRaidFrameContainer:GetChildren() }
 
     for _, frame in pairs(children) do
-        if string.match(frame:GetName() or "", "CompactRaidGroup") then
+        if not frame:IsForbidden() and frame:IsVisible() and string.match(frame:GetName() or "", "CompactRaidGroup") then
             frames[#frames + 1] = frame
         end
     end

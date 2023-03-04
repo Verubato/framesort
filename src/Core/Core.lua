@@ -33,7 +33,6 @@ end
 function addon:CanSort()
     -- nothing to sort if we're not in a group
     if not IsInGroup() then
-        -- not worth logging anything here
         return false
     end
 
