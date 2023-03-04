@@ -1,6 +1,6 @@
 local addonName, addon = ...
 local logPrefix = addonName .. ": "
-local warningPrefix = addonName .. " - Warning: "
+local warningPrefix = logPrefix .. "Warning - "
 
 local function Enabled()
     if addon.Options.Version < 5 then

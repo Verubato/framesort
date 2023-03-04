@@ -50,8 +50,7 @@ function addon:CanSort()
     end
 
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        -- don't use traditional mode if edit mode is active as it'll spread taint everywhere
-        if EditModeManagerFrame.editModeActive and not addon.Options.SortingMethod.TaintlessEnabled then
+        if EditModeManagerFrame.editModeActive then
             addon:Debug("Not sorting while edit mode active.")
             return false
         end
@@ -164,6 +163,7 @@ function addon:LayoutRaid()
     for i, frame in ipairs(memberFrames) do
         local data = addon:ToFrameWithPosition(frame)
         local unit = SecureButton_GetUnit(frame)
+
         framesByUnit[unit] = data
         memberFramesByIndex[i] = data
     end
@@ -249,8 +249,8 @@ if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
 
             if unit then
                 units[#units + 1] = unit
-                frame:ClearAllPoints()
                 frameByUnit[unit] = frame
+                frame:ClearAllPoints()
             end
         end
 
