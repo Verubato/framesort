@@ -173,7 +173,8 @@ end
 
 ---Applies spacing to the raid frames.
 function addon:ApplyRaidFrameSpacing()
-    --  TODO: Pets not spacing properly when "Keep Groups Together" = true in Wotlk
+    -- TODO: Pets spacing not working properly in Wotlk when "Keep Groups Together" == true
+    -- TODO: Spacing not working in Wotlk when in a party (not raid) and "Keep Groups Together" == true
     local flat = nil
     local horizontal = nil
     local rowBased = nil
