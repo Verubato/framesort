@@ -157,8 +157,14 @@ if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
 
             -- party frames are placed relative of each other
             -- so we offset values contain what spacing we've previously applied (if any)
-            local xDelta = horizontalLayout and spacing.Horizontal - (offsetX or 0)
-            local yDelta = not horizontalLayout and spacing.Vertical + (offsetY or 0)
+            local xDelta = 0
+            local yDelta = 0
+
+            if horizontalLayout then
+                xDelta = spacing.Horizontal - (offsetX or 0)
+            else
+                yDelta = spacing.Vertical + (offsetY or 0)
+            end
 
             -- apply the spacing
             frame:AdjustPointsOffset(xDelta, -yDelta)
