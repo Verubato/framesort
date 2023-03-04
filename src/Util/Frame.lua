@@ -71,7 +71,7 @@ function addon:GetRaidFrameGroupMembers(group)
     local members = {}
 
     for _, frame in ipairs(frames) do
-        if frame.unitExists then
+        if frame and not frame:IsForbidden() and frame:IsVisible() and frame.unitExists then
             members[#members + 1] = frame
         end
     end
