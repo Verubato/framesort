@@ -52,6 +52,21 @@ local function ConflictingAddons()
     return nil
 end
 
+local function KeepGroupsTogether()
+    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+        local raidGroupDisplayType = EditModeManagerFrame:GetSettingValue(
+            Enum.EditModeSystem.UnitFrame,
+            Enum.EditModeUnitFrameSystemIndices.Raid,
+            Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
+
+        return
+            raidGroupDisplayType ~= Enum.RaidGroupDisplayType.CombineGroupsVertical and
+            raidGroupDisplayType ~= Enum.RaidGroupDisplayType.CombineGroupsHorizontal
+    else
+        return CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
+    end
+end
+
 ---Adds the health check options panel.
 ---@param parent table the parent UI panel.
 function builder:BuildHealthCheck(parent)
@@ -75,6 +90,8 @@ function builder:BuildHealthCheck(parent)
 
     local conflictWarning = panel:CreateFontString("lblConflictingAddonsWarning", "ARTWORK", "GameFontRed")
 
+    local groupsTogetherWarning = panel:CreateFontString("lblGroupsTogetherWarning", "ARTWORK", "GameFontRed")
+
     local healthyMessage = panel:CreateFontString("lblHealthy", "ARTWORK", "GameFontGreen")
     healthyMessage:SetPoint("TOPLEFT", description, "BOTTOMLEFT", 0, -verticalSpacing)
     healthyMessage:SetText("All health checks have passed!")
@@ -82,7 +99,8 @@ function builder:BuildHealthCheck(parent)
     local controls = {
         raidStyleWarning,
         tamperedWarning,
-        conflictWarning
+        conflictWarning,
+        groupsTogetherWarning
     }
 
     panel:HookScript("OnShow", function()
@@ -102,7 +120,19 @@ function builder:BuildHealthCheck(parent)
         and "'" .. conflictingAddons .. "' may cause conflicts, consider disabling it."
         or "")
 
-        local healthy = usingRaidStyle and not sortingTampered and not conflictingAddons
+        local groupsTogether = KeepGroupsTogether()
+        groupsTogetherWarning:SetShown(groupsTogether)
+
+        if groupsTogether then
+            -- TODO: see if it's possible for FrameSort to work with this setting enabled.
+            if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+                groupsTogetherWarning:SetText("Sorting won't work unless the raid display is 'Combined Groups' in Edit Mode.")
+            else
+                groupsTogetherWarning:SetText("Sorting won't work unless the 'Keep Groups Together' raid profile setting is disabled.")
+            end
+        end
+
+        local healthy = usingRaidStyle and not sortingTampered and not conflictingAddons and not groupsTogether
         healthyMessage:SetShown(healthy)
 
         -- for each visible message, reposition them

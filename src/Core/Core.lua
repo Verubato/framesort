@@ -53,6 +53,23 @@ function addon:CanSort()
             addon:Debug("Not sorting while edit mode active.")
             return false
         end
+
+        local raidGroupDisplayType = EditModeManagerFrame:GetSettingValue(
+            Enum.EditModeSystem.UnitFrame,
+            Enum.EditModeUnitFrameSystemIndices.Raid,
+            Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
+
+        if raidGroupDisplayType ~= Enum.RaidGroupDisplayType.CombineGroupsVertical and
+            raidGroupDisplayType ~= Enum.RaidGroupDisplayType.CombineGroupsHorizontal then
+            addon:Debug("Cannot sort frames when 'Separate' raid display mode is being used.")
+            return false
+        end
+    else
+        local together = CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
+        if together then
+            addon:Debug("Cannot sort frames when the 'Keep Groups Together' setting is enabled.")
+            return false
+        end
     end
 
     return true
@@ -188,7 +205,10 @@ function addon:LayoutRaid()
         -- get pets based off the sorted units instead of the frames
         -- as this comes with the benefit that the pets will also be sorted
         local pets = addon:GetPets(units)
-        assert(#pets == #petFrames)
+        if #pets ~= #petFrames then
+            addon:Warning("Unexpectedly encoutered a different number of pet frames '" .. #petFrames .. "' vs pet units '" .. #pets .. "'.")
+            return true
+        end
 
         addon:Debug("Sorting pet frames (taintless).")
         addon:RearrangeFrames(pets, framesByUnit, petFramesByIndex)

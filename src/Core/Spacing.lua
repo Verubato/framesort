@@ -44,7 +44,7 @@ local function FlatMode(frames, rowBased)
 
         if rowBased then
             -- retail uses rows
-            local isNewRow = previous and frame:GetLeft() < previous:GetLeft()
+            local isNewRow = previous and (frame:GetLeft() or 0) < (previous:GetLeft() or 0)
             if isNewRow then
                 xStep = 0
                 yStep = yStep + spacing.Vertical
@@ -63,8 +63,8 @@ local function FlatMode(frames, rowBased)
         end
 
         -- calculate the offset based on the current and original position
-        local xDelta = xStep - (frame:GetLeft() - frame.FrameSort.OriginalPosition.X)
-        local yDelta = yStep + (frame:GetTop() - frame.FrameSort.OriginalPosition.Y)
+        local xDelta = xStep - ((frame:GetLeft() or 0) - (frame.FrameSort.OriginalPosition.X or 0))
+        local yDelta = yStep + ((frame:GetTop() or 0) - (frame.FrameSort.OriginalPosition.Y or 0))
 
         -- apply the spacing
         frame:AdjustPointsOffset(xDelta, -yDelta)
@@ -173,12 +173,7 @@ end
 
 ---Applies spacing to the raid frames.
 function addon:ApplyRaidFrameSpacing()
-    -- Retail: 
-    --  Everything seems to work.
-    -- Wotlk: 
-    --  Everything seems to work when "Keep Groups Together" = false
-    --  Pets not spacing properly when "Keep Groups Together" = true
-    --  Vertical groups not spacing properly when "Keep Groups Together" = true
+    --  TODO: Pets not spacing properly when "Keep Groups Together" = true in Wotlk
     local flat = nil
     local horizontal = nil
     local rowBased = nil
