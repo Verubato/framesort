@@ -18,7 +18,7 @@ local function ConfigureSlider(slider, value)
     _G[slider:GetName() .. "Text"]:SetText(value)
 end
 
-local function BuildSpacingOptions(panel, anchor, name, spacing, additionalTopSpacing, applySpacingFunc)
+local function BuildSpacingOptions(panel, anchor, name, spacing, additionalTopSpacing)
     local title = panel:CreateFontString("lbl" .. name .. "Title", "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -(verticalSpacing + additionalTopSpacing))
     title:SetText(name)
