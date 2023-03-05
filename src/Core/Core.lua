@@ -10,19 +10,18 @@ function addon:OnEvent(eventName)
     addon:ApplySpacing()
 end
 
----Event hook on blizzard updating party frames.
-function addon:OnUpdatePartyFrames()
-    if addon.Options.SortingMethod.TaintlessEnabled then
-        addon:LayoutParty()
-    end
+---Event hook on blizzard performing frame layouts.
+function addon:OnLayout(container)
+    if not container or container:IsForbidden() or not container:IsVisible() then return end
+    if container ~= CompactRaidFrameContainer and container ~= CompactPartyFrame then return end
+    if container.flowPauseUpdates then return end
 
-    addon:ApplySpacing()
-end
-
----Event hook on blizzard updating raid frames.
-function addon:OnUpdateRaidFrames()
     if addon.Options.SortingMethod.TaintlessEnabled then
-        addon:LayoutRaid()
+        if container == CompactRaidFrameContainer then
+            addon:LayoutRaid()
+        elseif WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+            addon:LayoutParty()
+        end
     end
 
     addon:ApplySpacing()

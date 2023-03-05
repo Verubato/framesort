@@ -25,12 +25,7 @@ function addon:Init()
     -- It seems Blizzard do an update layout after combat ends, so even for the experimental mode we also need to re-sort.
     addon.EventLoop:RegisterEvent("PLAYER_REGEN_ENABLED")
 
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        hooksecurefunc("CompactRaidGroup_UpdateLayout", function(_) addon:OnUpdatePartyFrames() end)
-        hooksecurefunc(CompactRaidFrameContainer, "LayoutFrames", function() addon:OnUpdateRaidFrames() end)
-    else
-        hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", function() addon:OnUpdateRaidFrames() end)
-    end
+    hooksecurefunc("FlowContainer_DoLayout", function(container) addon:OnLayout(container) end)
 
     if addon.Options.SortingMethod.TraditionalEnabled then
         -- Fired whenever a group or raid is formed or disbanded, players are leaving or joining the group or raid.
