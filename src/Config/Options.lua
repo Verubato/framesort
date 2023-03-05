@@ -111,7 +111,7 @@ function builder:BuildSortModeCheckboxes(
 
         local mode = playerModes[sender]
         onPlayerSortModeChanged(mode)
-        addon:TrySort()
+        addon:Apply()
     end
 
     for chkbox, _ in pairs(playerModes) do
@@ -162,7 +162,7 @@ function builder:BuildSortModeCheckboxes(
 
         local mode = modes[sender]
         onSortModeChanged(mode)
-        addon:TrySort()
+        addon:Apply()
     end
 
     for chkbox, _ in pairs(modes) do

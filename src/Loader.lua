@@ -25,15 +25,14 @@ function addon:Init()
     -- It seems Blizzard do an update layout after combat ends, so even for the experimental mode we also need to re-sort.
     addon.EventLoop:RegisterEvent("PLAYER_REGEN_ENABLED")
 
-    hooksecurefunc("FlowContainer_DoLayout", function(container) addon:OnLayout(container) end)
+    -- Fires when the player logs in, /reloads the UI or zones between map instances.
+    -- Basically whenever the loading screen appears.
+    addon.EventLoop:RegisterEvent("PLAYER_ENTERING_WORLD")
 
-    if addon.Options.SortingMethod.TraditionalEnabled then
-        -- Fired whenever a group or raid is formed or disbanded, players are leaving or joining the group or raid.
-        addon.EventLoop:RegisterEvent("GROUP_ROSTER_UPDATE")
-        -- Fires when the player logs in, /reloads the UI or zones between map instances.
-        -- Basically whenever the loading screen appears.
-        addon.EventLoop:RegisterEvent("PLAYER_ENTERING_WORLD")
-    end
+    -- Fired whenever a group or raid is formed or disbanded, players are leaving or joining the group or raid.
+    addon.EventLoop:RegisterEvent("GROUP_ROSTER_UPDATE")
+
+    hooksecurefunc("FlowContainer_DoLayout", function(container) addon:OnLayout(container) end)
 end
 
 addon.Loader = CreateFrame("Frame")
