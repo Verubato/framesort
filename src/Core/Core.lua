@@ -1,13 +1,18 @@
 local _, addon = ...
 
+---Applies sorting and spacing.
+function addon:Apply()
+    addon.SortPending = not addon:TrySort()
+    addon:ApplySpacing()
+end
+
 ---Listens for events where we should refresh the frames.
 ---@param eventName string
 function addon:OnEvent(eventName)
-    -- only attempt a sort after combat ends if one is pending
+    -- only attempt to run after combat ends if one is pending
     if eventName == "PLAYER_REGEN_ENABLED" and not addon.SortPending then return end
 
-    addon.SortPending = not addon:TrySort()
-    addon:ApplySpacing()
+    addon:Apply()
 end
 
 ---Event hook on blizzard performing frame layouts.
@@ -16,15 +21,7 @@ function addon:OnLayout(container)
     if container ~= CompactRaidFrameContainer and container ~= CompactPartyFrame then return end
     if container.flowPauseUpdates then return end
 
-    if addon.Options.SortingMethod.TaintlessEnabled then
-        if container == CompactRaidFrameContainer then
-            addon:LayoutRaid()
-        elseif WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-            addon:LayoutParty()
-        end
-    end
-
-    addon:ApplySpacing()
+    addon:Apply()
 end
 
 ---Determines whether sorting can be performed.
