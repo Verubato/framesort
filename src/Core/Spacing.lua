@@ -31,56 +31,47 @@ local function StoreCurrentPosition(frame)
     }
 end
 
-local function FlatMode(frames, rowBased)
+local function FlatMode(frames)
     local spacing = addon.Options.Appearance.Raid.Spacing
-    local previous = nil
     local xStep = 0
     local yStep = 0
 
     -- iterate over the frames from top left to bottom right
     -- (frames assumed they are in order)
-    for _, frame in ipairs(frames) do
-        TrackRaidFrame(frame)
+    for i, current in ipairs(frames) do
+        local previous = i > 1 and frames[i - 1] or nil
 
-        if rowBased then
-            -- retail uses rows
-            local isNewRow = previous and (frame:GetLeft() or 0) < (previous:GetLeft() or 0)
+        TrackRaidFrame(current)
+
+        if previous then
+            local isNewRow =
+                (current.FrameSort.OriginalPosition.X or 0) < (previous.FrameSort.OriginalPosition.X or 0) or
+                (current.FrameSort.OriginalPosition.Y or 0) < (previous.FrameSort.OriginalPosition.Y or 0)
+
             if isNewRow then
                 xStep = 0
                 yStep = yStep + spacing.Vertical
-            elseif previous then
+            else
                 xStep = xStep + spacing.Horizontal
-            end
-        else
-            -- wotlk uses columns
-            local isNewCol = previous and frame:GetLeft() ~= previous:GetLeft()
-            if isNewCol then
-                yStep = 0
-                xStep = xStep + spacing.Horizontal
-            elseif previous then
-                yStep = yStep + spacing.Vertical
             end
         end
 
         -- calculate the offset based on the current and original position
-        local xDelta = xStep - ((frame:GetLeft() or 0) - (frame.FrameSort.OriginalPosition.X or 0))
-        local yDelta = yStep + ((frame:GetTop() or 0) - (frame.FrameSort.OriginalPosition.Y or 0))
+        local xDelta = xStep - ((current:GetLeft() or 0) - (current.FrameSort.OriginalPosition.X or 0))
+        local yDelta = yStep + ((current:GetTop() or 0) - (current.FrameSort.OriginalPosition.Y or 0))
 
         -- apply the spacing
-        frame:AdjustPointsOffset(xDelta, -yDelta)
+        current:AdjustPointsOffset(xDelta, -yDelta)
 
         -- store the position we moved it to
-        StoreCurrentPosition(frame)
-
-        previous = frame
+        StoreCurrentPosition(current)
     end
 end
 
 local function SeparateMode(groups, horizontal)
     local spacing = addon.Options.Appearance.Raid.Spacing
 
-    for i = 1, #groups do
-        local group = groups[i]
+    for i, group in ipairs(groups) do
         local members = addon:GetRaidFrameGroupMembers(group)
 
         TrackRaidFrame(group)
@@ -181,7 +172,6 @@ function addon:ApplyRaidFrameSpacing()
     -- TODO: Pets spacing not working properly in Wotlk when "Keep Groups Together" == true
     local flat = nil
     local horizontal = nil
-    local rowBased = nil
 
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         local raidGroupDisplayType = EditModeManagerFrame:GetSettingValue(
@@ -194,11 +184,9 @@ function addon:ApplyRaidFrameSpacing()
             raidGroupDisplayType == Enum.RaidGroupDisplayType.CombineGroupsHorizontal
 
         horizontal = raidGroupDisplayType == Enum.RaidGroupDisplayType.SeparateGroupsHorizontal
-        rowBased = true
     else
         flat = not CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
         horizontal = CompactRaidFrameManager_GetSetting("HorizontalGroups")
-        rowBased = false
     end
 
     if flat then
@@ -206,7 +194,7 @@ function addon:ApplyRaidFrameSpacing()
         if #frames == 0 then return end
 
         addon:Debug("Applying raid frame spacing (flattened layout).")
-        FlatMode(frames, rowBased)
+        FlatMode(frames)
     else
         local groups = addon:GetRaidFrameGroups()
         if #groups == 0 then return end
