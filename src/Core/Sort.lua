@@ -255,17 +255,9 @@ end
 ---Attempts to sort the party/raid frames.
 ---@return boolean sorted true if sorted, otherwise false.
 function addon:TrySort()
-    local sorted = false
-
     if addon.Options.SortingMethod.TaintlessEnabled then
-        sorted = TrySortTaintless()
+        return TrySortTaintless()
     else
-        sorted = TrySortTraditional()
+        return TrySortTraditional()
     end
-
-    if sorted then
-        addon:UpdateTargets()
-    end
-
-    return sorted
 end

@@ -1,55 +1,32 @@
 local _, addon = ...
 
-local function TrackFrame(frame)
-    local currentPosition = {
-        X = frame:GetLeft(),
-        Y = frame:GetTop()
-    }
-
-    if not frame.FrameSort then
-        frame.FrameSort = {
-            OriginalPosition = currentPosition,
-            CurrentPosition = currentPosition
-        }
-    end
-
-    -- if the frame has moved then we need to reset the stored positions
-    local hasMoved =
-        currentPosition.X ~= frame.FrameSort.CurrentPosition.X or
-        currentPosition.Y ~= frame.FrameSort.CurrentPosition.Y
-
-    if hasMoved then
-        frame.FrameSort.OriginalPosition = currentPosition
-        frame.FrameSort.CurrentPosition = currentPosition
-    end
-end
-
-local function UpdateCurrentPosition(frame)
-    frame.FrameSort.CurrentPosition = {
-        X = frame:GetLeft(),
-        Y = frame:GetTop()
-    }
-end
-
 --- Applies spacing to frames that are organised in 'flat' mode.
 --- Flat mode is where frames are all placed relative to 1 point, i.e. the parent container.
-local function FlatMode(frames, spacing, offset)
+local function FlatMode(frames, spacing)
     local xStep = 0
     local yStep = 0
+    local previousPos = nil
 
     -- iterate over the frames from top left to bottom right
     -- (frames are assumed to be in order)
     for i, current in ipairs(frames) do
         local previous = i > 1 and frames[i - 1] or nil
 
-        TrackFrame(current)
-
         if previous then
-            local isNewRow =
-                (current.FrameSort.OriginalPosition.X or 0) < (previous.FrameSort.OriginalPosition.X or 0) or
-                (current.FrameSort.OriginalPosition.Y or 0) < (previous.FrameSort.OriginalPosition.Y or 0)
+            -- triggered when we've enetered the next column
+            local leftTrigger = (current:GetLeft() or 0) < previousPos.left
 
-            if isNewRow then
+            -- triggered when we've enetered the next row
+            local topTrigger = (current:GetTop() or 0) ~= previousPos.top
+
+            -- triggered after 2 or more subsequent pets
+            local petAfterPetTrigger = addon:IsPet(current.unit) and addon:IsPet(previous.unit)
+
+            if petAfterPetTrigger then
+                -- TODO: get pet spacing to work
+                -- pets are such a pain to add spacing to
+                -- so just ignore them for now
+            elseif leftTrigger or topTrigger then
                 xStep = 0
                 yStep = yStep + spacing.Vertical
             else
@@ -57,42 +34,38 @@ local function FlatMode(frames, spacing, offset)
             end
         end
 
-        -- calculate the offset based on the current and original position
-        local xDelta = xStep - ((current:GetLeft() or 0) - (current.FrameSort.OriginalPosition.X or 0))
-        local yDelta = yStep + ((current:GetTop() or 0) - (current.FrameSort.OriginalPosition.Y or 0))
-
-        -- any additional offset to be applied
-        if offset then
-            xDelta = xDelta + offset.X
-            yDelta = yDelta + offset.Y
-        end
+        -- store the unmodified coords
+        previousPos = {
+            left = current:GetLeft() or 0,
+            top = current:GetTop() or 0
+        }
 
         -- apply the spacing
-        current:AdjustPointsOffset(xDelta, -yDelta)
-
-        -- store the position we moved it to
-        UpdateCurrentPosition(current)
+        current:AdjustPointsOffset(xStep, -yStep)
     end
 end
 
-local function FlatModePets(pets, spacing, groupsCount, horizontal, firstMemberFrame)
-    local offset = {
-        X = not horizontal and groupsCount * spacing.Horizontal or 0,
-        Y = horizontal and groupsCount * spacing.Vertical or 0
-    }
+local function FlatModePets(pets, spacing, horizontal, relativeTo)
+    if #pets == 0 then return end
 
-    -- in vertical mode, blizzard haven't aligned the pet frames nicely
-    -- so let's do that
-    if not horizontal and #pets > 0 and firstMemberFrame then
-        TrackFrame(firstMemberFrame)
-        TrackFrame(pets[1])
+    -- move pet frames as if they were a group
+    local xOffset = 0
+    local yOffset = 0
 
-        local yfix = firstMemberFrame.FrameSort.OriginalPosition.Y - pets[1].FrameSort.OriginalPosition.Y
-        offset.Y = offset.Y - yfix
+    if horizontal then
+        yOffset = (relativeTo:GetBottom() - pets[1]:GetTop()) - spacing.Vertical
+    else
+        xOffset = (relativeTo:GetRight() - pets[1]:GetLeft()) + spacing.Horizontal
+
+        -- in vertical mode, blizzard doesn't align the pet frame nicely
+        yOffset = relativeTo:GetTop() - pets[1]:GetTop()
     end
 
-    -- pets are shown outside of groups (i.e. the "flat" mode)
-    FlatMode(pets, spacing, offset)
+    for _, pet in pairs(pets) do
+        pet:AdjustPointsOffset(xOffset, yOffset)
+    end
+
+    FlatMode(pets, spacing)
 end
 
 local function GroupedModeMembers(members, spacing, horizontal)
@@ -120,32 +93,35 @@ end
 ---e.g.: group2: frame5 is placed relative to frame4.
 local function GroupedMode(groups, pets, spacing, horizontal)
     local firstMember = nil
-    for i, group in ipairs(groups) do
-        TrackFrame(group)
+    local firstMemberOfLastGroup = nil
 
-        if i > 1 then
+    for i, group in ipairs(groups) do
+        local previous = i > 1 and groups[i - 1] or nil
+
+        if previous then
             local xDelta = 0
             local yDelta = 0
 
             if horizontal then
                 -- add vertical spacing between each group
-                yDelta = ((i - 1) * spacing.Vertical) + ((group:GetTop() or 0) - (group.FrameSort.OriginalPosition.Y or 0))
+                yDelta = ((i - 1) * spacing.Vertical) + (group:GetTop() - previous:GetBottom())
             else
                 -- add horizontal spacing between each group
-                xDelta = ((i - 1) * spacing.Horizontal) - ((group:GetLeft() or 0) - (group.FrameSort.OriginalPosition.X or 0))
+                xDelta = ((i - 1) * spacing.Horizontal) - (group:GetLeft() - previous:GetRight())
             end
 
             group:AdjustPointsOffset(xDelta, -yDelta)
-            UpdateCurrentPosition(group)
         end
 
         local members = addon:GetRaidFrameGroupMembers(group)
         firstMember = firstMember or members[1]
+        firstMemberOfLastGroup = members[1]
+
         GroupedModeMembers(members, spacing, horizontal)
     end
 
     if pets and #pets > 0 then
-        FlatModePets(pets, spacing, #groups, horizontal, firstMember)
+        FlatModePets(pets, spacing, horizontal, firstMemberOfLastGroup)
     end
 end
 
@@ -198,7 +174,7 @@ local function ApplyPartyFrameSpacing()
 
     if not flat and showPets then
         local _, pets, _ = addon:GetRaidFrames()
-        FlatModePets(pets, spacing, 1, horizontal, frames[1])
+        FlatModePets(pets, spacing, horizontal, frames[1])
     end
 end
 
