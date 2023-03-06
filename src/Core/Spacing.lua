@@ -1,6 +1,6 @@
 local _, addon = ...
 
-local function TrackRaidFrame(frame)
+local function TrackFrame(frame)
     local currentPosition = {
         X = frame:GetLeft(),
         Y = frame:GetTop()
@@ -24,24 +24,25 @@ local function TrackRaidFrame(frame)
     end
 end
 
-local function StoreCurrentPosition(frame)
+local function UpdateCurrentPosition(frame)
     frame.FrameSort.CurrentPosition = {
         X = frame:GetLeft(),
         Y = frame:GetTop()
     }
 end
 
-local function FlatMode(frames)
-    local spacing = addon.Options.Appearance.Raid.Spacing
+--- Applies spacing to frames that are organised in 'flat' mode.
+--- Flat mode is where frames are all placed relative to 1 point, i.e. the parent container.
+local function FlatMode(frames, spacing, offset)
     local xStep = 0
     local yStep = 0
 
     -- iterate over the frames from top left to bottom right
-    -- (frames assumed they are in order)
+    -- (frames are assumed to be in order)
     for i, current in ipairs(frames) do
         local previous = i > 1 and frames[i - 1] or nil
 
-        TrackRaidFrame(current)
+        TrackFrame(current)
 
         if previous then
             local isNewRow =
@@ -60,21 +61,46 @@ local function FlatMode(frames)
         local xDelta = xStep - ((current:GetLeft() or 0) - (current.FrameSort.OriginalPosition.X or 0))
         local yDelta = yStep + ((current:GetTop() or 0) - (current.FrameSort.OriginalPosition.Y or 0))
 
+        -- any additional offset to be applied
+        if offset then
+            xDelta = xDelta + offset.X
+            yDelta = yDelta + offset.Y
+        end
+
         -- apply the spacing
         current:AdjustPointsOffset(xDelta, -yDelta)
 
         -- store the position we moved it to
-        StoreCurrentPosition(current)
+        UpdateCurrentPosition(current)
     end
 end
 
-local function SeparateMode(groups, horizontal)
-    local spacing = addon.Options.Appearance.Raid.Spacing
+local function GroupedModeMembers(members, spacing, horizontal)
+    for j = 2, #members do
+        local member = members[j]
+        local _, _, _, offsetX, offsetY = member:GetPoint()
+        local xDelta = 0
+        local yDelta = 0
 
+        -- frames are placed relative of each other
+        -- so offset values contain what spacing we've previously applied
+        if horizontal then
+            xDelta = spacing.Horizontal - (offsetX or 0)
+        else
+            yDelta = spacing.Vertical + (offsetY or 0)
+        end
+
+        member:AdjustPointsOffset(xDelta, -yDelta)
+    end
+end
+
+---Applies spacing to frames that are organised in 'grouped' mode.
+---Grouped mode is where frames are placed relative to the frame before it within one or more groups,
+---e.g.: group1: frame3 is placed relative to frame2 which is placed relative to frame 1.
+---e.g.: group2: frame5 is placed relative to frame4.
+local function GroupedMode(groups, pets, spacing, horizontal)
     for i, group in ipairs(groups) do
-        local members = addon:GetRaidFrameGroupMembers(group)
-
-        TrackRaidFrame(group)
+        TrackFrame(group)
 
         if i > 1 then
             local xDelta = 0
@@ -89,89 +115,28 @@ local function SeparateMode(groups, horizontal)
             end
 
             group:AdjustPointsOffset(xDelta, -yDelta)
-            StoreCurrentPosition(group)
+            UpdateCurrentPosition(group)
         end
 
-        for j = 2, #members do
-            local member = members[j]
-            local _, _, _, offsetX, offsetY = member:GetPoint()
-            local xDelta = 0
-            local yDelta = 0
+        local members = addon:GetRaidFrameGroupMembers(group)
+        GroupedModeMembers(members, spacing, horizontal)
+    end
 
-            if horizontal then
-                -- add horizontal spacing between each member
-                xDelta = spacing.Horizontal - (offsetX or 0)
-            else
-                -- add vertical spacing between each member
-                yDelta = spacing.Vertical + (offsetY or 0)
-            end
-
-            member:AdjustPointsOffset(xDelta, -yDelta)
-        end
+    if pets and #pets > 0 then
+        -- pets are shown outside of groups (i.e. the "flat" mode)
+        FlatMode(pets, spacing, {
+            X = not horizontal and #groups * spacing.Horizontal or 0,
+            Y = horizontal and #groups * spacing.Vertical or 0
+        })
     end
 end
 
----Applies spacing to party/raid frames (depending on which are shown).
-function addon:ApplySpacing()
-    if InCombatLockdown() then
-        return
-    end
-
-    if CompactRaidFrameContainer and not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
-        addon:ApplyRaidFrameSpacing()
-    end
-
-    if CompactPartyFrame and not CompactPartyFrame:IsForbidden() and CompactPartyFrame:IsVisible() then
-        addon:ApplyPartyFrameSpacing()
-    end
-end
-
----Applies spacing to party frames.
-function addon:ApplyPartyFrameSpacing()
-    local frames = addon:GetPartyFrames()
-
-    if #frames == 0 then
-        return
-    end
-
-    addon:Debug("Applying party frame spacing.")
-
-    local horizontal = false
-    local spacing = addon.Options.Appearance.Party.Spacing
-
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        horizontal = EditModeManagerFrame:ShouldRaidFrameUseHorizontalRaidGroups(CompactPartyFrame.isParty)
-    else
-        spacing = addon.Options.Appearance.Raid.Spacing
-        horizontal = CompactRaidFrameManager_GetSetting("HorizontalGroups")
-    end
-
-    -- iterate over the frames from top left to bottom right
-    for i = 2, #frames do
-        local frame = frames[i]
-        local _, _, _, offsetX, offsetY = frame:GetPoint()
-
-        -- party frames are placed relative of each other
-        -- so we offset values contain what spacing we've previously applied (if any)
-        local xDelta = 0
-        local yDelta = 0
-
-        if horizontal then
-            xDelta = spacing.Horizontal - (offsetX or 0)
-        else
-            yDelta = spacing.Vertical + (offsetY or 0)
-        end
-
-        -- apply the spacing
-        frame:AdjustPointsOffset(xDelta, -yDelta)
-    end
-end
-
----Applies spacing to the raid frames.
-function addon:ApplyRaidFrameSpacing()
-    -- TODO: Pets spacing not working properly in Wotlk when "Keep Groups Together" == true
+local function GetSettings()
     local flat = nil
     local horizontal = nil
+    local showPets = CompactRaidFrameManager_GetSetting("DisplayPets")
+    local partySpacing = addon.Options.Appearance.Party.Spacing
+    local raidSpacing = addon.Options.Appearance.Raid.Spacing
 
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         local raidGroupDisplayType = EditModeManagerFrame:GetSettingValue(
@@ -187,24 +152,72 @@ function addon:ApplyRaidFrameSpacing()
     else
         flat = not CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
         horizontal = CompactRaidFrameManager_GetSetting("HorizontalGroups")
+        partySpacing = addon.Options.Appearance.Raid
     end
+
+    return flat, horizontal, showPets, partySpacing, raidSpacing
+end
+
+local function ApplyPartyFrameSpacing()
+    local frames = addon:GetPartyFrames()
+    if #frames == 0 then return end
+
+    addon:Debug("Applying party frame spacing.")
+
+    local flat, horizontal, showPets, spacing, _ = GetSettings()
+
+    GroupedModeMembers(frames, spacing, horizontal)
+
+    if not flat and showPets then
+        local _, pets, _ = addon:GetRaidFrames()
+        FlatMode(pets, spacing, {
+            X = not horizontal and spacing.Horizontal or 0,
+            Y = horizontal and spacing.Vertical or 0
+        })
+        GroupedModePets(pets, 1, spacing, horizontal)
+    end
+end
+
+local function ApplyRaidFrameSpacing()
+    local flat, horizontal, showPets, _, spacing = GetSettings()
 
     if flat then
         local _, _, frames = addon:GetRaidFrames()
         if #frames == 0 then return end
 
         addon:Debug("Applying raid frame spacing (flattened layout).")
-        FlatMode(frames)
+        FlatMode(frames, spacing)
     else
         local groups = addon:GetRaidFrameGroups()
         if #groups == 0 then return end
 
-        if horizontal then
-            addon:Debug("Applying raid frame spacing (horizontal grouped layout).")
-        else
-            addon:Debug("Applying raid frame spacing (vertical grouped layout).")
+        local pets = nil
+        if showPets then
+            _, pets, _ = addon:GetRaidFrames()
         end
 
-        SeparateMode(groups, horizontal)
+        local withPets = showPets and " with pets" or ""
+        if horizontal then
+            addon:Debug("Applying raid frame spacing" .. withPets .. " (horizontal grouped layout).")
+        else
+            addon:Debug("Applying raid frame spacing" .. withPets .. " (vertical grouped layout).")
+        end
+
+        GroupedMode(groups, pets, spacing, horizontal)
+    end
+end
+
+---Applies spacing to party and raid frames.
+function addon:ApplySpacing()
+    if InCombatLockdown() then
+        return
+    end
+
+    if CompactRaidFrameContainer and not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
+        ApplyRaidFrameSpacing()
+    end
+
+    if CompactPartyFrame and not CompactPartyFrame:IsForbidden() and CompactPartyFrame:IsVisible() then
+        ApplyPartyFrameSpacing()
     end
 end
