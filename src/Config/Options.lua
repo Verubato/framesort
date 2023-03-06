@@ -11,7 +11,7 @@ local horizontalSpacing = addon.OptionsBuilder.HorizontalSpacing
 ---Adds the title UI components.
 ---@param panel table the parent UI panel.
 ---@return table The bottom left most control to use for anchoring subsequent UI components.
-function builder:BuiltTitle(panel)
+local function BuiltTitle(panel)
     local title = panel:CreateFontString("lblTitle", "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
     title:SetText("Frame Sort")
@@ -54,7 +54,7 @@ end
 ---@param onPlayerSortModeChanged function function(mode) callback function when the player sort mode changes.
 ---@param onSortModeChanged function function(mode) callback function when the group sort mode changes.
 ---@return table The bottom left most control to use for anchoring subsequent UI components.
-function builder:BuildSortModeCheckboxes(
+local function BuildSortModeCheckboxes(
     parentPanel,
     pointOffset,
     labelText,
@@ -179,8 +179,8 @@ function addon:InitOptions()
     local panel = CreateFrame("Frame")
     panel.name = "Frame Sort"
 
-    local anchor = builder:BuiltTitle(panel)
-    anchor = builder:BuildSortModeCheckboxes(
+    local anchor = BuiltTitle(panel)
+    anchor = BuildSortModeCheckboxes(
         panel,
         anchor,
         "Arena",
@@ -193,7 +193,7 @@ function addon:InitOptions()
         function(mode) addon.Options.Arena.GroupSortMode = mode end
     )
 
-    anchor = builder:BuildSortModeCheckboxes(
+    anchor = BuildSortModeCheckboxes(
         panel,
         anchor,
         "Dungeon (mythics, 5-mans)",
@@ -206,7 +206,7 @@ function addon:InitOptions()
         function(mode) addon.Options.Dungeon.GroupSortMode = mode end
     )
 
-    anchor = builder:BuildSortModeCheckboxes(
+    anchor = BuildSortModeCheckboxes(
         panel,
         anchor,
         "Raid (battlegrounds, raids)",
@@ -219,7 +219,7 @@ function addon:InitOptions()
         function(mode) addon.Options.Raid.GroupSortMode = mode end
     )
 
-    anchor = builder:BuildSortModeCheckboxes(
+    anchor = BuildSortModeCheckboxes(
         panel,
         anchor,
         "World (non-instance groups)",
