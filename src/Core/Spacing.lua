@@ -75,6 +75,26 @@ local function FlatMode(frames, spacing, offset)
     end
 end
 
+local function FlatModePets(pets, spacing, groupsCount, horizontal, firstMemberFrame)
+    local offset = {
+        X = not horizontal and groupsCount * spacing.Horizontal or 0,
+        Y = horizontal and groupsCount * spacing.Vertical or 0
+    }
+
+    -- in vertical mode, blizzard haven't aligned the pet frames nicely
+    -- so let's do that
+    if not horizontal and #pets > 0 and firstMemberFrame then
+        TrackFrame(firstMemberFrame)
+        TrackFrame(pets[1])
+
+        local yfix = firstMemberFrame.FrameSort.OriginalPosition.Y - pets[1].FrameSort.OriginalPosition.Y
+        offset.Y = offset.Y - yfix
+    end
+
+    -- pets are shown outside of groups (i.e. the "flat" mode)
+    FlatMode(pets, spacing, offset)
+end
+
 local function GroupedModeMembers(members, spacing, horizontal)
     for j = 2, #members do
         local member = members[j]
@@ -99,6 +119,7 @@ end
 ---e.g.: group1: frame3 is placed relative to frame2 which is placed relative to frame 1.
 ---e.g.: group2: frame5 is placed relative to frame4.
 local function GroupedMode(groups, pets, spacing, horizontal)
+    local firstMember = nil
     for i, group in ipairs(groups) do
         TrackFrame(group)
 
@@ -119,15 +140,12 @@ local function GroupedMode(groups, pets, spacing, horizontal)
         end
 
         local members = addon:GetRaidFrameGroupMembers(group)
+        firstMember = firstMember or members[1]
         GroupedModeMembers(members, spacing, horizontal)
     end
 
     if pets and #pets > 0 then
-        -- pets are shown outside of groups (i.e. the "flat" mode)
-        FlatMode(pets, spacing, {
-            X = not horizontal and #groups * spacing.Horizontal or 0,
-            Y = horizontal and #groups * spacing.Vertical or 0
-        })
+        FlatModePets(pets, spacing, #groups, horizontal, firstMember)
     end
 end
 
@@ -180,10 +198,7 @@ local function ApplyPartyFrameSpacing()
 
     if not flat and showPets then
         local _, pets, _ = addon:GetRaidFrames()
-        FlatMode(pets, spacing, {
-            X = not horizontal and spacing.Horizontal or 0,
-            Y = horizontal and spacing.Vertical or 0
-        })
+        FlatModePets(pets, spacing, 1, horizontal, frames[1])
     end
 end
 
