@@ -94,7 +94,6 @@ local function LayoutRaid()
     end
 
     table.sort(units, sortFunction)
-    addon:SetTargets(units)
 
     local framesByUnit = {}
     local memberFramesByIndex = {}
@@ -170,7 +169,6 @@ local function LayoutParty()
     end
 
     table.sort(units, sortFunction)
-    addon:SetTargets(units)
     addon:Debug("Sorting party frames (taintless).")
 
     -- place the first frame at the beginning of the container

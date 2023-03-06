@@ -64,6 +64,7 @@ end
 function addon:Apply()
     addon.SortPending = not addon:TrySort()
     addon:ApplySpacing()
+    addon:UpdateTargets()
 end
 
 loader:HookScript("OnEvent", OnLoadAddon)
