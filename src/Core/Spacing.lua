@@ -131,40 +131,50 @@ local function GroupedMode(groups, pets, spacing, horizontal)
     end
 end
 
-local function GetSettings()
+local function GetSettings(isRaid)
     local flat = nil
     local horizontal = nil
     local showPets = CompactRaidFrameManager_GetSetting("DisplayPets")
-    local partySpacing = addon.Options.Appearance.Party.Spacing
-    local raidSpacing = addon.Options.Appearance.Raid.Spacing
+    local spacing = isRaid and addon.Options.Appearance.Raid.Spacing or addon.Options.Appearance.Party.Spacing
 
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        local raidGroupDisplayType = EditModeManagerFrame:GetSettingValue(
-            Enum.EditModeSystem.UnitFrame,
-            Enum.EditModeUnitFrameSystemIndices.Raid,
-            Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
+        if isRaid then
+            local displayType = EditModeManagerFrame:GetSettingValue(
+                Enum.EditModeSystem.UnitFrame,
+                Enum.EditModeUnitFrameSystemIndices.Raid,
+                Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
 
-        flat =
-            raidGroupDisplayType == Enum.RaidGroupDisplayType.CombineGroupsVertical or
-            raidGroupDisplayType == Enum.RaidGroupDisplayType.CombineGroupsHorizontal
+            flat =
+                displayType == Enum.RaidGroupDisplayType.CombineGroupsVertical or
+                displayType == Enum.RaidGroupDisplayType.CombineGroupsHorizontal
 
-        horizontal = raidGroupDisplayType == Enum.RaidGroupDisplayType.SeparateGroupsHorizontal
+            horizontal =
+                displayType == Enum.RaidGroupDisplayType.SeparateGroupsHorizontal or
+                displayType == Enum.RaidGroupDisplayType.CombineGroupsHorizontal
+        else
+            flat = true
+
+            horizontal = EditModeManagerFrame:GetSettingValueBool(
+                Enum.EditModeSystem.UnitFrame,
+                Enum.EditModeUnitFrameSystemIndices.Party,
+                Enum.EditModeUnitFrameSetting.UseHorizontalGroups)
+        end
     else
         flat = not CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
         horizontal = CompactRaidFrameManager_GetSetting("HorizontalGroups")
-        partySpacing = addon.Options.Appearance.Raid
+        spacing = addon.Options.Appearance.Raid.Spacing
     end
 
-    return flat, horizontal, showPets, partySpacing, raidSpacing
+    return flat, horizontal, showPets, spacing
 end
 
 local function ApplyPartyFrameSpacing()
     local frames = addon:GetPartyFrames()
     if #frames == 0 then return end
 
-    addon:Debug("Applying party frame spacing.")
+    local flat, horizontal, showPets, spacing = GetSettings(false)
 
-    local flat, horizontal, showPets, spacing, _ = GetSettings()
+    addon:Debug("Applying party frame spacing (" .. (horizontal and "horizontal" or "vertical") .. " layout).")
 
     GroupedModeMembers(frames, spacing, horizontal)
 
@@ -174,12 +184,11 @@ local function ApplyPartyFrameSpacing()
             X = not horizontal and spacing.Horizontal or 0,
             Y = horizontal and spacing.Vertical or 0
         })
-        GroupedModePets(pets, 1, spacing, horizontal)
     end
 end
 
 local function ApplyRaidFrameSpacing()
-    local flat, horizontal, showPets, _, spacing = GetSettings()
+    local flat, horizontal, showPets, spacing = GetSettings(true)
 
     if flat then
         local _, _, frames = addon:GetRaidFrames()
