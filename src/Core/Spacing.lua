@@ -234,6 +234,7 @@ end
 ---Applies spacing to party and raid frames.
 function addon:ApplySpacing()
     if InCombatLockdown() then
+        addon:Debug("Can't apply spacing during combat.")
         return
     end
 

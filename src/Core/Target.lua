@@ -27,7 +27,10 @@ end
 
 ---Updates the targeting hotkeys to the sorted units.
 function addon:UpdateTargets()
-    if InCombatLockdown() then return end
+    if InCombatLockdown() then
+        addon:Debug("Can't update targets during combat.")
+        return
+    end
 
     local units = addon:GetUnits()
     local sortFunction = addon:GetSortFunction()
@@ -38,4 +41,3 @@ function addon:UpdateTargets()
 
     SetTargets(units)
 end
-
