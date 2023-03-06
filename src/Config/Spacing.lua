@@ -54,11 +54,11 @@ local function BuildSpacingOptions(panel, anchor, name, spacing, additionalTopSp
     return ySlider
 end
 
----Adds the appearance options panel.
+---Adds the spacing options panel.
 ---@param parentPanel table the parent UI panel.
-function builder:BuildAppearanceOptions(parentPanel)
-    local panel = CreateFrame("Frame", addonName .. "Appearance", parentPanel)
-    panel.name = "Appearance"
+function builder:BuildSpacingOptions(parentPanel)
+    local panel = CreateFrame("Frame", addonName .. "Spacing", parentPanel)
+    panel.name = "Spacing"
     panel.parent = parentPanel.name
 
     local spacingTitle = panel:CreateFontString("lblSpacingTitle", "ARTWORK", "GameFontNormalLarge")

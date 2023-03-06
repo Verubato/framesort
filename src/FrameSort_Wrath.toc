@@ -13,7 +13,7 @@ Util\Frame.lua
 Config\Defaults.lua
 Config\OptionsUpgrader.lua
 Config\Options.lua
-Config\Appearance.lua
+Config\Spacing.lua
 Config\Keybindings.lua
 Config\SortingMethod.lua
 Config\HealthCheck.lua
