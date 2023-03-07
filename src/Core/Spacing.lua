@@ -91,7 +91,7 @@ end
 ---e.g.: group1: frame3 is placed relative to frame2 which is placed relative to frame 1.
 ---e.g.: group2: frame5 is placed relative to frame4.
 local function GroupedMode(groups, pets, spacing, horizontal)
-    local petsReferencePoint = nil
+    local petsReferencePoint = groups[1]
     local previousGroupMembers = nil
 
     for i, group in ipairs(groups) do
