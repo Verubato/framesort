@@ -92,36 +92,49 @@ end
 ---e.g.: group1: frame3 is placed relative to frame2 which is placed relative to frame 1.
 ---e.g.: group2: frame5 is placed relative to frame4.
 local function GroupedMode(groups, pets, spacing, horizontal)
-    local firstMember = nil
-    local firstMemberOfLastGroup = nil
+    local petsReferencePoint = nil
+    local previousGroupMembers = nil
 
     for i, group in ipairs(groups) do
         local previous = i > 1 and groups[i - 1] or nil
+        local members = addon:GetRaidFrameGroupMembers(group)
 
         if previous then
             local xDelta = 0
             local yDelta = 0
 
             if horizontal then
-                -- add vertical spacing between each group
-                yDelta = ((i - 1) * spacing.Vertical) + (group:GetTop() - previous:GetBottom())
+                if group:GetLeft() == previous:GetLeft() then
+                    -- add vertical spacing between each group
+                    yDelta = ((i - 1) * spacing.Vertical) + (group:GetTop() - previous:GetBottom())
+                end
+
+                if group:GetTop() <= previous:GetTop() then
+                    petsReferencePoint = members[1]
+                end
             else
+                if group:GetLeft() >= previous:GetLeft() then
+                    petsReferencePoint = members[1]
+                end
+
                 -- add horizontal spacing between each group
-                xDelta = ((i - 1) * spacing.Horizontal) - (group:GetLeft() - previous:GetRight())
+                if group:GetTop() == previous:GetTop() then
+                    xDelta = ((i - 1) * spacing.Horizontal) - (group:GetLeft() - previous:GetRight())
+                elseif not horizontal and previousGroupMembers and #previousGroupMembers > 0 then
+                    local lastPreviousGroupMember = previousGroupMembers[#previousGroupMembers]
+                    yDelta = ((i - 1) * spacing.Vertical) + (group:GetTop() - lastPreviousGroupMember:GetBottom())
+                end
             end
 
             group:AdjustPointsOffset(xDelta, -yDelta)
         end
 
-        local members = addon:GetRaidFrameGroupMembers(group)
-        firstMember = firstMember or members[1]
-        firstMemberOfLastGroup = members[1]
-
+        previousGroupMembers = members
         GroupedModeMembers(members, spacing, horizontal)
     end
 
     if pets and #pets > 0 then
-        FlatModePets(pets, spacing, horizontal, firstMemberOfLastGroup)
+        FlatModePets(pets, spacing, horizontal, petsReferencePoint)
     end
 end
 
