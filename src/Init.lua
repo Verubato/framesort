@@ -7,13 +7,13 @@ local function OnEvent(_, eventName)
     -- only attempt to run after combat ends if one is pending
     if eventName == "PLAYER_REGEN_ENABLED" and not addon.SortPending then return end
 
-    addon:Sort()
+    addon:Apply()
 end
 
 ---Event hook on blizzard performing frame layouts.
 local function OnLayout(container)
     if not container or container:IsForbidden() or not container:IsVisible() then return end
-    if container ~= CompactRaidFrameContainer and container ~= CompactPartyFrame then return end
+    if container ~= CompactRaidFrameContainer then return end
     if container.flowPauseUpdates then return end
 
     addon:ApplySpacing()
@@ -54,10 +54,11 @@ local function OnLoadAddon(_, _, name)
     loader:UnregisterEvent("ADDON_LOADED")
 end
 
----Applies sorting.
-function addon:Sort()
+---Runs the sorting, spacing, and targeting modules.
+function addon:Apply()
     addon.SortPending = not addon:TrySort()
     addon:UpdateTargets()
+    addon:ApplySpacing()
 end
 
 loader:HookScript("OnEvent", OnLoadAddon)

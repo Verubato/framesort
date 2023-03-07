@@ -18,16 +18,6 @@ local function ConfigureSlider(slider, value)
     _G[slider:GetName() .. "Text"]:SetText(value)
 end
 
-local function ApplySpacing()
-    if CompactPartyFrame and not CompactPartyFrame:IsForbidden() and CompactPartyFrame:IsVisible() then
-        FlowContainer_DoLayout(CompactPartyFrame)
-    end
-
-    if CompactRaidFrameContainer and not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
-        FlowContainer_DoLayout(CompactRaidFrameContainer)
-    end
-end
-
 local function BuildSpacingOptions(panel, anchor, name, spacing, additionalTopSpacing)
     local title = panel:CreateFontString("lbl" .. name .. "Title", "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -(verticalSpacing + additionalTopSpacing))
@@ -44,7 +34,7 @@ local function BuildSpacingOptions(panel, anchor, name, spacing, additionalTopSp
     xSlider:SetScript("OnValueChanged", function(_, value, _)
         _G[xSlider:GetName() .. "Text"]:SetText(tostring(value))
         spacing.Horizontal = value
-        ApplySpacing()
+        addon:ApplySpacing()
     end)
 
     local yLabel = panel:CreateFontString("lbl" .. name .. "YSpacing", "ARTWORK", "GameFontWhite")
@@ -58,7 +48,7 @@ local function BuildSpacingOptions(panel, anchor, name, spacing, additionalTopSp
     ySlider:SetScript("OnValueChanged", function(_, value, _)
         _G[ySlider:GetName() .. "Text"]:SetText(tostring(value))
         spacing.Vertical = value
-        ApplySpacing()
+        addon:ApplySpacing()
     end)
 
     return ySlider
