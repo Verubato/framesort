@@ -3,8 +3,8 @@ local _, addon = ...
 --- Applies spacing to frames that are organised in 'flat' mode.
 --- Flat mode is where frames are all placed relative to 1 point, i.e. the parent container.
 local function FlatMode(frames, spacing)
-    local xStep = 0
-    local yStep = 0
+    local xDelta = 0
+    local yDelta = 0
     local previousPos = nil
 
     -- iterate over the frames from top left to bottom right
@@ -13,35 +13,34 @@ local function FlatMode(frames, spacing)
         local previous = i > 1 and frames[i - 1] or nil
 
         if previous then
-            -- triggered when we've enetered the next column
-            local leftTrigger = (current:GetLeft() or 0) < previousPos.left
+            local isNewRow = ((current:GetLeft() or 0) < previousPos.left) or ((current:GetTop() or 0) < previousPos.top)
+            local isPetAfterPet = addon:IsPet(current.unit) and addon:IsPet(previous.unit)
 
-            -- triggered when we've enetered the next row
-            local topTrigger = (current:GetTop() or 0) ~= previousPos.top
-
-            -- triggered after 2 or more subsequent pets
-            local petAfterPetTrigger = addon:IsPet(current.unit) and addon:IsPet(previous.unit)
-
-            if petAfterPetTrigger then
+            if isPetAfterPet then
                 -- TODO: get pet spacing to work
                 -- pets are such a pain to add spacing to
                 -- so just ignore them for now
-            elseif leftTrigger or topTrigger then
-                xStep = 0
-                yStep = yStep + spacing.Vertical
-            else
-                xStep = xStep + spacing.Horizontal
+            elseif not isNewRow then
+                -- we're within the same row
+                -- subtract existing spacing
+                xDelta = spacing.Horizontal - ((current:GetLeft() or 0) - (previous:GetRight() or 0))
+            elseif isNewRow then
+                -- we've hit a new row
+                -- subtract existing vertical spacing
+                yDelta = spacing.Vertical + ((current:GetTop() or 0) - (previous:GetBottom() or 0))
+                -- reset the horizontal spacing
+                xDelta = 0
             end
         end
 
         -- store the unmodified coords
         previousPos = {
             left = current:GetLeft() or 0,
-            top = current:GetTop() or 0
+            top = current:GetTop() or 0,
         }
 
         -- apply the spacing
-        current:AdjustPointsOffset(xStep, -yStep)
+        current:AdjustPointsOffset(xDelta, -yDelta)
     end
 end
 
