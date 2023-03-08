@@ -8,9 +8,10 @@ A simple World of Warcraft (Retail) add-on that places the player frame (you) at
 * Works for both raid-style party and regular raid frames.
 * Sort the remaining frames by group/role/alphabetical.
 * Setup different sorting rules for arena, bgs, world, and raids.
-* Supports both Retail and Wrath of the Lich King.
 * Taintless sorting method to avoid taint/UI issues.
 * Set keybindings to target frames based on their visually ordered representation rather than their party number.
+* Add spacing between frames.
+* Supports both Retail and Wotlk.
 
 ## Install ##
 
