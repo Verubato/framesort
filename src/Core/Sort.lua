@@ -1,6 +1,6 @@
 local _, addon = ...
 
----Determines whether sorting can be performed.
+---Determines whether general sorting can be performed.
 ---@return boolean
 local function CanSort()
     -- nothing to sort if we're not in a group
@@ -25,7 +25,25 @@ local function CanSort()
             addon:Debug("Not sorting while edit mode active.")
             return false
         end
+    end
 
+    return true
+end
+
+---Determines whether party sorting can be performed.
+---@return boolean
+local function CanSortParty()
+    if CompactPartyFrame:IsForbidden() or not CompactPartyFrame:IsVisible() then return false end
+
+    return CanSort()
+end
+
+---Determines whether raid sorting can be performed.
+---@return boolean
+local function CanSortRaid()
+    if CompactRaidFrameContainer:IsForbidden() or not CompactRaidFrameContainer:IsVisible() then return false end
+
+    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         local raidGroupDisplayType = EditModeManagerFrame:GetSettingValue(
             Enum.EditModeSystem.UnitFrame,
             Enum.EditModeUnitFrameSystemIndices.Raid,
@@ -44,7 +62,7 @@ local function CanSort()
         end
     end
 
-    return true
+    return CanSort()
 end
 
 ---Rearranges frames in order of the specified units.
@@ -78,7 +96,7 @@ end
 ---Sorts raid frames.
 ---@return boolean sorted true if frames were sorted, otherwise false.
 local function LayoutRaid()
-    if not CanSort() then
+    if not CanSortRaid() then
         addon.SortPending = true
         return false
     end
@@ -144,7 +162,7 @@ end
 ---Sorts party frames.
 ---@return boolean sorted true if frames were sorted, otherwise false.
 local function LayoutParty()
-    if not CanSort() then
+    if not CanSortParty() then
         addon.SortPending = true
         return false
     end
@@ -198,27 +216,25 @@ end
 ---Attempts to sort the party/raid frames using the traditional method.
 ---@return boolean sorted true if sorted, otherwise false.
 local function TrySortTraditional()
-    if not CanSort() then return false end
-
     local sortFunc = addon:GetSortFunction()
     if sortFunc == nil then return false end
 
     local sorted = false
 
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        if not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
+        if CanSortRaid() then
             addon:Debug("Sorting raid frames (traditional).")
             CompactRaidFrameContainer:SetFlowSortFunction(sortFunc)
             sorted = true
         end
 
-        if not CompactPartyFrame:IsForbidden() and CompactPartyFrame:IsVisible() then
+        if CanSortParty() then
             addon:Debug("Sorting party frames (traditional).")
             CompactPartyFrame_SetFlowSortFunction(sortFunc)
             sorted = sorted or true
         end
     else
-        if not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
+        if CanSortRaid() then
             addon:Debug("Sorting raid frames (traditional).")
             CompactRaidFrameContainer_SetFlowSortFunction(CompactRaidFrameContainer, sortFunc)
             sorted = true
@@ -231,22 +247,16 @@ end
 ---Attempts to sort the party/raid frames using the taintless method.
 ---@return boolean sorted true if sorted, otherwise false.
 local function TrySortTaintless()
-    if not CanSort() then return false end
-
     local sorted = false
 
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        if not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
-            sorted = LayoutRaid()
-        end
-
-        if not CompactPartyFrame:IsForbidden() and CompactPartyFrame:IsVisible() then
+        if CanSortParty() then
             sorted = sorted or LayoutParty()
         end
-    else
-        if not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
-            sorted = LayoutRaid()
-        end
+    end
+
+    if CanSortRaid() then
+        sorted = LayoutRaid()
     end
 
     return sorted
