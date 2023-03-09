@@ -251,12 +251,12 @@ local function TrySortTaintless()
 
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         if CanSortParty() then
-            sorted = sorted or LayoutParty()
+            sorted = LayoutParty()
         end
     end
 
     if CanSortRaid() then
-        sorted = LayoutRaid()
+        sorted = sorted or LayoutRaid()
     end
 
     return sorted
