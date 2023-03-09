@@ -126,7 +126,7 @@ function builder:BuildHealthCheck(parent)
         if groupsTogether then
             -- TODO: see if it's possible for FrameSort to work with this setting enabled.
             if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-                groupsTogetherWarning:SetText("Sorting won't work unless the raid display is 'Combined Groups' in Edit Mode.")
+                groupsTogetherWarning:SetText("Raid sorting won't work unless the raid display is 'Combined Groups' in Edit Mode.")
             else
                 groupsTogetherWarning:SetText("Sorting won't work unless the 'Keep Groups Together' raid profile setting is disabled.")
             end

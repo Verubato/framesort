@@ -35,6 +35,14 @@ end
 local function CanSortParty()
     if CompactPartyFrame:IsForbidden() or not CompactPartyFrame:IsVisible() then return false end
 
+    if WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE then
+        local together = CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
+        if together then
+            addon:Debug("Cannot sort frames when the 'Keep Groups Together' setting is enabled.")
+            return false
+        end
+    end
+
     return CanSort()
 end
 
