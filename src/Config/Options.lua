@@ -174,9 +174,23 @@ end
 
 ---Initialises the addon options.
 function addon:InitOptions()
-    -- load our saved variables or init them if this is the first run
-    Options = Options or CopyTable(addon.Defaults)
-    addon.Options = Options
+    -- eventually the idea is to delete the "Options" variable
+    -- I didn't realise this is a global variable when first made the addon
+    -- "Options" is too generic and maybe could cause conflicts?
+    -- so now moving to the "Addon Name" + DB convention
+    if not Options and not FrameSortDB then
+        FrameSortDB = {
+            Options = CopyTable(addon.Defaults)
+        }
+    elseif Options and not FrameSortDB then
+        FrameSortDB = {
+            Options = CopyTable(Options)
+        }
+
+        Options = nil
+    end
+
+    addon.Options = FrameSortDB.Options
     addon:UpgradeOptions()
 
     local panel = CreateFrame("Frame")
