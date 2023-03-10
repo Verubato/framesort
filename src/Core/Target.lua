@@ -2,9 +2,19 @@ local _, addon = ...
 local prefix = "FSTarget"
 local keybindingsCount = 5
 
----Sets the units to use for targeting.
-function SetTargets(units)
-    addon:Debug("Updating frame targets.")
+---Updates the targeting hotkeys to the sorted units.
+local function UpdateTargets()
+    if InCombatLockdown() then
+        addon:Debug("Can't update targets during combat.")
+        return false
+    end
+
+    local units = addon:GetUnits()
+    local sortFunction = addon:GetSortFunction()
+
+    if sortFunction then
+        table.sort(units, sortFunction)
+    end
 
     -- if units has less than 5 items it's still fine as units[i] will just be nil
     for i = 1, keybindingsCount do
@@ -13,6 +23,12 @@ function SetTargets(units)
 
         btn:SetAttribute("unit", unit)
     end
+
+    return true
+end
+
+local function OnSorted()
+    UpdateTargets()
 end
 
 ---Initialises the targeting frames feature.
@@ -23,21 +39,7 @@ function addon:InitTargeting()
         target:SetAttribute("type", "target")
         target:SetAttribute("unit", "player")
     end
+
+    addon:RegisterPostSortCallback(OnSorted)
 end
 
----Updates the targeting hotkeys to the sorted units.
-function addon:UpdateTargets()
-    if InCombatLockdown() then
-        addon:Debug("Can't update targets during combat.")
-        return
-    end
-
-    local units = addon:GetUnits()
-    local sortFunction = addon:GetSortFunction()
-
-    if sortFunction then
-        table.sort(units, sortFunction)
-    end
-
-    SetTargets(units)
-end
