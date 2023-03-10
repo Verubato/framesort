@@ -3,6 +3,10 @@ local logPrefix = addonName .. ": "
 local warningPrefix = logPrefix .. "Warning - "
 
 local function Enabled()
+    if not addon.Options or not addon.Options.Version then
+        return false
+    end
+
     if addon.Options.Version < 5 then
         return addon.Options.DebugEnabled or false
     end
