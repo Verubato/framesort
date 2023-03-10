@@ -17,7 +17,6 @@ Config\Spacing.lua
 Config\Keybindings.lua
 Config\SortingMethod.lua
 Config\HealthCheck.lua
-Config\Debug.lua
 Core\Compare.lua
 Core\Target.lua
 Core\Spacing.lua

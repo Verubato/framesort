@@ -255,7 +255,6 @@ function addon:InitOptions()
     builder:BuildKeybindingOptions(panel)
     builder:BuildSpacingOptions(panel)
     builder:BuildHealthCheck(panel)
-    builder:BuildDebugOptions(panel)
 
     SLASH_FRAMESORT1 = "/fs"
     SLASH_FRAMESORT2 = "/framesort"
