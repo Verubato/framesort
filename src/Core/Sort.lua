@@ -1,4 +1,7 @@
 local _, addon = ...
+local eventFrame = nil
+local sortPending = false
+local callbacks = {}
 
 ---Determines whether general sorting can be performed.
 ---@return boolean
@@ -73,11 +76,18 @@ local function CanSortRaid()
     return CanSort()
 end
 
+---Calls the post sorting callbacks.
+local function InvokeCallbacks()
+    for _, callback in pairs(callbacks) do
+        callback()
+    end
+end
+
 ---Rearranges frames in order of the specified units.
 ---@param orderedUnits table<string>
 ---@param framesByUnit table<string, table>
 ---@param framesByIndex table<FrameWithPosition>
-function RearrangeFrames(orderedUnits, framesByUnit, framesByIndex)
+local function RearrangeFrames(orderedUnits, framesByUnit, framesByIndex)
     -- probably too complicated to calculate positions due to the whole flow container layout logic
     -- so instead we can just re-use the existing positions and shuffle them
     -- probably safer and better supported this way anyway
@@ -105,7 +115,7 @@ end
 ---@return boolean sorted true if frames were sorted, otherwise false.
 local function LayoutRaid()
     if not CanSortRaid() then
-        addon.SortPending = true
+        sortPending = true
         return false
     end
 
@@ -171,7 +181,7 @@ end
 ---@return boolean sorted true if frames were sorted, otherwise false.
 local function LayoutParty()
     if not CanSortParty() then
-        addon.SortPending = true
+        sortPending = true
         return false
     end
 
@@ -270,12 +280,54 @@ local function TrySortTaintless()
     return sorted
 end
 
+---Listens for events where we should perform a sort.
+---@param eventName string
+local function OnEvent(_, eventName)
+    -- only attempt to run after combat ends if one is pending
+    if eventName == "PLAYER_REGEN_ENABLED" and not sortPending then return end
+
+    addon:TrySort()
+end
+
+---Register a callback to call after sorting has been performed.
+---@param callback function
+function addon:RegisterPostSortCallback(callback)
+    callbacks[#callbacks + 1] = callback
+end
+
 ---Attempts to sort the party/raid frames.
 ---@return boolean sorted true if sorted, otherwise false.
 function addon:TrySort()
+    local sorted = false
+
     if addon.Options.SortingMethod.TaintlessEnabled then
-        return TrySortTaintless()
+        sorted = TrySortTaintless()
     else
-        return TrySortTraditional()
+        sorted = TrySortTraditional()
     end
+
+    if sorted then
+        InvokeCallbacks()
+    end
+
+    sortPending = not sorted
+    return sorted
+end
+
+---Initialises the sorting module.
+function addon:InitSorting()
+    eventFrame = CreateFrame("Frame")
+    eventFrame:HookScript("OnEvent", OnEvent)
+    -- Fired after ending combat, as regen rates return to normal.
+    -- Useful for determining when a player has left combat.
+    -- This occurs when you are not on the hate list of any NPC, or a few seconds after the latest pvp attack that you were involved with.
+    -- It seems Blizzard do an update layout after combat ends, so even for the experimental mode we also need to re-sort.
+    eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+
+    -- Fires when the player logs in, /reloads the UI or zones between map instances.
+    -- Basically whenever the loading screen appears.
+    eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+
+    -- Fired whenever a group or raid is formed or disbanded, players are leaving or joining the group or raid.
+    eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
 end

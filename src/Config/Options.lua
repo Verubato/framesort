@@ -111,7 +111,7 @@ local function BuildSortModeCheckboxes(
 
         local mode = playerModes[sender]
         onPlayerSortModeChanged(mode)
-        addon:Apply()
+        addon:TrySort()
     end
 
     for chkbox, _ in pairs(playerModes) do
@@ -162,7 +162,7 @@ local function BuildSortModeCheckboxes(
 
         local mode = modes[sender]
         onSortModeChanged(mode)
-        addon:Apply()
+        addon:TrySort()
     end
 
     for chkbox, _ in pairs(modes) do
@@ -172,8 +172,11 @@ local function BuildSortModeCheckboxes(
     return modeLabel
 end
 
----Adds the options interface to the wow addons section and enables slash commands.
+---Initialises the addon options.
 function addon:InitOptions()
+    -- load our saved variables or init them if this is the first run
+    Options = Options or CopyTable(addon.Defaults)
+    addon.Options = Options
     addon:UpgradeOptions()
 
     local panel = CreateFrame("Frame")
