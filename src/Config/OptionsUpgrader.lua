@@ -93,7 +93,7 @@ local function UpgradeToVersion5()
 end
 
 local function UpgradeToVersion6()
-    addon.Options.Appearance = addon.Defaults.Appearance
+    addon.Options.Appearance = CopyTable(addon.Defaults.Appearance)
     addon.Options.Version = 6
 end
 

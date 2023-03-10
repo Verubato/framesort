@@ -3,7 +3,7 @@
 ## Notes: Places the player frame at the top/middle/bottom (configurable) of party/raid frames.
 ## Author: Verubato
 ## Version: 3.3.1
-## SavedVariables: Options
+## SavedVariables: Options, FrameSortDB
 
 Type\SortMode.lua
 Type\FrameWithPosition.lua
