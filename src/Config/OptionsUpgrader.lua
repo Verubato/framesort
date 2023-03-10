@@ -97,6 +97,11 @@ local function UpgradeToVersion6()
     addon.Options.Version = 6
 end
 
+local function UpgradeToVersion7()
+    addon.Options.Debug.Enabled = false
+    addon.Options.Version = 7
+end
+
 ---Upgrades saved options to the current version.
 function addon:UpgradeOptions()
     if addon.Options.Version == nil then
@@ -122,5 +127,10 @@ function addon:UpgradeOptions()
     if addon.Options.Version == 5 then
         addon:Debug("Upgrading options to version 6.")
         UpgradeToVersion6()
+    end
+
+    if addon.Options.Version == 6 then
+        addon:Debug("Upgrading options to version 7.")
+        UpgradeToVersion7()
     end
 end

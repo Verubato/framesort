@@ -2,7 +2,7 @@ local _, addon = ...
 
 ---Default configuration.
 addon.Defaults = {
-    Version = 6,
+    Version = 7,
     Debug = {
         Enabled = false
     },
