@@ -102,35 +102,23 @@ local function UpgradeToVersion7()
     addon.Options.Version = 7
 end
 
+local upgradeFunctions = {
+    Version2 = UpgradeToVersion2,
+    Version3 = UpgradeToVersion3,
+    Version4 = UpgradeToVersion4,
+    Version5 = UpgradeToVersion5,
+    Version6 = UpgradeToVersion6,
+    Version7 = UpgradeToVersion7,
+}
+
 ---Upgrades saved options to the current version.
 function addon:UpgradeOptions()
-    if addon.Options.Version == nil then
-        addon:Debug("Upgrading options to version 2.")
-        UpgradeToVersion2()
-    end
+    while (addon.Options.Version or 1) < addon.Defaults.Version do
+        local nextVersion = (addon.Options.Version or 1) + 1
+        local upgrader = upgradeFunctions["Version" .. nextVersion]
+        assert(upgrader ~= nil)
 
-    if addon.Options.Version == 2 then
-        addon:Debug("Upgrading options to version 3.")
-        UpgradeToVersion3()
-    end
-
-    if addon.Options.Version == 3 then
-        addon:Debug("Upgrading options to version 4.")
-        UpgradeToVersion4()
-    end
-
-    if addon.Options.Version == 4 then
-        addon:Debug("Upgrading options to version 5.")
-        UpgradeToVersion5()
-    end
-
-    if addon.Options.Version == 5 then
-        addon:Debug("Upgrading options to version 6.")
-        UpgradeToVersion6()
-    end
-
-    if addon.Options.Version == 6 then
-        addon:Debug("Upgrading options to version 7.")
-        UpgradeToVersion7()
+        addon:Debug("Upgrading options to version " .. nextVersion .. ".")
+        upgrader()
     end
 end
