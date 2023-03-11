@@ -105,6 +105,12 @@ function M:test_get_frame_ids()
         # FrameSort = Frame10 Something else 5
         /cast [@a] Spell; [mod:shift, @b] Spell;
         ]]), { 10 })
+
+    assertEquals(macro:GetFrameIds([[
+        #showtooltip
+        # FrameSort = Frame1, Frame3
+        /cast [@frame2] Spell; [mod:shift, @frame1] Spell;
+        ]]), { 1, 3 })
 end
 
 function M:test_get_new_body()
@@ -163,6 +169,19 @@ function M:test_get_new_body()
         #showtooltip
         # framesort Frame1 frame2, frame3:frame4, frame5
         /cast [@party2,exists][@party4,exists][@party1,exists][@party2][@player] Spell;
+    ]]
+
+    assertEquals(
+        macro:GetNewBody(macroText, macro:GetFrameIds(macroText), units),
+        expected)
+
+    macroText = [[
+        #framesort frame1
+        /cmd [@frame1]
+    ]]
+    expected = [[
+        #framesort frame1
+        /cmd [@party2]
     ]]
 
     assertEquals(
