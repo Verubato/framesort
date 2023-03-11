@@ -3,6 +3,8 @@ local maxMacros = 138
 local eventFrame = nil
 local isSelfEditingMacro = false
 local macro = addon.Macro
+local array = addon.Array
+local previousUnits = nil
 
 local function InspectMacro(slot)
     local _, _, body = GetMacroInfo(slot)
@@ -24,9 +26,17 @@ local function InspectMacro(slot)
     addon:Debug("Updated macro at slot " .. slot)
 end
 
+
 function addon:ScanMacros()
     if InCombatLockdown() then
         addon:Debug("Can't update macros during combat.")
+        return
+    end
+
+    local units = addon:GetVisuallyOrderedUnits()
+
+    -- prevent editing macros if the units haven't changed
+    if previousUnits and array:ArrayEquals(previousUnits, units) then
         return
     end
 
@@ -35,6 +45,8 @@ function addon:ScanMacros()
     for i = 1, maxMacros do
         InspectMacro(i)
     end
+
+    previousUnits = units
 end
 
 local function OnEditMacro(macroInfo, _, _, _)
