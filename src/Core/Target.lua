@@ -1,6 +1,7 @@
 local _, addon = ...
 local prefix = "FSTarget"
 local keybindingsCount = 5
+local eventFrame = nil
 
 ---Updates the targeting hotkeys to the sorted units.
 local function UpdateTargets()
@@ -9,26 +10,18 @@ local function UpdateTargets()
         return false
     end
 
-    local units = addon:GetUnits()
-    local sortFunction = addon:GetSortFunction()
-
-    if sortFunction then
-        table.sort(units, sortFunction)
-    end
+    addon:Debug("Updating targets.")
+    local units = addon:GetVisuallyOrderedUnits()
 
     -- if units has less than 5 items it's still fine as units[i] will just be nil
     for i = 1, keybindingsCount do
         local unit = units[i]
         local btn = _G[prefix .. i]
 
-        btn:SetAttribute("unit", unit)
+        btn:SetAttribute("unit", unit or "none")
     end
 
     return true
-end
-
-local function OnSorted()
-    UpdateTargets()
 end
 
 ---Initialises the targeting frames feature.
@@ -40,6 +33,10 @@ function addon:InitTargeting()
         target:SetAttribute("unit", "none")
     end
 
-    addon:RegisterPostSortCallback(OnSorted)
+    eventFrame = CreateFrame("Frame")
+    eventFrame:HookScript("OnEvent", UpdateTargets)
+    eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+    eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
+    addon:RegisterPostSortCallback(UpdateTargets)
+    hooksecurefunc("FlowContainer_DoLayout", UpdateTargets)
 end
-

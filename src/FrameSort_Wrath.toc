@@ -20,6 +20,7 @@ Config\Macro.lua
 Config\SortingMethod.lua
 Config\HealthCheck.lua
 Core\Compare.lua
+Core\Visual.lua
 Core\Target.lua
 Core\Spacing.lua
 Core\Sort.lua

@@ -138,8 +138,8 @@ function addon:CompareTopLeft(leftFrame, rightFrame)
     local leftX = leftFrame:GetLeft()
     local rightX = rightFrame:GetLeft()
 
-    if leftY == nil then return false end
-    if rightY == nil then return true end
+    if leftX == nil then return false end
+    if rightX == nil then return true end
 
     return leftX < rightX
 end

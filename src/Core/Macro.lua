@@ -1,5 +1,6 @@
 local _, addon = ...
 local maxMacros = 138
+local eventFrame = nil
 local isSelfEditingMacro = false
 local macro = addon.Macro
 
@@ -10,13 +11,7 @@ local function InspectMacro(slot)
 
     addon:Debug("Found macro at slot " .. slot)
 
-    local units = addon:GetUnits()
-    local sortFunction = addon:GetSortFunction()
-
-    if sortFunction then
-        table.sort(units, sortFunction)
-    end
-
+    local units = addon:GetVisuallyOrderedUnits()
     local frameIds = macro:GetFrameIds(body)
     local newBody = macro:GetNewBody(body, frameIds, units)
 
@@ -52,13 +47,20 @@ local function OnEditMacro(macroInfo, _, _, _)
     InspectMacro(macroInfo)
 end
 
-local function OnSort()
+local function UpdateMacros()
+    addon:Debug("Updating macros.")
+
     addon:ScanMacros()
 end
 
 ---Initialises the macros module.
 function addon:InitMacros()
-    addon:RegisterPostSortCallback(OnSort)
+    eventFrame = CreateFrame("Frame")
+    eventFrame:HookScript("OnEvent", UpdateMacros)
+    eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+    eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
+    addon:RegisterPostSortCallback(UpdateMacros)
 
     hooksecurefunc("EditMacro", OnEditMacro)
+    hooksecurefunc("FlowContainer_DoLayout", UpdateMacros)
 end

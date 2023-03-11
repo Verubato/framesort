@@ -8,7 +8,8 @@ local function FlatMode(frames, spacing)
     local previousPos = nil
 
     -- iterate over the frames from top left to bottom right
-    -- (frames are assumed to be in order)
+    table.sort(frames, function(x, y) return addon:CompareTopLeft(x, y) end)
+
     for i, current in ipairs(frames) do
         local previous = i > 1 and frames[i - 1] or nil
 
@@ -94,6 +95,12 @@ local function GroupedMode(groups, pets, spacing, horizontal)
     local petsReferencePoint = groups[1]
     local previousGroupMembers = nil
 
+    table.sort(groups, function(x, y) return addon:CompareTopLeft(x, y) end)
+
+    if pets then
+        table.sort(pets, function(x, y) return addon:CompareTopLeft(x, y) end)
+    end
+
     for i, group in ipairs(groups) do
         local previous = i > 1 and groups[i - 1] or nil
         local members = addon:GetRaidFrameGroupMembers(group)
@@ -178,6 +185,7 @@ local function ApplyPartyFrameSpacing()
     local frames = addon:GetPartyFrames()
     if #frames == 0 then return end
 
+    table.sort(frames, function(x, y) return addon:CompareTopLeft(x, y) end)
     local flat, horizontal, showPets, spacing = GetSettings(false)
 
     addon:Debug("Applying party frame spacing (" .. (horizontal and "horizontal" or "vertical") .. " layout).")
