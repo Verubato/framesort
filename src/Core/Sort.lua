@@ -298,7 +298,6 @@ end
 
 ---Event hook on blizzard performing frame layouts.
 local function OnLayout(container)
-    if not container or container:IsForbidden() or not container:IsVisible() then return end
     if container ~= CompactRaidFrameContainer then return end
     if container.flowPauseUpdates then return end
 
