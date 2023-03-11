@@ -19,11 +19,11 @@ local function ConfigureSlider(slider, value)
 end
 
 local function BuildSpacingOptions(panel, anchor, name, spacing, additionalTopSpacing)
-    local title = panel:CreateFontString("lbl" .. name .. "Title", "ARTWORK", "GameFontNormalLarge")
+    local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -(verticalSpacing + additionalTopSpacing))
     title:SetText(name)
 
-    local xLabel = panel:CreateFontString("lbl" .. name .. "XSpacing", "ARTWORK", "GameFontWhite")
+    local xLabel = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
     xLabel:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -verticalSpacing)
     xLabel:SetText("Horizontal")
 
@@ -37,7 +37,7 @@ local function BuildSpacingOptions(panel, anchor, name, spacing, additionalTopSp
         addon:ApplySpacing()
     end)
 
-    local yLabel = panel:CreateFontString("lbl" .. name .. "YSpacing", "ARTWORK", "GameFontWhite")
+    local yLabel = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
     yLabel:SetPoint("TOPLEFT", xSlider, "BOTTOMLEFT", 0, -verticalSpacing * 2)
     yLabel:SetText("Vertical")
 
@@ -61,11 +61,11 @@ function builder:BuildSpacingOptions(parent)
     panel.name = "Spacing"
     panel.parent = parent.name
 
-    local spacingTitle = panel:CreateFontString("lblSpacingTitle", "ARTWORK", "GameFontNormalLarge")
+    local spacingTitle = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     spacingTitle:SetPoint("TOPLEFT", panel, verticalSpacing, -verticalSpacing)
     spacingTitle:SetText("Spacing")
 
-    local spacingDescription = panel:CreateFontString("lblAppearanceDescription", "ARTWORK", "GameFontWhite")
+    local spacingDescription = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
     spacingDescription:SetPoint("TOPLEFT", spacingTitle, "BOTTOMLEFT", 0, -verticalSpacing)
     spacingDescription:SetText("Add some spacing between party/raid frames.")
 

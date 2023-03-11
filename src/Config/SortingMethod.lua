@@ -5,18 +5,17 @@ local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
 ---Adds a dot point list for each string item in lines
 ---@param panel table the parent panel
 ---@param anchor table anchor point.
----@param uniqueName string unique name to use for the UI components.
 ---@param titleText string the dotpoint list title.
 ---@param lines table
 ---@return table returns the anchor of the bottom item.
-local function BuildDottedList(panel, anchor, uniqueName, titleText, lines)
-    local title = panel:CreateFontString("lbl" .. uniqueName .. "Title", "ARTWORK", "GameFontWhite")
+local function BuildDottedList(panel, anchor, titleText, lines)
+    local title = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
     title:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
     title:SetText(titleText)
 
     anchor = title
-    for i, line in ipairs(lines) do
-        local lineItem = panel:CreateFontString("lbl" .. uniqueName .. i, "ARTWORK", "GameFontWhite")
+    for _, line in ipairs(lines) do
+        local lineItem = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
         lineItem:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing / 2)
         lineItem:SetText(" - " .. line)
         anchor = lineItem
@@ -32,7 +31,7 @@ function builder:BuildSortingMethodOptions(parent)
     panel.name = "Sorting Method"
     panel.parent = parent.name
 
-    local taintless = CreateFrame("CheckButton", "chkTaintlessEnabled", panel, "UICheckButtonTemplate")
+    local taintless = CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
     taintless:SetPoint("TOPLEFT", panel, verticalSpacing, -verticalSpacing)
     taintless.Text:SetText("Taintless")
     taintless.Text:SetFontObject("GameFontNormalLarge")
@@ -45,25 +44,25 @@ function builder:BuildSortingMethodOptions(parent)
 
     local anchor = taintless
     for i, line in ipairs(taintlessLines) do
-        local description = panel:CreateFontString("lblTaintlessDescription" .. i, "ARTWORK", "GameFontWhite")
+        local description = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
         description:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", i == 1 and 4 or 0, -verticalSpacing / 2)
         description:SetText(line)
         anchor = description
     end
 
-    anchor = BuildDottedList(panel, anchor, "TaintlessPros", "Pros: ", {
+    anchor = BuildDottedList(panel, anchor, "Pros: ", {
         "No taint (technical term for addons interfering with Blizzard's UI code).",
         "No Lua errors.",
         "No UI lockups."
     })
 
-    anchor = BuildDottedList(panel, anchor, "TaintlessCons", "Cons: ", {
+    anchor = BuildDottedList(panel, anchor, "Cons: ", {
         "Still under development and testing (may yet have bugs to fix).",
         "Sorting can temporarily become undone during combat if the group/raid changes.",
         "May not work well with other addons that expect the traditional method."
     })
 
-    local traditional = CreateFrame("CheckButton", "chkTraditionalEnabled", panel, "UICheckButtonTemplate")
+    local traditional = CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
     traditional:SetPoint("TOPLEFT", anchor, 0, -verticalSpacing * 2)
     traditional.Text:SetText("Traditional")
     traditional.Text:SetFontObject("GameFontNormalLarge")
@@ -76,28 +75,28 @@ function builder:BuildSortingMethodOptions(parent)
 
     anchor = traditional
     for i, line in ipairs(traditionalLines) do
-        local description = panel:CreateFontString("lblTraditionalDescription" .. i, "ARTWORK", "GameFontWhite")
+        local description = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
         description:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", i == 1 and 4 or 0, -verticalSpacing / 2)
         description:SetText(line)
         anchor = description
     end
 
-    anchor = BuildDottedList(panel, anchor, "TraditionalPros", "Pros: ", {
+    anchor = BuildDottedList(panel, anchor,"Pros: ", {
         "Probably more reliable as it leverages Blizzard's internal sorting methods.",
         "If Blizzard were to resolve their UI issues, this would likely become the recommended mode."
     })
 
-    anchor = BuildDottedList(panel, anchor, "TraditionalCons", "Cons: ", {
+    anchor = BuildDottedList(panel, anchor, "Cons: ", {
         "Will cause Lua errors, this is normal and can be ignored in most cases.",
         "BugSack will report the occasional ADDON_ACTION_BLOCKED error from FrameSort.",
         "May sporadically lockup certain parts of the UI."
     })
 
-    local reloadReminder = panel:CreateFontString("lblReload", "ARTWORK", "GameFontRed")
+    local reloadReminder = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
     reloadReminder:SetPoint("TOPLEFT", anchor, 0, -verticalSpacing * 2)
     reloadReminder:SetText("Please reload after changing these settings.")
 
-    local reloadButton = CreateFrame("Button", "btnReload", panel, "UIPanelButtonTemplate")
+    local reloadButton = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
     reloadButton:SetPoint("TOPLEFT", reloadReminder, 0, -verticalSpacing * 1.5)
     reloadButton:SetWidth(100)
     reloadButton.Text:SetText("Reload")

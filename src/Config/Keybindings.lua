@@ -16,7 +16,7 @@ function builder:BuildKeybindingOptions(parent)
     panel.name = "Keybindings"
     panel.parent = parent.name
 
-    local title = panel:CreateFontString("lblTitle", "ARTWORK", "GameFontNormalLarge")
+    local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
     title:SetText("Keybindings")
 
@@ -45,8 +45,8 @@ function builder:BuildKeybindingOptions(parent)
     }
 
     local anchor = title
-    for i, line in ipairs(lines) do
-        local description = panel:CreateFontString("lblKeybindingsDescription" .. i, "ARTWORK", "GameFontWhite")
+    for _, line in ipairs(lines) do
+        local description = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
         description:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing / 2)
         description:SetText(line)
         anchor = description
