@@ -30,6 +30,8 @@ function addon:ScanMacros()
         return
     end
 
+    addon:Debug("Updating macros.")
+
     for i = 1, maxMacros do
         InspectMacro(i)
     end
@@ -48,8 +50,6 @@ local function OnEditMacro(macroInfo, _, _, _)
 end
 
 local function UpdateMacros()
-    addon:Debug("Updating macros.")
-
     addon:ScanMacros()
 end
 

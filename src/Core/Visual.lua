@@ -15,7 +15,9 @@ function addon:GetVisuallyOrderedFrames()
         return {}
     end
 
-    table.sort(frames, function(x, y) return addon:CompareTopLeft(x, y) end)
+    -- for some reason frames can be off by tiny amounts but they look visually aligned
+    -- so do a fuzzy compare to ignore any minor x/y differences
+    table.sort(frames, function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
 
     return frames
 end
@@ -26,7 +28,6 @@ function addon:GetVisuallyOrderedUnits()
     local units = {}
 
     for _, frame in ipairs(frames) do
-        print(frame.unit)
         units[#units + 1] = frame.unit
     end
 

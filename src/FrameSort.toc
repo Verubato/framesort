@@ -8,9 +8,11 @@
 Type\SortMode.lua
 Type\FrameWithPosition.lua
 Util\Log.lua
+Util\Math.lua
 Util\Unit.lua
 Util\Frame.lua
 Util\Macro.lua
+Util\Array.lua
 Config\Defaults.lua
 Config\OptionsUpgrader.lua
 Config\Options.lua

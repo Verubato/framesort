@@ -1,4 +1,6 @@
 local _, addon = ...
+local fsMath = addon.Math
+local fuzzyDecimalPlaces = 0
 
 ---Returns a function that accepts two parameters of unit tokens and returns true if the left token should be ordered before the right.
 ---Sorting is based on the player's instance and configured options.
@@ -140,6 +142,43 @@ function addon:CompareTopLeft(leftFrame, rightFrame)
 
     if leftX == nil then return false end
     if rightX == nil then return true end
+
+    return leftX < rightX
+end
+
+---Returns true if the left frame is "earlier" than the right frame.
+---Earlier = more top left
+---Fuzziness provides some leeway when comparing the top and left values.
+---@param leftFrame table a wow frame
+---@param rightFrame table a wow frame
+---@return boolean
+function addon:CompareTopLeftFuzzy(leftFrame, rightFrame)
+    if not leftFrame then
+        return false
+    elseif not rightFrame then
+        return true
+    end
+
+    local leftY = leftFrame:GetTop()
+    local rightY = rightFrame:GetTop()
+
+    -- TODO: I don't know why sometimes this happens, is it normal/safe?
+    if leftY == nil then return false end
+    if rightY == nil then return true end
+
+    leftY = fsMath:Round(leftY, fuzzyDecimalPlaces)
+    rightY = fsMath:Round(rightY, fuzzyDecimalPlaces)
+
+    if leftY ~= rightY then return leftY > rightY end
+
+    local leftX = leftFrame:GetLeft()
+    local rightX = rightFrame:GetLeft()
+
+    if leftX == nil then return false end
+    if rightX == nil then return true end
+
+    leftX = fsMath:Round(leftX, fuzzyDecimalPlaces)
+    rightX = fsMath:Round(rightX, fuzzyDecimalPlaces)
 
     return leftX < rightX
 end
