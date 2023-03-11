@@ -31,7 +31,7 @@ function builder:BuildMacroOptions(parent)
 
     local note = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
     note:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -verticalSpacing)
-    note:SetText("Note: this feature is very new and hasn't had much testing, so please let me know if you find any issues.")
+    note:SetText("Note: this feature is new and hasn't had much testing, so please let me know if you find any issues.")
 
     local countLine = panel:CreateFontString(nil, "ARTWORK", "GameFontGreen")
     countLine:SetPoint("TOPLEFT", note, "BOTTOMLEFT", 0, -verticalSpacing)
