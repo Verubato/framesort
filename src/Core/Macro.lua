@@ -62,7 +62,6 @@ local function OnEditMacro(macroInfo, _, _, _)
 end
 
 local function OnLayout(container)
-    if not container or container:IsForbidden() or not container:IsVisible() then return end
     if container ~= CompactRaidFrameContainer then return end
     if container.flowPauseUpdates then return end
 
