@@ -10,11 +10,11 @@ local builder = addon.OptionsBuilder
 local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
 
 ---Adds the keybinding options description panel.
----@param parentPanel table the parent UI panel.
-function builder:BuildKeybindingOptions(parentPanel)
+---@param parent table the parent UI panel.
+function builder:BuildKeybindingOptions(parent)
     local panel = CreateFrame("Frame", addonName .. "Keybindings", parent)
     panel.name = "Keybindings"
-    panel.parent = parentPanel.name
+    panel.parent = parent.name
 
     local title = panel:CreateFontString("lblTitle", "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
