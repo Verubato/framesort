@@ -27,7 +27,7 @@ local function InspectMacro(slot)
 end
 
 
-function addon:ScanMacros()
+local function ScanMacros()
     if InCombatLockdown() then
         addon:Debug("Can't update macros during combat.")
         return
@@ -61,18 +61,22 @@ local function OnEditMacro(macroInfo, _, _, _)
     InspectMacro(macroInfo)
 end
 
-local function UpdateMacros()
-    addon:ScanMacros()
+local function OnLayout(container)
+    if not container or container:IsForbidden() or not container:IsVisible() then return end
+    if container ~= CompactRaidFrameContainer then return end
+    if container.flowPauseUpdates then return end
+
+    ScanMacros()
 end
 
 ---Initialises the macros module.
 function addon:InitMacros()
     eventFrame = CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", UpdateMacros)
+    eventFrame:HookScript("OnEvent", ScanMacros)
     eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
     eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
-    addon:RegisterPostSortCallback(UpdateMacros)
+    addon:RegisterPostSortCallback(ScanMacros)
 
     hooksecurefunc("EditMacro", OnEditMacro)
-    hooksecurefunc("FlowContainer_DoLayout", UpdateMacros)
+    hooksecurefunc("FlowContainer_DoLayout", OnLayout)
 end

@@ -126,8 +126,8 @@ local function LayoutRaid()
 
     -- frames can and will most likely be completely out of order if a previous sort has occurred
     -- so we need to sort them
-    table.sort(memberFrames, function(x, y) return addon:CompareTopLeft(x, y) end)
-    table.sort(petFrames, function(x, y) return addon:CompareTopLeft(x, y) end)
+    table.sort(memberFrames, function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
+    table.sort(petFrames, function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
 
     local units = {}
     for _, frame in pairs(memberFrames) do
@@ -296,6 +296,15 @@ local function OnEvent(_, eventName)
     addon:TrySort()
 end
 
+---Event hook on blizzard performing frame layouts.
+local function OnLayout(container)
+    if not container or container:IsForbidden() or not container:IsVisible() then return end
+    if container ~= CompactRaidFrameContainer then return end
+    if container.flowPauseUpdates then return end
+
+    LayoutRaid()
+end
+
 ---Register a callback to call after sorting has been performed.
 ---@param callback function
 function addon:RegisterPostSortCallback(callback)
@@ -337,4 +346,8 @@ function addon:InitSorting()
 
     -- Fired whenever a group or raid is formed or disbanded, players are leaving or joining the group or raid.
     eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
+
+    if addon.Options.SortingMethod.TaintlessEnabled then
+        hooksecurefunc("FlowContainer_DoLayout", OnLayout)
+    end
 end

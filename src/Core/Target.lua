@@ -34,6 +34,14 @@ local function UpdateTargets()
     return true
 end
 
+local function OnLayout(container)
+    if not container or container:IsForbidden() or not container:IsVisible() then return end
+    if container ~= CompactRaidFrameContainer then return end
+    if container.flowPauseUpdates then return end
+
+    UpdateTargets()
+end
+
 ---Initialises the targeting frames feature.
 function addon:InitTargeting()
     for i = 1, keybindingsCount do
@@ -48,5 +56,5 @@ function addon:InitTargeting()
     eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
     eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
     addon:RegisterPostSortCallback(UpdateTargets)
-    hooksecurefunc("FlowContainer_DoLayout", UpdateTargets)
+    hooksecurefunc("FlowContainer_DoLayout", OnLayout)
 end
