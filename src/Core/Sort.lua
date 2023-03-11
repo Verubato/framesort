@@ -301,7 +301,7 @@ local function OnLayout(container)
     if container ~= CompactRaidFrameContainer then return end
     if container.flowPauseUpdates then return end
 
-    LayoutRaid()
+    TrySortTaintless()
 end
 
 ---Register a callback to call after sorting has been performed.
