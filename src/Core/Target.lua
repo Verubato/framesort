@@ -11,7 +11,6 @@ local function UpdateTargets()
     end
 
     addon:Debug("Updating targets.")
-    local units = addon:GetVisuallyOrderedUnits()
 
     -- if units has less than 5 items it's still fine as units[i] will just be nil
     for i = 1, keybindingsCount do

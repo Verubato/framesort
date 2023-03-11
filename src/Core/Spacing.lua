@@ -48,6 +48,8 @@ end
 local function FlatModePets(pets, spacing, horizontal, relativeTo)
     if #pets == 0 then return end
 
+    table.sort(pets, function(x, y) return addon:CompareTopLeft(x, y) end)
+
     -- move pet frames as if they were a group
     local xOffset = 0
     local yOffset = 0
@@ -97,10 +99,6 @@ local function GroupedMode(groups, pets, spacing, horizontal)
 
     table.sort(groups, function(x, y) return addon:CompareTopLeft(x, y) end)
 
-    if pets then
-        table.sort(pets, function(x, y) return addon:CompareTopLeft(x, y) end)
-    end
-
     for i, group in ipairs(groups) do
         local previous = i > 1 and groups[i - 1] or nil
         local members = addon:GetRaidFrameGroupMembers(group)
@@ -115,6 +113,7 @@ local function GroupedMode(groups, pets, spacing, horizontal)
                     yDelta = ((i - 1) * spacing.Vertical) + (group:GetTop() - previous:GetBottom())
                 end
 
+                -- table.sort(members, function(x, y) return addon:CompareTopLeft(x, y) end)
                 if group:GetTop() <= previous:GetTop() then
                     petsReferencePoint = members[1]
                 end
@@ -185,7 +184,6 @@ local function ApplyPartyFrameSpacing()
     local frames = addon:GetPartyFrames()
     if #frames == 0 then return end
 
-    table.sort(frames, function(x, y) return addon:CompareTopLeft(x, y) end)
     local flat, horizontal, showPets, spacing = GetSettings(false)
 
     addon:Debug("Applying party frame spacing (" .. (horizontal and "horizontal" or "vertical") .. " layout).")
@@ -217,11 +215,8 @@ local function ApplyRaidFrameSpacing()
         end
 
         local withPets = showPets and " with pets" or ""
-        if horizontal then
-            addon:Debug("Applying raid frame spacing" .. withPets .. " (horizontal grouped layout).")
-        else
-            addon:Debug("Applying raid frame spacing" .. withPets .. " (vertical grouped layout).")
-        end
+        local direction = (horizontal and "(horizontal" or "(vertical") .. " grouped layout)."
+        addon:Debug("Applying raid frame spacing" .. withPets .. direction)
 
         GroupedMode(groups, pets, spacing, horizontal)
     end
