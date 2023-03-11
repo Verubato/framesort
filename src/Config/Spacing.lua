@@ -55,11 +55,11 @@ local function BuildSpacingOptions(panel, anchor, name, spacing, additionalTopSp
 end
 
 ---Adds the spacing options panel.
----@param parentPanel table the parent UI panel.
-function builder:BuildSpacingOptions(parentPanel)
-    local panel = CreateFrame("Frame", addonName .. "Spacing", parentPanel)
+---@param parent table the parent UI panel.
+function builder:BuildSpacingOptions(parent)
+    local panel = CreateFrame("Frame", addonName .. "Spacing", parent)
     panel.name = "Spacing"
-    panel.parent = parentPanel.name
+    panel.parent = parent.name
 
     local spacingTitle = panel:CreateFontString("lblSpacingTitle", "ARTWORK", "GameFontNormalLarge")
     spacingTitle:SetPoint("TOPLEFT", panel, verticalSpacing, -verticalSpacing)

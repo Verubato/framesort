@@ -1,6 +1,7 @@
 local addonName, addon = ...
 local logPrefix = addonName .. ": "
 local warningPrefix = logPrefix .. "Warning - "
+local errorPrefix = logPrefix .. "Error - "
 
 local function Enabled()
     if not addon.Options or not addon.Options.Version then
@@ -28,4 +29,16 @@ function addon:Warning(msg)
     if Enabled() then
         print(warningPrefix .. msg)
     end
+end
+
+---Prints an information message to the chat window.
+---@param msg string
+function addon:Info(msg)
+    print(logPrefix .. msg)
+end
+
+---Prints an error message to the chat window.
+---@param msg string
+function addon:Error(msg)
+    print(errorPrefix .. msg)
 end

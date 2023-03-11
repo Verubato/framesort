@@ -26,11 +26,11 @@ local function BuildDottedList(panel, anchor, uniqueName, titleText, lines)
 end
 
 ---Adds the sorting mode options panel.
----@param parentPanel table the parent UI panel.
-function builder:BuildSortingMethodOptions(parentPanel)
+---@param parent table the parent UI panel.
+function builder:BuildSortingMethodOptions(parent)
     local panel = CreateFrame("Frame", addonName .. "SortingMethod", parent)
     panel.name = "Sorting Method"
-    panel.parent = parentPanel.name
+    panel.parent = parent.name
 
     local taintless = CreateFrame("CheckButton", "chkTaintlessEnabled", panel, "UICheckButtonTemplate")
     taintless:SetPoint("TOPLEFT", panel, verticalSpacing, -verticalSpacing)

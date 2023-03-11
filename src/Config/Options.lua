@@ -253,6 +253,7 @@ function addon:InitOptions()
 
     builder:BuildSortingMethodOptions(panel)
     builder:BuildKeybindingOptions(panel)
+    builder:BuildMacroOptions(panel)
     builder:BuildSpacingOptions(panel)
     builder:BuildHealthCheck(panel)
 

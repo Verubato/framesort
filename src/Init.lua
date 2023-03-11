@@ -7,6 +7,7 @@ local function Init()
     addon:InitSorting()
     addon:InitSpacing()
     addon:InitTargeting()
+    addon:InitMacros()
 end
 
 ---Listens for our to be loaded and then initialises it.

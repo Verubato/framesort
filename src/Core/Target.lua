@@ -37,7 +37,7 @@ function addon:InitTargeting()
         local target = CreateFrame("Button", prefix .. i, UIParent, "SecureActionButtonTemplate")
         target:RegisterForClicks("AnyDown")
         target:SetAttribute("type", "target")
-        target:SetAttribute("unit", "player")
+        target:SetAttribute("unit", "none")
     end
 
     addon:RegisterPostSortCallback(OnSorted)
