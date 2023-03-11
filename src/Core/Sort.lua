@@ -124,6 +124,11 @@ local function LayoutRaid()
 
     if not sortFunction or #memberFrames == 0 then return false end
 
+    -- frames can and will most likely be completely out of order if a previous sort has occurred
+    -- so we need to sort them
+    table.sort(memberFrames, function(x, y) return addon:CompareTopLeft(x, y) end)
+    table.sort(petFrames, function(x, y) return addon:CompareTopLeft(x, y) end)
+
     local units = {}
     for _, frame in pairs(memberFrames) do
         units[#units + 1] = SecureButton_GetUnit(frame)
@@ -189,6 +194,8 @@ local function LayoutParty()
     local frames = addon:GetPartyFrames()
 
     if not sortFunction or #frames == 0 then return false end
+
+    table.sort(frames, function(x, y) return addon:CompareTopLeft(x, y) end)
 
     local useHorizontalGroups = EditModeManagerFrame:ShouldRaidFrameUseHorizontalRaidGroups(CompactPartyFrame.isParty)
     local frameByUnit = {}
