@@ -1,4 +1,5 @@
 local _, addon = ...
+local eventFrame = nil
 
 --- Applies spacing to frames that are organised in 'flat' mode.
 --- Flat mode is where frames are all placed relative to 1 point, i.e. the parent container.
@@ -71,6 +72,7 @@ local function FlatModePets(pets, spacing, horizontal, relativeTo)
 end
 
 local function GroupedModeMembers(members, spacing, horizontal)
+    table.sort(members, function(x, y) return addon:CompareTopLeft(x, y) end)
     for j = 2, #members do
         local member = members[j]
         local _, _, _, offsetX, offsetY = member:GetPoint()
@@ -231,6 +233,10 @@ local function OnLayout(container)
     addon:ApplySpacing()
 end
 
+local function OnEvent()
+    addon:ApplySpacing()
+end
+
 ---Applies spacing to party and raid frames.
 function addon:ApplySpacing()
     if InCombatLockdown() then
@@ -249,5 +255,11 @@ end
 
 ---Initialises the spacing module.
 function addon:InitSpacing()
+    eventFrame = CreateFrame("Frame")
+    eventFrame:HookScript("OnEvent", OnEvent)
+    eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+    eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+    eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
+    addon:RegisterPostSortCallback(OnEvent)
     hooksecurefunc("FlowContainer_DoLayout", OnLayout)
 end
