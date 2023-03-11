@@ -1,6 +1,7 @@
 local addonName, addon = ...
 local builder = addon.OptionsBuilder
 local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
+local horizontalSpacing = addon.OptionsBuilder.HorizontalSpacing
 
 ---Returns true if using raid-style party frames.
 local function IsUsingRaidStyleFrames()
@@ -29,6 +30,8 @@ local function AddonFriendlyName(name)
     if not name then
         return "(unknown)"
     elseif name == "" then
+        return "(user macro)"
+    elseif name == "*** ForceTaint_Strong ***" then
         return "(user macro)"
     else
         return name
@@ -82,62 +85,93 @@ function builder:BuildHealthCheck(parent)
     description:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -verticalSpacing)
     description:SetText("Any known issues with configuration or conflicting addons will be shown below.")
 
-    local raidStyleWarning = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
-    raidStyleWarning:SetText("Please enable 'Use Raid-Style Party Frames' in the Blizzard settings.")
+    local raidStyleDescription = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+    raidStyleDescription:SetPoint("TOPLEFT", description, "BOTTOMLEFT", 0, -verticalSpacing)
+    raidStyleDescription:SetText("Using Raid-Style Party Frames... ")
 
-    local tamperedWarning = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
-    tamperedWarning:SetText("Blizzard sorting functions have been tampered with, please disable other frame sorting macro/addons.")
+    local raidStyleResult = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+    raidStyleResult:SetPoint("TOPLEFT", raidStyleDescription, "TOPRIGHT")
 
-    local conflictWarning = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
+    local togetherDescription = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+    togetherDescription:SetPoint("TOPLEFT", raidStyleDescription, "BOTTOMLEFT", 0, -verticalSpacing)
+    togetherDescription:SetText("'Keep Groups Together' setting disabled... ")
 
-    local groupsTogetherWarning = panel:CreateFontString("lblGroupsTogetherWarning", "ARTWORK", "GameFontRed")
+    local togetherResult = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+    togetherResult:SetPoint("TOPLEFT", togetherDescription, "TOPRIGHT")
 
-    local healthyMessage = panel:CreateFontString(nil, "ARTWORK", "GameFontGreen")
-    healthyMessage:SetPoint("TOPLEFT", description, "BOTTOMLEFT", 0, -verticalSpacing)
-    healthyMessage:SetText("All health checks have passed!")
+    local tamperedDescription = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+    tamperedDescription:SetPoint("TOPLEFT", togetherDescription, "BOTTOMLEFT", 0, -verticalSpacing)
+    tamperedDescription:SetText("Blizzard sorting functions not tampered with... ")
 
-    local controls = {
-        raidStyleWarning,
-        tamperedWarning,
-        conflictWarning,
-        groupsTogetherWarning
+    local tamperedResult = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
+    tamperedResult:SetPoint("TOPLEFT", tamperedDescription, "TOPRIGHT")
+
+    local conflictDescription = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+    conflictDescription:SetPoint("TOPLEFT", tamperedDescription, "BOTTOMLEFT", 0, -verticalSpacing)
+    conflictDescription:SetText("No conflicting addons... ")
+
+    local conflictResult = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
+    conflictResult:SetPoint("TOPLEFT", conflictDescription, "TOPRIGHT")
+
+    local remediationTitle = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+    remediationTitle:SetPoint("TOPLEFT", conflictDescription, 0, -verticalSpacing * 2)
+    remediationTitle:SetText("Remediation Steps")
+
+    local raidStyleRemediation = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+    raidStyleRemediation:SetText("- Please enable 'Use Raid-Style Party Frames' in the Blizzard settings.")
+
+    local togetherRemediation = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+        togetherRemediation:SetText("- Change the raid display mode to one of the 'Combined Groups' options via Edit Mode.")
+    else
+        togetherRemediation:SetText("- Disable the 'Keep Groups Together' raid profile setting.")
+    end
+
+    local tamperedRemediation = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+    tamperedRemediation:SetText("- Please disable other frame sorting addons/macros.")
+
+    local conflictRemediation = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+
+    local remediationControls = {
+        raidStyleRemediation,
+        togetherRemediation,
+        tamperedRemediation,
+        conflictRemediation
     }
 
     panel:HookScript("OnShow", function()
         local usingRaidStyle = IsUsingRaidStyleFrames()
-        local sortingTampered = SortingFunctionsTampered()
-
-        raidStyleWarning:SetShown(not usingRaidStyle)
-
-        tamperedWarning:SetShown(sortingTampered)
-        if sortingTampered then
-            tamperedWarning:SetPoint("TOPLEFT", description, "BOTTOMLEFT", 0, -verticalSpacing)
-        end
-
-        local conflictingAddons = ConflictingAddons()
-        conflictWarning:SetShown(conflictingAddons ~= nil)
-        conflictWarning:SetText(conflictingAddons
-        and "'" .. conflictingAddons .. "' may cause conflicts, consider disabling it."
-        or "")
+        raidStyleResult:SetText(usingRaidStyle and "Passed!" or "Failed")
+        raidStyleResult:SetFontObject(usingRaidStyle and "GameFontGreen" or "GameFontRed")
 
         local groupsTogether = KeepGroupsTogether()
-        groupsTogetherWarning:SetShown(groupsTogether)
+        togetherResult:SetText(not groupsTogether and "Passed!" or "Failed")
+        togetherResult:SetFontObject(not groupsTogether and "GameFontGreen" or "GameFontRed")
 
-        if groupsTogether then
-            -- TODO: see if it's possible for FrameSort to work with this setting enabled.
-            if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-                groupsTogetherWarning:SetText("Raid sorting won't work unless the raid display is 'Combined Groups' in Edit Mode.")
-            else
-                groupsTogetherWarning:SetText("Sorting won't work unless the 'Keep Groups Together' raid profile setting is disabled.")
-            end
+        local sortingTampered = SortingFunctionsTampered()
+        tamperedResult:SetText(not sortingTampered and "Passed!" or "Failed")
+        tamperedResult:SetFontObject(not sortingTampered and "GameFontGreen" or "GameFontRed")
+
+        local conflictingAddons = ConflictingAddons()
+        local noConflicts = conflictingAddons == nil
+
+        conflictResult:SetText(noConflicts and "Passed!" or "Failed")
+        conflictResult:SetFontObject(noConflicts and "GameFontGreen" or "GameFontRed")
+
+        local healthy = usingRaidStyle and not groupsTogether and not sortingTampered and noConflicts
+
+        remediationTitle:SetShown(not healthy)
+        raidStyleRemediation:SetShown(not usingRaidStyle)
+        togetherRemediation:SetShown(groupsTogether)
+        tamperedRemediation:SetShown(sortingTampered)
+
+        if not noConflicts then
+            conflictRemediation:SetText("- '" .. conflictingAddons .. "' may cause conflicts, consider disabling it.")
         end
 
-        local healthy = usingRaidStyle and not sortingTampered and not conflictingAddons and not groupsTogether
-        healthyMessage:SetShown(healthy)
-
         -- for each visible message, reposition them
-        local anchor = description
-        for _, control in ipairs(controls) do
+        local anchor = remediationTitle
+        for _, control in ipairs(remediationControls) do
             if control:IsShown() then
                 control:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
                 anchor = control
