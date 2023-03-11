@@ -12,7 +12,7 @@ local horizontalSpacing = addon.OptionsBuilder.HorizontalSpacing
 ---@param panel table the parent UI panel.
 ---@return table The bottom left most control to use for anchoring subsequent UI components.
 local function BuiltTitle(panel)
-    local title = panel:CreateFontString("lblTitle", "ARTWORK", "GameFontNormalLarge")
+    local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
     title:SetText("Frame Sort")
 
@@ -26,14 +26,14 @@ local function BuiltTitle(panel)
     local keyWidth = 50
     local i = 1
     for k, v in pairs(lines) do
-        local keyText = panel:CreateFontString("lblDescriptionKey" .. i, "ARTWORK", "GameFontWhite")
+        local keyText = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
         keyText:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing * 0.75)
         keyText:SetText(k .. ": ")
         keyText:SetWidth(keyWidth)
         keyText:SetJustifyH("LEFT")
         anchor = keyText
 
-        local valueText = panel:CreateFontString("lblDescriptionValue" .. i, "ARTWORK", "GameFontWhite")
+        local valueText = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
         valueText:SetPoint("LEFT", keyText, "RIGHT")
         valueText:SetText(v)
         i = i + 1
@@ -46,7 +46,6 @@ end
 ---@param parentPanel table the parent UI panel.
 ---@param pointOffset table a UI component used as a relative position anchor for the new components.
 ---@param labelText string the text to display on the enabled checkbox.
----@param uniqueGroupName string a unique string used for the component names.
 ---@param sortingEnabled boolean whether sorting is currently enabled.
 ---@param playerSortMode string current player sort mode.
 ---@param sortMode string current group sort mode.
@@ -58,14 +57,13 @@ local function BuildSortModeCheckboxes(
     parentPanel,
     pointOffset,
     labelText,
-    uniqueGroupName,
     sortingEnabled,
     playerSortMode,
     sortMode,
     onEnabledChanged,
     onPlayerSortModeChanged,
     onSortModeChanged)
-    local enabled = CreateFrame("CheckButton", "chk" .. uniqueGroupName .. "Enabled", parentPanel, "UICheckButtonTemplate")
+    local enabled = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     -- not sure why, but checkbox left seems to be off by about 4 units by default
     enabled:SetPoint("TOPLEFT", pointOffset, "BOTTOMLEFT", -4, -verticalSpacing)
     enabled.Text:SetText(" " .. labelText)
@@ -73,21 +71,21 @@ local function BuildSortModeCheckboxes(
     enabled:SetChecked(sortingEnabled)
     enabled:HookScript("OnClick", function() onEnabledChanged(enabled:GetChecked()) end)
 
-    local playerLabel = parentPanel:CreateFontString("lbl" .. uniqueGroupName .. "PlayerSortMode", "ARTWORK", "GameFontNormal")
+    local playerLabel = parentPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
     playerLabel:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, -verticalSpacing)
     playerLabel:SetText("Player: ")
 
-    local top = CreateFrame("CheckButton", "chk" .. uniqueGroupName .. "PlayerSortTop", parentPanel, "UICheckButtonTemplate")
+    local top = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     top.Text:SetText("Top")
     top:SetPoint("LEFT", playerLabel, "RIGHT", horizontalSpacing / 2, 0)
     top:SetChecked(playerSortMode == addon.PlayerSortMode.Top)
 
-    local middle = CreateFrame("CheckButton", "chk" .. uniqueGroupName .. "PlayerSortMiddle", parentPanel, "UICheckButtonTemplate")
+    local middle = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     middle.Text:SetText("Middle")
     middle:SetPoint("LEFT", top, "RIGHT", horizontalSpacing, 0)
     middle:SetChecked(playerSortMode == addon.PlayerSortMode.Middle)
 
-    local bottom = CreateFrame("CheckButton", "chk" .. uniqueGroupName .. "PlayerSortBottom", parentPanel, "UICheckButtonTemplate")
+    local bottom = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     bottom.Text:SetText("Bottom")
     bottom:SetPoint("LEFT", middle, "RIGHT", horizontalSpacing, 0)
     bottom:SetChecked(playerSortMode == addon.PlayerSortMode.Bottom)
@@ -118,7 +116,7 @@ local function BuildSortModeCheckboxes(
         chkbox:HookScript("OnClick", onPlayerClick)
     end
 
-    local modeLabel = parentPanel:CreateFontString("lbl" .. uniqueGroupName .. "SortMode", "ARTWORK", "GameFontNormal")
+    local modeLabel = parentPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
     modeLabel:SetPoint("TOPLEFT", playerLabel, "BOTTOMLEFT", 0, -verticalSpacing * 1.5)
     modeLabel:SetText("Sort: ")
 
@@ -126,19 +124,19 @@ local function BuildSortModeCheckboxes(
     -- because the dropdown box control has taint issues that haven't been fixed for years
     -- also it seems to have become much worse in dragonflight
     -- so while a dropdown would be better ui design, it's too buggy to use at the moment
-    local group = CreateFrame("CheckButton", "chk" .. uniqueGroupName .. "SortGroup", parentPanel, "UICheckButtonTemplate")
+    local group = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     group:SetPoint("LEFT", top, "LEFT")
     -- TODO: not sure why this doesn't align well even when aligning TOP/BOTTOM, so just hacking in a +10 to fix it for now
     group:SetPoint("TOP", modeLabel, "TOP", 0, 10)
     group.Text:SetText(addon.GroupSortMode.Group)
     group:SetChecked(sortMode == addon.GroupSortMode.Group)
 
-    local role = CreateFrame("CheckButton", "chk" .. uniqueGroupName .. "SortRole", parentPanel, "UICheckButtonTemplate")
+    local role = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     role:SetPoint("LEFT", group, "RIGHT", horizontalSpacing, 0)
     role.Text:SetText(addon.GroupSortMode.Role)
     role:SetChecked(sortMode == addon.GroupSortMode.Role)
 
-    local alpha = CreateFrame("CheckButton", "chk" .. uniqueGroupName .. "SortAlpha", parentPanel, "UICheckButtonTemplate")
+    local alpha = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     alpha:SetPoint("LEFT", role, "RIGHT", horizontalSpacing, 0)
     alpha.Text:SetText(addon.GroupSortMode.Alphabetical)
     alpha:SetChecked(sortMode == addon.GroupSortMode.Alphabetical)
@@ -201,7 +199,6 @@ function addon:InitOptions()
         panel,
         anchor,
         "Arena",
-        "Arena",
         addon.Options.Arena.Enabled,
         addon.Options.Arena.PlayerSortMode,
         addon.Options.Arena.GroupSortMode,
@@ -214,7 +211,6 @@ function addon:InitOptions()
         panel,
         anchor,
         "Dungeon (mythics, 5-mans)",
-        "Dungeon",
         addon.Options.Dungeon.Enabled,
         addon.Options.Dungeon.PlayerSortMode,
         addon.Options.Dungeon.GroupSortMode,
@@ -227,7 +223,6 @@ function addon:InitOptions()
         panel,
         anchor,
         "Raid (battlegrounds, raids)",
-        "Raid",
         addon.Options.Raid.Enabled,
         addon.Options.Raid.PlayerSortMode,
         addon.Options.Raid.GroupSortMode,
@@ -240,7 +235,6 @@ function addon:InitOptions()
         panel,
         anchor,
         "World (non-instance groups)",
-        "World",
         addon.Options.World.Enabled,
         addon.Options.World.PlayerSortMode,
         addon.Options.World.GroupSortMode,

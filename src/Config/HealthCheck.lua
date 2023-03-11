@@ -74,25 +74,25 @@ function builder:BuildHealthCheck(parent)
     panel.name = "Health Check"
     panel.parent = parent.name
 
-    local title = panel:CreateFontString("lblHealthCheck", "ARTWORK", "GameFontNormalLarge")
+    local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
     title:SetText("Health Check")
 
-    local description = panel:CreateFontString("lblHealthCheck", "ARTWORK", "GameFontWhite")
+    local description = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
     description:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -verticalSpacing)
     description:SetText("Any known issues with configuration or conflicting addons will be shown below.")
 
-    local raidStyleWarning = panel:CreateFontString("lblRaidStyleFramesWarning", "ARTWORK", "GameFontRed")
+    local raidStyleWarning = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
     raidStyleWarning:SetText("Please enable 'Use Raid-Style Party Frames' in the Blizzard settings.")
 
-    local tamperedWarning = panel:CreateFontString("lblInBuiltSortingWarning", "ARTWORK", "GameFontRed")
+    local tamperedWarning = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
     tamperedWarning:SetText("Blizzard sorting functions have been tampered with, please disable other frame sorting macro/addons.")
 
-    local conflictWarning = panel:CreateFontString("lblConflictingAddonsWarning", "ARTWORK", "GameFontRed")
+    local conflictWarning = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
 
     local groupsTogetherWarning = panel:CreateFontString("lblGroupsTogetherWarning", "ARTWORK", "GameFontRed")
 
-    local healthyMessage = panel:CreateFontString("lblHealthy", "ARTWORK", "GameFontGreen")
+    local healthyMessage = panel:CreateFontString(nil, "ARTWORK", "GameFontGreen")
     healthyMessage:SetPoint("TOPLEFT", description, "BOTTOMLEFT", 0, -verticalSpacing)
     healthyMessage:SetText("All health checks have passed!")
 
