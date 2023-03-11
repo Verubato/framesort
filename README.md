@@ -11,6 +11,7 @@ A simple World of Warcraft (Retail) add-on that places the player frame (you) at
 * Taintless sorting method to avoid taint/UI issues.
 * Set keybindings to target frames based on their visually ordered representation rather than their party number.
 * Add spacing between frames.
+* Macro support for @frame targeting.
 * Supports both Retail and Wotlk.
 
 ## Install ##
