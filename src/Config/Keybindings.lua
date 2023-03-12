@@ -40,8 +40,6 @@ function builder:BuildKeybindingOptions(parent)
         "",
         "The FrameSort keybindings will target based on the visual frame position rather than the party position.",
         "So targeting 'Frame 1' will target the Tank, 'Frame 2' the healer, 'Frame 3' the DPS in spot 3, and so on.",
-        "",
-        "Hope that helps some people out there, and enjoy."
     }
 
     local anchor = title
