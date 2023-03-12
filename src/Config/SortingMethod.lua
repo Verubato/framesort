@@ -57,7 +57,6 @@ function builder:BuildSortingMethodOptions(parent)
     })
 
     anchor = BuildDottedList(panel, anchor, "Cons: ", {
-        "Still under development and testing (may yet have bugs to fix).",
         "Sorting can temporarily become undone during combat if the group/raid changes.",
         "May not work well with other addons that expect the traditional method."
     })
