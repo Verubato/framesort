@@ -16,19 +16,11 @@ A simple World of Warcraft (Retail) add-on that places the player frame (you) at
 
 ## Screenshots ##
 
-### Sorting ###
-
 ![Options](https://github.com/Verubato/frame-sort/raw/main/assets/options.png)
-
-### Spacing ###
 
 ![Spacing](https://github.com/Verubato/frame-sort/raw/main/assets/spacing.png)
 
-### Keybindings ###
-
 ![Keybindings](https://github.com/Verubato/frame-sort/raw/main/assets/keybindings.png)
-
-### Macros ###
 
 ![Macros](https://github.com/Verubato/frame-sort/raw/main/assets/macros.png)
 
