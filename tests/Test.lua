@@ -8,5 +8,6 @@ TestIsPet = require("IsPetTest")
 TestIsMember = require("IsMemberTest")
 TestGetUnitAliases = require("UnitAliasesTest")
 TestMacro = require("MacroTest")
+TestOptionsUpgrader = require("UpgradeOptionsTest")
 
 os.exit(luaunit:run())

@@ -1,133 +1,165 @@
 local _, addon = ...
+local upgrader = {}
 
-local function UpgradeToVersion2()
-    addon.Options.ArenaEnabled = addon.Options.PartySortEnabled
-    addon.Options.ArenaPlayerSortMode = addon.Options.PlayerSortMode
-    addon.Options.ArenaSortMode = addon.Options.PartySortMode
+addon.OptionsUpgrader = upgrader
 
-    addon.Options.DungeonEnabled = addon.Options.PartySortEnabled
-    addon.Options.DungeonPlayerSortMode = addon.Options.PlayerSortMode
-    addon.Options.DungeonSortMode = addon.Options.PartySortMode
+function upgrader:UpgradeToVersion2(options)
+    assert(options.Version == nil or options.Version == 1)
 
-    addon.Options.WorldEnabled = addon.Options.PartySortEnabled
-    addon.Options.WorldPlayerSortMode = addon.Options.PlayerSortMode
-    addon.Options.WorldSortMode = addon.Options.PartySortMode
+    options.ArenaEnabled = options.PartySortEnabled
+    options.ArenaPlayerSortMode = options.PlayerSortMode
+    options.ArenaSortMode = options.PartySortMode
 
-    addon.Options.RaidEnabled = addon.Options.RaidSortEnabled
-    addon.Options.RaidPlayerSortMode = addon.Options.PlayerSortMode
+    options.DungeonEnabled = options.PartySortEnabled
+    options.DungeonPlayerSortMode = options.PlayerSortMode
+    options.DungeonSortMode = options.PartySortMode
 
-    addon.Options.DebugEnabled = false
+    options.WorldEnabled = options.PartySortEnabled
+    options.WorldPlayerSortMode = options.PlayerSortMode
+    options.WorldSortMode = options.PartySortMode
 
-    addon.Options.PartySortEnabled = nil
-    addon.Options.PlayerSortMode = nil
-    addon.Options.RaidSortEnabled = nil
+    options.RaidEnabled = options.RaidSortEnabled
+    options.RaidPlayerSortMode = options.PlayerSortMode
 
-    addon.Options.Version = 2
+    options.DebugEnabled = false
+
+    options.PartySortEnabled = nil
+    options.PartySortMode = nil
+    options.PlayerSortMode = nil
+    options.RaidSortEnabled = nil
+
+    options.Version = 2
 end
 
-local function UpgradeToVersion3()
-    addon.Options.ExperimentalEnabled = false
-    addon.Options.Version = 3
+function upgrader:UpgradeToVersion3(options)
+    assert(options.Version == 2)
+
+    options.ExperimentalEnabled = false
+    options.Version = 3
 end
 
-local function UpgradeToVersion4()
-    addon.Options.SortingMethod = {
+function upgrader:UpgradeToVersion4(options)
+    assert(options.Version == 3)
+
+    options.SortingMethod = {
         TaintlessEnabled = true,
         TraditionalEnabled = false
     }
 
-    addon.Options.Version = 4
+    options.Version = 4
 end
 
-local function UpgradeToVersion5()
-    addon.Options.Debug = {
-        Enabled = addon.Options.DebugEnabled
+function upgrader:UpgradeToVersion5(options)
+    assert(options.Version == 4)
+
+    options.Debug = {
+        Enabled = options.DebugEnabled
     }
 
-    addon.Options.Arena = {
-        Enabled = addon.Options.ArenaEnabled,
-        PlayerSortMode = addon.Options.ArenaPlayerSortMode,
-        GroupSortMode = addon.Options.ArenaSortMode
+    options.Arena = {
+        Enabled = options.ArenaEnabled,
+        PlayerSortMode = options.ArenaPlayerSortMode,
+        GroupSortMode = options.ArenaSortMode
     }
 
-    addon.Options.Dungeon = {
-        Enabled = addon.Options.DungeonEnabled,
-        PlayerSortMode = addon.Options.DungeonPlayerSortMode,
-        GroupSortMode = addon.Options.DungeonSortMode
+    options.Dungeon = {
+        Enabled = options.DungeonEnabled,
+        PlayerSortMode = options.DungeonPlayerSortMode,
+        GroupSortMode = options.DungeonSortMode
     }
 
-    addon.Options.Raid = {
-        Enabled = addon.Options.RaidEnabled,
-        PlayerSortMode = addon.Options.RaidPlayerSortMode,
-        GroupSortMode = addon.Options.RaidSortMode
+    options.Raid = {
+        Enabled = options.RaidEnabled,
+        PlayerSortMode = options.RaidPlayerSortMode,
+        GroupSortMode = options.RaidSortMode
     }
 
-    addon.Options.World = {
-        Enabled = addon.Options.WorldEnabled,
-        PlayerSortMode = addon.Options.WorldPlayerSortMode,
-        GroupSortMode = addon.Options.WorldSortMode
+    options.World = {
+        Enabled = options.WorldEnabled,
+        PlayerSortMode = options.WorldPlayerSortMode,
+        GroupSortMode = options.WorldSortMode
     }
 
-    addon.Options.DebugEnabled = nil
+    options.DebugEnabled = nil
 
-    addon.Options.ArenaEnabled = nil
-    addon.Options.ArenaPlayerSortMode = nil
-    addon.Options.ArenaSortMode = nil
+    options.ArenaEnabled = nil
+    options.ArenaPlayerSortMode = nil
+    options.ArenaSortMode = nil
 
-    addon.Options.DungeonEnabled = nil
-    addon.Options.DungeonPlayerSortMode = nil
-    addon.Options.DungeonSortMode = nil
+    options.DungeonEnabled = nil
+    options.DungeonPlayerSortMode = nil
+    options.DungeonSortMode = nil
 
-    addon.Options.RaidEnabled = nil
-    addon.Options.RaidPlayerSortMode = nil
-    addon.Options.RaidSortMode = nil
+    options.RaidEnabled = nil
+    options.RaidPlayerSortMode = nil
+    options.RaidSortMode = nil
 
-    addon.Options.WorldEnabled = nil
-    addon.Options.WorldPlayerSortMode = nil
-    addon.Options.WorldSortMode = nil
+    options.WorldEnabled = nil
+    options.WorldPlayerSortMode = nil
+    options.WorldSortMode = nil
 
     -- forgot to remove this in version 4
-    addon.Options.ExperimentalEnabled = nil
+    options.ExperimentalEnabled = nil
 
-    addon.Options.Version = 5
+    options.Version = 5
 end
 
-local function UpgradeToVersion6()
-    addon.Options.Appearance = CopyTable(addon.Defaults.Appearance)
-    addon.Options.Version = 6
+function upgrader:UpgradeToVersion6(options)
+    assert(options.Version == 5)
+
+    options.Appearance = {
+        Party = {
+            Spacing = {
+                Horizontal = 0,
+                Vertical = 0
+            },
+        },
+        Raid = {
+            Spacing = {
+                Horizontal = 0,
+                Vertical = 0
+            }
+        }
+    }
+
+    options.Version = 6
 end
 
-local function UpgradeToVersion7()
-    addon.Options.Debug.Enabled = false
-    addon.Options.Version = 7
+function upgrader:UpgradeToVersion7(options)
+    assert(options.Version == 6)
+
+    options.Debug.Enabled = false
+    options.Version = 7
 end
 
-local function UpgradeToVersion8()
-    addon.Options.Arena.Reverse = false
-    addon.Options.Dungeon.Reverse = false
-    addon.Options.Raid.Reverse = false
-    addon.Options.World.Reverse = false
-    addon.Options.Version = 8
+function upgrader:UpgradeToVersion8(options)
+    assert(options.Version == 7)
+
+    options.Arena.Reverse = false
+    options.Dungeon.Reverse = false
+    options.Raid.Reverse = false
+    options.World.Reverse = false
+    options.Version = 8
 end
 
 local upgradeFunctions = {
-    Version2 = UpgradeToVersion2,
-    Version3 = UpgradeToVersion3,
-    Version4 = UpgradeToVersion4,
-    Version5 = UpgradeToVersion5,
-    Version6 = UpgradeToVersion6,
-    Version7 = UpgradeToVersion7,
-    Version8 = UpgradeToVersion8,
+    Version2 = upgrader.UpgradeToVersion2,
+    Version3 = upgrader.UpgradeToVersion3,
+    Version4 = upgrader.UpgradeToVersion4,
+    Version5 = upgrader.UpgradeToVersion5,
+    Version6 = upgrader.UpgradeToVersion6,
+    Version7 = upgrader.UpgradeToVersion7,
+    Version8 = upgrader.UpgradeToVersion8,
 }
 
 ---Upgrades saved options to the current version.
 function addon:UpgradeOptions()
     while (addon.Options.Version or 1) < addon.Defaults.Version do
         local nextVersion = (addon.Options.Version or 1) + 1
-        local upgrader = upgradeFunctions["Version" .. nextVersion]
-        assert(upgrader ~= nil)
+        local next = upgradeFunctions["Version" .. nextVersion]
+        assert(next ~= nil)
 
         addon:Debug("Upgrading options to version " .. nextVersion .. ".")
-        upgrader()
+        next(upgrader, addon.Options)
     end
 end
