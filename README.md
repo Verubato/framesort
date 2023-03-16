@@ -33,6 +33,6 @@ The addon can be installed via:
 * [WowUp](https://wowup.io/)
 * [Manually](https://github.com/Verubato/frame-sort/releases/latest)
 
-## Donations ##
+## Donate ##
 
 [Buy me a coffee <3](https://buy.stripe.com/cN23cZ48G9mJeXu3cc)
