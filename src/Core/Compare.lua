@@ -8,7 +8,7 @@ local fuzzyDecimalPlaces = 0
 ---@return function?
 function addon:GetSortFunction()
     local inInstance, instanceType = IsInInstance()
-    local enabled, playerSortMode, groupSortMode = addon:GetSortMode(inInstance, instanceType)
+    local enabled, playerSortMode, groupSortMode, reverse = addon:GetSortMode(inInstance, instanceType)
 
     if not enabled then return nil end
 
@@ -16,14 +16,14 @@ function addon:GetSortFunction()
     assert(groupSortMode ~= nil)
 
     if playerSortMode ~= addon.PlayerSortMode.Middle then
-        return function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode) end
+        return function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode, reverse) end
     end
 
     -- we need to pre-sort to determine where the middle actually is
     local units = addon:GetUnits()
-    table.sort(units, function(x, y) return addon:Compare(x, y, addon.PlayerSortMode.Top, groupSortMode) end)
+    table.sort(units, function(x, y) return addon:Compare(x, y, addon.PlayerSortMode.Top, groupSortMode, reverse) end)
 
-    return function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode, units) end
+    return function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode, reverse, units) end
 end
 
 ---Returns the sort mode from the configured options for the specified instance type.
@@ -32,18 +32,19 @@ end
 ---@return boolean enabled whether sorting is enabled.
 ---@return PlayerSortMode? playerMode the player sort mode.
 ---@return GroupSortMode? groupMode the group sort mode.
+---@return boolean? reverse whether the sorting is reversed.
 function addon:GetSortMode(inInstance, instanceType)
     if inInstance and instanceType == "arena" then
-        return addon.Options.Arena.Enabled, addon.Options.Arena.PlayerSortMode, addon.Options.Arena.GroupSortMode
+        return addon.Options.Arena.Enabled, addon.Options.Arena.PlayerSortMode, addon.Options.Arena.GroupSortMode, addon.Options.Arena.Reverse
     elseif inInstance and instanceType == "party" then
-        return addon.Options.Dungeon.Enabled, addon.Options.Dungeon.PlayerSortMode, addon.Options.Dungeon.GroupSortMode
+        return addon.Options.Dungeon.Enabled, addon.Options.Dungeon.PlayerSortMode, addon.Options.Dungeon.GroupSortMode, addon.Options.Dungeon.Reverse
     elseif inInstance and (instanceType == "raid" or instanceType == "pvp") then
-        return addon.Options.Raid.Enabled, addon.Options.Raid.PlayerSortMode, addon.Options.Raid.GroupSortMode
+        return addon.Options.Raid.Enabled, addon.Options.Raid.PlayerSortMode, addon.Options.Raid.GroupSortMode, addon.Options.Raid.Reverse
     elseif not inInstance and addon.Options.World.Enabled then
-        return addon.Options.World.Enabled, addon.Options.World.PlayerSortMode, addon.Options.World.GroupSortMode
+        return addon.Options.World.Enabled, addon.Options.World.PlayerSortMode, addon.Options.World.GroupSortMode, addon.Options.World.Reverse
     end
 
-    return false, nil, nil
+    return false, nil, nil, nil
 end
 
 ---Returns true if the left token should be ordered before the right token.
@@ -52,9 +53,10 @@ end
 ---@param rightToken string
 ---@param playerSortMode string
 ---@param groupSortMode string
+---@param reverse boolean?
 ---@param preSortedUnits table?
 ---@return boolean
-function addon:Compare(leftToken, rightToken, playerSortMode, groupSortMode, preSortedUnits)
+function addon:Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse, preSortedUnits)
     if not UnitExists(leftToken) then
         return false
     elseif not UnitExists(rightToken) then
@@ -73,15 +75,25 @@ function addon:Compare(leftToken, rightToken, playerSortMode, groupSortMode, pre
         else
             return playerSortMode == addon.PlayerSortMode.Bottom
         end
-    elseif groupSortMode == addon.GroupSortMode.Group then
-        return CRFSort_Group(leftToken, rightToken)
-    elseif groupSortMode == addon.GroupSortMode.Role then
-        return CRFSort_Role(leftToken, rightToken)
-    elseif groupSortMode == addon.GroupSortMode.Alphabetical then
-        return CRFSort_Alphabetical(leftToken, rightToken)
-    else
-        return leftToken < rightToken
     end
+
+    local result = false
+
+    if groupSortMode == addon.GroupSortMode.Group then
+        result = CRFSort_Group(leftToken, rightToken)
+    elseif groupSortMode == addon.GroupSortMode.Role then
+        result = CRFSort_Role(leftToken, rightToken)
+    elseif groupSortMode == addon.GroupSortMode.Alphabetical then
+        result = CRFSort_Alphabetical(leftToken, rightToken)
+    else
+        result = leftToken < rightToken
+    end
+
+    if reverse then
+        result = not result
+    end
+
+    return result
 end
 
 ---Returns true if the specified token is ordered after the mid point.

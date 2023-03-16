@@ -2,7 +2,7 @@ local _, addon = ...
 
 ---Default configuration.
 addon.Defaults = {
-    Version = 7,
+    Version = 8,
     Debug = {
         Enabled = false
     },
@@ -10,21 +10,25 @@ addon.Defaults = {
         Enabled = true,
         PlayerSortMode = addon.PlayerSortMode.Top,
         GroupSortMode = addon.GroupSortMode.Group,
+        Reverse = false
     },
     Dungeon = {
         Enabled = true,
         PlayerSortMode = addon.PlayerSortMode.Top,
         GroupSortMode = addon.GroupSortMode.Role,
+        Reverse = false
     },
     World = {
         Enabled = true,
         PlayerSortMode = addon.PlayerSortMode.Top,
         GroupSortMode = addon.GroupSortMode.Group,
+        Reverse = false
     },
     Raid = {
         Enabled = false,
         PlayerSortMode = addon.PlayerSortMode.Top,
         GroupSortMode = addon.GroupSortMode.Role,
+        Reverse = false
     },
     SortingMethod = {
         TaintlessEnabled = true,

@@ -60,14 +60,14 @@ end
 
 function M:test_sort_player_middle()
     local presorted = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8" }
-    assertEquals(addon:Compare("player", "raid1", addon.PlayerSortMode.Middle, addon.GroupSortMode.Group, presorted), false)
-    assertEquals(addon:Compare("player", "raid3", addon.PlayerSortMode.Middle, addon.GroupSortMode.Group, presorted), false)
-    assertEquals(addon:Compare("player", "raid4", addon.PlayerSortMode.Middle, addon.GroupSortMode.Group, presorted), false)
-    assertEquals(addon:Compare("player", "raid5", addon.PlayerSortMode.Middle, addon.GroupSortMode.Group, presorted), false)
+    assertEquals(addon:Compare("player", "raid1", addon.PlayerSortMode.Middle, addon.GroupSortMode.Group, false, presorted), false)
+    assertEquals(addon:Compare("player", "raid3", addon.PlayerSortMode.Middle, addon.GroupSortMode.Group, false, presorted), false)
+    assertEquals(addon:Compare("player", "raid4", addon.PlayerSortMode.Middle, addon.GroupSortMode.Group, false, presorted), false)
+    assertEquals(addon:Compare("player", "raid5", addon.PlayerSortMode.Middle, addon.GroupSortMode.Group, false, presorted), false)
     -- there's no exact mid as we have an even number of raid members
-    assertEquals(addon:Compare("player", "raid6", addon.PlayerSortMode.Middle, addon.GroupSortMode.Group, presorted), true)
-    assertEquals(addon:Compare("player", "raid7", addon.PlayerSortMode.Middle, addon.GroupSortMode.Group, presorted), true)
-    assertEquals(addon:Compare("player", "raid8", addon.PlayerSortMode.Middle, addon.GroupSortMode.Group, presorted), true)
+    assertEquals(addon:Compare("player", "raid6", addon.PlayerSortMode.Middle, addon.GroupSortMode.Group, false, presorted), true)
+    assertEquals(addon:Compare("player", "raid7", addon.PlayerSortMode.Middle, addon.GroupSortMode.Group, false, presorted), true)
+    assertEquals(addon:Compare("player", "raid8", addon.PlayerSortMode.Middle, addon.GroupSortMode.Group, false, presorted), true)
 end
 
 return M
