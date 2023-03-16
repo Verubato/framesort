@@ -57,18 +57,19 @@ end
 ---@param preSortedUnits table?
 ---@return boolean
 function addon:Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse, preSortedUnits)
-    if not UnitExists(leftToken) then
-        return false
-    elseif not UnitExists(rightToken) then
-        return true
-    elseif UnitIsUnit(leftToken, "player") then
+    if not UnitExists(leftToken) then return false end
+    if not UnitExists(rightToken) then return true end
+
+    if UnitIsUnit(leftToken, "player") then
         if playerSortMode == addon.PlayerSortMode.Middle then
             assert(preSortedUnits ~= nil)
             return addon:CompareMiddle(rightToken, preSortedUnits)
         else
             return playerSortMode == addon.PlayerSortMode.Top
         end
-    elseif UnitIsUnit(rightToken, "player") then
+    end
+
+    if UnitIsUnit(rightToken, "player") then
         if playerSortMode == addon.PlayerSortMode.Middle then
             assert(preSortedUnits ~= nil)
             return not addon:CompareMiddle(leftToken, preSortedUnits)
@@ -77,23 +78,21 @@ function addon:Compare(leftToken, rightToken, playerSortMode, groupSortMode, rev
         end
     end
 
-    local result = false
+    if reverse then
+        local tmp = leftToken
+        leftToken = rightToken
+        rightToken = tmp
+    end
 
     if groupSortMode == addon.GroupSortMode.Group then
-        result = CRFSort_Group(leftToken, rightToken)
+        return CRFSort_Group(leftToken, rightToken)
     elseif groupSortMode == addon.GroupSortMode.Role then
-        result = CRFSort_Role(leftToken, rightToken)
+        return CRFSort_Role(leftToken, rightToken)
     elseif groupSortMode == addon.GroupSortMode.Alphabetical then
-        result = CRFSort_Alphabetical(leftToken, rightToken)
+        return CRFSort_Alphabetical(leftToken, rightToken)
     else
-        result = leftToken < rightToken
+        return leftToken < rightToken
     end
-
-    if reverse then
-        result = not result
-    end
-
-    return result
 end
 
 ---Returns true if the specified token is ordered after the mid point.
