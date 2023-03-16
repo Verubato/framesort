@@ -35,4 +35,4 @@ The addon can be installed via:
 
 ## Donate ##
 
-[Buy me a coffee <3](https://buy.stripe.com/cN23cZ48G9mJeXu3cc)
+[Buy me a coffee ❤](https://buy.stripe.com/cN23cZ48G9mJeXu3cc)
