@@ -102,6 +102,14 @@ local function UpgradeToVersion7()
     addon.Options.Version = 7
 end
 
+local function UpgradeToVersion8()
+    addon.Options.Arena.Reverse = false
+    addon.Options.Dungeon.Reverse = false
+    addon.Options.Raid.Reverse = false
+    addon.Options.World.Reverse = false
+    addon.Options.Version = 8
+end
+
 local upgradeFunctions = {
     Version2 = UpgradeToVersion2,
     Version3 = UpgradeToVersion3,
@@ -109,6 +117,7 @@ local upgradeFunctions = {
     Version5 = UpgradeToVersion5,
     Version6 = UpgradeToVersion6,
     Version7 = UpgradeToVersion7,
+    Version8 = UpgradeToVersion8,
 }
 
 ---Upgrades saved options to the current version.
