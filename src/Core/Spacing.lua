@@ -72,7 +72,7 @@ local function FlatModePets(pets, spacing, horizontal, relativeTo)
 end
 
 local function GroupedModeMembers(members, spacing, horizontal)
-    table.sort(members, function(x, y) return addon:CompareTopLeft(x, y) end)
+    table.sort(members, function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
     for j = 2, #members do
         local member = members[j]
         local _, _, _, offsetX, offsetY = member:GetPoint()
@@ -112,24 +112,26 @@ local function GroupedMode(groups, pets, spacing, horizontal)
             if horizontal then
                 if group:GetLeft() == previous:GetLeft() then
                     -- add vertical spacing between each group
-                    yDelta = ((i - 1) * spacing.Vertical) + (group:GetTop() - previous:GetBottom())
+                    yDelta = spacing.Vertical + (group:GetTop() - previous:GetBottom())
+                elseif previousGroupMembers and #previousGroupMembers > 0 then
+                    local lastPreviousGroupMember = previousGroupMembers[#previousGroupMembers]
+                    xDelta = spacing.Horizontal - (group:GetLeft() - lastPreviousGroupMember:GetRight())
                 end
 
-                -- table.sort(members, function(x, y) return addon:CompareTopLeft(x, y) end)
                 if group:GetTop() <= previous:GetTop() then
                     petsReferencePoint = members[1]
                 end
             else
-                if group:GetLeft() >= previous:GetLeft() then
-                    petsReferencePoint = members[1]
+                if group:GetTop() == previous:GetTop() then
+                    -- add horizontal spacing between each group
+                    xDelta = spacing.Horizontal - (group:GetLeft() - previous:GetRight())
+                elseif previousGroupMembers and #previousGroupMembers > 0 then
+                    local lastPreviousGroupMember = previousGroupMembers[#previousGroupMembers]
+                    yDelta = spacing.Vertical + (group:GetTop() - lastPreviousGroupMember:GetBottom())
                 end
 
-                -- add horizontal spacing between each group
-                if group:GetTop() == previous:GetTop() then
-                    xDelta = ((i - 1) * spacing.Horizontal) - (group:GetLeft() - previous:GetRight())
-                elseif not horizontal and previousGroupMembers and #previousGroupMembers > 0 then
-                    local lastPreviousGroupMember = previousGroupMembers[#previousGroupMembers]
-                    yDelta = ((i - 1) * spacing.Vertical) + (group:GetTop() - lastPreviousGroupMember:GetBottom())
+                if group:GetLeft() >= previous:GetLeft() then
+                    petsReferencePoint = members[1]
                 end
             end
 
