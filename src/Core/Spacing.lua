@@ -108,33 +108,18 @@ local function GroupedMode(groups, pets, spacing, horizontal)
         if previous then
             local xDelta = 0
             local yDelta = 0
+            local lastPreviousGroupMember = previousGroupMembers and previousGroupMembers[#previousGroupMembers]
+            local anchor = lastPreviousGroupMember or previous
 
-            if horizontal then
-                if group:GetLeft() == previous:GetLeft() then
-                    -- add vertical spacing between each group
-                    yDelta = spacing.Vertical + (group:GetTop() - previous:GetBottom())
-                elseif previousGroupMembers and #previousGroupMembers > 0 then
-                    local lastPreviousGroupMember = previousGroupMembers[#previousGroupMembers]
-                    xDelta = spacing.Horizontal - (group:GetLeft() - lastPreviousGroupMember:GetRight())
-                end
-
-                if group:GetTop() <= previous:GetTop() then
-                    petsReferencePoint = members[1]
-                end
-            else
-                if group:GetTop() == previous:GetTop() then
-                    -- add horizontal spacing between each group
-                    xDelta = spacing.Horizontal - (group:GetLeft() - previous:GetRight())
-                elseif previousGroupMembers and #previousGroupMembers > 0 then
-                    local lastPreviousGroupMember = previousGroupMembers[#previousGroupMembers]
-                    yDelta = spacing.Vertical + (group:GetTop() - lastPreviousGroupMember:GetBottom())
-                end
-
-                if group:GetLeft() >= previous:GetLeft() then
-                    petsReferencePoint = members[1]
-                end
+            if group:GetLeft() == previous:GetLeft() then
+                -- add vertical spacing between each group
+                yDelta = spacing.Vertical + (group:GetTop() - anchor:GetBottom())
+            elseif group:GetTop() == previous:GetTop() then
+                -- add horizontal spacing between each group
+                xDelta = spacing.Horizontal - (group:GetLeft() - anchor:GetRight())
             end
 
+            petsReferencePoint = members[1]
             group:AdjustPointsOffset(xDelta, -yDelta)
         end
 
