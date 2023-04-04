@@ -1,5 +1,7 @@
 local _, addon = ...
 local eventFrame = nil
+local previousPartySpacing = nil
+local previousRaidSpacing = nil
 
 --- Applies spacing to frames that are organised in 'flat' mode.
 --- Flat mode is where frames are all placed relative to 1 point, i.e. the parent container.
@@ -72,7 +74,10 @@ local function FlatModePets(pets, spacing, horizontal, relativeTo)
 end
 
 local function GroupedModeMembers(members, spacing, horizontal)
+    -- not sure why, but group member top values aren't exact
+    -- so use fuzzy sorting
     table.sort(members, function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
+
     for j = 2, #members do
         local member = members[j]
         local _, _, _, offsetX, offsetY = member:GetPoint()
@@ -231,11 +236,26 @@ function addon:ApplySpacing()
     end
 
     if CompactRaidFrameContainer and not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
-        ApplyRaidFrameSpacing()
+        local _, _, _, spacing = GetSettings(true)
+        local zeroSpacing = spacing.Horizontal == 0 and spacing.Vertical == 0
+        local previousNonZero = previousRaidSpacing and (previousRaidSpacing.Horizontal ~= 0 or previousRaidSpacing.Vertical ~= 0)
+
+        -- avoid applying 0 spacing
+        if not zeroSpacing or previousNonZero then
+            ApplyRaidFrameSpacing()
+            previousRaidSpacing = spacing
+        end
     end
 
     if CompactPartyFrame and not CompactPartyFrame:IsForbidden() and CompactPartyFrame:IsVisible() then
-        ApplyPartyFrameSpacing()
+        local _, _, _, spacing = GetSettings(false)
+        local zeroSpacing = spacing.Horizontal == 0 and spacing.Vertical == 0
+        local previousNonZero = previousPartySpacing and (previousPartySpacing.Horizontal ~= 0 or previousPartySpacing.Vertical ~= 0)
+
+        if not zeroSpacing or previousNonZero then
+            ApplyPartyFrameSpacing()
+            previousPartySpacing = spacing
+        end
     end
 end
 
