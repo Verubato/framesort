@@ -12,8 +12,6 @@ local function GridLayout(frames)
     local byLookup = {}
     local row = 0
     local col = 0
-    local maxRow = 0
-    local maxCol = 0
 
     -- build a view of the row/col layout
     for i, frame in ipairs(frames) do
@@ -29,12 +27,8 @@ local function GridLayout(frames)
             if isNewRow then
                 row = row + 1
                 col = 0
-
-                if row > maxRow then maxRow = row end
             else
                 col = col + 1
-
-                if col > maxCol then maxCol = col end
             end
         end
 
@@ -64,17 +58,12 @@ local function FlatMode(frames, spacing)
 
         if previous then
             local isNewRow = ((current:GetLeft() or 0) < previousPos.left) or ((current:GetTop() or 0) < previousPos.top)
-            local isPetAfterPet = addon:IsPet(current.unit) and addon:IsPet(previous.unit)
 
-            if isPetAfterPet then
-                -- TODO: get pet spacing to work
-                -- pets are such a pain to add spacing to
-                -- so just ignore them for now
-            elseif isNewRow then
+            if isNewRow then
                 -- we've hit a new row
                 -- subtract existing vertical spacing
                 yDelta = spacing.Vertical + ((current:GetTop() or 0) - (previous:GetBottom() or 0))
-            else
+            elseif not addon:IsPet(current.unit) then
                 -- we're within the same row
                 -- subtract existing spacing
                 xDelta = spacing.Horizontal - ((current:GetLeft() or 0) - (previous:GetRight() or 0))
@@ -93,29 +82,30 @@ local function FlatMode(frames, spacing)
     end
 end
 
-local function FlatModePets(pets, spacing, horizontal, relativeTo)
-    if #pets == 0 then return end
-
+local function FlatModePets(pets, spacing, membersFlat, horizontal, relativeTo)
     table.sort(pets, function(x, y) return addon:CompareTopLeft(x, y) end)
 
     -- move pet frames as if they were a group
     local xDelta = 0
     local yDelta = 0
 
-    if horizontal then
+    if membersFlat then
+        if relativeTo:GetLeft() > pets[1]:GetLeft() then
+            xDelta = relativeTo:GetLeft() - pets[1]:GetLeft()
+        end
         yDelta = (relativeTo:GetBottom() - pets[1]:GetTop()) - spacing.Vertical
     else
-        xDelta = (relativeTo:GetRight() - pets[1]:GetLeft()) + spacing.Horizontal
-
-        -- in vertical mode, blizzard doesn't align the pet frame nicely
-        yDelta = relativeTo:GetTop() - pets[1]:GetTop()
+        if horizontal then
+            yDelta = (relativeTo:GetBottom() - pets[1]:GetTop()) - spacing.Vertical
+        else
+            yDelta = relativeTo:GetTop() - pets[1]:GetTop()
+            xDelta = (relativeTo:GetRight() - pets[1]:GetLeft()) + spacing.Horizontal
+        end
     end
 
     for _, pet in pairs(pets) do
         pet:AdjustPointsOffset(xDelta, yDelta)
     end
-
-    FlatMode(pets, spacing)
 end
 
 local function GroupedModeMembers(members, spacing, horizontal)
@@ -150,8 +140,8 @@ end
 ---Grouped mode is where frames are placed relative to the frame before it within one or more groups,
 ---e.g.: group1: frame3 is placed relative to frame2 which is placed relative to frame 1.
 ---e.g.: group2: frame5 is placed relative to frame4.
-local function GroupedMode(groups, pets, spacing, horizontal)
-    local posByGroup, groupByPos, maxRow, maxCol = GridLayout(groups)
+local function GroupedMode(groups, spacing, horizontal)
+    local posByGroup, groupByPos = GridLayout(groups)
     local membersByGroup = {}
 
     for _, group in ipairs(groups) do
@@ -202,7 +192,7 @@ local function GroupedMode(groups, pets, spacing, horizontal)
                     local members = membersByGroup[next]
                     local lastMember = members[#members]
 
-                    if not bottomMost or lastMember:GetBottom() < bottomMost:GetBottom() then
+                    if not bottomMost or (lastMember:GetBottom() or 0) < (bottomMost:GetBottom() or 0) then
                         bottomMost = lastMember
                     end
 
@@ -237,7 +227,7 @@ local function GroupedMode(groups, pets, spacing, horizontal)
                         local members = membersByGroup[next]
                         local lastMember = members[#members]
 
-                        if not leftMost or lastMember:GetRight() > leftMost:GetRight() then
+                        if not leftMost or (lastMember:GetRight() or 0) > (leftMost:GetRight() or 0) then
                             leftMost = lastMember
                         end
                     end
@@ -276,14 +266,6 @@ local function GroupedMode(groups, pets, spacing, horizontal)
         end
 
         group:AdjustPointsOffset(xDelta, -yDelta)
-    end
-
-    if pets and #pets > 0 then
-        local lastGroup = groupByPos[maxRow][maxCol]
-        local members = membersByGroup[lastGroup]
-        local petsAnchor = members[1] or lastGroup
-
-        FlatModePets(pets, spacing, horizontal, petsAnchor)
     end
 end
 
@@ -336,33 +318,46 @@ local function ApplyPartyFrameSpacing()
 
     if not flat and showPets then
         local _, pets, _ = addon:GetRaidFrames()
-        FlatModePets(pets, spacing, horizontal, frames[1])
+        FlatModePets(pets, spacing, false, horizontal, frames[1])
     end
 end
 
 local function ApplyRaidFrameSpacing()
     local flat, horizontal, showPets, spacing = GetSettings(true)
 
-    if flat then
-        local _, _, frames = addon:GetRaidFrames()
-        if #frames == 0 then return end
+    addon:Debug("Applying raid frame spacing" ..
+    (showPets and " with pets " or " ") ..
+    (horizontal and "(horizontal " or "(vertical ") ..
+    (flat and "flattened" or "grouped") ..
+    " layout.")
 
-        addon:Debug("Applying raid frame spacing (flattened layout).")
-        FlatMode(frames, spacing)
+    if flat then
+        local members, pets, _ = addon:GetRaidFrames()
+        if #members == 0 and #pets == 0 then return end
+
+        FlatMode(members, spacing)
+
+        if not pets or #pets == 0 then return end
+
+        table.sort(members, function(x, y) return addon:CompareLeftTop(x, y) end)
+        FlatModePets(pets, spacing, true, horizontal, members[#members])
     else
         local groups = addon:GetRaidFrameGroups()
         if #groups == 0 then return end
+
+        GroupedMode(groups, spacing, horizontal)
 
         local pets = nil
         if showPets then
             _, pets, _ = addon:GetRaidFrames()
         end
 
-        local withPets = showPets and " with pets" or ""
-        local direction = (horizontal and "(horizontal" or "(vertical") .. " grouped layout)."
-        addon:Debug("Applying raid frame spacing" .. withPets .. direction)
+        if not pets or #pets == 0 then return end
 
-        GroupedMode(groups, pets, spacing, horizontal)
+        local lastGroup = groups[#groups]
+        local lastGroupMembers = addon:GetRaidFrameGroupMembers(lastGroup)
+
+        FlatModePets(pets, spacing, false, horizontal, lastGroupMembers[1])
     end
 end
 
