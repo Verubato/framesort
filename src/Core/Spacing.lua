@@ -2,12 +2,56 @@ local _, addon = ...
 local eventFrame = nil
 local previousPartySpacing = nil
 local previousRaidSpacing = nil
+local fsMath = addon.Math
 
---- Applies spacing to frames that are organised in 'flat' mode.
---- Flat mode is where frames are all placed relative to 1 point, i.e. the parent container.
+--- Returns a lookup table of frames to their row and column positions.
+local function GridLayout(frames)
+    table.sort(frames, function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
+
+    local byGroup = {}
+    local byLookup = {}
+    local row = 0
+    local col = 0
+    local maxRow = 0
+    local maxCol = 0
+
+    -- build a view of the row/col layout
+    for i, frame in ipairs(frames) do
+        local previous = i > 1 and frames[i - 1] or nil
+
+        if previous then
+            local groupFuzzyLeft = fsMath:Round(frame:GetLeft() or 0)
+            local groupFuzzyTop = fsMath:Round(frame:GetTop() or 0)
+            local previousFuzzyLeft = fsMath:Round(previous:GetLeft() or 0)
+            local previousFuzzyTop = fsMath:Round(previous:GetTop() or 0)
+            local isNewRow = groupFuzzyLeft < previousFuzzyLeft or groupFuzzyTop < previousFuzzyTop
+
+            if isNewRow then
+                row = row + 1
+                col = 0
+
+                if row > maxRow then maxRow = row end
+            else
+                col = col + 1
+
+                if col > maxCol then maxCol = col end
+            end
+        end
+
+        byGroup[frame] = {
+            Row = row,
+            Column = col
+        }
+        byLookup[row] = byLookup[row] or {}
+        byLookup[row][col] = frame
+    end
+
+    return byGroup, byLookup, maxRow, maxCol
+end
+
+---Applies spacing to frames that are organised in 'flat' mode.
+---Flat mode is where frames are all placed relative to 1 point, i.e. the parent container.
 local function FlatMode(frames, spacing)
-    local xDelta = 0
-    local yDelta = 0
     local previousPos = nil
 
     -- iterate over the frames from top left to bottom right
@@ -15,6 +59,8 @@ local function FlatMode(frames, spacing)
 
     for i, current in ipairs(frames) do
         local previous = i > 1 and frames[i - 1] or nil
+        local xDelta = 0
+        local yDelta = 0
 
         if previous then
             local isNewRow = ((current:GetLeft() or 0) < previousPos.left) or ((current:GetTop() or 0) < previousPos.top)
@@ -24,16 +70,15 @@ local function FlatMode(frames, spacing)
                 -- TODO: get pet spacing to work
                 -- pets are such a pain to add spacing to
                 -- so just ignore them for now
-            elseif not isNewRow then
-                -- we're within the same row
-                -- subtract existing spacing
-                xDelta = spacing.Horizontal - ((current:GetLeft() or 0) - (previous:GetRight() or 0))
             elseif isNewRow then
                 -- we've hit a new row
                 -- subtract existing vertical spacing
                 yDelta = spacing.Vertical + ((current:GetTop() or 0) - (previous:GetBottom() or 0))
-                -- reset the horizontal spacing
-                xDelta = 0
+            else
+                -- we're within the same row
+                -- subtract existing spacing
+                xDelta = spacing.Horizontal - ((current:GetLeft() or 0) - (previous:GetRight() or 0))
+                yDelta = current:GetTop() - previous:GetTop()
             end
         end
 
@@ -54,20 +99,20 @@ local function FlatModePets(pets, spacing, horizontal, relativeTo)
     table.sort(pets, function(x, y) return addon:CompareTopLeft(x, y) end)
 
     -- move pet frames as if they were a group
-    local xOffset = 0
-    local yOffset = 0
+    local xDelta = 0
+    local yDelta = 0
 
     if horizontal then
-        yOffset = (relativeTo:GetBottom() - pets[1]:GetTop()) - spacing.Vertical
+        yDelta = (relativeTo:GetBottom() - pets[1]:GetTop()) - spacing.Vertical
     else
-        xOffset = (relativeTo:GetRight() - pets[1]:GetLeft()) + spacing.Horizontal
+        xDelta = (relativeTo:GetRight() - pets[1]:GetLeft()) + spacing.Horizontal
 
         -- in vertical mode, blizzard doesn't align the pet frame nicely
-        yOffset = relativeTo:GetTop() - pets[1]:GetTop()
+        yDelta = relativeTo:GetTop() - pets[1]:GetTop()
     end
 
     for _, pet in pairs(pets) do
-        pet:AdjustPointsOffset(xOffset, yOffset)
+        pet:AdjustPointsOffset(xDelta, yDelta)
     end
 
     FlatMode(pets, spacing)
@@ -78,18 +123,23 @@ local function GroupedModeMembers(members, spacing, horizontal)
     -- so use fuzzy sorting
     table.sort(members, function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
 
-    for j = 2, #members do
-        local member = members[j]
+    for i = 1, #members do
+        local member = members[i]
         local _, _, _, offsetX, offsetY = member:GetPoint()
         local xDelta = 0
         local yDelta = 0
 
-        -- frames are placed relative of each other
-        -- so offset values contain what spacing we've previously applied
-        if horizontal then
-            xDelta = spacing.Horizontal - (offsetX or 0)
+        if i == 1 then
+            -- no idea why, but sometimes the first member X offset is set when it shouldn't be
+            if horizontal then xDelta = -offsetX end
         else
-            yDelta = spacing.Vertical + (offsetY or 0)
+            -- frames are placed relative of each other
+            -- so offset values contain what spacing we've previously applied
+            if horizontal then
+                xDelta = spacing.Horizontal - (offsetX or 0)
+            else
+                yDelta = spacing.Vertical + (offsetY or 0)
+            end
         end
 
         member:AdjustPointsOffset(xDelta, -yDelta)
@@ -101,39 +151,139 @@ end
 ---e.g.: group1: frame3 is placed relative to frame2 which is placed relative to frame 1.
 ---e.g.: group2: frame5 is placed relative to frame4.
 local function GroupedMode(groups, pets, spacing, horizontal)
-    local petsReferencePoint = groups[1]
-    local previousGroupMembers = nil
+    local posByGroup, groupByPos, maxRow, maxCol = GridLayout(groups)
+    local membersByGroup = {}
 
-    table.sort(groups, function(x, y) return addon:CompareTopLeft(x, y) end)
-
-    for i, group in ipairs(groups) do
-        local previous = i > 1 and groups[i - 1] or nil
+    for _, group in ipairs(groups) do
         local members = addon:GetRaidFrameGroupMembers(group)
+        table.sort(members, function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
 
-        if previous then
-            local xDelta = 0
-            local yDelta = 0
-            local lastPreviousGroupMember = previousGroupMembers and previousGroupMembers[#previousGroupMembers]
-            local anchor = lastPreviousGroupMember or previous
+        membersByGroup[group] = members
+    end
 
-            if group:GetLeft() == previous:GetLeft() then
-                -- add vertical spacing between each group
-                yDelta = spacing.Vertical + (group:GetTop() - anchor:GetBottom())
-            elseif group:GetTop() == previous:GetTop() then
-                -- add horizontal spacing between each group
-                xDelta = spacing.Horizontal - (group:GetLeft() - anchor:GetRight())
-            end
+    local debugRow = 0
+    while groupByPos[debugRow] do
+        local debugCol = 0
 
-            petsReferencePoint = members[1]
-            group:AdjustPointsOffset(xDelta, -yDelta)
+        while groupByPos[debugRow][debugCol] do
+            local group = groupByPos[debugRow][debugCol]
+            addon:Debug(group.title:GetText() .. ": Row = " .. debugRow .. " Col = " .. debugCol)
+            debugCol = debugCol + 1
         end
 
-        previousGroupMembers = members
+        debugRow = debugRow + 1
+    end
+
+    --- apply spacing to the member frames
+    for _, group in ipairs(groups) do
+        local members = membersByGroup[group]
         GroupedModeMembers(members, spacing, horizontal)
     end
 
+    -- determine the vertical anchors
+    local verticalAnchorsByRow = {}
+    for i = 1, #groups do
+        local group = groups[i]
+        local pos = posByGroup[group]
+
+        if pos.Row >= 1 then
+            if horizontal then
+                -- in horizontal mode, the anchor is simply the group above
+                local above = pos.Row >= 1 and groupByPos[pos.Row - 1][pos.Column]
+                verticalAnchorsByRow[pos.Row] = above
+            else
+                -- in vertical mode, the anchor is the bottom most member of the groups in the above row
+                local previousRow = groupByPos[pos.Row - 1]
+                local bottomMost = nil
+                local col = 0
+
+                while previousRow[col] do
+                    local next = previousRow[col]
+                    local members = membersByGroup[next]
+                    local lastMember = members[#members]
+
+                    if not bottomMost or lastMember:GetBottom() < bottomMost:GetBottom() then
+                        bottomMost = lastMember
+                    end
+
+                    col = col + 1
+                end
+
+                verticalAnchorsByRow[pos.Row] = bottomMost
+            end
+        end
+    end
+
+    -- determine the horizontal anchors
+    local horizontalAnchorsByColumn = {}
+    for i = 1, #groups do
+        local group = groups[i]
+        local pos = posByGroup[group]
+
+        if pos.Column >= 1 then
+            if not horizontal then
+                -- in vertical mode, the anchor is simply the group to the left
+                local left = pos.Column >= 1 and groupByPos[pos.Row][pos.Column - 1] or nil
+                horizontalAnchorsByColumn[pos.Column] = left
+            else
+                -- in horizontal mode, the anchor is the left most member of the groups in the left column
+                local leftMost = nil
+                local row = 0
+
+                while groupByPos[row] do
+                    local next = groupByPos[row][pos.Column - 1]
+
+                    if next then
+                        local members = membersByGroup[next]
+                        local lastMember = members[#members]
+
+                        if not leftMost or lastMember:GetRight() > leftMost:GetRight() then
+                            leftMost = lastMember
+                        end
+                    end
+
+                    row = row + 1
+                end
+
+                horizontalAnchorsByColumn[pos.Column] = leftMost
+            end
+        end
+    end
+
+    -- finally, apply spacing between the groups
+    for i = 1, #groups do
+        local group = groups[i]
+        local pos = posByGroup[group]
+        local xDelta = 0
+        local yDelta = 0
+
+        -- vertical spacing
+        if pos.Row >= 1 then
+            local anchor = verticalAnchorsByRow[pos.Row]
+
+            if anchor then
+                yDelta = spacing.Vertical + (group:GetTop() - anchor:GetBottom())
+            end
+        end
+
+        -- horizontal spacing
+        if pos.Column >= 1 then
+            local anchor = horizontalAnchorsByColumn[pos.Column]
+
+            if anchor then
+                xDelta = spacing.Horizontal - (group:GetLeft() - anchor:GetRight())
+            end
+        end
+
+        group:AdjustPointsOffset(xDelta, -yDelta)
+    end
+
     if pets and #pets > 0 then
-        FlatModePets(pets, spacing, horizontal, petsReferencePoint)
+        local lastGroup = groupByPos[maxRow][maxCol]
+        local members = membersByGroup[lastGroup]
+        local petsAnchor = members[1] or lastGroup
+
+        FlatModePets(pets, spacing, horizontal, petsAnchor)
     end
 end
 
