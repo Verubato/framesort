@@ -8,8 +8,8 @@ local fsMath = addon.Math
 local function GridLayout(frames)
     table.sort(frames, function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
 
-    local byGroup = {}
-    local byLookup = {}
+    local byFrame = {}
+    local byPos = {}
     local row = 0
     local col = 0
 
@@ -32,83 +32,175 @@ local function GridLayout(frames)
             end
         end
 
-        byGroup[frame] = {
+        byFrame[frame] = {
             Row = row,
             Column = col
         }
-        byLookup[row] = byLookup[row] or {}
-        byLookup[row][col] = frame
+        byPos[row] = byPos[row] or {}
+        byPos[row][col] = frame
     end
 
-    return byGroup, byLookup, maxRow, maxCol
+    local debugRow = 0
+    while byPos[debugRow] do
+        local debugCol = 0
+
+        while byPos[debugRow][debugCol] do
+            local frame = byPos[debugRow][debugCol]
+            local name = (frame.title and frame.title:GetText()) or (frame.unit and UnitName(frame.unit)) or frame:GetName()
+
+            addon:Debug(name .. ": Row = " .. debugRow .. " Col = " .. debugCol)
+            debugCol = debugCol + 1
+        end
+
+        debugRow = debugRow + 1
+    end
+
+    return byFrame, byPos, maxRow, maxCol
+end
+
+local function GetSettings(isRaid)
+    local flat = nil
+    local horizontal = nil
+    local showPets = CompactRaidFrameManager_GetSetting("DisplayPets")
+    local spacing = isRaid and addon.Options.Appearance.Raid.Spacing or addon.Options.Appearance.Party.Spacing
+
+    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+        if isRaid then
+            local displayType = EditModeManagerFrame:GetSettingValue(
+                Enum.EditModeSystem.UnitFrame,
+                Enum.EditModeUnitFrameSystemIndices.Raid,
+                Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
+
+            flat =
+                displayType == Enum.RaidGroupDisplayType.CombineGroupsVertical or
+                displayType == Enum.RaidGroupDisplayType.CombineGroupsHorizontal
+
+            horizontal =
+                displayType == Enum.RaidGroupDisplayType.SeparateGroupsHorizontal or
+                displayType == Enum.RaidGroupDisplayType.CombineGroupsHorizontal
+        else
+            flat = true
+
+            horizontal = EditModeManagerFrame:GetSettingValueBool(
+                Enum.EditModeSystem.UnitFrame,
+                Enum.EditModeUnitFrameSystemIndices.Party,
+                Enum.EditModeUnitFrameSetting.UseHorizontalGroups)
+        end
+    else
+        flat = not CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
+        horizontal = CompactRaidFrameManager_GetSetting("HorizontalGroups")
+        spacing = addon.Options.Appearance.Raid.Spacing
+    end
+
+    return flat, horizontal, showPets, spacing
 end
 
 ---Applies spacing to frames that are organised in 'flat' mode.
 ---Flat mode is where frames are all placed relative to 1 point, i.e. the parent container.
-local function FlatMode(frames, spacing)
-    local previousPos = nil
+local function FlatMembers(frames, spacing)
+    local _, frameByPos = GridLayout(frames)
 
-    -- iterate over the frames from top left to bottom right
-    table.sort(frames, function(x, y) return addon:CompareTopLeft(x, y) end)
-
-    for i, current in ipairs(frames) do
-        local previous = i > 1 and frames[i - 1] or nil
+    local row = 0
+    while frameByPos[row] do
         local xDelta = 0
         local yDelta = 0
 
-        if previous then
-            local isNewRow = ((current:GetLeft() or 0) < previousPos.left) or ((current:GetTop() or 0) < previousPos.top)
+        if row >= 1 then
+            local first = frameByPos[row][0]
+            local above = frameByPos[row - 1][0]
 
-            if isNewRow then
-                -- we've hit a new row
-                -- subtract existing vertical spacing
-                yDelta = spacing.Vertical + ((current:GetTop() or 0) - (previous:GetBottom() or 0))
-            elseif not addon:IsPet(current.unit) then
-                -- we're within the same row
-                -- subtract existing spacing
-                xDelta = spacing.Horizontal - ((current:GetLeft() or 0) - (previous:GetRight() or 0))
-                yDelta = current:GetTop() - previous:GetTop()
+            yDelta = spacing.Vertical + ((first:GetTop() or 0) - (above:GetBottom() or 0))
+        end
+
+        local col = 0
+        while frameByPos[row][col] do
+            local frame = frameByPos[row][col]
+
+            if col >= 1 then
+                local left = frameByPos[row][col - 1]
+                xDelta = spacing.Horizontal - ((frame:GetLeft() or 0) - (left:GetRight() or 0))
+            end
+
+            frame:AdjustPointsOffset(xDelta, -yDelta)
+
+            col = col + 1
+        end
+
+        row = row + 1
+    end
+end
+
+local function Pets(spacing, flat, horizontal)
+    local _, pets, _ = addon:GetRaidFrames()
+
+    if #pets == 0 then return end
+
+    local firstPet = pets[1]
+
+    local function RelativePoint(frame, parent)
+        local left = (frame:GetLeft() or 0) - (parent:GetLeft() or 0)
+        local right = (frame:GetRight() or 0) - (parent:GetRight() or 0)
+        local top = (frame:GetTop() or 0) - (parent:GetTop() or 0)
+        local bottom = (frame:GetBottom() or 0) - (parent:GetBottom() or 0)
+
+        return left, right, top, bottom
+    end
+
+    local parent = CompactRaidFrameContainer
+
+    if flat then
+        local members, _, _ = addon:GetRaidFrames()
+        table.sort(members, function(x, y) return addon:CompareLeftTop(x, y) end)
+
+        local left, _, _, bottom = RelativePoint(members[#members], parent)
+        firstPet:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", left, bottom - spacing.Vertical)
+    else
+        local groups = addon:GetRaidFrameGroups()
+
+        table.sort(groups, function(x, y) return addon:CompareTopLeft(x, y) end)
+
+        local lastGroup = groups[#groups]
+        local lastGroupMembers = addon:GetRaidFrameGroupMembers(lastGroup)
+
+        table.sort(lastGroupMembers, function(x, y) return addon:CompareTopLeft(x, y) end)
+
+        if horizontal then
+            table.sort(lastGroupMembers, function(x, y) return addon:CompareTopLeft(x, y) end)
+        end
+
+        local left, right, top, bottom = RelativePoint(lastGroupMembers[1], parent)
+        if horizontal then
+            firstPet:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", left, bottom - spacing.Vertical)
+        else
+            firstPet:SetPoint("TOPLEFT", parent, "TOPRIGHT", right + spacing.Horizontal, top)
+        end
+    end
+
+    -- move all the remaining pets
+    for i = 2, #pets do
+        local pet = pets[i]
+        local previous = pets[i - 1]
+        local is2ndPet = i % 2 == 0
+
+        if is2ndPet then
+            local left, _, _, bottom = RelativePoint(previous, parent)
+            -- 2 pet frames fit into 1 member raid frame
+            -- so for the 2nd frame just anchor it to the first
+            pet:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", left, bottom)
+        else
+            if horizontal and not flat then
+                local twoBefore = pets[i - 2]
+                local _, right, top, _ = RelativePoint(twoBefore, parent)
+                pet:SetPoint("TOPLEFT", parent, "TOPRIGHT", right + spacing.Horizontal, top)
+            else
+                local relativeLeft, _, _, relativeBottom = RelativePoint(previous, parent)
+                pet:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", relativeLeft, relativeBottom - spacing.Vertical)
             end
         end
-
-        -- store the unmodified coords
-        previousPos = {
-            left = current:GetLeft() or 0,
-            top = current:GetTop() or 0,
-        }
-
-        -- apply the spacing
-        current:AdjustPointsOffset(xDelta, -yDelta)
     end
 end
 
-local function FlatModePets(pets, spacing, membersFlat, horizontal, relativeTo)
-    table.sort(pets, function(x, y) return addon:CompareTopLeft(x, y) end)
-
-    -- move pet frames as if they were a group
-    local xDelta = 0
-    local yDelta = 0
-
-    if membersFlat then
-        if relativeTo:GetLeft() > pets[1]:GetLeft() then
-            xDelta = relativeTo:GetLeft() - pets[1]:GetLeft()
-        end
-        yDelta = (relativeTo:GetBottom() - pets[1]:GetTop()) - spacing.Vertical
-    else
-        if horizontal then
-            yDelta = (relativeTo:GetBottom() - pets[1]:GetTop()) - spacing.Vertical
-        else
-            yDelta = relativeTo:GetTop() - pets[1]:GetTop()
-            xDelta = (relativeTo:GetRight() - pets[1]:GetLeft()) + spacing.Horizontal
-        end
-    end
-
-    for _, pet in pairs(pets) do
-        pet:AdjustPointsOffset(xDelta, yDelta)
-    end
-end
-
-local function GroupedModeMembers(members, spacing, horizontal)
+local function GroupedMembers(members, spacing, horizontal)
     -- not sure why, but group member top values aren't exact
     -- so use fuzzy sorting
     table.sort(members, function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
@@ -140,7 +232,7 @@ end
 ---Grouped mode is where frames are placed relative to the frame before it within one or more groups,
 ---e.g.: group1: frame3 is placed relative to frame2 which is placed relative to frame 1.
 ---e.g.: group2: frame5 is placed relative to frame4.
-local function GroupedMode(groups, spacing, horizontal)
+local function Groups(groups, spacing, horizontal)
     local posByGroup, groupByPos = GridLayout(groups)
     local membersByGroup = {}
 
@@ -151,23 +243,10 @@ local function GroupedMode(groups, spacing, horizontal)
         membersByGroup[group] = members
     end
 
-    local debugRow = 0
-    while groupByPos[debugRow] do
-        local debugCol = 0
-
-        while groupByPos[debugRow][debugCol] do
-            local group = groupByPos[debugRow][debugCol]
-            addon:Debug(group.title:GetText() .. ": Row = " .. debugRow .. " Col = " .. debugCol)
-            debugCol = debugCol + 1
-        end
-
-        debugRow = debugRow + 1
-    end
-
     --- apply spacing to the member frames
     for _, group in ipairs(groups) do
         local members = membersByGroup[group]
-        GroupedModeMembers(members, spacing, horizontal)
+        GroupedMembers(members, spacing, horizontal)
     end
 
     -- determine the vertical anchors
@@ -240,7 +319,7 @@ local function GroupedMode(groups, spacing, horizontal)
         end
     end
 
-    -- finally, apply spacing between the groups
+    -- apply spacing between the groups
     for i = 1, #groups do
         local group = groups[i]
         local pos = posByGroup[group]
@@ -252,7 +331,7 @@ local function GroupedMode(groups, spacing, horizontal)
             local anchor = verticalAnchorsByRow[pos.Row]
 
             if anchor then
-                yDelta = spacing.Vertical + (group:GetTop() - anchor:GetBottom())
+                yDelta = spacing.Vertical + ((group:GetTop() or 0) - (anchor:GetBottom() or 0))
             end
         end
 
@@ -261,7 +340,7 @@ local function GroupedMode(groups, spacing, horizontal)
             local anchor = horizontalAnchorsByColumn[pos.Column]
 
             if anchor then
-                xDelta = spacing.Horizontal - (group:GetLeft() - anchor:GetRight())
+                xDelta = spacing.Horizontal - ((group:GetLeft() or 0) - (anchor:GetRight() or 0))
             end
         end
 
@@ -269,95 +348,31 @@ local function GroupedMode(groups, spacing, horizontal)
     end
 end
 
-local function GetSettings(isRaid)
-    local flat = nil
-    local horizontal = nil
-    local showPets = CompactRaidFrameManager_GetSetting("DisplayPets")
-    local spacing = isRaid and addon.Options.Appearance.Raid.Spacing or addon.Options.Appearance.Party.Spacing
-
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        if isRaid then
-            local displayType = EditModeManagerFrame:GetSettingValue(
-                Enum.EditModeSystem.UnitFrame,
-                Enum.EditModeUnitFrameSystemIndices.Raid,
-                Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
-
-            flat =
-                displayType == Enum.RaidGroupDisplayType.CombineGroupsVertical or
-                displayType == Enum.RaidGroupDisplayType.CombineGroupsHorizontal
-
-            horizontal =
-                displayType == Enum.RaidGroupDisplayType.SeparateGroupsHorizontal or
-                displayType == Enum.RaidGroupDisplayType.CombineGroupsHorizontal
-        else
-            flat = true
-
-            horizontal = EditModeManagerFrame:GetSettingValueBool(
-                Enum.EditModeSystem.UnitFrame,
-                Enum.EditModeUnitFrameSystemIndices.Party,
-                Enum.EditModeUnitFrameSetting.UseHorizontalGroups)
-        end
-    else
-        flat = not CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
-        horizontal = CompactRaidFrameManager_GetSetting("HorizontalGroups")
-        spacing = addon.Options.Appearance.Raid.Spacing
-    end
-
-    return flat, horizontal, showPets, spacing
-end
-
 local function ApplyPartyFrameSpacing()
     local frames = addon:GetPartyFrames()
-    if #frames == 0 then return end
+    local _, horizontal, showPets, spacing = GetSettings(false)
 
-    local flat, horizontal, showPets, spacing = GetSettings(false)
+    GroupedMembers(frames, spacing, horizontal)
 
-    addon:Debug("Applying party frame spacing (" .. (horizontal and "horizontal" or "vertical") .. " layout).")
-
-    GroupedModeMembers(frames, spacing, horizontal)
-
-    if not flat and showPets then
-        local _, pets, _ = addon:GetRaidFrames()
-        FlatModePets(pets, spacing, false, horizontal, frames[1])
+    if showPets then
+        Pets(spacing, false, horizontal)
     end
 end
 
 local function ApplyRaidFrameSpacing()
     local flat, horizontal, showPets, spacing = GetSettings(true)
 
-    addon:Debug("Applying raid frame spacing" ..
-    (showPets and " with pets " or " ") ..
-    (horizontal and "(horizontal " or "(vertical ") ..
-    (flat and "flattened" or "grouped") ..
-    " layout.")
-
     if flat then
-        local members, pets, _ = addon:GetRaidFrames()
-        if #members == 0 and #pets == 0 then return end
-
-        FlatMode(members, spacing)
-
-        if not pets or #pets == 0 then return end
-
-        table.sort(members, function(x, y) return addon:CompareLeftTop(x, y) end)
-        FlatModePets(pets, spacing, true, horizontal, members[#members])
+        local members, _, _ = addon:GetRaidFrames()
+        FlatMembers(members, spacing)
     else
         local groups = addon:GetRaidFrameGroups()
-        if #groups == 0 then return end
 
-        GroupedMode(groups, spacing, horizontal)
+        Groups(groups, spacing, horizontal)
+    end
 
-        local pets = nil
-        if showPets then
-            _, pets, _ = addon:GetRaidFrames()
-        end
-
-        if not pets or #pets == 0 then return end
-
-        local lastGroup = groups[#groups]
-        local lastGroupMembers = addon:GetRaidFrameGroupMembers(lastGroup)
-
-        FlatModePets(pets, spacing, false, horizontal, lastGroupMembers[1])
+    if showPets then
+        Pets(spacing, flat, horizontal)
     end
 end
 
@@ -387,6 +402,7 @@ function addon:ApplySpacing()
 
         -- avoid applying 0 spacing
         if not zeroSpacing or previousNonZero then
+            addon:Debug("Applying raid frame spacing.")
             ApplyRaidFrameSpacing()
             previousRaidSpacing = spacing
         end
@@ -398,6 +414,7 @@ function addon:ApplySpacing()
         local previousNonZero = previousPartySpacing and (previousPartySpacing.Horizontal ~= 0 or previousPartySpacing.Vertical ~= 0)
 
         if not zeroSpacing or previousNonZero then
+            addon:Debug("Applying party frame spacing.")
             ApplyPartyFrameSpacing()
             previousPartySpacing = spacing
         end
