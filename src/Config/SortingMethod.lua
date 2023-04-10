@@ -33,6 +33,7 @@ function builder:BuildSortingMethodOptions(parent)
 
     local taintless = CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
     taintless:SetPoint("TOPLEFT", panel, verticalSpacing, -verticalSpacing)
+    builder:TextShim(taintless)
     taintless.Text:SetText("Taintless")
     taintless.Text:SetFontObject("GameFontNormalLarge")
     taintless:SetChecked(addon.Options.SortingMethod.TaintlessEnabled)
@@ -63,6 +64,7 @@ function builder:BuildSortingMethodOptions(parent)
 
     local traditional = CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
     traditional:SetPoint("TOPLEFT", anchor, 0, -verticalSpacing * 2)
+    builder:TextShim(traditional)
     traditional.Text:SetText("Traditional")
     traditional.Text:SetFontObject("GameFontNormalLarge")
     traditional:SetChecked(addon.Options.SortingMethod.TraditionalEnabled)
@@ -80,7 +82,7 @@ function builder:BuildSortingMethodOptions(parent)
         anchor = description
     end
 
-    anchor = BuildDottedList(panel, anchor,"Pros: ", {
+    anchor = BuildDottedList(panel, anchor, "Pros: ", {
         "Probably more reliable as it leverages Blizzard's internal sorting methods.",
         "If Blizzard were to resolve their UI issues, this would likely become the recommended mode."
     })
@@ -98,7 +100,7 @@ function builder:BuildSortingMethodOptions(parent)
     local reloadButton = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
     reloadButton:SetPoint("TOPLEFT", reloadReminder, 0, -verticalSpacing * 1.5)
     reloadButton:SetWidth(100)
-    reloadButton.Text:SetText("Reload")
+    reloadButton:SetText("Reload")
     reloadButton:HookScript("OnClick", function() ReloadUI() end)
     reloadButton:SetShown(false)
 

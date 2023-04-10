@@ -8,6 +8,12 @@ local builder = addon.OptionsBuilder
 local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
 local horizontalSpacing = addon.OptionsBuilder.HorizontalSpacing
 
+function builder:TextShim(frame)
+    if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then return end
+
+    frame.Text = frame.text
+end
+
 ---Adds the title UI components.
 ---@param panel table the parent UI panel.
 ---@return table The bottom left most control to use for anchoring subsequent UI components.
@@ -69,6 +75,7 @@ local function BuildSortModeCheckboxes(
     local enabled = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     -- not sure why, but checkbox left seems to be off by about 4 units by default
     enabled:SetPoint("TOPLEFT", pointOffset, "BOTTOMLEFT", -4, -verticalSpacing)
+    builder:TextShim(enabled)
     enabled.Text:SetText(" " .. labelText)
     enabled.Text:SetFontObject("GameFontNormalLarge")
     enabled:SetChecked(sortingEnabled)
@@ -79,16 +86,19 @@ local function BuildSortModeCheckboxes(
     playerLabel:SetText("Player: ")
 
     local top = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
+    builder:TextShim(top)
     top.Text:SetText("Top")
     top:SetPoint("LEFT", playerLabel, "RIGHT", horizontalSpacing / 2, 0)
     top:SetChecked(playerSortMode == addon.PlayerSortMode.Top)
 
     local middle = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
+    builder:TextShim(middle)
     middle.Text:SetText("Middle")
     middle:SetPoint("LEFT", top, "RIGHT", horizontalSpacing, 0)
     middle:SetChecked(playerSortMode == addon.PlayerSortMode.Middle)
 
     local bottom = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
+    builder:TextShim(bottom)
     bottom.Text:SetText("Bottom")
     bottom:SetPoint("LEFT", middle, "RIGHT", horizontalSpacing, 0)
     bottom:SetChecked(playerSortMode == addon.PlayerSortMode.Bottom)
@@ -131,21 +141,25 @@ local function BuildSortModeCheckboxes(
     group:SetPoint("LEFT", top, "LEFT")
     -- TODO: not sure why this doesn't align well even when aligning TOP/BOTTOM, so just hacking in a +10 to fix it for now
     group:SetPoint("TOP", modeLabel, "TOP", 0, 10)
+    builder:TextShim(group)
     group.Text:SetText(addon.GroupSortMode.Group)
     group:SetChecked(sortMode == addon.GroupSortMode.Group)
 
     local role = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     role:SetPoint("LEFT", group, "RIGHT", horizontalSpacing, 0)
+    builder:TextShim(role)
     role.Text:SetText(addon.GroupSortMode.Role)
     role:SetChecked(sortMode == addon.GroupSortMode.Role)
 
     local alpha = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     alpha:SetPoint("LEFT", role, "RIGHT", horizontalSpacing, 0)
+    builder:TextShim(alpha)
     alpha.Text:SetText("Alpha")
     alpha:SetChecked(sortMode == addon.GroupSortMode.Alphabetical)
 
     local rev = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     rev:SetPoint("LEFT", alpha, "RIGHT", horizontalSpacing, 0)
+    builder:TextShim(rev)
     rev.Text:SetText("Reverse")
     rev:SetChecked(reverse)
 
@@ -209,19 +223,22 @@ function addon:InitOptions()
     panel.name = "Frame Sort"
 
     local anchor = BuiltTitle(panel)
-    anchor = BuildSortModeCheckboxes(
-        panel,
-        anchor,
-        "Arena",
-        addon.Options.Arena.Enabled,
-        addon.Options.Arena.PlayerSortMode,
-        addon.Options.Arena.GroupSortMode,
-        addon.Options.Arena.Reverse,
-        function(enabled) addon.Options.Arena.Enabled = enabled end,
-        function(mode) addon.Options.Arena.PlayerSortMode = mode end,
-        function(mode) addon.Options.Arena.GroupSortMode = mode end,
-        function(reverse) addon.Options.Arena.Reverse = reverse end
-    )
+
+    if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+        anchor = BuildSortModeCheckboxes(
+            panel,
+            anchor,
+            "Arena",
+            addon.Options.Arena.Enabled,
+            addon.Options.Arena.PlayerSortMode,
+            addon.Options.Arena.GroupSortMode,
+            addon.Options.Arena.Reverse,
+            function(enabled) addon.Options.Arena.Enabled = enabled end,
+            function(mode) addon.Options.Arena.PlayerSortMode = mode end,
+            function(mode) addon.Options.Arena.GroupSortMode = mode end,
+            function(reverse) addon.Options.Arena.Reverse = reverse end
+        )
+    end
 
     anchor = BuildSortModeCheckboxes(
         panel,
