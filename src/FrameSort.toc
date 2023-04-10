@@ -2,7 +2,7 @@
 ## Title: Frame Sort
 ## Notes: Places the player frame at the top/middle/bottom (configurable) of party/raid frames.
 ## Author: Verubato
-## Version: 4.1.2
+## Version: 4.1.3
 ## SavedVariables: Options, FrameSortDB
 
 Type\SortMode.lua
