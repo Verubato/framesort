@@ -1,0 +1,31 @@
+## Interface: 11403
+## Title: Frame Sort
+## Notes: Places the player frame at the top/middle/bottom (configurable) of party/raid frames.
+## Author: Verubato
+## Version: 4.1.2
+## SavedVariables: Options, FrameSortDB
+
+Type\SortMode.lua
+Type\FrameWithPosition.lua
+Util\Log.lua
+Util\Math.lua
+Util\Unit.lua
+Util\Frame.lua
+Util\Macro.lua
+Util\Array.lua
+Config\Defaults.lua
+Config\OptionsUpgrader.lua
+Config\Options.lua
+Config\Spacing.lua
+Config\Keybindings.lua
+Config\Macro.lua
+Config\SortingMethod.lua
+Config\HealthCheck.lua
+Core\Compare.lua
+Core\Visual.lua
+Core\Target.lua
+Core\Spacing.lua
+Core\Sort.lua
+Core\Macro.lua
+Init.lua
+
