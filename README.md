@@ -12,7 +12,7 @@ A simple World of Warcraft (Retail) add-on that places the player frame (you) at
 * Set keybindings to target frames based on their visually ordered representation rather than their party number.
 * Add spacing between frames.
 * Macro support for @frame targeting.
-* Supports both Retail and Wotlk.
+* Supports Retail, Wotlk, and Classic.
 
 ## Screenshots ##
 
