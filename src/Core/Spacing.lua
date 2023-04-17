@@ -12,6 +12,8 @@ local function GridLayout(frames)
     local byPos = {}
     local row = 0
     local col = 0
+    local maxRow = 0
+    local maxCol = 0
 
     -- build a view of the row/col layout
     for i, frame in ipairs(frames) do
@@ -26,9 +28,12 @@ local function GridLayout(frames)
 
             if isNewRow then
                 row = row + 1
+                maxRow = row
                 col = 0
             else
                 col = col + 1
+
+                if col > maxCol then maxCol = col end
             end
         end
 
@@ -88,7 +93,12 @@ local function GetSettings(isRaid)
         end
     else
         flat = not CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
-        horizontal = CompactRaidFrameManager_GetSetting("HorizontalGroups")
+        if flat then
+            -- classic doesn't have the option for horizontal flat
+            horizontal = false
+        else
+            horizontal = CompactRaidFrameManager_GetSetting("HorizontalGroups")
+        end
         spacing = addon.Options.Appearance.Raid.Spacing
     end
 
@@ -130,72 +140,70 @@ local function FlatMembers(frames, spacing)
     end
 end
 
-local function Pets(spacing, flat, horizontal)
-    local _, pets, _ = addon:GetRaidFrames()
+local function RelativeTopLeft(frame, parent)
+    local top = (frame:GetTop() or 0) - (parent:GetTop() or 0)
+    local left = (frame:GetLeft() or 0) - (parent:GetLeft() or 0)
 
-    if #pets == 0 then return end
+    return top, left
+end
 
+local function Pets(spacing, horizontal)
+    local members, pets, _ = addon:GetRaidFrames()
+
+    if #pets == 0 or #members == 0 then return end
+
+    local _, byPos, maxRow, maxCol = GridLayout(members)
     local firstPet = pets[1]
-
-    local function RelativePoint(frame, parent)
-        local left = (frame:GetLeft() or 0) - (parent:GetLeft() or 0)
-        local right = (frame:GetRight() or 0) - (parent:GetRight() or 0)
-        local top = (frame:GetTop() or 0) - (parent:GetTop() or 0)
-        local bottom = (frame:GetBottom() or 0) - (parent:GetBottom() or 0)
-
-        return left, right, top, bottom
-    end
-
     local parent = CompactRaidFrameContainer
+    local placeHorizontal = horizontal
 
-    if flat then
-        local members, _, _ = addon:GetRaidFrames()
-        table.sort(members, function(x, y) return addon:CompareLeftTop(x, y) end)
-
-        local left, _, _, bottom = RelativePoint(members[#members], parent)
-        firstPet:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", left, bottom - spacing.Vertical)
-    else
-        local groups = addon:GetRaidFrameGroups()
-
-        table.sort(groups, function(x, y) return addon:CompareTopLeft(x, y) end)
-
-        local lastGroup = groups[#groups]
-        local lastGroupMembers = addon:GetRaidFrameGroupMembers(lastGroup)
-
-        table.sort(lastGroupMembers, function(x, y) return addon:CompareTopLeft(x, y) end)
-
-        if horizontal then
-            table.sort(lastGroupMembers, function(x, y) return addon:CompareTopLeft(x, y) end)
-        end
-
-        local left, right, top, bottom = RelativePoint(lastGroupMembers[1], parent)
-        if horizontal then
-            firstPet:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", left, bottom - spacing.Vertical)
-        else
-            firstPet:SetPoint("TOPLEFT", parent, "TOPRIGHT", right + spacing.Horizontal, top)
-        end
+    if horizontal and maxRow > 0 then
+        placeHorizontal = false
+    elseif not horizontal and maxCol > 0 then
+        placeHorizontal = true
     end
+
+    if placeHorizontal then
+        local topRight = nil
+        local firstRow = byPos[0]
+        local i = 0
+
+        while firstRow[i] do
+            topRight = firstRow[i]
+            i = i + 1
+        end
+
+        local top, left = RelativeTopLeft(topRight, parent)
+        firstPet:SetPoint("TOPLEFT", parent, "TOPLEFT", left + topRight:GetWidth() + spacing.Horizontal, top)
+    else
+        local bottomLeft = byPos[maxRow][0]
+        local top, left = RelativeTopLeft(bottomLeft, parent)
+        firstPet:SetPoint("TOPLEFT", parent, "TOPLEFT", left, top - bottomLeft:GetHeight() - spacing.Vertical)
+    end
+
+    local petsPerRaidFrame = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and 3 or 2
 
     -- move all the remaining pets
     for i = 2, #pets do
         local pet = pets[i]
         local previous = pets[i - 1]
-        local is2ndPet = i % 2 == 0
+        -- in classic 2 pet frames fit into 1 member raid frame
+        -- so for the 2nd frame just anchor it to the first
+        -- in retail 3 pet frames almost fit
+        local addSpacing = i % petsPerRaidFrame == 1
 
-        if is2ndPet then
-            local left, _, _, bottom = RelativePoint(previous, parent)
-            -- 2 pet frames fit into 1 member raid frame
-            -- so for the 2nd frame just anchor it to the first
-            pet:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", left, bottom)
-        else
-            if horizontal and not flat then
-                local twoBefore = pets[i - 2]
-                local _, right, top, _ = RelativePoint(twoBefore, parent)
-                pet:SetPoint("TOPLEFT", parent, "TOPRIGHT", right + spacing.Horizontal, top)
+        if addSpacing then
+            if horizontal then
+                local cellBefore = pets[i - petsPerRaidFrame]
+                local top, left = RelativeTopLeft(cellBefore, parent)
+                pet:SetPoint("TOPLEFT", parent, "TOPLEFT", left + cellBefore:GetWidth() + spacing.Horizontal, top)
             else
-                local relativeLeft, _, _, relativeBottom = RelativePoint(previous, parent)
-                pet:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", relativeLeft, relativeBottom - spacing.Vertical)
+                local top, left = RelativeTopLeft(previous, parent)
+                pet:SetPoint("TOPLEFT", parent, "TOPLEFT", left, top - previous:GetHeight() - spacing.Vertical)
             end
+        else
+            local top, left = RelativeTopLeft(previous, parent)
+            pet:SetPoint("TOPLEFT", parent, "TOPLEFT", left, top - previous:GetHeight())
         end
     end
 end
@@ -355,7 +363,7 @@ local function ApplyPartyFrameSpacing()
     GroupedMembers(frames, spacing, horizontal)
 
     if showPets then
-        Pets(spacing, false, horizontal)
+        Pets(spacing, horizontal)
     end
 end
 
@@ -372,7 +380,7 @@ local function ApplyRaidFrameSpacing()
     end
 
     if showPets then
-        Pets(spacing, flat, horizontal)
+        Pets(spacing, horizontal)
     end
 end
 
@@ -428,6 +436,7 @@ function addon:InitSpacing()
     eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
     eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
     eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
+    eventFrame:RegisterEvent("PLAYER_ROLES_ASSIGNED")
     addon:RegisterPostSortCallback(OnEvent)
     hooksecurefunc("FlowContainer_DoLayout", OnLayout)
 end
