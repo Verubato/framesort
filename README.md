@@ -32,7 +32,3 @@ The addon can be installed via:
 * [Wago.io](https://addons.wago.io/addons/framesort)
 * [WowUp](https://wowup.io/)
 * [Manually](https://github.com/Verubato/frame-sort/releases/latest)
-
-## Donate ##
-
-[Buy me a coffee ❤](https://buy.stripe.com/cN23cZ48G9mJeXu3cc)
