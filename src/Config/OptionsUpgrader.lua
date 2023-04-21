@@ -142,6 +142,16 @@ function upgrader:UpgradeToVersion8(options)
     options.Version = 8
 end
 
+function upgrader:UpgradeToVersion9(options)
+    assert(options.Version == 8)
+
+    options.Debug = nil
+    options.Logging = {
+        Enabled = false
+    }
+    options.Version = 9
+end
+
 local upgradeFunctions = {
     Version2 = upgrader.UpgradeToVersion2,
     Version3 = upgrader.UpgradeToVersion3,
@@ -150,6 +160,7 @@ local upgradeFunctions = {
     Version6 = upgrader.UpgradeToVersion6,
     Version7 = upgrader.UpgradeToVersion7,
     Version8 = upgrader.UpgradeToVersion8,
+    Version9 = upgrader.UpgradeToVersion9,
 }
 
 ---Upgrades saved options to the current version.

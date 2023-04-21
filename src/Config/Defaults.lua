@@ -2,8 +2,8 @@ local _, addon = ...
 
 ---Default configuration.
 addon.Defaults = {
-    Version = 8,
-    Debug = {
+    Version = 9,
+    Logging = {
         Enabled = false
     },
     Arena = {

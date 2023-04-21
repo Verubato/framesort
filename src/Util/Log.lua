@@ -1,31 +1,31 @@
-local addonName, addon = ...
-local logPrefix = addonName .. ": "
-local warningPrefix = logPrefix .. "Warning - "
+local _, addon = ...
+local logLevelDebug = "Debug"
+local logLevelWarning = "Warning"
+local log = {}
 
-local function Enabled()
-    if not addon.Options or not addon.Options.Version then
-        return false
-    end
+local function Write(msg, level)
+    if not addon.Options.Logging or not addon.Options.Logging.Enabled then return end
 
-    if addon.Options.Version < 5 then
-        return addon.Options.DebugEnabled or false
-    end
+    log[#log + 1] = {
+        Message = msg,
+        Level = level,
+        Timestamp = date("%Y-%m-%d %H:%M:%S")
+    }
+end
 
-    return addon.Options.Debug.Enabled
+function addon:InitLogging()
+    -- reset the log on each run
+    FrameSortDB.Log = log
 end
 
 ---Prints a debug message to the chat window if DebugMode is enabled.
 ---@param msg string
 function addon:Debug(msg)
-    if Enabled() then
-        print(logPrefix .. msg)
-    end
+    Write(msg, logLevelDebug)
 end
 
 ---Prints a warning message to the chat window if DebugMode is enabled.
 ---@param msg string
 function addon:Warning(msg)
-    if Enabled() then
-        print(warningPrefix .. msg)
-    end
+    Write(msg, logLevelWarning)
 end

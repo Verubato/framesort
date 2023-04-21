@@ -457,4 +457,106 @@ function M:test_upgrade_options_version8()
     assertEquals(options, expected)
 end
 
+function M:test_upgrade_options_version9()
+    local options = {
+        Arena = {
+            Enabled = true,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Group",
+            Reverse = false
+        },
+        Dungeon = {
+            Enabled = true,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Group",
+            Reverse = false
+        },
+        World = {
+            Enabled = true,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Group",
+            Reverse = false
+        },
+        Raid = {
+            Enabled = false,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Role",
+            Reverse = false
+        },
+        Debug = { Enabled = false },
+        SortingMethod = {
+            TaintlessEnabled = true,
+            TraditionalEnabled = false
+        },
+        Appearance = {
+            Party = {
+                Spacing = {
+                    Horizontal = 0,
+                    Vertical = 0
+                },
+            },
+            Raid = {
+                Spacing = {
+                    Horizontal = 0,
+                    Vertical = 0
+                }
+            }
+        },
+        Version = 8
+    }
+
+    upgrader:UpgradeToVersion9(options)
+
+    local expected = {
+        Logging = {
+            Enabled = false
+        },
+        Arena = {
+            Enabled = true,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Group",
+            Reverse = false
+        },
+        Dungeon = {
+            Enabled = true,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Group",
+            Reverse = false
+        },
+        World = {
+            Enabled = true,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Group",
+            Reverse = false
+        },
+        Raid = {
+            Enabled = false,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Role",
+            Reverse = false
+        },
+        SortingMethod = {
+            TaintlessEnabled = true,
+            TraditionalEnabled = false
+        },
+        Appearance = {
+            Party = {
+                Spacing = {
+                    Horizontal = 0,
+                    Vertical = 0
+                },
+            },
+            Raid = {
+                Spacing = {
+                    Horizontal = 0,
+                    Vertical = 0
+                }
+            }
+        },
+        Version = 9
+    }
+
+    assertEquals(options, expected)
+end
+
 return M
