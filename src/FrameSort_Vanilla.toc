@@ -28,4 +28,3 @@ Core\Spacing.lua
 Core\Sort.lua
 Core\Macro.lua
 Init.lua
-

@@ -605,8 +605,7 @@ function M:test_upgrade_options_version10()
         },
         Raid = {
             Enabled = false,
-            PlayerSortMode = "Top",
-            GroupSortMode = "Role",
+            -- missing sorting modes
             Reverse = false
         },
         SortingMethod = {
