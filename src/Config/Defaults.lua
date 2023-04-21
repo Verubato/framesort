@@ -2,7 +2,7 @@ local _, addon = ...
 
 ---Default configuration.
 addon.Defaults = {
-    Version = 9,
+    Version = 10,
     Logging = {
         Enabled = false
     },
