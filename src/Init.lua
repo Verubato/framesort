@@ -3,20 +3,12 @@ local loader = nil
 
 local function InitSavedVars()
     if not FrameSortDB then FrameSortDB = {} end
-
-    -- eventually the idea is to delete the "Options" variable
-    -- I didn't realise this is a global variable when first made the addon
-    -- "Options" is too generic and could cause conflicts
-    -- so now moving to the "Addon Name" + DB convention
-    if Options and not FrameSortDB.Options then
-        FrameSortDB.Options = CopyTable(Options)
-        Options = nil
-    elseif not FrameSortDB.Options then
+    if not FrameSortDB.Options then
         FrameSortDB.Options = CopyTable(addon.Defaults)
     end
 
     addon.Options = FrameSortDB.Options
-    addon:UpgradeOptions()
+    addon:UpgradeOptions(addon.Options)
 end
 
 ---Initialises the addon.
