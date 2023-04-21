@@ -290,6 +290,8 @@ end
 ---Listens for events where we should perform a sort.
 ---@param eventName string
 local function OnEvent(_, eventName)
+    addon:Debug("Event: " .. eventName)
+
     -- only attempt to run after combat ends if one is pending
     if eventName == "PLAYER_REGEN_ENABLED" and not sortPending then return end
 
