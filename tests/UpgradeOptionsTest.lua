@@ -1,5 +1,7 @@
 local deps = {
-    "Config\\OptionsUpgrader.lua"
+    "Config\\OptionsUpgrader.lua",
+    "Type\\SortMode.lua",
+    "Config\\Defaults.lua"
 }
 
 local addon = {}
@@ -554,6 +556,129 @@ function M:test_upgrade_options_version9()
             }
         },
         Version = 9
+    }
+
+    assertEquals(options, expected)
+end
+
+function M:test_upgrade_options_version10()
+    local options = {
+        -- Ability Team Tracker values
+        ["backdropColorAlpha"] = 0.800000011920929,
+        ["NineSlice"] = {
+            ["BottomLeftCorner"] = {
+            },
+            ["TopEdge"] = {
+            },
+            ["BottomEdge"] = {
+            },
+            ["Center"] = {
+            },
+            ["TopRightCorner"] = {
+            },
+            ["BottomRightCorner"] = {
+            },
+            ["TopLeftCorner"] = {
+            },
+            ["RightEdge"] = {
+            },
+            ["LeftEdge"] = {
+            },
+        },
+        ["layoutType"] = "TooltipDefaultLayout",
+        Logging = {
+            Enabled = false
+        },
+        -- missing Arena to be reset
+        Arena = nil,
+        Dungeon = {
+            Enabled = true,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Group",
+            Reverse = false
+        },
+        World = {
+            Enabled = true,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Group",
+            Reverse = false
+        },
+        Raid = {
+            Enabled = false,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Role",
+            Reverse = false
+        },
+        SortingMethod = {
+            TaintlessEnabled = true,
+            TraditionalEnabled = false
+        },
+        Appearance = {
+            Party = {
+                Spacing = {
+                    Horizontal = 0,
+                    Vertical = 0
+                },
+            },
+            Raid = {
+                Spacing = {
+                    Horizontal = 0,
+                    Vertical = 0
+                }
+            }
+        },
+        Version = 9
+    }
+
+    upgrader:UpgradeToVersion10(options)
+
+    local expected = {
+        Logging = {
+            Enabled = false
+        },
+        Arena = {
+            Enabled = true,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Group",
+            Reverse = false
+        },
+        Dungeon = {
+            Enabled = true,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Group",
+            Reverse = false
+        },
+        World = {
+            Enabled = true,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Group",
+            Reverse = false
+        },
+        Raid = {
+            Enabled = false,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Role",
+            Reverse = false
+        },
+        SortingMethod = {
+            TaintlessEnabled = true,
+            TraditionalEnabled = false
+        },
+        Appearance = {
+            Party = {
+                Spacing = {
+                    Horizontal = 0,
+                    Vertical = 0
+                },
+            },
+            Raid = {
+                Spacing = {
+                    Horizontal = 0,
+                    Vertical = 0
+                }
+            }
+        },
+        Version = 10
     }
 
     assertEquals(options, expected)

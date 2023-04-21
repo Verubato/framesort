@@ -152,6 +152,45 @@ function upgrader:UpgradeToVersion9(options)
     options.Version = 9
 end
 
+local function CleanTable(options, defaults)
+    -- remove values that aren't ours
+    for k, v in pairs(options) do
+        if defaults[k] == nil then
+            options[k] = nil
+        elseif v ~= nil and type(v) == "table" then
+            CleanTable(options[k], defaults[k])
+        end
+    end
+end
+
+local function AddMissing(options, defaults)
+    -- add defaults for any missing values
+    for k, v in pairs(defaults) do
+        if options[k] == nil then
+            options[k] = v
+        end
+
+        if type(v) == "table" then
+            AddMissing(options[k], defaults[k])
+        end
+    end
+end
+
+function upgrader:UpgradeToVersion10(options)
+    assert(options.Version == 9)
+
+    -- encountered a clash with Ability Team Tracker also using the "Options" global variable
+    -- so clean up our saved variable for anyone affected
+
+    -- remove clashing values
+    CleanTable(options, addon.Defaults)
+
+    -- add any missing values back
+    AddMissing(options, addon.Defaults)
+
+    options.Version = 10
+end
+
 local upgradeFunctions = {
     Version2 = upgrader.UpgradeToVersion2,
     Version3 = upgrader.UpgradeToVersion3,
@@ -161,6 +200,7 @@ local upgradeFunctions = {
     Version7 = upgrader.UpgradeToVersion7,
     Version8 = upgrader.UpgradeToVersion8,
     Version9 = upgrader.UpgradeToVersion9,
+    Version10 = upgrader.UpgradeToVersion10
 }
 
 ---Upgrades saved options to the current version.
