@@ -24,6 +24,10 @@ A simple World of Warcraft (Retail) add-on that places the player frame (you) at
 
 ![Macros](https://github.com/Verubato/frame-sort/raw/main/assets/macros.png)
 
+## Xaryu Explains ##
+
+[![Xaryu's Explanation on YouTube](https://markdown-videos.deta.dev/youtube/2PiKjvT30cM)](https://www.youtube.com/watch?v=2PiKjvT30cM&t=212s)
+
 ## Install ##
 
 The addon can be installed via:
