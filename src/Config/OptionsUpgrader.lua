@@ -164,13 +164,13 @@ local upgradeFunctions = {
 }
 
 ---Upgrades saved options to the current version.
-function addon:UpgradeOptions()
-    while (addon.Options.Version or 1) < addon.Defaults.Version do
-        local nextVersion = (addon.Options.Version or 1) + 1
+function addon:UpgradeOptions(options)
+    while (options.Version or 1) < addon.Defaults.Version do
+        local nextVersion = (options.Version or 1) + 1
         local next = upgradeFunctions["Version" .. nextVersion]
         assert(next ~= nil)
 
         addon:Debug("Upgrading options to version " .. nextVersion .. ".")
-        next(upgrader, addon.Options)
+        next(upgrader, options)
     end
 end
