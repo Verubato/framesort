@@ -168,9 +168,7 @@ local function AddMissing(options, defaults)
     for k, v in pairs(defaults) do
         if options[k] == nil then
             options[k] = v
-        end
-
-        if type(v) == "table" then
+        elseif type(v) == "table" then
             AddMissing(options[k], defaults[k])
         end
     end
