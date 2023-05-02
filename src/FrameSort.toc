@@ -27,4 +27,5 @@ Core\Target.lua
 Core\Spacing.lua
 Core\Sort.lua
 Core\Macro.lua
+Core\Blocker.lua
 Init.lua
