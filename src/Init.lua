@@ -20,6 +20,7 @@ local function Init()
     addon:InitSpacing()
     addon:InitTargeting()
     addon:InitMacros()
+    addon:InitCombatBlocking()
 end
 
 ---Listens for our to be loaded and then initialises it.
