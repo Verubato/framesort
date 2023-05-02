@@ -45,21 +45,6 @@ local function GridLayout(frames)
         byPos[row][col] = frame
     end
 
-    local debugRow = 0
-    while byPos[debugRow] do
-        local debugCol = 0
-
-        while byPos[debugRow][debugCol] do
-            local frame = byPos[debugRow][debugCol]
-            local name = (frame.title and frame.title:GetText()) or (frame.unit and UnitName(frame.unit)) or frame:GetName()
-
-            addon:Debug(name .. ": Row = " .. debugRow .. " Col = " .. debugCol)
-            debugCol = debugCol + 1
-        end
-
-        debugRow = debugRow + 1
-    end
-
     return byFrame, byPos, maxRow, maxCol
 end
 
