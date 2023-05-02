@@ -1,4 +1,4 @@
-## Interface: 100007
+## Interface: 100100
 ## Title: Frame Sort
 ## Notes: Places the player frame at the top/middle/bottom (configurable) of party/raid frames.
 ## Author: Verubato
