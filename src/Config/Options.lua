@@ -20,7 +20,7 @@ end
 local function BuiltTitle(panel)
     local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
-    title:SetText("Frame Sort")
+    title:SetText("FrameSort")
 
     local lines = {
         Group = "party1 > party2 > partyN > partyN+1",
@@ -201,7 +201,7 @@ end
 ---Initialises the addon options.
 function addon:InitOptions()
     local panel = CreateFrame("Frame")
-    panel.name = "Frame Sort"
+    panel.name = "FrameSort"
 
     local anchor = BuiltTitle(panel)
 

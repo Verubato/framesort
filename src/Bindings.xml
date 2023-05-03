@@ -1,7 +1,7 @@
 <Bindings>
-  <Binding name="CLICK FSTarget1:LeftButton" description="Frame Sort Bindings" category="Frame Sort" header="FRAMESORT_TARGET"></Binding>
-  <Binding name="CLICK FSTarget2:LeftButton" description="Frame Sort Bindings" category="Frame Sort"></Binding>
-  <Binding name="CLICK FSTarget3:LeftButton" description="Frame Sort Bindings" category="Frame Sort"></Binding>
-  <Binding name="CLICK FSTarget4:LeftButton" description="Frame Sort Bindings" category="Frame Sort"></Binding>
-  <Binding name="CLICK FSTarget5:LeftButton" description="Frame Sort Bindings" category="Frame Sort"></Binding>
+  <Binding name="CLICK FSTarget1:LeftButton" description="FrameSort Bindings" category="FrameSort" header="FRAMESORT_TARGET"></Binding>
+  <Binding name="CLICK FSTarget2:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
+  <Binding name="CLICK FSTarget3:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
+  <Binding name="CLICK FSTarget4:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
+  <Binding name="CLICK FSTarget5:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
 </Bindings>
