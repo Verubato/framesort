@@ -1,6 +1,6 @@
 # Frame Sort #
 
-A simple World of Warcraft (Retail) add-on that places the player frame (you) at the top/middle/bottom (configurable) of the party/raid frames.
+A simple World of Warcraft add-on that places the player frame (you) at the top/middle/bottom (configurable) of the party/raid frames.
 
 ## Features ##
 
