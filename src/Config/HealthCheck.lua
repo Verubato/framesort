@@ -1,7 +1,6 @@
 local addonName, addon = ...
 local builder = addon.OptionsBuilder
 local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
-local horizontalSpacing = addon.OptionsBuilder.HorizontalSpacing
 
 ---Returns true if using raid-style party frames.
 local function IsUsingRaidStyleFrames()
