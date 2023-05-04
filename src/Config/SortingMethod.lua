@@ -39,7 +39,6 @@ function builder:BuildSortingMethodOptions(parent)
     taintless:SetChecked(addon.Options.SortingMethod.TaintlessEnabled)
 
     local taintlessLines = {
-        "Formerly Experimental mode.",
         "A brand new sorting mode that shouldn't bug/lock/taint the UI.",
     }
 
