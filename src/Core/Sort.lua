@@ -213,7 +213,6 @@ local function LayoutParty()
 
     table.sort(units, sortFunction)
 
-
     -- place the first frame at the beginning of the container
     local firstUnit = units[1]
     local firstFrame = frameByUnit[firstUnit]
