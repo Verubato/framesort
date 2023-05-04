@@ -2,6 +2,7 @@ local _, addon = ...
 local eventFrame = nil
 
 local function UpdateVisible(frame)
+    if not frame then return end
     if frame:IsForbidden() then return end
     if not IsInGroup() then return false end
     if InCombatLockdown() then return false end
@@ -20,22 +21,19 @@ local function UpdateVisible(frame)
     frame:SetShown(mode ~= addon.PlayerSortMode.Hidden)
 end
 
-local function OnSorted()
+local function Run()
     local player = addon:GetPlayerFrame()
-    UpdateVisible(player)
-end
+    if not player then return end
 
-local function OnEvent()
-    local player = addon:GetPlayerFrame()
     UpdateVisible(player)
 end
 
 ---Initialises the player show/hide module.
 function addon:InitPlayerHiding()
     eventFrame = CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", OnEvent)
+    eventFrame:HookScript("OnEvent", Run)
     eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
     eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
     hooksecurefunc("CompactUnitFrame_UpdateVisible", UpdateVisible)
-    addon:RegisterPostSortCallback(OnSorted)
+    addon:RegisterPostSortCallback(Run)
 end
