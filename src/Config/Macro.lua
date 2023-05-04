@@ -73,7 +73,7 @@ function builder:BuildMacroOptions(parent)
 
     panel:HookScript("OnShow", function()
         local count = CountMacros()
-        countLine:SetText("FrameSort has found " .. count .. " macros to manage.")
+        countLine:SetText("FrameSort has found " .. count .. " |4macro:macros; to manage.")
     end)
 
     InterfaceOptions_AddCategory(panel)
