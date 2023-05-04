@@ -122,11 +122,6 @@ local function BuildSortModeCheckboxes(
             if chkbox ~= sender then chkbox:SetChecked(false) end
         end
 
-        -- at least 1 must be checked
-        if not sender:GetChecked() then
-            sender:SetChecked(true)
-        end
-
         local mode = playerModes[sender]
         onPlayerSortModeChanged(mode)
         addon:TrySort()
@@ -180,11 +175,6 @@ local function BuildSortModeCheckboxes(
         -- uncheck the others
         for chkbox, _ in pairs(modes) do
             if chkbox ~= sender then chkbox:SetChecked(false) end
-        end
-
-        -- at least 1 must be checked
-        if not sender:GetChecked() then
-            sender:SetChecked(true)
         end
 
         local mode = modes[sender]
