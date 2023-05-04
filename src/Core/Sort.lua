@@ -347,6 +347,9 @@ function addon:InitSorting()
     -- Fired whenever a group or raid is formed or disbanded, players are leaving or joining the group or raid.
     eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
 
+    -- Fired when people within the raid group change their tank/healer/dps role
+    eventFrame:RegisterEvent("PLAYER_ROLES_ASSIGNED")
+
     if addon.Options.SortingMethod.TaintlessEnabled then
         hooksecurefunc("FlowContainer_DoLayout", OnLayout)
     end
