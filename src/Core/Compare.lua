@@ -40,7 +40,8 @@ function addon:GetSortMode(inInstance, instanceType)
         return addon.Options.Dungeon.Enabled, addon.Options.Dungeon.PlayerSortMode, addon.Options.Dungeon.GroupSortMode, addon.Options.Dungeon.Reverse
     elseif inInstance and (instanceType == "raid" or instanceType == "pvp") then
         return addon.Options.Raid.Enabled, addon.Options.Raid.PlayerSortMode, addon.Options.Raid.GroupSortMode, addon.Options.Raid.Reverse
-    elseif not inInstance and addon.Options.World.Enabled then
+    elseif (inInstance and instanceType == "scenario") or not inInstance then
+        -- use the world sorting rules for scenarios
         return addon.Options.World.Enabled, addon.Options.World.PlayerSortMode, addon.Options.World.GroupSortMode, addon.Options.World.Reverse
     end
 
