@@ -103,10 +103,17 @@ local function BuildSortModeCheckboxes(
     bottom:SetPoint("LEFT", middle, "RIGHT", horizontalSpacing, 0)
     bottom:SetChecked(playerSortMode == addon.PlayerSortMode.Bottom)
 
+    local hidden = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
+    builder:TextShim(hidden)
+    hidden.Text:SetText("Hidden")
+    hidden:SetPoint("LEFT", bottom, "RIGHT", horizontalSpacing, 0)
+    hidden:SetChecked(playerSortMode == addon.PlayerSortMode.Hidden)
+
     local playerModes = {
         [top] = addon.PlayerSortMode.Top,
         [middle] = addon.PlayerSortMode.Middle,
-        [bottom] = addon.PlayerSortMode.Bottom
+        [bottom] = addon.PlayerSortMode.Bottom,
+        [hidden] = addon.PlayerSortMode.Hidden,
     }
 
     local function onPlayerClick(sender)

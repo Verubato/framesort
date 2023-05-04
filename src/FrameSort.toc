@@ -29,4 +29,5 @@ Core\Spacing.lua
 Core\Sort.lua
 Core\Macro.lua
 Core\Blocker.lua
+Core\HidePlayer.lua
 Init.lua

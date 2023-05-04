@@ -7,8 +7,7 @@ local fuzzyDecimalPlaces = 0
 ---Nil may be returned if sorting is not enabled for the player's current instance.
 ---@return function?
 function addon:GetSortFunction()
-    local inInstance, instanceType = IsInInstance()
-    local enabled, playerSortMode, groupSortMode, reverse = addon:GetSortMode(inInstance, instanceType)
+    local enabled, playerSortMode, groupSortMode, reverse = addon:GetSortMode()
 
     if not enabled then return nil end
 
@@ -26,14 +25,14 @@ function addon:GetSortFunction()
     return function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode, reverse, units) end
 end
 
----Returns the sort mode from the configured options for the specified instance type.
----@param inInstance boolean
----@param instanceType string
+---Returns the sort mode from the configured options for the current instance.
 ---@return boolean enabled whether sorting is enabled.
 ---@return PlayerSortMode? playerMode the player sort mode.
 ---@return GroupSortMode? groupMode the group sort mode.
 ---@return boolean? reverse whether the sorting is reversed.
-function addon:GetSortMode(inInstance, instanceType)
+function addon:GetSortMode()
+    local inInstance, instanceType = IsInInstance()
+
     if inInstance and instanceType == "arena" then
         return addon.Options.Arena.Enabled, addon.Options.Arena.PlayerSortMode, addon.Options.Arena.GroupSortMode, addon.Options.Arena.Reverse
     elseif inInstance and instanceType == "party" then
@@ -62,7 +61,9 @@ function addon:Compare(leftToken, rightToken, playerSortMode, groupSortMode, rev
     if not UnitExists(rightToken) then return true end
 
     if UnitIsUnit(leftToken, "player") then
-        if playerSortMode == addon.PlayerSortMode.Middle then
+        if playerSortMode == addon.PlayerSortMode.Hidden then
+            return false
+        elseif playerSortMode == addon.PlayerSortMode.Middle then
             assert(preSortedUnits ~= nil)
             return addon:CompareMiddle(rightToken, preSortedUnits)
         else
@@ -71,7 +72,9 @@ function addon:Compare(leftToken, rightToken, playerSortMode, groupSortMode, rev
     end
 
     if UnitIsUnit(rightToken, "player") then
-        if playerSortMode == addon.PlayerSortMode.Middle then
+        if playerSortMode == addon.PlayerSortMode.Hidden then
+            return true
+        elseif playerSortMode == addon.PlayerSortMode.Middle then
             assert(preSortedUnits ~= nil)
             return not addon:CompareMiddle(leftToken, preSortedUnits)
         else

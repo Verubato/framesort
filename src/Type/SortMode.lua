@@ -11,5 +11,6 @@ addon.GroupSortMode = {
 addon.PlayerSortMode = {
     Top = "Top",
     Middle = "Middle",
-    Bottom = "Bottom"
+    Bottom = "Bottom",
+    Hidden = "Hidden"
 }

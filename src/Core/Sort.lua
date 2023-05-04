@@ -120,7 +120,7 @@ local function LayoutRaid()
     end
 
     local sortFunction = addon:GetSortFunction()
-    local memberFrames, petFrames = addon:GetRaidFrames()
+    local memberFrames, petFrames = addon:GetRaidFrames(true)
 
     if not sortFunction or #memberFrames == 0 then return false end
 
@@ -191,7 +191,7 @@ local function LayoutParty()
     end
 
     local sortFunction = addon:GetSortFunction()
-    local frames = addon:GetPartyFrames()
+    local frames = addon:GetPartyFrames(true)
 
     if not sortFunction or #frames == 0 then return false end
 
@@ -212,7 +212,7 @@ local function LayoutParty()
     end
 
     table.sort(units, sortFunction)
-    addon:Debug("Sorting party frames (taintless).")
+
 
     -- place the first frame at the beginning of the container
     local firstUnit = units[1]
