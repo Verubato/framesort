@@ -2,21 +2,31 @@ local _, addon = ...
 local eventFrame = nil
 
 local function PauseUpdates()
-    CompactRaidFrameContainer:UnregisterEvent("GROUP_ROSTER_UPDATE")
+    if CompactRaidFrameContainer and not CompactRaidFrameContainer:UnregisterEvent("GROUP_ROSTER_UPDATE") then
+        addon:Warning("Failed to unregister event GROUP_ROSTER_UPDATE from CompactRaidFrameContainer.")
+    end
+
+    if CompactPartyFrame and not CompactPartyFrame:UnregisterEvent("GROUP_ROSTER_UPDATE") then
+        addon:Warning("Failed to register event GROUP_ROSTER_UPDATE from CompactPartyFrame.")
+    end
 end
 
 local function ResumeUpdates()
-    CompactRaidFrameContainer:RegisterEvent("GROUP_ROSTER_UPDATE")
+    if CompactRaidFrameContainer and not CompactRaidFrameContainer:RegisterEvent("GROUP_ROSTER_UPDATE") then
+        addon:Warning("Failed to register event GROUP_ROSTER_UPDATE to CompactRaidFrameContainer.")
+    end
+
+    if CompactPartyFrame and not CompactPartyFrame:RegisterEvent("GROUP_ROSTER_UPDATE") then
+        addon:Warning("Failed to register event GROUP_ROSTER_UPDATE to CompactPartyFrame.")
+    end
 end
 
 local function OnEvent(_, event)
-    if not CompactRaidFrameContainer then return end
-
     if event == "PLAYER_REGEN_ENABLED" then
         ResumeUpdates()
     elseif event == "PLAYER_REGEN_DISABLED" then
         PauseUpdates()
-    elseif event == "GROUP_ROSTER_UPDATE" and InCombatLockdown() then
+    elseif "GROUP_ROSTER_UPDATE" and InCombatLockdown() then
         addon:Debug("Blocked raid frame update during combat.")
     end
 end
