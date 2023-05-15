@@ -6,7 +6,6 @@ Test8Members = require("Compare8Test")
 TestGetUnits = require("GetUnitsTest")
 TestIsPet = require("IsPetTest")
 TestIsMember = require("IsMemberTest")
-TestGetUnitAliases = require("UnitAliasesTest")
 TestMacro = require("MacroTest")
 TestOptionsUpgrader = require("UpgradeOptionsTest")
 

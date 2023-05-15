@@ -1,0 +1,4 @@
+---@class LinkedListNode
+---@field Next LinkedListNode? the next node
+---@field Previous LinkedListNode? the previous node
+---@field Value table? the object of the current node

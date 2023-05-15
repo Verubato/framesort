@@ -128,3 +128,51 @@ function addon:GetPlayerFrame()
 
     return player
 end
+
+---Returns the frames in order of their relative positioning to each other.
+---@param frames table<table> frames in any particular order
+---@return LinkedListNode root in order of parent -> child -> child -> child
+function addon:ToFrameChain(frames)
+    local nodesByFrame = {}
+    for _, frame in ipairs(frames) do
+        nodesByFrame[frame:GetName()] = {
+            Next = nil,
+            Previous = nil,
+            Value = frame
+        }
+    end
+
+    local root = nil
+    for _, child in pairs(nodesByFrame) do
+        local _, relativeTo, _, _, _ = child.Value:GetPoint()
+        local parent = nodesByFrame[relativeTo:GetName()]
+
+        if parent then
+            if parent.Next then
+                addon:Error(string.format("Encountered multiple children for frame %s in frame frame chain.", parent.Value:GetName()))
+                return {}
+            end
+
+            parent.Next = child
+            child.Previous = parent
+        else
+            root = child
+        end
+    end
+
+    -- assert we have a complete chain
+    local count = 0
+    local current = root
+
+    while current do
+        count = count + 1
+        current = current.Next
+    end
+
+    if count ~= #frames then
+        addon:Error(string.format("Incomplete/broken frame chain: expected %d nodes but only found %d", #frames, count))
+        return {}
+    end
+
+    return root
+end
