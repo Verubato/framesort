@@ -12,13 +12,13 @@ local function CanSort()
 
     -- can't make changes during combat
     if InCombatLockdown() and not addon.Options.SortingMethod.TaintlessEnabled then
-        addon:Debug("Can't perform non-taintless sorting during combat.")
+        addon:Warning("Can't perform non-taintless sorting during combat.")
         return false
     end
 
     local groupSize = GetNumGroupMembers()
     if groupSize <= 0 then
-        addon:Debug("Can't sort because group has 0 members.")
+        addon:Warning("Can't sort because group has 0 members.")
         return false
     end
 
@@ -40,7 +40,7 @@ local function CanSortParty()
     if WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE then
         local together = CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
         if together then
-            addon:Debug("Cannot sort frames when the 'Keep Groups Together' setting is enabled.")
+            addon:Warning("Cannot sort frames when the 'Keep Groups Together' setting is enabled.")
             return false
         end
     end
@@ -61,13 +61,13 @@ local function CanSortRaid()
 
         if raidGroupDisplayType ~= Enum.RaidGroupDisplayType.CombineGroupsVertical and
             raidGroupDisplayType ~= Enum.RaidGroupDisplayType.CombineGroupsHorizontal then
-            addon:Debug("Cannot sort frames when 'Separate' raid display mode is being used.")
+            addon:Warning("Cannot sort frames when 'Separate' raid display mode is being used.")
             return false
         end
     else
         local together = CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
         if together then
-            addon:Debug("Cannot sort frames when the 'Keep Groups Together' setting is enabled.")
+            addon:Warning("Cannot sort frames when the 'Keep Groups Together' setting is enabled.")
             return false
         end
     end
@@ -190,7 +190,6 @@ local function LayoutRaid()
 
     table.sort(units, sortFunction)
 
-    addon:Debug("Sorting raid frames (taintless).")
     RearrangeFrames(memberFrames, units)
 
     if #petFrames > 0 then
@@ -202,7 +201,6 @@ local function LayoutRaid()
             return true
         end
 
-        addon:Debug("Sorting pet frames (taintless).")
         RearrangeFrames(petFrames, pets)
     end
 
@@ -225,7 +223,6 @@ local function LayoutParty()
 
     table.sort(units, sortFunction)
 
-    addon:Debug("Sorting party frames (taintless).")
     RearrangeFrameChain(frames, units)
 
     return true
@@ -241,19 +238,16 @@ local function TrySortTraditional()
 
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         if CanSortRaid() then
-            addon:Debug("Sorting raid frames (traditional).")
             CompactRaidFrameContainer:SetFlowSortFunction(sortFunc)
             sorted = true
         end
 
         if CanSortParty() then
-            addon:Debug("Sorting party frames (traditional).")
             CompactPartyFrame_SetFlowSortFunction(sortFunc)
             sorted = sorted or true
         end
     else
         if CanSortRaid() then
-            addon:Debug("Sorting raid frames (traditional).")
             CompactRaidFrameContainer_SetFlowSortFunction(CompactRaidFrameContainer, sortFunc)
             sorted = true
         end
@@ -283,8 +277,6 @@ end
 ---Listens for events where we should perform a sort.
 ---@param eventName string
 local function OnEvent(_, eventName)
-    addon:Debug("Event: " .. eventName)
-
     -- only attempt to run after combat ends if one is pending
     if eventName == "PLAYER_REGEN_ENABLED" and not sortPending then return end
 
