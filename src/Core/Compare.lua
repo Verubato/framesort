@@ -197,31 +197,3 @@ function addon:CompareTopLeftFuzzy(leftFrame, rightFrame)
 
     return leftX < rightX
 end
-
----Returns true if the left frame is "earlier" than the right frame.
----@param leftFrame table a wow frame
----@param rightFrame table a wow frame
----@return boolean
-function addon:CompareLeftTop(leftFrame, rightFrame)
-    if not leftFrame then
-        return false
-    elseif not rightFrame then
-        return true
-    end
-
-    local leftX = leftFrame:GetLeft()
-    local rightX = rightFrame:GetLeft()
-
-    if leftX == nil then return false end
-    if rightX == nil then return true end
-
-    if leftX ~= rightX then return leftX < rightX end
-
-    local leftY = leftFrame:GetTop()
-    local rightY = rightFrame:GetTop()
-
-    if leftY == nil then return false end
-    if rightY == nil then return true end
-
-    return leftY > rightY
-end
