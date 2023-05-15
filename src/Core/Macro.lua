@@ -11,8 +11,6 @@ local function InspectMacro(slot)
 
     if not body or not macro:IsFrameSortMacro(body) then return false end
 
-    addon:Debug("Found macro at slot " .. slot)
-
     local units = addon:GetVisuallyOrderedUnits()
     local frameIds = macro:GetFrameIds(body)
     local newBody = macro:GetNewBody(body, frameIds, units)
@@ -22,14 +20,12 @@ local function InspectMacro(slot)
     isSelfEditingMacro = true
     EditMacro(slot, nil, nil, newBody)
     isSelfEditingMacro = false
-
-    addon:Debug("Updated macro at slot " .. slot)
 end
 
 
 local function ScanMacros()
     if InCombatLockdown() then
-        addon:Debug("Can't update macros during combat.")
+        addon:Warning("Can't update macros during combat.")
         return
     end
 
@@ -39,8 +35,6 @@ local function ScanMacros()
     if previousUnits and array:ArrayEquals(previousUnits, units) then
         return
     end
-
-    addon:Debug("Updating macros.")
 
     for i = 1, maxMacros do
         InspectMacro(i)
@@ -54,7 +48,7 @@ local function OnEditMacro(macroInfo, _, _, _)
     if isSelfEditingMacro then return end
 
     if InCombatLockdown() then
-        addon:Debug("Can't update macros during combat.")
+        addon:Warning("Can't update macros during combat.")
         return
     end
 

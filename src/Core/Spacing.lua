@@ -422,7 +422,6 @@ function addon:ApplySpacing()
 
         -- avoid applying 0 spacing
         if not zeroSpacing or previousNonZero then
-            addon:Debug("Applying raid frame spacing.")
             ApplyRaidFrameSpacing()
             previousRaidSpacing = spacing
         end
@@ -434,7 +433,6 @@ function addon:ApplySpacing()
         local previousNonZero = previousPartySpacing and (previousPartySpacing.Horizontal ~= 0 or previousPartySpacing.Vertical ~= 0)
 
         if not zeroSpacing or previousNonZero then
-            addon:Debug("Applying party frame spacing.")
             ApplyPartyFrameSpacing()
             previousPartySpacing = spacing
         end

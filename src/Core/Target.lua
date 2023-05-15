@@ -8,7 +8,7 @@ local array = addon.Array
 ---Updates the targeting hotkeys to the sorted units.
 local function UpdateTargets()
     if InCombatLockdown() then
-        addon:Debug("Can't update targets during combat.")
+        addon:Warning("Can't update targets during combat.")
         return false
     end
 
@@ -18,8 +18,6 @@ local function UpdateTargets()
     if previousUnits and array:ArrayEquals(previousUnits, units) then
         return
     end
-
-    addon:Debug("Updating targets.")
 
     -- if units has less than 5 items it's still fine as units[i] will just be nil
     for i = 1, keybindingsCount do
