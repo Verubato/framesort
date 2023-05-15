@@ -6,14 +6,13 @@ local callbacks = {}
 ---Determines whether general sorting can be performed.
 ---@return boolean
 local function CanSort()
-    -- nothing to sort if we're not in a group
     if not IsInGroup() then
         return false
     end
 
     -- can't make changes during combat
-    if InCombatLockdown() then
-        addon:Debug("Can't sort during combat.")
+    if InCombatLockdown() and not addon.Options.SortingMethod.TaintlessEnabled then
+        addon:Debug("Can't perform non-taintless sorting during combat.")
         return false
     end
 
@@ -84,29 +83,94 @@ local function InvokeCallbacks()
 end
 
 ---Rearranges frames in order of the specified units.
----@param orderedUnits table<string>
----@param framesByUnit table<string, table>
----@param framesByIndex table<FrameWithPosition>
-local function RearrangeFrames(orderedUnits, framesByUnit, framesByIndex)
-    -- probably too complicated to calculate positions due to the whole flow container layout logic
-    -- so instead we can just re-use the existing positions and shuffle them
-    -- probably safer and better supported this way anyway
-    for i = 1, #orderedUnits do
-        local sourceUnit = orderedUnits[i]
-        local source = framesByUnit[sourceUnit]
-        local target = framesByIndex[i]
+---@param frames table<table> the set of frames to rearrange.
+---@param units table<string> unit ids in the desired order.
+local function RearrangeFrames(frames, units)
+    table.sort(frames, function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
 
-        assert(source ~= nil)
-        assert(target ~= nil)
+    -- store the position of each frame before moving
+    local points = {}
+    for _, frame in ipairs(frames) do
+        points[#points + 1] = addon:GetPointEx(frame)
+    end
 
-        source.Frame:ClearAllPoints()
+    local function FrameIndex(unit, framesLocal)
+        for i = 1, #framesLocal do
+            if UnitIsUnit(unit, framesLocal[i].unit) then
+                return i
+            end
+        end
 
-        for j = 1, #target.Points do
-            local point = target.Points[j]
+        error(string.format("Unable to determine the frame index for unit %s", unit))
+    end
 
-            -- move the source frame to the target
-            ---@diagnostic disable-next-line: deprecated
-            source.Frame:SetPoint(unpack(point))
+    for unitIndex, unit in ipairs(units) do
+        local frameIndex = FrameIndex(unit, frames)
+
+        if frameIndex ~= unitIndex then
+            local from = points[frameIndex]
+            local to = points[unitIndex]
+            local frame = frames[frameIndex]
+
+            if from.point == "TOPLEFT" and
+                from.point == to.point and
+                from.relativeTo == to.relativeTo and
+                from.relativePoint == to.relativePoint then
+                local xDelta = (to.offsetX or 0) - (from.offsetX or 0)
+                local yDelta = (to.offsetY or 0) - (from.offsetY or 0)
+
+                frame:AdjustPointsOffset(xDelta, yDelta)
+            else
+                addon:Error(string.format("Unable to move frame %s as it doesn't share to the same parent anchor.", frame:GetName()))
+            end
+        end
+    end
+end
+
+---Rearranges the display of a frame chain in order of the specified units.
+---@param frames table<table> the set of frames to rearrange.
+---@param units table<string> unit ids in the desired order.
+local function RearrangeFrameChain(frames, units)
+    table.sort(frames, function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
+
+    local chain = addon:ToFrameChain(frames)
+    local chainFrames = {}
+    local current = chain
+
+    while current do
+        chainFrames[#chainFrames + 1] = current.Value
+        current = current.Next
+    end
+
+    -- store the position of each frame before moving
+    local points = {}
+    for _, frame in ipairs(frames) do
+        points[#points + 1] = {
+            Top = frame:GetTop() or 0,
+            Left = frame:GetLeft() or 0
+        }
+    end
+
+    local function UnitIndex(unit, unitsLocal)
+        for i = 1, #unitsLocal do
+            if UnitIsUnit(unitsLocal[i], unit) then
+                return i
+            end
+        end
+
+        error(string.format("Unable to determine the unit index for %s", unit))
+    end
+
+    for _, source in ipairs(chainFrames) do
+        local unitIndex = UnitIndex(source.unit, units)
+
+        if frameIndex ~= unitIndex then
+            local to = points[unitIndex]
+            local from = { Top = source:GetTop() or 0, Left = source:GetLeft() or 0 }
+            local xDelta = to.Left - from.Left
+            local yDelta = to.Top - from.Top
+
+            source:AdjustPointsOffset(xDelta, yDelta)
         end
     end
 end
@@ -114,20 +178,10 @@ end
 ---Sorts raid frames.
 ---@return boolean sorted true if frames were sorted, otherwise false.
 local function LayoutRaid()
-    if not CanSortRaid() then
-        sortPending = true
-        return false
-    end
-
     local sortFunction = addon:GetSortFunction()
     local memberFrames, petFrames = addon:GetRaidFrames(true)
 
     if not sortFunction or #memberFrames == 0 then return false end
-
-    -- frames can and will most likely be completely out of order if a previous sort has occurred
-    -- so we need to sort them
-    table.sort(memberFrames, function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
-    table.sort(petFrames, function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
 
     local units = {}
     for _, frame in pairs(memberFrames) do
@@ -136,47 +190,20 @@ local function LayoutRaid()
 
     table.sort(units, sortFunction)
 
-    local framesByUnit = {}
-    local memberFramesByIndex = {}
-    local petFramesByIndex = {}
-
-    -- add players to the lookup table
-    for i, frame in ipairs(memberFrames) do
-        local data = addon:ToFrameWithPosition(frame)
-        local unit = SecureButton_GetUnit(frame)
-
-        framesByUnit[unit] = data
-        memberFramesByIndex[i] = data
-    end
-
     addon:Debug("Sorting raid frames (taintless).")
-    RearrangeFrames(units, framesByUnit, memberFramesByIndex)
-
-    -- add pets to the lookup table
-    for i, frame in ipairs(petFrames) do
-        local data = addon:ToFrameWithPosition(frame)
-        local unit = SecureButton_GetUnit(frame)
-        petFramesByIndex[i] = data
-
-        -- TODO: see if there is a way we can do without the need for aliases
-        -- we can get the pet units from the pet frames, but we'd then need to sort them separately
-        local aliases = addon:GetUnitAliases(unit)
-        for j = 1, #aliases do
-            framesByUnit[aliases[j]] = data
-        end
-    end
+    RearrangeFrames(memberFrames, units)
 
     if #petFrames > 0 then
         -- get pets based off the sorted units instead of the frames
         -- as this comes with the benefit that the pets will also be sorted
         local pets = addon:GetPets(units)
         if #pets ~= #petFrames then
-            addon:Warning("Unexpectedly encoutered a different number of pet frames '" .. #petFrames .. "' vs pet units '" .. #pets .. "'.")
+            addon:Warning(string.format("Unexpectedly encoutered a different number of pet frames '%d' vs pet units '%d'.", #petFrames, #pets))
             return true
         end
 
         addon:Debug("Sorting pet frames (taintless).")
-        RearrangeFrames(pets, framesByUnit, petFramesByIndex)
+        RearrangeFrames(petFrames, pets)
     end
 
     return true
@@ -185,54 +212,21 @@ end
 ---Sorts party frames.
 ---@return boolean sorted true if frames were sorted, otherwise false.
 local function LayoutParty()
-    if not CanSortParty() then
-        sortPending = true
-        return false
-    end
-
     local sortFunction = addon:GetSortFunction()
     local frames = addon:GetPartyFrames(true)
 
     if not sortFunction or #frames == 0 then return false end
 
-    table.sort(frames, function(x, y) return addon:CompareTopLeft(x, y) end)
-
-    local useHorizontalGroups = EditModeManagerFrame:ShouldRaidFrameUseHorizontalRaidGroups(CompactPartyFrame.isParty)
-    local frameByUnit = {}
     local units = {}
 
     for _, frame in ipairs(frames) do
-        local unit = SecureButton_GetUnit(frame)
-
-        if unit then
-            units[#units + 1] = unit
-            frameByUnit[unit] = frame
-            frame:ClearAllPoints()
-        end
+        units[#units + 1] = SecureButton_GetUnit(frame)
     end
 
     table.sort(units, sortFunction)
 
-    -- place the first frame at the beginning of the container
-    local firstUnit = units[1]
-    local firstFrame = frameByUnit[firstUnit]
-    local firstFrameRelativePoint = useHorizontalGroups and "TOPLEFT" or "TOP"
-    firstFrame:SetPoint(firstFrameRelativePoint, CompactPartyFrame, firstFrameRelativePoint, 0, -CompactPartyFrame.title:GetHeight());
-
-    -- all other frames are placed relative to the frame before it
-    local previous = firstFrame
-
-    for i = 2, #units do
-        local unit = units[i]
-        local next = frameByUnit[unit]
-
-        next:SetPoint(
-            useHorizontalGroups and "LEFT" or "TOP",
-            previous,
-            useHorizontalGroups and "RIGHT" or "BOTTOM")
-
-        previous = next
-    end
+    addon:Debug("Sorting party frames (taintless).")
+    RearrangeFrameChain(frames, units)
 
     return true
 end

@@ -104,7 +104,7 @@ local function FlatMembers(frames, spacing)
             local first = frameByPos[row][0]
             local above = frameByPos[row - 1][0]
 
-            yDelta = spacing.Vertical + ((first:GetTop() or 0) - (above:GetBottom() or 0))
+            yDelta = (above:GetBottom() or 0) - (first:GetTop() or 0) - spacing.Vertical
         end
 
         local col = 0
@@ -116,7 +116,7 @@ local function FlatMembers(frames, spacing)
                 xDelta = spacing.Horizontal - ((frame:GetLeft() or 0) - (left:GetRight() or 0))
             end
 
-            frame:AdjustPointsOffset(xDelta, -yDelta)
+            frame:AdjustPointsOffset(xDelta, yDelta)
 
             col = col + 1
         end
@@ -125,20 +125,16 @@ local function FlatMembers(frames, spacing)
     end
 end
 
-local function RelativeTopLeft(frame, parent)
-    local top = (frame:GetTop() or 0) - (parent:GetTop() or 0)
-    local left = (frame:GetLeft() or 0) - (parent:GetLeft() or 0)
-
-    return top, left
-end
-
 local function Pets(spacing, horizontal)
     local members, pets, _ = addon:GetRaidFrames()
 
     if #pets == 0 or #members == 0 then return end
 
+    table.sort(pets, function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
+
     local _, byPos, maxRow, maxCol = GridLayout(members)
     local firstPet = pets[1]
+    local firstPetPoint = addon:GetPointEx(firstPet)
     local parent = CompactRaidFrameContainer
     local placeHorizontal = horizontal
 
@@ -158,12 +154,18 @@ local function Pets(spacing, horizontal)
             i = i + 1
         end
 
-        local top, left = RelativeTopLeft(topRight, parent)
-        firstPet:SetPoint("TOPLEFT", parent, "TOPLEFT", left + topRight:GetWidth() + spacing.Horizontal, top)
+        local top, left = addon:RelativeTopLeft(topRight, parent)
+        local xDelta = left - (firstPetPoint.offsetX - topRight:GetWidth() - spacing.Horizontal)
+        local yDelta = top - firstPetPoint.offsetY
+
+        firstPet:AdjustPointsOffset(xDelta, yDelta)
     else
         local bottomLeft = byPos[maxRow][0]
-        local top, left = RelativeTopLeft(bottomLeft, parent)
-        firstPet:SetPoint("TOPLEFT", parent, "TOPLEFT", left, top - bottomLeft:GetHeight() - spacing.Vertical)
+        local top, left = addon:RelativeTopLeft(bottomLeft, parent)
+        local xDelta = left - firstPetPoint.offsetX
+        local yDelta = top - firstPetPoint.offsetY - bottomLeft:GetHeight() - spacing.Vertical
+
+        firstPet:AdjustPointsOffset(xDelta, yDelta)
     end
 
     local petsPerRaidFrame = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and 3 or 2
@@ -171,53 +173,83 @@ local function Pets(spacing, horizontal)
     -- move all the remaining pets
     for i = 2, #pets do
         local pet = pets[i]
+        local petPoint = addon:GetPointEx(pet)
         local previous = pets[i - 1]
         -- in classic 2 pet frames fit into 1 member raid frame
         -- so for the 2nd frame just anchor it to the first
         -- in retail 3 pet frames almost fit
         local addSpacing = i % petsPerRaidFrame == 1
+        local xDelta = 0
+        local yDelta = 0
 
         if addSpacing then
             if horizontal then
                 local cellBefore = pets[i - petsPerRaidFrame]
-                local top, left = RelativeTopLeft(cellBefore, parent)
-                pet:SetPoint("TOPLEFT", parent, "TOPLEFT", left + cellBefore:GetWidth() + spacing.Horizontal, top)
+                local top, left = addon:RelativeTopLeft(cellBefore, parent)
+                xDelta = left - petPoint.offsetX - cellBefore:GetWidth() - spacing.Horizontal
+                yDelta = top - petPoint.offsetY
             else
-                local top, left = RelativeTopLeft(previous, parent)
-                pet:SetPoint("TOPLEFT", parent, "TOPLEFT", left, top - previous:GetHeight() - spacing.Vertical)
+                local top, left = addon:RelativeTopLeft(previous, parent)
+                xDelta = left - petPoint.offsetX
+                yDelta = top - petPoint.offsetY - previous:GetHeight() - spacing.Vertical
             end
         else
-            local top, left = RelativeTopLeft(previous, parent)
-            pet:SetPoint("TOPLEFT", parent, "TOPLEFT", left, top - previous:GetHeight())
+            local top, left = addon:RelativeTopLeft(previous, parent)
+            xDelta = left - petPoint.offsetX
+            yDelta = top - petPoint.offsetY - previous:GetHeight()
         end
+
+        pet:AdjustPointsOffset(xDelta, yDelta)
     end
 end
 
-local function GroupedMembers(members, spacing, horizontal)
-    -- not sure why, but group member top values aren't exact
-    -- so use fuzzy sorting
-    table.sort(members, function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
+local function GroupedMembers(frames, spacing, horizontal)
+    if #frames == 0 then return end
 
-    for i = 1, #members do
-        local member = members[i]
-        local _, _, _, offsetX, offsetY = member:GetPoint()
+    local byFrame, byPos, _, _ = GridLayout(frames)
+    local root = addon:ToFrameChain(frames)
+    local current = root
+
+    -- why all this complexity instead of just a simple sequence of SetPoint() calls?
+    -- it's because SetPoint() can't be called in combat whereas AdjustPointsOffset() can
+    -- SetPoint() is just completely disallowed (by unsecure code) in combat, even if only changing x/y points
+    -- being able to run this in combat has the benefit that if blizzard reset/redraw frames mid-combat, we can reapply our sorting/spacing!
+    while current do
+        local frame = current.Value
+        local pos = byFrame[frame]
         local xDelta = 0
         local yDelta = 0
 
-        if i == 1 then
-            -- no idea why, but sometimes the first member X offset is set when it shouldn't be
-            if horizontal then xDelta = -offsetX end
-        else
-            -- frames are placed relative of each other
-            -- so offset values contain what spacing we've previously applied
-            if horizontal then
-                xDelta = spacing.Horizontal - (offsetX or 0)
+        if pos.Row == 0 and pos.Column == 0 then
+            local _, container, _, _, _ = root.Value:GetPoint()
+            local top = container.title and (container.title:GetBottom() or 0) or (container:GetTop() or 0)
+            local left = container:GetLeft() or 0
+
+            xDelta = left - (frame:GetLeft() or 0)
+            yDelta = top - (frame:GetTop() or 0)
+        elseif horizontal and pos.Column > 0 then
+            local left = byPos[pos.Row][pos.Column - 1]
+            if left then
+                xDelta = (left:GetRight() or 0) - (frame:GetLeft() or 0) + spacing.Horizontal
             else
-                yDelta = spacing.Vertical + (offsetY or 0)
+                addon:Warning(string.format("Failed to determine the frame left of %s", frame:GetName()))
             end
+        elseif not horizontal and pos.Row > 0 then
+            local above = byPos[pos.Row - 1][pos.Column]
+            if above then
+                yDelta = (above:GetBottom() or 0) - (frame:GetTop() or 0) - spacing.Vertical
+            else
+                addon:Warning(string.format("Failed to determine the frame above %s", frame:GetName()))
+            end
+        else
+            addon:Warning(string.format("Unable to determine the previous frame of %s", frame:GetName()))
         end
 
-        member:AdjustPointsOffset(xDelta, -yDelta)
+        if xDelta ~= 0 or yDelta ~= 0 then
+            frame:AdjustPointsOffset(xDelta, yDelta)
+        end
+
+        current = current.Next
     end
 end
 
@@ -324,7 +356,7 @@ local function Groups(groups, spacing, horizontal)
             local anchor = verticalAnchorsByRow[pos.Row]
 
             if anchor then
-                yDelta = spacing.Vertical + ((group:GetTop() or 0) - (anchor:GetBottom() or 0))
+                yDelta = (anchor:GetBottom() or 0) - (group:GetTop() or 0) - spacing.Vertical
             end
         end
 
@@ -337,7 +369,7 @@ local function Groups(groups, spacing, horizontal)
             end
         end
 
-        group:AdjustPointsOffset(xDelta, -yDelta)
+        group:AdjustPointsOffset(xDelta, yDelta)
     end
 end
 
@@ -383,11 +415,6 @@ end
 
 ---Applies spacing to party and raid frames.
 function addon:ApplySpacing()
-    if InCombatLockdown() then
-        addon:Debug("Can't apply spacing during combat.")
-        return
-    end
-
     if CompactRaidFrameContainer and not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
         local _, _, _, spacing = GetSettings(true)
         local zeroSpacing = spacing.Horizontal == 0 and spacing.Vertical == 0

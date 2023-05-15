@@ -1,6 +1,7 @@
 local _, addon = ...
 local logLevelDebug = "Debug"
 local logLevelWarning = "Warning"
+local logLevelError = "Error"
 local log = {}
 
 local function Write(msg, level)
@@ -18,14 +19,20 @@ function addon:InitLogging()
     FrameSortDB.Log = log
 end
 
----Prints a debug message to the chat window if DebugMode is enabled.
+---Logs a debug message.
 ---@param msg string
 function addon:Debug(msg)
     Write(msg, logLevelDebug)
 end
 
----Prints a warning message to the chat window if DebugMode is enabled.
+---Logs a warning message.
 ---@param msg string
 function addon:Warning(msg)
     Write(msg, logLevelWarning)
+end
+
+---Logs an error message.
+---@param msg string
+function addon:Error(msg)
+    Write(msg, logLevelError)
 end

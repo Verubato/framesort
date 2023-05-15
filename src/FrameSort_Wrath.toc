@@ -7,7 +7,7 @@
 ## IconTexture: Interface\AddOns\FrameSort\Media\icon.blp
 
 Type\SortMode.lua
-Type\FrameWithPosition.lua
+Type\Point.lua
 Util\Log.lua
 Util\Math.lua
 Util\Unit.lua
