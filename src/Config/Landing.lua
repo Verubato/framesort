@@ -18,7 +18,7 @@ function builder:BuildLanding(panel)
         "I'm currently working on fixing them and will be releasing updates ASAP.",
         "This release of FrameSort has some major internal changes that should hopefully resolve many of them.",
         "",
-        "Known issues that causing frames to become unsorted are:",
+        "Known issues that cause frames to become unsorted are:",
         " - Priests mind control.",
         " - Pets being summoned/killed/dismissed.",
         "",
@@ -41,7 +41,5 @@ function builder:BuildLanding(panel)
         description:SetText(line)
         anchor = description
     end
-
-    InterfaceOptions_AddCategory(panel)
 end
 
