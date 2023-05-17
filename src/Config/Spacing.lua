@@ -1,4 +1,4 @@
-local addonName, addon = ...
+local _, addon = ...
 local builder = addon.OptionsBuilder
 local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
 local minSpacing = 0
@@ -57,7 +57,7 @@ end
 ---Adds the spacing options panel.
 ---@param parent table the parent UI panel.
 function builder:BuildSpacingOptions(parent)
-    local panel = CreateFrame("Frame", addonName .. "Spacing", parent)
+    local panel = CreateFrame("Frame", "FrameSortSpacing", parent)
     panel.name = "Spacing"
     panel.parent = parent.name
 

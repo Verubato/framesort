@@ -6,6 +6,15 @@ local macro = addon.Macro
 local array = addon.Array
 local previousUnits = nil
 
+local function CanUpdate()
+    if InCombatLockdown() then
+        addon:Warning("Can't update macros during combat.")
+        return false
+    end
+
+    return true
+end
+
 local function InspectMacro(slot)
     local _, _, body = GetMacroInfo(slot)
 
@@ -22,13 +31,7 @@ local function InspectMacro(slot)
     isSelfEditingMacro = false
 end
 
-
 local function ScanMacros()
-    if InCombatLockdown() then
-        addon:Warning("Can't update macros during combat.")
-        return
-    end
-
     local units = addon:GetVisuallyOrderedUnits()
 
     -- prevent editing macros if the units haven't changed
@@ -47,10 +50,7 @@ local function OnEditMacro(macroInfo, _, _, _)
     -- prevent recursion from EditMacro hook
     if isSelfEditingMacro then return end
 
-    if InCombatLockdown() then
-        addon:Warning("Can't update macros during combat.")
-        return
-    end
+    if not CanUpdate() then return end
 
     InspectMacro(macroInfo)
 end
@@ -58,6 +58,13 @@ end
 local function OnLayout(container)
     if container ~= CompactRaidFrameContainer then return end
     if container.flowPauseUpdates then return end
+    if not CanUpdate() then return end
+
+    ScanMacros()
+end
+
+local function Run()
+    if not CanUpdate() then return end
 
     ScanMacros()
 end
@@ -65,10 +72,11 @@ end
 ---Initialises the macros module.
 function addon:InitMacros()
     eventFrame = CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", ScanMacros)
+    eventFrame:HookScript("OnEvent", Run)
     eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
     eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
-    addon:RegisterPostSortCallback(ScanMacros)
+    eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+    addon:RegisterPostSortCallback(Run)
 
     hooksecurefunc("EditMacro", OnEditMacro)
     hooksecurefunc("FlowContainer_DoLayout", OnLayout)

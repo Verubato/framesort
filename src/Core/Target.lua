@@ -5,13 +5,16 @@ local eventFrame = nil
 local previousUnits = nil
 local array = addon.Array
 
----Updates the targeting hotkeys to the sorted units.
-local function UpdateTargets()
+local function CanUpdate()
     if InCombatLockdown() then
         addon:Warning("Can't update targets during combat.")
         return false
     end
 
+    return true
+end
+
+local function UpdateTargets()
     local units = addon:GetVisuallyOrderedUnits()
 
     -- prevent editing macros if the units haven't changed
@@ -36,6 +39,13 @@ local function OnLayout(container)
     if not container or container:IsForbidden() or not container:IsVisible() then return end
     if container ~= CompactRaidFrameContainer then return end
     if container.flowPauseUpdates then return end
+    if not CanUpdate() then return end
+
+    UpdateTargets()
+end
+
+local function Run()
+    if not CanUpdate() then return end
 
     UpdateTargets()
 end
@@ -50,9 +60,10 @@ function addon:InitTargeting()
     end
 
     eventFrame = CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", UpdateTargets)
+    eventFrame:HookScript("OnEvent", Run)
     eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
     eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
-    addon:RegisterPostSortCallback(UpdateTargets)
+    eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+    addon:RegisterPostSortCallback(Run)
     hooksecurefunc("FlowContainer_DoLayout", OnLayout)
 end

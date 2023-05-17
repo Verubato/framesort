@@ -1,4 +1,4 @@
-local addonName, addon = ...
+local _, addon = ...
 local builder = addon.OptionsBuilder
 local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
 local maxMacros = 138
@@ -21,7 +21,7 @@ end
 ---Adds the macro options panel.
 ---@param parent table the parent UI panel.
 function builder:BuildMacroOptions(parent)
-    local panel = CreateFrame("Frame", addonName .. "Macros", parent)
+    local panel = CreateFrame("Frame", "FrameSortMacros", parent)
     panel.name = "Macros"
     panel.parent = parent.name
 

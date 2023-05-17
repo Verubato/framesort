@@ -1,4 +1,4 @@
-local addonName, addon = ...
+local _, addon = ...
 addon.OptionsBuilder = {
     VerticalSpacing = 15,
     HorizontalSpacing = 50
@@ -196,7 +196,7 @@ local function BuildSortModeCheckboxes(
 end
 
 function builder:BuildSortingOptions(parent)
-    local panel = CreateFrame("Frame", addonName .. "Rules", parent)
+    local panel = CreateFrame("Frame", "FrameSortRules", parent)
     panel.name = "Rules"
     panel.parent = parent.name
 

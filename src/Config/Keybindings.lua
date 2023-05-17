@@ -5,14 +5,14 @@ _G["BINDING_NAME_CLICK FSTarget3:LeftButton"]= "Target frame 3"
 _G["BINDING_NAME_CLICK FSTarget4:LeftButton"]= "Target frame 4"
 _G["BINDING_NAME_CLICK FSTarget5:LeftButton"]= "Target frame 5"
 
-local addonName, addon = ...
+local _, addon = ...
 local builder = addon.OptionsBuilder
 local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
 
 ---Adds the keybinding options description panel.
 ---@param parent table the parent UI panel.
 function builder:BuildKeybindingOptions(parent)
-    local panel = CreateFrame("Frame", addonName .. "Keybindings", parent)
+    local panel = CreateFrame("Frame", "FrameSortKeybindings", parent)
     panel.name = "Keybindings"
     panel.parent = parent.name
 

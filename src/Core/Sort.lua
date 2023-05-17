@@ -133,15 +133,6 @@ end
 local function RearrangeFrameChain(frames, units)
     table.sort(frames, function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
 
-    local chain = addon:ToFrameChain(frames)
-    local chainFrames = {}
-    local current = chain
-
-    while current do
-        chainFrames[#chainFrames + 1] = current.Value
-        current = current.Next
-    end
-
     -- store the position of each frame before moving
     local points = {}
     for _, frame in ipairs(frames) do
@@ -161,17 +152,20 @@ local function RearrangeFrameChain(frames, units)
         error(string.format("Unable to determine the unit index for %s", unit))
     end
 
-    for _, source in ipairs(chainFrames) do
+    local chain = addon:ToFrameChain(frames)
+    local current = chain
+
+    while current do
+        local source = current.Value
         local unitIndex = UnitIndex(source.unit, units)
+        local to = points[unitIndex]
+        local from = { Top = source:GetTop() or 0, Left = source:GetLeft() or 0 }
+        local xDelta = to.Left - from.Left
+        local yDelta = to.Top - from.Top
 
-        if frameIndex ~= unitIndex then
-            local to = points[unitIndex]
-            local from = { Top = source:GetTop() or 0, Left = source:GetLeft() or 0 }
-            local xDelta = to.Left - from.Left
-            local yDelta = to.Top - from.Top
+        source:AdjustPointsOffset(xDelta, yDelta)
 
-            source:AdjustPointsOffset(xDelta, yDelta)
-        end
+        current = current.Next
     end
 end
 

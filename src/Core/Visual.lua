@@ -1,7 +1,7 @@
 local _, addon = ...
 
----Returns the set of visible unit frames, ordered by their visual representation.
-function addon:GetVisuallyOrderedFrames()
+---Returns the set of visible unit frames ordered by their visual representation.
+local function GetVisuallyOrderedFrames()
     local party = addon:GetPartyFrames()
     local frames = nil
 
@@ -22,9 +22,9 @@ function addon:GetVisuallyOrderedFrames()
     return frames
 end
 
----Returns the set of visible unit tokens, ordered by their visual representation.
+---Returns the set of visible unit tokens ordered by their visual representation.
 function addon:GetVisuallyOrderedUnits()
-    local frames = addon:GetVisuallyOrderedFrames()
+    local frames = GetVisuallyOrderedFrames()
     local units = {}
 
     for _, frame in ipairs(frames) do
