@@ -101,13 +101,13 @@ local function RearrangeFrames(frames, units)
             end
         end
 
-        error(string.format("Unable to determine the frame index for unit %s", unit))
+        return nil
     end
 
     for unitIndex, unit in ipairs(units) do
         local frameIndex = FrameIndex(unit, frames)
 
-        if frameIndex ~= unitIndex then
+        if frameIndex and frameIndex ~= unitIndex then
             local from = points[frameIndex]
             local to = points[unitIndex]
             local frame = frames[frameIndex]
@@ -149,7 +149,7 @@ local function RearrangeFrameChain(frames, units)
             end
         end
 
-        error(string.format("Unable to determine the unit index for %s", unit))
+        return nil
     end
 
     local chain = addon:ToFrameChain(frames)
@@ -158,12 +158,15 @@ local function RearrangeFrameChain(frames, units)
     while current do
         local source = current.Value
         local unitIndex = UnitIndex(source.unit, units)
-        local to = points[unitIndex]
-        local from = { Top = source:GetTop() or 0, Left = source:GetLeft() or 0 }
-        local xDelta = to.Left - from.Left
-        local yDelta = to.Top - from.Top
 
-        source:AdjustPointsOffset(xDelta, yDelta)
+        if unitIndex then
+            local to = points[unitIndex]
+            local from = { Top = source:GetTop() or 0, Left = source:GetLeft() or 0 }
+            local xDelta = to.Left - from.Left
+            local yDelta = to.Top - from.Top
+
+            source:AdjustPointsOffset(xDelta, yDelta)
+        end
 
         current = current.Next
     end
