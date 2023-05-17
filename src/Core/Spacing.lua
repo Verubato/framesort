@@ -186,7 +186,7 @@ local function Pets(spacing, horizontal)
             if horizontal then
                 local cellBefore = pets[i - petsPerRaidFrame]
                 local top, left = addon:RelativeTopLeft(cellBefore, parent)
-                xDelta = left - petPoint.offsetX - cellBefore:GetWidth() - spacing.Horizontal
+                xDelta = (left - petPoint.offsetX) + cellBefore:GetWidth() + spacing.Horizontal
                 yDelta = top - petPoint.offsetY
             else
                 local top, left = addon:RelativeTopLeft(previous, parent)
