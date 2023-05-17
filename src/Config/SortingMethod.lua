@@ -57,7 +57,7 @@ function builder:BuildSortingMethodOptions(parent)
     })
 
     anchor = BuildDottedList(panel, anchor, "Cons: ", {
-        "Sorting can temporarily become undone during combat if the group/raid changes.",
+        "May break with Blizzard patches.",
         "May not work well with other addons that expect the traditional method."
     })
 
