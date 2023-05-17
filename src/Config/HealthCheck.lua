@@ -72,7 +72,7 @@ end
 ---Adds the health check options panel.
 ---@param parent table the parent UI panel.
 function builder:BuildHealthCheck(parent)
-    local panel = CreateFrame("Frame", addonName .. "HealthCheck", parent)
+    local panel = CreateFrame("Frame", "FrameSortHealthCheck", parent)
     panel.name = "Health Check"
     panel.parent = parent.name
 

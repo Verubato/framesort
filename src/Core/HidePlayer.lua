@@ -1,7 +1,7 @@
 local _, addon = ...
 local eventFrame = nil
 
-local function UpdateVisible(frame)
+local function CanUpdate(frame)
     if not frame then return end
     if frame:IsForbidden() then return end
     if not IsInGroup() then return false end
@@ -13,6 +13,12 @@ local function UpdateVisible(frame)
             return false
         end
     end
+
+    return true
+end
+
+local function UpdateVisible(frame)
+    if not CanUpdate(frame) then return end
 
     local enabled, mode, _, _ = addon:GetSortMode()
 
@@ -34,6 +40,7 @@ function addon:InitPlayerHiding()
     eventFrame:HookScript("OnEvent", Run)
     eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
     eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
+    eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
     hooksecurefunc("CompactUnitFrame_UpdateVisible", UpdateVisible)
     addon:RegisterPostSortCallback(Run)
 end

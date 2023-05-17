@@ -401,18 +401,6 @@ local function ApplyRaidFrameSpacing()
     end
 end
 
----Event hook on blizzard performing frame layouts.
-local function OnLayout(container)
-    if container ~= CompactRaidFrameContainer then return end
-    if container.flowPauseUpdates then return end
-
-    addon:ApplySpacing()
-end
-
-local function OnEvent()
-    addon:ApplySpacing()
-end
-
 ---Applies spacing to party and raid frames.
 function addon:ApplySpacing()
     if CompactRaidFrameContainer and not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
@@ -439,14 +427,25 @@ function addon:ApplySpacing()
     end
 end
 
+local function OnLayout(container)
+    if container ~= CompactRaidFrameContainer then return end
+    if container.flowPauseUpdates then return end
+
+    addon:ApplySpacing()
+end
+
+local function Run()
+    addon:ApplySpacing()
+end
+
 ---Initialises the spacing module.
 function addon:InitSpacing()
     eventFrame = CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", OnEvent)
+    eventFrame:HookScript("OnEvent", Run)
     eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
     eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
     eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
     eventFrame:RegisterEvent("PLAYER_ROLES_ASSIGNED")
-    addon:RegisterPostSortCallback(OnEvent)
+    addon:RegisterPostSortCallback(Run)
     hooksecurefunc("FlowContainer_DoLayout", OnLayout)
 end
