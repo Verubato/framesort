@@ -1,0 +1,27 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\FrameXML\UI.xsd">
+    <Script file="Type\SortMode.lua"/>
+    <Script file="Type\Point.lua"/>
+    <Script file="Util\Log.lua"/>
+    <Script file="Util\Math.lua"/>
+    <Script file="Util\Unit.lua"/>
+    <Script file="Util\Frame.lua"/>
+    <Script file="Util\Macro.lua"/>
+    <Script file="Util\Array.lua"/>
+    <Script file="Config\Defaults.lua"/>
+    <Script file="Config\OptionsUpgrader.lua"/>
+    <Script file="Config\Options.lua"/>
+    <Script file="Config\Landing.lua"/>
+    <Script file="Config\Spacing.lua"/>
+    <Script file="Config\Keybindings.lua"/>
+    <Script file="Config\Macro.lua"/>
+    <Script file="Config\SortingMethod.lua"/>
+    <Script file="Config\HealthCheck.lua"/>
+    <Script file="Core\Compare.lua"/>
+    <Script file="Core\Visual.lua"/>
+    <Script file="Core\Target.lua"/>
+    <Script file="Core\Spacing.lua"/>
+    <Script file="Core\Sort.lua"/>
+    <Script file="Core\Macro.lua"/>
+    <Script file="Core\HidePlayer.lua"/>
+    <Script file="Init.lua"/>
+</Ui>
