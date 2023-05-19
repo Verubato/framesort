@@ -195,11 +195,7 @@ local function BuildSortModeCheckboxes(
     return modeLabel
 end
 
-function builder:BuildSortingOptions(parent)
-    local panel = CreateFrame("Frame", "FrameSortRules", parent)
-    panel.name = "Rules"
-    panel.parent = parent.name
-
+function builder:BuildSortingOptions(panel)
     local anchor = BuiltTitle(panel)
 
     if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
@@ -259,8 +255,6 @@ function builder:BuildSortingOptions(parent)
         function(mode) addon.Options.World.GroupSortMode = mode end,
         function(reverse) addon.Options.World.Reverse = reverse end
     )
-
-    InterfaceOptions_AddCategory(panel)
 end
 
 ---Initialises the addon options.
@@ -270,7 +264,6 @@ function addon:InitOptions()
 
     InterfaceOptions_AddCategory(panel)
 
-    builder:BuildLanding(panel)
     builder:BuildSortingOptions(panel)
     builder:BuildSortingMethodOptions(panel)
     builder:BuildKeybindingOptions(panel)
