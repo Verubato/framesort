@@ -116,7 +116,9 @@ local function FlatMembers(frames, spacing)
                 xDelta = spacing.Horizontal - ((frame:GetLeft() or 0) - (left:GetRight() or 0))
             end
 
-            frame:AdjustPointsOffset(xDelta, yDelta)
+            if xDelta ~= 0 or yDelta ~= 0 then
+                frame:AdjustPointsOffset(xDelta, yDelta)
+            end
 
             col = col + 1
         end
@@ -126,7 +128,7 @@ local function FlatMembers(frames, spacing)
 end
 
 local function Pets(spacing, horizontal)
-    local members, pets, _ = addon:GetRaidFrames()
+    local members, pets = addon:GetRaidFrames()
 
     if #pets == 0 or #members == 0 then return end
 
@@ -145,27 +147,24 @@ local function Pets(spacing, horizontal)
     end
 
     if placeHorizontal then
-        local topRight = nil
         local firstRow = byPos[0]
-        local i = 0
-
-        while firstRow[i] do
-            topRight = firstRow[i]
-            i = i + 1
-        end
-
+        local topRight = firstRow[#firstRow]
         local top, left = addon:RelativeTopLeft(topRight, parent)
         local xDelta = left - (firstPetPoint.offsetX - topRight:GetWidth() - spacing.Horizontal)
         local yDelta = top - firstPetPoint.offsetY
 
-        firstPet:AdjustPointsOffset(xDelta, yDelta)
+        if xDelta ~= 0 or yDelta ~= 0 then
+            firstPet:AdjustPointsOffset(xDelta, yDelta)
+        end
     else
         local bottomLeft = byPos[maxRow][0]
         local top, left = addon:RelativeTopLeft(bottomLeft, parent)
         local xDelta = left - firstPetPoint.offsetX
         local yDelta = top - firstPetPoint.offsetY - bottomLeft:GetHeight() - spacing.Vertical
 
-        firstPet:AdjustPointsOffset(xDelta, yDelta)
+        if xDelta ~= 0 or yDelta ~= 0 then
+            firstPet:AdjustPointsOffset(xDelta, yDelta)
+        end
     end
 
     local petsPerRaidFrame = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and 3 or 2
@@ -199,7 +198,9 @@ local function Pets(spacing, horizontal)
             yDelta = top - petPoint.offsetY - previous:GetHeight()
         end
 
-        pet:AdjustPointsOffset(xDelta, yDelta)
+        if xDelta ~= 0 or yDelta ~= 0 then
+            pet:AdjustPointsOffset(xDelta, yDelta)
+        end
     end
 end
 
@@ -369,7 +370,9 @@ local function Groups(groups, spacing, horizontal)
             end
         end
 
-        group:AdjustPointsOffset(xDelta, yDelta)
+        if xDelta ~= 0 or yDelta ~= 0 then
+            group:AdjustPointsOffset(xDelta, yDelta)
+        end
     end
 end
 
@@ -388,7 +391,7 @@ local function ApplyRaidFrameSpacing()
     local flat, horizontal, showPets, spacing = GetSettings(true)
 
     if flat then
-        local members, _, _ = addon:GetRaidFrames()
+        local members, _ = addon:GetRaidFrames()
         FlatMembers(members, spacing)
     else
         local groups = addon:GetRaidFrameGroups()
