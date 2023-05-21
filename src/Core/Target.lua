@@ -3,7 +3,7 @@ local prefix = "FSTarget"
 local keybindingsCount = 5
 local eventFrame = nil
 local previousUnits = nil
-local array = addon.Array
+local enumerable = addon.Enumerable
 
 local function CanUpdate()
     if InCombatLockdown() then
@@ -18,7 +18,7 @@ local function UpdateTargets()
     local units = addon:GetVisuallyOrderedUnits()
 
     -- prevent editing macros if the units haven't changed
-    if previousUnits and array:ArrayEquals(previousUnits, units) then
+    if previousUnits and enumerable:ArrayEquals(previousUnits, units) then
         return
     end
 

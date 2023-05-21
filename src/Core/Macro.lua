@@ -2,9 +2,9 @@ local _, addon = ...
 local maxMacros = 138
 local eventFrame = nil
 local isSelfEditingMacro = false
-local macro = addon.Macro
-local array = addon.Array
 local previousUnits = nil
+local macro = addon.Macro
+local enumerable = addon.Enumerable
 
 local function CanUpdate()
     if InCombatLockdown() then
@@ -35,7 +35,7 @@ local function ScanMacros()
     local units = addon:GetVisuallyOrderedUnits()
 
     -- prevent editing macros if the units haven't changed
-    if previousUnits and array:ArrayEquals(previousUnits, units) then
+    if previousUnits and enumerable:ArrayEquals(previousUnits, units) then
         return
     end
 

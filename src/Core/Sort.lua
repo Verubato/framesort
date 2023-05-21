@@ -2,6 +2,7 @@ local _, addon = ...
 local eventFrame = nil
 local sortPending = false
 local callbacks = {}
+local enumerable = addon.Enumerable
 
 ---Determines whether general sorting can be performed.
 ---@return boolean
@@ -86,26 +87,20 @@ end
 ---@param frames table<table> the set of frames to rearrange.
 ---@param units table<string> unit ids in the desired order.
 local function RearrangeFrames(frames, units)
-    table.sort(frames, function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
-
-    -- store the position of each frame before moving
-    local points = {}
-    for _, frame in ipairs(frames) do
-        points[#points + 1] = addon:GetPointEx(frame)
-    end
-
-    local function FrameIndex(unit, framesLocal)
-        for i = 1, #framesLocal do
-            if UnitIsUnit(unit, framesLocal[i].unit) then
-                return i
-            end
-        end
-
-        return nil
-    end
+    local sorted = enumerable
+        :From(frames)
+        :OrderBy(function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
+        :ToTable()
+    local points = enumerable
+        :From(sorted)
+        :Map(function(x) return addon:GetPointEx(x) end)
+        :ToTable()
 
     for unitIndex, unit in ipairs(units) do
-        local frameIndex = FrameIndex(unit, frames)
+        ---@type any, number
+        local _, frameIndex = enumerable
+            :From(sorted)
+            :First(function(f) return UnitIsUnit(f.unit, unit) end)
 
         if frameIndex and frameIndex ~= unitIndex then
             local from = points[frameIndex]
@@ -119,6 +114,7 @@ local function RearrangeFrames(frames, units)
                 local xDelta = (to.offsetX or 0) - (from.offsetX or 0)
                 local yDelta = (to.offsetY or 0) - (from.offsetY or 0)
 
+                -- TODO why is lua_ls getting type confused here when removing the above @type specifier?
                 frame:AdjustPointsOffset(xDelta, yDelta)
             else
                 addon:Error(string.format("Unable to move frame %s as it doesn't share to the same parent anchor.", frame:GetName()))
@@ -131,33 +127,28 @@ end
 ---@param frames table<table> the set of frames to rearrange.
 ---@param units table<string> unit ids in the desired order.
 local function RearrangeFrameChain(frames, units)
-    table.sort(frames, function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
-
-    -- store the position of each frame before moving
-    local points = {}
-    for _, frame in ipairs(frames) do
-        points[#points + 1] = {
-            Top = frame:GetTop() or 0,
-            Left = frame:GetLeft() or 0
-        }
-    end
-
-    local function UnitIndex(unit, unitsLocal)
-        for i = 1, #unitsLocal do
-            if UnitIsUnit(unitsLocal[i], unit) then
-                return i
-            end
-        end
-
-        return nil
-    end
+    local sorted = enumerable
+        :From(frames)
+        :OrderBy(function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
+        :ToTable()
+    local points = enumerable
+        :From(sorted)
+        :Map(function(x)
+            return {
+                Top = x:GetTop() or 0,
+                Left = x:GetLeft() or 0
+            }
+        end)
+        :ToTable()
 
     local chain = addon:ToFrameChain(frames)
     local current = chain
 
     while current do
         local source = current.Value
-        local unitIndex = UnitIndex(source.unit, units)
+        local _, unitIndex = enumerable
+            :From(units)
+            :First(function(x) return UnitIsUnit(x, source.unit) end)
 
         if unitIndex then
             local to = points[unitIndex]
@@ -180,12 +171,11 @@ local function LayoutRaid()
 
     if not sortFunction or #memberFrames == 0 then return false end
 
-    local units = {}
-    for _, frame in pairs(memberFrames) do
-        units[#units + 1] = SecureButton_GetUnit(frame)
-    end
-
-    table.sort(units, sortFunction)
+    local units = enumerable
+        :From(memberFrames)
+        :Map(function(x) return SecureButton_GetUnit(x) end)
+        :OrderBy(sortFunction)
+        :ToTable()
 
     RearrangeFrames(memberFrames, units)
 
@@ -212,13 +202,11 @@ local function LayoutParty()
 
     if not sortFunction or #frames == 0 then return false end
 
-    local units = {}
-
-    for _, frame in ipairs(frames) do
-        units[#units + 1] = SecureButton_GetUnit(frame)
-    end
-
-    table.sort(units, sortFunction)
+    local units = enumerable
+        :From(frames)
+        :Map(function(x) return SecureButton_GetUnit(x) end)
+        :OrderBy(sortFunction)
+        :ToTable()
 
     RearrangeFrameChain(frames, units)
 

@@ -1,20 +1,7 @@
 local _, addon = ...
 
----Returns the set of raid frames.
----@param includeInvisible boolean true to include invisible frames, otherwise false.
----@return table<table>,table<table>,table<table> frames member frames, pet frames, member and pet frames combined
-function addon:GetRaidFrames(includeInvisible)
-    local container = CompactRaidFrameContainer
-
-    if not container then return {}, {}, {} end
-    if container:IsForbidden() or not container:IsVisible() then return {}, {}, {} end
-
+local function ExtractFrames(children, includeInvisible)
     local frames = {}
-    local members = {}
-    local pets = {}
-    local combined = {}
-    local children = { CompactRaidFrameContainer:GetChildren() }
-
     for _, frame in pairs(children) do
         if frame and not frame:IsForbidden() and (includeInvisible or frame:IsVisible()) and frame.unitExists then
             frames[#frames + 1] = frame
@@ -31,85 +18,90 @@ function addon:GetRaidFrames(includeInvisible)
         end
     end
 
-    for _, frame in pairs(frames) do
-        if addon:IsMember(frame.unit) then
-            members[#members + 1] = frame
-            combined[#combined + 1] = frame
-        elseif addon:IsPet(frame.unit) then
-            pets[#pets + 1] = frame
-            combined[#combined + 1] = frame
-        else
-            addon:Debug("Unknown unit type: " .. frame.unit)
-        end
-    end
+    return frames
+end
 
-    return members, pets, combined
+---Returns the set of raid frames.
+---@param includeInvisible boolean true to include invisible frames, otherwise false.
+---@return Enumerable<table>,Enumerable<table> frames member frames, pet frames
+function addon:GetRaidFrames(includeInvisible)
+    local empty = addon.Enumerable:Empty():ToTable()
+    local container = CompactRaidFrameContainer
+
+    if not container then return empty, empty end
+    if container:IsForbidden() or not container:IsVisible() then return empty, empty end
+
+    local children = { CompactRaidFrameContainer:GetChildren() }
+    local frames = ExtractFrames(children, includeInvisible)
+    local members = addon.Enumerable:From(frames)
+        :Where(function(x) return addon:IsMember(x.unit) end)
+    local pets = addon.Enumerable:From(frames)
+        :Where(function(x) return addon:IsPet(x.unit) end)
+
+    return members:ToTable(), pets:ToTable()
 end
 
 ---Returns the set of raid frame group frames.
 ---@param includeInvisible boolean true to include invisible frames, otherwise false.
 ---@return table<table> frames group frames
 function addon:GetRaidFrameGroups(includeInvisible)
-    local frames = {}
+    local empty = addon.Enumerable:Empty():ToTable()
     local container = CompactRaidFrameContainer
 
-    if not container then return frames end
-    if container:IsForbidden() or not container:IsVisible() then return frames end
+    if not container then return empty end
+    if container:IsForbidden() or not container:IsVisible() then return empty end
 
-    local children = { container:GetChildren() }
-
-    for _, frame in pairs(children) do
-        if not frame:IsForbidden() and (includeInvisible or frame:IsVisible()) and string.match(frame:GetName() or "", "CompactRaidGroup") then
-            frames[#frames + 1] = frame
-        end
-    end
-
-    return frames
+    return addon.Enumerable
+        :From({ container:GetChildren() })
+        :Where(function(frame)
+            return
+                not frame:IsForbidden()
+                and (includeInvisible or frame:IsVisible())
+                and string.match(frame:GetName() or "", "CompactRaidGroup")
+        end)
+        :ToTable()
 end
 
 ---Returns the set of visible member frames within a raid group frame.
 ---@param includeInvisible boolean true to include invisible frames, otherwise false.
 ---@return table<table> frames group frames
 function addon:GetRaidFrameGroupMembers(group, includeInvisible)
-    local frames = { group:GetChildren() }
-    local members = {}
-
-    for _, frame in ipairs(frames) do
-        if frame and not frame:IsForbidden() and (includeInvisible or frame:IsVisible()) and frame.unitExists then
-            members[#members + 1] = frame
-        end
-    end
-
-    return members
+    return addon.Enumerable
+        :From({ group:GetChildren() })
+        :Where(function(frame)
+            return
+                frame
+                and not frame:IsForbidden()
+                and (includeInvisible or frame:IsVisible())
+                and frame.unitExists
+        end)
+        :ToTable()
 end
 
 ---Returns the set of visible party frames.
 ---@param includeInvisible boolean true to include invisible frames, otherwise false.
 ---@return table<table> frames party frames
 function addon:GetPartyFrames(includeInvisible)
-    local frames = {}
+    local empty = addon.Enumerable:Empty():ToTable()
     local container = CompactPartyFrame
 
-    if not container then return frames end
-    if container:IsForbidden() or not container:IsVisible() then return frames end
+    if not container then return empty end
+    if container:IsForbidden() or not container:IsVisible() then return empty end
 
-    if not CompactPartyFrame then
-        return frames
-    end
-
-    local children = { container:GetChildren() }
-
-    for _, frame in pairs(children) do
-        if frame and not frame:IsForbidden() and frame.unitExists and (includeInvisible or frame:IsVisible()) then
-            frames[#frames + 1] = frame
-        end
-    end
-
-    return frames
+    return addon.Enumerable
+        :From({ container:GetChildren() })
+        :Where(function(frame)
+            return
+                frame
+                and not frame:IsForbidden()
+                and frame.unitExists
+                and (includeInvisible or frame:IsVisible())
+        end)
+        :ToTable()
 end
 
 ---Returns the player compact raid frame.
----@return table playerFrame
+---@return table? playerFrame
 function addon:GetPlayerFrame()
     local frames = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and addon:GetPartyFrames(true) or nil
 
@@ -118,39 +110,35 @@ function addon:GetPlayerFrame()
     end
 
     -- find the player frame
-    local player = nil
-    for _, frame in ipairs(frames) do
-        if UnitIsUnit("player", frame.unit) then
-            player = frame
-            break
-        end
-    end
-
-    return player
+    return addon.Enumerable
+        :From(frames)
+        :First(function(frame) return UnitIsUnit("player", frame.unit) end)
 end
 
 ---Returns the frames in order of their relative positioning to each other.
 ---@param frames table<table> frames in any particular order
 ---@return LinkedListNode root in order of parent -> child -> child -> child
 function addon:ToFrameChain(frames)
-    local nodesByFrame = {}
-    for _, frame in ipairs(frames) do
-        nodesByFrame[frame:GetName()] = {
-            Next = nil,
-            Previous = nil,
-            Value = frame
-        }
-    end
+    local empty = addon.Enumerable:Empty():ToTable()
+    local nodesByFrame = addon.Enumerable
+        :From(frames)
+        :ToLookup(function(frame) return frame end, function(frame)
+            return {
+                Next = nil,
+                Previous = nil,
+                Value = frame
+            }
+        end)
 
     local root = nil
     for _, child in pairs(nodesByFrame) do
         local _, relativeTo, _, _, _ = child.Value:GetPoint()
-        local parent = nodesByFrame[relativeTo:GetName()]
+        local parent = nodesByFrame[relativeTo]
 
         if parent then
             if parent.Next then
                 addon:Error(string.format("Encountered multiple children for frame %s in frame frame chain.", parent.Value:GetName()))
-                return {}
+                return empty
             end
 
             parent.Next = child
@@ -171,7 +159,7 @@ function addon:ToFrameChain(frames)
 
     if count ~= #frames then
         addon:Error(string.format("Incomplete/broken frame chain: expected %d nodes but only found %d", #frames, count))
-        return {}
+        return empty
     end
 
     return root
