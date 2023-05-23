@@ -449,6 +449,7 @@ function addon:InitSpacing()
     eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
     eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
     eventFrame:RegisterEvent("PLAYER_ROLES_ASSIGNED")
+    eventFrame:RegisterEvent("UNIT_PET")
     addon:RegisterPostSortCallback(Run)
     hooksecurefunc("FlowContainer_DoLayout", OnLayout)
 end
