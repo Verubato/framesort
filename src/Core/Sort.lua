@@ -1,7 +1,14 @@
 local _, addon = ...
+local fsCompare = addon.Compare
+local fsUnit = addon.Unit
+local fsFrame = addon.Frame
+local fsPoint = addon.Point
+local fsEnumerable = addon.Enumerable
+local fsLog = addon.Log
 local sortPending = false
 local callbacks = {}
-local enumerable = addon.Enumerable
+local M = {}
+addon.Sorting = M
 
 ---Determines whether general sorting can be performed.
 ---@return boolean
@@ -12,19 +19,19 @@ local function CanSort()
 
     -- can't make changes during combat
     if InCombatLockdown() and not addon.Options.SortingMethod.TaintlessEnabled then
-        addon:Warning("Can't perform non-taintless sorting during combat.")
+        fsLog:Warning("Can't perform non-taintless sorting during combat.")
         return false
     end
 
     local groupSize = GetNumGroupMembers()
     if groupSize <= 0 then
-        addon:Warning("Can't sort because group has 0 members.")
+        fsLog:Warning("Can't sort because group has 0 members.")
         return false
     end
 
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         if EditModeManagerFrame.editModeActive then
-            addon:Debug("Not sorting while edit mode active.")
+            fsLog:Debug("Not sorting while edit mode active.")
             return false
         end
     end
@@ -40,7 +47,7 @@ local function CanSortParty()
     if WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE then
         local together = CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
         if together then
-            addon:Warning("Cannot sort frames when the 'Keep Groups Together' setting is enabled.")
+            fsLog:Warning("Cannot sort frames when the 'Keep Groups Together' setting is enabled.")
             return false
         end
     end
@@ -61,13 +68,13 @@ local function CanSortRaid()
 
         if raidGroupDisplayType ~= Enum.RaidGroupDisplayType.CombineGroupsVertical and
             raidGroupDisplayType ~= Enum.RaidGroupDisplayType.CombineGroupsHorizontal then
-            addon:Warning("Cannot sort frames when 'Separate' raid display mode is being used.")
+            fsLog:Warning("Cannot sort frames when 'Separate' raid display mode is being used.")
             return false
         end
     else
         local together = CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
         if together then
-            addon:Warning("Cannot sort frames when the 'Keep Groups Together' setting is enabled.")
+            fsLog:Warning("Cannot sort frames when the 'Keep Groups Together' setting is enabled.")
             return false
         end
     end
@@ -86,18 +93,18 @@ end
 ---@param frames table<table> the set of frames to rearrange.
 ---@param units table<string> unit ids in the desired order.
 local function RearrangeFrames(frames, units)
-    local sorted = enumerable
+    local sorted = fsEnumerable
         :From(frames)
-        :OrderBy(function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
+        :OrderBy(function(x, y) return fsCompare:CompareTopLeftFuzzy(x, y) end)
         :ToTable()
-    local points = enumerable
+    local points = fsEnumerable
         :From(sorted)
-        :Map(function(x) return addon:GetPointEx(x) end)
+        :Map(function(x) return fsPoint:GetPointEx(x) end)
         :ToTable()
 
     for unitIndex, unit in ipairs(units) do
         ---@type any, number
-        local _, frameIndex = enumerable
+        local _, frameIndex = fsEnumerable
             :From(sorted)
             :First(function(f) return UnitIsUnit(f.unit, unit) end)
 
@@ -116,7 +123,7 @@ local function RearrangeFrames(frames, units)
                 -- TODO why is lua_ls getting type confused here when removing the above @type specifier?
                 frame:AdjustPointsOffset(xDelta, yDelta)
             else
-                addon:Error(string.format("Unable to move frame %s as it doesn't share to the same parent anchor.", frame:GetName()))
+                fsLog:Error(string.format("Unable to move frame %s as it doesn't share to the same parent anchor.", frame:GetName()))
             end
         end
     end
@@ -126,11 +133,11 @@ end
 ---@param frames table<table> the set of frames to rearrange.
 ---@param units table<string> unit ids in the desired order.
 local function RearrangeFrameChain(frames, units)
-    local sorted = enumerable
+    local sorted = fsEnumerable
         :From(frames)
-        :OrderBy(function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
+        :OrderBy(function(x, y) return fsCompare:CompareTopLeftFuzzy(x, y) end)
         :ToTable()
-    local points = enumerable
+    local points = fsEnumerable
         :From(sorted)
         :Map(function(x)
             return {
@@ -140,12 +147,12 @@ local function RearrangeFrameChain(frames, units)
         end)
         :ToTable()
 
-    local chain = addon:ToFrameChain(frames)
+    local chain = fsFrame:ToFrameChain(frames)
     local current = chain
 
     while current do
         local source = current.Value
-        local _, unitIndex = enumerable
+        local _, unitIndex = fsEnumerable
             :From(units)
             :First(function(x) return UnitIsUnit(x, source.unit) end)
 
@@ -165,12 +172,12 @@ end
 ---Sorts raid frames.
 ---@return boolean sorted true if frames were sorted, otherwise false.
 local function LayoutRaid()
-    local sortFunction = addon:GetSortFunction()
-    local memberFrames, petFrames = addon:GetRaidFrames(true)
+    local sortFunction = fsCompare:GetSortFunction()
+    local memberFrames, petFrames = fsFrame:GetRaidFrames(true)
 
     if not sortFunction or #memberFrames == 0 then return false end
 
-    local units = enumerable
+    local units = fsEnumerable
         :From(memberFrames)
         :Map(function(x) return SecureButton_GetUnit(x) end)
         :OrderBy(sortFunction)
@@ -181,9 +188,9 @@ local function LayoutRaid()
     if #petFrames > 0 then
         -- get pets based off the sorted units instead of the frames
         -- as this comes with the benefit that the pets will also be sorted
-        local pets = addon:GetPets(units)
+        local pets = fsUnit:GetPets(units)
         if #pets ~= #petFrames then
-            addon:Warning(string.format("Unexpectedly encoutered a different number of pet frames '%d' vs pet units '%d'.", #petFrames, #pets))
+            fsLog:Warning(string.format("Unexpectedly encoutered a different number of pet frames '%d' vs pet units '%d'.", #petFrames, #pets))
             return true
         end
 
@@ -196,12 +203,12 @@ end
 ---Sorts party frames.
 ---@return boolean sorted true if frames were sorted, otherwise false.
 local function LayoutParty()
-    local sortFunction = addon:GetSortFunction()
-    local frames = addon:GetPartyFrames(true)
+    local sortFunction = fsCompare:GetSortFunction()
+    local frames = fsFrame:GetPartyFrames(true)
 
     if not sortFunction or #frames == 0 then return false end
 
-    local units = enumerable
+    local units = fsEnumerable
         :From(frames)
         :Map(function(x) return SecureButton_GetUnit(x) end)
         :OrderBy(sortFunction)
@@ -215,7 +222,7 @@ end
 ---Attempts to sort the party/raid frames using the traditional method.
 ---@return boolean sorted true if sorted, otherwise false.
 local function TrySortTraditional()
-    local sortFunc = addon:GetSortFunction()
+    local sortFunc = fsCompare:GetSortFunction()
     if sortFunc == nil then return false end
 
     local sorted = false
@@ -264,7 +271,7 @@ local function OnEvent(_, eventName)
     -- only attempt to run after combat ends if one is pending
     if eventName == "PLAYER_REGEN_ENABLED" and not sortPending then return end
 
-    addon:TrySort()
+    M:TrySort()
 end
 
 ---Event hook on blizzard performing frame layouts.
@@ -277,13 +284,13 @@ end
 
 ---Register a callback to call after sorting has been performed.
 ---@param callback function
-function addon:RegisterPostSortCallback(callback)
+function M:RegisterPostSortCallback(callback)
     callbacks[#callbacks + 1] = callback
 end
 
 ---Attempts to sort the party/raid frames.
 ---@return boolean sorted true if sorted, otherwise false.
-function addon:TrySort()
+function M:TrySort()
     local sorted = false
 
     if addon.Options.SortingMethod.TaintlessEnabled then

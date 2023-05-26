@@ -1,9 +1,10 @@
 local _, addon = ...
-local upgrader = {}
+local fsLog = addon.Log
+local M = {}
 
-addon.OptionsUpgrader = upgrader
+addon.OptionsUpgrader = M
 
-function upgrader:UpgradeToVersion2(options)
+function M:UpgradeToVersion2(options)
     assert(options.Version == nil or options.Version == 1)
 
     options.ArenaEnabled = options.PartySortEnabled
@@ -31,14 +32,14 @@ function upgrader:UpgradeToVersion2(options)
     options.Version = 2
 end
 
-function upgrader:UpgradeToVersion3(options)
+function M:UpgradeToVersion3(options)
     assert(options.Version == 2)
 
     options.ExperimentalEnabled = false
     options.Version = 3
 end
 
-function upgrader:UpgradeToVersion4(options)
+function M:UpgradeToVersion4(options)
     assert(options.Version == 3)
 
     options.SortingMethod = {
@@ -49,7 +50,7 @@ function upgrader:UpgradeToVersion4(options)
     options.Version = 4
 end
 
-function upgrader:UpgradeToVersion5(options)
+function M:UpgradeToVersion5(options)
     assert(options.Version == 4)
 
     options.Debug = {
@@ -104,7 +105,7 @@ function upgrader:UpgradeToVersion5(options)
     options.Version = 5
 end
 
-function upgrader:UpgradeToVersion6(options)
+function M:UpgradeToVersion6(options)
     assert(options.Version == 5)
 
     options.Appearance = {
@@ -125,14 +126,14 @@ function upgrader:UpgradeToVersion6(options)
     options.Version = 6
 end
 
-function upgrader:UpgradeToVersion7(options)
+function M:UpgradeToVersion7(options)
     assert(options.Version == 6)
 
     options.Debug.Enabled = false
     options.Version = 7
 end
 
-function upgrader:UpgradeToVersion8(options)
+function M:UpgradeToVersion8(options)
     assert(options.Version == 7)
 
     options.Arena.Reverse = false
@@ -142,7 +143,7 @@ function upgrader:UpgradeToVersion8(options)
     options.Version = 8
 end
 
-function upgrader:UpgradeToVersion9(options)
+function M:UpgradeToVersion9(options)
     assert(options.Version == 8)
 
     options.Debug = nil
@@ -174,7 +175,7 @@ local function AddMissing(options, defaults)
     end
 end
 
-function upgrader:UpgradeToVersion10(options)
+function M:UpgradeToVersion10(options)
     assert(options.Version == 9)
 
     -- encountered a clash with Ability Team Tracker also using the "Options" global variable
@@ -190,15 +191,15 @@ function upgrader:UpgradeToVersion10(options)
 end
 
 local upgradeFunctions = {
-    Version2 = upgrader.UpgradeToVersion2,
-    Version3 = upgrader.UpgradeToVersion3,
-    Version4 = upgrader.UpgradeToVersion4,
-    Version5 = upgrader.UpgradeToVersion5,
-    Version6 = upgrader.UpgradeToVersion6,
-    Version7 = upgrader.UpgradeToVersion7,
-    Version8 = upgrader.UpgradeToVersion8,
-    Version9 = upgrader.UpgradeToVersion9,
-    Version10 = upgrader.UpgradeToVersion10
+    Version2 = M.UpgradeToVersion2,
+    Version3 = M.UpgradeToVersion3,
+    Version4 = M.UpgradeToVersion4,
+    Version5 = M.UpgradeToVersion5,
+    Version6 = M.UpgradeToVersion6,
+    Version7 = M.UpgradeToVersion7,
+    Version8 = M.UpgradeToVersion8,
+    Version9 = M.UpgradeToVersion9,
+    Version10 = M.UpgradeToVersion10
 }
 
 ---Upgrades saved options to the current version.
@@ -208,7 +209,7 @@ function addon:UpgradeOptions(options)
         local next = upgradeFunctions["Version" .. nextVersion]
         assert(next ~= nil)
 
-        addon:Debug("Upgrading options to version " .. nextVersion .. ".")
-        next(upgrader, options)
+        fsLog:Debug("Upgrading options to version " .. nextVersion .. ".")
+        next(M, options)
     end
 end

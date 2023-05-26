@@ -1,12 +1,19 @@
 local _, addon = ...
+local fsSort = addon.Sorting
+local fsFrame = addon.Frame
+local fsCompare = addon.Compare
+local fsPoint = addon.Point
+local fsMath = addon.Math
+local fsEnumerable = addon.Enumerable
+local fsLog = addon.Log
 local previousPartySpacing = nil
 local previousRaidSpacing = nil
-local fsMath = addon.Math
-local enumerable = addon.Enumerable
+local M = {}
+addon.Spacing = M
 
 --- Returns a lookup table of frames to their row and column positions.
 local function GridLayout(frames)
-    table.sort(frames, function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
+    table.sort(frames, function(x, y) return fsCompare:CompareTopLeftFuzzy(x, y) end)
 
     local byFrame = {}
     local byPos = {}
@@ -128,15 +135,15 @@ local function FlatMembers(frames, spacing)
 end
 
 local function Pets(spacing, horizontal)
-    local members, pets = addon:GetRaidFrames()
+    local members, pets = fsFrame:GetRaidFrames()
 
     if #pets == 0 or #members == 0 then return end
 
-    table.sort(pets, function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
+    table.sort(pets, function(x, y) return fsCompare:CompareTopLeftFuzzy(x, y) end)
 
     local _, byPos, maxRow, maxCol = GridLayout(members)
     local firstPet = pets[1]
-    local firstPetPoint = addon:GetPointEx(firstPet)
+    local firstPetPoint = fsPoint:GetPointEx(firstPet)
     local parent = CompactRaidFrameContainer
     local placeHorizontal = horizontal
 
@@ -149,7 +156,7 @@ local function Pets(spacing, horizontal)
     if placeHorizontal then
         local firstRow = byPos[1]
         local topRight = firstRow[#firstRow]
-        local top, left = addon:RelativeTopLeft(topRight, parent)
+        local top, left = fsPoint:RelativeTopLeft(topRight, parent)
         local xDelta = left - (firstPetPoint.offsetX - topRight:GetWidth() - spacing.Horizontal)
         local yDelta = top - firstPetPoint.offsetY
 
@@ -158,7 +165,7 @@ local function Pets(spacing, horizontal)
         end
     else
         local bottomLeft = byPos[maxRow][1]
-        local top, left = addon:RelativeTopLeft(bottomLeft, parent)
+        local top, left = fsPoint:RelativeTopLeft(bottomLeft, parent)
         local xDelta = left - firstPetPoint.offsetX
         local yDelta = top - firstPetPoint.offsetY - bottomLeft:GetHeight() - spacing.Vertical
 
@@ -172,28 +179,28 @@ local function Pets(spacing, horizontal)
     -- move all the remaining pets
     for i = 2, #pets do
         local pet = pets[i]
-        local petPoint = addon:GetPointEx(pet)
+        local petPoint = fsPoint:GetPointEx(pet)
         local previous = pets[i - 1]
         -- in classic 2 pet frames fit into 1 member raid frame
         -- so for the 2nd frame just anchor it to the first
         -- in retail 3 pet frames almost fit
-        local addSpacing = i % petsPerRaidFrame == 1
+        local addSpacing = i % petsPerRaidFrame == fsPoint
         local xDelta = 0
         local yDelta = 0
 
         if addSpacing then
             if horizontal then
                 local cellBefore = pets[i - petsPerRaidFrame]
-                local top, left = addon:RelativeTopLeft(cellBefore, parent)
+                local top, left = fsPoint:RelativeTopLeft(cellBefore, parent)
                 xDelta = (left - petPoint.offsetX) + cellBefore:GetWidth() + spacing.Horizontal
                 yDelta = top - petPoint.offsetY
             else
-                local top, left = addon:RelativeTopLeft(previous, parent)
+                local top, left = fsPoint:RelativeTopLeft(previous, parent)
                 xDelta = left - petPoint.offsetX
                 yDelta = top - petPoint.offsetY - previous:GetHeight() - spacing.Vertical
             end
         else
-            local top, left = addon:RelativeTopLeft(previous, parent)
+            local top, left = fsPoint:RelativeTopLeft(previous, parent)
             xDelta = left - petPoint.offsetX
             yDelta = top - petPoint.offsetY - previous:GetHeight()
         end
@@ -208,7 +215,7 @@ local function GroupedMembers(frames, spacing, horizontal)
     if #frames == 0 then return end
 
     local byFrame, byPos, _, _ = GridLayout(frames)
-    local root = addon:ToFrameChain(frames)
+    local root = fsFrame:ToFrameChain(frames)
     local current = root
 
     -- why all this complexity instead of just a simple sequence of SetPoint() calls?
@@ -233,17 +240,17 @@ local function GroupedMembers(frames, spacing, horizontal)
             if left then
                 xDelta = (left:GetRight() or 0) - (frame:GetLeft() or 0) + spacing.Horizontal
             else
-                addon:Warning(string.format("Failed to determine the frame left of %s", frame:GetName()))
+                fsLog:Warning(string.format("Failed to determine the frame left of %s", frame:GetName()))
             end
         elseif not horizontal and pos.Row > 1 then
             local above = byPos[pos.Row - 1][pos.Column]
             if above then
                 yDelta = (above:GetBottom() or 0) - (frame:GetTop() or 0) - spacing.Vertical
             else
-                addon:Warning(string.format("Failed to determine the frame above %s", frame:GetName()))
+                fsLog:Warning(string.format("Failed to determine the frame above %s", frame:GetName()))
             end
         else
-            addon:Warning(string.format("Unable to determine the previous frame of %s", frame:GetName()))
+            fsLog:Warning(string.format("Unable to determine the previous frame of %s", frame:GetName()))
         end
 
         if xDelta ~= 0 or yDelta ~= 0 then
@@ -260,13 +267,13 @@ end
 ---e.g.: group2: frame5 is placed relative to frame4.
 local function Groups(groups, spacing, horizontal)
     local posByGroup, groupByPos = GridLayout(groups)
-    local membersByGroup = enumerable
+    local membersByGroup = fsEnumerable
         :From(groups)
         :ToLookup(
             function(group) return group end,
             function(group)
-                local members = addon:GetRaidFrameGroupMembers(group)
-                table.sort(members, function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
+                local members = fsFrame:GetRaidFrameGroupMembers(group)
+                table.sort(members, function(x, y) return fsCompare:CompareTopLeftFuzzy(x, y) end)
                 return members
             end)
 
@@ -289,7 +296,7 @@ local function Groups(groups, spacing, horizontal)
             else
                 -- in vertical mode, the anchor is the bottom most member of the groups in the above row
                 local previousRow = groupByPos[pos.Row - 1]
-                local lastMembers = enumerable
+                local lastMembers = fsEnumerable
                     :From(previousRow)
                     :Map(function(g)
                         local members = membersByGroup[g]
@@ -313,7 +320,7 @@ local function Groups(groups, spacing, horizontal)
                 horizontalAnchorsByColumn[pos.Column] = left
             else
                 -- in horizontal mode, the anchor is the left most member of the groups in the left column
-                local leftMembers = enumerable
+                local leftMembers = fsEnumerable
                     :From(groupByPos)
                     :Map(function(g)
                         local members = membersByGroup[g]
@@ -357,7 +364,7 @@ local function Groups(groups, spacing, horizontal)
 end
 
 local function ApplyPartyFrameSpacing()
-    local frames = addon:GetPartyFrames()
+    local frames = fsFrame:GetPartyFrames()
     local _, horizontal, showPets, spacing = GetSettings(false)
 
     GroupedMembers(frames, spacing, horizontal)
@@ -371,10 +378,10 @@ local function ApplyRaidFrameSpacing()
     local flat, horizontal, showPets, spacing = GetSettings(true)
 
     if flat then
-        local members, _ = addon:GetRaidFrames()
+        local members, _ = fsFrame:GetRaidFrames()
         FlatMembers(members, spacing)
     else
-        local groups = addon:GetRaidFrameGroups()
+        local groups = fsFrame:GetRaidFrameGroups()
 
         Groups(groups, spacing, horizontal)
     end
@@ -385,7 +392,7 @@ local function ApplyRaidFrameSpacing()
 end
 
 ---Applies spacing to party and raid frames.
-function addon:ApplySpacing()
+function M:ApplySpacing()
     if CompactRaidFrameContainer and not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
         local _, _, _, spacing = GetSettings(true)
         local zeroSpacing = spacing.Horizontal == 0 and spacing.Vertical == 0
@@ -414,11 +421,11 @@ local function OnLayout(container)
     if container ~= CompactRaidFrameContainer then return end
     if container.flowPauseUpdates then return end
 
-    addon:ApplySpacing()
+    M:ApplySpacing()
 end
 
 local function Run()
-    addon:ApplySpacing()
+    M:ApplySpacing()
 end
 
 ---Initialises the spacing module.
@@ -430,6 +437,6 @@ function addon:InitSpacing()
     eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
     eventFrame:RegisterEvent("PLAYER_ROLES_ASSIGNED")
     eventFrame:RegisterEvent("UNIT_PET")
-    addon:RegisterPostSortCallback(Run)
+    fsSort:RegisterPostSortCallback(Run)
     hooksecurefunc("FlowContainer_DoLayout", OnLayout)
 end

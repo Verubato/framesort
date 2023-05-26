@@ -1,6 +1,7 @@
 local _, addon = ...
-local builder = addon.OptionsBuilder
-local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
+local fsBuilder = addon.OptionsBuilder
+local fsSpacing = addon.Spacing
+local verticalSpacing = fsBuilder.VerticalSpacing
 local minSpacing = 0
 local maxSpacing = 100
 
@@ -34,7 +35,7 @@ local function BuildSpacingOptions(panel, anchor, name, spacing, additionalTopSp
     xSlider:SetScript("OnValueChanged", function(_, value, _)
         _G[xSlider:GetName() .. "Text"]:SetText(tostring(value))
         spacing.Horizontal = value
-        addon:ApplySpacing()
+        fsSpacing:ApplySpacing()
     end)
 
     local yLabel = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
@@ -48,7 +49,7 @@ local function BuildSpacingOptions(panel, anchor, name, spacing, additionalTopSp
     ySlider:SetScript("OnValueChanged", function(_, value, _)
         _G[ySlider:GetName() .. "Text"]:SetText(tostring(value))
         spacing.Vertical = value
-        addon:ApplySpacing()
+        fsSpacing:ApplySpacing()
     end)
 
     return ySlider
@@ -56,7 +57,7 @@ end
 
 ---Adds the spacing options panel.
 ---@param parent table the parent UI panel.
-function builder:BuildSpacingOptions(parent)
+function fsBuilder:BuildSpacingOptions(parent)
     local panel = CreateFrame("Frame", "FrameSortSpacing", parent)
     panel.name = "Spacing"
     panel.parent = parent.name

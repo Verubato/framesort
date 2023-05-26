@@ -1,6 +1,6 @@
 local _, addon = ...
-local macro = {}
-addon.Macro = macro
+local M = {}
+addon.Macro = M
 
 ---Returns the start and end index of the nth "@" selector, e.g. @raid1, @player, @placeholder, @, @abc
 ---@param str string
@@ -68,12 +68,12 @@ local function ReplaceUnitSelector(body, unit, occurrence)
 end
 
 ---Returns true if the macro is one that FrameSort should update.
-function macro:IsFrameSortMacro(body)
+function M:IsFrameSortMacro(body)
     return body and string.match(body, "[Ff]rame[Ss]ort") ~= nil or false
 end
 
 ---Extracts the frame numbers from the macro body.
-function macro:GetFrameIds(body)
+function M:GetFrameIds(body)
     local ids = {}
 
     for match in string.gmatch(body, "[^@][Ff]rame%d+") do
@@ -89,7 +89,7 @@ end
 ---@param ids table<number> frame ids
 ---@param units table<string> sorted unit ids.
 ---@return string? the new macro body, or nil if invalid
-function macro:GetNewBody(body, ids, units)
+function M:GetNewBody(body, ids, units)
     local newBody = body
 
     for i, id in ipairs(ids) do

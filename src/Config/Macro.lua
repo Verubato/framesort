@@ -1,8 +1,8 @@
 local _, addon = ...
-local builder = addon.OptionsBuilder
-local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
+local fsBuilder = addon.OptionsBuilder
+local fsMacro = addon.Macro
 local maxMacros = 138
-local macro = addon.Macro
+local verticalSpacing = fsBuilder.VerticalSpacing
 
 local function CountMacros()
     local count = 0
@@ -10,7 +10,7 @@ local function CountMacros()
     for i = 1, maxMacros do
         local _, _, body = GetMacroInfo(i)
 
-        if body and macro:IsFrameSortMacro(body) then
+        if body and fsMacro:IsFrameSortMacro(body) then
             count = count + 1
         end
     end
@@ -20,7 +20,7 @@ end
 
 ---Adds the macro options panel.
 ---@param parent table the parent UI panel.
-function builder:BuildMacroOptions(parent)
+function fsBuilder:BuildMacroOptions(parent)
     local panel = CreateFrame("Frame", "FrameSortMacros", parent)
     panel.name = "Macros"
     panel.parent = parent.name

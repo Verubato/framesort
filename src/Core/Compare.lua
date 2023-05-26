@@ -1,13 +1,16 @@
 local _, addon = ...
+local fsUnit = addon.Unit
 local fsMath = addon.Math
 local fuzzyDecimalPlaces = 0
+local M = {}
+addon.Compare = M
 
 ---Returns a function that accepts two parameters of unit tokens and returns true if the left token should be ordered before the right.
 ---Sorting is based on the player's instance and configured options.
 ---Nil may be returned if sorting is not enabled for the player's current instance.
 ---@return function?
-function addon:GetSortFunction()
-    local enabled, playerSortMode, groupSortMode, reverse = addon:GetSortMode()
+function M:GetSortFunction()
+    local enabled, playerSortMode, groupSortMode, reverse = M:GetSortMode()
 
     if not enabled then return nil end
 
@@ -15,14 +18,14 @@ function addon:GetSortFunction()
     assert(groupSortMode ~= nil)
 
     if playerSortMode ~= addon.PlayerSortMode.Middle then
-        return function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode, reverse) end
+        return function(x, y) return M:Compare(x, y, playerSortMode, groupSortMode, reverse) end
     end
 
     -- we need to pre-sort to determine where the middle actually is
-    local units = addon:GetUnits()
-    table.sort(units, function(x, y) return addon:Compare(x, y, addon.PlayerSortMode.Top, groupSortMode, reverse) end)
+    local units = fsUnit:GetUnits()
+    table.sort(units, function(x, y) return M:Compare(x, y, addon.PlayerSortMode.Top, groupSortMode, reverse) end)
 
-    return function(x, y) return addon:Compare(x, y, playerSortMode, groupSortMode, reverse, units) end
+    return function(x, y) return M:Compare(x, y, playerSortMode, groupSortMode, reverse, units) end
 end
 
 ---Returns the sort mode from the configured options for the current instance.
@@ -30,7 +33,7 @@ end
 ---@return PlayerSortMode? playerMode the player sort mode.
 ---@return GroupSortMode? groupMode the group sort mode.
 ---@return boolean? reverse whether the sorting is reversed.
-function addon:GetSortMode()
+function M:GetSortMode()
     local inInstance, instanceType = IsInInstance()
 
     if inInstance and instanceType == "arena" then
@@ -56,7 +59,7 @@ end
 ---@param reverse boolean?
 ---@param preSortedUnits table?
 ---@return boolean
-function addon:Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse, preSortedUnits)
+function M:Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse, preSortedUnits)
     if not UnitExists(leftToken) then return false end
     if not UnitExists(rightToken) then return true end
 
@@ -65,7 +68,7 @@ function addon:Compare(leftToken, rightToken, playerSortMode, groupSortMode, rev
             return false
         elseif playerSortMode == addon.PlayerSortMode.Middle then
             assert(preSortedUnits ~= nil)
-            return addon:CompareMiddle(rightToken, preSortedUnits)
+            return M:CompareMiddle(rightToken, preSortedUnits)
         else
             return playerSortMode == addon.PlayerSortMode.Top
         end
@@ -76,7 +79,7 @@ function addon:Compare(leftToken, rightToken, playerSortMode, groupSortMode, rev
             return true
         elseif playerSortMode == addon.PlayerSortMode.Middle then
             assert(preSortedUnits ~= nil)
-            return not addon:CompareMiddle(leftToken, preSortedUnits)
+            return not M:CompareMiddle(leftToken, preSortedUnits)
         else
             return playerSortMode == addon.PlayerSortMode.Bottom
         end
@@ -103,7 +106,7 @@ end
 ---@param token string
 ---@param sortedUnits table
 ---@return boolean
-function addon:CompareMiddle(token, sortedUnits)
+function M:CompareMiddle(token, sortedUnits)
     -- total number of members in the group
     local total = 0
     -- index of the token we are comparing with
@@ -131,7 +134,7 @@ end
 ---@param leftFrame table a wow frame
 ---@param rightFrame table a wow frame
 ---@return boolean
-function addon:CompareTopLeftFuzzy(leftFrame, rightFrame)
+function M:CompareTopLeftFuzzy(leftFrame, rightFrame)
     if not leftFrame then
         return false
     elseif not rightFrame then

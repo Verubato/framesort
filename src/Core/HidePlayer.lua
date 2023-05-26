@@ -1,4 +1,7 @@
 local _, addon = ...
+local fsSort = addon.Sorting
+local fsFrame = addon.Frame
+local fsCompare = addon.Compare
 
 local function CanUpdate(frame)
     if not frame then return end
@@ -19,7 +22,7 @@ end
 local function UpdateVisible(frame)
     if not CanUpdate(frame) then return end
 
-    local enabled, mode, _, _ = addon:GetSortMode()
+    local enabled, mode, _, _ = fsCompare:GetSortMode()
 
     if not enabled then return end
 
@@ -27,7 +30,7 @@ local function UpdateVisible(frame)
 end
 
 local function Run()
-    local player = addon:GetPlayerFrame()
+    local player = fsFrame:GetPlayerFrame()
     if not player then return end
 
     UpdateVisible(player)
@@ -41,5 +44,5 @@ function addon:InitPlayerHiding()
     eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
     eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
     hooksecurefunc("CompactUnitFrame_UpdateVisible", UpdateVisible)
-    addon:RegisterPostSortCallback(Run)
+    fsSort:RegisterPostSortCallback(Run)
 end

@@ -1,6 +1,6 @@
 local addonName, addon = ...
-local builder = addon.OptionsBuilder
-local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
+local fsBuilder = addon.OptionsBuilder
+local verticalSpacing = fsBuilder.VerticalSpacing
 
 ---Returns true if using raid-style party frames.
 local function IsUsingRaidStyleFrames()
@@ -71,7 +71,7 @@ end
 
 ---Adds the health check options panel.
 ---@param parent table the parent UI panel.
-function builder:BuildHealthCheck(parent)
+function fsBuilder:BuildHealthCheck(parent)
     local panel = CreateFrame("Frame", "FrameSortHealthCheck", parent)
     panel.name = "Health Check"
     panel.parent = parent.name

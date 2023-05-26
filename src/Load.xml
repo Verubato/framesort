@@ -7,6 +7,13 @@
     <Script file="Util\Enumerable.lua"/>
     <Script file="Util\Frame.lua"/>
     <Script file="Util\Macro.lua"/>
+    <Script file="Core\Compare.lua"/>
+    <Script file="Core\Visual.lua"/>
+    <Script file="Core\Sort.lua"/>
+    <Script file="Core\Spacing.lua"/>
+    <Script file="Core\Macro.lua"/>
+    <Script file="Core\Target.lua"/>
+    <Script file="Core\HidePlayer.lua"/>
     <Script file="Config\Defaults.lua"/>
     <Script file="Config\OptionsUpgrader.lua"/>
     <Script file="Config\Options.lua"/>
@@ -15,12 +22,5 @@
     <Script file="Config\Macro.lua"/>
     <Script file="Config\SortingMethod.lua"/>
     <Script file="Config\HealthCheck.lua"/>
-    <Script file="Core\Compare.lua"/>
-    <Script file="Core\Visual.lua"/>
-    <Script file="Core\Target.lua"/>
-    <Script file="Core\Spacing.lua"/>
-    <Script file="Core\Sort.lua"/>
-    <Script file="Core\Macro.lua"/>
-    <Script file="Core\HidePlayer.lua"/>
     <Script file="Init.lua"/>
 </Ui>

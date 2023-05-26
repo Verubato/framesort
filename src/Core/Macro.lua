@@ -1,14 +1,16 @@
 local _, addon = ...
+local fsSort = addon.Sorting
+local fsMacro = addon.Macro
+local fsEnumerable = addon.Enumerable
+local fsVisual = addon.Visual
+local fsLog = addon.Log
 local maxMacros = 138
-local eventFrame = nil
 local isSelfEditingMacro = false
 local previousUnits = nil
-local macro = addon.Macro
-local enumerable = addon.Enumerable
 
 local function CanUpdate()
     if InCombatLockdown() then
-        addon:Warning("Can't update macros during combat.")
+        fsLog:Warning("Can't update macros during combat.")
         return false
     end
 
@@ -18,11 +20,11 @@ end
 local function InspectMacro(slot)
     local _, _, body = GetMacroInfo(slot)
 
-    if not body or not macro:IsFrameSortMacro(body) then return false end
+    if not body or not fsMacro:IsFrameSortMacro(body) then return false end
 
-    local units = addon:GetVisuallyOrderedUnits()
-    local frameIds = macro:GetFrameIds(body)
-    local newBody = macro:GetNewBody(body, frameIds, units)
+    local units = fsVisual:GetVisuallyOrderedUnits()
+    local frameIds = fsMacro:GetFrameIds(body)
+    local newBody = fsMacro:GetNewBody(body, frameIds, units)
 
     if not newBody then return false end
 
@@ -32,10 +34,10 @@ local function InspectMacro(slot)
 end
 
 local function ScanMacros()
-    local units = addon:GetVisuallyOrderedUnits()
+    local units = fsVisual:GetVisuallyOrderedUnits()
 
     -- prevent editing macros if the units haven't changed
-    if previousUnits and enumerable:ArrayEquals(previousUnits, units) then
+    if previousUnits and fsEnumerable:ArrayEquals(previousUnits, units) then
         return
     end
 
@@ -71,12 +73,12 @@ end
 
 ---Initialises the macros module.
 function addon:InitMacros()
-    eventFrame = CreateFrame("Frame")
+    local eventFrame = CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", Run)
     eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
     eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
     eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
-    addon:RegisterPostSortCallback(Run)
+    fsSort:RegisterPostSortCallback(Run)
 
     hooksecurefunc("EditMacro", OnEditMacro)
     hooksecurefunc("FlowContainer_DoLayout", OnLayout)

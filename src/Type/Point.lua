@@ -1,4 +1,6 @@
 local _, addon = ...
+local M = {}
+addon.Point = M
 
 ---@class Point
 ---@field point string
@@ -10,7 +12,7 @@ local _, addon = ...
 ---Returns the name values from frame:GetPoint()
 ---@param frame table
 ---@return Point point
-function addon:GetPointEx(frame)
+function M:GetPointEx(frame)
     local point, relativeTo, relativePoint, offsetX, offsetY = frame:GetPoint()
 
     return {
@@ -27,7 +29,7 @@ end
 ---@param parent table the parent frame
 ---@return integer top
 ---@return integer left
-function addon:RelativeTopLeft(child, parent)
+function M:RelativeTopLeft(child, parent)
     local top = (child:GetTop() or 0) - (parent:GetTop() or 0)
     local left = (child:GetLeft() or 0) - (parent:GetLeft() or 0)
 
