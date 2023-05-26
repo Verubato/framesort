@@ -134,12 +134,13 @@ local function FlatMembers(frames, spacing)
     end
 end
 
-local function Pets(spacing, horizontal)
-    local members, pets = fsFrame:GetRaidFrames()
+local function Pets(members, spacing, horizontal)
+    local _, pets = fsFrame:GetRaidFrames()
 
     if #pets == 0 or #members == 0 then return end
 
     table.sort(pets, function(x, y) return fsCompare:CompareTopLeftFuzzy(x, y) end)
+    table.sort(members, function(x, y) return fsCompare:CompareTopLeftFuzzy(x, y) end)
 
     local _, byPos, maxRow, maxCol = GridLayout(members)
     local firstPet = pets[1]
@@ -370,15 +371,15 @@ local function ApplyPartyFrameSpacing()
     GroupedMembers(frames, spacing, horizontal)
 
     if showPets then
-        Pets(spacing, horizontal)
+        Pets(frames, spacing, horizontal)
     end
 end
 
 local function ApplyRaidFrameSpacing()
     local flat, horizontal, showPets, spacing = GetSettings(true)
+    local members, _ = fsFrame:GetRaidFrames()
 
     if flat then
-        local members, _ = fsFrame:GetRaidFrames()
         FlatMembers(members, spacing)
     else
         local groups = fsFrame:GetRaidFrameGroups()
@@ -387,7 +388,7 @@ local function ApplyRaidFrameSpacing()
     end
 
     if showPets then
-        Pets(spacing, horizontal)
+        Pets(members, spacing, horizontal)
     end
 end
 
