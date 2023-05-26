@@ -1,5 +1,4 @@
 local _, addon = ...
-local eventFrame = nil
 local sortPending = false
 local callbacks = {}
 local enumerable = addon.Enumerable
@@ -303,7 +302,7 @@ end
 
 ---Initialises the sorting module.
 function addon:InitSorting()
-    eventFrame = CreateFrame("Frame")
+    local eventFrame = CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", OnEvent)
     -- Fired after ending combat, as regen rates return to normal.
     -- Useful for determining when a player has left combat.
