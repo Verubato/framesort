@@ -122,7 +122,7 @@ local function BuildSortModeCheckboxes(
             if chkbox ~= sender then chkbox:SetChecked(false) end
         end
 
-        local mode = playerModes[sender]
+        local mode = sender:GetChecked() and playerModes[sender] or ""
         onPlayerSortModeChanged(mode)
         fsSort:TrySort()
     end
@@ -177,7 +177,7 @@ local function BuildSortModeCheckboxes(
             if chkbox ~= sender then chkbox:SetChecked(false) end
         end
 
-        local mode = modes[sender]
+        local mode = sender:GetChecked() and modes[sender] or ""
         onSortModeChanged(mode)
         fsSort:TrySort()
     end
