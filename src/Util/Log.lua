@@ -2,9 +2,14 @@ local _, addon = ...
 local logLevelDebug = "Debug"
 local logLevelWarning = "Warning"
 local logLevelError = "Error"
+local printOutput = false
 local log = {}
 
 local function Write(msg, level)
+    if printOutput then
+        print(string.format("FrameSort: %s - %s", level, msg))
+    end
+
     if not addon.Options.Logging or not addon.Options.Logging.Enabled then return end
 
     log[#log + 1] = {

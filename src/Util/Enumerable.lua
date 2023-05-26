@@ -91,12 +91,76 @@ end
 function M:First(predicate)
     local next = self.Next()
     local index = 1
+
     while next and not predicate(next) do
         next = self.Next()
         index = index + 1
     end
 
     return next, next and index or nil
+end
+
+---Returns the item with the minimum value.
+---@param valueSelector? fun(item: any): any
+---@return any? item
+function M:Min(valueSelector)
+    local items = self:ToTable()
+    if #items == 0 then return nil end
+
+    local minItem = items[1]
+    local minValue = valueSelector and valueSelector(minItem) or minItem
+
+    for i = 2, #items do
+        local nextItem = items[i]
+        local min = valueSelector and valueSelector(nextItem) or nextItem
+
+        if min < minValue then
+            minItem = nextItem
+            minValue = min
+        end
+    end
+
+    return minItem
+end
+
+---Returns the item with the maximum value.
+---@param valueSelector? fun(item: any): any
+---@return any? item
+function M:Max(valueSelector)
+    local items = self:ToTable()
+    if #items == 0 then return nil end
+
+    local maxItem = items[1]
+    local maxValue = valueSelector and valueSelector(maxItem) or maxItem
+
+    for i = 2, #items do
+        local nextItem = items[i]
+        local max = valueSelector and valueSelector(nextItem) or nextItem
+
+        if max > maxValue then
+            maxItem = nextItem
+            maxValue = max
+        end
+    end
+
+    return maxItem
+end
+
+---Reverses the sequence.
+function M:Reverse()
+    local items = self:ToTable()
+    local index = #items
+
+    local iterator = function()
+        if index == 0 then return nil end
+
+        local next = items[index]
+        index = index - 1
+
+        return next
+    end
+
+    return M:From(iterator)
 end
 
 ---Evaluates the iterator function to return the results as a table.

@@ -4,9 +4,9 @@
     <Script file="Util\Log.lua"/>
     <Script file="Util\Math.lua"/>
     <Script file="Util\Unit.lua"/>
+    <Script file="Util\Enumerable.lua"/>
     <Script file="Util\Frame.lua"/>
     <Script file="Util\Macro.lua"/>
-    <Script file="Util\Enumerable.lua"/>
     <Script file="Config\Defaults.lua"/>
     <Script file="Config\OptionsUpgrader.lua"/>
     <Script file="Config\Options.lua"/>

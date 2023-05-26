@@ -1,4 +1,5 @@
 local _, addon = ...
+local enumerable = addon.Enumerable
 
 local function ExtractFrames(children, includeInvisible)
     local frames = {}
@@ -22,36 +23,36 @@ local function ExtractFrames(children, includeInvisible)
 end
 
 ---Returns the set of raid frames.
----@param includeInvisible boolean true to include invisible frames, otherwise false.
+---@param includeInvisible boolean? true to include invisible frames.
 ---@return Enumerable<table>,Enumerable<table> frames member frames, pet frames
 function addon:GetRaidFrames(includeInvisible)
-    local empty = addon.Enumerable:Empty():ToTable()
+    local empty = enumerable:Empty():ToTable()
     local container = CompactRaidFrameContainer
 
     if not container then return empty, empty end
     if container:IsForbidden() or not container:IsVisible() then return empty, empty end
 
-    local children = { CompactRaidFrameContainer:GetChildren() }
+    local children = { container:GetChildren() }
     local frames = ExtractFrames(children, includeInvisible)
-    local members = addon.Enumerable:From(frames)
+    local members = enumerable:From(frames)
         :Where(function(x) return addon:IsMember(x.unit) end)
-    local pets = addon.Enumerable:From(frames)
+    local pets = enumerable:From(frames)
         :Where(function(x) return addon:IsPet(x.unit) end)
 
     return members:ToTable(), pets:ToTable()
 end
 
 ---Returns the set of raid frame group frames.
----@param includeInvisible boolean true to include invisible frames, otherwise false.
+---@param includeInvisible boolean? true to include invisible frames.
 ---@return table<table> frames group frames
 function addon:GetRaidFrameGroups(includeInvisible)
-    local empty = addon.Enumerable:Empty():ToTable()
+    local empty = enumerable:Empty():ToTable()
     local container = CompactRaidFrameContainer
 
     if not container then return empty end
     if container:IsForbidden() or not container:IsVisible() then return empty end
 
-    return addon.Enumerable
+    return enumerable
         :From({ container:GetChildren() })
         :Where(function(frame)
             return
@@ -63,10 +64,10 @@ function addon:GetRaidFrameGroups(includeInvisible)
 end
 
 ---Returns the set of visible member frames within a raid group frame.
----@param includeInvisible boolean true to include invisible frames, otherwise false.
+---@param includeInvisible boolean? true to include invisible frames.
 ---@return table<table> frames group frames
 function addon:GetRaidFrameGroupMembers(group, includeInvisible)
-    return addon.Enumerable
+    return enumerable
         :From({ group:GetChildren() })
         :Where(function(frame)
             return
@@ -79,16 +80,16 @@ function addon:GetRaidFrameGroupMembers(group, includeInvisible)
 end
 
 ---Returns the set of visible party frames.
----@param includeInvisible boolean true to include invisible frames, otherwise false.
+---@param includeInvisible boolean? true to include invisible frames.
 ---@return table<table> frames party frames
 function addon:GetPartyFrames(includeInvisible)
-    local empty = addon.Enumerable:Empty():ToTable()
+    local empty = enumerable:Empty():ToTable()
     local container = CompactPartyFrame
 
     if not container then return empty end
     if container:IsForbidden() or not container:IsVisible() then return empty end
 
-    return addon.Enumerable
+    return enumerable
         :From({ container:GetChildren() })
         :Where(function(frame)
             return
@@ -110,7 +111,7 @@ function addon:GetPlayerFrame()
     end
 
     -- find the player frame
-    return addon.Enumerable
+    return enumerable
         :From(frames)
         :First(function(frame) return UnitIsUnit("player", frame.unit) end)
 end
@@ -119,8 +120,8 @@ end
 ---@param frames table<table> frames in any particular order
 ---@return LinkedListNode root in order of parent -> child -> child -> child
 function addon:ToFrameChain(frames)
-    local empty = addon.Enumerable:Empty():ToTable()
-    local nodesByFrame = addon.Enumerable
+    local empty = enumerable:Empty():ToTable()
+    local nodesByFrame = enumerable
         :From(frames)
         :ToLookup(function(frame) return frame end, function(frame)
             return {
