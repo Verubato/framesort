@@ -12,6 +12,8 @@ end
 local mock = require("Mock")
 local M = {}
 
+local unit = addon.Unit
+
 function M:setUp()
     MAX_RAID_MEMBERS = 40
     MEMBERS_PER_RAID_GROUP = 5
@@ -22,9 +24,9 @@ function M:test_party_full()
 
     local count = 5
     local members = mock:GenerateUnits(count)
-    UnitExists = function(unit) return mock:UnitExists(unit, members) end
+    UnitExists = function(x) return mock:UnitExists(x, members) end
 
-    local units = addon:GetUnits()
+    local units = unit:GetUnits()
 
     assertEquals(#units, count)
     assertEquals(units[1], "player")
@@ -38,7 +40,7 @@ function M:test_party_empty()
     IsInRaid = function() return false end
     UnitExists = function(_) return false end
 
-    local units = addon:GetUnits()
+    local units = unit:GetUnits()
 
     -- the player token will always exist
     assertEquals(#units, 1)
@@ -49,9 +51,9 @@ function M:test_party3()
 
     local count = 3
     local members = mock:GenerateUnits(count)
-    UnitExists = function(unit) return mock:UnitExists(unit, members) end
+    UnitExists = function(x) return mock:UnitExists(x, members) end
 
-    local units = addon:GetUnits()
+    local units = unit:GetUnits()
 
     assertEquals(#units, count)
     assertEquals(units[1], "player")
@@ -66,9 +68,9 @@ function M:test_raid_full()
 
     local count = 40
     local members = mock:GenerateUnits(count, true)
-    UnitExists = function(unit) return mock:UnitExists(unit, members) end
+    UnitExists = function(x) return mock:UnitExists(x, members) end
 
-    local units = addon:GetUnits()
+    local units = unit:GetUnits()
 
     assertEquals(#units, count)
 
@@ -81,7 +83,7 @@ function M:test_raid_empty()
     IsInRaid = function() return true end
     UnitExists = function(_) return false end
 
-    local units = addon:GetUnits()
+    local units = unit:GetUnits()
 
     assertEquals(#units, 0)
 end
@@ -92,9 +94,9 @@ function M:test_raid3()
     local count = 3
     local members = mock:GenerateUnits(count, true)
     print("TEST" .. tostring(#members))
-    UnitExists = function(unit) return mock:UnitExists(unit, members) end
+    UnitExists = function(x) return mock:UnitExists(x, members) end
 
-    local units = addon:GetUnits()
+    local units = unit:GetUnits()
 
     assertEquals(#units, count)
 

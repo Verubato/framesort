@@ -1,6 +1,6 @@
 local _, addon = ...
-local builder = addon.OptionsBuilder
-local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
+local fsBuilder = addon.OptionsBuilder
+local verticalSpacing = fsBuilder.VerticalSpacing
 
 ---Adds a dot point list for each string item in lines
 ---@param panel table the parent panel
@@ -26,14 +26,14 @@ end
 
 ---Adds the sorting mode options panel.
 ---@param parent table the parent UI panel.
-function builder:BuildSortingMethodOptions(parent)
+function fsBuilder:BuildSortingMethodOptions(parent)
     local panel = CreateFrame("Frame", "FrameSortSortingMethod", parent)
     panel.name = "Sorting Method"
     panel.parent = parent.name
 
     local taintless = CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
     taintless:SetPoint("TOPLEFT", panel, verticalSpacing, -verticalSpacing)
-    builder:TextShim(taintless)
+    fsBuilder:TextShim(taintless)
     taintless.Text:SetText("Taintless")
     taintless.Text:SetFontObject("GameFontNormalLarge")
     taintless:SetChecked(addon.Options.SortingMethod.TaintlessEnabled)
@@ -63,7 +63,7 @@ function builder:BuildSortingMethodOptions(parent)
 
     local traditional = CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
     traditional:SetPoint("TOPLEFT", anchor, 0, -verticalSpacing * 2)
-    builder:TextShim(traditional)
+    fsBuilder:TextShim(traditional)
     traditional.Text:SetText("Traditional")
     traditional.Text:SetFontObject("GameFontNormalLarge")
     traditional:SetChecked(addon.Options.SortingMethod.TraditionalEnabled)

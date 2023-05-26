@@ -1,12 +1,15 @@
 local _, addon = ...
+local fsSort = addon.Sorting
+local fsEnumerable = addon.Enumerable
+local fsVisual = addon.Visual
+local fsLog = addon.Log
 local prefix = "FSTarget"
 local keybindingsCount = 5
 local previousUnits = nil
-local enumerable = addon.Enumerable
 
 local function CanUpdate()
     if InCombatLockdown() then
-        addon:Warning("Can't update targets during combat.")
+        fsLog:Warning("Can't update targets during combat.")
         return false
     end
 
@@ -14,10 +17,10 @@ local function CanUpdate()
 end
 
 local function UpdateTargets()
-    local units = addon:GetVisuallyOrderedUnits()
+    local units = fsVisual:GetVisuallyOrderedUnits()
 
     -- prevent editing macros if the units haven't changed
-    if previousUnits and enumerable:ArrayEquals(previousUnits, units) then
+    if previousUnits and fsEnumerable:ArrayEquals(previousUnits, units) then
         return
     end
 
@@ -63,6 +66,6 @@ function addon:InitTargeting()
     eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
     eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
     eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
-    addon:RegisterPostSortCallback(Run)
+    fsSort:RegisterPostSortCallback(Run)
     hooksecurefunc("FlowContainer_DoLayout", OnLayout)
 end

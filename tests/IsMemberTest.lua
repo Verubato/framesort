@@ -9,36 +9,37 @@ for _, fileName in ipairs(deps) do
     module("UnitTest", addon)
 end
 
+local unit = addon.Unit
 local M = {}
 
 function M:test_is_member_player()
-    assertEquals(addon:IsMember("player"), true)
+    assertEquals(unit:IsMember("player"), true)
 end
 
 function M:test_is_party_member()
-    assertEquals(addon:IsMember("party1"), true)
-    assertEquals(addon:IsMember("party2"), true)
-    assertEquals(addon:IsMember("party3"), true)
-    assertEquals(addon:IsMember("party4"), true)
+    assertEquals(unit:IsMember("party1"), true)
+    assertEquals(unit:IsMember("party2"), true)
+    assertEquals(unit:IsMember("party3"), true)
+    assertEquals(unit:IsMember("party4"), true)
 end
 
 function M:test_is_raid_member()
-    assertEquals(addon:IsMember("raid1"), true)
-    assertEquals(addon:IsMember("raid2"), true)
-    assertEquals(addon:IsMember("raid3"), true)
-    assertEquals(addon:IsMember("raid4"), true)
-    assertEquals(addon:IsMember("raid10"), true)
-    assertEquals(addon:IsMember("raid19"), true)
-    assertEquals(addon:IsMember("raid39"), true)
-    assertEquals(addon:IsMember("raid40"), true)
+    assertEquals(unit:IsMember("raid1"), true)
+    assertEquals(unit:IsMember("raid2"), true)
+    assertEquals(unit:IsMember("raid3"), true)
+    assertEquals(unit:IsMember("raid4"), true)
+    assertEquals(unit:IsMember("raid10"), true)
+    assertEquals(unit:IsMember("raid19"), true)
+    assertEquals(unit:IsMember("raid39"), true)
+    assertEquals(unit:IsMember("raid40"), true)
 end
 
 function M:test_is_not_member()
-    assertEquals(addon:IsMember(""), false)
-    assertEquals(addon:IsMember("none"), false)
-    assertEquals(addon:IsMember("pet"), false)
-    assertEquals(addon:IsMember("playerpet"), false)
-    assertEquals(addon:IsMember("party1pet"), false)
+    assertEquals(unit:IsMember(""), false)
+    assertEquals(unit:IsMember("none"), false)
+    assertEquals(unit:IsMember("pet"), false)
+    assertEquals(unit:IsMember("playerpet"), false)
+    assertEquals(unit:IsMember("party1pet"), false)
 end
 
 return M

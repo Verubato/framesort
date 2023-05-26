@@ -3,12 +3,12 @@ addon.OptionsBuilder = {
     VerticalSpacing = 15,
     HorizontalSpacing = 50
 }
+local fsBuilder = addon.OptionsBuilder
+local fsSort = addon.Sorting
+local verticalSpacing = fsBuilder.VerticalSpacing
+local horizontalSpacing = fsBuilder.HorizontalSpacing
 
-local builder = addon.OptionsBuilder
-local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
-local horizontalSpacing = addon.OptionsBuilder.HorizontalSpacing
-
-function builder:TextShim(frame)
+function fsBuilder:TextShim(frame)
     if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then return end
 
     frame.Text = frame.text
@@ -75,7 +75,7 @@ local function BuildSortModeCheckboxes(
     local enabled = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     -- not sure why, but checkbox left seems to be off by about 4 units by default
     enabled:SetPoint("TOPLEFT", pointOffset, "BOTTOMLEFT", -4, -verticalSpacing)
-    builder:TextShim(enabled)
+    fsBuilder:TextShim(enabled)
     enabled.Text:SetText(" " .. labelText)
     enabled.Text:SetFontObject("GameFontNormalLarge")
     enabled:SetChecked(sortingEnabled)
@@ -86,25 +86,25 @@ local function BuildSortModeCheckboxes(
     playerLabel:SetText("Player: ")
 
     local top = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-    builder:TextShim(top)
+    fsBuilder:TextShim(top)
     top.Text:SetText("Top")
     top:SetPoint("LEFT", playerLabel, "RIGHT", horizontalSpacing / 2, 0)
     top:SetChecked(playerSortMode == addon.PlayerSortMode.Top)
 
     local middle = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-    builder:TextShim(middle)
+    fsBuilder:TextShim(middle)
     middle.Text:SetText("Middle")
     middle:SetPoint("LEFT", top, "RIGHT", horizontalSpacing, 0)
     middle:SetChecked(playerSortMode == addon.PlayerSortMode.Middle)
 
     local bottom = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-    builder:TextShim(bottom)
+    fsBuilder:TextShim(bottom)
     bottom.Text:SetText("Bottom")
     bottom:SetPoint("LEFT", middle, "RIGHT", horizontalSpacing, 0)
     bottom:SetChecked(playerSortMode == addon.PlayerSortMode.Bottom)
 
     local hidden = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-    builder:TextShim(hidden)
+    fsBuilder:TextShim(hidden)
     hidden.Text:SetText("Hidden")
     hidden:SetPoint("LEFT", bottom, "RIGHT", horizontalSpacing, 0)
     hidden:SetChecked(playerSortMode == addon.PlayerSortMode.Hidden)
@@ -124,7 +124,7 @@ local function BuildSortModeCheckboxes(
 
         local mode = playerModes[sender]
         onPlayerSortModeChanged(mode)
-        addon:TrySort()
+        fsSort:TrySort()
     end
 
     for chkbox, _ in pairs(playerModes) do
@@ -143,25 +143,25 @@ local function BuildSortModeCheckboxes(
     group:SetPoint("LEFT", top, "LEFT")
     -- TODO: not sure why this doesn't align well even when aligning TOP/BOTTOM, so just hacking in a +10 to fix it for now
     group:SetPoint("TOP", modeLabel, "TOP", 0, 10)
-    builder:TextShim(group)
+    fsBuilder:TextShim(group)
     group.Text:SetText(addon.GroupSortMode.Group)
     group:SetChecked(sortMode == addon.GroupSortMode.Group)
 
     local role = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     role:SetPoint("LEFT", group, "RIGHT", horizontalSpacing, 0)
-    builder:TextShim(role)
+    fsBuilder:TextShim(role)
     role.Text:SetText(addon.GroupSortMode.Role)
     role:SetChecked(sortMode == addon.GroupSortMode.Role)
 
     local alpha = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     alpha:SetPoint("LEFT", role, "RIGHT", horizontalSpacing, 0)
-    builder:TextShim(alpha)
+    fsBuilder:TextShim(alpha)
     alpha.Text:SetText("Alpha")
     alpha:SetChecked(sortMode == addon.GroupSortMode.Alphabetical)
 
     local rev = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     rev:SetPoint("LEFT", alpha, "RIGHT", horizontalSpacing, 0)
-    builder:TextShim(rev)
+    fsBuilder:TextShim(rev)
     rev.Text:SetText("Reverse")
     rev:SetChecked(reverse)
 
@@ -179,7 +179,7 @@ local function BuildSortModeCheckboxes(
 
         local mode = modes[sender]
         onSortModeChanged(mode)
-        addon:TrySort()
+        fsSort:TrySort()
     end
 
     for chkbox, _ in pairs(modes) do
@@ -189,13 +189,13 @@ local function BuildSortModeCheckboxes(
     rev:HookScript("OnClick", function()
         local value = rev:GetChecked()
         onReverseChanged(value)
-        addon:TrySort()
+        fsSort:TrySort()
     end)
 
     return modeLabel
 end
 
-function builder:BuildSortingOptions(panel)
+function fsBuilder:BuildSortingOptions(panel)
     local anchor = BuiltTitle(panel)
 
     if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
@@ -264,12 +264,12 @@ function addon:InitOptions()
 
     InterfaceOptions_AddCategory(panel)
 
-    builder:BuildSortingOptions(panel)
-    builder:BuildSortingMethodOptions(panel)
-    builder:BuildKeybindingOptions(panel)
-    builder:BuildMacroOptions(panel)
-    builder:BuildSpacingOptions(panel)
-    builder:BuildHealthCheck(panel)
+    fsBuilder:BuildSortingOptions(panel)
+    fsBuilder:BuildSortingMethodOptions(panel)
+    fsBuilder:BuildKeybindingOptions(panel)
+    fsBuilder:BuildMacroOptions(panel)
+    fsBuilder:BuildSpacingOptions(panel)
+    fsBuilder:BuildHealthCheck(panel)
 
     SLASH_FRAMESORT1 = "/fs"
     SLASH_FRAMESORT2 = "/framesort"
