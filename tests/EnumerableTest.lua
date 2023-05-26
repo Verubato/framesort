@@ -9,11 +9,13 @@ for _, fileName in ipairs(deps) do
     module("UnitTest", addon)
 end
 
+local enumerable = addon.Enumerable
+
 local M = {}
 
 function M:test_empty()
-    local one = addon.Enumerable:Empty()
-    local two = addon.Enumerable:Empty()
+    local one = enumerable:Empty()
+    local two = enumerable:Empty()
 
     -- should be the same instance
     assertEquals(one, two)
@@ -21,14 +23,14 @@ function M:test_empty()
 end
 
 function M:test_totable()
-    local array = addon.Enumerable:From({ "a", "b", "c" })
+    local array = enumerable:From({ "a", "b", "c" })
     local test = array:ToTable()
 
     assertEquals(test, { "a", "b", "c" })
 end
 
 function M:test_map()
-    local array = addon.Enumerable:From({ "a", "b", "c" })
+    local array = enumerable:From({ "a", "b", "c" })
     local mapped = array
         :Map(function(x) return x .. x end)
         :ToTable()
@@ -37,7 +39,7 @@ function M:test_map()
 end
 
 function M:test_where()
-    local array = addon.Enumerable:From({ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 })
+    local array = enumerable:From({ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 })
     local even = array
         :Where(function(x) return x % 2 == 0 end)
         :ToTable()
@@ -47,10 +49,10 @@ end
 
 function M:test_where_multiple()
     local array = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }
-    local even = addon.Enumerable:From(array)
+    local even = enumerable:From(array)
         :Where(function(x) return x % 2 == 0 end)
         :ToTable()
-    local odd = addon.Enumerable:From(array)
+    local odd = enumerable:From(array)
         :Where(function(x) return x % 2 == 1 end)
         :ToTable()
 
@@ -59,7 +61,7 @@ function M:test_where_multiple()
 end
 
 function M:test_orderby()
-    local array = addon.Enumerable:From({ "z", "x", "a", "d" })
+    local array = enumerable:From({ "z", "x", "a", "d" })
     local sorted = array
         :OrderBy(function(x, y) return x < y end)
         :ToTable()
@@ -68,7 +70,7 @@ function M:test_orderby()
 end
 
 function M:test_first()
-    local array = addon.Enumerable:From({ 1, 3, 5, 6, 8, 9 })
+    local array = enumerable:From({ 1, 3, 5, 6, 8, 9 })
     local first = array
         :First(function(x) return x % 2 == 0 end)
 
@@ -76,7 +78,7 @@ function M:test_first()
 end
 
 function M:test_tolookup()
-    local array = addon.Enumerable:From({
+    local array = enumerable:From({
         { letter = "a", word = "apple" },
         { letter = "b", word = "banana" },
         { letter = "c", word = "carrot" }
@@ -90,6 +92,64 @@ function M:test_tolookup()
         ["b"] = "banana",
         ["c"] = "carrot"
     })
+end
+
+function M:test_reverse()
+    assertEquals(
+        enumerable
+        :From({ 1, 2, 3 })
+        :Reverse()
+        :ToTable(),
+        -- expected
+        { 3, 2, 1 })
+
+    assertEquals(
+        enumerable
+        :From({ 1, 2, 3, 4 })
+        :Reverse()
+        :ToTable(),
+        -- expected
+        { 4, 3, 2, 1 })
+
+    assertEquals(
+        enumerable
+        :From({ 1 })
+        :Reverse()
+        :ToTable(),
+        -- expected
+        { 1 })
+
+    assertEquals(
+        enumerable
+        :From({ "a", "b", "c", "d", "e" })
+        :Reverse()
+        :ToTable(),
+        -- expected
+        { "e", "d", "c", "b", "a" })
+end
+
+function M:test_min()
+    assertEquals(enumerable:From({ 7, 5, 2 }):Min(), 2)
+
+    assertEquals(enumerable:From({
+            { name = "a", value = 5 },
+            { name = "b", value = 3 },
+            { name = "c", value = 8 }
+        })
+        :Min(function(x) return x.value end),
+        { name = "b", value = 3 })
+end
+
+function M:test_max()
+    assertEquals(enumerable:From({ 7, 5, 2 }):Max(), 7)
+
+    assertEquals(enumerable:From({
+            { name = "a", value = 5 },
+            { name = "b", value = 3 },
+            { name = "c", value = 8 }
+        })
+        :Max(function(x) return x.value end),
+        { name = "c", value = 8 })
 end
 
 return M

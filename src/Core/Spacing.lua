@@ -3,6 +3,7 @@ local eventFrame = nil
 local previousPartySpacing = nil
 local previousRaidSpacing = nil
 local fsMath = addon.Math
+local enumerable = addon.Enumerable
 
 --- Returns a lookup table of frames to their row and column positions.
 local function GridLayout(frames)
@@ -10,10 +11,10 @@ local function GridLayout(frames)
 
     local byFrame = {}
     local byPos = {}
-    local row = 0
-    local col = 0
-    local maxRow = 0
-    local maxCol = 0
+    local row = 1
+    local col = 1
+    local maxRow = 1
+    local maxCol = 1
 
     -- build a view of the row/col layout
     for i, frame in ipairs(frames) do
@@ -29,7 +30,7 @@ local function GridLayout(frames)
             if isNewRow then
                 row = row + 1
                 maxRow = row
-                col = 0
+                col = 1
             else
                 col = col + 1
 
@@ -95,23 +96,23 @@ end
 local function FlatMembers(frames, spacing)
     local _, frameByPos = GridLayout(frames)
 
-    local row = 0
+    local row = 1
     while frameByPos[row] do
         local xDelta = 0
         local yDelta = 0
 
-        if row >= 1 then
-            local first = frameByPos[row][0]
-            local above = frameByPos[row - 1][0]
+        if row > 1 then
+            local first = frameByPos[row][1]
+            local above = frameByPos[row - 1][1]
 
             yDelta = (above:GetBottom() or 0) - (first:GetTop() or 0) - spacing.Vertical
         end
 
-        local col = 0
+        local col = 1
         while frameByPos[row][col] do
             local frame = frameByPos[row][col]
 
-            if col >= 1 then
+            if col > 1 then
                 local left = frameByPos[row][col - 1]
                 xDelta = spacing.Horizontal - ((frame:GetLeft() or 0) - (left:GetRight() or 0))
             end
@@ -140,14 +141,14 @@ local function Pets(spacing, horizontal)
     local parent = CompactRaidFrameContainer
     local placeHorizontal = horizontal
 
-    if horizontal and maxRow > 0 then
+    if horizontal and maxRow > 1 then
         placeHorizontal = false
-    elseif not horizontal and maxCol > 0 then
+    elseif not horizontal and maxCol > 1 then
         placeHorizontal = true
     end
 
     if placeHorizontal then
-        local firstRow = byPos[0]
+        local firstRow = byPos[1]
         local topRight = firstRow[#firstRow]
         local top, left = addon:RelativeTopLeft(topRight, parent)
         local xDelta = left - (firstPetPoint.offsetX - topRight:GetWidth() - spacing.Horizontal)
@@ -157,7 +158,7 @@ local function Pets(spacing, horizontal)
             firstPet:AdjustPointsOffset(xDelta, yDelta)
         end
     else
-        local bottomLeft = byPos[maxRow][0]
+        local bottomLeft = byPos[maxRow][1]
         local top, left = addon:RelativeTopLeft(bottomLeft, parent)
         local xDelta = left - firstPetPoint.offsetX
         local yDelta = top - firstPetPoint.offsetY - bottomLeft:GetHeight() - spacing.Vertical
@@ -221,21 +222,21 @@ local function GroupedMembers(frames, spacing, horizontal)
         local xDelta = 0
         local yDelta = 0
 
-        if pos.Row == 0 and pos.Column == 0 then
+        if pos.Row == 1 and pos.Column == 1 then
             local _, container, _, _, _ = root.Value:GetPoint()
             local top = container.title and (container.title:GetBottom() or 0) or (container:GetTop() or 0)
             local left = container:GetLeft() or 0
 
             xDelta = left - (frame:GetLeft() or 0)
             yDelta = top - (frame:GetTop() or 0)
-        elseif horizontal and pos.Column > 0 then
+        elseif horizontal and pos.Column > 1 then
             local left = byPos[pos.Row][pos.Column - 1]
             if left then
                 xDelta = (left:GetRight() or 0) - (frame:GetLeft() or 0) + spacing.Horizontal
             else
                 addon:Warning(string.format("Failed to determine the frame left of %s", frame:GetName()))
             end
-        elseif not horizontal and pos.Row > 0 then
+        elseif not horizontal and pos.Row > 1 then
             local above = byPos[pos.Row - 1][pos.Column]
             if above then
                 yDelta = (above:GetBottom() or 0) - (frame:GetTop() or 0) - spacing.Vertical
@@ -260,14 +261,15 @@ end
 ---e.g.: group2: frame5 is placed relative to frame4.
 local function Groups(groups, spacing, horizontal)
     local posByGroup, groupByPos = GridLayout(groups)
-    local membersByGroup = {}
-
-    for _, group in ipairs(groups) do
-        local members = addon:GetRaidFrameGroupMembers(group)
-        table.sort(members, function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
-
-        membersByGroup[group] = members
-    end
+    local membersByGroup = enumerable
+        :From(groups)
+        :ToLookup(
+            function(group) return group end,
+            function(group)
+                local members = addon:GetRaidFrameGroupMembers(group)
+                table.sort(members, function(x, y) return addon:CompareTopLeftFuzzy(x, y) end)
+                return members
+            end)
 
     --- apply spacing to the member frames
     for _, group in ipairs(groups) do
@@ -277,33 +279,24 @@ local function Groups(groups, spacing, horizontal)
 
     -- determine the vertical anchors
     local verticalAnchorsByRow = {}
-    for i = 1, #groups do
-        local group = groups[i]
+    for _, group in ipairs(groups) do
         local pos = posByGroup[group]
 
-        if pos.Row >= 1 then
+        if pos.Row > 1 then
             if horizontal then
                 -- in horizontal mode, the anchor is simply the group above
-                local above = pos.Row >= 1 and groupByPos[pos.Row - 1][pos.Column]
+                local above = pos.Row > 1 and groupByPos[pos.Row - 1][pos.Column]
                 verticalAnchorsByRow[pos.Row] = above
             else
                 -- in vertical mode, the anchor is the bottom most member of the groups in the above row
                 local previousRow = groupByPos[pos.Row - 1]
-                local bottomMost = nil
-                local col = 0
-
-                while previousRow[col] do
-                    local next = previousRow[col]
-                    local members = membersByGroup[next]
-                    local lastMember = members[#members]
-
-                    if not bottomMost or (lastMember:GetBottom() or 0) < (bottomMost:GetBottom() or 0) then
-                        bottomMost = lastMember
-                    end
-
-                    col = col + 1
-                end
-
+                local lastMembers = enumerable
+                    :From(previousRow)
+                    :Map(function(g)
+                        local members = membersByGroup[g]
+                        return members[#members]
+                    end)
+                local bottomMost = lastMembers:Min(function(member) return member:GetBottom() or 0 end)
                 verticalAnchorsByRow[pos.Row] = bottomMost
             end
         end
@@ -311,35 +304,23 @@ local function Groups(groups, spacing, horizontal)
 
     -- determine the horizontal anchors
     local horizontalAnchorsByColumn = {}
-    for i = 1, #groups do
-        local group = groups[i]
+    for _, group in ipairs(groups) do
         local pos = posByGroup[group]
 
-        if pos.Column >= 1 then
+        if pos.Column > 1 then
             if not horizontal then
                 -- in vertical mode, the anchor is simply the group to the left
-                local left = pos.Column >= 1 and groupByPos[pos.Row][pos.Column - 1] or nil
+                local left = pos.Column > 1 and groupByPos[pos.Row][pos.Column - 1] or nil
                 horizontalAnchorsByColumn[pos.Column] = left
             else
                 -- in horizontal mode, the anchor is the left most member of the groups in the left column
-                local leftMost = nil
-                local row = 0
-
-                while groupByPos[row] do
-                    local next = groupByPos[row][pos.Column - 1]
-
-                    if next then
-                        local members = membersByGroup[next]
-                        local lastMember = members[#members]
-
-                        if not leftMost or (lastMember:GetRight() or 0) > (leftMost:GetRight() or 0) then
-                            leftMost = lastMember
-                        end
-                    end
-
-                    row = row + 1
-                end
-
+                local leftMembers = enumerable
+                    :From(groupByPos)
+                    :Map(function(g)
+                        local members = membersByGroup[g]
+                        return members[#members]
+                    end)
+                local leftMost = leftMembers:Max(function(member) return member:GetRight() or 0 end)
                 horizontalAnchorsByColumn[pos.Column] = leftMost
             end
         end
@@ -353,7 +334,7 @@ local function Groups(groups, spacing, horizontal)
         local yDelta = 0
 
         -- vertical spacing
-        if pos.Row >= 1 then
+        if pos.Row > 1 then
             local anchor = verticalAnchorsByRow[pos.Row]
 
             if anchor then
@@ -362,7 +343,7 @@ local function Groups(groups, spacing, horizontal)
         end
 
         -- horizontal spacing
-        if pos.Column >= 1 then
+        if pos.Column > 1 then
             local anchor = horizontalAnchorsByColumn[pos.Column]
 
             if anchor then
