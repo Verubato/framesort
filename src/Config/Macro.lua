@@ -41,7 +41,7 @@ function fsBuilder:BuildMacroOptions(parent)
         "",
         "#showtooltip",
         "#FrameSort Frame1",
-        "/cast [@placeholder] Spell;",
+        "/cast [@none] Spell;",
         "",
         "Example 2",
         "",
@@ -59,7 +59,7 @@ function fsBuilder:BuildMacroOptions(parent)
         "/cast [@a] Spell; [mod:shift, @b] Spell; [mod:ctrl, @c] Spell;",
         "",
         "Notes:",
-        " - The \"@\" placeholder values can be anything, e.g. @a, or @placeholder, or @frame1.",
+        " - The \"@\" placeholder values can be anything, e.g. @none, or @placeholder, or @a.",
         " - Order matters, e.g. \"#framesort frame2, frame1\" would replace the first '@' with frame2."
     }
 

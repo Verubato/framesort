@@ -38,7 +38,7 @@ function fsBuilder:BuildKeybindingOptions(parent)
         "makes targeting confusing.",
         "If you were to /target party1, it would target the DPS player in position 3 rather than the tank.",
         "",
-        "The FrameSort keybindings will target based on the visual frame position rather than the party position.",
+        "FrameSort keybindings will target based on their visual frame position rather than party number.",
         "So targeting 'Frame 1' will target the Tank, 'Frame 2' the healer, 'Frame 3' the DPS in spot 3, and so on.",
     }
 
