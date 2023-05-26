@@ -1,7 +1,6 @@
 local _, addon = ...
 local prefix = "FSTarget"
 local keybindingsCount = 5
-local eventFrame = nil
 local previousUnits = nil
 local enumerable = addon.Enumerable
 
@@ -59,7 +58,7 @@ function addon:InitTargeting()
         target:SetAttribute("unit", "none")
     end
 
-    eventFrame = CreateFrame("Frame")
+    local eventFrame = CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", Run)
     eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
     eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")

@@ -1,5 +1,4 @@
 local _, addon = ...
-local eventFrame = nil
 
 local function CanUpdate(frame)
     if not frame then return end
@@ -36,7 +35,7 @@ end
 
 ---Initialises the player show/hide module.
 function addon:InitPlayerHiding()
-    eventFrame = CreateFrame("Frame")
+    local eventFrame = CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", Run)
     eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
     eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")

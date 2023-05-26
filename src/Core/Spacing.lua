@@ -1,5 +1,4 @@
 local _, addon = ...
-local eventFrame = nil
 local previousPartySpacing = nil
 local previousRaidSpacing = nil
 local fsMath = addon.Math
@@ -424,7 +423,7 @@ end
 
 ---Initialises the spacing module.
 function addon:InitSpacing()
-    eventFrame = CreateFrame("Frame")
+    local eventFrame = CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", Run)
     eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
     eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
