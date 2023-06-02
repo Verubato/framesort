@@ -133,12 +133,9 @@ end
 ---@param frames table<table> the set of frames to rearrange.
 ---@param units table<string> unit ids in the desired order.
 local function RearrangeFrameChain(frames, units)
-    local sorted = fsEnumerable
+    local points = fsEnumerable
         :From(frames)
         :OrderBy(function(x, y) return fsCompare:CompareTopLeftFuzzy(x, y) end)
-        :ToTable()
-    local points = fsEnumerable
-        :From(sorted)
         :Map(function(x)
             return {
                 Top = x:GetTop() or 0,
