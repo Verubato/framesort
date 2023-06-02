@@ -231,11 +231,13 @@ local function GroupedMembers(frames, spacing, horizontal)
 
         if pos.Row == 1 and pos.Column == 1 then
             local _, container, _, _, _ = root.Value:GetPoint()
-            local top = container.title and (container.title:GetBottom() or 0) or (container:GetTop() or 0)
-            local left = container:GetLeft() or 0
-
-            xDelta = left - (frame:GetLeft() or 0)
-            yDelta = top - (frame:GetTop() or 0)
+            if horizontal then
+                local left = container:GetLeft() or 0
+                xDelta = left - (frame:GetLeft() or 0)
+            else
+                local top = container.title and (container.title:GetBottom() or 0) or (container:GetTop() or 0)
+                yDelta = top - (frame:GetTop() or 0)
+            end
         elseif horizontal and pos.Column > 1 then
             local left = byPos[pos.Row][pos.Column - 1]
             if left then
