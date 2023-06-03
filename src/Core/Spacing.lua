@@ -5,7 +5,6 @@ local fsCompare = addon.Compare
 local fsPoint = addon.Point
 local fsMath = addon.Math
 local fsEnumerable = addon.Enumerable
-local fsLog = addon.Log
 local previousPartySpacing = nil
 local previousRaidSpacing = nil
 local M = {}
@@ -215,46 +214,58 @@ end
 local function GroupedMembers(frames, spacing, horizontal)
     if #frames == 0 then return end
 
-    local byFrame, byPos, _, _ = GridLayout(frames)
-    local root = fsFrame:ToFrameChain(frames)
-    local current = root
-
     -- why all this complexity instead of just a simple sequence of SetPoint() calls?
     -- it's because SetPoint() can't be called in combat whereas AdjustPointsOffset() can
     -- SetPoint() is just completely disallowed (by unsecure code) in combat, even if only changing x/y points
     -- being able to run this in combat has the benefit that if blizzard reset/redraw frames mid-combat, we can reapply our sorting/spacing!
+    local root = fsFrame:ToFrameChain(frames)
+
+    -- ensure it's ordered
+    local ordered = fsEnumerable
+        :From(frames)
+        :OrderBy(function(x, y) return fsCompare:CompareTopLeftFuzzy(x, y) end)
+        :ToTable()
+
+    -- calculate the desired positions (with spacing added)
+    local positions = {}
+    local currentSpacing = 0
+
+    for i, frame in ipairs(ordered) do
+        if i == 1 then
+            positions[i] = {
+                Top = frame:GetTop() or 0,
+                Left = frame:GetLeft() or 0
+            }
+        else
+            local previous = ordered[i - 1]
+
+            if horizontal then
+                local spacingToAdd = (i - 1) * spacing.Horizontal
+                positions[i] = {
+                    Top = (previous:GetTop() or 0),
+                    Left = ((previous:GetRight() or 0) + currentSpacing) + spacingToAdd,
+                }
+
+                currentSpacing = currentSpacing + (previous:GetRight() - frame:GetLeft())
+            else
+                local spacingToAdd = (i - 1) * spacing.Vertical
+                positions[i] = {
+                    Top = ((previous:GetBottom() or 0) + currentSpacing) - spacingToAdd,
+                    Left = (previous:GetLeft() or 0)
+                }
+
+                currentSpacing = currentSpacing + (previous:GetBottom() - frame:GetTop())
+            end
+        end
+    end
+
+    local current = root
     while current do
         local frame = current.Value
-        local pos = byFrame[frame]
-        local xDelta = 0
-        local yDelta = 0
-
-        if pos.Row == 1 and pos.Column == 1 then
-            local _, container, _, _, _ = root.Value:GetPoint()
-            if horizontal then
-                local left = container:GetLeft() or 0
-                xDelta = left - (frame:GetLeft() or 0)
-            else
-                local top = container.title and (container.title:GetBottom() or 0) or (container:GetTop() or 0)
-                yDelta = top - (frame:GetTop() or 0)
-            end
-        elseif horizontal and pos.Column > 1 then
-            local left = byPos[pos.Row][pos.Column - 1]
-            if left then
-                xDelta = (left:GetRight() or 0) - (frame:GetLeft() or 0) + spacing.Horizontal
-            else
-                fsLog:Warning(string.format("Failed to determine the frame left of %s", frame:GetName()))
-            end
-        elseif not horizontal and pos.Row > 1 then
-            local above = byPos[pos.Row - 1][pos.Column]
-            if above then
-                yDelta = (above:GetBottom() or 0) - (frame:GetTop() or 0) - spacing.Vertical
-            else
-                fsLog:Warning(string.format("Failed to determine the frame above %s", frame:GetName()))
-            end
-        else
-            fsLog:Warning(string.format("Unable to determine the previous frame of %s", frame:GetName()))
-        end
+        local index = fsEnumerable:From(ordered):IndexOf(frame)
+        local to = positions[index]
+        local xDelta = to.Left - (frame:GetLeft() or 0)
+        local yDelta = to.Top - (frame:GetTop() or 0)
 
         if xDelta ~= 0 or yDelta ~= 0 then
             frame:AdjustPointsOffset(xDelta, yDelta)

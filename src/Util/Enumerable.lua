@@ -100,6 +100,14 @@ function M:First(predicate)
     return next, next and index or nil
 end
 
+---Returns the first instance that matches the predicate.
+---@param item any
+---@return any? number? index
+function M:IndexOf(item)
+    local _, index = self:First(function(x) return x == item end)
+    return index
+end
+
 ---Returns the item with the minimum value.
 ---@param valueSelector? fun(item: any): any
 ---@return any? item
@@ -146,6 +154,20 @@ function M:Max(valueSelector)
     return maxItem
 end
 
+---Sums a sequence.
+---@param valueSelector? fun(item: any): number
+---@return number
+function M:Sum(valueSelector)
+    local items = self:ToTable()
+    local sum = 0
+
+    for _, item in ipairs(items) do
+        sum = sum + ((valueSelector and valueSelector(item)) or item)
+    end
+
+    return sum
+end
+
 ---Reverses the sequence.
 function M:Reverse()
     local items = self:ToTable()
@@ -179,6 +201,22 @@ function M:ToTable()
     end
 
     return items
+end
+
+---Returns the first `count` number of items.
+---@param count number
+---@return Enumerable
+function M:Take(count)
+    local taken = 0
+    local iterator = function()
+        if taken == count then return nil end
+
+        local next = self.Next()
+        taken = taken + 1
+        return next
+    end
+
+    return M:From(iterator)
 end
 
 ---Evaluates the iterator function to return the results as a lookup table.

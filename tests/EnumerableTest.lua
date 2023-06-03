@@ -77,6 +77,13 @@ function M:test_first()
     assertEquals(first, 6)
 end
 
+function M:test_indexof()
+    assertEquals(fsEnumerable:From({ "a", "b", "c" }):IndexOf("a"), 1)
+    assertEquals(fsEnumerable:From({ "a", "b", "c" }):IndexOf("b"), 2)
+    assertEquals(fsEnumerable:From({ "a", "b", "c" }):IndexOf("c"), 3)
+    assertEquals(fsEnumerable:From({ "a", "b", "c" }):IndexOf("d"), nil)
+end
+
 function M:test_tolookup()
     local array = fsEnumerable:From({
         { letter = "a", word = "apple" },
@@ -150,6 +157,25 @@ function M:test_max()
         })
         :Max(function(x) return x.value end),
         { name = "c", value = 8 })
+end
+
+function M:test_sum()
+    assertEquals(fsEnumerable:From({ 1, 2, 3 }):Sum(), 6)
+
+    assertEquals(fsEnumerable:From({
+            { name = "a", value = 5 },
+            { name = "b", value = 3 },
+            { name = "c", value = 8 }
+        })
+        :Sum(function(x) return x.value end),
+        16)
+end
+
+function M:test_take()
+    assertEquals(fsEnumerable:From({ 1, 2, 3 }):Take(1):ToTable(), { 1 })
+    assertEquals(fsEnumerable:From({ 1, 2, 3 }):Take(2):ToTable(), { 1, 2 })
+    assertEquals(fsEnumerable:From({ 1, 2, 3 }):Take(3):ToTable(), { 1, 2, 3 })
+    assertEquals(fsEnumerable:From({ 1, 2, 3 }):Take(4):ToTable(), { 1, 2, 3 })
 end
 
 return M
