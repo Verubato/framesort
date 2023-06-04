@@ -144,10 +144,6 @@ function M:CompareTopLeftFuzzy(leftFrame, rightFrame)
     local leftY = leftFrame:GetTop()
     local rightY = rightFrame:GetTop()
 
-    -- TODO: I don't know why sometimes this happens, is it normal/safe?
-    if leftY == nil then return false end
-    if rightY == nil then return true end
-
     leftY = fsMath:Round(leftY, fuzzyDecimalPlaces)
     rightY = fsMath:Round(rightY, fuzzyDecimalPlaces)
 
@@ -155,9 +151,6 @@ function M:CompareTopLeftFuzzy(leftFrame, rightFrame)
 
     local leftX = leftFrame:GetLeft()
     local rightX = rightFrame:GetLeft()
-
-    if leftX == nil then return false end
-    if rightX == nil then return true end
 
     leftX = fsMath:Round(leftX, fuzzyDecimalPlaces)
     rightX = fsMath:Round(rightX, fuzzyDecimalPlaces)

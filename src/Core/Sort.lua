@@ -117,8 +117,8 @@ local function RearrangeFrames(frames, units)
                 from.point == to.point and
                 from.relativeTo == to.relativeTo and
                 from.relativePoint == to.relativePoint then
-                local xDelta = (to.offsetX or 0) - (from.offsetX or 0)
-                local yDelta = (to.offsetY or 0) - (from.offsetY or 0)
+                local xDelta = to.offsetX - from.offsetX
+                local yDelta = to.offsetY - from.offsetY
 
                 -- TODO why is lua_ls getting type confused here when removing the above @type specifier?
                 frame:AdjustPointsOffset(xDelta, yDelta)
@@ -138,8 +138,8 @@ local function RearrangeFrameChain(frames, units)
         :OrderBy(function(x, y) return fsCompare:CompareTopLeftFuzzy(x, y) end)
         :Map(function(x)
             return {
-                Top = x:GetTop() or 0,
-                Left = x:GetLeft() or 0
+                Top = x:GetTop(),
+                Left = x:GetLeft()
             }
         end)
         :ToTable()
@@ -155,7 +155,7 @@ local function RearrangeFrameChain(frames, units)
 
         if unitIndex then
             local to = points[unitIndex]
-            local from = { Top = source:GetTop() or 0, Left = source:GetLeft() or 0 }
+            local from = { Top = source:GetTop(), Left = source:GetLeft() }
             local xDelta = to.Left - from.Left
             local yDelta = to.Top - from.Top
 

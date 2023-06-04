@@ -30,8 +30,8 @@ end
 ---@return integer top
 ---@return integer left
 function M:RelativeTopLeft(child, parent)
-    local top = (child:GetTop() or 0) - (parent:GetTop() or 0)
-    local left = (child:GetLeft() or 0) - (parent:GetLeft() or 0)
+    local top = child:GetTop() - parent:GetTop()
+    local left = child:GetLeft() - parent:GetLeft()
 
     return top, left
 end
