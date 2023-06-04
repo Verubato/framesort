@@ -26,10 +26,10 @@ local function GridLayout(frames)
         local previous = i > 1 and frames[i - 1] or nil
 
         if previous then
-            local groupFuzzyLeft = fsMath:Round(frame:GetLeft() or 0)
-            local groupFuzzyTop = fsMath:Round(frame:GetTop() or 0)
-            local previousFuzzyLeft = fsMath:Round(previous:GetLeft() or 0)
-            local previousFuzzyTop = fsMath:Round(previous:GetTop() or 0)
+            local groupFuzzyLeft = fsMath:Round(frame:GetLeft())
+            local groupFuzzyTop = fsMath:Round(frame:GetTop())
+            local previousFuzzyLeft = fsMath:Round(previous:GetLeft())
+            local previousFuzzyTop = fsMath:Round(previous:GetTop())
             local isNewRow = groupFuzzyLeft < previousFuzzyLeft or groupFuzzyTop < previousFuzzyTop
 
             if isNewRow then
@@ -110,7 +110,7 @@ local function FlatMembers(frames, spacing)
             local first = frameByPos[row][1]
             local above = frameByPos[row - 1][1]
 
-            yDelta = (above:GetBottom() or 0) - (first:GetTop() or 0) - spacing.Vertical
+            yDelta = above:GetBottom() - first:GetTop() - spacing.Vertical
         end
 
         local col = 1
@@ -119,7 +119,7 @@ local function FlatMembers(frames, spacing)
 
             if col > 1 then
                 local left = frameByPos[row][col - 1]
-                xDelta = spacing.Horizontal - ((frame:GetLeft() or 0) - (left:GetRight() or 0))
+                xDelta = spacing.Horizontal - (frame:GetLeft() - left:GetRight())
             end
 
             if xDelta ~= 0 or yDelta ~= 0 then
@@ -233,8 +233,8 @@ local function GroupedMembers(frames, spacing, horizontal)
     for i, frame in ipairs(ordered) do
         if i == 1 then
             positions[i] = {
-                Top = frame:GetTop() or 0,
-                Left = frame:GetLeft() or 0
+                Top = frame:GetTop(),
+                Left = frame:GetLeft()
             }
         else
             local previous = ordered[i - 1]
@@ -242,16 +242,16 @@ local function GroupedMembers(frames, spacing, horizontal)
             if horizontal then
                 local spacingToAdd = (i - 1) * spacing.Horizontal
                 positions[i] = {
-                    Top = (previous:GetTop() or 0),
-                    Left = ((previous:GetRight() or 0) + currentSpacing) + spacingToAdd,
+                    Top = previous:GetTop(),
+                    Left = (previous:GetRight() + currentSpacing) + spacingToAdd,
                 }
 
                 currentSpacing = currentSpacing + (previous:GetRight() - frame:GetLeft())
             else
                 local spacingToAdd = (i - 1) * spacing.Vertical
                 positions[i] = {
-                    Top = ((previous:GetBottom() or 0) + currentSpacing) - spacingToAdd,
-                    Left = (previous:GetLeft() or 0)
+                    Top = (previous:GetBottom() + currentSpacing) - spacingToAdd,
+                    Left = previous:GetLeft()
                 }
 
                 currentSpacing = currentSpacing + (previous:GetBottom() - frame:GetTop())
@@ -264,8 +264,8 @@ local function GroupedMembers(frames, spacing, horizontal)
         local frame = current.Value
         local index = fsEnumerable:From(ordered):IndexOf(frame)
         local to = positions[index]
-        local xDelta = to.Left - (frame:GetLeft() or 0)
-        local yDelta = to.Top - (frame:GetTop() or 0)
+        local xDelta = to.Left - frame:GetLeft()
+        local yDelta = to.Top - frame:GetTop()
 
         if xDelta ~= 0 or yDelta ~= 0 then
             frame:AdjustPointsOffset(xDelta, yDelta)
@@ -316,7 +316,7 @@ local function Groups(groups, spacing, horizontal)
                         local members = membersByGroup[g]
                         return members[#members]
                     end)
-                local bottomMost = lastMembers:Min(function(member) return member:GetBottom() or 0 end)
+                local bottomMost = lastMembers:Min(function(member) return member:GetBottom() end)
                 verticalAnchorsByRow[pos.Row] = bottomMost
             end
         end
@@ -340,7 +340,7 @@ local function Groups(groups, spacing, horizontal)
                         local members = membersByGroup[g]
                         return members[#members]
                     end)
-                local leftMost = leftMembers:Max(function(member) return member:GetRight() or 0 end)
+                local leftMost = leftMembers:Max(function(member) return member:GetRight() end)
                 horizontalAnchorsByColumn[pos.Column] = leftMost
             end
         end
@@ -358,7 +358,7 @@ local function Groups(groups, spacing, horizontal)
             local anchor = verticalAnchorsByRow[pos.Row]
 
             if anchor then
-                yDelta = (anchor:GetBottom() or 0) - (group:GetTop() or 0) - spacing.Vertical
+                yDelta = anchor:GetBottom() - group:GetTop() - spacing.Vertical
             end
         end
 
@@ -367,7 +367,7 @@ local function Groups(groups, spacing, horizontal)
             local anchor = horizontalAnchorsByColumn[pos.Column]
 
             if anchor then
-                xDelta = spacing.Horizontal - ((group:GetLeft() or 0) - (anchor:GetRight() or 0))
+                xDelta = spacing.Horizontal - (group:GetLeft() - anchor:GetRight())
             end
         end
 
