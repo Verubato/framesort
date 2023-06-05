@@ -37,10 +37,7 @@ local function UpdateTargets()
     return true
 end
 
-local function OnLayout(container)
-    if not container or container:IsForbidden() or not container:IsVisible() then return end
-    if container ~= CompactRaidFrameContainer then return end
-    if container.flowPauseUpdates then return end
+local function OnLayout()
     if not CanUpdate() then return end
 
     UpdateTargets()
@@ -67,5 +64,10 @@ function addon:InitTargeting()
     eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
     eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
     fsSort:RegisterPostSortCallback(Run)
-    hooksecurefunc("FlowContainer_DoLayout", OnLayout)
+
+    if CompactRaidFrameContainer.LayoutFrames then
+        hooksecurefunc(CompactRaidFrameContainer, "LayoutFrames", OnLayout)
+    elseif CompactRaidFrameContainer_LayoutFrames then
+        hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", OnLayout)
+    end
 end
