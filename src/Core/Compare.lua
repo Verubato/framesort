@@ -206,5 +206,5 @@ function M:CompareBottomLeftFuzzy(leftFrame, rightFrame)
     leftX = fsMath:Round(leftX, fuzzyDecimalPlaces)
     rightX = fsMath:Round(rightX, fuzzyDecimalPlaces)
 
-    return leftX > rightX
+    return leftX < rightX
 end
