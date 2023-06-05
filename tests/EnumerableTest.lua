@@ -178,4 +178,38 @@ function M:test_take()
     assertEquals(fsEnumerable:From({ 1, 2, 3 }):Take(4):ToTable(), { 1, 2, 3 })
 end
 
+function M:test_concat()
+    assertEquals(fsEnumerable
+        :From({ 1 })
+        :Concat({ 2, 3 })
+        :ToTable(),
+        { 1, 2, 3 })
+
+    assertEquals(fsEnumerable
+        :From({})
+        :Concat({ 2, 3 })
+        :ToTable(),
+        { 2, 3 })
+
+    assertEquals(fsEnumerable
+        :From({ 1 })
+        :Concat({})
+        :ToTable(),
+        { 1 })
+
+    assertEquals(fsEnumerable
+        :From({ 1 })
+        :Concat(fsEnumerable:From({ 2, 3 }))
+        :ToTable(),
+        { 1, 2, 3 })
+end
+
+function M:test_flatten()
+    assertEquals(fsEnumerable
+        :From({ { 1 }, { 2, 3 }, { 4, 5, 6 } })
+        :Flatten()
+        :ToTable(),
+        { 1, 2, 3, 4, 5, 6 })
+end
+
 return M
