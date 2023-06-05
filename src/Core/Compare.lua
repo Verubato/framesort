@@ -14,9 +14,6 @@ function M:GetSortFunction()
 
     if not enabled then return nil end
 
-    assert(playerSortMode ~= nil)
-    assert(groupSortMode ~= nil)
-
     if playerSortMode ~= addon.PlayerSortMode.Middle then
         return function(x, y) return M:Compare(x, y, playerSortMode, groupSortMode, reverse) end
     end
@@ -54,8 +51,8 @@ end
 ---preSortedUnits is required if playerSortMode == Middle.
 ---@param leftToken string
 ---@param rightToken string
----@param playerSortMode string
----@param groupSortMode string
+---@param playerSortMode? string
+---@param groupSortMode? string
 ---@param reverse boolean?
 ---@param preSortedUnits table?
 ---@return boolean
@@ -63,25 +60,27 @@ function M:Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse
     if not UnitExists(leftToken) then return false end
     if not UnitExists(rightToken) then return true end
 
-    if UnitIsUnit(leftToken, "player") then
-        if playerSortMode == addon.PlayerSortMode.Hidden then
-            return false
-        elseif playerSortMode == addon.PlayerSortMode.Middle then
-            assert(preSortedUnits ~= nil)
-            return M:CompareMiddle(rightToken, preSortedUnits)
-        else
-            return playerSortMode == addon.PlayerSortMode.Top
+    if playerSortMode and playerSortMode ~= "" then
+        if UnitIsUnit(leftToken, "player") then
+            if playerSortMode == addon.PlayerSortMode.Hidden then
+                return false
+            elseif playerSortMode == addon.PlayerSortMode.Middle then
+                assert(preSortedUnits ~= nil)
+                return M:CompareMiddle(rightToken, preSortedUnits)
+            else
+                return playerSortMode == addon.PlayerSortMode.Top
+            end
         end
-    end
 
-    if UnitIsUnit(rightToken, "player") then
-        if playerSortMode == addon.PlayerSortMode.Hidden then
-            return true
-        elseif playerSortMode == addon.PlayerSortMode.Middle then
-            assert(preSortedUnits ~= nil)
-            return not M:CompareMiddle(leftToken, preSortedUnits)
-        else
-            return playerSortMode == addon.PlayerSortMode.Bottom
+        if UnitIsUnit(rightToken, "player") then
+            if playerSortMode == addon.PlayerSortMode.Hidden then
+                return true
+            elseif playerSortMode == addon.PlayerSortMode.Middle then
+                assert(preSortedUnits ~= nil)
+                return not M:CompareMiddle(leftToken, preSortedUnits)
+            else
+                return playerSortMode == addon.PlayerSortMode.Bottom
+            end
         end
     end
 
@@ -91,15 +90,17 @@ function M:Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse
         rightToken = tmp
     end
 
-    if groupSortMode == addon.GroupSortMode.Group then
-        return CRFSort_Group(leftToken, rightToken)
-    elseif groupSortMode == addon.GroupSortMode.Role then
-        return CRFSort_Role(leftToken, rightToken)
-    elseif groupSortMode == addon.GroupSortMode.Alphabetical then
-        return CRFSort_Alphabetical(leftToken, rightToken)
-    else
-        return leftToken < rightToken
+    if groupSortMode and groupSortMode ~= "" then
+        if groupSortMode == addon.GroupSortMode.Group then
+            return CRFSort_Group(leftToken, rightToken)
+        elseif groupSortMode == addon.GroupSortMode.Role then
+            return CRFSort_Role(leftToken, rightToken)
+        elseif groupSortMode == addon.GroupSortMode.Alphabetical then
+            return CRFSort_Alphabetical(leftToken, rightToken)
+        end
     end
+
+    return leftToken < rightToken
 end
 
 ---Returns true if the specified token is ordered after the mid point.
