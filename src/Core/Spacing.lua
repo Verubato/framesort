@@ -194,7 +194,7 @@ local function Pets(pets, members, spacing, horizontal)
         -- in classic 2 pet frames fit into 1 member raid frame
         -- so for the 2nd frame just anchor it to the first
         -- in retail 3 pet frames almost fit
-        local addSpacing = i % petsPerRaidFrame == fsPoint
+        local addSpacing = i % petsPerRaidFrame == 1
         local xDelta = 0
         local yDelta = 0
 
@@ -301,8 +301,7 @@ local function Groups(groups, spacing, horizontal)
 
     -- apply spacing between the groups
     local posByGroup, _ = GridLayout(groups)
-    for i = 1, #groups do
-        local group = groups[i]
+    for _, group in ipairs(groups) do
         local pos = posByGroup[group]
         local xDelta = 0
         local yDelta = 0
@@ -349,7 +348,7 @@ local function Groups(groups, spacing, horizontal)
             if left then
                 xDelta = spacing.Horizontal - (group:GetLeft() - left:GetRight())
             else
-                -- no frames above us, anchor to parent
+                -- no frames left of us, anchor to parent
                 local parent = group:GetParent()
                 xDelta = group:GetLeft() - parent:GetLeft()
             end
