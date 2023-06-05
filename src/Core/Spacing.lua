@@ -10,50 +10,6 @@ local previousRaidSpacing = nil
 local M = {}
 addon.Spacing = M
 
---- Returns a lookup table of frames to their row and column positions.
-local function GridLayout(frames)
-    table.sort(frames, function(x, y) return fsCompare:CompareTopLeftFuzzy(x, y) end)
-
-    local byFrame = {}
-    local byPos = {}
-    local row = 1
-    local col = 1
-    local maxRow = 1
-    local maxCol = 1
-
-    -- build a view of the row/col layout
-    for i, frame in ipairs(frames) do
-        local previous = i > 1 and frames[i - 1] or nil
-
-        if previous then
-            local groupFuzzyLeft = fsMath:Round(frame:GetLeft())
-            local groupFuzzyTop = fsMath:Round(frame:GetTop())
-            local previousFuzzyLeft = fsMath:Round(previous:GetLeft())
-            local previousFuzzyTop = fsMath:Round(previous:GetTop())
-            local isNewRow = groupFuzzyLeft < previousFuzzyLeft or groupFuzzyTop < previousFuzzyTop
-
-            if isNewRow then
-                row = row + 1
-                maxRow = row
-                col = 1
-            else
-                col = col + 1
-
-                if col > maxCol then maxCol = col end
-            end
-        end
-
-        byFrame[frame] = {
-            Row = row,
-            Column = col
-        }
-        byPos[row] = byPos[row] or {}
-        byPos[row][col] = frame
-    end
-
-    return byFrame, byPos, maxRow, maxCol
-end
-
 local function GetSettings(isRaid)
     local flat = nil
     local horizontal = nil
@@ -101,37 +57,44 @@ end
 local function FlatMembers(frames, spacing)
     if #frames == 0 then return end
 
-    local _, frameByPos = GridLayout(frames)
-    local row = 1
+    local orderedLeftTop = fsEnumerable
+        :From(frames)
+        :OrderBy(function(x, y) return fsCompare:CompareLeftTopFuzzy(x, y) end)
+        :ToTable()
 
-    while frameByPos[row] do
-        local xDelta = 0
+    for i = 2, #orderedLeftTop do
+        local frame = orderedLeftTop[i]
+        local previous = orderedLeftTop[i - 1]
         local yDelta = 0
 
-        if row > 1 then
-            local first = frameByPos[row][1]
-            local above = frameByPos[row - 1][1]
-
-            yDelta = above:GetBottom() - first:GetTop() - spacing.Vertical
+        -- same column
+        if fsMath:Round(frame:GetLeft()) == fsMath:Round(previous:GetLeft()) then
+            yDelta = (previous:GetBottom() - frame:GetTop()) - spacing.Vertical
         end
 
-        local col = 1
-        while frameByPos[row][col] do
-            local frame = frameByPos[row][col]
+        if yDelta ~= 0 then
+            frame:AdjustPointsOffset(0, yDelta)
+        end
+    end
 
-            if col > 1 then
-                local left = frameByPos[row][col - 1]
-                xDelta = spacing.Horizontal - (frame:GetLeft() - left:GetRight())
-            end
+    local orderedTopLeft = fsEnumerable
+        :From(frames)
+        :OrderBy(function(x, y) return fsCompare:CompareTopLeftFuzzy(x, y) end)
+        :ToTable()
 
-            if xDelta ~= 0 or yDelta ~= 0 then
-                frame:AdjustPointsOffset(xDelta, yDelta)
-            end
+    for i = 2, #orderedTopLeft do
+        local frame = orderedTopLeft[i]
+        local previous = orderedTopLeft[i - 1]
+        local xDelta = 0
 
-            col = col + 1
+        -- same row
+        if fsMath:Round(frame:GetTop()) == fsMath:Round(previous:GetTop()) then
+            xDelta = spacing.Horizontal - (frame:GetLeft() - previous:GetRight())
         end
 
-        row = row + 1
+        if xDelta ~= 0 then
+            frame:AdjustPointsOffset(xDelta, 0)
+        end
     end
 end
 
@@ -144,11 +107,18 @@ local function Pets(pets, members, spacing, horizontal)
     local firstPetPoint = fsPoint:GetPointEx(firstPet)
     local parent = firstPet:GetParent()
     local placeHorizontal = horizontal
-    local _, _, maxRow, maxCol = GridLayout(members)
+    local hasMoreThanOneRow = fsEnumerable
+        :From(members)
+        :First(function(x) return fsMath:Round(x:GetBottom()) > fsMath:Round(members[1]:GetBottom()) end)
+        ~= nil
+    local hasMoreThanOneColumn = fsEnumerable
+        :From(members)
+        :First(function(x) return fsMath:Round(x:GetLeft()) > fsMath:Round(members[1]:GetLeft()) end)
+        ~= nil
 
-    if horizontal and maxRow > 1 then
+    if horizontal and hasMoreThanOneRow then
         placeHorizontal = false
-    elseif not horizontal and maxCol > 1 then
+    elseif not horizontal and hasMoreThanOneColumn then
         placeHorizontal = true
     end
 
@@ -293,6 +263,8 @@ end
 local function Groups(groups, spacing, horizontal)
     if #groups == 0 then return end
 
+    table.sort(groups, function(x, y) return fsCompare:CompareTopLeftFuzzy(x, y) end)
+
     --- apply spacing to the member frames
     for _, group in ipairs(groups) do
         local members = fsFrame:GetRaidFrameGroupMembers(group)
@@ -300,58 +272,52 @@ local function Groups(groups, spacing, horizontal)
     end
 
     -- apply spacing between the groups
-    local posByGroup, _ = GridLayout(groups)
     for _, group in ipairs(groups) do
-        local pos = posByGroup[group]
         local xDelta = 0
         local yDelta = 0
 
         -- vertical spacing
-        if pos.Row > 1 then
-            local above = fsEnumerable
-                :From(groups)
-                -- grab the groups above
-                :Where(function(g) return posByGroup[g].Row < pos.Row end)
-                -- grab the member frames
-                :Map(function(g) return fsFrame:GetRaidFrameGroupMembers(g) end)
-                -- flatten members
-                :Flatten()
-                -- only consider visible frames
-                :Where(function(frame) return frame:IsVisible() end)
-                -- find the bottom most frame
-                :Min(function(frame) return frame:GetBottom() end)
+        local above = fsEnumerable
+            :From(groups)
+            -- grab the groups above
+            :Where(function(g) return fsMath:Round(g:GetTop()) > fsMath:Round(group:GetTop()) end)
+            -- grab the member frames
+            :Map(function(g) return fsFrame:GetRaidFrameGroupMembers(g) end)
+            -- flatten members
+            :Flatten()
+            -- only consider visible frames
+            :Where(function(frame) return frame:IsVisible() end)
+            -- find the bottom most frame
+            :Min(function(frame) return frame:GetBottom() end)
 
-            if above then
-                yDelta = above:GetBottom() - group:GetTop() - spacing.Vertical
-            else
-                -- no frames above us, anchor to parent
-                local parent = group:GetParent()
-                yDelta = parent:GetTop() - group:GetTop()
-            end
+        if above then
+            yDelta = above:GetBottom() - group:GetTop() - spacing.Vertical
+        else
+            -- no frames above us, anchor to parent
+            local parent = group:GetParent()
+            yDelta = parent:GetTop() - group:GetTop()
         end
 
         -- horizontal spacing
-        if pos.Column > 1 then
-            local left = fsEnumerable
-                :From(groups)
-                -- grab the groups left
-                :Where(function(g) return posByGroup[g].Column < pos.Column end)
-                -- grab the member frames
-                :Map(function(g) return fsFrame:GetRaidFrameGroupMembers(g) end)
-                -- flatten members
-                :Flatten()
-                -- only consider visible frames
-                :Where(function(frame) return frame:IsVisible() end)
-                -- find the right most frame
-                :Max(function(frame) return frame:GetRight() end)
+        local left = fsEnumerable
+            :From(groups)
+            -- grab the groups left
+            :Where(function(g) return fsMath:Round(g:GetLeft()) < fsMath:Round(group:GetLeft()) end)
+            -- grab the member frames
+            :Map(function(g) return fsFrame:GetRaidFrameGroupMembers(g) end)
+            -- flatten members
+            :Flatten()
+            -- only consider visible frames
+            :Where(function(frame) return frame:IsVisible() end)
+            -- find the right most frame
+            :Max(function(frame) return frame:GetRight() end)
 
-            if left then
-                xDelta = spacing.Horizontal - (group:GetLeft() - left:GetRight())
-            else
-                -- no frames left of us, anchor to parent
-                local parent = group:GetParent()
-                xDelta = group:GetLeft() - parent:GetLeft()
-            end
+        if left then
+            xDelta = spacing.Horizontal - (group:GetLeft() - left:GetRight())
+        else
+            -- no frames left of us, anchor to parent
+            local parent = group:GetParent()
+            xDelta = group:GetLeft() - parent:GetLeft()
         end
 
         if xDelta ~= 0 or yDelta ~= 0 then
