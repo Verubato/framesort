@@ -22,13 +22,17 @@ end
 
 ---Returns an Enumerable instance from the specified items.
 ---@generic T: table, V
----@param auto T|function
+---@param auto T|function|Enumerable
 ---@return Enumerable
 function M:From(auto)
     local t = type(auto)
     local enumerable = {}
 
-    if t == "table" then
+    if t == "function" then
+        enumerable.Next = auto
+    elseif t == "table" and auto.Next and type(auto.Next) == "function" then
+        enumerable.Next = auto.Next
+    elseif t == "table" then
         local iterator, elements, index = ipairs(auto)
         enumerable.State = {
             Iterator = iterator,
@@ -40,8 +44,6 @@ function M:From(auto)
             enumerable.State.Index = nextIndex
             return next
         end
-    elseif t == "function" then
-        enumerable.Next = auto
     else
         error(string.format("Invalid type %s", t))
     end
@@ -64,6 +66,27 @@ function M:Map(apply)
         if not next then return nil end
 
         return apply(next)
+    end
+
+    return M:From(iterator)
+end
+
+---Flattens a sequence of arrays to a single array.
+---@return Enumerable
+function M:Flatten()
+    local next = nil
+    local index = nil
+    local iterator = function()
+        if not index or index > #next then
+            next = self.Next()
+            index = 1
+            if not next then return nil end
+        end
+
+        local item = next[index]
+        index = index + 1
+
+        return item
     end
 
     return M:From(iterator)
@@ -245,6 +268,25 @@ function M:OrderBy(compare)
     table.sort(items, compare)
 
     return M:From(items)
+end
+
+---Combines two sequences together.
+---@param other table|function
+function M:Concat(other)
+    local enumerable = M:From(other)
+    local finishedFirst = false
+    local iterator = function()
+        if not finishedFirst then
+            local item = self.Next()
+            if item then return item end
+
+            finishedFirst = true
+        end
+
+        return enumerable.Next()
+    end
+
+    return M:From(iterator)
 end
 
 ---Compares the two arrays and returns true if their items are equivalent, otherwise false.

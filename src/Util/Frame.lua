@@ -5,25 +5,36 @@ local fsLog = addon.Log
 local M = {}
 addon.Frame = M
 
+local function IsValidUnitFrame(frame, includeInvisible)
+    return
+        not frame:IsForbidden()
+        and frame.unitExists
+        and (includeInvisible or frame:IsVisible())
+        -- to prevent some weird issue early in the loading process
+        -- where frames are visible but aren't positioned
+        and frame:GetTop() ~= nil
+        and frame:GetLeft() ~= nil
+end
+
+local function IsValidGroupFrame(frame, includeInvisible)
+    return
+        not frame:IsForbidden()
+        and (includeInvisible or frame:IsVisible())
+        and string.match(frame:GetName() or "", "CompactRaidGroup")
+end
+
 local function ExtractFrames(children, includeInvisible)
-    local frames = {}
-    for _, frame in pairs(children) do
-        if frame and not frame:IsForbidden() and (includeInvisible or frame:IsVisible()) and frame.unitExists then
-            frames[#frames + 1] = frame
-        elseif string.match(frame:GetName() or "", "CompactRaidGroup") then
-            -- if the raid frames are separated by group
-            -- then the member frames are further nested
-            local groupChildren = { frame:GetChildren() }
-
-            for _, sub in pairs(groupChildren) do
-                if sub and not sub:IsForbidden() and (includeInvisible or sub:IsVisible()) and sub.unitExists then
-                    frames[#frames + 1] = sub
-                end
-            end
-        end
-    end
-
-    return frames
+    local fromRoot = fsEnumerable
+        :From(children)
+    local fromGroup = fsEnumerable
+        :From(children)
+        :Where(function(frame) return IsValidGroupFrame(frame, includeInvisible) end)
+        :Map(function(group) return { group:GetChildren() } end)
+        :Flatten()
+    return fromRoot
+        :Concat(fromGroup)
+        :Where(function(frame) return IsValidUnitFrame(frame, includeInvisible) end)
+        :ToTable()
 end
 
 ---Returns the set of raid frames.
@@ -58,12 +69,7 @@ function M:GetRaidFrameGroups(includeInvisible)
 
     return fsEnumerable
         :From({ container:GetChildren() })
-        :Where(function(frame)
-            return
-                not frame:IsForbidden()
-                and (includeInvisible or frame:IsVisible())
-                and string.match(frame:GetName() or "", "CompactRaidGroup")
-        end)
+        :Where(function(frame) return IsValidGroupFrame(frame, includeInvisible) end)
         :ToTable()
 end
 
@@ -73,13 +79,7 @@ end
 function M:GetRaidFrameGroupMembers(group, includeInvisible)
     return fsEnumerable
         :From({ group:GetChildren() })
-        :Where(function(frame)
-            return
-                frame
-                and not frame:IsForbidden()
-                and (includeInvisible or frame:IsVisible())
-                and frame.unitExists
-        end)
+        :Where(function(frame) return IsValidUnitFrame(frame, includeInvisible) end)
         :ToTable()
 end
 
@@ -95,13 +95,7 @@ function M:GetPartyFrames(includeInvisible)
 
     return fsEnumerable
         :From({ container:GetChildren() })
-        :Where(function(frame)
-            return
-                frame
-                and not frame:IsForbidden()
-                and frame.unitExists
-                and (includeInvisible or frame:IsVisible())
-        end)
+        :Where(function(frame) return IsValidUnitFrame(frame, includeInvisible) end)
         :ToTable()
 end
 
