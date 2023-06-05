@@ -157,6 +157,33 @@ function M:CompareTopLeftFuzzy(leftFrame, rightFrame)
 end
 
 ---Returns true if the left frame is "earlier" than the right frame.
+---Earlier = more left top
+---Fuzziness provides some leeway when comparing the top and left values.
+---@param leftFrame table a wow frame
+---@param rightFrame table a wow frame
+---@return boolean
+function M:CompareLeftTopFuzzy(leftFrame, rightFrame)
+    if not leftFrame then return false end
+    if not rightFrame then return true end
+
+    local leftX = leftFrame:GetLeft()
+    local rightX = rightFrame:GetLeft()
+
+    leftX = fsMath:Round(leftX, fuzzyDecimalPlaces)
+    rightX = fsMath:Round(rightX, fuzzyDecimalPlaces)
+
+    if leftX ~= rightX then return leftX < rightX end
+
+    local leftY = leftFrame:GetTop()
+    local rightY = rightFrame:GetTop()
+
+    leftY = fsMath:Round(leftY, fuzzyDecimalPlaces)
+    rightY = fsMath:Round(rightY, fuzzyDecimalPlaces)
+
+    return leftY > rightY
+end
+
+---Returns true if the left frame is "earlier" than the right frame.
 ---Earlier = more top right
 ---Fuzziness provides some leeway when comparing the top and left values.
 ---@param leftFrame table a wow frame
