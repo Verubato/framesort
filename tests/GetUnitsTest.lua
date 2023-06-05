@@ -93,7 +93,6 @@ function M:test_raid3()
 
     local count = 3
     local members = mock:GenerateUnits(count, true)
-    print("TEST" .. tostring(#members))
     UnitExists = function(x) return mock:UnitExists(x, members) end
 
     local units = unit:GetUnits()
