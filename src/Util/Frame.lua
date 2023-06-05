@@ -5,42 +5,41 @@ local fsLog = addon.Log
 local M = {}
 addon.Frame = M
 
-local function IsValidUnitFrame(frame, includeInvisible)
+local function IsValidUnitFrame(frame)
     return
         not frame:IsForbidden()
         and frame.unitExists
-        and (includeInvisible or frame:IsVisible())
-        -- to prevent some weird issue early in the loading process
-        -- where frames are visible but aren't positioned
+        -- to prevent some weird issue where frames are visible but aren't positioned
         and frame:GetTop() ~= nil
         and frame:GetLeft() ~= nil
 end
 
-local function IsValidGroupFrame(frame, includeInvisible)
+local function IsValidGroupFrame(frame)
     return
         not frame:IsForbidden()
-        and (includeInvisible or frame:IsVisible())
+        -- to prevent some weird issue where frames are visible but aren't positioned
+        and frame:GetTop() ~= nil
+        and frame:GetLeft() ~= nil
         and string.match(frame:GetName() or "", "CompactRaidGroup")
 end
 
-local function ExtractFrames(children, includeInvisible)
+local function ExtractFrames(children)
     local fromRoot = fsEnumerable
         :From(children)
     local fromGroup = fsEnumerable
         :From(children)
-        :Where(function(frame) return IsValidGroupFrame(frame, includeInvisible) end)
+        :Where(function(frame) return IsValidGroupFrame(frame) end)
         :Map(function(group) return { group:GetChildren() } end)
         :Flatten()
     return fromRoot
         :Concat(fromGroup)
-        :Where(function(frame) return IsValidUnitFrame(frame, includeInvisible) end)
+        :Where(function(frame) return IsValidUnitFrame(frame) end)
         :ToTable()
 end
 
 ---Returns the set of raid frames.
----@param includeInvisible boolean? true to include invisible frames.
 ---@return Enumerable<table>,Enumerable<table> frames member frames, pet frames
-function M:GetRaidFrames(includeInvisible)
+function M:GetRaidFrames()
     local empty = fsEnumerable:Empty():ToTable()
     local container = CompactRaidFrameContainer
 
@@ -48,19 +47,20 @@ function M:GetRaidFrames(includeInvisible)
     if container:IsForbidden() or not container:IsVisible() then return empty, empty end
 
     local children = { container:GetChildren() }
-    local frames = ExtractFrames(children, includeInvisible)
-    local members = fsEnumerable:From(frames)
+    local frames = ExtractFrames(children)
+    local members = fsEnumerable
+        :From(frames)
         :Where(function(x) return fsUnit:IsMember(x.unit) end)
-    local pets = fsEnumerable:From(frames)
+    local pets = fsEnumerable
+        :From(frames)
         :Where(function(x) return fsUnit:IsPet(x.unit) end)
 
     return members:ToTable(), pets:ToTable()
 end
 
 ---Returns the set of raid frame group frames.
----@param includeInvisible boolean? true to include invisible frames.
 ---@return table<table> frames group frames
-function M:GetRaidFrameGroups(includeInvisible)
+function M:GetRaidFrameGroups()
     local empty = fsEnumerable:Empty():ToTable()
     local container = CompactRaidFrameContainer
 
@@ -69,43 +69,46 @@ function M:GetRaidFrameGroups(includeInvisible)
 
     return fsEnumerable
         :From({ container:GetChildren() })
-        :Where(function(frame) return IsValidGroupFrame(frame, includeInvisible) end)
+        :Where(function(frame) return IsValidGroupFrame(frame) end)
         :ToTable()
 end
 
----Returns the set of visible member frames within a raid group frame.
----@param includeInvisible boolean? true to include invisible frames.
+---Returns the set of member frames within a raid group frame.
 ---@return table<table> frames group frames
-function M:GetRaidFrameGroupMembers(group, includeInvisible)
+function M:GetRaidFrameGroupMembers(group)
     return fsEnumerable
         :From({ group:GetChildren() })
-        :Where(function(frame) return IsValidUnitFrame(frame, includeInvisible) end)
+        :Where(function(frame) return IsValidUnitFrame(frame) end)
         :ToTable()
 end
 
----Returns the set of visible party frames.
----@param includeInvisible boolean? true to include invisible frames.
----@return table<table> frames party frames
-function M:GetPartyFrames(includeInvisible)
+---Returns the set of party frames.
+---@return Enumerable<table>,Enumerable<table> frames member frames, pet frames
+function M:GetPartyFrames()
     local empty = fsEnumerable:Empty():ToTable()
     local container = CompactPartyFrame
 
-    if not container then return empty end
-    if container:IsForbidden() or not container:IsVisible() then return empty end
+    if not container then return empty, empty end
+    if container:IsForbidden() or not container:IsVisible() then return empty, empty end
 
-    return fsEnumerable
-        :From({ container:GetChildren() })
-        :Where(function(frame) return IsValidUnitFrame(frame, includeInvisible) end)
-        :ToTable()
+    local frames = { container:GetChildren() }
+    local members = fsEnumerable
+        :From(frames)
+        :Where(function(x) return fsUnit:IsMember(x.unit) end)
+    local pets = fsEnumerable
+        :From(frames)
+        :Where(function(x) return fsUnit:IsPet(x.unit) end)
+
+    return members:ToTable(), pets:ToTable()
 end
 
 ---Returns the player compact raid frame.
 ---@return table? playerFrame
 function M:GetPlayerFrame()
-    local frames = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and M:GetPartyFrames(true) or nil
+    local frames = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and M:GetPartyFrames() or nil
 
     if not frames or #frames == 0 then
-        frames = M:GetRaidFrames(true)
+        frames = M:GetRaidFrames()
     end
 
     -- find the player frame
@@ -118,7 +121,7 @@ end
 ---@param frames table<table> frames in any particular order
 ---@return LinkedListNode root in order of parent -> child -> child -> child
 function M:ToFrameChain(frames)
-    local empty = fsEnumerable:Empty():ToTable()
+    local invalid = { Valid = false }
     local nodesByFrame = fsEnumerable
         :From(frames)
         :ToLookup(function(frame) return frame end, function(frame)
@@ -137,7 +140,7 @@ function M:ToFrameChain(frames)
         if parent then
             if parent.Next then
                 fsLog:Error(string.format("Encountered multiple children for frame %s in frame frame chain.", parent.Value:GetName()))
-                return empty
+                return invalid
             end
 
             parent.Next = child
@@ -158,8 +161,9 @@ function M:ToFrameChain(frames)
 
     if count ~= #frames then
         fsLog:Error(string.format("Incomplete/broken frame chain: expected %d nodes but only found %d", #frames, count))
-        return empty
+        return invalid
     end
 
+    root.Valid = true
     return root
 end

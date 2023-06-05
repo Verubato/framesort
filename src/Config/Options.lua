@@ -5,6 +5,7 @@ addon.OptionsBuilder = {
 }
 local fsBuilder = addon.OptionsBuilder
 local fsSort = addon.Sorting
+local fsHide = addon.HidePlayer
 local verticalSpacing = fsBuilder.VerticalSpacing
 local horizontalSpacing = fsBuilder.HorizontalSpacing
 
@@ -125,6 +126,7 @@ local function BuildSortModeCheckboxes(
         local mode = sender:GetChecked() and playerModes[sender] or ""
         onPlayerSortModeChanged(mode)
         fsSort:TrySort()
+        fsHide:ShowHidePlayer()
     end
 
     for chkbox, _ in pairs(playerModes) do

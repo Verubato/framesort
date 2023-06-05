@@ -145,6 +145,7 @@ local function RearrangeFrameChain(frames, units)
         :ToTable()
 
     local chain = fsFrame:ToFrameChain(frames)
+    if not chain.Valid then return end
     local current = chain
 
     while current do
@@ -170,7 +171,7 @@ end
 ---@return boolean sorted true if frames were sorted, otherwise false.
 local function LayoutRaid()
     local sortFunction = fsCompare:GetSortFunction()
-    local memberFrames, petFrames = fsFrame:GetRaidFrames(true)
+    local memberFrames, petFrames = fsFrame:GetRaidFrames()
 
     if not sortFunction or #memberFrames == 0 then return false end
 
@@ -201,7 +202,7 @@ end
 ---@return boolean sorted true if frames were sorted, otherwise false.
 local function LayoutParty()
     local sortFunction = fsCompare:GetSortFunction()
-    local frames = fsFrame:GetPartyFrames(true)
+    local frames = fsFrame:GetPartyFrames()
 
     if not sortFunction or #frames == 0 then return false end
 
