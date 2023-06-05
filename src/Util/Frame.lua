@@ -91,7 +91,10 @@ function M:GetPartyFrames()
     if not container then return empty, empty end
     if container:IsForbidden() or not container:IsVisible() then return empty, empty end
 
-    local frames = { container:GetChildren() }
+    local frames = fsEnumerable
+        :From({ container:GetChildren() })
+        :Where(function(x) return IsValidUnitFrame(x) end)
+        :ToTable()
     local members = fsEnumerable
         :From(frames)
         :Where(function(x) return fsUnit:IsMember(x.unit) end)
