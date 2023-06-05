@@ -335,7 +335,8 @@ local function Groups(groups, spacing, horizontal)
             else
                 -- in horizontal mode, the anchor is the left most member of the groups in the left column
                 local leftMembers = fsEnumerable
-                    :From(groupByPos)
+                    :From(groups)
+                    :Where(function(g) return posByGroup[g].Column == pos.Column - 1 end)
                     :Map(function(g)
                         local members = membersByGroup[g]
                         return members[#members]
