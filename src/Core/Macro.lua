@@ -57,9 +57,7 @@ local function OnEditMacro(macroInfo, _, _, _)
     InspectMacro(macroInfo)
 end
 
-local function OnLayout(container)
-    if container ~= CompactRaidFrameContainer then return end
-    if container.flowPauseUpdates then return end
+local function OnLayout()
     if not CanUpdate() then return end
 
     ScanMacros()
@@ -81,5 +79,10 @@ function addon:InitMacros()
     fsSort:RegisterPostSortCallback(Run)
 
     hooksecurefunc("EditMacro", OnEditMacro)
-    hooksecurefunc("FlowContainer_DoLayout", OnLayout)
+
+    if CompactRaidFrameContainer.LayoutFrames then
+        hooksecurefunc(CompactRaidFrameContainer, "LayoutFrames", OnLayout)
+    elseif CompactRaidFrameContainer_LayoutFrames then
+        hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", OnLayout)
+    end
 end

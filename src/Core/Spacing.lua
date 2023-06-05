@@ -414,10 +414,7 @@ function M:ApplySpacing()
     end
 end
 
-local function OnLayout(container)
-    if container ~= CompactRaidFrameContainer then return end
-    if container.flowPauseUpdates then return end
-
+local function OnLayout()
     M:ApplySpacing()
 end
 
@@ -435,5 +432,12 @@ function addon:InitSpacing()
     eventFrame:RegisterEvent("PLAYER_ROLES_ASSIGNED")
     eventFrame:RegisterEvent("UNIT_PET")
     fsSort:RegisterPostSortCallback(Run)
-    hooksecurefunc("FlowContainer_DoLayout", OnLayout)
+
+    if addon.Options.SortingMethod.TaintlessEnabled then
+        if CompactRaidFrameContainer.LayoutFrames then
+            hooksecurefunc(CompactRaidFrameContainer, "LayoutFrames", OnLayout)
+        elseif CompactRaidFrameContainer_LayoutFrames then
+            hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", OnLayout)
+        end
+    end
 end

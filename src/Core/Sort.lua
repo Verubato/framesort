@@ -273,10 +273,7 @@ local function OnEvent(_, eventName)
 end
 
 ---Event hook on blizzard performing frame layouts.
-local function OnLayout(container)
-    if container ~= CompactRaidFrameContainer then return end
-    if container.flowPauseUpdates then return end
-
+local function OnLayout()
     M:TrySort()
 end
 
@@ -325,7 +322,16 @@ function addon:InitSorting()
     -- Fired when people within the raid group change their tank/healer/dps role
     eventFrame:RegisterEvent("PLAYER_ROLES_ASSIGNED")
 
+    -- previously used FlowContainer_DoLayout but was encountering weird issues
+    -- where frames didn't have x/y coords (perhaps too early in the loading process?)
+    -- and also frames that didn't have units assigned
     if addon.Options.SortingMethod.TaintlessEnabled then
-        hooksecurefunc("FlowContainer_DoLayout", OnLayout)
+        if CompactRaidFrameContainer.LayoutFrames then
+            -- retail
+            hooksecurefunc(CompactRaidFrameContainer, "LayoutFrames", OnLayout)
+        elseif CompactRaidFrameContainer_LayoutFrames then
+            -- wotlk/classic
+            hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", OnLayout)
+        end
     end
 end
