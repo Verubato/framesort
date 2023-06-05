@@ -2,6 +2,8 @@ local _, addon = ...
 local fsSort = addon.Sorting
 local fsFrame = addon.Frame
 local fsCompare = addon.Compare
+local M = {}
+addon.HidePlayer = M
 
 local function CanUpdate(frame)
     if not frame then return end
@@ -34,6 +36,11 @@ local function Run()
     if not player then return end
 
     UpdateVisible(player)
+end
+
+---Shows or hides the player (depending on settings).
+function M:ShowHidePlayer()
+    Run()
 end
 
 ---Initialises the player show/hide module.

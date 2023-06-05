@@ -135,11 +135,8 @@ end
 ---@param rightFrame table a wow frame
 ---@return boolean
 function M:CompareTopLeftFuzzy(leftFrame, rightFrame)
-    if not leftFrame then
-        return false
-    elseif not rightFrame then
-        return true
-    end
+    if not leftFrame then return false end
+    if not rightFrame then return true end
 
     local leftY = leftFrame:GetTop()
     local rightY = rightFrame:GetTop()
@@ -156,4 +153,58 @@ function M:CompareTopLeftFuzzy(leftFrame, rightFrame)
     rightX = fsMath:Round(rightX, fuzzyDecimalPlaces)
 
     return leftX < rightX
+end
+
+---Returns true if the left frame is "earlier" than the right frame.
+---Earlier = more top right
+---Fuzziness provides some leeway when comparing the top and left values.
+---@param leftFrame table a wow frame
+---@param rightFrame table a wow frame
+---@return boolean
+function M:CompareTopRightFuzzy(leftFrame, rightFrame)
+    if not leftFrame then return false end
+    if not rightFrame then return true end
+
+    local leftY = leftFrame:GetTop()
+    local rightY = rightFrame:GetTop()
+
+    leftY = fsMath:Round(leftY, fuzzyDecimalPlaces)
+    rightY = fsMath:Round(rightY, fuzzyDecimalPlaces)
+
+    if leftY ~= rightY then return leftY > rightY end
+
+    local leftX = leftFrame:GetLeft()
+    local rightX = rightFrame:GetLeft()
+
+    leftX = fsMath:Round(leftX, fuzzyDecimalPlaces)
+    rightX = fsMath:Round(rightX, fuzzyDecimalPlaces)
+
+    return leftX > rightX
+end
+
+---Returns true if the left frame is "earlier" than the right frame.
+---Earlier = more bottom left
+---Fuzziness provides some leeway when comparing the top and left values.
+---@param leftFrame table a wow frame
+---@param rightFrame table a wow frame
+---@return boolean
+function M:CompareBottomLeftFuzzy(leftFrame, rightFrame)
+    if not leftFrame then return false end
+    if not rightFrame then return true end
+
+    local leftY = leftFrame:GetBottom()
+    local rightY = rightFrame:GetBottom()
+
+    leftY = fsMath:Round(leftY, fuzzyDecimalPlaces)
+    rightY = fsMath:Round(rightY, fuzzyDecimalPlaces)
+
+    if leftY ~= rightY then return leftY < rightY end
+
+    local leftX = leftFrame:GetLeft()
+    local rightX = rightFrame:GetLeft()
+
+    leftX = fsMath:Round(leftX, fuzzyDecimalPlaces)
+    rightX = fsMath:Round(rightX, fuzzyDecimalPlaces)
+
+    return leftX > rightX
 end
