@@ -57,12 +57,6 @@ local function OnEditMacro(macroInfo, _, _, _)
     InspectMacro(macroInfo)
 end
 
-local function OnLayout()
-    if not CanUpdate() then return end
-
-    ScanMacros()
-end
-
 local function Run()
     if not CanUpdate() then return end
 
@@ -81,8 +75,8 @@ function addon:InitMacros()
     hooksecurefunc("EditMacro", OnEditMacro)
 
     if CompactRaidFrameContainer.LayoutFrames then
-        hooksecurefunc(CompactRaidFrameContainer, "LayoutFrames", OnLayout)
+        hooksecurefunc(CompactRaidFrameContainer, "LayoutFrames", Run)
     elseif CompactRaidFrameContainer_LayoutFrames then
-        hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", OnLayout)
+        hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", Run)
     end
 end

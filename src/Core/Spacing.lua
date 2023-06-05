@@ -414,10 +414,6 @@ function M:ApplySpacing()
     end
 end
 
-local function OnLayout()
-    M:ApplySpacing()
-end
-
 local function Run()
     M:ApplySpacing()
 end
@@ -435,9 +431,15 @@ function addon:InitSpacing()
 
     if addon.Options.SortingMethod.TaintlessEnabled then
         if CompactRaidFrameContainer.LayoutFrames then
-            hooksecurefunc(CompactRaidFrameContainer, "LayoutFrames", OnLayout)
+            hooksecurefunc(CompactRaidFrameContainer, "LayoutFrames", Run)
         elseif CompactRaidFrameContainer_LayoutFrames then
-            hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", OnLayout)
+            hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", Run)
+        end
+
+        if CompactRaidFrameContainer.OnSizeChanged then
+            hooksecurefunc(CompactRaidFrameContainer, "OnSizeChanged", Run)
+        elseif CompactRaidFrameContainer_OnSizeChanged then
+            hooksecurefunc("CompactRaidFrameContainer_OnSizeChanged", Run)
         end
     end
 end

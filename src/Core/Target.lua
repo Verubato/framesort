@@ -37,12 +37,6 @@ local function UpdateTargets()
     return true
 end
 
-local function OnLayout()
-    if not CanUpdate() then return end
-
-    UpdateTargets()
-end
-
 local function Run()
     if not CanUpdate() then return end
 
@@ -66,8 +60,8 @@ function addon:InitTargeting()
     fsSort:RegisterPostSortCallback(Run)
 
     if CompactRaidFrameContainer.LayoutFrames then
-        hooksecurefunc(CompactRaidFrameContainer, "LayoutFrames", OnLayout)
+        hooksecurefunc(CompactRaidFrameContainer, "LayoutFrames", Run)
     elseif CompactRaidFrameContainer_LayoutFrames then
-        hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", OnLayout)
+        hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", Run)
     end
 end
