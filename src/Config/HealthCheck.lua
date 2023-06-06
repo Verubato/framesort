@@ -1,6 +1,7 @@
 local addonName, addon = ...
 local fsBuilder = addon.OptionsBuilder
 local verticalSpacing = fsBuilder.VerticalSpacing
+local fsFrame = addon.Frame
 
 ---Returns true if using raid-style party frames.
 local function IsUsingRaidStyleFrames()
@@ -54,21 +55,6 @@ local function ConflictingAddons()
     return nil
 end
 
-local function KeepGroupsTogether()
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        local raidGroupDisplayType = EditModeManagerFrame:GetSettingValue(
-            Enum.EditModeSystem.UnitFrame,
-            Enum.EditModeUnitFrameSystemIndices.Raid,
-            Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
-
-        return
-            raidGroupDisplayType ~= Enum.RaidGroupDisplayType.CombineGroupsVertical and
-            raidGroupDisplayType ~= Enum.RaidGroupDisplayType.CombineGroupsHorizontal
-    else
-        return CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
-    end
-end
-
 ---Adds the health check options panel.
 ---@param parent table the parent UI panel.
 function fsBuilder:BuildHealthCheck(parent)
@@ -93,7 +79,7 @@ function fsBuilder:BuildHealthCheck(parent)
 
     local togetherDescription = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
     togetherDescription:SetPoint("TOPLEFT", raidStyleDescription, "BOTTOMLEFT", 0, -verticalSpacing)
-    togetherDescription:SetText("'Keep Groups Together' setting disabled... ")
+    togetherDescription:SetText("'Keep Groups Together' setting disabled, or using Taintless sorting... ")
 
     local togetherResult = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
     togetherResult:SetPoint("TOPLEFT", togetherDescription, "TOPRIGHT")
@@ -143,13 +129,13 @@ function fsBuilder:BuildHealthCheck(parent)
         raidStyleResult:SetText(usingRaidStyle and "Passed!" or "Failed")
         raidStyleResult:SetFontObject(usingRaidStyle and "GameFontGreen" or "GameFontRed")
 
-        local groupsTogether = KeepGroupsTogether()
-        togetherResult:SetText(not groupsTogether and "Passed!" or "Failed")
-        togetherResult:SetFontObject(not groupsTogether and "GameFontGreen" or "GameFontRed")
+        local canSortGroups = not fsFrame:KeepGroupsTogether() or addon.Options.SortingMethod.TaintlessEnabled
+        togetherResult:SetText(canSortGroups and "Passed!" or "Failed")
+        togetherResult:SetFontObject(canSortGroups and "GameFontGreen" or "GameFontRed")
 
-        local sortingTampered = SortingFunctionsTampered()
-        tamperedResult:SetText(not sortingTampered and "Passed!" or "Failed")
-        tamperedResult:SetFontObject(not sortingTampered and "GameFontGreen" or "GameFontRed")
+        local sortingNotTampered = not SortingFunctionsTampered()
+        tamperedResult:SetText(sortingNotTampered and "Passed!" or "Failed")
+        tamperedResult:SetFontObject(sortingNotTampered and "GameFontGreen" or "GameFontRed")
 
         local conflictingAddons = ConflictingAddons()
         local noConflicts = conflictingAddons == nil
@@ -157,12 +143,12 @@ function fsBuilder:BuildHealthCheck(parent)
         conflictResult:SetText(noConflicts and "Passed!" or "Failed")
         conflictResult:SetFontObject(noConflicts and "GameFontGreen" or "GameFontRed")
 
-        local healthy = usingRaidStyle and not groupsTogether and not sortingTampered and noConflicts
+        local healthy = usingRaidStyle and canSortGroups and sortingNotTampered and noConflicts
 
         remediationTitle:SetShown(not healthy)
         raidStyleRemediation:SetShown(not usingRaidStyle)
-        togetherRemediation:SetShown(groupsTogether)
-        tamperedRemediation:SetShown(sortingTampered)
+        togetherRemediation:SetShown(not canSortGroups)
+        tamperedRemediation:SetShown(not sortingNotTampered)
 
         if not noConflicts then
             conflictRemediation:SetText("- '" .. conflictingAddons .. "' may cause conflicts, consider disabling it.")

@@ -11,45 +11,16 @@ local M = {}
 addon.Spacing = M
 
 local function GetSettings(isRaid)
-    local flat = nil
-    local horizontal = nil
-    local showPets = CompactRaidFrameManager_GetSetting("DisplayPets")
+    local together = fsFrame:KeepGroupsTogether()
+    local horizontal = fsFrame:HorizontalLayout(isRaid)
+    local showPets = fsFrame:ShowPets()
     local spacing = isRaid and addon.Options.Appearance.Raid.Spacing or addon.Options.Appearance.Party.Spacing
 
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        if isRaid then
-            local displayType = EditModeManagerFrame:GetSettingValue(
-                Enum.EditModeSystem.UnitFrame,
-                Enum.EditModeUnitFrameSystemIndices.Raid,
-                Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
-
-            flat =
-                displayType == Enum.RaidGroupDisplayType.CombineGroupsVertical or
-                displayType == Enum.RaidGroupDisplayType.CombineGroupsHorizontal
-
-            horizontal =
-                displayType == Enum.RaidGroupDisplayType.SeparateGroupsHorizontal or
-                displayType == Enum.RaidGroupDisplayType.CombineGroupsHorizontal
-        else
-            flat = true
-
-            horizontal = EditModeManagerFrame:GetSettingValueBool(
-                Enum.EditModeSystem.UnitFrame,
-                Enum.EditModeUnitFrameSystemIndices.Party,
-                Enum.EditModeUnitFrameSetting.UseHorizontalGroups)
-        end
-    else
-        flat = not CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
-        if flat then
-            -- classic doesn't have the option for horizontal flat
-            horizontal = false
-        else
-            horizontal = CompactRaidFrameManager_GetSetting("HorizontalGroups")
-        end
+    if WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE then
         spacing = addon.Options.Appearance.Raid.Spacing
     end
 
-    return flat, horizontal, showPets, spacing
+    return together, horizontal, showPets, spacing
 end
 
 ---Applies spacing to frames that are organised in 'flat' mode.
@@ -327,26 +298,30 @@ local function Groups(groups, spacing, horizontal)
 end
 
 local function ApplyPartyFrameSpacing()
-    local members, pets = fsFrame:GetPartyFrames()
-    local _, horizontal, showPets, spacing = GetSettings(false)
+    local members = fsFrame:GetPartyFrames()
+    local together, horizontal, showPets, spacing = GetSettings(false)
 
-    GroupedMembers(members, spacing, horizontal)
+    if together then
+        GroupedMembers(members, spacing, horizontal)
+    else
+        FlatMembers(members, spacing)
+    end
 
     if showPets then
+        local _, pets = fsFrame:GetRaidFrames()
         Pets(pets, members, spacing, horizontal)
     end
 end
 
 local function ApplyRaidFrameSpacing()
-    local flat, horizontal, showPets, spacing = GetSettings(true)
+    local together, horizontal, showPets, spacing = GetSettings(true)
     local members, pets = fsFrame:GetRaidFrames()
 
-    if flat then
-        FlatMembers(members, spacing)
-    else
+    if together then
         local groups = fsFrame:GetRaidFrameGroups()
-
         Groups(groups, spacing, horizontal)
+    else
+        FlatMembers(members, spacing)
     end
 
     if showPets then
@@ -395,17 +370,15 @@ function addon:InitSpacing()
     eventFrame:RegisterEvent("UNIT_PET")
     fsSort:RegisterPostSortCallback(Run)
 
-    if addon.Options.SortingMethod.TaintlessEnabled then
-        if CompactRaidFrameContainer.LayoutFrames then
-            hooksecurefunc(CompactRaidFrameContainer, "LayoutFrames", Run)
-        elseif CompactRaidFrameContainer_LayoutFrames then
-            hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", Run)
-        end
+    if CompactRaidFrameContainer.LayoutFrames then
+        hooksecurefunc(CompactRaidFrameContainer, "LayoutFrames", Run)
+    elseif CompactRaidFrameContainer_LayoutFrames then
+        hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", Run)
+    end
 
-        if CompactRaidFrameContainer.OnSizeChanged then
-            hooksecurefunc(CompactRaidFrameContainer, "OnSizeChanged", Run)
-        elseif CompactRaidFrameContainer_OnSizeChanged then
-            hooksecurefunc("CompactRaidFrameContainer_OnSizeChanged", Run)
-        end
+    if CompactRaidFrameContainer.OnSizeChanged then
+        hooksecurefunc(CompactRaidFrameContainer, "OnSizeChanged", Run)
+    elseif CompactRaidFrameContainer_OnSizeChanged then
+        hooksecurefunc("CompactRaidFrameContainer_OnSizeChanged", Run)
     end
 end

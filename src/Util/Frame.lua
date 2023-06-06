@@ -83,26 +83,20 @@ function M:GetRaidFrameGroupMembers(group)
 end
 
 ---Returns the set of party frames.
----@return Enumerable<table>,Enumerable<table> frames member frames, pet frames
+---@return Enumerable<table> frames member frames
 function M:GetPartyFrames()
     local empty = fsEnumerable:Empty():ToTable()
     local container = CompactPartyFrame
 
-    if not container then return empty, empty end
-    if container:IsForbidden() or not container:IsVisible() then return empty, empty end
+    if not container then return empty end
+    if container:IsForbidden() or not container:IsVisible() then return empty end
 
-    local frames = fsEnumerable
+    local members = fsEnumerable
         :From({ container:GetChildren() })
         :Where(function(x) return IsValidUnitFrame(x) end)
-        :ToTable()
-    local members = fsEnumerable
-        :From(frames)
         :Where(function(x) return fsUnit:IsMember(x.unit) end)
-    local pets = fsEnumerable
-        :From(frames)
-        :Where(function(x) return fsUnit:IsPet(x.unit) end)
 
-    return members:ToTable(), pets:ToTable()
+    return members:ToTable()
 end
 
 ---Returns the player compact raid frame.
@@ -169,4 +163,51 @@ function M:ToFrameChain(frames)
 
     root.Valid = true
     return root
+end
+
+---Returns true if pets are shown in raid frames
+---@return boolean
+function M:ShowPets()
+    return CompactRaidFrameManager_GetSetting("DisplayPets")
+end
+
+---Returns true if groups are kept together.
+---@return boolean
+function M:KeepGroupsTogether()
+    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+        local raidGroupDisplayType = EditModeManagerFrame:GetSettingValue(
+            Enum.EditModeSystem.UnitFrame,
+            Enum.EditModeUnitFrameSystemIndices.Raid,
+            Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
+
+        return
+            raidGroupDisplayType == Enum.RaidGroupDisplayType.SeparateGroupsVertical or
+            raidGroupDisplayType == Enum.RaidGroupDisplayType.SeparateGroupsHorizontal
+    else
+        return CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
+    end
+end
+
+---Returns true if the frames are using horizontal layout.
+---@param isRaid boolean true for raid frames, false for party.
+function M:HorizontalLayout(isRaid)
+    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+        if isRaid then
+            local displayType = EditModeManagerFrame:GetSettingValue(
+                Enum.EditModeSystem.UnitFrame,
+                Enum.EditModeUnitFrameSystemIndices.Raid,
+                Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
+
+            return
+                displayType == Enum.RaidGroupDisplayType.SeparateGroupsHorizontal or
+                displayType == Enum.RaidGroupDisplayType.CombineGroupsHorizontal
+        else
+            return EditModeManagerFrame:GetSettingValueBool(
+                Enum.EditModeSystem.UnitFrame,
+                Enum.EditModeUnitFrameSystemIndices.Party,
+                Enum.EditModeUnitFrameSetting.UseHorizontalGroups)
+        end
+    else
+        return CompactRaidFrameManager_GetSetting("HorizontalGroups")
+    end
 end
