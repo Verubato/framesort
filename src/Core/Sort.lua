@@ -161,7 +161,7 @@ local function LayoutRaid()
         :OrderBy(sortFunction)
         :ToTable()
 
-    if fsFrame:KeepGroupsTogether() then
+    if fsFrame:KeepGroupsTogether(true) then
         local groups = fsFrame:GetRaidFrameGroups()
 
         for _, group in ipairs(groups) do

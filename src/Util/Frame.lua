@@ -173,8 +173,10 @@ end
 
 ---Returns true if groups are kept together.
 ---@return boolean
-function M:KeepGroupsTogether()
+function M:KeepGroupsTogether(isRaid)
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+        if not isRaid then return true end
+
         local raidGroupDisplayType = EditModeManagerFrame:GetSettingValue(
             Enum.EditModeSystem.UnitFrame,
             Enum.EditModeUnitFrameSystemIndices.Raid,
