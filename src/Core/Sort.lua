@@ -19,7 +19,7 @@ local function CanSort()
 
     -- can't make changes during combat
     if InCombatLockdown() and not addon.Options.SortingMethod.TaintlessEnabled then
-        fsLog:Warning("Can't perform non-taintless sorting during combat.")
+        fsLog:Warning("Cannot perform non-taintless sorting during combat.")
         return false
     end
 
@@ -36,50 +36,30 @@ local function CanSort()
         end
     end
 
+    if fsFrame:KeepGroupsTogether() and not addon.Options.SortingMethod.TaintlessEnabled then
+        fsLog:Warning("Cannot perform non-taintless sorting when the 'Keep Groups Together' setting is enabled.")
+        return false
+    end
+
     return true
 end
 
 ---Determines whether party sorting can be performed.
 ---@return boolean
 local function CanSortParty()
-    if CompactPartyFrame:IsForbidden() or not CompactPartyFrame:IsVisible() then return false end
-
-    if WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE then
-        local together = CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
-        if together then
-            fsLog:Warning("Cannot sort frames when the 'Keep Groups Together' setting is enabled.")
-            return false
-        end
-    end
-
-    return CanSort()
+    return
+        not CompactPartyFrame:IsForbidden()
+        and CompactPartyFrame:IsVisible()
+        and CanSort()
 end
 
 ---Determines whether raid sorting can be performed.
 ---@return boolean
 local function CanSortRaid()
-    if CompactRaidFrameContainer:IsForbidden() or not CompactRaidFrameContainer:IsVisible() then return false end
-
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        local raidGroupDisplayType = EditModeManagerFrame:GetSettingValue(
-            Enum.EditModeSystem.UnitFrame,
-            Enum.EditModeUnitFrameSystemIndices.Raid,
-            Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
-
-        if raidGroupDisplayType ~= Enum.RaidGroupDisplayType.CombineGroupsVertical and
-            raidGroupDisplayType ~= Enum.RaidGroupDisplayType.CombineGroupsHorizontal then
-            fsLog:Warning("Cannot sort frames when 'Separate' raid display mode is being used.")
-            return false
-        end
-    else
-        local together = CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
-        if together then
-            fsLog:Warning("Cannot sort frames when the 'Keep Groups Together' setting is enabled.")
-            return false
-        end
-    end
-
-    return CanSort()
+    return
+        not CompactRaidFrameContainer:IsForbidden()
+        and CompactRaidFrameContainer:IsVisible()
+        and CanSort()
 end
 
 ---Calls the post sorting callbacks.
@@ -175,18 +155,32 @@ local function LayoutRaid()
 
     if not sortFunction or #memberFrames == 0 then return false end
 
-    local units = fsEnumerable
+    local allUnits = fsEnumerable
         :From(memberFrames)
         :Map(function(x) return SecureButton_GetUnit(x) end)
         :OrderBy(sortFunction)
         :ToTable()
 
-    RearrangeFrames(memberFrames, units)
+    if fsFrame:KeepGroupsTogether() then
+        local groups = fsFrame:GetRaidFrameGroups()
 
-    if #petFrames > 0 then
+        for _, group in ipairs(groups) do
+            local frames = fsFrame:GetRaidFrameGroupMembers(group)
+            local units = fsEnumerable
+                :From(frames)
+                :Map(function(x) return SecureButton_GetUnit(x) end)
+                :OrderBy(sortFunction)
+                :ToTable()
+            RearrangeFrameChain(frames, units)
+        end
+    else
+        RearrangeFrames(memberFrames, allUnits)
+    end
+
+    if fsFrame:ShowPets() then
         -- get pets based off the sorted units instead of the frames
         -- as this comes with the benefit that the pets will also be sorted
-        local pets = fsUnit:GetPets(units)
+        local pets = fsUnit:GetPets(allUnits)
         if #pets ~= #petFrames then
             fsLog:Warning(string.format("Unexpectedly encoutered a different number of pet frames '%d' vs pet units '%d'.", #petFrames, #pets))
             return true
