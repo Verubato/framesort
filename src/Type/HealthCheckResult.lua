@@ -1,0 +1,4 @@
+---@class HealthCheckResult
+---@field Passed boolean true if passed, otherwise false.
+---@field Description string description of the health check.
+---@field Remediation string description of how to resolve the issue.

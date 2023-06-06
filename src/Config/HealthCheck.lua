@@ -1,59 +1,8 @@
-local addonName, addon = ...
+local _, addon = ...
 local fsBuilder = addon.OptionsBuilder
 local verticalSpacing = fsBuilder.VerticalSpacing
-local fsFrame = addon.Frame
-
----Returns true if using raid-style party frames.
-local function IsUsingRaidStyleFrames()
-    local raidStyleFrames = false
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        raidStyleFrames = EditModeManagerFrame:UseRaidStylePartyFrames()
-    else
-        raidStyleFrames = GetCVarBool("useCompactPartyFrames")
-    end
-
-    return raidStyleFrames
-end
-
----Returns true if the inbuilt Blizzard sorting functions have been tampered with.
-local function SortingFunctionsTampered()
-    return
-        not issecurevariable("CRFSort_Group") or
-        not issecurevariable("CRFSort_Role") or
-        not issecurevariable("CRFSort_Alphabetical")
-end
-
----Returns the friendly name of an addon from issecurevariable.
----@param name string the addon name from issecurevariable.
----@return string
-local function AddonFriendlyName(name)
-    if not name then
-        return "(unknown)"
-    elseif name == "" then
-        return "(user macro)"
-    elseif name == "*** ForceTaint_Strong ***" then
-        return "(user macro)"
-    else
-        return name
-    end
-end
-
----Returns a string of conflicting addons that are enabled.
-local function ConflictingAddons()
-    local issecure, taintedAddon = issecurevariable(CompactRaidFrameContainer, "flowSortFunc")
-    if not issecure and taintedAddon ~= addonName then
-        return AddonFriendlyName(taintedAddon)
-    end
-
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        issecure, taintedAddon = issecurevariable(CompactPartyFrame, "flowSortFunc")
-        if not issecure and taintedAddon ~= addonName then
-            return AddonFriendlyName(taintedAddon)
-        end
-    end
-
-    return nil
-end
+local fsHealth = addon.Health
+local lines = {}
 
 ---Adds the health check options panel.
 ---@param parent table the parent UI panel.
@@ -66,103 +15,60 @@ function fsBuilder:BuildHealthCheck(parent)
     title:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
     title:SetText("Health Check")
 
-    local description = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-    description:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -verticalSpacing)
-    description:SetText("Any known issues with configuration or conflicting addons will be shown below.")
-
-    local raidStyleDescription = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-    raidStyleDescription:SetPoint("TOPLEFT", description, "BOTTOMLEFT", 0, -verticalSpacing)
-    raidStyleDescription:SetText("Using Raid-Style Party Frames... ")
-
-    local raidStyleResult = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-    raidStyleResult:SetPoint("TOPLEFT", raidStyleDescription, "TOPRIGHT")
-
-    local togetherDescription = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-    togetherDescription:SetPoint("TOPLEFT", raidStyleDescription, "BOTTOMLEFT", 0, -verticalSpacing)
-    togetherDescription:SetText("'Keep Groups Together' setting disabled, or using Taintless sorting... ")
-
-    local togetherResult = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-    togetherResult:SetPoint("TOPLEFT", togetherDescription, "TOPRIGHT")
-
-    local tamperedDescription = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-    tamperedDescription:SetPoint("TOPLEFT", togetherDescription, "BOTTOMLEFT", 0, -verticalSpacing)
-    tamperedDescription:SetText("Blizzard sorting functions not tampered with... ")
-
-    local tamperedResult = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
-    tamperedResult:SetPoint("TOPLEFT", tamperedDescription, "TOPRIGHT")
-
-    local conflictDescription = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-    conflictDescription:SetPoint("TOPLEFT", tamperedDescription, "BOTTOMLEFT", 0, -verticalSpacing)
-    conflictDescription:SetText("No conflicting addons... ")
-
-    local conflictResult = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
-    conflictResult:SetPoint("TOPLEFT", conflictDescription, "TOPRIGHT")
+    local healthDescription = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+    healthDescription:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -verticalSpacing)
+    healthDescription:SetText("Any known issues with configuration or conflicting addons will be shown below.")
 
     local remediationTitle = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
-    remediationTitle:SetPoint("TOPLEFT", conflictDescription, 0, -verticalSpacing * 2)
+    remediationTitle:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
     remediationTitle:SetText("Remediation Steps")
 
-    local raidStyleRemediation = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-    raidStyleRemediation:SetText("- Please enable 'Use Raid-Style Party Frames' in the Blizzard settings.")
-
-    local togetherRemediation = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        togetherRemediation:SetText("- Change the raid display mode to one of the 'Combined Groups' options via Edit Mode.")
-    else
-        togetherRemediation:SetText("- Disable the 'Keep Groups Together' raid profile setting.")
-    end
-
-    local tamperedRemediation = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-    tamperedRemediation:SetText("- Please disable other frame sorting addons/macros.")
-
-    local conflictRemediation = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-
-    local remediationControls = {
-        raidStyleRemediation,
-        togetherRemediation,
-        tamperedRemediation,
-        conflictRemediation
-    }
-
     panel:HookScript("OnShow", function()
-        local usingRaidStyle = IsUsingRaidStyleFrames()
-        raidStyleResult:SetText(usingRaidStyle and "Passed!" or "Failed")
-        raidStyleResult:SetFontObject(usingRaidStyle and "GameFontGreen" or "GameFontRed")
+        local healthy, results = fsHealth:IsHealthy()
 
-        local canSortGroups = not fsFrame:KeepGroupsTogether() or addon.Options.SortingMethod.TaintlessEnabled
-        togetherResult:SetText(canSortGroups and "Passed!" or "Failed")
-        togetherResult:SetFontObject(canSortGroups and "GameFontGreen" or "GameFontRed")
+        while #lines < #results do
+            local description = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+            local result = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
+            local remediation = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
 
-        local sortingNotTampered = not SortingFunctionsTampered()
-        tamperedResult:SetText(sortingNotTampered and "Passed!" or "Failed")
-        tamperedResult:SetFontObject(sortingNotTampered and "GameFontGreen" or "GameFontRed")
+            result:SetPoint("TOPLEFT", description, "TOPRIGHT", 4, 0)
 
-        local conflictingAddons = ConflictingAddons()
-        local noConflicts = conflictingAddons == nil
-
-        conflictResult:SetText(noConflicts and "Passed!" or "Failed")
-        conflictResult:SetFontObject(noConflicts and "GameFontGreen" or "GameFontRed")
-
-        local healthy = usingRaidStyle and canSortGroups and sortingNotTampered and noConflicts
-
-        remediationTitle:SetShown(not healthy)
-        raidStyleRemediation:SetShown(not usingRaidStyle)
-        togetherRemediation:SetShown(not canSortGroups)
-        tamperedRemediation:SetShown(not sortingNotTampered)
-
-        if not noConflicts then
-            conflictRemediation:SetText("- '" .. conflictingAddons .. "' may cause conflicts, consider disabling it.")
+            lines[#lines + 1] = {
+                Description = description,
+                Result = result,
+                Remediation = remediation
+            }
         end
 
-        -- for each visible message, reposition them
-        local anchor = remediationTitle
-        for _, control in ipairs(remediationControls) do
-            if control:IsShown() then
-                control:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
-                anchor = control
+        local anchor = healthDescription
+        for i, result in ipairs(results) do
+            local line = lines[i]
+
+            line.Description:SetText(result.Description)
+            line.Description:SetPoint("TOPLEFT", anchor, 0, -verticalSpacing * 2)
+            line.Result:SetText(result.Passed and "Passed!" or "Failed")
+            line.Result:SetFontObject(result.Passed and "GameFontGreen" or "GameFontRed")
+
+            anchor = line.Description
+        end
+
+        remediationTitle:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
+        remediationTitle:SetShown(not healthy)
+        anchor = remediationTitle
+
+        for i, result in ipairs(results) do
+            local line = lines[i]
+            line.Remediation:SetText(result.Remediation and (" - " .. result.Remediation) or "")
+            line.Remediation:SetShown(not result.Passed)
+
+            if not result.Passed then
+                line.Remediation:SetPoint("TOPLEFT", anchor, 0, -verticalSpacing * 2)
+                anchor = line.Remediation
             end
         end
     end)
 
     InterfaceOptions_AddCategory(panel)
+
+    return panel
 end

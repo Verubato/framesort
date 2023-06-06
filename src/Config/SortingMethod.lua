@@ -53,7 +53,8 @@ function fsBuilder:BuildSortingMethodOptions(parent)
     anchor = BuildDottedList(panel, anchor, "Pros: ", {
         "No taint (technical term for addons interfering with Blizzard's UI code).",
         "No Lua errors.",
-        "No UI lockups."
+        "No UI lockups.",
+        "Can sort when groups are kept together.",
     })
 
     anchor = BuildDottedList(panel, anchor, "Cons: ", {
@@ -89,7 +90,8 @@ function fsBuilder:BuildSortingMethodOptions(parent)
     anchor = BuildDottedList(panel, anchor, "Cons: ", {
         "Will cause Lua errors, this is normal and can be ignored in most cases.",
         "BugSack will report the occasional ADDON_ACTION_BLOCKED error from FrameSort.",
-        "May sporadically lockup certain parts of the UI."
+        "May sporadically lockup certain parts of the UI.",
+        "Can't sort when groups are kept together.",
     })
 
     local reloadReminder = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")

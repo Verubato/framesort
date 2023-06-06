@@ -6,6 +6,7 @@ addon.OptionsBuilder = {
 local fsBuilder = addon.OptionsBuilder
 local fsSort = addon.Sorting
 local fsHide = addon.HidePlayer
+local fsHealth = addon.Health
 local verticalSpacing = fsBuilder.VerticalSpacing
 local horizontalSpacing = fsBuilder.HorizontalSpacing
 
@@ -23,15 +24,24 @@ local function BuiltTitle(panel)
     title:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
     title:SetText("FrameSort")
 
+    local unhealthy = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
+    unhealthy:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -verticalSpacing)
+    unhealthy:SetText("There are some issuse that may prevent FrameSort from working correctly.")
+
+    local unhealthyGoto = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
+    unhealthyGoto:SetPoint("TOPLEFT", unhealthy, "BOTTOMLEFT", 0, -verticalSpacing)
+    unhealthyGoto:SetText("Please go to the Health Check panel to view more details.")
+
     local lines = {
         Group = "party1 > party2 > partyN > partyN+1",
         Role  = "tank > healer > dps",
         Alpha = "NameA > NameB > NameZ"
     }
 
-    local anchor = title
     local keyWidth = 50
     local i = 1
+    local anchor = title
+    local sortingRules = {}
     for k, v in pairs(lines) do
         local keyText = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
         keyText:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing * 0.75)
@@ -44,9 +54,36 @@ local function BuiltTitle(panel)
         valueText:SetPoint("LEFT", keyText, "RIGHT")
         valueText:SetText(v)
         i = i + 1
+
+        sortingRules[#sortingRules + 1] = {
+            Key = keyText,
+            Value = valueText
+        }
     end
 
-    return anchor
+    -- local dynamicAnchor = CreateFrame("Frame", nil, panel)
+    local dynamicAnchor = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+    dynamicAnchor:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT")
+    dynamicAnchor:Show()
+
+    panel:HookScript("OnShow", function()
+        local healthy = fsHealth:IsHealthy()
+        unhealthy:SetShown(not healthy)
+        unhealthyGoto:SetShown(not healthy)
+
+        for _, rule in ipairs(sortingRules) do
+            rule.Key:SetShown(healthy)
+            rule.Value:SetShown(healthy)
+        end
+
+        if healthy then
+            dynamicAnchor:SetPoint("TOPLEFT", sortingRules[#sortingRules].Key, "BOTTOMLEFT")
+        else
+            dynamicAnchor:SetPoint("TOPLEFT", unhealthyGoto, "BOTTOMLEFT")
+        end
+    end)
+
+    return dynamicAnchor
 end
 
 ---Adds a row of the player and group sort mode checkboxes.
@@ -277,12 +314,12 @@ function addon:InitOptions()
     SLASH_FRAMESORT2 = "/framesort"
 
     SlashCmdList.FRAMESORT = function()
-        InterfaceOptionsFrame_OpenToCategory(panel.name)
+        InterfaceOptionsFrame_OpenToCategory(panel)
 
         -- workaround the classic bug where the first call opens the Game interface
         -- and a second call is required
         if WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE then
-            InterfaceOptionsFrame_OpenToCategory(panel.name)
+            InterfaceOptionsFrame_OpenToCategory(panel)
         end
     end
 end

@@ -14,6 +14,7 @@
     <Script file="Core\Macro.lua"/>
     <Script file="Core\Target.lua"/>
     <Script file="Core\HidePlayer.lua"/>
+    <Script file="Core\Health.lua"/>
     <Script file="Config\Defaults.lua"/>
     <Script file="Config\OptionsUpgrader.lua"/>
     <Script file="Config\Options.lua"/>

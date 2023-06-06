@@ -211,3 +211,12 @@ function M:HorizontalLayout(isRaid)
         return CompactRaidFrameManager_GetSetting("HorizontalGroups")
     end
 end
+
+---Returns true if using raid-style party frames.
+function M:IsUsingRaidStyleFrames()
+    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+        return EditModeManagerFrame:UseRaidStylePartyFrames()
+    else
+        return GetCVarBool("useCompactPartyFrames")
+    end
+end
