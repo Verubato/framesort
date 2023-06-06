@@ -11,7 +11,7 @@ local M = {}
 addon.Spacing = M
 
 local function GetSettings(isRaid)
-    local together = fsFrame:KeepGroupsTogether()
+    local together = fsFrame:KeepGroupsTogether(isRaid)
     local horizontal = fsFrame:HorizontalLayout(isRaid)
     local showPets = fsFrame:ShowPets()
     local spacing = isRaid and addon.Options.Appearance.Raid.Spacing or addon.Options.Appearance.Party.Spacing
