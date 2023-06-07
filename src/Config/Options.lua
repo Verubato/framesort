@@ -61,12 +61,10 @@ local function BuiltTitle(panel)
         }
     end
 
-    -- local dynamicAnchor = CreateFrame("Frame", nil, panel)
     local dynamicAnchor = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
     dynamicAnchor:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT")
-    dynamicAnchor:Show()
 
-    panel:HookScript("OnShow", function()
+    local onShow = function()
         local healthy = fsHealth:IsHealthy()
         unhealthy:SetShown(not healthy)
         unhealthyGoto:SetShown(not healthy)
@@ -81,7 +79,13 @@ local function BuiltTitle(panel)
         else
             dynamicAnchor:SetPoint("TOPLEFT", unhealthyGoto, "BOTTOMLEFT")
         end
-    end)
+    end
+
+    panel:HookScript("OnShow", onShow)
+
+    local loader = CreateFrame("Frame", nil, panel)
+    loader:HookScript("OnEvent", onShow)
+    loader:RegisterEvent("PLAYER_ENTERING_WORLD")
 
     return dynamicAnchor
 end
