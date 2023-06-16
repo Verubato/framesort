@@ -313,17 +313,17 @@ end
 
 local function ApplyRaidFrameSpacing()
     local together, horizontal, showPets, spacing = GetSettings(true)
-    local members, pets = fsFrame:GetRaidFrames()
+    local players, pets = fsFrame:GetRaidFrames()
 
     if together then
         local groups = fsFrame:GetRaidFrameGroups()
         Groups(groups, spacing, horizontal)
     else
-        FlatMembers(members, spacing)
+        FlatMembers(players, spacing)
     end
 
     if showPets then
-        Pets(pets, members, spacing, horizontal)
+        Pets(pets, players, spacing, horizontal)
     end
 end
 

@@ -48,14 +48,14 @@ function M:GetRaidFrames()
     end
 
     local frames = ExtractFrames({ container:GetChildren() })
-    local members = fsEnumerable
+    local players = fsEnumerable
         :From(frames)
-        :Where(function(x) return fsUnit:IsMember(x.unit) end)
+        :Where(function(x) return fsUnit:IsPlayer(x.unit) end)
     local pets = fsEnumerable
         :From(frames)
         :Where(function(x) return fsUnit:IsPet(x.unit) end)
 
-    return members:ToTable(), pets:ToTable()
+    return players:ToTable(), pets:ToTable()
 end
 
 ---Returns the set of raid frame group frames.
@@ -94,7 +94,7 @@ function M:GetPartyFrames()
     return fsEnumerable
         :From({ container:GetChildren() })
         :Where(function(x) return IsValidUnitFrame(x) end)
-        :Where(function(x) return fsUnit:IsMember(x.unit) end)
+        :Where(function(x) return fsUnit:IsPlayer(x.unit) end)
         :ToTable()
 end
 
