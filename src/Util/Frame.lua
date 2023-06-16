@@ -101,7 +101,7 @@ end
 ---Returns the player compact raid frame.
 ---@return table? playerFrame
 function M:GetPlayerFrame()
-    local frames = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and M:GetPartyFrames() or nil
+    local frames = M:GetPartyFrames()
 
     if not frames or #frames == 0 then
         frames = M:GetRaidFrames()
