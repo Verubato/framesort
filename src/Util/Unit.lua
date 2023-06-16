@@ -1,21 +1,4 @@
 local _, addon = ...
-local memberUnitPatterns = {
-    "^player$",
-    "^party%d$",
-    "^raid%d$",
-    "^raid%d%d$",
-}
-local petUnitPatterns = {
-    "^pet$",
-    "^playerpet$",
-    "^party%dpet$",
-    "^partypet%d$",
-    "^raidpet%d$",
-    "^raidpet%d%d$",
-    "^raid%dpet$",
-    "^raid%d%dpet$"
-}
-
 local fsEnumerable = addon.Enumerable
 local M = {}
 addon.Unit = M
@@ -54,20 +37,14 @@ function M:GetPets(units)
         :ToTable()
 end
 
----Determines if the unit token is a pet.
+---Returns true if the unit token is a pet.
 ---@param unit string
----@return boolean true if the unit is a pet, otherwise false.
 function M:IsPet(unit)
-    return fsEnumerable
-        :From(petUnitPatterns)
-        :Any(function(pattern) return string.match(unit, pattern) ~= nil end)
+    return string.match(unit, ".*pet.*") ~= nil
 end
 
----Determines if the unit token is a person/member/human.
+---Returns true if the unit token is a person/human.
 ---@param unit string
----@return boolean true if the unit is a member, otherwise false.
-function M:IsMember(unit)
-    return fsEnumerable
-        :From(memberUnitPatterns)
-        :Any(function(pattern) return string.match(unit, pattern) ~= nil end)
+function M:IsPlayer(unit)
+    return UnitIsPlayer(unit)
 end

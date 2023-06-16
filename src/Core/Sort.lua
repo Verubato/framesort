@@ -151,12 +151,12 @@ end
 ---@return boolean sorted true if frames were sorted, otherwise false.
 local function LayoutRaid()
     local sortFunction = fsCompare:GetSortFunction()
-    local memberFrames, petFrames = fsFrame:GetRaidFrames()
+    local playerFrames, petFrames = fsFrame:GetRaidFrames()
 
-    if not sortFunction or #memberFrames == 0 then return false end
+    if not sortFunction or #playerFrames == 0 then return false end
 
     local allUnits = fsEnumerable
-        :From(memberFrames)
+        :From(playerFrames)
         :Map(function(x) return SecureButton_GetUnit(x) end)
         :OrderBy(sortFunction)
         :ToTable()
@@ -174,7 +174,7 @@ local function LayoutRaid()
             RearrangeFrameChain(frames, units)
         end
     else
-        RearrangeFrames(memberFrames, allUnits)
+        RearrangeFrames(playerFrames, allUnits)
     end
 
     if fsFrame:ShowPets() then
