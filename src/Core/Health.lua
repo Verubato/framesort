@@ -86,7 +86,6 @@ function M:IsHealthy()
 
     return fsEnumerable
         :From(results)
-        :First(function(x) return not x.Passed end)
-        == nil
-        , results
+        :All(function(x) return x.Passed end),
+        results
 end

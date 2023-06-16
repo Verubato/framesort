@@ -16,6 +16,7 @@ local petUnitPatterns = {
     "^raid%d%dpet$"
 }
 
+local fsEnumerable = addon.Enumerable
 local M = {}
 addon.Unit = M
 
@@ -46,39 +47,27 @@ end
 ---@param units table<string>
 ---@return table<string> pet unit tokens
 function M:GetPets(units)
-    local pets = {}
-    for _, unit in ipairs(units) do
-        local petUnit = unit .. "pet"
-        if UnitExists(petUnit) then
-            pets[#pets + 1] = petUnit
-        end
-    end
-
-    return pets
+    return fsEnumerable
+        :From(units)
+        :Map(function(x) return x .. "pet" end)
+        :Where(function(x) return UnitExists(x) end)
+        :ToTable()
 end
 
 ---Determines if the unit token is a pet.
 ---@param unit string
 ---@return boolean true if the unit is a pet, otherwise false.
 function M:IsPet(unit)
-    for _, pattern in pairs(petUnitPatterns) do
-        if string.match(unit, pattern) ~= nil then
-            return true
-        end
-    end
-
-    return false
+    return fsEnumerable
+        :From(petUnitPatterns)
+        :Any(function(pattern) return string.match(unit, pattern) ~= nil end)
 end
 
 ---Determines if the unit token is a person/member/human.
 ---@param unit string
 ---@return boolean true if the unit is a member, otherwise false.
 function M:IsMember(unit)
-    for _, pattern in pairs(memberUnitPatterns) do
-        if string.match(unit, pattern) ~= nil then
-            return true
-        end
-    end
-
-    return false
+    return fsEnumerable
+        :From(memberUnitPatterns)
+        :Any(function(pattern) return string.match(unit, pattern) ~= nil end)
 end

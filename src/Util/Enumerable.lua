@@ -109,18 +109,42 @@ function M:Where(predicate)
 end
 
 ---Returns the first instance that matches the predicate.
----@param predicate fun(item: any): boolean
+---@param predicate? fun(item: any): boolean
 ---@return any? item, number? index
 function M:First(predicate)
     local next = self.Next()
     local index = 1
 
-    while next and not predicate(next) do
-        next = self.Next()
-        index = index + 1
+    if predicate then
+        while next and not predicate(next) do
+            next = self.Next()
+            index = index + 1
+        end
     end
 
     return next, next and index or nil
+end
+
+---Returns true if any item matches the predicate, or if no predicate is provided then returns true if any item exists.
+---@param predicate? fun(item: any): boolean
+---@return any? item, number? index
+function M:Any(predicate)
+    return self:First(predicate) ~= nil
+end
+
+---Returns true if all items match the predicate.
+---@param predicate fun(item: any): boolean
+---@return boolean
+function M:All(predicate)
+    local next = self.Next()
+    if not next then return false end
+
+    while next do
+        if not predicate(next) then return false end
+        next = self.Next()
+    end
+
+    return true
 end
 
 ---Returns the first instance that matches the predicate.

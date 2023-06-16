@@ -1,6 +1,7 @@
 local _, addon = ...
 local fsUnit = addon.Unit
 local fsMath = addon.Math
+local fsEnumerable = addon.Enumerable
 local fuzzyDecimalPlaces = 0
 local M = {}
 addon.Compare = M
@@ -108,24 +109,16 @@ end
 ---@param sortedUnits table
 ---@return boolean
 function M:CompareMiddle(token, sortedUnits)
-    -- total number of members in the group
-    local total = 0
     -- index of the token we are comparing with
-    local index = nil
-    for i, x in ipairs(sortedUnits) do
-        total = total + 1
-        if x == token then
-            index = i
-        end
-    end
+    local index = fsEnumerable:From(sortedUnits):IndexOf(token)
 
     -- most likely a non-existant unit
-    if index == nil then return false end
+    if not index then return false end
 
     -- 0 based
     index = index - 1
 
-    local mid = math.floor(total / 2)
+    local mid = math.floor(#sortedUnits / 2)
     return index > mid
 end
 
@@ -139,19 +132,13 @@ function M:CompareTopLeftFuzzy(leftFrame, rightFrame)
     if not leftFrame then return false end
     if not rightFrame then return true end
 
-    local leftY = leftFrame:GetTop()
-    local rightY = rightFrame:GetTop()
-
-    leftY = fsMath:Round(leftY, fuzzyDecimalPlaces)
-    rightY = fsMath:Round(rightY, fuzzyDecimalPlaces)
+    local leftY = fsMath:Round(leftFrame:GetTop(), fuzzyDecimalPlaces)
+    local rightY = fsMath:Round(rightFrame:GetTop(), fuzzyDecimalPlaces)
 
     if leftY ~= rightY then return leftY > rightY end
 
-    local leftX = leftFrame:GetLeft()
-    local rightX = rightFrame:GetLeft()
-
-    leftX = fsMath:Round(leftX, fuzzyDecimalPlaces)
-    rightX = fsMath:Round(rightX, fuzzyDecimalPlaces)
+    local leftX = fsMath:Round(leftFrame:GetLeft(), fuzzyDecimalPlaces)
+    local rightX = fsMath:Round(rightFrame:GetLeft(), fuzzyDecimalPlaces)
 
     return leftX < rightX
 end
@@ -166,19 +153,13 @@ function M:CompareLeftTopFuzzy(leftFrame, rightFrame)
     if not leftFrame then return false end
     if not rightFrame then return true end
 
-    local leftX = leftFrame:GetLeft()
-    local rightX = rightFrame:GetLeft()
-
-    leftX = fsMath:Round(leftX, fuzzyDecimalPlaces)
-    rightX = fsMath:Round(rightX, fuzzyDecimalPlaces)
+    local leftX = fsMath:Round(leftFrame:GetLeft(), fuzzyDecimalPlaces)
+    local rightX = fsMath:Round(rightFrame:GetLeft(), fuzzyDecimalPlaces)
 
     if leftX ~= rightX then return leftX < rightX end
 
-    local leftY = leftFrame:GetTop()
-    local rightY = rightFrame:GetTop()
-
-    leftY = fsMath:Round(leftY, fuzzyDecimalPlaces)
-    rightY = fsMath:Round(rightY, fuzzyDecimalPlaces)
+    local leftY = fsMath:Round(leftFrame:GetTop(), fuzzyDecimalPlaces)
+    local rightY = fsMath:Round(rightFrame:GetTop(), fuzzyDecimalPlaces)
 
     return leftY > rightY
 end
@@ -193,19 +174,13 @@ function M:CompareTopRightFuzzy(leftFrame, rightFrame)
     if not leftFrame then return false end
     if not rightFrame then return true end
 
-    local leftY = leftFrame:GetTop()
-    local rightY = rightFrame:GetTop()
-
-    leftY = fsMath:Round(leftY, fuzzyDecimalPlaces)
-    rightY = fsMath:Round(rightY, fuzzyDecimalPlaces)
+    local leftY = fsMath:Round(leftFrame:GetTop(), fuzzyDecimalPlaces)
+    local rightY = fsMath:Round(rightFrame:GetTop(), fuzzyDecimalPlaces)
 
     if leftY ~= rightY then return leftY > rightY end
 
-    local leftX = leftFrame:GetLeft()
-    local rightX = rightFrame:GetLeft()
-
-    leftX = fsMath:Round(leftX, fuzzyDecimalPlaces)
-    rightX = fsMath:Round(rightX, fuzzyDecimalPlaces)
+    local leftX = fsMath:Round(leftFrame:GetLeft(), fuzzyDecimalPlaces)
+    local rightX = fsMath:Round(rightFrame:GetLeft(), fuzzyDecimalPlaces)
 
     return leftX > rightX
 end
@@ -220,19 +195,13 @@ function M:CompareBottomLeftFuzzy(leftFrame, rightFrame)
     if not leftFrame then return false end
     if not rightFrame then return true end
 
-    local leftY = leftFrame:GetBottom()
-    local rightY = rightFrame:GetBottom()
-
-    leftY = fsMath:Round(leftY, fuzzyDecimalPlaces)
-    rightY = fsMath:Round(rightY, fuzzyDecimalPlaces)
+    local leftY = fsMath:Round(leftFrame:GetBottom(), fuzzyDecimalPlaces)
+    local rightY = fsMath:Round(rightFrame:GetBottom(), fuzzyDecimalPlaces)
 
     if leftY ~= rightY then return leftY < rightY end
 
-    local leftX = leftFrame:GetLeft()
-    local rightX = rightFrame:GetLeft()
-
-    leftX = fsMath:Round(leftX, fuzzyDecimalPlaces)
-    rightX = fsMath:Round(rightX, fuzzyDecimalPlaces)
+    local leftX = fsMath:Round(leftFrame:GetLeft(), fuzzyDecimalPlaces)
+    local rightX = fsMath:Round(rightFrame:GetLeft(), fuzzyDecimalPlaces)
 
     return leftX < rightX
 end
