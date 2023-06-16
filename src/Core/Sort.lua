@@ -12,7 +12,7 @@ addon.Sorting = M
 
 ---Determines whether general sorting can be performed.
 ---@return boolean
-local function CanSort()
+local function CanSort(isRaid)
     if not IsInGroup() then
         return false
     end
@@ -36,7 +36,7 @@ local function CanSort()
         end
     end
 
-    if fsFrame:KeepGroupsTogether() and not addon.Options.SortingMethod.TaintlessEnabled then
+    if fsFrame:KeepGroupsTogether(isRaid) and not addon.Options.SortingMethod.TaintlessEnabled then
         fsLog:Warning("Cannot perform non-taintless sorting when the 'Keep Groups Together' setting is enabled.")
         return false
     end
@@ -50,7 +50,7 @@ local function CanSortParty()
     return
         not CompactPartyFrame:IsForbidden()
         and CompactPartyFrame:IsVisible()
-        and CanSort()
+        and CanSort(false)
 end
 
 ---Determines whether raid sorting can be performed.
@@ -59,7 +59,7 @@ local function CanSortRaid()
     return
         not CompactRaidFrameContainer:IsForbidden()
         and CompactRaidFrameContainer:IsVisible()
-        and CanSort()
+        and CanSort(true)
 end
 
 ---Calls the post sorting callbacks.
@@ -244,10 +244,8 @@ end
 local function TrySortTaintless()
     local sorted = false
 
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        if CanSortParty() then
-            sorted = LayoutParty()
-        end
+    if CanSortParty() then
+        sorted = LayoutParty()
     end
 
     if CanSortRaid() then
