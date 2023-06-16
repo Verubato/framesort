@@ -70,11 +70,22 @@ function M:test_orderby()
 end
 
 function M:test_first()
-    local array = fsEnumerable:From({ 1, 3, 5, 6, 8, 9 })
-    local first = array
-        :First(function(x) return x % 2 == 0 end)
+    assertEquals(fsEnumerable:From({ 1, 3, 5, 6, 8, 9 }):First(function(x) return x % 2 == 0 end), 6)
+    assertEquals(fsEnumerable:From({ "a", "b", "c" }):First(), "a")
+end
 
-    assertEquals(first, 6)
+function M:test_any()
+    assertEquals(fsEnumerable:From({}):Any(), false)
+    assertEquals(fsEnumerable:From({ 1, 3, 5, 6 }):Any(function(x) return x % 2 == 0 end), true)
+    assertEquals(fsEnumerable:From({ 1, 3, 5 }):Any(function(x) return x % 2 == 0 end), false)
+    assertEquals(fsEnumerable:From({ "a", "b", "c" }):Any(), true)
+end
+
+function M:test_all()
+    assertEquals(fsEnumerable:From({}):All(), false)
+    assertEquals(fsEnumerable:From({ 1, 3, 5 }):All(function(x) return x % 2 == 1 end), true)
+    assertEquals(fsEnumerable:From({ 1, 2, 3 }):All(function(x) return x % 2 == 0 end), false)
+    assertEquals(fsEnumerable:From({ "a" }):All(function(x) return x ~= nil end), true)
 end
 
 function M:test_indexof()

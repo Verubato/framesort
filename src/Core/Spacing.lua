@@ -80,12 +80,10 @@ local function Pets(pets, members, spacing, horizontal)
     local placeHorizontal = horizontal
     local hasMoreThanOneRow = fsEnumerable
         :From(members)
-        :First(function(x) return fsMath:Round(x:GetBottom()) > fsMath:Round(members[1]:GetBottom()) end)
-        ~= nil
+        :Any(function(x) return fsMath:Round(x:GetBottom()) > fsMath:Round(members[1]:GetBottom()) end)
     local hasMoreThanOneColumn = fsEnumerable
         :From(members)
-        :First(function(x) return fsMath:Round(x:GetLeft()) > fsMath:Round(members[1]:GetLeft()) end)
-        ~= nil
+        :Any(function(x) return fsMath:Round(x:GetLeft()) > fsMath:Round(members[1]:GetLeft()) end)
 
     if horizontal and hasMoreThanOneRow then
         placeHorizontal = false

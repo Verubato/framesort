@@ -40,14 +40,14 @@ end
 ---Returns the set of raid frames.
 ---@return Enumerable<table>,Enumerable<table> frames member frames, pet frames
 function M:GetRaidFrames()
-    local empty = fsEnumerable:Empty():ToTable()
     local container = CompactRaidFrameContainer
 
-    if not container then return empty, empty end
-    if container:IsForbidden() or not container:IsVisible() then return empty, empty end
+    if not container or container:IsForbidden() or not container:IsVisible() then
+        local empty = fsEnumerable:Empty():ToTable()
+        return empty, empty
+    end
 
-    local children = { container:GetChildren() }
-    local frames = ExtractFrames(children)
+    local frames = ExtractFrames({ container:GetChildren() })
     local members = fsEnumerable
         :From(frames)
         :Where(function(x) return fsUnit:IsMember(x.unit) end)
@@ -61,11 +61,11 @@ end
 ---Returns the set of raid frame group frames.
 ---@return table<table> frames group frames
 function M:GetRaidFrameGroups()
-    local empty = fsEnumerable:Empty():ToTable()
     local container = CompactRaidFrameContainer
 
-    if not container then return empty end
-    if container:IsForbidden() or not container:IsVisible() then return empty end
+    if not container or container:IsForbidden() or not container:IsVisible() then
+        return fsEnumerable:Empty():ToTable()
+    end
 
     return fsEnumerable
         :From({ container:GetChildren() })
@@ -85,18 +85,17 @@ end
 ---Returns the set of party frames.
 ---@return Enumerable<table> frames member frames
 function M:GetPartyFrames()
-    local empty = fsEnumerable:Empty():ToTable()
     local container = CompactPartyFrame
 
-    if not container then return empty end
-    if container:IsForbidden() or not container:IsVisible() then return empty end
+    if not container or container:IsForbidden() or not container:IsVisible() then
+        return fsEnumerable:Empty():ToTable()
+    end
 
-    local members = fsEnumerable
+    return fsEnumerable
         :From({ container:GetChildren() })
         :Where(function(x) return IsValidUnitFrame(x) end)
         :Where(function(x) return fsUnit:IsMember(x.unit) end)
-
-    return members:ToTable()
+        :ToTable()
 end
 
 ---Returns the player compact raid frame.
