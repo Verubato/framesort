@@ -27,6 +27,7 @@ local function ConfigureEditBox(box, value)
     box:SetText(tostring(value))
     box:SetCursorPosition(0)
     box:SetJustifyH("CENTER")
+    box:SetNumeric(true)
 end
 
 local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, addY, additionalTopSpacing)
