@@ -283,7 +283,6 @@ end
 
 local function ApplySpacing(container, petsContainer, spacing, together, horizontal, showPets)
     local players = fsFrame:GetUnitFrames(container)
-    local _, pets = fsFrame:GetUnitFrames(petsContainer or container)
 
     if together then
         local groups = fsFrame:GetGroups(container)
@@ -297,6 +296,7 @@ local function ApplySpacing(container, petsContainer, spacing, together, horizon
     end
 
     if showPets then
+        local _, pets = fsFrame:GetUnitFrames(petsContainer or container)
         Pets(pets, players, spacing, horizontal)
     end
 end
@@ -312,7 +312,7 @@ function M:ApplySpacing()
             petsContainer = CompactRaidFrameContainer,
             together = fsFrame:KeepGroupsTogether(false),
             horizontal = fsFrame:HorizontalLayout(false),
-            showPets = false
+            showPets = fsFrame:ShowPets()
         },
         {
             container = CompactRaidFrameContainer,
@@ -337,9 +337,12 @@ function M:ApplySpacing()
             local previousNonZero = previous and (previous.Horizontal ~= 0 or previous.Vertical ~= 0)
 
             -- avoid applying 0 spacing
-            if not zeroSpacing or previousNonZero then
+            if previousNonZero or not zeroSpacing then
                 ApplySpacing(x.container, x.petsContainer, x.spacing, x.together, x.horizontal, x.showPets)
-                previousSpacing[x.container] = spacing
+                previousSpacing[x.container] = {
+                    Horizontal = x.spacing.Horizontal,
+                    Vertical = x.spacing.Vertical,
+                }
             end
         end
     end
