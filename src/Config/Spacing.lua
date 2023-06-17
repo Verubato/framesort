@@ -16,43 +16,115 @@ local function ConfigureSlider(slider, value)
 
     _G[slider:GetName() .. "Low"]:SetText(minSpacing)
     _G[slider:GetName() .. "High"]:SetText(maxSpacing)
-    _G[slider:GetName() .. "Text"]:SetText(value)
 end
 
-local function BuildSpacingOptions(panel, anchor, name, spacing, additionalTopSpacing)
+local function ConfigureEditBox(box, value)
+    box:SetFontObject("GameFontWhite")
+    box:SetSize(50, 20)
+    box:SetAutoFocus(false)
+    ---@diagnostic disable-next-line: deprecated
+    box:SetMaxLetters(math.log10(maxSpacing) + 1)
+    box:SetText(tostring(value))
+    box:SetCursorPosition(0)
+    box:SetJustifyH("CENTER")
+end
+
+local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, addY, additionalTopSpacing)
     local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
-    title:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -(verticalSpacing + additionalTopSpacing))
+    title:SetPoint("TOPLEFT", parentAnchor, "BOTTOMLEFT", 0, -(verticalSpacing + additionalTopSpacing))
     title:SetText(name)
 
-    local xLabel = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-    xLabel:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -verticalSpacing)
-    xLabel:SetText("Horizontal")
+    local anchor = title
+    local setValue = function(auto, slider, box)
+        local value = tonumber(auto)
 
-    local xSlider = CreateFrame("Slider", "sld" .. name .. "XSpacing", panel, "OptionsSliderTemplate")
-    xSlider:SetPoint("TOPLEFT", xLabel, "BOTTOMLEFT", 0, -verticalSpacing)
-    ConfigureSlider(xSlider, spacing.Horizontal)
+        if not value or value < minSpacing or value > maxSpacing then
+            box:SetFontObject("GameFontRed")
+            return nil
+        end
 
-    xSlider:SetScript("OnValueChanged", function(_, value, _)
-        _G[xSlider:GetName() .. "Text"]:SetText(tostring(value))
-        spacing.Horizontal = value
-        fsSpacing:ApplySpacing()
-    end)
+        local text = tostring(value)
+        box:SetFontObject("GameFontWhite")
 
-    local yLabel = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-    yLabel:SetPoint("TOPLEFT", xSlider, "BOTTOMLEFT", 0, -verticalSpacing * 2)
-    yLabel:SetText("Vertical")
+        box:SetText(text)
+        slider:SetValue(value)
+        return value
+    end
 
-    local ySlider = CreateFrame("Slider", "sld" .. name .. "YSpacing", panel, "OptionsSliderTemplate")
-    ySlider:SetPoint("TOPLEFT", yLabel, "BOTTOMLEFT", 0, -verticalSpacing)
-    ConfigureSlider(ySlider, spacing.Vertical)
+    if addX then
+        local label = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+        label:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
+        label:SetText("Horizontal")
 
-    ySlider:SetScript("OnValueChanged", function(_, value, _)
-        _G[ySlider:GetName() .. "Text"]:SetText(tostring(value))
-        spacing.Vertical = value
-        fsSpacing:ApplySpacing()
-    end)
+        local slider = CreateFrame("Slider", "sld" .. name .. "XSpacing", panel, "OptionsSliderTemplate")
+        slider:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -verticalSpacing)
+        ConfigureSlider(slider, spacing.Horizontal)
 
-    return ySlider
+        local box = CreateFrame("EditBox", nil, panel, "InputBoxTemplate")
+        box:SetPoint("CENTER", slider, "CENTER", 0, 25)
+        ConfigureEditBox(box, spacing.Horizontal)
+
+        slider:SetScript("OnValueChanged", function(_, sliderValue, userInput)
+            if not userInput then return end
+
+            local value = setValue(sliderValue, slider, box)
+            if value then
+                spacing.Horizontal = value
+                fsSpacing:ApplySpacing()
+            end
+        end)
+
+        box:SetScript("OnTextChanged", function(_, userInput)
+            if not userInput then return end
+
+            local value = setValue(box:GetText(), slider, box)
+            if value then
+                spacing.Horizontal = value
+                fsSpacing:ApplySpacing()
+            end
+        end)
+
+        anchor = slider
+    end
+
+    if addY then
+        local label = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+        label:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
+        label:SetText("Vertical")
+
+        local slider = CreateFrame("Slider", "sld" .. name .. "YSpacing", panel, "OptionsSliderTemplate")
+        slider:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -verticalSpacing)
+        ConfigureSlider(slider, spacing.Vertical)
+
+        local box = CreateFrame("EditBox", nil, panel, "InputBoxTemplate")
+        box:SetPoint("CENTER", slider, "CENTER", 0, 25)
+        ConfigureEditBox(box, spacing.Vertical)
+
+        slider:SetScript("OnValueChanged", function(_, sliderValue, userInput)
+            if not userInput then return end
+
+            local value = setValue(sliderValue, slider, box)
+            if value then
+                spacing.Vertical = value
+                fsSpacing:ApplySpacing()
+            end
+        end)
+
+        box:SetScript("OnTextChanged", function(_, userInput)
+            if not userInput then return end
+
+            local value = setValue(box:GetText(), slider, box)
+
+            if value then
+                spacing.Vertical = value
+                fsSpacing:ApplySpacing()
+            end
+        end)
+
+        anchor = slider
+    end
+
+    return anchor
 end
 
 ---Adds the spacing options panel.
@@ -73,11 +145,15 @@ function fsBuilder:BuildSpacingOptions(parent)
     local anchor = spacingDescription
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         -- for retail
-        anchor = BuildSpacingOptions(panel, anchor, "Party", addon.Options.Appearance.Party.Spacing, 0)
+        anchor = BuildSpacingOptions(panel, anchor, "Party", addon.Options.Appearance.Party.Spacing, true, true, 0)
     end
 
     local title = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and "Raid" or "Group"
-    anchor = BuildSpacingOptions(panel, anchor, title, addon.Options.Appearance.Raid.Spacing, verticalSpacing)
+    anchor = BuildSpacingOptions(panel, anchor, title, addon.Options.Appearance.Raid.Spacing, true, true, verticalSpacing)
+
+    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and CompactArenaFrame then
+        anchor = BuildSpacingOptions(panel, anchor, "Enemy Arena", addon.Options.Appearance.EnemyArena.Spacing, false, true, verticalSpacing)
+    end
 
     InterfaceOptions_AddCategory(panel)
 end

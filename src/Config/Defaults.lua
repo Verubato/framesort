@@ -2,7 +2,7 @@ local _, addon = ...
 
 ---Default configuration.
 addon.Defaults = {
-    Version = 10,
+    Version = 11,
     Logging = {
         Enabled = false
     },
@@ -42,6 +42,12 @@ addon.Defaults = {
             },
         },
         Raid = {
+            Spacing = {
+                Horizontal = 0,
+                Vertical = 0
+            }
+        },
+        EnemyArena = {
             Spacing = {
                 Horizontal = 0,
                 Vertical = 0

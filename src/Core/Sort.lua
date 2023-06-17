@@ -48,7 +48,8 @@ end
 ---@return boolean
 local function CanSortParty()
     return
-        not CompactPartyFrame:IsForbidden()
+        CompactPartyFrame
+        and not CompactPartyFrame:IsForbidden()
         and CompactPartyFrame:IsVisible()
         and CanSort(false)
 end
@@ -57,7 +58,8 @@ end
 ---@return boolean
 local function CanSortRaid()
     return
-        not CompactRaidFrameContainer:IsForbidden()
+        CompactRaidFrameContainer
+        and not CompactRaidFrameContainer:IsForbidden()
         and CompactRaidFrameContainer:IsVisible()
         and CanSort(true)
 end

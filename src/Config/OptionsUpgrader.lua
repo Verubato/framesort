@@ -180,14 +180,75 @@ function M:UpgradeToVersion10(options)
 
     -- encountered a clash with Ability Team Tracker also using the "Options" global variable
     -- so clean up our saved variable for anyone affected
+    local v10Defaults = {
+        Version = 10,
+        Logging = {
+            Enabled = false
+        },
+        Arena = {
+            Enabled = true,
+            PlayerSortMode = addon.PlayerSortMode.Top,
+            GroupSortMode = addon.GroupSortMode.Group,
+            Reverse = false
+        },
+        Dungeon = {
+            Enabled = true,
+            PlayerSortMode = addon.PlayerSortMode.Top,
+            GroupSortMode = addon.GroupSortMode.Role,
+            Reverse = false
+        },
+        World = {
+            Enabled = true,
+            PlayerSortMode = addon.PlayerSortMode.Top,
+            GroupSortMode = addon.GroupSortMode.Group,
+            Reverse = false
+        },
+        Raid = {
+            Enabled = false,
+            PlayerSortMode = addon.PlayerSortMode.Top,
+            GroupSortMode = addon.GroupSortMode.Role,
+            Reverse = false
+        },
+        SortingMethod = {
+            TaintlessEnabled = true,
+            TraditionalEnabled = false
+        },
+        Appearance = {
+            Party = {
+                Spacing = {
+                    Horizontal = 0,
+                    Vertical = 0
+                },
+            },
+            Raid = {
+                Spacing = {
+                    Horizontal = 0,
+                    Vertical = 0
+                }
+            }
+        }
+    }
 
     -- remove clashing values
-    CleanTable(options, addon.Defaults)
+    CleanTable(options, v10Defaults)
 
     -- add any missing values back
-    AddMissing(options, addon.Defaults)
+    AddMissing(options, v10Defaults)
 
     options.Version = 10
+end
+
+function M:UpgradeToVersion11(options)
+    assert(options.Version == 10)
+
+    options.Appearance.EnemyArena = {
+        Spacing = {
+            Horizontal = 0,
+            Vertical = 0
+        }
+    }
+
+    options.Version = 11
 end
 
 local upgradeFunctions = {
@@ -199,7 +260,8 @@ local upgradeFunctions = {
     Version7 = M.UpgradeToVersion7,
     Version8 = M.UpgradeToVersion8,
     Version9 = M.UpgradeToVersion9,
-    Version10 = M.UpgradeToVersion10
+    Version10 = M.UpgradeToVersion10,
+    Version11 = M.UpgradeToVersion11
 }
 
 ---Upgrades saved options to the current version.
