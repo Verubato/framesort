@@ -37,11 +37,10 @@ local function ExtractFrames(children)
         :ToTable()
 end
 
----Returns the set of raid frames.
----@return Enumerable<table>,Enumerable<table> frames member frames, pet frames
-function M:GetRaidFrames()
-    local container = CompactRaidFrameContainer
-
+---Returns the set of frames with a unit attached.
+---@param container table party/raid/member container
+---@return table<table> players, table<table> pets
+function M:GetUnitFrames(container)
     if not container or container:IsForbidden() or not container:IsVisible() then
         local empty = fsEnumerable:Empty():ToTable()
         return empty, empty
@@ -51,18 +50,18 @@ function M:GetRaidFrames()
     local players = fsEnumerable
         :From(frames)
         :Where(function(x) return fsUnit:IsPlayer(x.unit) end)
+        :ToTable()
     local pets = fsEnumerable
         :From(frames)
         :Where(function(x) return fsUnit:IsPet(x.unit) end)
+        :ToTable()
 
-    return players:ToTable(), pets:ToTable()
+    return players, pets
 end
 
 ---Returns the set of raid frame group frames.
----@return table<table> frames group frames
-function M:GetRaidFrameGroups()
-    local container = CompactRaidFrameContainer
-
+---@return table<table> groups
+function M:GetGroups(container)
     if not container or container:IsForbidden() or not container:IsVisible() then
         return fsEnumerable:Empty():ToTable()
     end
@@ -73,28 +72,30 @@ function M:GetRaidFrameGroups()
         :ToTable()
 end
 
+---Returns the set of party frames.
+---@return table<table> players, table<table> pets
+function M:GetPartyFrames()
+    return M:GetUnitFrames(CompactPartyFrame)
+end
+
+---Returns the set of raid frames.
+---@return table<table> players, table<table> pets
+function M:GetRaidFrames()
+    return M:GetUnitFrames(CompactRaidFrameContainer)
+end
+
+---Returns the set of raid frame group frames.
+---@return table<table> groups
+function M:GetRaidFrameGroups()
+    return M:GetGroups(CompactRaidFrameContainer)
+end
+
 ---Returns the set of member frames within a raid group frame.
----@return table<table> frames group frames
+---@return table<table> units
 function M:GetRaidFrameGroupMembers(group)
     return fsEnumerable
         :From({ group:GetChildren() })
         :Where(function(frame) return IsValidUnitFrame(frame) end)
-        :ToTable()
-end
-
----Returns the set of party frames.
----@return Enumerable<table> frames member frames
-function M:GetPartyFrames()
-    local container = CompactPartyFrame
-
-    if not container or container:IsForbidden() or not container:IsVisible() then
-        return fsEnumerable:Empty():ToTable()
-    end
-
-    return fsEnumerable
-        :From({ container:GetChildren() })
-        :Where(function(x) return IsValidUnitFrame(x) end)
-        :Where(function(x) return fsUnit:IsPlayer(x.unit) end)
         :ToTable()
 end
 

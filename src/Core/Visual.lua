@@ -1,6 +1,7 @@
 local _, addon = ...
 local fsFrame = addon.Frame
 local fsCompare = addon.Compare
+local fsEnumerable = addon.Enumerable
 local M = {}
 addon.Visual = M
 
@@ -14,7 +15,7 @@ function M:GetVisuallyOrderedUnits()
 
     -- for some reason frames can be off by tiny amounts but they look visually aligned
     -- so do a fuzzy compare to ignore any minor x/y differences
-    return addon.Enumerable
+    return fsEnumerable
         :From(frames)
         :OrderBy(function(x, y) return fsCompare:CompareTopLeftFuzzy(x, y) end)
         :Map(function(x) return x.unit end)

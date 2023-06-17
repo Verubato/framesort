@@ -5,23 +5,9 @@ local fsCompare = addon.Compare
 local fsPoint = addon.Point
 local fsMath = addon.Math
 local fsEnumerable = addon.Enumerable
-local previousPartySpacing = nil
-local previousRaidSpacing = nil
+local previousSpacing = {}
 local M = {}
 addon.Spacing = M
-
-local function GetSettings(isRaid)
-    local together = fsFrame:KeepGroupsTogether(isRaid)
-    local horizontal = fsFrame:HorizontalLayout(isRaid)
-    local showPets = fsFrame:ShowPets()
-    local spacing = isRaid and addon.Options.Appearance.Raid.Spacing or addon.Options.Appearance.Party.Spacing
-
-    if WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE then
-        spacing = addon.Options.Appearance.Raid.Spacing
-    end
-
-    return together, horizontal, showPets, spacing
-end
 
 ---Applies spacing to frames that are organised in 'flat' mode.
 ---Flat mode is where frames are all placed relative to 1 point, i.e. the parent container.
@@ -295,29 +281,17 @@ local function Groups(groups, spacing, horizontal)
     end
 end
 
-local function ApplyPartyFrameSpacing()
-    local members = fsFrame:GetPartyFrames()
-    local together, horizontal, showPets, spacing = GetSettings(false)
+local function ApplySpacing(container, petsContainer, spacing, together, horizontal, showPets)
+    local players = fsFrame:GetUnitFrames(container)
+    local _, pets = fsFrame:GetUnitFrames(petsContainer or container)
 
     if together then
-        GroupedMembers(members, spacing, horizontal)
-    else
-        FlatMembers(members, spacing)
-    end
-
-    if showPets then
-        local _, pets = fsFrame:GetRaidFrames()
-        Pets(pets, members, spacing, horizontal)
-    end
-end
-
-local function ApplyRaidFrameSpacing()
-    local together, horizontal, showPets, spacing = GetSettings(true)
-    local players, pets = fsFrame:GetRaidFrames()
-
-    if together then
-        local groups = fsFrame:GetRaidFrameGroups()
-        Groups(groups, spacing, horizontal)
+        local groups = fsFrame:GetGroups(container)
+        if #groups ~= 0 then
+            Groups(groups, spacing, horizontal)
+        else
+            GroupedMembers(players, spacing, horizontal)
+        end
     else
         FlatMembers(players, spacing)
     end
@@ -329,26 +303,44 @@ end
 
 ---Applies spacing to party and raid frames.
 function M:ApplySpacing()
-    if CompactRaidFrameContainer and not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
-        local _, _, _, spacing = GetSettings(true)
-        local zeroSpacing = spacing.Horizontal == 0 and spacing.Vertical == 0
-        local previousNonZero = previousRaidSpacing and (previousRaidSpacing.Horizontal ~= 0 or previousRaidSpacing.Vertical ~= 0)
+    local containers = {
+        {
+            container = CompactPartyFrame,
+            spacing = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE
+                and addon.Options.Appearance.Raid.Spacing
+                or addon.Options.Appearance.Party.Spacing,
+            petsContainer = CompactRaidFrameContainer,
+            together = fsFrame:KeepGroupsTogether(false),
+            horizontal = fsFrame:HorizontalLayout(false),
+            showPets = false
+        },
+        {
+            container = CompactRaidFrameContainer,
+            spacing = addon.Options.Appearance.Raid.Spacing,
+            together = fsFrame:KeepGroupsTogether(true),
+            horizontal = fsFrame:HorizontalLayout(true),
+            showPets = fsFrame:ShowPets()
+        },
+        {
+            container = CompactArenaFrame,
+            spacing = addon.Options.Appearance.EnemyArena.Spacing,
+            together = false,
+            horizontal = false,
+            showPets = true
+        }
+    }
 
-        -- avoid applying 0 spacing
-        if not zeroSpacing or previousNonZero then
-            ApplyRaidFrameSpacing()
-            previousRaidSpacing = spacing
-        end
-    end
+    for _, x in ipairs(containers) do
+        if x.container then
+            local zeroSpacing = x.spacing.Horizontal == 0 and x.spacing.Vertical == 0
+            local previous = previousSpacing[x.container]
+            local previousNonZero = previous and (previous.Horizontal ~= 0 or previous.Vertical ~= 0)
 
-    if CompactPartyFrame and not CompactPartyFrame:IsForbidden() and CompactPartyFrame:IsVisible() then
-        local _, _, _, spacing = GetSettings(false)
-        local zeroSpacing = spacing.Horizontal == 0 and spacing.Vertical == 0
-        local previousNonZero = previousPartySpacing and (previousPartySpacing.Horizontal ~= 0 or previousPartySpacing.Vertical ~= 0)
-
-        if not zeroSpacing or previousNonZero then
-            ApplyPartyFrameSpacing()
-            previousPartySpacing = spacing
+            -- avoid applying 0 spacing
+            if not zeroSpacing or previousNonZero then
+                ApplySpacing(x.container, x.petsContainer, x.spacing, x.together, x.horizontal, x.showPets)
+                previousSpacing[x.container] = spacing
+            end
         end
     end
 end
@@ -359,24 +351,27 @@ end
 
 ---Initialises the spacing module.
 function addon:InitSpacing()
-    local eventFrame = CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", Run)
-    eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
-    eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-    eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
-    eventFrame:RegisterEvent("PLAYER_ROLES_ASSIGNED")
-    eventFrame:RegisterEvent("UNIT_PET")
     fsSort:RegisterPostSortCallback(Run)
 
-    if CompactRaidFrameContainer.LayoutFrames then
-        hooksecurefunc(CompactRaidFrameContainer, "LayoutFrames", Run)
-    elseif CompactRaidFrameContainer_LayoutFrames then
-        hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", Run)
+    if CompactParyFrame then
+        hooksecurefunc(CompactArenaFrame, "UpdateLayout", Run)
     end
 
-    if CompactRaidFrameContainer.OnSizeChanged then
-        hooksecurefunc(CompactRaidFrameContainer, "OnSizeChanged", Run)
-    elseif CompactRaidFrameContainer_OnSizeChanged then
-        hooksecurefunc("CompactRaidFrameContainer_OnSizeChanged", Run)
+    if CompactRaidFrameContainer then
+        if CompactRaidFrameContainer.LayoutFrames then
+            hooksecurefunc(CompactRaidFrameContainer, "LayoutFrames", Run)
+        elseif CompactRaidFrameContainer_LayoutFrames then
+            hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", Run)
+        end
+
+        if CompactRaidFrameContainer.OnSizeChanged then
+            hooksecurefunc(CompactRaidFrameContainer, "OnSizeChanged", Run)
+        elseif CompactRaidFrameContainer_OnSizeChanged then
+            hooksecurefunc("CompactRaidFrameContainer_OnSizeChanged", Run)
+        end
+    end
+
+    if CompactArenaFrame then
+        hooksecurefunc(CompactArenaFrame, "UpdateLayout", Run)
     end
 end
