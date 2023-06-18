@@ -39,7 +39,7 @@ end
 
 ---Returns the set of frames with a unit attached.
 ---@param container table party/raid/member container
----@return table<table> players, table<table> pets
+---@return table[] players, table[] pets
 function M:GetUnitFrames(container)
     if not container or container:IsForbidden() or not container:IsVisible() then
         local empty = fsEnumerable:Empty():ToTable()
@@ -60,7 +60,7 @@ function M:GetUnitFrames(container)
 end
 
 ---Returns the set of raid frame group frames.
----@return table<table> groups
+---@return table[] groups
 function M:GetGroups(container)
     if not container or container:IsForbidden() or not container:IsVisible() then
         return fsEnumerable:Empty():ToTable()
@@ -73,25 +73,25 @@ function M:GetGroups(container)
 end
 
 ---Returns the set of party frames.
----@return table<table> players, table<table> pets
+---@return table[] players, table[] pets
 function M:GetPartyFrames()
     return M:GetUnitFrames(CompactPartyFrame)
 end
 
 ---Returns the set of raid frames.
----@return table<table> players, table<table> pets
+---@return table[] players, table[] pets
 function M:GetRaidFrames()
     return M:GetUnitFrames(CompactRaidFrameContainer)
 end
 
 ---Returns the set of raid frame group frames.
----@return table<table> groups
+---@return table[] groups
 function M:GetRaidFrameGroups()
     return M:GetGroups(CompactRaidFrameContainer)
 end
 
 ---Returns the set of member frames within a raid group frame.
----@return table<table> units
+---@return table[] units
 function M:GetRaidFrameGroupMembers(group)
     return fsEnumerable
         :From({ group:GetChildren() })
@@ -115,7 +115,7 @@ function M:GetPlayerFrame()
 end
 
 ---Returns the frames in order of their relative positioning to each other.
----@param frames table<table> frames in any particular order
+---@param frames table[] frames in any particular order
 ---@return LinkedListNode root in order of parent -> child -> child -> child
 function M:ToFrameChain(frames)
     local invalid = { Valid = false }

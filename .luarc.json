@@ -3,5 +3,8 @@
         "disable": [
             "undefined-global"
         ]
+    },
+    "runtime": {
+        "version": "Lua 5.1"
     }
 }

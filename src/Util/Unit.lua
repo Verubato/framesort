@@ -4,7 +4,7 @@ local M = {}
 addon.Unit = M
 
 ---Gets a table of group member unit tokens that exist (UnitExists()).
----@return table<string>
+---@return string[]
 function M:GetUnits()
     local isRaid = IsInRaid()
     local prefix = isRaid and "raid" or "party"
@@ -27,8 +27,8 @@ function M:GetUnits()
 end
 
 ---Gets the pet units for the specified player units.
----@param units table<string>
----@return table<string> pet unit tokens
+---@param units string[]
+---@return string[] pet unit tokens
 function M:GetPets(units)
     return fsEnumerable
         :From(units)
