@@ -86,8 +86,8 @@ end
 
 ---Returns a copy of the macro body with the new unit inserted.
 ---@param body string the current macro body.
----@param ids table<number> frame ids
----@param units table<string> sorted unit ids.
+---@param ids number[] frame ids
+---@param units string[] sorted unit ids.
 ---@return string? the new macro body, or nil if invalid
 function M:GetNewBody(body, ids, units)
     local newBody = body

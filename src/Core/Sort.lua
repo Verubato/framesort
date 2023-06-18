@@ -72,8 +72,8 @@ local function InvokeCallbacks()
 end
 
 ---Rearranges frames in order of the specified units.
----@param frames table<table> the set of frames to rearrange.
----@param units table<string> unit ids in the desired order.
+---@param frames table[] the set of frames to rearrange.
+---@param units string[] unit ids in the desired order.
 local function RearrangeFrames(frames, units)
     local sorted = fsEnumerable
         :From(frames)
@@ -85,7 +85,6 @@ local function RearrangeFrames(frames, units)
         :ToTable()
 
     for unitIndex, unit in ipairs(units) do
-        ---@type any, number
         local _, frameIndex = fsEnumerable
             :From(sorted)
             :First(function(f) return UnitIsUnit(f.unit, unit) end)
@@ -102,7 +101,6 @@ local function RearrangeFrames(frames, units)
                 local xDelta = to.offsetX - from.offsetX
                 local yDelta = to.offsetY - from.offsetY
 
-                -- TODO why is lua_ls getting type confused here when removing the above @type specifier?
                 frame:AdjustPointsOffset(xDelta, yDelta)
             else
                 fsLog:Error(string.format("Unable to move frame %s as it doesn't share to the same parent anchor.", frame:GetName()))
@@ -112,8 +110,8 @@ local function RearrangeFrames(frames, units)
 end
 
 ---Rearranges the display of a frame chain in order of the specified units.
----@param frames table<table> the set of frames to rearrange.
----@param units table<string> unit ids in the desired order.
+---@param frames table[] the set of frames to rearrange.
+---@param units string[] unit ids in the desired order.
 local function RearrangeFrameChain(frames, units)
     local points = fsEnumerable
         :From(frames)

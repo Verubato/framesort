@@ -22,7 +22,6 @@ local function ConfigureEditBox(box, value)
     box:SetFontObject("GameFontWhite")
     box:SetSize(50, 20)
     box:SetAutoFocus(false)
-    ---@diagnostic disable-next-line: deprecated
     box:SetMaxLetters(math.log10(maxSpacing) + 1)
     box:SetText(tostring(value))
     box:SetCursorPosition(0)

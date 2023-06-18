@@ -21,8 +21,7 @@ function M:Empty()
 end
 
 ---Returns an Enumerable instance from the specified items.
----@generic T: table, V
----@param auto T|function|Enumerable
+---@param auto table|function|Enumerable
 ---@return Enumerable
 function M:From(auto)
     local t = type(auto)
@@ -314,8 +313,8 @@ function M:Concat(other)
 end
 
 ---Compares the two arrays and returns true if their items are equivalent, otherwise false.
----@param left table<any>
----@param right table<any>
+---@param left any[]
+---@param right any[]
 ---@return boolean
 function M:ArrayEquals(left, right)
     if #left ~= #right then return false end
