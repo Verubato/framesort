@@ -4,7 +4,7 @@ local _, addon = ...
 addon.GroupSortMode = {
     Group = "Group",
     Role = "Role",
-    Alphabetical = "Alphabetical"
+    Alphabetical = "Alphabetical",
 }
 
 ---@enum PlayerSortMode
@@ -12,5 +12,5 @@ addon.PlayerSortMode = {
     Top = "Top",
     Middle = "Middle",
     Bottom = "Bottom",
-    Hidden = "Hidden"
+    Hidden = "Hidden",
 }

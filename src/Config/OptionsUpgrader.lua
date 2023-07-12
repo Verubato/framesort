@@ -44,7 +44,7 @@ function M:UpgradeToVersion4(options)
 
     options.SortingMethod = {
         TaintlessEnabled = true,
-        TraditionalEnabled = false
+        TraditionalEnabled = false,
     }
 
     options.Version = 4
@@ -54,31 +54,31 @@ function M:UpgradeToVersion5(options)
     assert(options.Version == 4)
 
     options.Debug = {
-        Enabled = options.DebugEnabled
+        Enabled = options.DebugEnabled,
     }
 
     options.Arena = {
         Enabled = options.ArenaEnabled,
         PlayerSortMode = options.ArenaPlayerSortMode,
-        GroupSortMode = options.ArenaSortMode
+        GroupSortMode = options.ArenaSortMode,
     }
 
     options.Dungeon = {
         Enabled = options.DungeonEnabled,
         PlayerSortMode = options.DungeonPlayerSortMode,
-        GroupSortMode = options.DungeonSortMode
+        GroupSortMode = options.DungeonSortMode,
     }
 
     options.Raid = {
         Enabled = options.RaidEnabled,
         PlayerSortMode = options.RaidPlayerSortMode,
-        GroupSortMode = options.RaidSortMode
+        GroupSortMode = options.RaidSortMode,
     }
 
     options.World = {
         Enabled = options.WorldEnabled,
         PlayerSortMode = options.WorldPlayerSortMode,
-        GroupSortMode = options.WorldSortMode
+        GroupSortMode = options.WorldSortMode,
     }
 
     options.DebugEnabled = nil
@@ -112,15 +112,15 @@ function M:UpgradeToVersion6(options)
         Party = {
             Spacing = {
                 Horizontal = 0,
-                Vertical = 0
+                Vertical = 0,
             },
         },
         Raid = {
             Spacing = {
                 Horizontal = 0,
-                Vertical = 0
-            }
-        }
+                Vertical = 0,
+            },
+        },
     }
 
     options.Version = 6
@@ -148,7 +148,7 @@ function M:UpgradeToVersion9(options)
 
     options.Debug = nil
     options.Logging = {
-        Enabled = false
+        Enabled = false,
     }
     options.Version = 9
 end
@@ -183,50 +183,50 @@ function M:UpgradeToVersion10(options)
     local v10Defaults = {
         Version = 10,
         Logging = {
-            Enabled = false
+            Enabled = false,
         },
         Arena = {
             Enabled = true,
             PlayerSortMode = addon.PlayerSortMode.Top,
             GroupSortMode = addon.GroupSortMode.Group,
-            Reverse = false
+            Reverse = false,
         },
         Dungeon = {
             Enabled = true,
             PlayerSortMode = addon.PlayerSortMode.Top,
             GroupSortMode = addon.GroupSortMode.Role,
-            Reverse = false
+            Reverse = false,
         },
         World = {
             Enabled = true,
             PlayerSortMode = addon.PlayerSortMode.Top,
             GroupSortMode = addon.GroupSortMode.Group,
-            Reverse = false
+            Reverse = false,
         },
         Raid = {
             Enabled = false,
             PlayerSortMode = addon.PlayerSortMode.Top,
             GroupSortMode = addon.GroupSortMode.Role,
-            Reverse = false
+            Reverse = false,
         },
         SortingMethod = {
             TaintlessEnabled = true,
-            TraditionalEnabled = false
+            TraditionalEnabled = false,
         },
         Appearance = {
             Party = {
                 Spacing = {
                     Horizontal = 0,
-                    Vertical = 0
+                    Vertical = 0,
                 },
             },
             Raid = {
                 Spacing = {
                     Horizontal = 0,
-                    Vertical = 0
-                }
-            }
-        }
+                    Vertical = 0,
+                },
+            },
+        },
     }
 
     -- remove clashing values
@@ -244,8 +244,8 @@ function M:UpgradeToVersion11(options)
     options.Appearance.EnemyArena = {
         Spacing = {
             Horizontal = 0,
-            Vertical = 0
-        }
+            Vertical = 0,
+        },
     }
 
     options.Version = 11
@@ -261,7 +261,7 @@ local upgradeFunctions = {
     Version8 = M.UpgradeToVersion8,
     Version9 = M.UpgradeToVersion9,
     Version10 = M.UpgradeToVersion10,
-    Version11 = M.UpgradeToVersion11
+    Version11 = M.UpgradeToVersion11,
 }
 
 ---Upgrades saved options to the current version.

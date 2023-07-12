@@ -4,54 +4,54 @@ local _, addon = ...
 addon.Defaults = {
     Version = 11,
     Logging = {
-        Enabled = false
+        Enabled = false,
     },
     Arena = {
         Enabled = true,
         PlayerSortMode = addon.PlayerSortMode.Top,
         GroupSortMode = addon.GroupSortMode.Group,
-        Reverse = false
+        Reverse = false,
     },
     Dungeon = {
         Enabled = true,
         PlayerSortMode = addon.PlayerSortMode.Top,
         GroupSortMode = addon.GroupSortMode.Role,
-        Reverse = false
+        Reverse = false,
     },
     World = {
         Enabled = true,
         PlayerSortMode = addon.PlayerSortMode.Top,
         GroupSortMode = addon.GroupSortMode.Group,
-        Reverse = false
+        Reverse = false,
     },
     Raid = {
         Enabled = false,
         PlayerSortMode = addon.PlayerSortMode.Top,
         GroupSortMode = addon.GroupSortMode.Role,
-        Reverse = false
+        Reverse = false,
     },
     SortingMethod = {
         TaintlessEnabled = true,
-        TraditionalEnabled = false
+        TraditionalEnabled = false,
     },
     Appearance = {
         Party = {
             Spacing = {
                 Horizontal = 0,
-                Vertical = 0
+                Vertical = 0,
             },
         },
         Raid = {
             Spacing = {
                 Horizontal = 0,
-                Vertical = 0
-            }
+                Vertical = 0,
+            },
         },
         EnemyArena = {
             Spacing = {
                 Horizontal = 0,
-                Vertical = 0
-            }
-        }
-    }
+                Vertical = 0,
+            },
+        },
+    },
 }

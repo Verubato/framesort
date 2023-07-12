@@ -1,13 +1,15 @@
 local deps = {
     "Config\\OptionsUpgrader.lua",
     "Type\\SortMode.lua",
-    "Config\\Defaults.lua"
+    "Config\\Defaults.lua",
 }
 
 local addon = {}
 for _, fileName in ipairs(deps) do
     local module = loadfile("..\\src\\" .. fileName)
-    if module == nil then error("Failed to load " .. fileName) end
+    if module == nil then
+        error("Failed to load " .. fileName)
+    end
     module("UnitTest", addon)
 end
 
@@ -20,7 +22,7 @@ function M:test_upgrade_options_version2()
         RaidSortMode = "Role",
         PartySortMode = "Group",
         RaidSortEnabled = false,
-        PartySortEnabled = true
+        PartySortEnabled = true,
     }
 
     upgrader:UpgradeToVersion2(options)
@@ -39,7 +41,7 @@ function M:test_upgrade_options_version2()
         RaidSortMode = "Role",
         RaidPlayerSortMode = "Top",
         DebugEnabled = false,
-        Version = 2
+        Version = 2,
     }
 
     assertEquals(options, expected)
@@ -60,7 +62,7 @@ function M:test_upgrade_options_version3()
         RaidSortMode = "Role",
         RaidPlayerSortMode = "Top",
         DebugEnabled = false,
-        Version = 2
+        Version = 2,
     }
 
     upgrader:UpgradeToVersion3(options)
@@ -80,7 +82,7 @@ function M:test_upgrade_options_version3()
         RaidPlayerSortMode = "Top",
         DebugEnabled = false,
         ExperimentalEnabled = false,
-        Version = 3
+        Version = 3,
     }
 
     assertEquals(options, expected)
@@ -102,7 +104,7 @@ function M:test_upgrade_options_version4()
         RaidPlayerSortMode = "Top",
         DebugEnabled = false,
         ExperimentalEnabled = false,
-        Version = 3
+        Version = 3,
     }
 
     upgrader:UpgradeToVersion4(options)
@@ -124,9 +126,9 @@ function M:test_upgrade_options_version4()
         ExperimentalEnabled = false,
         SortingMethod = {
             TaintlessEnabled = true,
-            TraditionalEnabled = false
+            TraditionalEnabled = false,
         },
-        Version = 4
+        Version = 4,
     }
 
     assertEquals(options, expected)
@@ -153,7 +155,7 @@ function M:test_upgrade_options_version5()
         ExperimentalEnabled = false,
         SortingMethod = {
             TaintlessEnabled = true,
-            TraditionalEnabled = false
+            TraditionalEnabled = false,
         },
         Version = 4,
     }
@@ -184,7 +186,7 @@ function M:test_upgrade_options_version5()
         Debug = { Enabled = false },
         SortingMethod = {
             TaintlessEnabled = true,
-            TraditionalEnabled = false
+            TraditionalEnabled = false,
         },
         Version = 5,
     }
@@ -217,9 +219,9 @@ function M:test_upgrade_options_version6()
         Debug = { Enabled = false },
         SortingMethod = {
             TaintlessEnabled = true,
-            TraditionalEnabled = false
+            TraditionalEnabled = false,
         },
-        Version = 5
+        Version = 5,
     }
 
     upgrader:UpgradeToVersion6(options)
@@ -248,21 +250,21 @@ function M:test_upgrade_options_version6()
         Debug = { Enabled = false },
         SortingMethod = {
             TaintlessEnabled = true,
-            TraditionalEnabled = false
+            TraditionalEnabled = false,
         },
         Appearance = {
             Party = {
                 Spacing = {
                     Horizontal = 0,
-                    Vertical = 0
+                    Vertical = 0,
                 },
             },
             Raid = {
                 Spacing = {
                     Horizontal = 0,
-                    Vertical = 0
-                }
-            }
+                    Vertical = 0,
+                },
+            },
         },
         Version = 6,
     }
@@ -295,21 +297,21 @@ function M:test_upgrade_options_version7()
         Debug = { Enabled = true },
         SortingMethod = {
             TaintlessEnabled = true,
-            TraditionalEnabled = false
+            TraditionalEnabled = false,
         },
         Appearance = {
             Party = {
                 Spacing = {
                     Horizontal = 0,
-                    Vertical = 0
+                    Vertical = 0,
                 },
             },
             Raid = {
                 Spacing = {
                     Horizontal = 0,
-                    Vertical = 0
-                }
-            }
+                    Vertical = 0,
+                },
+            },
         },
         Version = 6,
     }
@@ -340,23 +342,23 @@ function M:test_upgrade_options_version7()
         Debug = { Enabled = false },
         SortingMethod = {
             TaintlessEnabled = true,
-            TraditionalEnabled = false
+            TraditionalEnabled = false,
         },
         Appearance = {
             Party = {
                 Spacing = {
                     Horizontal = 0,
-                    Vertical = 0
+                    Vertical = 0,
                 },
             },
             Raid = {
                 Spacing = {
                     Horizontal = 0,
-                    Vertical = 0
-                }
-            }
+                    Vertical = 0,
+                },
+            },
         },
-        Version = 7
+        Version = 7,
     }
 
     assertEquals(options, expected)
@@ -387,23 +389,23 @@ function M:test_upgrade_options_version8()
         Debug = { Enabled = false },
         SortingMethod = {
             TaintlessEnabled = true,
-            TraditionalEnabled = false
+            TraditionalEnabled = false,
         },
         Appearance = {
             Party = {
                 Spacing = {
                     Horizontal = 0,
-                    Vertical = 0
+                    Vertical = 0,
                 },
             },
             Raid = {
                 Spacing = {
                     Horizontal = 0,
-                    Vertical = 0
-                }
-            }
+                    Vertical = 0,
+                },
+            },
         },
-        Version = 7
+        Version = 7,
     }
 
     upgrader:UpgradeToVersion8(options)
@@ -413,48 +415,47 @@ function M:test_upgrade_options_version8()
             Enabled = true,
             PlayerSortMode = "Top",
             GroupSortMode = "Group",
-            Reverse = false
+            Reverse = false,
         },
         Dungeon = {
             Enabled = true,
             PlayerSortMode = "Top",
             GroupSortMode = "Group",
-            Reverse = false
+            Reverse = false,
         },
         World = {
             Enabled = true,
             PlayerSortMode = "Top",
             GroupSortMode = "Group",
-            Reverse = false
+            Reverse = false,
         },
         Raid = {
             Enabled = false,
             PlayerSortMode = "Top",
             GroupSortMode = "Role",
-            Reverse = false
+            Reverse = false,
         },
         Debug = { Enabled = false },
         SortingMethod = {
             TaintlessEnabled = true,
-            TraditionalEnabled = false
+            TraditionalEnabled = false,
         },
         Appearance = {
             Party = {
                 Spacing = {
                     Horizontal = 0,
-                    Vertical = 0
+                    Vertical = 0,
                 },
             },
             Raid = {
                 Spacing = {
                     Horizontal = 0,
-                    Vertical = 0
-                }
-            }
+                    Vertical = 0,
+                },
+            },
         },
-        Version = 8
+        Version = 8,
     }
-
 
     assertEquals(options, expected)
 end
@@ -465,97 +466,97 @@ function M:test_upgrade_options_version9()
             Enabled = true,
             PlayerSortMode = "Top",
             GroupSortMode = "Group",
-            Reverse = false
+            Reverse = false,
         },
         Dungeon = {
             Enabled = true,
             PlayerSortMode = "Top",
             GroupSortMode = "Group",
-            Reverse = false
+            Reverse = false,
         },
         World = {
             Enabled = true,
             PlayerSortMode = "Top",
             GroupSortMode = "Group",
-            Reverse = false
+            Reverse = false,
         },
         Raid = {
             Enabled = false,
             PlayerSortMode = "Top",
             GroupSortMode = "Role",
-            Reverse = false
+            Reverse = false,
         },
         Debug = { Enabled = false },
         SortingMethod = {
             TaintlessEnabled = true,
-            TraditionalEnabled = false
+            TraditionalEnabled = false,
         },
         Appearance = {
             Party = {
                 Spacing = {
                     Horizontal = 0,
-                    Vertical = 0
+                    Vertical = 0,
                 },
             },
             Raid = {
                 Spacing = {
                     Horizontal = 0,
-                    Vertical = 0
-                }
-            }
+                    Vertical = 0,
+                },
+            },
         },
-        Version = 8
+        Version = 8,
     }
 
     upgrader:UpgradeToVersion9(options)
 
     local expected = {
         Logging = {
-            Enabled = false
+            Enabled = false,
         },
         Arena = {
             Enabled = true,
             PlayerSortMode = "Top",
             GroupSortMode = "Group",
-            Reverse = false
+            Reverse = false,
         },
         Dungeon = {
             Enabled = true,
             PlayerSortMode = "Top",
             GroupSortMode = "Group",
-            Reverse = false
+            Reverse = false,
         },
         World = {
             Enabled = true,
             PlayerSortMode = "Top",
             GroupSortMode = "Group",
-            Reverse = false
+            Reverse = false,
         },
         Raid = {
             Enabled = false,
             PlayerSortMode = "Top",
             GroupSortMode = "Role",
-            Reverse = false
+            Reverse = false,
         },
         SortingMethod = {
             TaintlessEnabled = true,
-            TraditionalEnabled = false
+            TraditionalEnabled = false,
         },
         Appearance = {
             Party = {
                 Spacing = {
                     Horizontal = 0,
-                    Vertical = 0
+                    Vertical = 0,
                 },
             },
             Raid = {
                 Spacing = {
                     Horizontal = 0,
-                    Vertical = 0
-                }
-            }
+                    Vertical = 0,
+                },
+            },
         },
-        Version = 9
+        Version = 9,
     }
 
     assertEquals(options, expected)
@@ -566,28 +567,19 @@ function M:test_upgrade_options_version10()
         -- Ability Team Tracker values
         ["backdropColorAlpha"] = 0.800000011920929,
         ["NineSlice"] = {
-            ["BottomLeftCorner"] = {
-            },
-            ["TopEdge"] = {
-            },
-            ["BottomEdge"] = {
-            },
-            ["Center"] = {
-            },
-            ["TopRightCorner"] = {
-            },
-            ["BottomRightCorner"] = {
-            },
-            ["TopLeftCorner"] = {
-            },
-            ["RightEdge"] = {
-            },
-            ["LeftEdge"] = {
-            },
+            ["BottomLeftCorner"] = {},
+            ["TopEdge"] = {},
+            ["BottomEdge"] = {},
+            ["Center"] = {},
+            ["TopRightCorner"] = {},
+            ["BottomRightCorner"] = {},
+            ["TopLeftCorner"] = {},
+            ["RightEdge"] = {},
+            ["LeftEdge"] = {},
         },
         ["layoutType"] = "TooltipDefaultLayout",
         Logging = {
-            Enabled = false
+            Enabled = false,
         },
         -- missing Arena to be reset
         Arena = nil,
@@ -595,89 +587,89 @@ function M:test_upgrade_options_version10()
             Enabled = true,
             PlayerSortMode = "Top",
             GroupSortMode = "Group",
-            Reverse = false
+            Reverse = false,
         },
         World = {
             Enabled = true,
             PlayerSortMode = "Top",
             GroupSortMode = "Group",
-            Reverse = false
+            Reverse = false,
         },
         Raid = {
             Enabled = false,
             -- missing sorting modes
-            Reverse = false
+            Reverse = false,
         },
         SortingMethod = {
             TaintlessEnabled = true,
-            TraditionalEnabled = false
+            TraditionalEnabled = false,
         },
         Appearance = {
             Party = {
                 Spacing = {
                     Horizontal = 0,
-                    Vertical = 0
+                    Vertical = 0,
                 },
             },
             Raid = {
                 Spacing = {
                     Horizontal = 0,
-                    Vertical = 0
-                }
-            }
+                    Vertical = 0,
+                },
+            },
         },
-        Version = 9
+        Version = 9,
     }
 
     upgrader:UpgradeToVersion10(options)
 
     local expected = {
         Logging = {
-            Enabled = false
+            Enabled = false,
         },
         Arena = {
             Enabled = true,
             PlayerSortMode = "Top",
             GroupSortMode = "Group",
-            Reverse = false
+            Reverse = false,
         },
         Dungeon = {
             Enabled = true,
             PlayerSortMode = "Top",
             GroupSortMode = "Group",
-            Reverse = false
+            Reverse = false,
         },
         World = {
             Enabled = true,
             PlayerSortMode = "Top",
             GroupSortMode = "Group",
-            Reverse = false
+            Reverse = false,
         },
         Raid = {
             Enabled = false,
             PlayerSortMode = "Top",
             GroupSortMode = "Role",
-            Reverse = false
+            Reverse = false,
         },
         SortingMethod = {
             TaintlessEnabled = true,
-            TraditionalEnabled = false
+            TraditionalEnabled = false,
         },
         Appearance = {
             Party = {
                 Spacing = {
                     Horizontal = 0,
-                    Vertical = 0
+                    Vertical = 0,
                 },
             },
             Raid = {
                 Spacing = {
                     Horizontal = 0,
-                    Vertical = 0
-                }
-            }
+                    Vertical = 0,
+                },
+            },
         },
-        Version = 10
+        Version = 10,
     }
 
     assertEquals(options, expected)
@@ -686,108 +678,108 @@ end
 function M:test_upgrade_options_version11()
     local options = {
         Logging = {
-            Enabled = false
+            Enabled = false,
         },
         Arena = {
             Enabled = true,
             PlayerSortMode = "Top",
             GroupSortMode = "Group",
-            Reverse = false
+            Reverse = false,
         },
         Dungeon = {
             Enabled = true,
             PlayerSortMode = "Top",
             GroupSortMode = "Group",
-            Reverse = false
+            Reverse = false,
         },
         World = {
             Enabled = true,
             PlayerSortMode = "Top",
             GroupSortMode = "Group",
-            Reverse = false
+            Reverse = false,
         },
         Raid = {
             Enabled = false,
             PlayerSortMode = "Top",
             GroupSortMode = "Role",
-            Reverse = false
+            Reverse = false,
         },
         SortingMethod = {
             TaintlessEnabled = true,
-            TraditionalEnabled = false
+            TraditionalEnabled = false,
         },
         Appearance = {
             Party = {
                 Spacing = {
                     Horizontal = 0,
-                    Vertical = 0
+                    Vertical = 0,
                 },
             },
             Raid = {
                 Spacing = {
                     Horizontal = 0,
-                    Vertical = 0
-                }
-            }
+                    Vertical = 0,
+                },
+            },
         },
-        Version = 10
+        Version = 10,
     }
 
     upgrader:UpgradeToVersion11(options)
 
     local expected = {
         Logging = {
-            Enabled = false
+            Enabled = false,
         },
         Arena = {
             Enabled = true,
             PlayerSortMode = "Top",
             GroupSortMode = "Group",
-            Reverse = false
+            Reverse = false,
         },
         Dungeon = {
             Enabled = true,
             PlayerSortMode = "Top",
             GroupSortMode = "Group",
-            Reverse = false
+            Reverse = false,
         },
         World = {
             Enabled = true,
             PlayerSortMode = "Top",
             GroupSortMode = "Group",
-            Reverse = false
+            Reverse = false,
         },
         Raid = {
             Enabled = false,
             PlayerSortMode = "Top",
             GroupSortMode = "Role",
-            Reverse = false
+            Reverse = false,
         },
         SortingMethod = {
             TaintlessEnabled = true,
-            TraditionalEnabled = false
+            TraditionalEnabled = false,
         },
         Appearance = {
             Party = {
                 Spacing = {
                     Horizontal = 0,
-                    Vertical = 0
+                    Vertical = 0,
                 },
             },
             Raid = {
                 Spacing = {
                     Horizontal = 0,
-                    Vertical = 0
-                }
+                    Vertical = 0,
+                },
             },
             EnemyArena = {
                 Spacing = {
                     Horizontal = 0,
-                    Vertical = 0
-                }
-            }
+                    Vertical = 0,
+                },
+            },
         },
-        Version = 11
+        Version = 11,
     }
 
     assertEquals(options, expected)

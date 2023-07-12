@@ -17,7 +17,11 @@ function M:GetVisuallyOrderedUnits()
     -- so do a fuzzy compare to ignore any minor x/y differences
     return fsEnumerable
         :From(frames)
-        :OrderBy(function(x, y) return fsCompare:CompareTopLeftFuzzy(x, y) end)
-        :Map(function(x) return x.unit end)
+        :OrderBy(function(x, y)
+            return fsCompare:CompareTopLeftFuzzy(x, y)
+        end)
+        :Map(function(x)
+            return x.unit
+        end)
         :ToTable()
 end

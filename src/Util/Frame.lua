@@ -6,34 +6,37 @@ local M = {}
 addon.Frame = M
 
 local function IsValidUnitFrame(frame)
-    return
-        not frame:IsForbidden()
+    return not frame:IsForbidden()
         and frame.unitExists
-        -- to prevent some weird issue where frames are visible but aren't positioned
+        -- to prevent some weird issue where frames are visible but aren't positioned
         and frame:GetTop() ~= nil
         and frame:GetLeft() ~= nil
 end
 
 local function IsValidGroupFrame(frame)
-    return
-        not frame:IsForbidden()
-        -- to prevent some weird issue where frames are visible but aren't positioned
+    return not frame:IsForbidden()
+        -- to prevent some weird issue where frames are visible but aren't positioned
         and frame:GetTop() ~= nil
         and frame:GetLeft() ~= nil
         and string.match(frame:GetName() or "", "CompactRaidGroup")
 end
 
 local function ExtractFrames(children)
-    local fromRoot = fsEnumerable
-        :From(children)
+    local fromRoot = fsEnumerable:From(children)
     local fromGroup = fsEnumerable
         :From(children)
-        :Where(function(frame) return IsValidGroupFrame(frame) end)
-        :Map(function(group) return { group:GetChildren() } end)
+        :Where(function(frame)
+            return IsValidGroupFrame(frame)
+        end)
+        :Map(function(group)
+            return { group:GetChildren() }
+        end)
         :Flatten()
     return fromRoot
         :Concat(fromGroup)
-        :Where(function(frame) return IsValidUnitFrame(frame) end)
+        :Where(function(frame)
+            return IsValidUnitFrame(frame)
+        end)
         :ToTable()
 end
 
@@ -49,11 +52,15 @@ function M:GetUnitFrames(container)
     local frames = ExtractFrames({ container:GetChildren() })
     local players = fsEnumerable
         :From(frames)
-        :Where(function(x) return fsUnit:IsPlayer(x.unit) end)
+        :Where(function(x)
+            return fsUnit:IsPlayer(x.unit)
+        end)
         :ToTable()
     local pets = fsEnumerable
         :From(frames)
-        :Where(function(x) return fsUnit:IsPet(x.unit) end)
+        :Where(function(x)
+            return fsUnit:IsPet(x.unit)
+        end)
         :ToTable()
 
     return players, pets
@@ -68,7 +75,9 @@ function M:GetGroups(container)
 
     return fsEnumerable
         :From({ container:GetChildren() })
-        :Where(function(frame) return IsValidGroupFrame(frame) end)
+        :Where(function(frame)
+            return IsValidGroupFrame(frame)
+        end)
         :ToTable()
 end
 
@@ -95,7 +104,9 @@ end
 function M:GetRaidFrameGroupMembers(group)
     return fsEnumerable
         :From({ group:GetChildren() })
-        :Where(function(frame) return IsValidUnitFrame(frame) end)
+        :Where(function(frame)
+            return IsValidUnitFrame(frame)
+        end)
         :ToTable()
 end
 
@@ -109,9 +120,9 @@ function M:GetPlayerFrame()
     end
 
     -- find the player frame
-    return fsEnumerable
-        :From(frames)
-        :First(function(frame) return UnitIsUnit("player", frame.unit) end)
+    return fsEnumerable:From(frames):First(function(frame)
+        return UnitIsUnit("player", frame.unit)
+    end)
 end
 
 ---Returns the frames in order of their relative positioning to each other.
@@ -119,15 +130,15 @@ end
 ---@return LinkedListNode root in order of parent -> child -> child -> child
 function M:ToFrameChain(frames)
     local invalid = { Valid = false }
-    local nodesByFrame = fsEnumerable
-        :From(frames)
-        :ToLookup(function(frame) return frame end, function(frame)
-            return {
-                Next = nil,
-                Previous = nil,
-                Value = frame
-            }
-        end)
+    local nodesByFrame = fsEnumerable:From(frames):ToLookup(function(frame)
+        return frame
+    end, function(frame)
+        return {
+            Next = nil,
+            Previous = nil,
+            Value = frame,
+        }
+    end)
 
     local root = nil
     for _, child in pairs(nodesByFrame) do
@@ -175,16 +186,13 @@ end
 ---@return boolean
 function M:KeepGroupsTogether(isRaid)
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        if not isRaid then return true end
+        if not isRaid then
+            return true
+        end
 
-        local raidGroupDisplayType = EditModeManagerFrame:GetSettingValue(
-            Enum.EditModeSystem.UnitFrame,
-            Enum.EditModeUnitFrameSystemIndices.Raid,
-            Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
+        local raidGroupDisplayType = EditModeManagerFrame:GetSettingValue(Enum.EditModeSystem.UnitFrame, Enum.EditModeUnitFrameSystemIndices.Raid, Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
 
-        return
-            raidGroupDisplayType == Enum.RaidGroupDisplayType.SeparateGroupsVertical or
-            raidGroupDisplayType == Enum.RaidGroupDisplayType.SeparateGroupsHorizontal
+        return raidGroupDisplayType == Enum.RaidGroupDisplayType.SeparateGroupsVertical or raidGroupDisplayType == Enum.RaidGroupDisplayType.SeparateGroupsHorizontal
     else
         return CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
     end
@@ -195,19 +203,11 @@ end
 function M:HorizontalLayout(isRaid)
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         if isRaid then
-            local displayType = EditModeManagerFrame:GetSettingValue(
-                Enum.EditModeSystem.UnitFrame,
-                Enum.EditModeUnitFrameSystemIndices.Raid,
-                Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
+            local displayType = EditModeManagerFrame:GetSettingValue(Enum.EditModeSystem.UnitFrame, Enum.EditModeUnitFrameSystemIndices.Raid, Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
 
-            return
-                displayType == Enum.RaidGroupDisplayType.SeparateGroupsHorizontal or
-                displayType == Enum.RaidGroupDisplayType.CombineGroupsHorizontal
+            return displayType == Enum.RaidGroupDisplayType.SeparateGroupsHorizontal or displayType == Enum.RaidGroupDisplayType.CombineGroupsHorizontal
         else
-            return EditModeManagerFrame:GetSettingValueBool(
-                Enum.EditModeSystem.UnitFrame,
-                Enum.EditModeUnitFrameSystemIndices.Party,
-                Enum.EditModeUnitFrameSetting.UseHorizontalGroups)
+            return EditModeManagerFrame:GetSettingValueBool(Enum.EditModeSystem.UnitFrame, Enum.EditModeUnitFrameSystemIndices.Party, Enum.EditModeUnitFrameSetting.UseHorizontalGroups)
         end
     else
         return CompactRaidFrameManager_GetSetting("HorizontalGroups")

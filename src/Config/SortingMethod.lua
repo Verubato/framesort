@@ -59,7 +59,7 @@ function fsBuilder:BuildSortingMethodOptions(parent)
 
     anchor = BuildDottedList(panel, anchor, "Cons: ", {
         "May break with Blizzard patches.",
-        "May not work well with other addons that expect the traditional method."
+        "May not work well with other addons that expect the traditional method.",
     })
 
     local traditional = CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
@@ -71,7 +71,7 @@ function fsBuilder:BuildSortingMethodOptions(parent)
 
     local traditionalLines = {
         "This is the standard sorting mode that addons and macros have used for 10+ years.",
-        "However it seems since DragonFlight the Blizzard UI has become quite fragile."
+        "However it seems since DragonFlight the Blizzard UI has become quite fragile.",
     }
 
     anchor = traditional
@@ -84,7 +84,7 @@ function fsBuilder:BuildSortingMethodOptions(parent)
 
     anchor = BuildDottedList(panel, anchor, "Pros: ", {
         "Probably more reliable as it leverages Blizzard's internal sorting methods.",
-        "If Blizzard were to resolve their UI issues, this would likely become the recommended mode."
+        "If Blizzard were to resolve their UI issues, this would likely become the recommended mode.",
     })
 
     anchor = BuildDottedList(panel, anchor, "Cons: ", {
@@ -102,7 +102,9 @@ function fsBuilder:BuildSortingMethodOptions(parent)
     reloadButton:SetPoint("TOPLEFT", reloadReminder, 0, -verticalSpacing * 1.5)
     reloadButton:SetWidth(100)
     reloadButton:SetText("Reload")
-    reloadButton:HookScript("OnClick", function() ReloadUI() end)
+    reloadButton:HookScript("OnClick", function()
+        ReloadUI()
+    end)
     reloadButton:SetShown(false)
 
     taintless:HookScript("OnClick", function()

@@ -12,11 +12,15 @@ addon.Spacing = M
 ---Applies spacing to frames that are organised in 'flat' mode.
 ---Flat mode is where frames are all placed relative to 1 point, i.e. the parent container.
 local function FlatMembers(frames, spacing)
-    if #frames == 0 then return end
+    if #frames == 0 then
+        return
+    end
 
     local orderedLeftTop = fsEnumerable
         :From(frames)
-        :OrderBy(function(x, y) return fsCompare:CompareLeftTopFuzzy(x, y) end)
+        :OrderBy(function(x, y)
+            return fsCompare:CompareLeftTopFuzzy(x, y)
+        end)
         :ToTable()
 
     for i = 2, #orderedLeftTop do
@@ -36,7 +40,9 @@ local function FlatMembers(frames, spacing)
 
     local orderedTopLeft = fsEnumerable
         :From(frames)
-        :OrderBy(function(x, y) return fsCompare:CompareTopLeftFuzzy(x, y) end)
+        :OrderBy(function(x, y)
+            return fsCompare:CompareTopLeftFuzzy(x, y)
+        end)
         :ToTable()
 
     for i = 2, #orderedTopLeft do
@@ -56,20 +62,24 @@ local function FlatMembers(frames, spacing)
 end
 
 local function Pets(pets, members, spacing, horizontal)
-    if #pets == 0 or #members == 0 then return end
+    if #pets == 0 or #members == 0 then
+        return
+    end
 
-    table.sort(pets, function(x, y) return fsCompare:CompareTopLeftFuzzy(x, y) end)
+    table.sort(pets, function(x, y)
+        return fsCompare:CompareTopLeftFuzzy(x, y)
+    end)
 
     local firstPet = pets[1]
     local firstPetPoint = fsPoint:GetPointEx(firstPet)
     local parent = firstPet:GetParent()
     local placeHorizontal = horizontal
-    local hasMoreThanOneRow = fsEnumerable
-        :From(members)
-        :Any(function(x) return fsMath:Round(x:GetBottom()) > fsMath:Round(members[1]:GetBottom()) end)
-    local hasMoreThanOneColumn = fsEnumerable
-        :From(members)
-        :Any(function(x) return fsMath:Round(x:GetLeft()) > fsMath:Round(members[1]:GetLeft()) end)
+    local hasMoreThanOneRow = fsEnumerable:From(members):Any(function(x)
+        return fsMath:Round(x:GetBottom()) > fsMath:Round(members[1]:GetBottom())
+    end)
+    local hasMoreThanOneColumn = fsEnumerable:From(members):Any(function(x)
+        return fsMath:Round(x:GetLeft()) > fsMath:Round(members[1]:GetLeft())
+    end)
 
     if horizontal and hasMoreThanOneRow then
         placeHorizontal = false
@@ -80,10 +90,16 @@ local function Pets(pets, members, spacing, horizontal)
     if placeHorizontal then
         local topRight = fsEnumerable
             :From(members)
-            :OrderBy(function(x, y) return fsCompare:CompareTopRightFuzzy(x, y) end)
-            :First(function(x) return x:IsVisible() end)
+            :OrderBy(function(x, y)
+                return fsCompare:CompareTopRightFuzzy(x, y)
+            end)
+            :First(function(x)
+                return x:IsVisible()
+            end)
 
-        if not topRight then return end
+        if not topRight then
+            return
+        end
 
         local top, left = fsPoint:RelativeTopLeft(topRight, parent)
         local xDelta = left - (firstPetPoint.offsetX - topRight:GetWidth() - spacing.Horizontal)
@@ -95,10 +111,16 @@ local function Pets(pets, members, spacing, horizontal)
     else
         local bottomLeft = fsEnumerable
             :From(members)
-            :OrderBy(function(x, y) return fsCompare:CompareBottomLeftFuzzy(x, y) end)
-            :First(function(x) return x:IsVisible() end)
+            :OrderBy(function(x, y)
+                return fsCompare:CompareBottomLeftFuzzy(x, y)
+            end)
+            :First(function(x)
+                return x:IsVisible()
+            end)
 
-        if not bottomLeft then return end
+        if not bottomLeft then
+            return
+        end
 
         local top, left = fsPoint:RelativeTopLeft(bottomLeft, parent)
         local xDelta = left - firstPetPoint.offsetX
@@ -147,19 +169,25 @@ local function Pets(pets, members, spacing, horizontal)
 end
 
 local function GroupedMembers(frames, spacing, horizontal)
-    if #frames == 0 then return end
+    if #frames == 0 then
+        return
+    end
 
     -- why all this complexity instead of just a simple sequence of SetPoint() calls?
     -- it's because SetPoint() can't be called in combat whereas AdjustPointsOffset() can
     -- SetPoint() is just completely disallowed (by unsecure code) in combat, even if only changing x/y points
     -- being able to run this in combat has the benefit that if blizzard reset/redraw frames mid-combat, we can reapply our sorting/spacing!
     local root = fsFrame:ToFrameChain(frames)
-    if not root.Valid then return end
+    if not root.Valid then
+        return
+    end
 
     -- ensure it's ordered
     local ordered = fsEnumerable
         :From(frames)
-        :OrderBy(function(x, y) return fsCompare:CompareTopLeftFuzzy(x, y) end)
+        :OrderBy(function(x, y)
+            return fsCompare:CompareTopLeftFuzzy(x, y)
+        end)
         :ToTable()
 
     -- calculate the desired positions (with spacing added)
@@ -170,7 +198,7 @@ local function GroupedMembers(frames, spacing, horizontal)
         if i == 1 then
             positions[i] = {
                 Top = frame:GetTop(),
-                Left = frame:GetLeft()
+                Left = frame:GetLeft(),
             }
         else
             local previous = ordered[i - 1]
@@ -187,7 +215,7 @@ local function GroupedMembers(frames, spacing, horizontal)
                 local spacingToAdd = (i - 1) * spacing.Vertical
                 positions[i] = {
                     Top = (previous:GetBottom() + currentSpacing) - spacingToAdd,
-                    Left = previous:GetLeft()
+                    Left = previous:GetLeft(),
                 }
 
                 currentSpacing = currentSpacing + (previous:GetBottom() - frame:GetTop())
@@ -216,9 +244,13 @@ end
 ---e.g.: group1: frame3 is placed relative to frame2 which is placed relative to frame 1.
 ---e.g.: group2: frame5 is placed relative to frame4.
 local function Groups(groups, spacing, horizontal)
-    if #groups == 0 then return end
+    if #groups == 0 then
+        return
+    end
 
-    table.sort(groups, function(x, y) return fsCompare:CompareTopLeftFuzzy(x, y) end)
+    table.sort(groups, function(x, y)
+        return fsCompare:CompareTopLeftFuzzy(x, y)
+    end)
 
     --- apply spacing to the member frames
     for _, group in ipairs(groups) do
@@ -235,15 +267,23 @@ local function Groups(groups, spacing, horizontal)
         local above = fsEnumerable
             :From(groups)
             -- grab the groups above
-            :Where(function(g) return fsMath:Round(g:GetTop()) > fsMath:Round(group:GetTop()) end)
+            :Where(function(g)
+                return fsMath:Round(g:GetTop()) > fsMath:Round(group:GetTop())
+            end)
             -- grab the member frames
-            :Map(function(g) return fsFrame:GetRaidFrameGroupMembers(g) end)
+            :Map(function(g)
+                return fsFrame:GetRaidFrameGroupMembers(g)
+            end)
             -- flatten members
             :Flatten()
             -- only consider visible frames
-            :Where(function(frame) return frame:IsVisible() end)
+            :Where(function(frame)
+                return frame:IsVisible()
+            end)
             -- find the bottom most frame
-            :Min(function(frame) return frame:GetBottom() end)
+            :Min(function(frame)
+                return frame:GetBottom()
+            end)
 
         if above then
             yDelta = above:GetBottom() - group:GetTop() - spacing.Vertical
@@ -257,15 +297,23 @@ local function Groups(groups, spacing, horizontal)
         local left = fsEnumerable
             :From(groups)
             -- grab the groups left
-            :Where(function(g) return fsMath:Round(g:GetLeft()) < fsMath:Round(group:GetLeft()) end)
+            :Where(function(g)
+                return fsMath:Round(g:GetLeft()) < fsMath:Round(group:GetLeft())
+            end)
             -- grab the member frames
-            :Map(function(g) return fsFrame:GetRaidFrameGroupMembers(g) end)
+            :Map(function(g)
+                return fsFrame:GetRaidFrameGroupMembers(g)
+            end)
             -- flatten members
             :Flatten()
             -- only consider visible frames
-            :Where(function(frame) return frame:IsVisible() end)
+            :Where(function(frame)
+                return frame:IsVisible()
+            end)
             -- find the right most frame
-            :Max(function(frame) return frame:GetRight() end)
+            :Max(function(frame)
+                return frame:GetRight()
+            end)
 
         if left then
             xDelta = spacing.Horizontal - (group:GetLeft() - left:GetRight())
@@ -306,28 +354,26 @@ function M:ApplySpacing()
     local containers = {
         {
             container = CompactPartyFrame,
-            spacing = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE
-                and addon.Options.Appearance.Raid.Spacing
-                or addon.Options.Appearance.Party.Spacing,
+            spacing = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE and addon.Options.Appearance.Raid.Spacing or addon.Options.Appearance.Party.Spacing,
             petsContainer = CompactRaidFrameContainer,
             together = fsFrame:KeepGroupsTogether(false),
             horizontal = fsFrame:HorizontalLayout(false),
-            showPets = fsFrame:ShowPets()
+            showPets = fsFrame:ShowPets(),
         },
         {
             container = CompactRaidFrameContainer,
             spacing = addon.Options.Appearance.Raid.Spacing,
             together = fsFrame:KeepGroupsTogether(true),
             horizontal = fsFrame:HorizontalLayout(true),
-            showPets = fsFrame:ShowPets()
+            showPets = fsFrame:ShowPets(),
         },
         {
             container = CompactArenaFrame,
             spacing = addon.Options.Appearance.EnemyArena.Spacing,
             together = false,
             horizontal = false,
-            showPets = true
-        }
+            showPets = true,
+        },
     }
 
     for _, x in ipairs(containers) do

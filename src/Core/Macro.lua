@@ -20,13 +20,17 @@ end
 local function InspectMacro(slot)
     local _, _, body = GetMacroInfo(slot)
 
-    if not body or not fsMacro:IsFrameSortMacro(body) then return false end
+    if not body or not fsMacro:IsFrameSortMacro(body) then
+        return false
+    end
 
     local units = fsVisual:GetVisuallyOrderedUnits()
     local frameIds = fsMacro:GetFrameIds(body)
     local newBody = fsMacro:GetNewBody(body, frameIds, units)
 
-    if not newBody then return false end
+    if not newBody then
+        return false
+    end
 
     isSelfEditingMacro = true
     EditMacro(slot, nil, nil, newBody)
@@ -50,15 +54,21 @@ end
 
 local function OnEditMacro(macroInfo, _, _, _)
     -- prevent recursion from EditMacro hook
-    if isSelfEditingMacro then return end
+    if isSelfEditingMacro then
+        return
+    end
 
-    if not CanUpdate() then return end
+    if not CanUpdate() then
+        return
+    end
 
     InspectMacro(macroInfo)
 end
 
 local function Run()
-    if not CanUpdate() then return end
+    if not CanUpdate() then
+        return
+    end
 
     ScanMacros()
 end

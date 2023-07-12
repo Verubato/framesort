@@ -36,7 +36,7 @@ function fsBuilder:BuildHealthCheck(parent)
             lines[#lines + 1] = {
                 Description = description,
                 Result = result,
-                Remediation = remediation
+                Remediation = remediation,
             }
         end
 

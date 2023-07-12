@@ -59,7 +59,7 @@ function M:IsHealthy()
     results[#results + 1] = {
         Passed = fsFrame:IsUsingRaidStyleFrames(),
         Description = "Using Raid-Style Party Frames...",
-        Remediation = "Please enable 'Use Raid-Style Party Frames' in the Blizzard settings."
+        Remediation = "Please enable 'Use Raid-Style Party Frames' in the Blizzard settings.",
     }
 
     local conflictingSorter = SortingFunctionsTampered()
@@ -79,13 +79,11 @@ function M:IsHealthy()
     results[#results + 1] = {
         Passed = SupportsKeepTogether(),
         Description = "'Keep Groups Together' setting disabled, or using Taintless sorting...",
-        Remediation = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
-            and "Change the raid display mode to one of the 'Combined Groups' options via Edit Mode."
-            or "Disable the 'Keep Groups Together' raid profile setting."
+        Remediation = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and "Change the raid display mode to one of the 'Combined Groups' options via Edit Mode."
+            or "Disable the 'Keep Groups Together' raid profile setting.",
     }
 
-    return fsEnumerable
-        :From(results)
-        :All(function(x) return x.Passed end),
-        results
+    return fsEnumerable:From(results):All(function(x)
+        return x.Passed
+    end), results
 end
