@@ -1,7 +1,7 @@
 local _, addon = ...
 addon.OptionsBuilder = {
     VerticalSpacing = 15,
-    HorizontalSpacing = 50
+    HorizontalSpacing = 50,
 }
 local fsBuilder = addon.OptionsBuilder
 local fsSort = addon.Sorting
@@ -11,7 +11,9 @@ local verticalSpacing = fsBuilder.VerticalSpacing
 local horizontalSpacing = fsBuilder.HorizontalSpacing
 
 function fsBuilder:TextShim(frame)
-    if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then return end
+    if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+        return
+    end
 
     frame.Text = frame.text
 end
@@ -34,8 +36,8 @@ local function BuiltTitle(panel)
 
     local lines = {
         Group = "party1 > party2 > partyN > partyN+1",
-        Role  = "tank > healer > dps",
-        Alpha = "NameA > NameB > NameZ"
+        Role = "tank > healer > dps",
+        Alpha = "NameA > NameB > NameZ",
     }
 
     local keyWidth = 50
@@ -57,7 +59,7 @@ local function BuiltTitle(panel)
 
         sortingRules[#sortingRules + 1] = {
             Key = keyText,
-            Value = valueText
+            Value = valueText,
         }
     end
 
@@ -113,7 +115,8 @@ local function BuildSortModeCheckboxes(
     onEnabledChanged,
     onPlayerSortModeChanged,
     onSortModeChanged,
-    onReverseChanged)
+    onReverseChanged
+)
     local enabled = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     -- not sure why, but checkbox left seems to be off by about 4 units by default
     enabled:SetPoint("TOPLEFT", pointOffset, "BOTTOMLEFT", -4, -verticalSpacing)
@@ -121,7 +124,9 @@ local function BuildSortModeCheckboxes(
     enabled.Text:SetText(" " .. labelText)
     enabled.Text:SetFontObject("GameFontNormalLarge")
     enabled:SetChecked(sortingEnabled)
-    enabled:HookScript("OnClick", function() onEnabledChanged(enabled:GetChecked()) end)
+    enabled:HookScript("OnClick", function()
+        onEnabledChanged(enabled:GetChecked())
+    end)
 
     local playerLabel = parentPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
     playerLabel:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, -verticalSpacing)
@@ -161,7 +166,9 @@ local function BuildSortModeCheckboxes(
     local function onPlayerClick(sender)
         -- uncheck the others
         for chkbox, _ in pairs(playerModes) do
-            if chkbox ~= sender then chkbox:SetChecked(false) end
+            if chkbox ~= sender then
+                chkbox:SetChecked(false)
+            end
         end
 
         local mode = sender:GetChecked() and playerModes[sender] or ""
@@ -211,13 +218,15 @@ local function BuildSortModeCheckboxes(
     local modes = {
         [group] = addon.GroupSortMode.Group,
         [role] = addon.GroupSortMode.Role,
-        [alpha] = addon.GroupSortMode.Alphabetical
+        [alpha] = addon.GroupSortMode.Alphabetical,
     }
 
     local function onModeClick(sender)
         -- uncheck the others
         for chkbox, _ in pairs(modes) do
-            if chkbox ~= sender then chkbox:SetChecked(false) end
+            if chkbox ~= sender then
+                chkbox:SetChecked(false)
+            end
         end
 
         local mode = sender:GetChecked() and modes[sender] or ""
@@ -250,10 +259,18 @@ function fsBuilder:BuildSortingOptions(panel)
             addon.Options.Arena.PlayerSortMode,
             addon.Options.Arena.GroupSortMode,
             addon.Options.Arena.Reverse,
-            function(enabled) addon.Options.Arena.Enabled = enabled end,
-            function(mode) addon.Options.Arena.PlayerSortMode = mode end,
-            function(mode) addon.Options.Arena.GroupSortMode = mode end,
-            function(reverse) addon.Options.Arena.Reverse = reverse end
+            function(enabled)
+                addon.Options.Arena.Enabled = enabled
+            end,
+            function(mode)
+                addon.Options.Arena.PlayerSortMode = mode
+            end,
+            function(mode)
+                addon.Options.Arena.GroupSortMode = mode
+            end,
+            function(reverse)
+                addon.Options.Arena.Reverse = reverse
+            end
         )
     end
 
@@ -265,10 +282,18 @@ function fsBuilder:BuildSortingOptions(panel)
         addon.Options.Dungeon.PlayerSortMode,
         addon.Options.Dungeon.GroupSortMode,
         addon.Options.Dungeon.Reverse,
-        function(enabled) addon.Options.Dungeon.Enabled = enabled end,
-        function(mode) addon.Options.Dungeon.PlayerSortMode = mode end,
-        function(mode) addon.Options.Dungeon.GroupSortMode = mode end,
-        function(reverse) addon.Options.Dungeon.Reverse = reverse end
+        function(enabled)
+            addon.Options.Dungeon.Enabled = enabled
+        end,
+        function(mode)
+            addon.Options.Dungeon.PlayerSortMode = mode
+        end,
+        function(mode)
+            addon.Options.Dungeon.GroupSortMode = mode
+        end,
+        function(reverse)
+            addon.Options.Dungeon.Reverse = reverse
+        end
     )
 
     anchor = BuildSortModeCheckboxes(
@@ -279,10 +304,18 @@ function fsBuilder:BuildSortingOptions(panel)
         addon.Options.Raid.PlayerSortMode,
         addon.Options.Raid.GroupSortMode,
         addon.Options.Raid.Reverse,
-        function(enabled) addon.Options.Raid.Enabled = enabled end,
-        function(mode) addon.Options.Raid.PlayerSortMode = mode end,
-        function(mode) addon.Options.Raid.GroupSortMode = mode end,
-        function(reverse) addon.Options.Raid.Reverse = reverse end
+        function(enabled)
+            addon.Options.Raid.Enabled = enabled
+        end,
+        function(mode)
+            addon.Options.Raid.PlayerSortMode = mode
+        end,
+        function(mode)
+            addon.Options.Raid.GroupSortMode = mode
+        end,
+        function(reverse)
+            addon.Options.Raid.Reverse = reverse
+        end
     )
 
     anchor = BuildSortModeCheckboxes(
@@ -293,10 +326,18 @@ function fsBuilder:BuildSortingOptions(panel)
         addon.Options.World.PlayerSortMode,
         addon.Options.World.GroupSortMode,
         addon.Options.World.Reverse,
-        function(enabled) addon.Options.World.Enabled = enabled end,
-        function(mode) addon.Options.World.PlayerSortMode = mode end,
-        function(mode) addon.Options.World.GroupSortMode = mode end,
-        function(reverse) addon.Options.World.Reverse = reverse end
+        function(enabled)
+            addon.Options.World.Enabled = enabled
+        end,
+        function(mode)
+            addon.Options.World.PlayerSortMode = mode
+        end,
+        function(mode)
+            addon.Options.World.GroupSortMode = mode
+        end,
+        function(reverse)
+            addon.Options.World.Reverse = reverse
+        end
     )
 end
 

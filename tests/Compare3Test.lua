@@ -1,13 +1,15 @@
 local deps = {
     "Util\\Enumerable.lua",
     "Type\\SortMode.lua",
-    "Core\\Compare.lua"
+    "Core\\Compare.lua",
 }
 
 local addon = {}
 for _, fileName in ipairs(deps) do
     local module = loadfile("..\\src\\" .. fileName)
-    if module == nil then error("Failed to load " .. fileName) end
+    if module == nil then
+        error("Failed to load " .. fileName)
+    end
     module("UnitTest", addon)
 end
 
@@ -18,9 +20,15 @@ local M = {}
 function M:setUp()
     -- wow api mocks
     local members = mock:GenerateUnits(3)
-    UnitExists = function(unit) return mock:UnitExists(unit, members) end
-    UnitIsUnit = function(left, right) return left == right end
-    CRFSort_Group = function(left, right) return left < right end
+    UnitExists = function(unit)
+        return mock:UnitExists(unit, members)
+    end
+    UnitIsUnit = function(left, right)
+        return left == right
+    end
+    CRFSort_Group = function(left, right)
+        return left < right
+    end
 end
 
 function M:test_sort_with_nonexistant_units()

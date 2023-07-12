@@ -1,13 +1,15 @@
 local deps = {
     "Util\\Enumerable.lua",
     "Type\\SortMode.lua",
-    "Core\\Compare.lua"
+    "Core\\Compare.lua",
 }
 
 local addon = {}
 for _, fileName in ipairs(deps) do
     local module = loadfile("..\\src\\" .. fileName)
-    if module == nil then error("Failed to load " .. fileName) end
+    if module == nil then
+        error("Failed to load " .. fileName)
+    end
     module("UnitTest", addon)
 end
 
@@ -19,8 +21,12 @@ function M:setUp()
     -- raids don't have a "player" token, so we'll just say we're raid2
     local playerToken = "raid2"
     local members = mock:GenerateUnits(8)
-    UnitExists = function(unit) return unit == "player" or mock:UnitExists(unit, members) end
-    UnitIsUnit = function(left, right) return left == right or (left == playerToken and right == "player") end
+    UnitExists = function(unit)
+        return unit == "player" or mock:UnitExists(unit, members)
+    end
+    UnitIsUnit = function(left, right)
+        return left == right or (left == playerToken and right == "player")
+    end
 end
 
 function M:test_sort_player_top()

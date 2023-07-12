@@ -6,12 +6,24 @@ local M = {}
 addon.HidePlayer = M
 
 local function CanUpdate(frame)
-    if not frame then return end
-    if frame:IsForbidden() then return end
-    if not IsInGroup() then return false end
-    if InCombatLockdown() then return false end
-    if not frame.unit or not frame.unitExists then return end
-    if not UnitIsUnit("player", frame.unit) then return end
+    if not frame then
+        return
+    end
+    if frame:IsForbidden() then
+        return
+    end
+    if not IsInGroup() then
+        return false
+    end
+    if InCombatLockdown() then
+        return false
+    end
+    if not frame.unit or not frame.unitExists then
+        return
+    end
+    if not UnitIsUnit("player", frame.unit) then
+        return
+    end
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         if EditModeManagerFrame.editModeActive then
             return false
@@ -22,18 +34,24 @@ local function CanUpdate(frame)
 end
 
 local function UpdateVisible(frame)
-    if not CanUpdate(frame) then return end
+    if not CanUpdate(frame) then
+        return
+    end
 
     local enabled, mode, _, _ = fsCompare:GetSortMode()
 
-    if not enabled then return end
+    if not enabled then
+        return
+    end
 
     frame:SetShown(mode ~= addon.PlayerSortMode.Hidden)
 end
 
 local function Run()
     local player = fsFrame:GetPlayerFrame()
-    if not player then return end
+    if not player then
+        return
+    end
 
     UpdateVisible(player)
 end

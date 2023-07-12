@@ -12,12 +12,14 @@ local function Write(msg, level)
         print(string.format("FrameSort: %s - %s", level, msg))
     end
 
-    if not addon.Options.Logging or not addon.Options.Logging.Enabled then return end
+    if not addon.Options.Logging or not addon.Options.Logging.Enabled then
+        return
+    end
 
     entries[#entries + 1] = {
         Message = msg,
         Level = level,
-        Timestamp = date("%Y-%m-%d %H:%M:%S")
+        Timestamp = date("%Y-%m-%d %H:%M:%S"),
     }
 end
 

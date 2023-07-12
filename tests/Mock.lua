@@ -12,7 +12,7 @@ function M:GenerateUnits(count, isRaid)
         table.insert(members, "player")
     end
 
-    for i = 1,toGenerate do
+    for i = 1, toGenerate do
         table.insert(members, prefix .. i)
     end
 
@@ -21,7 +21,9 @@ end
 
 function M:UnitExists(unit, members)
     for _, x in pairs(members) do
-        if x == unit then return true end
+        if x == unit then
+            return true
+        end
     end
 
     return false

@@ -16,7 +16,9 @@ local function NthFrameSelector(str, occurrence)
         n = n + 1
 
         startPos, endPos = string.find(str, "@", endPos and endPos + 1 or nil)
-        if not startPos or not endPos then return nil, nil end
+        if not startPos or not endPos then
+            return nil, nil
+        end
     end
 
     local unitStartPos, unitEndPos = string.find(str, "^%w+", endPos + 1)
@@ -40,7 +42,9 @@ local function ReplaceUnitSelector(body, unit, occurrence)
 
     if occurrence then
         startPos, endPos = NthFrameSelector(body, occurrence)
-        if not startPos or not endPos then error(occurrence) end
+        if not startPos or not endPos then
+            error(occurrence)
+        end
 
         local newBody = string.sub(body, 0, startPos)
         newBody = newBody .. unit
@@ -51,7 +55,9 @@ local function ReplaceUnitSelector(body, unit, occurrence)
         local newBody = body
         startPos, endPos = NthFrameSelector(newBody, n)
 
-        if not startPos or not endPos then return nil end
+        if not startPos or not endPos then
+            return nil
+        end
 
         while startPos and endPos do
             local replaced = string.sub(newBody, 0, startPos)

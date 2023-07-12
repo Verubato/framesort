@@ -47,21 +47,13 @@ end
 ---Determines whether party sorting can be performed.
 ---@return boolean
 local function CanSortParty()
-    return
-        CompactPartyFrame
-        and not CompactPartyFrame:IsForbidden()
-        and CompactPartyFrame:IsVisible()
-        and CanSort(false)
+    return CompactPartyFrame and not CompactPartyFrame:IsForbidden() and CompactPartyFrame:IsVisible() and CanSort(false)
 end
 
 ---Determines whether raid sorting can be performed.
 ---@return boolean
 local function CanSortRaid()
-    return
-        CompactRaidFrameContainer
-        and not CompactRaidFrameContainer:IsForbidden()
-        and CompactRaidFrameContainer:IsVisible()
-        and CanSort(true)
+    return CompactRaidFrameContainer and not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() and CanSort(true)
 end
 
 ---Calls the post sorting callbacks.
@@ -77,27 +69,28 @@ end
 local function RearrangeFrames(frames, units)
     local sorted = fsEnumerable
         :From(frames)
-        :OrderBy(function(x, y) return fsCompare:CompareTopLeftFuzzy(x, y) end)
+        :OrderBy(function(x, y)
+            return fsCompare:CompareTopLeftFuzzy(x, y)
+        end)
         :ToTable()
     local points = fsEnumerable
         :From(sorted)
-        :Map(function(x) return fsPoint:GetPointEx(x) end)
+        :Map(function(x)
+            return fsPoint:GetPointEx(x)
+        end)
         :ToTable()
 
     for unitIndex, unit in ipairs(units) do
-        local _, frameIndex = fsEnumerable
-            :From(sorted)
-            :First(function(f) return UnitIsUnit(f.unit, unit) end)
+        local _, frameIndex = fsEnumerable:From(sorted):First(function(f)
+            return UnitIsUnit(f.unit, unit)
+        end)
 
         if frameIndex and frameIndex ~= unitIndex then
             local from = points[frameIndex]
             local to = points[unitIndex]
             local frame = frames[frameIndex]
 
-            if from.point == "TOPLEFT" and
-                from.point == to.point and
-                from.relativeTo == to.relativeTo and
-                from.relativePoint == to.relativePoint then
+            if from.point == "TOPLEFT" and from.point == to.point and from.relativeTo == to.relativeTo and from.relativePoint == to.relativePoint then
                 local xDelta = to.offsetX - from.offsetX
                 local yDelta = to.offsetY - from.offsetY
 
@@ -115,24 +108,28 @@ end
 local function RearrangeFrameChain(frames, units)
     local points = fsEnumerable
         :From(frames)
-        :OrderBy(function(x, y) return fsCompare:CompareTopLeftFuzzy(x, y) end)
+        :OrderBy(function(x, y)
+            return fsCompare:CompareTopLeftFuzzy(x, y)
+        end)
         :Map(function(x)
             return {
                 Top = x:GetTop(),
-                Left = x:GetLeft()
+                Left = x:GetLeft(),
             }
         end)
         :ToTable()
 
     local chain = fsFrame:ToFrameChain(frames)
-    if not chain.Valid then return end
+    if not chain.Valid then
+        return
+    end
     local current = chain
 
     while current do
         local source = current.Value
-        local _, unitIndex = fsEnumerable
-            :From(units)
-            :First(function(x) return UnitIsUnit(x, source.unit) end)
+        local _, unitIndex = fsEnumerable:From(units):First(function(x)
+            return UnitIsUnit(x, source.unit)
+        end)
 
         if unitIndex then
             local to = points[unitIndex]
@@ -153,11 +150,15 @@ local function LayoutRaid()
     local sortFunction = fsCompare:GetSortFunction()
     local playerFrames, petFrames = fsFrame:GetRaidFrames()
 
-    if not sortFunction or #playerFrames == 0 then return false end
+    if not sortFunction or #playerFrames == 0 then
+        return false
+    end
 
     local allUnits = fsEnumerable
         :From(playerFrames)
-        :Map(function(x) return SecureButton_GetUnit(x) end)
+        :Map(function(x)
+            return SecureButton_GetUnit(x)
+        end)
         :OrderBy(sortFunction)
         :ToTable()
 
@@ -168,7 +169,9 @@ local function LayoutRaid()
             local frames = fsFrame:GetRaidFrameGroupMembers(group)
             local units = fsEnumerable
                 :From(frames)
-                :Map(function(x) return SecureButton_GetUnit(x) end)
+                :Map(function(x)
+                    return SecureButton_GetUnit(x)
+                end)
                 :OrderBy(sortFunction)
                 :ToTable()
             RearrangeFrameChain(frames, units)
@@ -198,11 +201,15 @@ local function LayoutParty()
     local sortFunction = fsCompare:GetSortFunction()
     local frames = fsFrame:GetPartyFrames()
 
-    if not sortFunction or #frames == 0 then return false end
+    if not sortFunction or #frames == 0 then
+        return false
+    end
 
     local units = fsEnumerable
         :From(frames)
-        :Map(function(x) return SecureButton_GetUnit(x) end)
+        :Map(function(x)
+            return SecureButton_GetUnit(x)
+        end)
         :OrderBy(sortFunction)
         :ToTable()
 
@@ -215,7 +222,9 @@ end
 ---@return boolean sorted true if sorted, otherwise false.
 local function TrySortTraditional()
     local sortFunc = fsCompare:GetSortFunction()
-    if sortFunc == nil then return false end
+    if sortFunc == nil then
+        return false
+    end
 
     local sorted = false
 
@@ -259,7 +268,9 @@ end
 ---@param eventName string
 local function OnEvent(_, eventName)
     -- only attempt to run after combat ends if one is pending
-    if eventName == "PLAYER_REGEN_ENABLED" and not sortPending then return end
+    if eventName == "PLAYER_REGEN_ENABLED" and not sortPending then
+        return
+    end
 
     M:TrySort()
 end

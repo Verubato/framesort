@@ -38,7 +38,9 @@ local function UpdateTargets()
 end
 
 local function Run()
-    if not CanUpdate() then return end
+    if not CanUpdate() then
+        return
+    end
 
     UpdateTargets()
 end

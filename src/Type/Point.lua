@@ -20,7 +20,7 @@ function M:GetPointEx(frame)
         relativeTo = relativeTo,
         relativePoint = relativePoint,
         offsetX = offsetX,
-        offsetY = offsetY
+        offsetY = offsetY,
     }
 end
 

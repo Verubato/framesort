@@ -39,7 +39,7 @@ function fsBuilder:BuildMacroOptions(parent)
     end)
 
     local intro = {
-        "FrameSort will dynamically update macros with the \"#FrameSort\" header.",
+        'FrameSort will dynamically update macros with the "#FrameSort" header.',
         "Below are some examples on how to use this.",
     }
 
@@ -60,7 +60,7 @@ function fsBuilder:BuildMacroOptions(parent)
         [[#FrameSort: frame1 frame2
 /cast [@a] Spell; [mod:shift, @b] Spell;]],
         [[#framesort: frame1, frame2, frame3
-/cast [@a] Spell; [mod:shift, @b] Spell; [mod:ctrl, @c] Spell;]]
+/cast [@a] Spell; [mod:shift, @b] Spell; [mod:ctrl, @c] Spell;]],
     }
 
     local padding = 10
@@ -80,12 +80,16 @@ function fsBuilder:BuildMacroOptions(parent)
 
         -- undo any user changes
         box:SetScript("OnTextChanged", function(_, userInput)
-            if not userInput then return end
+            if not userInput then
+                return
+            end
 
             box:SetText(example)
         end)
 
-        box:SetScript("OnEscapePressed", function() box:ClearFocus() end)
+        box:SetScript("OnEscapePressed", function()
+            box:ClearFocus()
+        end)
         box:SetTextInsets(padding, padding, padding, padding)
 
         local bg = CreateFrame("Frame", nil, panel, "BackdropTemplate")
@@ -100,8 +104,8 @@ function fsBuilder:BuildMacroOptions(parent)
 
     local notes = {
         "Notes:",
-        " - The \"@\" placeholder values can be anything, e.g. @none, or @placeholder, or @a.",
-        " - Order matters, e.g. \"#framesort frame2, frame1\" would replace the first '@' with frame2."
+        ' - The "@" placeholder values can be anything, e.g. @none, or @placeholder, or @a.',
+        " - Order matters, e.g. \"#framesort frame2, frame1\" would replace the first '@' with frame2.",
     }
 
     for i, line in ipairs(notes) do

@@ -36,7 +36,7 @@ function M:From(auto)
         enumerable.State = {
             Iterator = iterator,
             Elements = elements,
-            Index = index
+            Index = index,
         }
         enumerable.Next = function()
             local nextIndex, next = iterator(enumerable.State.Elements, enumerable.State.Index)
@@ -62,7 +62,9 @@ end
 function M:Map(apply)
     local iterator = function()
         local next = self.Next()
-        if not next then return nil end
+        if not next then
+            return nil
+        end
 
         return apply(next)
     end
@@ -79,7 +81,9 @@ function M:Flatten()
         if not index or index > #next then
             next = self.Next()
             index = 1
-            if not next then return nil end
+            if not next then
+                return nil
+            end
         end
 
         local item = next[index]
@@ -136,10 +140,14 @@ end
 ---@return boolean
 function M:All(predicate)
     local next = self.Next()
-    if not next then return false end
+    if not next then
+        return false
+    end
 
     while next do
-        if not predicate(next) then return false end
+        if not predicate(next) then
+            return false
+        end
         next = self.Next()
     end
 
@@ -150,7 +158,9 @@ end
 ---@param item any
 ---@return any? number? index
 function M:IndexOf(item)
-    local _, index = self:First(function(x) return x == item end)
+    local _, index = self:First(function(x)
+        return x == item
+    end)
     return index
 end
 
@@ -159,7 +169,9 @@ end
 ---@return any? item
 function M:Min(valueSelector)
     local items = self:ToTable()
-    if #items == 0 then return nil end
+    if #items == 0 then
+        return nil
+    end
 
     local minItem = items[1]
     local minValue = valueSelector and valueSelector(minItem) or minItem
@@ -182,7 +194,9 @@ end
 ---@return any? item
 function M:Max(valueSelector)
     local items = self:ToTable()
-    if #items == 0 then return nil end
+    if #items == 0 then
+        return nil
+    end
 
     local maxItem = items[1]
     local maxValue = valueSelector and valueSelector(maxItem) or maxItem
@@ -220,7 +234,9 @@ function M:Reverse()
     local index = #items
 
     local iterator = function()
-        if index == 0 then return nil end
+        if index == 0 then
+            return nil
+        end
 
         local next = items[index]
         index = index - 1
@@ -255,7 +271,9 @@ end
 function M:Take(count)
     local taken = 0
     local iterator = function()
-        if taken == count then return nil end
+        if taken == count then
+            return nil
+        end
 
         local next = self.Next()
         taken = taken + 1
@@ -301,7 +319,9 @@ function M:Concat(other)
     local iterator = function()
         if not finishedFirst then
             local item = self.Next()
-            if item then return item end
+            if item then
+                return item
+            end
 
             finishedFirst = true
         end
@@ -317,10 +337,14 @@ end
 ---@param right any[]
 ---@return boolean
 function M:ArrayEquals(left, right)
-    if #left ~= #right then return false end
+    if #left ~= #right then
+        return false
+    end
 
     for i = 0, #left do
-        if left[i] ~= right[i] then return false end
+        if left[i] ~= right[i] then
+            return false
+        end
     end
 
     return true

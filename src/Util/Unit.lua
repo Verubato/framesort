@@ -32,8 +32,12 @@ end
 function M:GetPets(units)
     return fsEnumerable
         :From(units)
-        :Map(function(x) return x .. "pet" end)
-        :Where(function(x) return UnitExists(x) end)
+        :Map(function(x)
+            return x .. "pet"
+        end)
+        :Where(function(x)
+            return UnitExists(x)
+        end)
         :ToTable()
 end
 

@@ -65,7 +65,9 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
         ConfigureEditBox(box, spacing.Horizontal)
 
         slider:SetScript("OnValueChanged", function(_, sliderValue, userInput)
-            if not userInput then return end
+            if not userInput then
+                return
+            end
 
             local value = setValue(sliderValue, slider, box)
             if value then
@@ -75,7 +77,9 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
         end)
 
         box:SetScript("OnTextChanged", function(_, userInput)
-            if not userInput then return end
+            if not userInput then
+                return
+            end
 
             local value = setValue(box:GetText(), slider, box)
             if value then
@@ -101,7 +105,9 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
         ConfigureEditBox(box, spacing.Vertical)
 
         slider:SetScript("OnValueChanged", function(_, sliderValue, userInput)
-            if not userInput then return end
+            if not userInput then
+                return
+            end
 
             local value = setValue(sliderValue, slider, box)
             if value then
@@ -111,7 +117,9 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
         end)
 
         box:SetScript("OnTextChanged", function(_, userInput)
-            if not userInput then return end
+            if not userInput then
+                return
+            end
 
             local value = setValue(box:GetText(), slider, box)
 

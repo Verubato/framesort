@@ -13,17 +13,25 @@ addon.Compare = M
 function M:GetSortFunction()
     local enabled, playerSortMode, groupSortMode, reverse = M:GetSortMode()
 
-    if not enabled then return nil end
+    if not enabled then
+        return nil
+    end
 
     if playerSortMode ~= addon.PlayerSortMode.Middle then
-        return function(x, y) return M:Compare(x, y, playerSortMode, groupSortMode, reverse) end
+        return function(x, y)
+            return M:Compare(x, y, playerSortMode, groupSortMode, reverse)
+        end
     end
 
     -- we need to pre-sort to determine where the middle actually is
     local units = fsUnit:GetUnits()
-    table.sort(units, function(x, y) return M:Compare(x, y, addon.PlayerSortMode.Top, groupSortMode, reverse) end)
+    table.sort(units, function(x, y)
+        return M:Compare(x, y, addon.PlayerSortMode.Top, groupSortMode, reverse)
+    end)
 
-    return function(x, y) return M:Compare(x, y, playerSortMode, groupSortMode, reverse, units) end
+    return function(x, y)
+        return M:Compare(x, y, playerSortMode, groupSortMode, reverse, units)
+    end
 end
 
 ---Returns the sort mode from the configured options for the current instance.
@@ -58,8 +66,12 @@ end
 ---@param preSortedUnits table?
 ---@return boolean
 function M:Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse, preSortedUnits)
-    if not UnitExists(leftToken) then return false end
-    if not UnitExists(rightToken) then return true end
+    if not UnitExists(leftToken) then
+        return false
+    end
+    if not UnitExists(rightToken) then
+        return true
+    end
 
     if playerSortMode and playerSortMode ~= "" then
         if UnitIsUnit(leftToken, "player") then
@@ -113,7 +125,9 @@ function M:CompareMiddle(token, sortedUnits)
     local index = fsEnumerable:From(sortedUnits):IndexOf(token)
 
     -- most likely a non-existant unit
-    if not index then return false end
+    if not index then
+        return false
+    end
 
     -- 0 based
     index = index - 1
@@ -129,13 +143,19 @@ end
 ---@param rightFrame table a wow frame
 ---@return boolean
 function M:CompareTopLeftFuzzy(leftFrame, rightFrame)
-    if not leftFrame then return false end
-    if not rightFrame then return true end
+    if not leftFrame then
+        return false
+    end
+    if not rightFrame then
+        return true
+    end
 
     local leftY = fsMath:Round(leftFrame:GetTop(), fuzzyDecimalPlaces)
     local rightY = fsMath:Round(rightFrame:GetTop(), fuzzyDecimalPlaces)
 
-    if leftY ~= rightY then return leftY > rightY end
+    if leftY ~= rightY then
+        return leftY > rightY
+    end
 
     local leftX = fsMath:Round(leftFrame:GetLeft(), fuzzyDecimalPlaces)
     local rightX = fsMath:Round(rightFrame:GetLeft(), fuzzyDecimalPlaces)
@@ -150,13 +170,19 @@ end
 ---@param rightFrame table a wow frame
 ---@return boolean
 function M:CompareLeftTopFuzzy(leftFrame, rightFrame)
-    if not leftFrame then return false end
-    if not rightFrame then return true end
+    if not leftFrame then
+        return false
+    end
+    if not rightFrame then
+        return true
+    end
 
     local leftX = fsMath:Round(leftFrame:GetLeft(), fuzzyDecimalPlaces)
     local rightX = fsMath:Round(rightFrame:GetLeft(), fuzzyDecimalPlaces)
 
-    if leftX ~= rightX then return leftX < rightX end
+    if leftX ~= rightX then
+        return leftX < rightX
+    end
 
     local leftY = fsMath:Round(leftFrame:GetTop(), fuzzyDecimalPlaces)
     local rightY = fsMath:Round(rightFrame:GetTop(), fuzzyDecimalPlaces)
@@ -171,13 +197,19 @@ end
 ---@param rightFrame table a wow frame
 ---@return boolean
 function M:CompareTopRightFuzzy(leftFrame, rightFrame)
-    if not leftFrame then return false end
-    if not rightFrame then return true end
+    if not leftFrame then
+        return false
+    end
+    if not rightFrame then
+        return true
+    end
 
     local leftY = fsMath:Round(leftFrame:GetTop(), fuzzyDecimalPlaces)
     local rightY = fsMath:Round(rightFrame:GetTop(), fuzzyDecimalPlaces)
 
-    if leftY ~= rightY then return leftY > rightY end
+    if leftY ~= rightY then
+        return leftY > rightY
+    end
 
     local leftX = fsMath:Round(leftFrame:GetLeft(), fuzzyDecimalPlaces)
     local rightX = fsMath:Round(rightFrame:GetLeft(), fuzzyDecimalPlaces)
@@ -192,13 +224,19 @@ end
 ---@param rightFrame table a wow frame
 ---@return boolean
 function M:CompareBottomLeftFuzzy(leftFrame, rightFrame)
-    if not leftFrame then return false end
-    if not rightFrame then return true end
+    if not leftFrame then
+        return false
+    end
+    if not rightFrame then
+        return true
+    end
 
     local leftY = fsMath:Round(leftFrame:GetBottom(), fuzzyDecimalPlaces)
     local rightY = fsMath:Round(rightFrame:GetBottom(), fuzzyDecimalPlaces)
 
-    if leftY ~= rightY then return leftY < rightY end
+    if leftY ~= rightY then
+        return leftY < rightY
+    end
 
     local leftX = fsMath:Round(leftFrame:GetLeft(), fuzzyDecimalPlaces)
     local rightX = fsMath:Round(rightFrame:GetLeft(), fuzzyDecimalPlaces)

@@ -1,11 +1,13 @@
 local deps = {
-    "Util\\Unit.lua"
+    "Util\\Unit.lua",
 }
 
 local addon = {}
 for _, fileName in ipairs(deps) do
     local module = loadfile("..\\src\\" .. fileName)
-    if module == nil then error("Failed to load " .. fileName) end
+    if module == nil then
+        error("Failed to load " .. fileName)
+    end
     module("UnitTest", addon)
 end
 
@@ -20,11 +22,15 @@ function M:setUp()
 end
 
 function M:test_party_full()
-    IsInRaid = function() return false end
+    IsInRaid = function()
+        return false
+    end
 
     local count = 5
     local members = mock:GenerateUnits(count)
-    UnitExists = function(x) return mock:UnitExists(x, members) end
+    UnitExists = function(x)
+        return mock:UnitExists(x, members)
+    end
 
     local units = unit:GetUnits()
 
@@ -37,8 +43,12 @@ function M:test_party_full()
 end
 
 function M:test_party_empty()
-    IsInRaid = function() return false end
-    UnitExists = function(_) return false end
+    IsInRaid = function()
+        return false
+    end
+    UnitExists = function(_)
+        return false
+    end
 
     local units = unit:GetUnits()
 
@@ -47,11 +57,15 @@ function M:test_party_empty()
 end
 
 function M:test_party3()
-    IsInRaid = function() return false end
+    IsInRaid = function()
+        return false
+    end
 
     local count = 3
     local members = mock:GenerateUnits(count)
-    UnitExists = function(x) return mock:UnitExists(x, members) end
+    UnitExists = function(x)
+        return mock:UnitExists(x, members)
+    end
 
     local units = unit:GetUnits()
 
@@ -64,11 +78,15 @@ function M:test_party3()
 end
 
 function M:test_raid_full()
-    IsInRaid = function() return true end
+    IsInRaid = function()
+        return true
+    end
 
     local count = 40
     local members = mock:GenerateUnits(count, true)
-    UnitExists = function(x) return mock:UnitExists(x, members) end
+    UnitExists = function(x)
+        return mock:UnitExists(x, members)
+    end
 
     local units = unit:GetUnits()
 
@@ -80,8 +98,12 @@ function M:test_raid_full()
 end
 
 function M:test_raid_empty()
-    IsInRaid = function() return true end
-    UnitExists = function(_) return false end
+    IsInRaid = function()
+        return true
+    end
+    UnitExists = function(_)
+        return false
+    end
 
     local units = unit:GetUnits()
 
@@ -89,11 +111,15 @@ function M:test_raid_empty()
 end
 
 function M:test_raid3()
-    IsInRaid = function() return true end
+    IsInRaid = function()
+        return true
+    end
 
     local count = 3
     local members = mock:GenerateUnits(count, true)
-    UnitExists = function(x) return mock:UnitExists(x, members) end
+    UnitExists = function(x)
+        return mock:UnitExists(x, members)
+    end
 
     local units = unit:GetUnits()
 
