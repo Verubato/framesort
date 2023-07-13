@@ -131,16 +131,14 @@ local function FlatPets(pets, members, spacing, horizontal)
         end
     end
 
-    local petsPerRaidFrame = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and 3 or 2
+    -- 2 pet frames fit into 1 member raid frame
+    local petsPerRaidFrame = 2
 
     -- move all the remaining pets
     for i = 2, #pets do
         local pet = pets[i]
         local petPoint = fsPoint:GetPointEx(pet)
         local previous = pets[i - 1]
-        -- in classic 2 pet frames fit into 1 member raid frame
-        -- so for the 2nd frame just anchor it to the first
-        -- in retail 3 pet frames almost fit
         local addSpacing = i % petsPerRaidFrame == 1
         local xDelta = 0
         local yDelta = 0
