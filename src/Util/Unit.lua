@@ -26,21 +26,6 @@ function M:GetUnits()
     return members
 end
 
----Gets the pet units for the specified player units.
----@param units string[]
----@return string[] pet unit tokens
-function M:GetPets(units)
-    return fsEnumerable
-        :From(units)
-        :Map(function(x)
-            return x .. "pet"
-        end)
-        :Where(function(x)
-            return UnitExists(x)
-        end)
-        :ToTable()
-end
-
 ---Returns true if the unit token is a pet.
 ---@param unit string
 function M:IsPet(unit)
