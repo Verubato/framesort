@@ -61,7 +61,7 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
         ConfigureSlider(slider, spacing.Horizontal)
 
         local box = CreateFrame("EditBox", nil, panel, "InputBoxTemplate")
-        box:SetPoint("CENTER", slider, "CENTER", 0, 25)
+        box:SetPoint("CENTER", slider, "CENTER", 0, 30)
         ConfigureEditBox(box, spacing.Horizontal)
 
         slider:SetScript("OnValueChanged", function(_, sliderValue, userInput)
@@ -101,7 +101,7 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
         ConfigureSlider(slider, spacing.Vertical)
 
         local box = CreateFrame("EditBox", nil, panel, "InputBoxTemplate")
-        box:SetPoint("CENTER", slider, "CENTER", 0, 25)
+        box:SetPoint("CENTER", slider, "CENTER", 0, 30)
         ConfigureEditBox(box, spacing.Vertical)
 
         slider:SetScript("OnValueChanged", function(_, sliderValue, userInput)
