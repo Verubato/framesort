@@ -6,19 +6,11 @@ local M = {}
 addon.Frame = M
 
 local function IsValidUnitFrame(frame)
-    return not frame:IsForbidden()
-        and frame.unitExists
-        -- to prevent some weird issue where frames are visible but aren't positioned
-        and frame:GetTop() ~= nil
-        and frame:GetLeft() ~= nil
+    return not frame:IsForbidden() and frame.unitExists and frame:GetTop() ~= nil and frame:GetLeft() ~= nil
 end
 
 local function IsValidGroupFrame(frame)
-    return not frame:IsForbidden()
-        -- to prevent some weird issue where frames are visible but aren't positioned
-        and frame:GetTop() ~= nil
-        and frame:GetLeft() ~= nil
-        and string.match(frame:GetName() or "", "CompactRaidGroup")
+    return not frame:IsForbidden() and frame:GetTop() ~= nil and frame:GetLeft() ~= nil and string.match(frame:GetName() or "", "CompactRaidGroup")
 end
 
 local function ExtractFrames(children)
@@ -130,6 +122,11 @@ end
 ---@return LinkedListNode root in order of parent -> child -> child -> child
 function M:ToFrameChain(frames)
     local invalid = { Valid = false }
+
+    if #frames == 0 then
+        return invalid
+    end
+
     local nodesByFrame = fsEnumerable:From(frames):ToLookup(function(frame)
         return frame
     end, function(frame)

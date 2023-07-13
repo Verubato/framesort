@@ -61,7 +61,7 @@ local function FlatMembers(frames, spacing)
     end
 end
 
-local function Pets(pets, members, spacing, horizontal)
+local function FlatPets(pets, members, spacing, horizontal)
     if #pets == 0 or #members == 0 then
         return
     end
@@ -168,11 +168,96 @@ local function Pets(pets, members, spacing, horizontal)
     end
 end
 
-local function GroupedMembers(frames, spacing, horizontal)
-    if #frames == 0 then
+local function ChainedPets(pets, players, spacing, horizontal)
+    local root = fsFrame:ToFrameChain(pets)
+    if not root.Valid then
         return
     end
 
+    -- ensure it's ordered
+    local ordered = fsEnumerable
+        :From(pets)
+        :OrderBy(function(x, y)
+            return fsCompare:CompareTopLeftFuzzy(x, y)
+        end)
+        :ToTable()
+
+    -- bottom/right most player anchor
+    local playerAnchor = nil
+    if horizontal then
+        playerAnchor = fsEnumerable
+            :From(players)
+            :OrderBy(function(x, y)
+                return fsCompare:CompareTopLeftFuzzy(x, y)
+            end)
+            :First(function(x)
+                return x:IsVisible()
+            end)
+    else
+        playerAnchor = fsEnumerable
+            :From(players)
+            :OrderBy(function(x, y)
+                return fsCompare:CompareBottomLeftFuzzy(x, y)
+            end)
+            :First(function(x)
+                return x:IsVisible()
+            end)
+    end
+
+    -- calculate the desired positions (with spacing added)
+    local positions = {}
+    local currentSpacing = 0
+
+    for i, frame in ipairs(ordered) do
+        local previous = i == 1 and playerAnchor or ordered[i - 1]
+        if horizontal then
+            local spacingToAdd = (i - 1) * spacing.Horizontal
+            positions[i] = {
+                Top = previous:GetTop(),
+                Left = (previous:GetRight() + currentSpacing) + spacingToAdd,
+            }
+
+            currentSpacing = currentSpacing + (previous:GetRight() - frame:GetLeft())
+        else
+            local spacingToAdd = (i - 1) * spacing.Vertical
+            positions[i] = {
+                Top = (previous:GetBottom() + currentSpacing) - spacingToAdd,
+                Left = previous:GetLeft(),
+            }
+
+            currentSpacing = currentSpacing + (previous:GetBottom() - frame:GetTop())
+        end
+    end
+
+    local current = root
+    while current do
+        local frame = current.Value
+        local index = fsEnumerable:From(ordered):IndexOf(frame)
+        local to = positions[index]
+        local xDelta = horizontal and (to.Left - frame:GetLeft()) or 0
+        local yDelta = not horizontal and (to.Top - frame:GetTop()) or 0
+
+        if xDelta ~= 0 or yDelta ~= 0 then
+            frame:AdjustPointsOffset(xDelta, yDelta)
+        end
+
+        current = current.Next
+    end
+
+    -- moving root moves the whole chain
+    -- so need to handle separately
+    local rootPetFrame = root.Value
+    local topPetFrame = ordered[1]
+    if horizontal then
+        local xDelta = (playerAnchor:GetLeft() - topPetFrame:GetLeft())
+        rootPetFrame:AdjustPointsOffset(xDelta, 0)
+    else
+        local yDelta = (playerAnchor:GetBottom() - topPetFrame:GetTop()) - spacing.Vertical
+        rootPetFrame:AdjustPointsOffset(0, yDelta)
+    end
+end
+
+local function GroupedMembers(frames, spacing, horizontal)
     -- why all this complexity instead of just a simple sequence of SetPoint() calls?
     -- it's because SetPoint() can't be called in combat whereas AdjustPointsOffset() can
     -- SetPoint() is just completely disallowed (by unsecure code) in combat, even if only changing x/y points
@@ -329,7 +414,7 @@ local function Groups(groups, spacing, horizontal)
     end
 end
 
-local function ApplySpacing(container, petsContainer, spacing, together, horizontal, showPets)
+local function ApplySpacing(container, petsContainer, spacing, together, horizontal, showPets, petsFlat)
     local players = fsFrame:GetUnitFrames(container)
 
     if together then
@@ -345,7 +430,11 @@ local function ApplySpacing(container, petsContainer, spacing, together, horizon
 
     if showPets then
         local _, pets = fsFrame:GetUnitFrames(petsContainer or container)
-        Pets(pets, players, spacing, horizontal)
+        if petsFlat then
+            FlatPets(pets, players, spacing, horizontal)
+        else
+            ChainedPets(pets, players, spacing, horizontal)
+        end
     end
 end
 
@@ -355,7 +444,8 @@ function M:ApplySpacing()
         {
             container = CompactPartyFrame,
             spacing = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE and addon.Options.Appearance.Raid.Spacing or addon.Options.Appearance.Party.Spacing,
-            petsContainer = CompactRaidFrameContainer,
+            petsContainer = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE and CompactRaidFrameContainer or CompactPartyFrame,
+            petsFlat = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE,
             together = fsFrame:KeepGroupsTogether(false),
             horizontal = fsFrame:HorizontalLayout(false),
             showPets = fsFrame:ShowPets(),
@@ -366,6 +456,7 @@ function M:ApplySpacing()
             together = fsFrame:KeepGroupsTogether(true),
             horizontal = fsFrame:HorizontalLayout(true),
             showPets = fsFrame:ShowPets(),
+            petsFlat = true,
         },
         {
             container = CompactArenaFrame,
@@ -373,6 +464,7 @@ function M:ApplySpacing()
             together = false,
             horizontal = false,
             showPets = true,
+            petsFlat = true,
         },
     }
 
@@ -384,7 +476,7 @@ function M:ApplySpacing()
 
             -- avoid applying 0 spacing
             if previousNonZero or not zeroSpacing then
-                ApplySpacing(x.container, x.petsContainer, x.spacing, x.together, x.horizontal, x.showPets)
+                ApplySpacing(x.container, x.petsContainer, x.spacing, x.together, x.horizontal, x.showPets, x.petsFlat)
                 previousSpacing[x.container] = {
                     Horizontal = x.spacing.Horizontal,
                     Vertical = x.spacing.Vertical,

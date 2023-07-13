@@ -144,17 +144,56 @@ local function RearrangeFrameChain(frames, units)
     end
 end
 
+---Returns a sorted array of pet units from the given ordered player units.
+---@param playerUnits string[]
+---@param petUnits string[]
+---@return string[] pet unit tokens
+local function SortPets(playerUnits, petUnits)
+    -- this is O(n^2) but it's tiny data so doesn't really matter
+    -- might refactor in the future to a better algorithm
+    return fsEnumerable
+        :From(playerUnits)
+        :Map(function(x)
+            return x .. "pet"
+        end)
+        :Where(function(petFromPlayer)
+            return fsEnumerable:From(petUnits):Any(function(pet)
+                return UnitIsUnit(pet, petFromPlayer)
+            end)
+        end)
+        :ToTable()
+end
+
+---Sorts raid pet frames.
+---@return boolean sorted true if frames were sorted, otherwise false.
+local function LayoutRaidPets(sortedPlayerUnits)
+    local _, petFrames = fsFrame:GetRaidFrames()
+    local petUnits = fsEnumerable
+        :From(petFrames)
+        :Map(function(x)
+            return SecureButton_GetUnit(x)
+        end)
+        :OrderBy(sortFunction)
+        :ToTable()
+
+    local sorted = SortPets(sortedPlayerUnits, petUnits)
+
+    RearrangeFrames(petFrames, sorted)
+
+    return true
+end
+
 ---Sorts raid frames.
 ---@return boolean sorted true if frames were sorted, otherwise false.
 local function LayoutRaid()
     local sortFunction = fsCompare:GetSortFunction()
-    local playerFrames, petFrames = fsFrame:GetRaidFrames()
+    local playerFrames = fsFrame:GetRaidFrames()
 
     if not sortFunction or #playerFrames == 0 then
         return false
     end
 
-    local allUnits = fsEnumerable
+    local playerUnits = fsEnumerable
         :From(playerFrames)
         :Map(function(x)
             return SecureButton_GetUnit(x)
@@ -167,29 +206,66 @@ local function LayoutRaid()
 
         for _, group in ipairs(groups) do
             local frames = fsFrame:GetRaidFrameGroupMembers(group)
-            local units = fsEnumerable
+            local groupUnits = fsEnumerable
                 :From(frames)
                 :Map(function(x)
                     return SecureButton_GetUnit(x)
                 end)
                 :OrderBy(sortFunction)
                 :ToTable()
-            RearrangeFrameChain(frames, units)
+            RearrangeFrameChain(frames, groupUnits)
         end
     else
-        RearrangeFrames(playerFrames, allUnits)
+        RearrangeFrames(playerFrames, playerUnits)
     end
 
-    if fsFrame:ShowPets() then
-        -- get pets based off the sorted units instead of the frames
-        -- as this comes with the benefit that the pets will also be sorted
-        local pets = fsUnit:GetPets(allUnits)
-        if #pets ~= #petFrames then
-            fsLog:Warning(string.format("Unexpectedly encoutered a different number of pet frames '%d' vs pet units '%d'.", #petFrames, #pets))
-            return true
-        end
+    return not fsFrame:ShowPets() or LayoutRaidPets(playerUnits)
+end
 
-        RearrangeFrames(petFrames, pets)
+---Sorts party pet frames.
+---@return boolean sorted true if frames were sorted, otherwise false.
+local function LayoutPartyPets(sortedPlayerUnits)
+    -- firstly sort the frames
+    local playerFrames, petFrames = fsFrame:GetPartyFrames()
+    local chain = fsFrame:ToFrameChain(petFrames)
+
+    if not chain.Valid then
+        return false
+    end
+
+    local petUnits = fsEnumerable
+        :From(petFrames)
+        :Map(function(x)
+            return SecureButton_GetUnit(x)
+        end)
+        :ToTable()
+    local sortedPetUnits = SortPets(sortedPlayerUnits, petUnits)
+
+    RearrangeFrameChain(petFrames, sortedPetUnits)
+
+    -- next move the frame chain as a group beneath the player frames
+    local rootPet = chain.Value
+
+    if not fsFrame:HorizontalLayout(false) then
+        local bottomFrame = fsEnumerable
+            :From(playerFrames)
+            :OrderBy(function(x, y)
+                return fsCompare:CompareBottomLeftFuzzy(x, y)
+            end)
+            :First(function(x)
+                return x:IsVisible()
+            end)
+        local topPetFrame = fsEnumerable
+            :From(petFrames)
+            :OrderBy(function(x, y)
+                return fsCompare:CompareTopLeftFuzzy(x, y)
+            end)
+            :First(function(x)
+                return x:IsVisible()
+            end)
+
+        local yDelta = bottomFrame:GetBottom() - topPetFrame:GetTop()
+        rootPet:AdjustPointsOffset(0, yDelta)
     end
 
     return true
@@ -199,23 +275,23 @@ end
 ---@return boolean sorted true if frames were sorted, otherwise false.
 local function LayoutParty()
     local sortFunction = fsCompare:GetSortFunction()
-    local frames = fsFrame:GetPartyFrames()
+    local playerFrames = fsFrame:GetPartyFrames()
 
-    if not sortFunction or #frames == 0 then
+    if not sortFunction or #playerFrames == 0 then
         return false
     end
 
-    local units = fsEnumerable
-        :From(frames)
+    local playerUnits = fsEnumerable
+        :From(playerFrames)
         :Map(function(x)
             return SecureButton_GetUnit(x)
         end)
         :OrderBy(sortFunction)
         :ToTable()
 
-    RearrangeFrameChain(frames, units)
+    RearrangeFrameChain(playerFrames, playerUnits)
 
-    return true
+    return not fsFrame:ShowPets() or LayoutPartyPets(playerUnits)
 end
 
 ---Attempts to sort the party/raid frames using the traditional method.
