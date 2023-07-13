@@ -58,9 +58,9 @@ function fsBuilder:BuildMacroOptions(parent)
         [[#framesort frame2
 /cast [@placeholder,help] Dispel; [@placeholder,harm] Purge;]],
         [[#FrameSort: frame1 frame2
-/cast [@a] Spell; [mod:shift, @b] Spell;]],
-        [[#framesort: frame1, frame2, frame3
-/cast [@a] Spell; [mod:shift, @b] Spell; [mod:ctrl, @c] Spell;]],
+/cast [mod:shift,@a] Spell; [@b] Spell;]],
+        [[#framesort: frame3, frame2, frame1
+/cast [mod:shift,@a] Spell; [mod:ctrl,@b] Spell; [@c] Spell;]],
     }
 
     local padding = 10
