@@ -444,7 +444,7 @@ function M:ApplySpacing()
             spacing = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE and addon.Options.Appearance.Raid.Spacing or addon.Options.Appearance.Party.Spacing,
             petsContainer = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE and CompactRaidFrameContainer or CompactPartyFrame,
             petsFlat = WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE,
-            together = fsFrame:KeepGroupsTogether(false),
+            together = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and true or fsFrame:KeepGroupsTogether(false),
             horizontal = fsFrame:HorizontalLayout(false),
             showPets = fsFrame:ShowPets(),
         },

@@ -36,7 +36,7 @@ local function CanSort(isRaid)
         end
     end
 
-    if fsFrame:KeepGroupsTogether(isRaid) and not addon.Options.SortingMethod.TaintlessEnabled then
+    if isRaid and fsFrame:KeepGroupsTogether(true) and not addon.Options.SortingMethod.TaintlessEnabled then
         fsLog:Warning("Cannot perform non-taintless sorting when the 'Keep Groups Together' setting is enabled.")
         return false
     end
