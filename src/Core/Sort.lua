@@ -311,7 +311,7 @@ local function TrySortTraditional()
         end
 
         if CanSortParty() then
-            CompactPartyFrame_SetFlowSortFunction(sortFunc)
+            CompactPartyFrame:SetFlowSortFunction(sortFunc)
             sorted = sorted or true
         end
     else

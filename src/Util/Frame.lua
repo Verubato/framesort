@@ -184,11 +184,10 @@ end
 function M:KeepGroupsTogether(isRaid)
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         if not isRaid then
-            return true
+            return false
         end
 
         local raidGroupDisplayType = EditModeManagerFrame:GetSettingValue(Enum.EditModeSystem.UnitFrame, Enum.EditModeUnitFrameSystemIndices.Raid, Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
-
         return raidGroupDisplayType == Enum.RaidGroupDisplayType.SeparateGroupsVertical or raidGroupDisplayType == Enum.RaidGroupDisplayType.SeparateGroupsHorizontal
     else
         return CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
