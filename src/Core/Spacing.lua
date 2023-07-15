@@ -513,4 +513,8 @@ function addon:InitSpacing()
     if CompactArenaFrame then
         hooksecurefunc(CompactArenaFrame, "UpdateLayout", Run)
     end
+
+    if CompactRaidGroup_UpdateLayout then
+        hooksecurefunc("CompactRaidGroup_UpdateLayout", Run)
+    end
 end
