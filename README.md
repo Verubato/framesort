@@ -16,13 +16,13 @@ A simple World of Warcraft add-on that places the player frame (you) at the top/
 
 ## Screenshots ##
 
-![Options](https://github.com/Verubato/frame-sort/raw/main/assets/options.png)
+![Options](https://github.com/Verubato/framesort/raw/main/assets/options.png)
 
-![Spacing](https://github.com/Verubato/frame-sort/raw/main/assets/spacing.png)
+![Spacing](https://github.com/Verubato/framesort/raw/main/assets/spacing.png)
 
-![Keybindings](https://github.com/Verubato/frame-sort/raw/main/assets/keybindings.png)
+![Keybindings](https://github.com/Verubato/framesort/raw/main/assets/keybindings.png)
 
-![Macros](https://github.com/Verubato/frame-sort/raw/main/assets/macros.png)
+![Macros](https://github.com/Verubato/framesort/raw/main/assets/macros.png)
 
 ## Xaryu Explains ##
 
@@ -35,4 +35,4 @@ The addon can be installed via:
 * [CurseForge](https://www.curseforge.com/wow/addons/framesort)
 * [Wago.io](https://addons.wago.io/addons/framesort)
 * [WowUp](https://wowup.io/)
-* [Manually](https://github.com/Verubato/frame-sort/releases/latest)
+* [Manually](https://github.com/Verubato/framesort/releases/latest)
