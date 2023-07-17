@@ -96,36 +96,19 @@ end
 ---@param parentPanel table the parent UI panel.
 ---@param pointOffset table a UI component used as a relative position anchor for the new components.
 ---@param labelText string the text to display on the enabled checkbox.
----@param sortingEnabled boolean whether sorting is currently enabled.
----@param playerSortMode string current player sort mode.
----@param sortMode string current group sort mode.
----@param reverse boolean current reverse sorting status.
----@param onEnabledChanged function function(enabled) callback function when enabled changes.
----@param onPlayerSortModeChanged function function(mode) callback function when the player sort mode changes.
----@param onSortModeChanged function function(mode) callback function when the group sort mode changes.
+---@param options table the configuration table
 ---@return table The bottom left most control to use for anchoring subsequent UI components.
-local function BuildSortModeCheckboxes(
-    parentPanel,
-    pointOffset,
-    labelText,
-    sortingEnabled,
-    playerSortMode,
-    sortMode,
-    reverse,
-    onEnabledChanged,
-    onPlayerSortModeChanged,
-    onSortModeChanged,
-    onReverseChanged
-)
+local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, options)
     local enabled = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     -- not sure why, but checkbox left seems to be off by about 4 units by default
     enabled:SetPoint("TOPLEFT", pointOffset, "BOTTOMLEFT", -4, -verticalSpacing)
     fsBuilder:TextShim(enabled)
     enabled.Text:SetText(" " .. labelText)
     enabled.Text:SetFontObject("GameFontNormalLarge")
-    enabled:SetChecked(sortingEnabled)
+    enabled:SetChecked(options.Enabled)
     enabled:HookScript("OnClick", function()
-        onEnabledChanged(enabled:GetChecked())
+        options.Enabled = enabled:GetChecked()
+        fsSort:TrySort()
     end)
 
     local playerLabel = parentPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
@@ -136,25 +119,25 @@ local function BuildSortModeCheckboxes(
     fsBuilder:TextShim(top)
     top.Text:SetText("Top")
     top:SetPoint("LEFT", playerLabel, "RIGHT", horizontalSpacing / 2, 0)
-    top:SetChecked(playerSortMode == addon.PlayerSortMode.Top)
+    top:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Top)
 
     local middle = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     fsBuilder:TextShim(middle)
     middle.Text:SetText("Middle")
     middle:SetPoint("LEFT", top, "RIGHT", horizontalSpacing, 0)
-    middle:SetChecked(playerSortMode == addon.PlayerSortMode.Middle)
+    middle:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Middle)
 
     local bottom = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     fsBuilder:TextShim(bottom)
     bottom.Text:SetText("Bottom")
     bottom:SetPoint("LEFT", middle, "RIGHT", horizontalSpacing, 0)
-    bottom:SetChecked(playerSortMode == addon.PlayerSortMode.Bottom)
+    bottom:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Bottom)
 
     local hidden = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     fsBuilder:TextShim(hidden)
     hidden.Text:SetText("Hidden")
     hidden:SetPoint("LEFT", bottom, "RIGHT", horizontalSpacing, 0)
-    hidden:SetChecked(playerSortMode == addon.PlayerSortMode.Hidden)
+    hidden:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Hidden)
 
     local playerModes = {
         [top] = addon.PlayerSortMode.Top,
@@ -171,8 +154,7 @@ local function BuildSortModeCheckboxes(
             end
         end
 
-        local mode = sender:GetChecked() and playerModes[sender] or ""
-        onPlayerSortModeChanged(mode)
+        options.PlayerSortMode = sender:GetChecked() and playerModes[sender] or ""
         fsSort:TrySort()
         fsHide:ShowHidePlayer()
     end
@@ -195,25 +177,25 @@ local function BuildSortModeCheckboxes(
     group:SetPoint("TOP", modeLabel, "TOP", 0, 10)
     fsBuilder:TextShim(group)
     group.Text:SetText(addon.GroupSortMode.Group)
-    group:SetChecked(sortMode == addon.GroupSortMode.Group)
+    group:SetChecked(options.GroupSortMode == addon.GroupSortMode.Group)
 
     local role = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     role:SetPoint("LEFT", group, "RIGHT", horizontalSpacing, 0)
     fsBuilder:TextShim(role)
     role.Text:SetText(addon.GroupSortMode.Role)
-    role:SetChecked(sortMode == addon.GroupSortMode.Role)
+    role:SetChecked(options.GroupSortMode == addon.GroupSortMode.Role)
 
     local alpha = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     alpha:SetPoint("LEFT", role, "RIGHT", horizontalSpacing, 0)
     fsBuilder:TextShim(alpha)
     alpha.Text:SetText("Alpha")
-    alpha:SetChecked(sortMode == addon.GroupSortMode.Alphabetical)
+    alpha:SetChecked(options.GroupSortMode == addon.GroupSortMode.Alphabetical)
 
     local rev = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     rev:SetPoint("LEFT", alpha, "RIGHT", horizontalSpacing, 0)
     fsBuilder:TextShim(rev)
     rev.Text:SetText("Reverse")
-    rev:SetChecked(reverse)
+    rev:SetChecked(options.Reverse)
 
     local modes = {
         [group] = addon.GroupSortMode.Group,
@@ -229,8 +211,7 @@ local function BuildSortModeCheckboxes(
             end
         end
 
-        local mode = sender:GetChecked() and modes[sender] or ""
-        onSortModeChanged(mode)
+        options.GroupSortMode = sender:GetChecked() and modes[sender] or ""
         fsSort:TrySort()
     end
 
@@ -239,8 +220,7 @@ local function BuildSortModeCheckboxes(
     end
 
     rev:HookScript("OnClick", function()
-        local value = rev:GetChecked()
-        onReverseChanged(value)
+        options.Reverse = rev:GetChecked()
         fsSort:TrySort()
     end)
 
@@ -251,94 +231,12 @@ function fsBuilder:BuildSortingOptions(panel)
     local anchor = BuiltTitle(panel)
 
     if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
-        anchor = BuildSortModeCheckboxes(
-            panel,
-            anchor,
-            "Arena",
-            addon.Options.Arena.Enabled,
-            addon.Options.Arena.PlayerSortMode,
-            addon.Options.Arena.GroupSortMode,
-            addon.Options.Arena.Reverse,
-            function(enabled)
-                addon.Options.Arena.Enabled = enabled
-            end,
-            function(mode)
-                addon.Options.Arena.PlayerSortMode = mode
-            end,
-            function(mode)
-                addon.Options.Arena.GroupSortMode = mode
-            end,
-            function(reverse)
-                addon.Options.Arena.Reverse = reverse
-            end
-        )
+        anchor = BuildSortModeCheckboxes(panel, anchor, "Arena", addon.Options.Arena)
     end
 
-    anchor = BuildSortModeCheckboxes(
-        panel,
-        anchor,
-        "Dungeon (mythics, 5-mans)",
-        addon.Options.Dungeon.Enabled,
-        addon.Options.Dungeon.PlayerSortMode,
-        addon.Options.Dungeon.GroupSortMode,
-        addon.Options.Dungeon.Reverse,
-        function(enabled)
-            addon.Options.Dungeon.Enabled = enabled
-        end,
-        function(mode)
-            addon.Options.Dungeon.PlayerSortMode = mode
-        end,
-        function(mode)
-            addon.Options.Dungeon.GroupSortMode = mode
-        end,
-        function(reverse)
-            addon.Options.Dungeon.Reverse = reverse
-        end
-    )
-
-    anchor = BuildSortModeCheckboxes(
-        panel,
-        anchor,
-        "Raid (battlegrounds, raids)",
-        addon.Options.Raid.Enabled,
-        addon.Options.Raid.PlayerSortMode,
-        addon.Options.Raid.GroupSortMode,
-        addon.Options.Raid.Reverse,
-        function(enabled)
-            addon.Options.Raid.Enabled = enabled
-        end,
-        function(mode)
-            addon.Options.Raid.PlayerSortMode = mode
-        end,
-        function(mode)
-            addon.Options.Raid.GroupSortMode = mode
-        end,
-        function(reverse)
-            addon.Options.Raid.Reverse = reverse
-        end
-    )
-
-    anchor = BuildSortModeCheckboxes(
-        panel,
-        anchor,
-        "World (non-instance groups)",
-        addon.Options.World.Enabled,
-        addon.Options.World.PlayerSortMode,
-        addon.Options.World.GroupSortMode,
-        addon.Options.World.Reverse,
-        function(enabled)
-            addon.Options.World.Enabled = enabled
-        end,
-        function(mode)
-            addon.Options.World.PlayerSortMode = mode
-        end,
-        function(mode)
-            addon.Options.World.GroupSortMode = mode
-        end,
-        function(reverse)
-            addon.Options.World.Reverse = reverse
-        end
-    )
+    anchor = BuildSortModeCheckboxes(panel, anchor, "Dungeon (mythics, 5-mans)", addon.Options.Dungeon)
+    anchor = BuildSortModeCheckboxes(panel, anchor, "Raid (battlegrounds, raids)", addon.Options.Raid)
+    anchor = BuildSortModeCheckboxes(panel, anchor, "World (non-instance groups)", addon.Options.World)
 end
 
 ---Initialises the addon options.
