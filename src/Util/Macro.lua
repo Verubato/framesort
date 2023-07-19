@@ -104,6 +104,16 @@ local function UnitForSelector(selector, friendlyUnits)
     local number = string.match(selector, "%d+")
     local index = number and tonumber(number) or nil
 
+    -- target
+    if string.match(string.lower(selector), "target") then
+        return "target"
+    end
+
+    -- focus
+    if string.match(string.lower(selector), "focus") then
+        return "focus"
+    end
+
     -- player
     if string.match(string.lower(selector), "player") then
         return "player"

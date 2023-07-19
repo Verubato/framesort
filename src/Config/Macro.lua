@@ -103,7 +103,7 @@ function fsBuilder:BuildMacroOptions(parent)
     local notes = {
         "Supported variables:",
         " - Frame1, Frame2, Frame3, Frame(1-99), etc.",
-        " - Player (to target yourself)",
+        " - Player, Focus, Target",
         " - Tank, Healer, DPS, Tank/Healer/DPS(1-99).",
         " - Add a number to choose the Nth tank/healer/dps, e.g. DPS2 selects the 2nd DPS.",
         " - Variables are case-insensitive, so 'fRaMe1' and 'Dps' will work.",
