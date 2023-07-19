@@ -496,4 +496,54 @@ function M:test_dps()
     assertEquals(macro:GetNewBody(macroText, units), expected)
 end
 
+function M:test_target()
+    local units = { "player", "party1", "party2" }
+
+    UnitGroupRolesAssigned = function(x)
+        if x == "party1" then
+            return "HEALER"
+        end
+
+        return "DAMAGER"
+    end
+
+    local macroText = [[
+        #showtooltip
+        #framesort Healer, Target
+        /cast [@none,exists][@b] Spell;
+    ]]
+    local expected = [[
+        #showtooltip
+        #framesort Healer, Target
+        /cast [@party1,exists][@target] Spell;
+    ]]
+
+    assertEquals(macro:GetNewBody(macroText, units), expected)
+end
+
+function M:test_focus()
+    local units = { "player", "party1", "party2" }
+
+    UnitGroupRolesAssigned = function(x)
+        if x == "party1" then
+            return "HEALER"
+        end
+
+        return "DAMAGER"
+    end
+
+    local macroText = [[
+        #showtooltip
+        #framesort Focus, Target
+        /cast [mod:shift,@a][@b] Spell;
+    ]]
+    local expected = [[
+        #showtooltip
+        #framesort Focus, Target
+        /cast [mod:shift,@focus][@target] Spell;
+    ]]
+
+    assertEquals(macro:GetNewBody(macroText, units), expected)
+end
+
 return M
