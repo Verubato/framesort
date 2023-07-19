@@ -111,6 +111,31 @@ function M:Where(predicate)
     return M:From(iterator)
 end
 
+---Returns the nth instance that matches the predicate.
+---@param n number
+---@param predicate fun(item: any): boolean
+---@return any? item, number? index
+function M:Nth(n, predicate)
+    local found = 0
+
+    while n > found do
+        local item = self.Next()
+
+        if not item then
+            return nil
+        end
+
+        if predicate(item) then
+            found = found + 1
+            if n == found then
+                return item
+            end
+        end
+    end
+
+    return nil
+end
+
 ---Returns the first instance that matches the predicate.
 ---@param predicate? fun(item: any): boolean
 ---@return any? item, number? index

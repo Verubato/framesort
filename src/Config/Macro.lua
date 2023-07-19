@@ -39,7 +39,7 @@ function fsBuilder:BuildMacroOptions(parent)
     end)
 
     local intro = {
-        'FrameSort will dynamically update macros with the "#FrameSort" header.',
+        'FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.',
         "Below are some examples on how to use this.",
     }
 
@@ -55,12 +55,10 @@ function fsBuilder:BuildMacroOptions(parent)
         [[#showtooltip
 #FrameSort Frame1
 /cast [@none] Spell;]],
-        [[#framesort frame2
-/cast [@placeholder,help] Dispel; [@placeholder,harm] Purge;]],
-        [[#FrameSort: frame1 frame2
-/cast [mod:shift,@a] Spell; [@b] Spell;]],
+        [[#FrameSort healer, frame1
+/cast [@healer,exists][@frame1,exists] Blessing of Protection]],
         [[#framesort: frame3, frame2, frame1
-/cast [mod:shift,@a] Spell; [mod:ctrl,@b] Spell; [@c] Spell;]],
+/cast [ctrl:shift,@a] Spell; [shift:ctrl,@b] Spell; [@c] Spell;]],
     }
 
     local padding = 10
@@ -103,9 +101,16 @@ function fsBuilder:BuildMacroOptions(parent)
     end
 
     local notes = {
-        "Notes:",
-        ' - The "@" placeholder values can be anything, e.g. @none, or @placeholder, or @a.',
-        " - Order matters, e.g. \"#framesort frame2, frame1\" would replace the first '@' with frame2.",
+        "Supported variables:",
+        " - Frame1, Frame2, Frame3, Frame(1-99), etc.",
+        " - Player (to target yourself)",
+        " - Tank, Healer, DPS, Tank/Healer/DPS(1-99).",
+        " - Add a number to choose the Nth tank/healer/dps, e.g. DPS2 selects the 2nd DPS.",
+        " - Variables are case-insensitive, so 'fRaMe1' and 'Dps' will work.",
+        "",
+        "Future features (not implemented yet):",
+        " - For arena, I plan on adding EnemyHealer, EnemyDPS, and EnemyFrame1-99 variables.",
+        " - So you could do /cast [@enemyhealer] Storm Bolt;"
     }
 
     for i, line in ipairs(notes) do

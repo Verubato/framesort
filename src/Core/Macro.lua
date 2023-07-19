@@ -1,12 +1,11 @@
 local _, addon = ...
 local fsSort = addon.Sorting
 local fsMacro = addon.Macro
-local fsEnumerable = addon.Enumerable
 local fsVisual = addon.Visual
 local fsLog = addon.Log
 local maxMacros = 138
 local isSelfEditingMacro = false
-local previousUnits = nil
+local updatePending = false
 
 local function CanUpdate()
     if InCombatLockdown() then
@@ -25,8 +24,7 @@ local function InspectMacro(slot)
     end
 
     local units = fsVisual:GetVisuallyOrderedUnits()
-    local frameIds = fsMacro:GetFrameIds(body)
-    local newBody = fsMacro:GetNewBody(body, frameIds, units)
+    local newBody = fsMacro:GetNewBody(body, units)
 
     if not newBody then
         return false
@@ -38,18 +36,9 @@ local function InspectMacro(slot)
 end
 
 local function ScanMacros()
-    local units = fsVisual:GetVisuallyOrderedUnits()
-
-    -- prevent editing macros if the units haven't changed
-    if previousUnits and fsEnumerable:ArrayEquals(previousUnits, units) then
-        return
-    end
-
     for i = 1, maxMacros do
         InspectMacro(i)
     end
-
-    previousUnits = units
 end
 
 local function OnEditMacro(macroInfo, _, _, _)
@@ -59,6 +48,7 @@ local function OnEditMacro(macroInfo, _, _, _)
     end
 
     if not CanUpdate() then
+        updatePending = true
         return
     end
 
@@ -67,10 +57,18 @@ end
 
 local function Run()
     if not CanUpdate() then
+        updatePending = true
         return
     end
 
     ScanMacros()
+    updatePending = false
+end
+
+local function CombatEnded()
+    if updatePending then
+        Run()
+    end
 end
 
 ---Initialises the macros module.
@@ -79,7 +77,12 @@ function addon:InitMacros()
     eventFrame:HookScript("OnEvent", Run)
     eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
     eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
-    eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+    eventFrame:RegisterEvent("PLAYER_ROLES_ASSIGNED")
+
+    local endCombatFrame = CreateFrame("Frame")
+    endCombatFrame:HookScript("OnEvent", CombatEnded)
+    endCombatFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+
     fsSort:RegisterPostSortCallback(Run)
 
     hooksecurefunc("EditMacro", OnEditMacro)
