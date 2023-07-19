@@ -443,6 +443,19 @@ function M:test_healer()
     ]]
 
     assertEquals(macro:GetNewBody(macroText, units), expected)
+
+    macroText = [[
+        #showtooltip
+        #framesort healer
+        /cast [@none,exists][] Spell;
+    ]]
+    expected = [[
+        #showtooltip
+        #framesort healer
+        /cast [@party1,exists][] Spell;
+    ]]
+
+    assertEquals(macro:GetNewBody(macroText, units), expected)
 end
 
 function M:test_dps()
