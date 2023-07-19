@@ -93,6 +93,33 @@ function M:test_first()
     assertEquals(fsEnumerable:From({ "a", "b", "c" }):First(), "a")
 end
 
+function M:test_nth()
+    assertEquals(
+        fsEnumerable:From({ 1, 2, 3 }):Nth(0, function(_)
+            return true
+        end),
+        nil
+    )
+    assertEquals(
+        fsEnumerable:From({ 1, 2, 3, 4, 5, 6 }):Nth(2, function(x)
+            return x % 2 == 0
+        end),
+        4
+    )
+    assertEquals(
+        fsEnumerable:From({ 1, 2, 3, 4, 5, 6 }):Nth(4, function(x)
+            return x % 2 == 0
+        end),
+        nil
+    )
+    assertEquals(
+        fsEnumerable:From({ 1, 2, -1, 3, 6, -4, 8, 9, -2 }):Nth(3, function(x)
+            return x < 0
+        end),
+        -2
+    )
+end
+
 function M:test_any()
     assertEquals(fsEnumerable:From({}):Any(), false)
     assertEquals(

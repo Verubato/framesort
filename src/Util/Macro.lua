@@ -1,4 +1,5 @@
 local _, addon = ...
+local fsEnumerable = addon.Enumerable
 local M = {}
 addon.Macro = M
 
@@ -6,7 +7,7 @@ addon.Macro = M
 ---@param str string
 ---@param occurrence number? the nth occurrence to find
 ---@return number? start, number? end
-local function NthFrameSelector(str, occurrence)
+local function NthSelector(str, occurrence)
     local startPos = nil
     local endPos = nil
     local n = 0
@@ -36,14 +37,14 @@ end
 ---@param unit string
 ---@param occurrence number? the nth selector to replace, or all selectors if this is nil.
 ---@return string? the new body text, or nil if invalid
-local function ReplaceUnitSelector(body, unit, occurrence)
+local function ReplaceSelector(body, unit, occurrence)
     local startPos = nil
     local endPos = nil
 
     if occurrence then
-        startPos, endPos = NthFrameSelector(body, occurrence)
+        startPos, endPos = NthSelector(body, occurrence)
         if not startPos or not endPos then
-            error(occurrence)
+            return body
         end
 
         local newBody = string.sub(body, 0, startPos)
@@ -53,7 +54,7 @@ local function ReplaceUnitSelector(body, unit, occurrence)
     else
         local n = 1
         local newBody = body
-        startPos, endPos = NthFrameSelector(newBody, n)
+        startPos, endPos = NthSelector(newBody, n)
 
         if not startPos or not endPos then
             return nil
@@ -66,41 +67,92 @@ local function ReplaceUnitSelector(body, unit, occurrence)
             newBody = replaced
 
             n = n + 1
-            startPos, endPos = NthFrameSelector(newBody, n)
+            startPos, endPos = NthSelector(newBody, n)
         end
 
         return newBody
     end
 end
 
----Returns true if the macro is one that FrameSort should update.
-function M:IsFrameSortMacro(body)
-    return body and string.match(body, "[Ff]rame[Ss]ort") ~= nil or false
-end
+local function GetSelectors(body)
+    local header = string.match(body, "[Ff][Rr][Aa][Mm][Ee][Ss][Oo][Rr][Tt].-\n")
+    local selectors = {}
 
----Extracts the frame numbers from the macro body.
-function M:GetFrameIds(body)
-    local ids = {}
-
-    for match in string.gmatch(body, "[^@][Ff]rame%d+") do
-        local number = string.match(match, "%d+")
-        ids[#ids + 1] = tonumber(number)
+    if not header then
+        return selectors
     end
 
-    return ids
+    -- basically string split on non-alpha characters
+    local passedHeader = false
+    for match in string.gmatch(header, "([%w]+)") do
+        if passedHeader then
+            selectors[#selectors + 1] = match
+        end
+
+        -- skip the "#framesort" header
+        passedHeader = true
+    end
+
+    return selectors
+end
+
+local function UnitForSelector(selector, friendlyUnits)
+    if not IsInGroup() then
+        return "none"
+    end
+
+    local number = string.match(selector, "%d+")
+    local index = number and tonumber(number) or nil
+
+    -- player
+    if string.match(string.lower(selector), "player") then
+        return "player"
+    end
+
+    -- frame
+    if string.match(string.lower(selector), "frame") then
+        return index and friendlyUnits[index] or "none"
+    end
+
+    -- tank
+    if string.match(string.lower(selector), "tank") then
+        return fsEnumerable:From(friendlyUnits):Nth(index or 1, function(x)
+            return UnitGroupRolesAssigned(x) == "TANK"
+        end) or "none"
+    end
+
+    -- healer
+    if string.match(string.lower(selector), "healer") then
+        return fsEnumerable:From(friendlyUnits):Nth(index or 1, function(x)
+            return UnitGroupRolesAssigned(x) == "HEALER"
+        end) or "none"
+    end
+
+    -- dps
+    if string.match(string.lower(selector), "dps") then
+        return fsEnumerable:From(friendlyUnits):Nth(index or 1, function(x)
+            return UnitGroupRolesAssigned(x) == "DAMAGER"
+        end) or "none"
+    end
+
+    return "unknown"
+end
+
+function M:IsFrameSortMacro(body)
+    return body and string.match(body, "[Ff][Rr][Aa][Mm][Ee][Ss][Oo][Rr][Tt]") ~= nil or false
 end
 
 ---Returns a copy of the macro body with the new unit inserted.
 ---@param body string the current macro body.
----@param ids number[] frame ids
 ---@param units string[] sorted unit ids.
 ---@return string? the new macro body, or nil if invalid
-function M:GetNewBody(body, ids, units)
+function M:GetNewBody(body, units)
     local newBody = body
+    local selectors = GetSelectors(body)
 
-    for i, id in ipairs(ids) do
-        local unit = (IsInGroup() and units[id]) or "none"
-        local tmp = ReplaceUnitSelector(newBody, unit, #ids > 1 and i or nil)
+    for i, selector in ipairs(selectors) do
+        local unit = UnitForSelector(selector, units)
+        local tmp = ReplaceSelector(newBody, unit, #selectors > 1 and i or nil)
 
         if not tmp then
             return nil
