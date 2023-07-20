@@ -55,10 +55,10 @@ function fsBuilder:BuildMacroOptions(parent)
         [[#showtooltip
 #FrameSort Frame1
 /cast [@none] Spell;]],
-        [[#FrameSort healer, frame1
-/cast [@healer,exists][@frame1,exists] Blessing of Protection]],
+        [[#FrameSort target, healer, frame1
+/cast [@target,help][@healer,exists][@frame1,exists][] Blessing of Protection]],
         [[#framesort: frame3, frame2, frame1
-/cast [ctrl:shift,@a] Spell; [shift:ctrl,@b] Spell; [@c] Spell;]],
+/cast [mod:shift,@a][mod:ctrl,@b][@c] Spell;]],
     }
 
     local padding = 10
@@ -69,7 +69,7 @@ function fsBuilder:BuildMacroOptions(parent)
 
         local box = CreateFrame("EditBox", nil, panel)
         box:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -verticalSpacing)
-        box:SetSize(400, 1)
+        box:SetSize(500, 1)
         box:SetFontObject("GameFontWhite")
         box:SetAutoFocus(false)
         box:SetMultiLine(true)
