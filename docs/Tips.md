@@ -3,13 +3,13 @@
 Yo, I'm the developer of FrameSort.
 I think most people just need party1/2 to be ordered properly but here are some other tips and tricks you can use FrameSort for.
 
-## 1. Spacing ##
+## Spacing ##
 
-1. Add spacing to show OmniCD/ATT icons below frames (probably mostly useful for RBGs).
+Add spacing to show OmniCD/ATT icons below frames (probably mostly useful for RBGs).
 
 ![BGs](Screenshots/BGs.png)
 
-2. Spacing to make frames align with GladiusEx/sArena for symmetry.
+Spacing to make frames align with GladiusEx/sArena for symmetry.
 
 sArena:
 
@@ -21,7 +21,7 @@ GladiusEx:
 
 I didn't bother to make it pixel perfect, but you get the idea.
 
-## 2. Macros ##
+## Macros ##
 
 ### Are you a ret paladin and your healer is feared/stunned? ###
 
@@ -71,7 +71,7 @@ Note if you are in the bottom position you'd want to change this to "DPS1".
 - In the near future I plan on adding EnemyHealer and EnemyDPS macro variables.
 - So you can do things like `/cast [@EnemyHealer] Storm Bolt` and get back to zugging.
 
-## 3. Targeting ##
+## Targeting ##
 
 Stop caring about party1/party2/raid76 and just target frames based on their visual order.
 This works in parties, raids, arena, in the world, everywhere; just target the damn box.
@@ -82,7 +82,7 @@ Or perhaps if you're a Mythic+ enjoyer:
 
 ![Mythic keybinds](Screenshots/Mythic-targeting.png)
 
-## 4. Feedback ##
+## Feedback ##
 
 I'm just a random Aussie dude who works full-time, is addicted to WoW, and cares deeply about the ordering of coloured boxes on my screen.
 
