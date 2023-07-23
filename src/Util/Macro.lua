@@ -3,6 +3,12 @@ local fsEnumerable = addon.Enumerable
 local M = {}
 addon.Macro = M
 
+local WowRole = {
+    Tank = "TANK",
+    Healer = "HEALER",
+    DPS = "DAMAGER"
+}
+
 ---Returns the start and end index of the nth "@" selector, e.g. @raid1, @player, @placeholder, @, @abc
 ---@param str string
 ---@param occurrence number? the nth occurrence to find
@@ -101,51 +107,63 @@ local function UnitForSelector(selector, friendlyUnits)
         return "none"
     end
 
-    local number = string.match(selector, "%d+")
-    local index = number and tonumber(number) or nil
-
-    -- target
-    if string.match(string.lower(selector), "target") then
-        return "target"
-    end
-
-    -- focus
-    if string.match(string.lower(selector), "focus") then
-        return "focus"
-    end
-
-    -- player
-    if string.match(string.lower(selector), "player") then
-        return "player"
-    end
+    local selectorLower = string.lower(selector)
+    local numberStr = string.match(selector, "%d+")
+    local number = numberStr and tonumber(numberStr) or nil
 
     -- frame
-    if string.match(string.lower(selector), "frame") then
-        return index and friendlyUnits[index] or "none"
+    if string.match(selectorLower, "frame") then
+        return number and friendlyUnits[number] or "none"
+    end
+
+    local tank = string.match(selectorLower, "tank")
+    local healer = string.match(selectorLower, "healer")
+    local dps = string.match(selectorLower, "dps")
+
+    -- enemy arena
+    if string.match(selectorLower, "enemy") then
+        local count = GetNumArenaOpponentSpecs()
+        if not count or count <= 0 then
+            return "none"
+        end
+
+        local ids = {}
+        for i = 1, count do
+            ids[#ids + 1] = i
+        end
+
+        local arenaId = fsEnumerable:From(ids):Nth(number or 1, function(x)
+            local specId = GetArenaOpponentSpec(x)
+            local _, _, _, _, role, _, _ = GetSpecializationInfoByID(specId)
+
+            return (tank and role == WowRole.Tank) or (healer and role == WowRole.Healer) or (dps and role == WowRole.DPS)
+        end)
+
+        if arenaId then
+            return "arena" .. arenaId
+        end
+
+        return "none"
     end
 
     -- tank
-    if string.match(string.lower(selector), "tank") then
-        return fsEnumerable:From(friendlyUnits):Nth(index or 1, function(x)
-            return UnitGroupRolesAssigned(x) == "TANK"
+    local role = nil
+    if tank then
+        role = WowRole.Tank
+    elseif healer then
+        role = WowRole.Healer
+    elseif dps then
+        role = WowRole.DPS
+    end
+
+    -- role
+    if role then
+        return fsEnumerable:From(friendlyUnits):Nth(number or 1, function(x)
+            return UnitGroupRolesAssigned(x) == role
         end) or "none"
     end
 
-    -- healer
-    if string.match(string.lower(selector), "healer") then
-        return fsEnumerable:From(friendlyUnits):Nth(index or 1, function(x)
-            return UnitGroupRolesAssigned(x) == "HEALER"
-        end) or "none"
-    end
-
-    -- dps
-    if string.match(string.lower(selector), "dps") then
-        return fsEnumerable:From(friendlyUnits):Nth(index or 1, function(x)
-            return UnitGroupRolesAssigned(x) == "DAMAGER"
-        end) or "none"
-    end
-
-    return "unknown"
+    return selector
 end
 
 function M:IsFrameSortMacro(body)
