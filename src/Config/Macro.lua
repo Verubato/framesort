@@ -54,11 +54,13 @@ function fsBuilder:BuildMacroOptions(parent)
     local examples = {
         [[#showtooltip
 #FrameSort Frame1
-/cast [@none] Spell;]],
-        [[#FrameSort target, healer, frame1
-/cast [@target,help][@healer,exists][@frame1,exists][] Blessing of Protection]],
-        [[#framesort: frame3, frame2, frame1
-/cast [mod:shift,@a][mod:ctrl,@b][@c] Spell;]],
+/cast [@frame1] Dispel;]],
+
+        [[#FrameSort Target, Healer
+/cast [@target,help][@healer,exists] Blessing of Protection]],
+
+        [[#FrameSort EnemyHealer, Target
+/cast [mod:shift,@enemyhealer][@target] Storm Bolt;]],
     }
 
     local padding = 10
@@ -102,15 +104,11 @@ function fsBuilder:BuildMacroOptions(parent)
 
     local notes = {
         "Supported variables:",
-        " - Frame1, Frame2, Frame3, Frame(1-99), etc.",
-        " - Player, Focus, Target",
-        " - Tank, Healer, DPS, Tank/Healer/DPS(1-99).",
-        " - Add a number to choose the Nth tank/healer/dps, e.g. DPS2 selects the 2nd DPS.",
-        " - Variables are case-insensitive, so 'fRaMe1' and 'Dps' will work.",
-        "",
-        "Future features (not implemented yet):",
-        " - For arena, I plan on adding EnemyHealer, EnemyDPS, and EnemyFrame1-99 variables.",
-        " - So you could do /cast [@enemyhealer] Storm Bolt;"
+        " - Frame1, Frame2, Frame3, etc.",
+        " - Tank, Healer, DPS.",
+        " - EnemyTank, EnemyHealer, EnemyDPS.",
+        " - Add a number to choose the Nth target, e.g., DPS2 selects the 2nd DPS.",
+        " - Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work.",
     }
 
     for i, line in ipairs(notes) do

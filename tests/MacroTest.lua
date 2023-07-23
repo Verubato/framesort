@@ -24,7 +24,21 @@ end
 function M:test_is_framesort_macro()
     assertEquals(
         macro:IsFrameSortMacro([[
+        #FrameSort
+        ]]),
+        true
+    )
+
+    assertEquals(
+        macro:IsFrameSortMacro([[
         #framesort
+        ]]),
+        true
+    )
+
+    assertEquals(
+        macro:IsFrameSortMacro([[
+        #FRAMESORT
         ]]),
         true
     )
@@ -33,23 +47,7 @@ function M:test_is_framesort_macro()
         macro:IsFrameSortMacro([[
         #showtooltip
         #framesort frame1
-        /cast [help, @a] Spell; [harm, @a] Spell2;
-        ]]),
-        true
-    )
-
-    assertEquals(
-        macro:IsFrameSortMacro([[
-        # FrameSort frame1
-        /cast [help, @a] Spell; [harm, @a] Spell2;
-        ]]),
-        true
-    )
-
-    assertEquals(
-        macro:IsFrameSortMacro([[
-        # framesort Frame2
-        /cast [help, @a] Spell; [harm, @a] Spell2;
+        /cast [@a] Spell;
         ]]),
         true
     )
@@ -57,7 +55,7 @@ function M:test_is_framesort_macro()
     assertEquals(
         macro:IsFrameSortMacro([[
         #FrameSort: Frame1, Frame2
-        /cast [help, @a] Spell; [harm, @a] Spell2;
+        /cast [help, @none] Spell; [harm, @none] Spell2;
         ]]),
         true
     )
@@ -74,104 +72,65 @@ function M:test_is_not_framesort_macro()
 
     assertEquals(
         macro:IsFrameSortMacro([[
-        #showtooltip
-        /cast [help, @a] Spell; [harm, @a] Spell2;
-        ]]),
-        false
-    )
-
-    assertEquals(
-        macro:IsFrameSortMacro([[
-        /cast [help, @a] Spell; [harm, @a] Spell2;
-        ]]),
-        false
-    )
-
-    assertEquals(
-        macro:IsFrameSortMacro([[
-        /cast [help, @a] Spell; [harm, @a] Spell2;
+        /cast [@none] Spell
         ]]),
         false
     )
 end
 
-function M:test_party()
+function M:test_separators()
     local units = { "party2", "party4", "party1", "party2", "player" }
     local macroText = [[
         #showtooltip
-        #FrameSort Frame1
-        /cast [@previous] Spell
+        #FrameSort Frame1, Frame2, Frame3, Frame4, Frame5
+        /cast [@a][@b][@c][@d][@e] Spell
     ]]
     local expected = [[
         #showtooltip
-        #FrameSort Frame1
-        /cast [@party2] Spell
+        #FrameSort Frame1, Frame2, Frame3, Frame4, Frame5
+        /cast [@party2][@party4][@party1][@party2][@player] Spell
     ]]
 
     assertEquals(macro:GetNewBody(macroText, units), expected)
 
     macroText = [[
         #showtooltip
-        #FrameSort Frame1
-        /cast [@] Spell
+        #FrameSort: Frame1 Frame2 Frame3 Frame4 Frame5
+        /cast [@a][@b][@c][@d][@e] Spell
     ]]
     expected = [[
         #showtooltip
-        #FrameSort Frame1
-        /cast [@party2] Spell
+        #FrameSort: Frame1 Frame2 Frame3 Frame4 Frame5
+        /cast [@party2][@party4][@party1][@party2][@player] Spell
     ]]
 
     assertEquals(macro:GetNewBody(macroText, units), expected)
 
     macroText = [[
         #showtooltip
-        # framesort Frame1 frame2
-        /cast [@a] Spell; [mod:shift, @b] Spell;
+        #FrameSort - Frame1|Frame2|Frame3|Frame4|Frame5
+        /cast [@a][@b][@c][@d][@e] Spell
     ]]
     expected = [[
         #showtooltip
-        # framesort Frame1 frame2
-        /cast [@party2] Spell; [mod:shift, @party4] Spell;
-    ]]
-
-    assertEquals(macro:GetNewBody(macroText, units), expected)
-
-    macroText = [[
-        #showtooltip
-        # framesort Frame1 frame2, frame3:frame4, frame5
-        /cast [@a,exists][@,exists][@player,exists][@previousname][@] Spell;
-    ]]
-    expected = [[
-        #showtooltip
-        # framesort Frame1 frame2, frame3:frame4, frame5
-        /cast [@party2,exists][@party4,exists][@party1,exists][@party2][@player] Spell;
-    ]]
-
-    assertEquals(macro:GetNewBody(macroText, units), expected)
-
-    macroText = [[
-        #framesort frame1
-        /cmd [@frame1]
-    ]]
-    expected = [[
-        #framesort frame1
-        /cmd [@party2]
+        #FrameSort - Frame1|Frame2|Frame3|Frame4|Frame5
+        /cast [@party2][@party4][@party1][@party2][@player] Spell
     ]]
 
     assertEquals(macro:GetNewBody(macroText, units), expected)
 end
 
-function M:test_raid()
-    local units = { "raid3", "raid11", "raid17" }
+function M:test_frame_123456()
+    local units = { "party2", "party1", "player", "raid17", "raid4", "asdf1" }
     local macroText = [[
         #showtooltip
-        #framesort frame3, frame2, frame1
-        /cast [@none,exists][@none,exists][@none,exists] Spell;
+        #FrameSort Frame1 Frame2 Frame3 Frame4 Frame5 Frame6
+        /cast [mod:ctrl,@a][mod:shift,@b][nomod,@c][something,@d][test,@e][@f] Spell
     ]]
     local expected = [[
         #showtooltip
-        #framesort frame3, frame2, frame1
-        /cast [@raid17,exists][@raid11,exists][@raid3,exists] Spell;
+        #FrameSort Frame1 Frame2 Frame3 Frame4 Frame5 Frame6
+        /cast [mod:ctrl,@party2][mod:shift,@party1][nomod,@player][something,@raid17][test,@raid4][@asdf1] Spell
     ]]
 
     assertEquals(macro:GetNewBody(macroText, units), expected)
@@ -189,32 +148,6 @@ function M:test_player()
         #showtooltip
         #framesort player
         /cast [@player] Spell;
-    ]]
-
-    assertEquals(macro:GetNewBody(macroText, units), expected)
-
-    macroText = [[
-        #showtooltip
-        #framesort Player
-        /cast [@none] Spell;
-    ]]
-    expected = [[
-        #showtooltip
-        #framesort Player
-        /cast [@player] Spell;
-    ]]
-
-    assertEquals(macro:GetNewBody(macroText, units), expected)
-
-    macroText = [[
-        #showtooltip
-        #framesort frame1, player, frame2
-        /cast [@none,exists][@none,exists][@none,exists] Spell;
-    ]]
-    expected = [[
-        #showtooltip
-        #framesort frame1, player, frame2
-        /cast [@player,exists][@player,exists][@party1,exists] Spell;
     ]]
 
     assertEquals(macro:GetNewBody(macroText, units), expected)
@@ -236,163 +169,6 @@ function M:test_tank()
         #showtooltip
         #framesort Tank
         /cast [@party3] Spell;
-    ]]
-
-    assertEquals(macro:GetNewBody(macroText, units), expected)
-
-    macroText = [[
-        #showtooltip
-        #framesort TANK
-        /cast [@none] Spell;
-    ]]
-    expected = [[
-        #showtooltip
-        #framesort TANK
-        /cast [@party3] Spell;
-    ]]
-
-    assertEquals(macro:GetNewBody(macroText, units), expected)
-
-    macroText = [[
-        #showtooltip
-        #framesort tank, frame1
-        /cast [@none,exists][@none,exists] Spell;
-    ]]
-    expected = [[
-        #showtooltip
-        #framesort tank, frame1
-        /cast [@party3,exists][@player,exists] Spell;
-    ]]
-
-    assertEquals(macro:GetNewBody(macroText, units), expected)
-end
-
-function M:test_role_n()
-    local units = { "player", "party1", "party2", "party3", "party4" }
-
-    UnitGroupRolesAssigned = function(x)
-        return "TANK"
-    end
-
-    local macroText = [[
-        #showtooltip
-        #framesort Tank
-        /cast [@none] Spell;
-    ]]
-    local expected = [[
-        #showtooltip
-        #framesort Tank
-        /cast [@player] Spell;
-    ]]
-
-    assertEquals(macro:GetNewBody(macroText, units), expected)
-
-    macroText = [[
-        #showtooltip
-        #framesort Tank1
-        /cast [@none] Spell;
-    ]]
-    expected = [[
-        #showtooltip
-        #framesort Tank1
-        /cast [@player] Spell;
-    ]]
-
-    assertEquals(macro:GetNewBody(macroText, units), expected)
-
-    macroText = [[
-        #showtooltip
-        #framesort Tank2
-        /cast [@none] Spell;
-    ]]
-    expected = [[
-        #showtooltip
-        #framesort Tank2
-        /cast [@party1] Spell;
-    ]]
-
-    assertEquals(macro:GetNewBody(macroText, units), expected)
-
-    macroText = [[
-        #showtooltip
-        #framesort Tank5
-        /cast [@none] Spell;
-    ]]
-    expected = [[
-        #showtooltip
-        #framesort Tank5
-        /cast [@party4] Spell;
-    ]]
-
-    assertEquals(macro:GetNewBody(macroText, units), expected)
-
-    UnitGroupRolesAssigned = function(x)
-        return "DAMAGER"
-    end
-
-    macroText = [[
-        #showtooltip
-        #framesort DPS
-        /cast [@none] Spell;
-    ]]
-    expected = [[
-        #showtooltip
-        #framesort DPS
-        /cast [@player] Spell;
-    ]]
-
-    assertEquals(macro:GetNewBody(macroText, units), expected)
-
-    macroText = [[
-        #showtooltip
-        #framesort DPS3
-        /cast [@none] Spell;
-    ]]
-    expected = [[
-        #showtooltip
-        #framesort DPS3
-        /cast [@party2] Spell;
-    ]]
-
-    assertEquals(macro:GetNewBody(macroText, units), expected)
-
-    UnitGroupRolesAssigned = function(x)
-        return "HEALER"
-    end
-
-    macroText = [[
-        #showtooltip
-        #framesort Healer1, Healer3, Healer2
-        /cast [@a,exists][@b,exists][@c,exists] Spell;
-    ]]
-    expected = [[
-        #showtooltip
-        #framesort Healer1, Healer3, Healer2
-        /cast [@player,exists][@party2,exists][@party1,exists] Spell;
-    ]]
-
-    assertEquals(macro:GetNewBody(macroText, units), expected)
-
-    UnitGroupRolesAssigned = function(x)
-        if x == "party1" then
-            return "TANK"
-        end
-        if x == "party3" then
-            return "HEALER"
-        end
-
-        return "DAMAGER"
-    end
-
-    macroText = [[
-        #showtooltip
-        #framesort DPS2
-        /cast [@a] Spell;
-    ]]
-    expected = [[
-        #showtooltip
-        #framesort DPS2
-        /cast [@party2] Spell;
     ]]
 
     assertEquals(macro:GetNewBody(macroText, units), expected)
@@ -528,7 +304,7 @@ function M:test_target()
     local expected = [[
         #showtooltip
         #framesort Healer, Target
-        /cast [@party1,exists][@target] Spell;
+        /cast [@party1,exists][@Target] Spell;
     ]]
 
     assertEquals(macro:GetNewBody(macroText, units), expected)
@@ -553,7 +329,280 @@ function M:test_focus()
     local expected = [[
         #showtooltip
         #framesort Focus, Target
-        /cast [mod:shift,@focus][@target] Spell;
+        /cast [mod:shift,@Focus][@Target] Spell;
+    ]]
+
+    assertEquals(macro:GetNewBody(macroText, units), expected)
+end
+
+function M:test_role_n()
+    local units = { "player", "party1", "party2", "party3", "party4" }
+
+    UnitGroupRolesAssigned = function(_)
+        return "TANK"
+    end
+
+    local macroText = [[
+        #showtooltip
+        #framesort Tank
+        /cast [@none] Spell;
+    ]]
+    local expected = [[
+        #showtooltip
+        #framesort Tank
+        /cast [@player] Spell;
+    ]]
+
+    assertEquals(macro:GetNewBody(macroText, units), expected)
+
+    macroText = [[
+        #showtooltip
+        #framesort Tank1
+        /cast [@none] Spell;
+    ]]
+    expected = [[
+        #showtooltip
+        #framesort Tank1
+        /cast [@player] Spell;
+    ]]
+
+    assertEquals(macro:GetNewBody(macroText, units), expected)
+
+    macroText = [[
+        #showtooltip
+        #framesort Tank2
+        /cast [@none] Spell;
+    ]]
+    expected = [[
+        #showtooltip
+        #framesort Tank2
+        /cast [@party1] Spell;
+    ]]
+
+    assertEquals(macro:GetNewBody(macroText, units), expected)
+
+    macroText = [[
+        #showtooltip
+        #framesort Tank5
+        /cast [@none] Spell;
+    ]]
+    expected = [[
+        #showtooltip
+        #framesort Tank5
+        /cast [@party4] Spell;
+    ]]
+
+    assertEquals(macro:GetNewBody(macroText, units), expected)
+
+    UnitGroupRolesAssigned = function(_)
+        return "DAMAGER"
+    end
+
+    macroText = [[
+        #showtooltip
+        #framesort DPS
+        /cast [@none] Spell;
+    ]]
+    expected = [[
+        #showtooltip
+        #framesort DPS
+        /cast [@player] Spell;
+    ]]
+
+    assertEquals(macro:GetNewBody(macroText, units), expected)
+
+    macroText = [[
+        #showtooltip
+        #framesort DPS3
+        /cast [@none] Spell;
+    ]]
+    expected = [[
+        #showtooltip
+        #framesort DPS3
+        /cast [@party2] Spell;
+    ]]
+
+    assertEquals(macro:GetNewBody(macroText, units), expected)
+
+    UnitGroupRolesAssigned = function(_)
+        return "HEALER"
+    end
+
+    macroText = [[
+        #showtooltip
+        #framesort Healer1, Healer3, Healer2
+        /cast [@a,exists][@b,exists][@c,exists] Spell;
+    ]]
+    expected = [[
+        #showtooltip
+        #framesort Healer1, Healer3, Healer2
+        /cast [@player,exists][@party2,exists][@party1,exists] Spell;
+    ]]
+
+    assertEquals(macro:GetNewBody(macroText, units), expected)
+
+    UnitGroupRolesAssigned = function(x)
+        if x == "party1" then
+            return "TANK"
+        end
+        if x == "party3" then
+            return "HEALER"
+        end
+
+        return "DAMAGER"
+    end
+
+    macroText = [[
+        #showtooltip
+        #framesort DPS2
+        /cast [@a] Spell;
+    ]]
+    expected = [[
+        #showtooltip
+        #framesort DPS2
+        /cast [@party2] Spell;
+    ]]
+
+    assertEquals(macro:GetNewBody(macroText, units), expected)
+end
+
+function M:test_specific()
+    local units = { "player", "party1", "party2", "party3", "party4" }
+
+    local macroText = [[
+        #showtooltip
+        #framesort arena1, arena2, arena3
+        /cast [mod:ctrl,@a][mod:shift,@b][@c] Spell;
+    ]]
+    local expected = [[
+        #showtooltip
+        #framesort arena1, arena2, arena3
+        /cast [mod:ctrl,@arena1][mod:shift,@arena2][@arena3] Spell;
+    ]]
+
+    assertEquals(macro:GetNewBody(macroText, units), expected)
+
+    macroText = [[
+        #showtooltip
+        #framesort playername, party1
+        /cast [mod:ctrl,@playername][mod:shift,@party1][@nochange] Spell;
+    ]]
+    expected = [[
+        #showtooltip
+        #framesort playername, party1
+        /cast [mod:ctrl,@playername][mod:shift,@party1][@nochange] Spell;
+    ]]
+
+    assertEquals(macro:GetNewBody(macroText, units), expected)
+end
+
+function M:test_arena()
+    local units = { "arena1", "arena2", "arena3", "arena4", "arena5" }
+
+    -- 5v5
+    GetNumArenaOpponentSpecs = function()
+        return 5
+    end
+    GetArenaOpponentSpec = function(i)
+        return i
+    end
+    GetSpecializationInfoByID = function(i)
+        local role = ""
+        if i == 1 then
+            role = "TANK"
+        elseif i == 2 then
+            role = "HEALER"
+        else
+            role = "DAMAGER"
+        end
+
+        return nil, nil, nil, nil, role, nil, nil
+    end
+
+    local macroText = [[
+        #showtooltip
+        #framesort EnemyHealer, EnemyTank
+        /cast [@a, exists][@b, exists] Spell
+    ]]
+    local expected = [[
+        #showtooltip
+        #framesort EnemyHealer, EnemyTank
+        /cast [@arena2, exists][@arena1, exists] Spell
+    ]]
+
+    assertEquals(macro:GetNewBody(macroText, units), expected)
+
+    GetNumArenaOpponentSpecs = function()
+        return 3
+    end
+    GetSpecializationInfoByID = function(i)
+        local role = ""
+        if i == 2 then
+            role = "HEALER"
+        else
+            role = "DAMAGER"
+        end
+
+        return nil, nil, nil, nil, role, nil, nil
+    end
+
+    macroText = [[
+        #showtooltip
+        #framesort EnemyHealer EnemyDPS1 enemydps2
+        /cast [@a, exists][@b, exists][@c] Spell
+    ]]
+    expected = [[
+        #showtooltip
+        #framesort EnemyHealer EnemyDPS1 enemydps2
+        /cast [@arena2, exists][@arena1, exists][@arena3] Spell
+    ]]
+
+    assertEquals(macro:GetNewBody(macroText, units), expected)
+end
+
+function M:test_multiline()
+    local units = { "player", "party1", "party2" }
+
+    local macroText = [[
+        #showtooltip
+        #framesort Frame1, Frame2, Frame3
+        /cast [mod:shift,@a] Spell;
+        /cast [mod:shift,@b] Spell;
+        /cast [mod:shift,@c] Spell;
+    ]]
+    local expected = [[
+        #showtooltip
+        #framesort Frame1, Frame2, Frame3
+        /cast [mod:shift,@player] Spell;
+        /cast [mod:shift,@party1] Spell;
+        /cast [mod:shift,@party2] Spell;
+    ]]
+
+    assertEquals(macro:GetNewBody(macroText, units), expected)
+
+    macroText = [[
+        #showtooltip
+        #framesort Frame1, Frame2, Frame3
+        /cast [mod:shift,@a] Spell;
+
+        #comment
+        /cast [mod:shift,@b] Spell;
+
+        # asdf
+
+        /cast [mod:shift,@c] Spell;
+    ]]
+    expected = [[
+        #showtooltip
+        #framesort Frame1, Frame2, Frame3
+        /cast [mod:shift,@player] Spell;
+
+        #comment
+        /cast [mod:shift,@party1] Spell;
+
+        # asdf
+
+        /cast [mod:shift,@party2] Spell;
     ]]
 
     assertEquals(macro:GetNewBody(macroText, units), expected)
