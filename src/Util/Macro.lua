@@ -107,6 +107,11 @@ local function UnitForSelector(selector, friendlyUnits)
     local numberStr = string.match(selector, "%d+")
     local number = numberStr and tonumber(numberStr) or nil
 
+    -- bottom frame
+    if string.match(selectorLower, "bottomframe") then
+        return number and friendlyUnits[#friendlyUnits] or "none"
+    end
+
     -- frame
     if string.match(selectorLower, "frame") then
         return number and friendlyUnits[number] or "none"

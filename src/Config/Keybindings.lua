@@ -1,9 +1,10 @@
 BINDING_HEADER_FRAMESORT_TARGET = "Targeting"
-_G["BINDING_NAME_CLICK FSTarget1:LeftButton"] = "Target frame 1"
+_G["BINDING_NAME_CLICK FSTarget1:LeftButton"] = "Target frame 1 (top frame)"
 _G["BINDING_NAME_CLICK FSTarget2:LeftButton"] = "Target frame 2"
 _G["BINDING_NAME_CLICK FSTarget3:LeftButton"] = "Target frame 3"
 _G["BINDING_NAME_CLICK FSTarget4:LeftButton"] = "Target frame 4"
 _G["BINDING_NAME_CLICK FSTarget5:LeftButton"] = "Target frame 5"
+_G["BINDING_NAME_CLICK FSTargetBottom:LeftButton"] = "Target bottom frame"
 
 local _, addon = ...
 local fsBuilder = addon.OptionsBuilder
