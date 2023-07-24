@@ -1,6 +1,5 @@
 local _, addon = ...
 local fsCompare = addon.Compare
-local fsUnit = addon.Unit
 local fsFrame = addon.Frame
 local fsPoint = addon.Point
 local fsEnumerable = addon.Enumerable

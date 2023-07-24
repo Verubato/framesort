@@ -103,10 +103,6 @@ local function GetSelectors(body)
 end
 
 local function UnitForSelector(selector, friendlyUnits)
-    if not IsInGroup() then
-        return "none"
-    end
-
     local selectorLower = string.lower(selector)
     local numberStr = string.match(selector, "%d+")
     local number = numberStr and tonumber(numberStr) or nil
@@ -146,7 +142,6 @@ local function UnitForSelector(selector, friendlyUnits)
         return "none"
     end
 
-    -- tank
     local role = nil
     if tank then
         role = WowRole.Tank
