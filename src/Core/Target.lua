@@ -4,8 +4,9 @@ local fsEnumerable = addon.Enumerable
 local fsVisual = addon.Visual
 local fsLog = addon.Log
 local prefix = "FSTarget"
-local keybindingsCount = 5
 local previousUnits = nil
+local targetFramesButtons = {}
+local targetBottomFrameButton = nil
 
 local function CanUpdate()
     if InCombatLockdown() then
@@ -25,12 +26,13 @@ local function UpdateTargets()
     end
 
     -- if units has less than 5 items it's still fine as units[i] will just be nil
-    for i = 1, keybindingsCount do
+    for i, btn in ipairs(targetFramesButtons) do
         local unit = units[i]
-        local btn = _G[prefix .. i]
 
         btn:SetAttribute("unit", unit or "none")
     end
+
+    targetBottomFrameButton:SetAttribute("unit", units[#units] or "none")
 
     previousUnits = units
 
@@ -47,12 +49,22 @@ end
 
 ---Initialises the targeting frames feature.
 function addon:InitTargeting()
+    -- target frame1-5
+    local keybindingsCount = 5
     for i = 1, keybindingsCount do
-        local target = CreateFrame("Button", prefix .. i, UIParent, "SecureActionButtonTemplate")
-        target:RegisterForClicks("AnyDown")
-        target:SetAttribute("type", "target")
-        target:SetAttribute("unit", "none")
+        local button = CreateFrame("Button", prefix .. i, UIParent, "SecureActionButtonTemplate")
+        button:RegisterForClicks("AnyDown")
+        button:SetAttribute("type", "target")
+        button:SetAttribute("unit", "none")
+
+        targetFramesButtons[#targetFramesButtons + 1] = button
     end
+
+    -- target bottom
+    targetBottomFrameButton = CreateFrame("Button", prefix .. "Bottom", UIParent, "SecureActionButtonTemplate")
+    targetBottomFrameButton:RegisterForClicks("AnyDown")
+    targetBottomFrameButton:SetAttribute("type", "target")
+    targetBottomFrameButton:SetAttribute("unit", "none")
 
     local eventFrame = CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", Run)

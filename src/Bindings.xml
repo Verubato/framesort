@@ -4,4 +4,5 @@
   <Binding name="CLICK FSTarget3:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
   <Binding name="CLICK FSTarget4:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
   <Binding name="CLICK FSTarget5:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
+  <Binding name="CLICK FSTargetBottom:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
 </Bindings>

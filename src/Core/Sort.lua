@@ -226,8 +226,8 @@ end
 local function LayoutPartyPets(sortedPlayerUnits)
     -- firstly sort the frames
     local playerFrames, petFrames = fsFrame:GetPartyFrames()
-    local chain = fsFrame:ToFrameChain(petFrames)
 
+    local chain = fsFrame:ToFrameChain(petFrames)
     if not chain.Valid then
         return false
     end
@@ -274,7 +274,7 @@ end
 ---@return boolean sorted true if frames were sorted, otherwise false.
 local function LayoutParty()
     local sortFunction = fsCompare:GetSortFunction()
-    local playerFrames = fsFrame:GetPartyFrames()
+    local playerFrames, petFrames = fsFrame:GetPartyFrames()
 
     if not sortFunction or #playerFrames == 0 then
         return false
@@ -290,7 +290,9 @@ local function LayoutParty()
 
     RearrangeFrameChain(playerFrames, playerUnits)
 
-    return not fsFrame:ShowPets() or LayoutPartyPets(playerUnits)
+    local shouldSortPets = fsFrame:ShowPets() and #petFrames > 0
+
+    return not shouldSortPets or LayoutPartyPets(playerUnits)
 end
 
 ---Attempts to sort the party/raid frames using the traditional method.
