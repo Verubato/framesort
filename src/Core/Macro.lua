@@ -78,7 +78,10 @@ function addon:InitMacros()
     eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
     eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
     eventFrame:RegisterEvent("PLAYER_ROLES_ASSIGNED")
-    eventFrame:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
+
+    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+        eventFrame:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
+    end
 
     local endCombatFrame = CreateFrame("Frame")
     endCombatFrame:HookScript("OnEvent", CombatEnded)
