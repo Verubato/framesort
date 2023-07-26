@@ -6,7 +6,7 @@ addon.Macro = M
 local WowRole = {
     Tank = "TANK",
     Healer = "HEALER",
-    DPS = "DAMAGER"
+    DPS = "DAMAGER",
 }
 
 ---Returns the start and end index of the nth "@" selector, e.g. @raid1, @player, @placeholder, @, @abc
@@ -41,43 +41,21 @@ end
 ---Replaces all, or the nth occurrence of an "@unit" instance with the specified unit
 ---@param body string
 ---@param unit string
----@param occurrence number? the nth selector to replace, or all selectors if this is nil.
+---@param occurrence number the nth selector to replace
 ---@return string? the new body text, or nil if invalid
 local function ReplaceSelector(body, unit, occurrence)
     local startPos = nil
     local endPos = nil
 
-    if occurrence then
-        startPos, endPos = NthSelector(body, occurrence)
-        if not startPos or not endPos then
-            return body
-        end
-
-        local newBody = string.sub(body, 0, startPos)
-        newBody = newBody .. unit
-        newBody = newBody .. string.sub(body, endPos + 1)
-        return newBody
-    else
-        local n = 1
-        local newBody = body
-        startPos, endPos = NthSelector(newBody, n)
-
-        if not startPos or not endPos then
-            return nil
-        end
-
-        while startPos and endPos do
-            local replaced = string.sub(newBody, 0, startPos)
-            replaced = replaced .. unit
-            replaced = replaced .. string.sub(newBody, endPos + 1)
-            newBody = replaced
-
-            n = n + 1
-            startPos, endPos = NthSelector(newBody, n)
-        end
-
-        return newBody
+    startPos, endPos = NthSelector(body, occurrence)
+    if not startPos or not endPos then
+        return nil
     end
+
+    local newBody = string.sub(body, 0, startPos)
+    newBody = newBody .. unit
+    newBody = newBody .. string.sub(body, endPos + 1)
+    return newBody
 end
 
 local function GetSelectors(body)
@@ -180,11 +158,9 @@ function M:GetNewBody(body, units)
 
     for i, selector in ipairs(selectors) do
         local unit = UnitForSelector(selector, units)
-        local tmp = ReplaceSelector(newBody, unit, #selectors > 1 and i or nil)
+        local tmp = ReplaceSelector(newBody, unit, i)
 
-        if not tmp then
-            return nil
-        else
+        if tmp then
             newBody = tmp
         end
     end
