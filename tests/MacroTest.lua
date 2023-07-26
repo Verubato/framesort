@@ -120,6 +120,31 @@ function M:test_separators()
     assertEquals(macro:GetNewBody(macroText, units), expected)
 end
 
+function M:test_one_selector()
+    local units = { "player", "party1", "party2", "party3", "party4" }
+
+    UnitGroupRolesAssigned = function(x)
+        if x == "party1" then
+            return "HEALER"
+        end
+
+        return "DAMAGER"
+    end
+
+    local macroText = [[
+        #showtooltip
+        #framesort Healer
+        /cast [@none,exists][mod:shift,@focus][@mouseover,harm][] Spell;
+    ]]
+    local expected = [[
+        #showtooltip
+        #framesort Healer
+        /cast [@party1,exists][mod:shift,@focus][@mouseover,harm][] Spell;
+    ]]
+
+    assertEquals(macro:GetNewBody(macroText, units), expected)
+end
+
 function M:test_frame_123456()
     local units = { "party2", "party1", "player", "raid17", "raid4", "asdf1" }
     local macroText = [[
