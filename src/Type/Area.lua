@@ -1,0 +1,5 @@
+---@alias Area
+---| "Arena"
+---| "Dungeon"
+---| "Raid"
+---| "World"

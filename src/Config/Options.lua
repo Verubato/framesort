@@ -224,6 +224,19 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         fsSort:TrySort()
     end)
 
+    parentPanel:HookScript("OnShow", function()
+        -- update checkboxes on show, in case the api updated them
+        enabled:SetChecked(options.Enabled)
+        top:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Top)
+        middle:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Middle)
+        bottom:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Bottom)
+        hidden:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Hidden)
+        group:SetChecked(options.GroupSortMode == addon.GroupSortMode.Group)
+        role:SetChecked(options.GroupSortMode == addon.GroupSortMode.Role)
+        alpha:SetChecked(options.GroupSortMode == addon.GroupSortMode.Alphabetical)
+        rev:SetChecked(options.Reverse)
+    end)
+
     return modeLabel
 end
 
