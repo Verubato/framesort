@@ -58,7 +58,7 @@ end
 ---Calls the post sorting callbacks.
 local function InvokeCallbacks()
     for _, callback in pairs(callbacks) do
-        callback()
+        pcall(callback)
     end
 end
 
@@ -357,7 +357,7 @@ local function OnLayout()
     M:TrySort()
 end
 
----Register a callback to call after sorting has been performed.
+---Register a callback to invoke after sorting has been performed.
 ---@param callback function
 function M:RegisterPostSortCallback(callback)
     callbacks[#callbacks + 1] = callback

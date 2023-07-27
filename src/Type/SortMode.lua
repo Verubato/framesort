@@ -1,13 +1,23 @@
 local _, addon = ...
 
----@enum GroupSortMode
+---@alias GroupSortMode
+---| "Group"
+---| "Role"
+---| "Alphabetical"
+
+
 addon.GroupSortMode = {
     Group = "Group",
     Role = "Role",
     Alphabetical = "Alphabetical",
 }
 
----@enum PlayerSortMode
+---@alias PlayerSortMode
+---| "Top"
+---| "Middle"
+---| "Bottom"
+---| "Hidden"
+
 addon.PlayerSortMode = {
     Top = "Top",
     Middle = "Middle",
