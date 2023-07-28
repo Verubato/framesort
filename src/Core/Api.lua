@@ -1,6 +1,7 @@
 local _, addon = ...
 local fsFrame = addon.Frame
 local fsEnumerable = addon.Enumerable
+local fsCompare = addon.Compare
 
 local Api = {
     v1 = {
