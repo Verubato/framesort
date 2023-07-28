@@ -14,7 +14,7 @@ end
 local mock = require("Mock")
 local M = {}
 
-local unit = addon.Unit
+local fsUnit = addon.Unit
 
 function M:setUp()
     MAX_RAID_MEMBERS = 40
@@ -32,7 +32,7 @@ function M:test_party_full()
         return mock:UnitExists(x, members)
     end
 
-    local units = unit:GetUnits()
+    local units = fsUnit:GetUnits()
 
     assertEquals(#units, count)
     assertEquals(units[1], "player")
@@ -50,7 +50,7 @@ function M:test_party_empty()
         return false
     end
 
-    local units = unit:GetUnits()
+    local units = fsUnit:GetUnits()
 
     -- the player token will always exist
     assertEquals(#units, 1)
@@ -67,7 +67,7 @@ function M:test_party3()
         return mock:UnitExists(x, members)
     end
 
-    local units = unit:GetUnits()
+    local units = fsUnit:GetUnits()
 
     assertEquals(#units, count)
     assertEquals(units[1], "player")
@@ -88,7 +88,7 @@ function M:test_raid_full()
         return mock:UnitExists(x, members)
     end
 
-    local units = unit:GetUnits()
+    local units = fsUnit:GetUnits()
 
     assertEquals(#units, count)
 
@@ -105,7 +105,7 @@ function M:test_raid_empty()
         return false
     end
 
-    local units = unit:GetUnits()
+    local units = fsUnit:GetUnits()
 
     assertEquals(#units, 0)
 end
@@ -121,7 +121,7 @@ function M:test_raid3()
         return mock:UnitExists(x, members)
     end
 
-    local units = unit:GetUnits()
+    local units = fsUnit:GetUnits()
 
     assertEquals(#units, count)
 
