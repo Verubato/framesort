@@ -1,5 +1,4 @@
 local _, addon = ...
-local fsEnumerable = addon.Enumerable
 local M = {}
 addon.Unit = M
 
