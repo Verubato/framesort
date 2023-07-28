@@ -45,7 +45,9 @@ function M:GetUnitFrames(container)
     local players = fsEnumerable
         :From(frames)
         :Where(function(x)
-            return fsUnit:IsPlayer(x.unit)
+            -- a mind controlled player is considered both a player and a pet and will have 2 frames
+            -- so we want include their player frame but exclude their pet frame
+            return fsUnit:IsPlayer(x.unit) and not fsUnit:IsPet(x.unit)
         end)
         :ToTable()
     local pets = fsEnumerable
