@@ -16,7 +16,6 @@ end
 ---Initialises the addon.
 local function Init()
     InitSavedVars()
-    addon:InitLogging()
     addon:InitOptions()
     addon:InitSorting()
     addon:InitPlayerHiding()
