@@ -1,7 +1,10 @@
 local _, addon = ...
+local fsUnit = addon.Unit
 local fsSort = addon.Sorting
+local fsEnumerable = addon.Enumerable
 local fsMacro = addon.Macro
-local fsVisual = addon.Visual
+local fsFrame = addon.Frame
+local fsCompare = addon.Compare
 local fsLog = addon.Log
 local maxMacros = 138
 local isSelfEditingMacro = false
@@ -16,6 +19,22 @@ local function CanUpdate()
     return true
 end
 
+local function GetTargets()
+    local players, _, getUnit = fsFrame:GetFrames()
+    if #players > 0 then
+        return fsEnumerable
+            :From(players)
+            :OrderBy(function(x, y)
+                return fsCompare:CompareTopLeftFuzzy(x, y)
+            end)
+            :Map(getUnit)
+            :ToTable()
+    end
+
+    -- fallback to retrieve the group units
+    return fsUnit:GetUnits()
+end
+
 local function InspectMacro(slot)
     local _, _, body = GetMacroInfo(slot)
 
@@ -23,7 +42,7 @@ local function InspectMacro(slot)
         return false
     end
 
-    local units = fsVisual:GetVisuallyOrderedUnits()
+    local units = GetTargets()
     local newBody = fsMacro:GetNewBody(body, units)
 
     if not newBody then

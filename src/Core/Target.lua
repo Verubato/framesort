@@ -1,7 +1,9 @@
 local _, addon = ...
+local fsUnit = addon.Unit
 local fsSort = addon.Sorting
 local fsEnumerable = addon.Enumerable
-local fsVisual = addon.Visual
+local fsFrame = addon.Frame
+local fsCompare = addon.Compare
 local fsLog = addon.Log
 local prefix = "FSTarget"
 local previousUnits = nil
@@ -17,8 +19,24 @@ local function CanUpdate()
     return true
 end
 
+local function GetTargets()
+    local players, _, getUnit = fsFrame:GetFrames()
+    if #players > 0 then
+        return fsEnumerable
+            :From(players)
+            :OrderBy(function(x, y)
+                return fsCompare:CompareTopLeftFuzzy(x, y)
+            end)
+            :Map(getUnit)
+            :ToTable()
+    end
+
+    -- fallback to retrieve the group units
+    return fsUnit:GetUnits()
+end
+
 local function UpdateTargets()
-    local units = fsVisual:GetVisuallyOrderedUnits()
+    local units = GetTargets()
 
     -- prevent editing macros if the units haven't changed
     if previousUnits and fsEnumerable:ArrayEquals(previousUnits, units) then

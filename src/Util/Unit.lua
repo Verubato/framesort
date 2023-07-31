@@ -5,10 +5,15 @@ addon.Unit = M
 ---Gets a table of group member unit tokens that exist (UnitExists()).
 ---@return string[]
 function M:GetUnits()
+    local members = {}
+
+    if not IsInGroup() then
+        return members
+    end
+
     local isRaid = IsInRaid()
     local prefix = isRaid and "raid" or "party"
     local toGenerate = isRaid and MAX_RAID_MEMBERS or (MEMBERS_PER_RAID_GROUP - 1)
-    local members = {}
 
     -- raids don't have the "player" token frame
     if not isRaid then

@@ -18,12 +18,6 @@ local function CanUpdate(frame)
     if InCombatLockdown() then
         return false
     end
-    if not frame.unit or not frame.unitExists then
-        return
-    end
-    if not UnitIsUnit("player", frame.unit) then
-        return
-    end
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         if EditModeManagerFrame.editModeActive then
             return false
@@ -68,6 +62,6 @@ function addon:InitPlayerHiding()
     eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
     eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
     eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
-    hooksecurefunc("CompactUnitFrame_UpdateVisible", UpdateVisible)
+    hooksecurefunc("CompactUnitFrame_UpdateVisible", Run)
     fsSort:RegisterPostSortCallback(Run)
 end

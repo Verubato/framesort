@@ -19,9 +19,9 @@ function fsBuilder:BuildHealthCheck(parent)
     healthDescription:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -verticalSpacing)
     healthDescription:SetText("Any known issues with configuration or conflicting addons will be shown below.")
 
-    local remediationTitle = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
-    remediationTitle:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
-    remediationTitle:SetText("Remediation Steps")
+    local helpTitle = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+    helpTitle:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
+    helpTitle:SetText("Help")
 
     panel:HookScript("OnShow", function()
         local healthy, results = fsHealth:IsHealthy()
@@ -29,14 +29,14 @@ function fsBuilder:BuildHealthCheck(parent)
         while #lines < #results do
             local description = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
             local result = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
-            local remediation = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+            local help = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
 
             result:SetPoint("TOPLEFT", description, "TOPRIGHT", 4, 0)
 
             lines[#lines + 1] = {
                 Description = description,
                 Result = result,
-                Remediation = remediation,
+                Help = help,
             }
         end
 
@@ -44,7 +44,7 @@ function fsBuilder:BuildHealthCheck(parent)
         for i, result in ipairs(results) do
             local line = lines[i]
 
-            line.Description:SetText(result.Description)
+            line.Description:SetText(result.Description .. "...")
             line.Description:SetPoint("TOPLEFT", anchor, 0, -verticalSpacing * 2)
             line.Result:SetText(result.Passed and "Passed!" or "Failed")
             line.Result:SetFontObject(result.Passed and "GameFontGreen" or "GameFontRed")
@@ -52,18 +52,18 @@ function fsBuilder:BuildHealthCheck(parent)
             anchor = line.Description
         end
 
-        remediationTitle:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
-        remediationTitle:SetShown(not healthy)
-        anchor = remediationTitle
+        helpTitle:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
+        helpTitle:SetShown(not healthy)
+        anchor = helpTitle
 
         for i, result in ipairs(results) do
             local line = lines[i]
-            line.Remediation:SetText(result.Remediation and (" - " .. result.Remediation) or "")
-            line.Remediation:SetShown(not result.Passed)
+            line.Help:SetText(result.Help and (" - " .. result.Help .. ".") or "")
+            line.Help:SetShown(not result.Passed)
 
             if not result.Passed then
-                line.Remediation:SetPoint("TOPLEFT", anchor, 0, -verticalSpacing * 2)
-                anchor = line.Remediation
+                line.Help:SetPoint("TOPLEFT", anchor, 0, -verticalSpacing * 2)
+                anchor = line.Help
             end
         end
     end)

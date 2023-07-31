@@ -5,15 +5,25 @@ local fsLog = addon.Log
 local M = {}
 addon.Frame = M
 
-local function IsValidUnitFrame(frame)
-    return not frame:IsForbidden() and frame.unitExists and frame:GetTop() ~= nil and frame:GetLeft() ~= nil
+local function IsValidUnitFrame(frame, getUnit)
+    return not frame:IsForbidden() and frame:GetTop() ~= nil and frame:GetLeft() ~= nil and getUnit(frame) ~= nil
 end
 
 local function IsValidGroupFrame(frame)
     return not frame:IsForbidden() and frame:GetTop() ~= nil and frame:GetLeft() ~= nil and string.match(frame:GetName() or "", "CompactRaidGroup")
 end
 
-local function ExtractFrames(children)
+local function GetUnit(frame)
+    -- once we add support for other addons
+    -- this function would extract the unit id token from their custom addon frame
+    if SecureButton_GetUnit then
+        return SecureButton_GetUnit(frame)
+    end
+
+    return frame.unit
+end
+
+local function ExtractFrames(children, getUnit)
     local fromRoot = fsEnumerable:From(children)
     local fromGroup = fsEnumerable
         :From(children)
@@ -27,33 +37,38 @@ local function ExtractFrames(children)
     return fromRoot
         :Concat(fromGroup)
         :Where(function(frame)
-            return IsValidUnitFrame(frame)
+            return IsValidUnitFrame(frame, getUnit)
         end)
         :ToTable()
 end
 
 ---Returns the set of frames with a unit attached.
 ---@param container table party/raid/member container
+---@param getUnit fun(frame: table): string
 ---@return table[] players, table[] pets
-function M:GetUnitFrames(container)
+function M:GetUnitFrames(container, getUnit)
     if not container or container:IsForbidden() or not container:IsVisible() then
         local empty = fsEnumerable:Empty():ToTable()
         return empty, empty
     end
 
-    local frames = ExtractFrames({ container:GetChildren() })
+    getUnit = getUnit or GetUnit
+
+    local frames = ExtractFrames({ container:GetChildren() }, getUnit)
     local players = fsEnumerable
         :From(frames)
         :Where(function(x)
             -- a mind controlled player is considered both a player and a pet and will have 2 frames
             -- so we want include their player frame but exclude their pet frame
-            return fsUnit:IsPlayer(x.unit) and not fsUnit:IsPet(x.unit)
+            local unit = getUnit(x)
+            return unit and fsUnit:IsPlayer(unit) and not fsUnit:IsPet(unit)
         end)
         :ToTable()
     local pets = fsEnumerable
         :From(frames)
         :Where(function(x)
-            return fsUnit:IsPet(x.unit)
+            local unit = getUnit(x)
+            return unit and fsUnit:IsPet(unit)
         end)
         :ToTable()
 
@@ -76,15 +91,28 @@ function M:GetGroups(container)
 end
 
 ---Returns the set of party frames.
----@return table[] players, table[] pets
+---@return table[] players, table[] pets, fun(frame: table): string
 function M:GetPartyFrames()
-    return M:GetUnitFrames(CompactPartyFrame)
+    local players, pets = M:GetUnitFrames(CompactPartyFrame, GetUnit)
+    return players, pets, GetUnit
 end
 
 ---Returns the set of raid frames.
----@return table[] players, table[] pets
+---@return table[] players, table[] pets, fun(frame: table): string
 function M:GetRaidFrames()
-    return M:GetUnitFrames(CompactRaidFrameContainer)
+    local players, pets = M:GetUnitFrames(CompactRaidFrameContainer, GetUnit)
+    return players, pets, GetUnit
+end
+
+---Returns party frames if visible, otherwise raid frames.
+---@return table[] players, table[] pets, fun(frame: table): string
+function M:GetFrames()
+    local party, pets, getUnit = M:GetPartyFrames()
+    if #party > 0 then
+        return party, pets, getUnit
+    end
+
+    return M:GetRaidFrames()
 end
 
 ---Returns the set of raid frame group frames.
@@ -99,7 +127,7 @@ function M:GetRaidFrameGroupMembers(group)
     return fsEnumerable
         :From({ group:GetChildren() })
         :Where(function(frame)
-            return IsValidUnitFrame(frame)
+            return IsValidUnitFrame(frame, GetUnit)
         end)
         :ToTable()
 end
@@ -107,15 +135,16 @@ end
 ---Returns the player compact raid frame.
 ---@return table? playerFrame
 function M:GetPlayerFrame()
-    local frames = M:GetPartyFrames()
+    local players, _, getUnit = M:GetPartyFrames()
 
-    if not frames or #frames == 0 then
-        frames = M:GetRaidFrames()
+    if not players or #players == 0 then
+        players, _, getUnit = M:GetRaidFrames()
     end
 
     -- find the player frame
-    return fsEnumerable:From(frames):First(function(frame)
-        return UnitIsUnit("player", frame.unit)
+    return fsEnumerable:From(players):First(function(frame)
+        local unit = getUnit(frame)
+        return unit and UnitIsUnit("player", unit)
     end)
 end
 

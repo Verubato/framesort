@@ -55,19 +55,19 @@ function Api.v1.Sorting:RegisterPostSortCallback(callback)
     addon.Sorting:RegisterPostSortCallback(callback)
 end
 
----Returns a collection of Blizzard party frames ordered by their visual representation.
+---Returns a collection of party frames ordered by their visual representation.
 function Api.v1.Sorting:GetPartyFrames()
     local frames = fsFrame:GetPartyFrames()
     return VisualOrder(frames)
 end
 
----Returns a collection of Blizzard raid frames ordered by their visual representation.
+---Returns a collection of raid frames ordered by their visual representation.
 function Api.v1.Sorting:GetRaidFrames()
     local frames = fsFrame:GetRaidFrames()
     return VisualOrder(frames)
 end
 
----Returns a collection of Blizzard party or raid frames (depending which are shown) ordered by their visual representation.
+---Returns a collection of party or raid frames (depending which are shown) ordered by their visual representation.
 function Api.v1.Sorting:GetFrames()
     local frames = self:GetPartyFrames()
     if #frames > 0 then

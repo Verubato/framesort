@@ -9,7 +9,7 @@ local WowRole = {
     DPS = "DAMAGER",
 }
 
----Returns the start and end index of the nth "@" selector, e.g. @raid1, @player, @placeholder, @, @abc
+---Returns the start and end index of the nth target selector, e.g. @raid1, @player, @placeholder, target=player
 ---@param str string
 ---@param occurrence number? the nth occurrence to find
 ---@return number? start, number? end
