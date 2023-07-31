@@ -34,9 +34,28 @@ local function SortingFunctionsTampered()
 end
 
 local function ConflictingAddons()
-    local issecure, taintedAddon = issecurevariable(CompactRaidFrameContainer, "flowSortFunc")
-    if not issecure and taintedAddon ~= addonName then
-        return AddonFriendlyName(taintedAddon)
+    if CompactRaidFrameContainer then
+        local issecure, taintedAddon = issecurevariable("CompactRaidFrameContainer")
+        if not issecure and taintedAddon ~= addonName then
+            return AddonFriendlyName(taintedAddon)
+        end
+
+        issecure, taintedAddon = issecurevariable(CompactRaidFrameContainer, "flowSortFunc")
+        if not issecure and taintedAddon ~= addonName then
+            return AddonFriendlyName(taintedAddon)
+        end
+    end
+
+    if CompactPartyFrame then
+        local issecure, taintedAddon = issecurevariable("CompactPartyFrame")
+        if not issecure and taintedAddon ~= addonName then
+            return AddonFriendlyName(taintedAddon)
+        end
+
+        issecure, taintedAddon = issecurevariable(CompactPartyFrame, "flowSortFunc")
+        if not issecure and taintedAddon ~= addonName then
+            return AddonFriendlyName(taintedAddon)
+        end
     end
 
     -- running both at the same time would cause issues
@@ -51,36 +70,53 @@ local function SupportsKeepTogether()
     return addon.Options.SortingMethod.TaintlessEnabled or not fsFrame:KeepGroupsTogether()
 end
 
+local function CanSeeFrames()
+    if not IsInGroup() then
+        return true
+    end
+
+    local party = fsFrame:GetPartyFrames()
+    local raid = fsFrame:GetRaidFrames()
+
+    return #party > 0 or #raid > 0
+end
+
 ---Returns true if the environment/settings is in a good state, otherwise false.
 ---@return boolean healthy,HealthCheckResult[] results
 function M:IsHealthy()
     local results = {}
 
     results[#results + 1] = {
+        Passed = CanSeeFrames(),
+        Description = "Default Blizzard frames are being used",
+        Help = "FrameSort currently only supports the default Blizzard frames",
+    }
+
+    results[#results + 1] = {
         Passed = fsFrame:IsUsingRaidStyleFrames(),
-        Description = "Using Raid-Style Party Frames...",
-        Remediation = "Please enable 'Use Raid-Style Party Frames' in the Blizzard settings.",
+        Description = "Using Raid-Style Party Frames",
+        Help = "Please enable 'Use Raid-Style Party Frames' in the Blizzard settings",
+    }
+
+    results[#results + 1] = {
+        Passed = SupportsKeepTogether(),
+        Description = "'Keep Groups Together' setting disabled, or using Taintless sorting",
+        Help = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and "Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"
+            or "Disable the 'Keep Groups Together' raid profile setting",
     }
 
     local conflictingSorter = SortingFunctionsTampered()
     results[#results + 1] = {
         Passed = conflictingSorter == nil,
-        Description = "Blizzard sorting functions not tampered with... ",
-        Remediation = string.format("%s may cause conflicts, consider disabling it.", conflictingSorter or ""),
+        Description = "Blizzard sorting functions not tampered with",
+        Help = string.format("%s may cause conflicts, consider disabling it", conflictingSorter or ""),
     }
 
     local conflictingAddon = ConflictingAddons()
     results[#results + 1] = {
         Passed = conflictingAddon == nil,
-        Description = "No conflicting addons...",
-        Remediation = string.format("%s may cause conflicts, consider disabling it.", conflictingAddon or ""),
-    }
-
-    results[#results + 1] = {
-        Passed = SupportsKeepTogether(),
-        Description = "'Keep Groups Together' setting disabled, or using Taintless sorting...",
-        Remediation = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and "Change the raid display mode to one of the 'Combined Groups' options via Edit Mode."
-            or "Disable the 'Keep Groups Together' raid profile setting.",
+        Description = "No conflicting addons",
+        Help = string.format("%s may cause conflicts, consider disabling it", conflictingAddon or ""),
     }
 
     return fsEnumerable:From(results):All(function(x)
