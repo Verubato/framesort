@@ -75,10 +75,11 @@ local function CanSeeFrames()
         return true
     end
 
-    local party = fsFrame:GetPartyFrames()
-    local raid = fsFrame:GetRaidFrames()
-
-    return #party > 0 or #raid > 0
+    return fsEnumerable:From(fsFrame:GetPartyFrames()):Any(function(x)
+        return x:IsVisible()
+    end) or fsEnumerable:From(fsFrame:GetRaidFrames()):Any(function(x)
+        return x:IsVisible()
+    end)
 end
 
 ---Returns true if the environment/settings is in a good state, otherwise false.
