@@ -431,7 +431,15 @@ local function ApplySpacing(container, petsContainer, spacing, together, horizon
         if petsFlat then
             FlatPets(pets, players, spacing, horizontal)
         else
-            ChainedPets(pets, players, spacing, horizontal)
+            -- some of the invisible pets don't form part of the frame chain
+            -- so we need to exclude them
+            local visiblePets = fsEnumerable
+                :From(pets)
+                :Where(function(x)
+                    return x:IsVisible()
+                end)
+                :ToTable()
+            ChainedPets(visiblePets, players, spacing, horizontal)
         end
     end
 end
