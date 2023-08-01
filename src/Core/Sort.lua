@@ -168,7 +168,7 @@ end
 ---Sorts raid pet frames.
 ---@return boolean sorted true if frames were sorted, otherwise false.
 local function LayoutRaidPets(sortedPlayerUnits, petFrames, getUnit)
-    local petUnits = fsEnumerable:From(petFrames):Map(getUnit):OrderBy(sortFunction):ToTable()
+    local petUnits = fsEnumerable:From(petFrames):Map(getUnit):oTable()
 
     local sorted = SortPets(sortedPlayerUnits, petUnits)
 
@@ -237,16 +237,14 @@ local function LayoutPartyPets(sortedPlayerUnits, playerFrames, petFrames, getUn
         :First(function(x)
             return x:IsVisible()
         end)
+
     local topPetFrame = fsEnumerable
         :From(petFrames)
         :OrderBy(function(x, y)
             return fsCompare:CompareTopLeftFuzzy(x, y)
         end)
-        :First(function(x)
-            return x:IsVisible()
-        end)
+        :First()
 
-    -- frames aren't visible
     if not bottomFrame or not topPetFrame then
         return true
     end
@@ -271,8 +269,24 @@ local function LayoutParty()
 
     RearrangeFrameChain(playerFrames, playerUnits, getUnit)
 
-    local shouldSortPets = fsFrame:ShowPets() and #petFrames > 0
-    return not shouldSortPets or LayoutPartyPets(playerUnits, playerFrames, petFrames, getUnit)
+    if fsFrame:ShowPets() then
+        -- some of the invisible pets don't form part of the frame chain
+        -- so we need to exclude them
+        local visiblePetFrames = fsEnumerable
+            :From(petFrames)
+            :Where(function(x)
+                return x:IsVisible()
+            end)
+            :ToTable()
+
+        if #visiblePetFrames == 0 then
+            return true
+        end
+
+        return LayoutPartyPets(playerUnits, playerFrames, visiblePetFrames, getUnit)
+    end
+
+    return true
 end
 
 ---Attempts to sort the party/raid frames using the traditional method.
