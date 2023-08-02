@@ -5,13 +5,7 @@ local fsCompare = addon.Compare
 local M = {}
 addon.HidePlayer = M
 
-local function CanUpdate(frame)
-    if not frame then
-        return
-    end
-    if frame:IsForbidden() then
-        return
-    end
+local function CanUpdate()
     if not IsInGroup() then
         return false
     end
@@ -27,8 +21,14 @@ local function CanUpdate(frame)
     return true
 end
 
-local function UpdateVisible(frame)
-    if not CanUpdate(frame) then
+local function Run()
+    if not CanUpdate() then
+        return
+    end
+
+    local player = fsFrame:GetPlayerFrame()
+
+    if not player or player:IsForbidden() then
         return
     end
 
@@ -38,16 +38,7 @@ local function UpdateVisible(frame)
         return
     end
 
-    frame:SetShown(mode ~= addon.PlayerSortMode.Hidden)
-end
-
-local function Run()
-    local player = fsFrame:GetPlayerFrame()
-    if not player then
-        return
-    end
-
-    UpdateVisible(player)
+    player:SetShown(mode ~= addon.PlayerSortMode.Hidden)
 end
 
 ---Shows or hides the player (depending on settings).
@@ -62,6 +53,5 @@ function addon:InitPlayerHiding()
     eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
     eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
     eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
-    hooksecurefunc("CompactUnitFrame_UpdateVisible", Run)
     fsSort:RegisterPostSortCallback(Run)
 end

@@ -168,8 +168,7 @@ end
 ---Sorts raid pet frames.
 ---@return boolean sorted true if frames were sorted, otherwise false.
 local function LayoutRaidPets(sortedPlayerUnits, petFrames, getUnit)
-    local petUnits = fsEnumerable:From(petFrames):Map(getUnit):oTable()
-
+    local petUnits = fsEnumerable:From(petFrames):Map(getUnit):ToTable()
     local sorted = SortPets(sortedPlayerUnits, petUnits)
 
     RearrangeFrames(petFrames, sorted, getUnit)
@@ -181,9 +180,14 @@ end
 ---@return boolean sorted true if frames were sorted, otherwise false.
 local function LayoutRaid()
     local sortFunction = fsCompare:GetSortFunction()
+
+    if not sortFunction then
+        return false
+    end
+
     local playerFrames, petFrames, getUnit = fsFrame:GetRaidFrames()
 
-    if not sortFunction or #playerFrames == 0 then
+    if #playerFrames == 0 then
         return false
     end
 
@@ -259,9 +263,14 @@ end
 ---@return boolean sorted true if frames were sorted, otherwise false.
 local function LayoutParty()
     local sortFunction = fsCompare:GetSortFunction()
+
+    if not sortFunction then
+        return false
+    end
+
     local playerFrames, petFrames, getUnit = fsFrame:GetPartyFrames()
 
-    if not sortFunction or #playerFrames == 0 then
+    if #playerFrames == 0 then
         return false
     end
 
@@ -346,8 +355,8 @@ local function OnEvent(_, eventName)
     M:TrySort()
 end
 
----Event hook on blizzard performing frame layouts.
-local function OnLayout()
+---Event hook on exiting edit mode.
+local function OnEditModeExited()
     M:TrySort()
 end
 
@@ -393,19 +402,13 @@ function addon:InitSorting()
     -- Fired whenever a group or raid is formed or disbanded, players are leaving or joining the group or raid.
     eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
 
-    -- Fired when people within the raid group change their tank/healer/dps role
+    -- Fired when people within the raid group change their tank/healer/dps role.
     eventFrame:RegisterEvent("PLAYER_ROLES_ASSIGNED")
 
-    -- previously used FlowContainer_DoLayout but was encountering weird issues
-    -- where frames didn't have x/y coords (perhaps too early in the loading process?)
-    -- and also frames that didn't have units assigned
-    if addon.Options.SortingMethod.TaintlessEnabled then
-        if CompactRaidFrameContainer.LayoutFrames then
-            -- retail
-            hooksecurefunc(CompactRaidFrameContainer, "LayoutFrames", OnLayout)
-        elseif CompactRaidFrameContainer_LayoutFrames then
-            -- wotlk/classic
-            hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", OnLayout)
-        end
+    -- Fired when a pet is created/destroyed which performs a frame layout.
+    eventFrame:RegisterEvent("UNIT_PET")
+
+    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+        EventRegistry:RegisterCallback("EditMode.Exit", OnEditModeExited)
     end
 end
