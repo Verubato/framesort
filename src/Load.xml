@@ -2,6 +2,7 @@
     <Script file="Type\SortMode.lua"/>
     <Script file="Type\Point.lua"/>
     <Script file="Util\Log.lua"/>
+    <Script file="Util\Events.lua"/>
     <Script file="Util\Enumerable.lua"/>
     <Script file="Util\Math.lua"/>
     <Script file="Util\Unit.lua"/>
