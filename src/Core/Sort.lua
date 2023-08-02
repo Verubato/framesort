@@ -165,17 +165,6 @@ local function SortPets(playerUnits, petUnits)
         :ToTable()
 end
 
----Sorts raid pet frames.
----@return boolean sorted true if frames were sorted, otherwise false.
-local function LayoutRaidPets(sortedPlayerUnits, petFrames, getUnit)
-    local petUnits = fsEnumerable:From(petFrames):Map(getUnit):ToTable()
-    local sorted = SortPets(sortedPlayerUnits, petUnits)
-
-    RearrangeFrames(petFrames, sorted, getUnit)
-
-    return true
-end
-
 ---Sorts raid frames.
 ---@return boolean sorted true if frames were sorted, otherwise false.
 local function LayoutRaid()
@@ -185,7 +174,7 @@ local function LayoutRaid()
         return false
     end
 
-    local playerFrames, petFrames, getUnit = fsFrame:GetRaidFrames()
+    local playerFrames, _, getUnit = fsFrame:GetRaidFrames()
 
     if #playerFrames == 0 then
         return false
@@ -205,8 +194,7 @@ local function LayoutRaid()
         RearrangeFrames(playerFrames, playerUnits, getUnit)
     end
 
-    local shouldSortPets = fsFrame:ShowPets() and #petFrames > 0
-    return not shouldSortPets or LayoutRaidPets(playerUnits, petFrames, getUnit)
+    return true
 end
 
 ---Sorts party pet frames.
