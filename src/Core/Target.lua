@@ -6,7 +6,6 @@ local fsFrame = addon.Frame
 local fsCompare = addon.Compare
 local fsLog = addon.Log
 local prefix = "FSTarget"
-local previousUnits = nil
 local targetFramesButtons = {}
 local targetBottomFrameButton = nil
 
@@ -38,11 +37,6 @@ end
 local function UpdateTargets()
     local units = GetTargets()
 
-    -- prevent editing macros if the units haven't changed
-    if previousUnits and fsEnumerable:ArrayEquals(previousUnits, units) then
-        return
-    end
-
     -- if units has less than 5 items it's still fine as units[i] will just be nil
     for i, btn in ipairs(targetFramesButtons) do
         local unit = units[i]
@@ -51,8 +45,6 @@ local function UpdateTargets()
     end
 
     targetBottomFrameButton:SetAttribute("unit", units[#units] or "none")
-
-    previousUnits = units
 
     return true
 end
@@ -90,10 +82,4 @@ function addon:InitTargeting()
     eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
     eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
     fsSort:RegisterPostSortCallback(Run)
-
-    if CompactRaidFrameContainer.LayoutFrames then
-        hooksecurefunc(CompactRaidFrameContainer, "LayoutFrames", Run)
-    elseif CompactRaidFrameContainer_LayoutFrames then
-        hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", Run)
-    end
 end

@@ -9,6 +9,8 @@ local fsLog = addon.Log
 local maxMacros = 138
 local isSelfEditingMacro = false
 local updatePending = false
+---@type table<number, boolean>
+local isFsMacroCache = {}
 
 local function CanUpdate()
     if InCombatLockdown() then
@@ -52,15 +54,23 @@ local function InspectMacro(slot)
     isSelfEditingMacro = true
     EditMacro(slot, nil, nil, newBody)
     isSelfEditingMacro = false
+
+    return true
 end
 
 local function ScanMacros()
-    for i = 1, maxMacros do
-        InspectMacro(i)
+    for slot = 1, maxMacros do
+        -- if we've already inspected this macro and it's not a framesort macro
+        -- then skip attempting to re-process it
+        local probablyFsMacro = isFsMacroCache[slot] == nil or isFsMacroCache[slot]
+
+        if probablyFsMacro then
+            isFsMacroCache[slot] = InspectMacro(slot)
+        end
     end
 end
 
-local function OnEditMacro(macroInfo, _, _, _)
+local function OnEditMacro(slot, _, _, _)
     -- prevent recursion from EditMacro hook
     if isSelfEditingMacro then
         return
@@ -71,7 +81,7 @@ local function OnEditMacro(macroInfo, _, _, _)
         return
     end
 
-    InspectMacro(macroInfo)
+    isFsMacroCache[slot] = InspectMacro(slot)
 end
 
 local function Run()
@@ -109,10 +119,4 @@ function addon:InitMacros()
     fsSort:RegisterPostSortCallback(Run)
 
     hooksecurefunc("EditMacro", OnEditMacro)
-
-    if CompactRaidFrameContainer.LayoutFrames then
-        hooksecurefunc(CompactRaidFrameContainer, "LayoutFrames", Run)
-    elseif CompactRaidFrameContainer_LayoutFrames then
-        hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", Run)
-    end
 end
