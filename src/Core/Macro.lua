@@ -104,17 +104,17 @@ end
 function addon:InitMacros()
     local eventFrame = CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", Run)
-    eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-    eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
-    eventFrame:RegisterEvent("PLAYER_ROLES_ASSIGNED")
+    eventFrame:RegisterEvent(addon.Events.PLAYER_ENTERING_WORLD)
+    eventFrame:RegisterEvent(addon.Events.GROUP_ROSTER_UPDATE)
+    eventFrame:RegisterEvent(addon.Events.PLAYER_ROLES_ASSIGNED)
 
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        eventFrame:RegisterEvent("ARENA_PREP_OPPONENT_SPECIALIZATIONS")
+        eventFrame:RegisterEvent(addon.Events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
     end
 
     local endCombatFrame = CreateFrame("Frame")
     endCombatFrame:HookScript("OnEvent", CombatEnded)
-    endCombatFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+    endCombatFrame:RegisterEvent(addon.Events.PLAYER_REGEN_ENABLED)
 
     fsSort:RegisterPostSortCallback(Run)
 

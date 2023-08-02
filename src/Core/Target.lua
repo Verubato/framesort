@@ -78,8 +78,8 @@ function addon:InitTargeting()
 
     local eventFrame = CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", Run)
-    eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-    eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
-    eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
+    eventFrame:RegisterEvent(addon.Events.PLAYER_ENTERING_WORLD)
+    eventFrame:RegisterEvent(addon.Events.GROUP_ROSTER_UPDATE)
+    eventFrame:RegisterEvent(addon.Events.PLAYER_REGEN_ENABLED)
     fsSort:RegisterPostSortCallback(Run)
 end

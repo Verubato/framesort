@@ -377,26 +377,13 @@ end
 function addon:InitSorting()
     local eventFrame = CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", OnEvent)
-    -- Fired after ending combat, as regen rates return to normal.
-    -- Useful for determining when a player has left combat.
-    -- This occurs when you are not on the hate list of any NPC, or a few seconds after the latest pvp attack that you were involved with.
-    -- It seems Blizzard do an update layout after combat ends, so even for the experimental mode we also need to re-sort.
-    eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
-
-    -- Fires when the player logs in, /reloads the UI or zones between map instances.
-    -- Basically whenever the loading screen appears.
-    eventFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
-
-    -- Fired whenever a group or raid is formed or disbanded, players are leaving or joining the group or raid.
-    eventFrame:RegisterEvent("GROUP_ROSTER_UPDATE")
-
-    -- Fired when people within the raid group change their tank/healer/dps role.
-    eventFrame:RegisterEvent("PLAYER_ROLES_ASSIGNED")
-
-    -- Fired when a pet is created/destroyed which performs a frame layout.
-    eventFrame:RegisterEvent("UNIT_PET")
+    eventFrame:RegisterEvent(addon.Events.PLAYER_REGEN_ENABLED)
+    eventFrame:RegisterEvent(addon.Events.PLAYER_ENTERING_WORLD)
+    eventFrame:RegisterEvent(addon.Events.GROUP_ROSTER_UPDATE)
+    eventFrame:RegisterEvent(addon.Events.PLAYER_ROLES_ASSIGNED)
+    eventFrame:RegisterEvent(addon.Events.UNIT_PET)
 
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        EventRegistry:RegisterCallback("EditMode.Exit", OnEditModeExited)
+        EventRegistry:RegisterCallback(addon.Events.EditModeExit, OnEditModeExited)
     end
 end
