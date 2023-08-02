@@ -500,8 +500,8 @@ end
 function addon:InitSpacing()
     fsSort:RegisterPostSortCallback(Run)
 
-    if CompactParyFrame then
-        hooksecurefunc(CompactArenaFrame, "UpdateLayout", Run)
+    if CompactPartyFrame then
+        hooksecurefunc(CompactPartyFrame, "UpdateLayout", Run)
     end
 
     if CompactRaidFrameContainer then
