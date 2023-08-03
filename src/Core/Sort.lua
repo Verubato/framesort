@@ -1,7 +1,6 @@
 local _, addon = ...
 local fsCompare = addon.Compare
 local fsFrame = addon.Frame
-local fsPoint = addon.Point
 local fsEnumerable = addon.Enumerable
 local fsLog = addon.Log
 local sortPending = false
@@ -65,8 +64,13 @@ end
 ---Rearranges frames in order of the specified units.
 ---@param frames table[] the set of frames to rearrange.
 ---@param units string[] unit ids in the desired order.
+---@param isChain boolean true if the set of frames are chained.
 ---@param getUnit fun(frame: table): string function to extract the unit from the given frame
-local function RearrangeFrames(frames, units, getUnit)
+local function RearrangeFrames(frames, units, isChain, getUnit)
+    if #frames == 0 then
+        return
+    end
+
     local sorted = fsEnumerable
         :From(frames)
         :OrderBy(function(x, y)
@@ -76,43 +80,6 @@ local function RearrangeFrames(frames, units, getUnit)
     local points = fsEnumerable
         :From(sorted)
         :Map(function(x)
-            return fsPoint:GetPointEx(x)
-        end)
-        :ToTable()
-
-    for unitIndex, unit in ipairs(units) do
-        local _, frameIndex = fsEnumerable:From(sorted):First(function(f)
-            return UnitIsUnit(unit, getUnit(f))
-        end)
-
-        if frameIndex and frameIndex ~= unitIndex then
-            local from = points[frameIndex]
-            local to = points[unitIndex]
-            local frame = frames[frameIndex]
-
-            if from.point == "TOPLEFT" and from.point == to.point and from.relativeTo == to.relativeTo and from.relativePoint == to.relativePoint then
-                local xDelta = to.offsetX - from.offsetX
-                local yDelta = to.offsetY - from.offsetY
-
-                frame:AdjustPointsOffset(xDelta, yDelta)
-            else
-                fsLog:Error(string.format("Unable to move frame %s as it doesn't share to the same parent anchor.", frame:GetName()))
-            end
-        end
-    end
-end
-
----Rearranges the display of a frame chain in order of the specified units.
----@param frames table[] the set of frames to rearrange.
----@param units string[] unit ids in the desired order.
----@param getUnit fun(frame: table): string function to extract the unit from the given frame
-local function RearrangeFrameChain(frames, units, getUnit)
-    local points = fsEnumerable
-        :From(frames)
-        :OrderBy(function(x, y)
-            return fsCompare:CompareTopLeftFuzzy(x, y)
-        end)
-        :Map(function(x)
             return {
                 Top = x:GetTop(),
                 Left = x:GetLeft(),
@@ -120,14 +87,23 @@ local function RearrangeFrameChain(frames, units, getUnit)
         end)
         :ToTable()
 
-    local chain = fsFrame:ToFrameChain(frames)
-    if not chain.Valid then
+    local enumerateOrder = sorted
+
+    if isChain then
+        local chain = fsFrame:ToFrameChain(frames)
+
+        if not chain.Valid then
+            fsLog:Error(string.format("The set of frames provided are not arranged in a chain hierarchy."))
+            return
+        end
+
+        enumerateOrder = fsFrame:FramesFromChain(chain)
+    elseif not fsFrame:IsFlat(frames) then
+        fsLog:Error(string.format("The set of frames provided are not arranged in a flattened hierarchy."))
         return
     end
-    local current = chain
 
-    while current do
-        local source = current.Value
+    for _, source in ipairs(enumerateOrder) do
         local _, unitIndex = fsEnumerable:From(units):First(function(x)
             return UnitIsUnit(x, getUnit(source))
         end)
@@ -140,8 +116,6 @@ local function RearrangeFrameChain(frames, units, getUnit)
 
             source:AdjustPointsOffset(xDelta, yDelta)
         end
-
-        current = current.Next
     end
 end
 
@@ -188,10 +162,10 @@ local function LayoutRaid()
         for _, group in ipairs(groups) do
             local frames = fsFrame:GetRaidFrameGroupMembers(group)
             local groupUnits = fsEnumerable:From(frames):Map(getUnit):OrderBy(sortFunction):ToTable()
-            RearrangeFrameChain(frames, groupUnits, getUnit)
+            RearrangeFrames(frames, groupUnits, true, getUnit)
         end
     else
-        RearrangeFrames(playerFrames, playerUnits, getUnit)
+        RearrangeFrames(playerFrames, playerUnits, false, getUnit)
     end
 
     return true
@@ -200,6 +174,10 @@ end
 ---Sorts party pet frames.
 ---@return boolean sorted true if frames were sorted, otherwise false.
 local function LayoutPartyPets(sortedPlayerUnits, playerFrames, petFrames, getUnit)
+    if #petFrames == 0 then
+        return false
+    end
+
     local chain = fsFrame:ToFrameChain(petFrames)
     if not chain.Valid then
         return false
@@ -213,7 +191,7 @@ local function LayoutPartyPets(sortedPlayerUnits, playerFrames, petFrames, getUn
         :ToTable()
     local sortedPetUnits = SortPets(sortedPlayerUnits, petUnits)
 
-    RearrangeFrameChain(petFrames, sortedPetUnits, getUnit)
+    RearrangeFrames(petFrames, sortedPetUnits, true, getUnit)
 
     if fsFrame:HorizontalLayout(false) then
         return true
@@ -226,9 +204,7 @@ local function LayoutPartyPets(sortedPlayerUnits, playerFrames, petFrames, getUn
         :OrderBy(function(x, y)
             return fsCompare:CompareBottomLeftFuzzy(x, y)
         end)
-        :First(function(x)
-            return x:IsVisible()
-        end)
+        :First()
 
     local topPetFrame = fsEnumerable
         :From(petFrames)
@@ -264,23 +240,10 @@ local function LayoutParty()
 
     local playerUnits = fsEnumerable:From(playerFrames):Map(getUnit):OrderBy(sortFunction):ToTable()
 
-    RearrangeFrameChain(playerFrames, playerUnits, getUnit)
+    RearrangeFrames(playerFrames, playerUnits, true, getUnit)
 
     if fsFrame:ShowPets() then
-        -- some of the invisible pets don't form part of the frame chain
-        -- so we need to exclude them
-        local visiblePetFrames = fsEnumerable
-            :From(petFrames)
-            :Where(function(x)
-                return x:IsVisible()
-            end)
-            :ToTable()
-
-        if #visiblePetFrames == 0 then
-            return true
-        end
-
-        return LayoutPartyPets(playerUnits, playerFrames, visiblePetFrames, getUnit)
+        return LayoutPartyPets(playerUnits, playerFrames, petFrames, getUnit)
     end
 
     return true
