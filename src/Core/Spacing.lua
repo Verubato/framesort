@@ -383,26 +383,29 @@ local function ApplyRaidSpacing()
             Flat(pets, spacing)
 
             if fsFrame:HorizontalLayout(true) then
-                local bottom = fsEnumerable
-                    :From(groups)
-                    :OrderBy(function(x, y)
-                        return fsCompare:CompareBottomLeftFuzzy(x, y)
-                    end)
-                    :First()
+                local bottomGroup = fsEnumerable:From(groups):Max(function(x)
+                    return x:GetBottom()
+                end)
+                local bottom = fsEnumerable:From(fsFrame:GetRaidFrameGroupMembers(bottomGroup)):Max(function(x)
+                    return x:GetBottom()
+                end)
 
                 AdjustBoundary(pets, spacing, nil, bottom, nil)
             else
-                local rightGroup = fsEnumerable
-                    :From(groups)
-                    :OrderBy(function(x, y)
-                        return fsCompare:CompareTopRightFuzzy(x, y)
-                    end)
-                    :First()
-                local top = rightGroup and fsEnumerable:From(fsFrame:GetRaidFrameGroupMembers(rightGroup)):Max(function(frame)
-                    return frame:GetRight()
+                local rightGroup = fsEnumerable:From(groups):Max(function(x)
+                    return x:GetRight()
+                end)
+                local right = rightGroup and fsEnumerable:From(fsFrame:GetRaidFrameGroupMembers(rightGroup)):Max(function(x)
+                    return x:GetRight()
+                end)
+                local topGroup = fsEnumerable:From(groups):Max(function(x)
+                    return x:GetTop()
+                end)
+                local top = topGroup and fsEnumerable:From(fsFrame:GetRaidFrameGroupMembers(topGroup)):Max(function(x)
+                    return x:GetTop()
                 end)
 
-                AdjustBoundary(pets, spacing, top, nil, rightGroup)
+                AdjustBoundary(pets, spacing, top, nil, right)
             end
         end
     end
