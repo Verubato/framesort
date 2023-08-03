@@ -1,7 +1,6 @@
 local _, addon = ...
 local fsEnumerable = addon.Enumerable
 local fsUnit = addon.Unit
-local fsLog = addon.Log
 local M = {}
 addon.Frame = M
 
@@ -23,38 +22,49 @@ local function GetUnit(frame)
     return frame.unit
 end
 
-local function ExtractFrames(children, getUnit)
-    local fromRoot = fsEnumerable:From(children)
-    local fromGroup = fsEnumerable
-        :From(children)
-        :Where(function(frame)
-            return IsValidGroupFrame(frame)
+local function ExtractFrames(container, getUnit, checkGroups, visibleOnly)
+    local children = { container:GetChildren() }
+    local frames = fsEnumerable:From(children)
+
+    if checkGroups then
+        local fromGroup = fsEnumerable
+            :From(children)
+            :Where(IsValidGroupFrame)
+            :Map(function(group)
+                return { group:GetChildren() }
+            end)
+            :Flatten()
+
+        frames = frames:Concat(fromGroup)
+    end
+
+    if visibleOnly then
+        frames = frames:Where(function(x)
+            return x:IsVisible()
         end)
-        :Map(function(group)
-            return { group:GetChildren() }
-        end)
-        :Flatten()
-    return fromRoot
-        :Concat(fromGroup)
-        :Where(function(frame)
-            return IsValidUnitFrame(frame, getUnit)
-        end)
-        :ToTable()
+    end
+
+    return frames:Where(function(frame)
+        return IsValidUnitFrame(frame, getUnit)
+    end)
 end
 
 ---Returns the set of frames from the specified container.
+---@param checkGroups boolean true to inspect groups, otherwise false.
 ---@return table[] players, table[] pets, fun(frame: table): string
-local function GetUnitFrames(container)
+local function GetUnitFrames(container, checkGroups, visibleOnly)
     if not container or container:IsForbidden() or not container:IsVisible() then
         local empty = fsEnumerable:Empty():ToTable()
-        return empty, empty, function(_) return "none" end
+        return empty, empty, function(_)
+            return "none"
+        end
     end
 
-    local frames = ExtractFrames({ container:GetChildren() }, GetUnit)
+    local frames = ExtractFrames(container, GetUnit, checkGroups, visibleOnly):ToTable()
     local players = fsEnumerable
         :From(frames)
         :Where(function(x)
-            -- a mind controlled player is considered both a player and a pet and will have 2 frames
+            -- a mind , falsecontrolled player is considered both a player and a pet and will have 2 frames
             -- so we want include their player frame but exclude their pet frame
             local unit = GetUnit(x)
             return unit and fsUnit:IsPlayer(unit) and not fsUnit:IsPet(unit)
@@ -78,34 +88,28 @@ function M:GetGroups(container)
         return fsEnumerable:Empty():ToTable()
     end
 
-    return fsEnumerable
-        :From({ container:GetChildren() })
-        :Where(function(frame)
-            return IsValidGroupFrame(frame)
-        end)
-        :ToTable()
+    return fsEnumerable:From({ container:GetChildren() }):Where(IsValidGroupFrame):ToTable()
 end
 
 ---Returns the set of party frames.
 ---@return table[] players, table[] pets, fun(frame: table): string
 function M:GetPartyFrames()
-    return GetUnitFrames(CompactPartyFrame)
+    return GetUnitFrames(CompactPartyFrame, false, true)
 end
 
 ---Returns the set of raid frames.
 ---@return table[] players, table[] pets, fun(frame: table): string
 function M:GetRaidFrames()
-    return GetUnitFrames(CompactRaidFrameContainer)
+    return GetUnitFrames(CompactRaidFrameContainer, M:KeepGroupsTogether(true), true)
 end
 
 ---Returns the set of enemy arena frames.
 ---@return table[] players, table[] pets, fun(frame: table): string
 function M:GetEnemyArenaFrames()
-    return GetUnitFrames(CompactArenaFrame)
+    return GetUnitFrames(CompactArenaFrame, false, true)
 end
 
 ---Returns party frames if visible, otherwise raid frames.
----@return table[] players, table[] pets, fun(frame: table): string
 function M:GetFrames()
     local party, pets, getUnit = M:GetPartyFrames()
     if #party > 0 then
@@ -124,27 +128,42 @@ end
 ---Returns the set of member frames within a raid group frame.
 ---@return table[] units
 function M:GetRaidFrameGroupMembers(group)
-    return fsEnumerable
-        :From({ group:GetChildren() })
-        :Where(function(frame)
-            return IsValidUnitFrame(frame, GetUnit)
-        end)
-        :ToTable()
+    return ExtractFrames(group, GetUnit, false, true):ToTable()
 end
 
 ---Returns the player compact raid frame.
 ---@return table? playerFrame
 function M:GetPlayerFrame()
-    local players, _, getUnit = M:GetPartyFrames()
+    local party, _, getUnit = GetUnitFrames(CompactPartyFrame, false, false)
+    local members = party
 
-    if not players or #players == 0 then
-        players, _, getUnit = M:GetRaidFrames()
+    if #party == 0 then
+        local raid, _, raidGetUnit = GetUnitFrames(CompactRaidFrameContainer, false, false)
+        members = raid
+        getUnit = raidGetUnit
+    end
+
+    if #members == 0 then
+        return nil
     end
 
     -- find the player frame
-    return fsEnumerable:From(players):First(function(frame)
-        local unit = getUnit(frame)
-        return unit and UnitIsUnit("player", unit)
+    local players = fsEnumerable
+        :From(members)
+        :Where(function(frame)
+            local unit = getUnit(frame)
+            -- a player can have more than one frame if they occupy a vehicle
+            -- as both the player and vehicle pet frame are shown
+            return unit and UnitIsUnit("player", unit) and not fsUnit:IsPet(unit)
+        end)
+        :ToTable()
+
+    if #players == 1 then
+        return players[1]
+    end
+
+    return fsEnumerable:From(players):First(function(x)
+        return x:IsVisible()
     end)
 end
 
@@ -175,7 +194,6 @@ function M:ToFrameChain(frames)
 
         if parent then
             if parent.Next then
-                fsLog:Error(string.format("Encountered multiple children for frame %s in frame frame chain.", parent.Value:GetName()))
                 return invalid
             end
 
@@ -196,12 +214,46 @@ function M:ToFrameChain(frames)
     end
 
     if count ~= #frames then
-        fsLog:Error(string.format("Incomplete/broken frame chain: expected %d nodes but only found %d", #frames, count))
         return invalid
     end
 
     root.Valid = true
     return root
+end
+
+---Returns an ordered set of frames from the given chain
+---@param chain LinkedListNode root
+function M:FramesFromChain(chain)
+    local frames = {}
+    local next = chain
+
+    while next do
+        frames[#frames + 1] = next.Value
+
+        next = next.Next
+    end
+
+    return frames
+end
+
+---Returns true if all the frames have the same anchor.
+---@param frames table[] frames in any particular order
+---@return boolean flat
+function M:IsFlat(frames)
+    if #frames == 0 then
+        return false
+    end
+
+    local _, anchor, _, _, _ = frames[1]:GetPoint()
+    for i = 2, #frames do
+        local _, relativeTo, _, _, _ = frames[i]:GetPoint()
+
+        if relativeTo ~= anchor then
+            return false
+        end
+    end
+
+    return true
 end
 
 ---Returns true if pets are shown in raid frames

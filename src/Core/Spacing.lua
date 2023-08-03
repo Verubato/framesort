@@ -262,10 +262,6 @@ local function Groups(groups, spacing)
             end)
             -- flatten members
             :Flatten()
-            -- only consider visible frames
-            :Where(function(frame)
-                return frame:IsVisible()
-            end)
             -- find the bottom most frame
             :Min(function(frame)
                 return frame:GetBottom()
@@ -292,10 +288,6 @@ local function Groups(groups, spacing)
             end)
             -- flatten members
             :Flatten()
-            -- only consider visible frames
-            :Where(function(frame)
-                return frame:IsVisible()
-            end)
             -- find the right most frame
             :Max(function(frame)
                 return frame:GetRight()
@@ -348,20 +340,9 @@ local function ApplyPartySpacing()
             :OrderBy(function(x, y)
                 return fsCompare:CompareBottomLeftFuzzy(x, y)
             end)
-            :First(function(x)
-                return x:IsVisible()
-            end)
+            :First()
 
-        -- some of the invisible pets don't form part of the frame chain
-        -- so we need to exclude them
-        local visiblePets = fsEnumerable
-            :From(pets)
-            :Where(function(x)
-                return x:IsVisible()
-            end)
-            :ToTable()
-
-        Chain(visiblePets, spacing, playerAnchor)
+        Chain(pets, spacing, playerAnchor)
     end
 
     StorePreviousSpacing(container, spacing)
@@ -404,9 +385,6 @@ local function ApplyRaidSpacing()
             if fsFrame:HorizontalLayout(true) then
                 local bottom = fsEnumerable
                     :From(groups)
-                    :Where(function(x)
-                        return x:IsVisible()
-                    end)
                     :OrderBy(function(x, y)
                         return fsCompare:CompareBottomLeftFuzzy(x, y)
                     end)
@@ -416,22 +394,13 @@ local function ApplyRaidSpacing()
             else
                 local rightGroup = fsEnumerable
                     :From(groups)
-                    :Where(function(x)
-                        return x:IsVisible()
-                    end)
                     :OrderBy(function(x, y)
                         return fsCompare:CompareTopRightFuzzy(x, y)
                     end)
                     :First()
-                local top = rightGroup
-                    and fsEnumerable
-                        :From(fsFrame:GetRaidFrameGroupMembers(rightGroup))
-                        :Where(function(frame)
-                            return frame:IsVisible()
-                        end)
-                        :Max(function(frame)
-                            return frame:GetRight()
-                        end)
+                local top = rightGroup and fsEnumerable:From(fsFrame:GetRaidFrameGroupMembers(rightGroup)):Max(function(frame)
+                    return frame:GetRight()
+                end)
 
                 AdjustBoundary(pets, spacing, top, nil, rightGroup)
             end
