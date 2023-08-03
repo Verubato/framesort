@@ -42,37 +42,33 @@ local function ExtractFrames(children, getUnit)
         :ToTable()
 end
 
----Returns the set of frames with a unit attached.
----@param container table party/raid/member container
----@param getUnit fun(frame: table): string
----@return table[] players, table[] pets
-function M:GetUnitFrames(container, getUnit)
+---Returns the set of frames from the specified container.
+---@return table[] players, table[] pets, fun(frame: table): string
+local function GetUnitFrames(container)
     if not container or container:IsForbidden() or not container:IsVisible() then
         local empty = fsEnumerable:Empty():ToTable()
-        return empty, empty
+        return empty, empty, function(_) return "none" end
     end
 
-    getUnit = getUnit or GetUnit
-
-    local frames = ExtractFrames({ container:GetChildren() }, getUnit)
+    local frames = ExtractFrames({ container:GetChildren() }, GetUnit)
     local players = fsEnumerable
         :From(frames)
         :Where(function(x)
             -- a mind controlled player is considered both a player and a pet and will have 2 frames
             -- so we want include their player frame but exclude their pet frame
-            local unit = getUnit(x)
+            local unit = GetUnit(x)
             return unit and fsUnit:IsPlayer(unit) and not fsUnit:IsPet(unit)
         end)
         :ToTable()
     local pets = fsEnumerable
         :From(frames)
         :Where(function(x)
-            local unit = getUnit(x)
+            local unit = GetUnit(x)
             return unit and fsUnit:IsPet(unit)
         end)
         :ToTable()
 
-    return players, pets
+    return players, pets, GetUnit
 end
 
 ---Returns the set of raid frame group frames.
@@ -93,15 +89,19 @@ end
 ---Returns the set of party frames.
 ---@return table[] players, table[] pets, fun(frame: table): string
 function M:GetPartyFrames()
-    local players, pets = M:GetUnitFrames(CompactPartyFrame, GetUnit)
-    return players, pets, GetUnit
+    return GetUnitFrames(CompactPartyFrame)
 end
 
 ---Returns the set of raid frames.
 ---@return table[] players, table[] pets, fun(frame: table): string
 function M:GetRaidFrames()
-    local players, pets = M:GetUnitFrames(CompactRaidFrameContainer, GetUnit)
-    return players, pets, GetUnit
+    return GetUnitFrames(CompactRaidFrameContainer)
+end
+
+---Returns the set of enemy arena frames.
+---@return table[] players, table[] pets, fun(frame: table): string
+function M:GetEnemyArenaFrames()
+    return GetUnitFrames(CompactArenaFrame)
 end
 
 ---Returns party frames if visible, otherwise raid frames.

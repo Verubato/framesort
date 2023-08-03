@@ -15,13 +15,13 @@ local fsEnumerable = addon.Enumerable
 
 local M = {}
 
-function M:test_empty()
-    local one = fsEnumerable:Empty()
-    local two = fsEnumerable:Empty()
+function M:test_new_instance()
+    local table = { 1, 2, 3 }
+    local one = fsEnumerable:From(table):ToTable()
+    local two = fsEnumerable:From(table):ToTable()
 
-    -- should be the same instance
-    assertEquals(one, two)
-    assert(one:ToTable() == two:ToTable())
+    -- should not be the same instance
+    assert(one ~= two)
 end
 
 function M:test_totable()

@@ -39,6 +39,10 @@ function M:From(auto)
             Index = index,
         }
         enumerable.Next = function()
+            if #enumerable.State.Elements == 0 then
+                return nil
+            end
+
             local nextIndex, next = iterator(enumerable.State.Elements, enumerable.State.Index)
             enumerable.State.Index = nextIndex
             return next
@@ -53,7 +57,8 @@ end
 ---Returns a new Enumerable instance.
 ---@return Enumerable
 function M:New()
-    return M:From({})
+    local table = {}
+    return M:From(table)
 end
 
 ---Maps a sequence from one type into another.
@@ -275,10 +280,6 @@ end
 ---Evaluates the iterator function to return the results as a table.
 ---@return table items
 function M:ToTable()
-    if self.State and self.State.Elements then
-        return self.State.Elements
-    end
-
     local items = {}
     local next = self.Next()
 
