@@ -154,7 +154,12 @@ local function Positions(frames, spacing, start, blockHeight)
                     pos.Top = top
                 end
 
-                -- TODO: xoffset
+                if xOffset then
+                    pos.Left = pos.Left or frame:GetLeft()
+
+                    local left = pos.Left + xOffset
+                    pos.Left = left
+                end
             end
         end
     end
@@ -164,13 +169,13 @@ end
 
 ---Applies spacing to frames that are organised in 'flat' mode.
 ---Flat mode is where frames are all placed relative to 1 point, i.e. the parent container.
-local function Flat(frames, spacing, blockHeight)
+local function Flat(frames, spacing, start, blockHeight)
     if #frames == 0 then
         return
     end
 
     -- calculate the desired positions (with spacing added)
-    local positions = Positions(frames, spacing, nil, blockHeight)
+    local positions = Positions(frames, spacing, start, blockHeight)
 
     for frame, to in pairs(positions) do
         local xDelta = to.Left and (to.Left - frame:GetLeft()) or 0
@@ -178,44 +183,6 @@ local function Flat(frames, spacing, blockHeight)
 
         if xDelta ~= 0 or yDelta ~= 0 then
             frame:AdjustPointsOffset(xDelta, yDelta)
-        end
-    end
-end
-
----Adjusts flat frames to ensure they sit outside the boundary
-local function AdjustBoundary(frames, spacing, top, bottom, right)
-    if #frames == 0 then
-        return
-    end
-
-    local topLeft = fsEnumerable
-        :From(frames)
-        :OrderBy(function(x, y)
-            return fsCompare:CompareTopLeftFuzzy(x, y)
-        end)
-        :First()
-
-    if bottom then
-        local yDelta = (bottom:GetBottom() - topLeft:GetTop()) - spacing.Vertical
-
-        for _, frame in ipairs(frames) do
-            frame:AdjustPointsOffset(0, yDelta)
-        end
-    end
-
-    if right then
-        local xDelta = spacing.Horizontal - (topLeft:GetLeft() - right:GetRight())
-
-        for _, frame in ipairs(frames) do
-            frame:AdjustPointsOffset(xDelta, 0)
-        end
-    end
-
-    if top then
-        local yDelta = top:GetTop() - topLeft:GetTop()
-
-        for _, frame in ipairs(frames) do
-            frame:AdjustPointsOffset(0, yDelta)
         end
     end
 end
@@ -367,10 +334,7 @@ local function ApplyRaidSpacing()
         return
     end
 
-    -- manually specify the block height to the player frames height
-    -- otherwise it would auto detect the pet frame height
-    local blockHeight = #players > 0 and players[1]:GetHeight() or nil
-    Flat(pets, spacing, blockHeight)
+    local start = {}
 
     if fsFrame:HorizontalLayout(true) then
         local bottomGroup = fsEnumerable:From(groups):Min(function(x)
@@ -380,7 +344,9 @@ local function ApplyRaidSpacing()
             return x:GetBottom()
         end)
 
-        AdjustBoundary(pets, spacing, nil, bottom, nil)
+        if bottom then
+            start.Top = bottom:GetBottom() - spacing.Vertical
+        end
     else
         local rightGroup = fsEnumerable:From(groups):Max(function(x)
             return x:GetRight()
@@ -395,8 +361,19 @@ local function ApplyRaidSpacing()
             return x:GetTop()
         end)
 
-        AdjustBoundary(pets, spacing, top, nil, right)
+        if top then
+            start.Top = top:GetTop()
+        end
+
+        if right then
+            start.Left = right:GetRight() + spacing.Horizontal
+        end
     end
+
+    -- manually specify the block height to the player frames height
+    -- otherwise it would auto detect the pet frame height
+    local blockHeight = #players > 0 and players[1]:GetHeight() or nil
+    Flat(pets, spacing, start, blockHeight)
 end
 
 local function ApplyEnemyArenaSpacing()
