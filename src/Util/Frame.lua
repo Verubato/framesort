@@ -15,10 +15,6 @@ end
 local function GetUnit(frame)
     -- once we add support for other addons
     -- this function would extract the unit id token from their custom addon frame
-    if SecureButton_GetUnit then
-        return SecureButton_GetUnit(frame)
-    end
-
     return frame.unit
 end
 
