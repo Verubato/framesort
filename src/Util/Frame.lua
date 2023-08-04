@@ -88,7 +88,12 @@ function M:GetGroups(container)
         return fsEnumerable:Empty():ToTable()
     end
 
-    return fsEnumerable:From({ container:GetChildren() }):Where(IsValidGroupFrame):ToTable()
+    return fsEnumerable
+        :From({ container:GetChildren() })
+        :Where(function(x)
+            return IsValidGroupFrame(x) and x:IsVisible()
+        end)
+        :ToTable()
 end
 
 ---Returns the set of party frames.
