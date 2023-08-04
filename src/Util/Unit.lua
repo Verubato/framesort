@@ -35,9 +35,3 @@ end
 function M:IsPet(unit)
     return string.match(unit, ".*pet.*") ~= nil
 end
-
----Returns true if the unit token is a person/human.
----@param unit string
-function M:IsPlayer(unit)
-    return UnitIsPlayer(unit)
-end

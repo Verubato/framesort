@@ -63,7 +63,7 @@ local function GetUnitFrames(container, checkGroups, visibleOnly)
             -- a mind , falsecontrolled player is considered both a player and a pet and will have 2 frames
             -- so we want include their player frame but exclude their pet frame
             local unit = GetUnit(x)
-            return unit and fsUnit:IsPlayer(unit) and not fsUnit:IsPet(unit)
+            return unit and UnitIsPlayer(unit) and not fsUnit:IsPet(unit)
         end)
         :ToTable()
     local pets = fsEnumerable
