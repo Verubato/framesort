@@ -10,7 +10,11 @@ addon.Spacing = M
 
 ---Calculates the desired positions of the frames with spacing applied.
 ---The returning table is sparse, so if there are no changes required to a frame then it won't have an entry.
-local function FlatPositions(frames, spacing)
+---@param frames table[] the set of frames to calculate positions on.
+---@param spacing table the spacing to apply
+---@param start table? an optional Top+Left position that frames should "start" at.
+---@return table
+local function Positions(frames, spacing, start)
     if #frames == 0 then
         return {}
     end
@@ -114,6 +118,39 @@ local function FlatPositions(frames, spacing)
         end
     end
 
+    -- apply the starting position offset
+    if start then
+        local first = orderedTopLeft[1]
+        positions[first] = {
+            Top = start.Top,
+            Left = start.Left,
+        }
+
+        local xOffset = start.Left and (start.Left - first:GetLeft()) or nil
+        local yOffset = start.Top and (first:GetTop() - start.Top) or nil
+
+        for i = 2, #orderedTopLeft do
+            local frame = orderedTopLeft[i]
+            local pos = positions[frame]
+
+            if yOffset or xOffset then
+                if not pos then
+                    pos = {}
+                    positions[frame] = pos
+                end
+
+                if yOffset then
+                    pos.Top = pos.Top or frame:GetTop()
+
+                    local top = pos.Top - yOffset
+                    pos.Top = top
+                end
+
+                -- TODO: xoffset
+            end
+        end
+    end
+
     return positions
 end
 
@@ -125,7 +162,7 @@ local function Flat(frames, spacing)
     end
 
     -- calculate the desired positions (with spacing added)
-    local positions = FlatPositions(frames, spacing)
+    local positions = Positions(frames, spacing)
 
     for frame, to in pairs(positions) do
         local xDelta = to.Left and (to.Left - frame:GetLeft()) or 0
@@ -175,7 +212,7 @@ local function AdjustBoundary(frames, spacing, top, bottom, right)
     end
 end
 
-local function Chain(frames, spacing, anchor)
+local function Chain(frames, spacing, above)
     if #frames == 0 then
         return
     end
@@ -189,156 +226,45 @@ local function Chain(frames, spacing, anchor)
         return
     end
 
-    -- ensure it's ordered
-    local ordered = fsEnumerable
+    -- store the top frame position before any movements
+    local first = fsEnumerable
         :From(frames)
         :OrderBy(function(x, y)
             return fsCompare:CompareTopLeftFuzzy(x, y)
         end)
-        :ToTable()
+        :First()
 
-    -- calculate the desired positions (with spacing added)
-    local positions = {}
-    local xApplied = 0
-    local yApplied = 0
+    local start = nil
 
-    for i, frame in ipairs(ordered) do
-        if i == 1 then
-            positions[i] = {
-                Top = frame:GetTop(),
-                Left = frame:GetLeft(),
-            }
-        else
-            local previous = ordered[i - 1]
-            local isSameColumn = fsMath:Round(frame:GetLeft()) == fsMath:Round(previous:GetLeft())
-
-            if isSameColumn then
-                local spacingToAdd = (i - 1) * spacing.Vertical
-                positions[i] = {
-                    Top = (previous:GetBottom() + yApplied) - spacingToAdd,
-                    Left = previous:GetLeft(),
-                }
-
-                yApplied = yApplied + (previous:GetBottom() - frame:GetTop())
-            else
-                local spacingToAdd = (i - 1) * spacing.Horizontal
-                positions[i] = {
-                    Top = previous:GetTop(),
-                    Left = previous:GetRight() + xApplied + spacingToAdd,
-                }
-
-                xApplied = xApplied + (previous:GetRight() - frame:GetLeft())
-            end
-        end
+    if above then
+        start = {
+            Top = above:GetBottom() - spacing.Vertical,
+        }
+    else
+        start = {
+            Top = first:GetTop(),
+            Left = first:GetLeft(),
+        }
     end
+
+    local positions = Positions(frames, spacing, start)
 
     -- apply the spacing
     local current = root
     while current do
         local frame = current.Value
-        local index = fsEnumerable:From(ordered):IndexOf(frame)
-        local to = positions[index]
-        local xDelta = to.Left - frame:GetLeft()
-        local yDelta = to.Top - frame:GetTop()
+        local to = positions[frame]
 
-        if xDelta ~= 0 or yDelta ~= 0 then
-            frame:AdjustPointsOffset(xDelta, yDelta)
+        if to then
+            local xDelta = to.Left and (to.Left - frame:GetLeft()) or 0
+            local yDelta = to.Top and (to.Top - frame:GetTop()) or 0
+
+            if xDelta ~= 0 or yDelta ~= 0 then
+                frame:AdjustPointsOffset(xDelta, yDelta)
+            end
         end
 
         current = current.Next
-    end
-
-    if not anchor then
-        return
-    end
-
-    -- space the root relative to the anchor
-    local rootFrame = root.Value
-    local topFrame = ordered[1]
-    local isSameColumn = fsMath:Round(rootFrame:GetLeft()) == fsMath:Round(anchor:GetLeft())
-
-    if isSameColumn then
-        local yDelta = (anchor:GetBottom() - topFrame:GetTop()) - spacing.Vertical
-        rootFrame:AdjustPointsOffset(0, yDelta)
-    else
-        local xDelta = (anchor:GetLeft() - topFrame:GetLeft())
-        rootFrame:AdjustPointsOffset(xDelta, 0)
-    end
-end
-
----Applies spacing to frames that are organised in 'grouped' mode.
----Grouped mode is where frames are placed relative to the frame before it within one or more groups,
----e.g.: group1: frame3 is placed relative to frame2 which is placed relative to frame 1.
----e.g.: group2: frame5 is placed relative to frame4.
-local function Groups(groups, spacing)
-    if #groups == 0 then
-        return
-    end
-
-    table.sort(groups, function(x, y)
-        return fsCompare:CompareTopLeftFuzzy(x, y)
-    end)
-
-    -- apply spacing between the groups
-    for _, group in ipairs(groups) do
-        local xDelta = 0
-        local yDelta = 0
-
-        -- vertical spacing
-        local above = fsEnumerable
-            :From(groups)
-            -- grab the groups above
-            :Where(function(g)
-                return fsMath:Round(g:GetTop()) > fsMath:Round(group:GetTop())
-            end)
-            -- grab the member frames
-            :Map(function(g)
-                return fsFrame:GetRaidFrameGroupMembers(g)
-            end)
-            -- flatten members
-            :Flatten()
-            -- find the bottom most frame
-            :Min(function(frame)
-                return frame:GetBottom()
-            end)
-
-        if above then
-            yDelta = above:GetBottom() - group:GetTop() - spacing.Vertical
-        else
-            -- no frames above us, anchor to parent
-            local parent = group:GetParent()
-            yDelta = parent:GetTop() - group:GetTop()
-        end
-
-        -- horizontal spacing
-        local left = fsEnumerable
-            :From(groups)
-            -- grab the groups left
-            :Where(function(g)
-                return fsMath:Round(g:GetLeft()) < fsMath:Round(group:GetLeft())
-            end)
-            -- grab the member frames
-            :Map(function(g)
-                return fsFrame:GetRaidFrameGroupMembers(g)
-            end)
-            -- flatten members
-            :Flatten()
-            -- find the right most frame
-            :Max(function(frame)
-                return frame:GetRight()
-            end)
-
-        if left then
-            xDelta = spacing.Horizontal - (group:GetLeft() - left:GetRight())
-        else
-            -- no frames left of us, anchor to parent
-            local parent = group:GetParent()
-            xDelta = group:GetLeft() - parent:GetLeft()
-        end
-
-        if xDelta ~= 0 or yDelta ~= 0 then
-            group:AdjustPointsOffset(xDelta, yDelta)
-        end
     end
 end
 
@@ -368,19 +294,23 @@ local function ApplyPartySpacing()
     local players, pets = fsFrame:GetPartyFrames()
 
     Chain(players, spacing)
+    StorePreviousSpacing(container, spacing)
 
-    if fsFrame:ShowPets() then
-        local playerAnchor = fsEnumerable
+    if not fsFrame:ShowPets() then
+        return
+    end
+
+    local above = nil
+    if not fsFrame:HorizontalLayout(false) then
+        above = fsEnumerable
             :From(players)
             :OrderBy(function(x, y)
                 return fsCompare:CompareBottomLeftFuzzy(x, y)
             end)
             :First()
-
-        Chain(pets, spacing, playerAnchor)
     end
 
-    StorePreviousSpacing(container, spacing)
+    Chain(pets, spacing, above)
 end
 
 local function ApplyRaidSpacing()
@@ -401,51 +331,56 @@ local function ApplyRaidSpacing()
         else
             Flat(players, spacing)
         end
+
+        StorePreviousSpacing(container, spacing)
+        return
+    end
+
+    local groups = fsFrame:GetGroups(container)
+    if #groups > 0 then
+        for _, group in ipairs(groups) do
+            local members = fsFrame:GetRaidFrameGroupMembers(group)
+            Chain(members, spacing)
+        end
+
+        Flat(groups, spacing)
     else
-        local groups = fsFrame:GetGroups(container)
-        if #groups > 0 then
-            for _, group in ipairs(groups) do
-                local members = fsFrame:GetRaidFrameGroupMembers(group)
-                Chain(members, spacing)
-            end
-
-            Groups(groups, spacing)
-        else
-            Chain(players, spacing)
-        end
-
-        if fsFrame:ShowPets() then
-            Flat(pets, spacing)
-
-            if fsFrame:HorizontalLayout(true) then
-                local bottomGroup = fsEnumerable:From(groups):Min(function(x)
-                    return x:GetBottom()
-                end)
-                local bottom = bottomGroup and fsEnumerable:From(fsFrame:GetRaidFrameGroupMembers(bottomGroup)):Min(function(x)
-                    return x:GetBottom()
-                end)
-
-                AdjustBoundary(pets, spacing, nil, bottom, nil)
-            else
-                local rightGroup = fsEnumerable:From(groups):Max(function(x)
-                    return x:GetRight()
-                end)
-                local right = rightGroup and fsEnumerable:From(fsFrame:GetRaidFrameGroupMembers(rightGroup)):Max(function(x)
-                    return x:GetRight()
-                end)
-                local topGroup = fsEnumerable:From(groups):Max(function(x)
-                    return x:GetTop()
-                end)
-                local top = topGroup and fsEnumerable:From(fsFrame:GetRaidFrameGroupMembers(topGroup)):Max(function(x)
-                    return x:GetTop()
-                end)
-
-                AdjustBoundary(pets, spacing, top, nil, right)
-            end
-        end
+        Chain(players, spacing)
     end
 
     StorePreviousSpacing(container, spacing)
+
+    if not fsFrame:ShowPets() then
+        return
+    end
+
+    Flat(pets, spacing)
+
+    if fsFrame:HorizontalLayout(true) then
+        local bottomGroup = fsEnumerable:From(groups):Min(function(x)
+            return x:GetBottom()
+        end)
+        local bottom = bottomGroup and fsEnumerable:From(fsFrame:GetRaidFrameGroupMembers(bottomGroup)):Min(function(x)
+            return x:GetBottom()
+        end)
+
+        AdjustBoundary(pets, spacing, nil, bottom, nil)
+    else
+        local rightGroup = fsEnumerable:From(groups):Max(function(x)
+            return x:GetRight()
+        end)
+        local right = rightGroup and fsEnumerable:From(fsFrame:GetRaidFrameGroupMembers(rightGroup)):Max(function(x)
+            return x:GetRight()
+        end)
+        local topGroup = fsEnumerable:From(groups):Max(function(x)
+            return x:GetTop()
+        end)
+        local top = topGroup and fsEnumerable:From(fsFrame:GetRaidFrameGroupMembers(topGroup)):Max(function(x)
+            return x:GetTop()
+        end)
+
+        AdjustBoundary(pets, spacing, top, nil, right)
+    end
 end
 
 local function ApplyEnemyArenaSpacing()
