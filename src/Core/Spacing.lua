@@ -18,6 +18,11 @@ local function FlatPositions(frames, spacing)
     local positions = {}
     local row = 1
     local yApplied = 0
+    local tallestFrame = fsEnumerable:From(frames):Max(function(x)
+        return x:GetHeight()
+    end)
+    local blockHeight = tallestFrame:GetHeight()
+    local currentBlockHeight = 0
     local orderedLeftTop = fsEnumerable
         :From(frames)
         :OrderBy(function(x, y)
@@ -25,24 +30,43 @@ local function FlatPositions(frames, spacing)
         end)
         :ToTable()
 
+    -- vertical spacing
+    -- iterate top to bottom
     for i = 2, #orderedLeftTop do
         local frame = orderedLeftTop[i]
         local previous = orderedLeftTop[i - 1]
         local sameColumn = fsMath:Round(frame:GetLeft()) == fsMath:Round(previous:GetLeft())
+        local top = nil
+        local newBlock = currentBlockHeight == 0
+        currentBlockHeight = currentBlockHeight + frame:GetHeight()
 
         if sameColumn then
-            local spacingToAdd = row * spacing.Vertical
-            positions[frame] = {
-                Top = (previous:GetBottom() + yApplied) - spacingToAdd,
-            }
+            if not newBlock then
+                -- we're inside an existing block, e.g. a split cell
+                -- by "block" I mean a segment of space in a grid layout which may contain 1 or more frames
+                local spacingToAdd = (row - 1) * spacing.Vertical
+                top = (previous:GetBottom() + yApplied) - spacingToAdd
+            elseif currentBlockHeight >= blockHeight or newBlock then
+                -- we've hit a new block or exceeded the block size
+                local spacingToAdd = row * spacing.Vertical
+                top = (previous:GetBottom() + yApplied) - spacingToAdd
+                yApplied = yApplied + (previous:GetBottom() - frame:GetTop())
+                row = row + 1
+            end
 
-            yApplied = yApplied + (previous:GetBottom() - frame:GetTop())
-            row = row + 1
-        end
-
-        if not sameColumn then
+            if top then
+                positions[frame] = {
+                    Top = top,
+                }
+            end
+        else
             row = 1
             yApplied = 0
+            currentBlockHeight = frame:GetHeight()
+        end
+
+        if currentBlockHeight >= blockHeight then
+            currentBlockHeight = 0
         end
     end
 
@@ -55,22 +79,33 @@ local function FlatPositions(frames, spacing)
         end)
         :ToTable()
 
+    -- horizontal spacing
+    -- iterate left to right
     for i = 2, #orderedTopLeft do
         local frame = orderedTopLeft[i]
         local previous = orderedTopLeft[i - 1]
         local sameRow = fsMath:Round(frame:GetTop()) == fsMath:Round(previous:GetTop())
+        local sameColumn = fsMath:Round(frame:GetLeft()) == fsMath:Round(previous:GetLeft())
+        local left = nil
 
-        if sameRow then
+        if sameColumn then
+            local spacingToAdd = (column - 1) * spacing.Horizontal
+            left = frame:GetLeft() + xApplied + spacingToAdd
+        elseif sameRow then
+            local spacingToAdd = column * spacing.Horizontal
+            left = previous:GetRight() + xApplied + spacingToAdd
+            xApplied = xApplied + (previous:GetRight() - frame:GetLeft())
+            column = column + 1
+        end
+
+        if left then
             local position = positions[frame]
             if not position then
                 position = {}
                 positions[frame] = position
             end
 
-            local spacingToAdd = column * spacing.Horizontal
-            position.Left = (previous:GetRight() + xApplied) + spacingToAdd
-            xApplied = xApplied + (previous:GetRight() - frame:GetLeft())
-            column = column + 1
+            position.Left = left
         end
 
         if not sameRow then
@@ -189,7 +224,7 @@ local function Chain(frames, spacing, anchor)
                 local spacingToAdd = (i - 1) * spacing.Horizontal
                 positions[i] = {
                     Top = previous:GetTop(),
-                    Left = (previous:GetRight() + xApplied) + spacingToAdd,
+                    Left = previous:GetRight() + xApplied + spacingToAdd,
                 }
 
                 xApplied = xApplied + (previous:GetRight() - frame:GetLeft())
@@ -383,10 +418,10 @@ local function ApplyRaidSpacing()
             Flat(pets, spacing)
 
             if fsFrame:HorizontalLayout(true) then
-                local bottomGroup = fsEnumerable:From(groups):Max(function(x)
+                local bottomGroup = fsEnumerable:From(groups):Min(function(x)
                     return x:GetBottom()
                 end)
-                local bottom = fsEnumerable:From(fsFrame:GetRaidFrameGroupMembers(bottomGroup)):Max(function(x)
+                local bottom = bottomGroup and fsEnumerable:From(fsFrame:GetRaidFrameGroupMembers(bottomGroup)):Min(function(x)
                     return x:GetBottom()
                 end)
 
