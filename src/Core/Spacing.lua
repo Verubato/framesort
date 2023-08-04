@@ -13,8 +13,9 @@ addon.Spacing = M
 ---@param frames table[] the set of frames to calculate positions on.
 ---@param spacing table the spacing to apply
 ---@param start table? an optional Top+Left position that frames should "start" at.
+---@param blockHeight number? an optional manual override to specify the grid block height, otherwise it will be automatically calculated.
 ---@return table
-local function Positions(frames, spacing, start)
+local function Positions(frames, spacing, start, blockHeight)
     if #frames == 0 then
         return {}
     end
@@ -22,17 +23,22 @@ local function Positions(frames, spacing, start)
     local positions = {}
     local row = 1
     local yApplied = 0
-    local tallestFrame = fsEnumerable:From(frames):Max(function(x)
-        return x:GetHeight()
-    end)
-    local blockHeight = tallestFrame:GetHeight()
-    local currentBlockHeight = 0
+
+    if not blockHeight then
+        local tallestFrame = fsEnumerable:From(frames):Max(function(x)
+            return x:GetHeight()
+        end)
+
+        blockHeight = tallestFrame:GetHeight()
+    end
+
     local orderedLeftTop = fsEnumerable
         :From(frames)
         :OrderBy(function(x, y)
             return fsCompare:CompareLeftTopFuzzy(x, y)
         end)
         :ToTable()
+    local currentBlockHeight = orderedLeftTop[1]:GetHeight()
 
     -- vertical spacing
     -- iterate top to bottom
@@ -41,21 +47,25 @@ local function Positions(frames, spacing, start)
         local previous = orderedLeftTop[i - 1]
         local sameColumn = fsMath:Round(frame:GetLeft()) == fsMath:Round(previous:GetLeft())
         local top = nil
-        local newBlock = currentBlockHeight == 0
-        currentBlockHeight = currentBlockHeight + frame:GetHeight()
 
         if sameColumn then
-            if not newBlock then
-                -- we're inside an existing block, e.g. a split cell
-                -- by "block" I mean a segment of space in a grid layout which may contain 1 or more frames
-                local spacingToAdd = (row - 1) * spacing.Vertical
-                top = (previous:GetBottom() + yApplied) - spacingToAdd
-            elseif currentBlockHeight >= blockHeight or newBlock then
+            if currentBlockHeight >= blockHeight then
+                currentBlockHeight = 0
+            end
+
+            local newBlock = currentBlockHeight == 0
+
+            if newBlock then
                 -- we've hit a new block or exceeded the block size
                 local spacingToAdd = row * spacing.Vertical
                 top = (previous:GetBottom() + yApplied) - spacingToAdd
                 yApplied = yApplied + (previous:GetBottom() - frame:GetTop())
                 row = row + 1
+            else
+                -- we're inside an existing block, e.g. a split cell
+                -- by "block" I mean a segment of space in a grid layout which may contain 1 or more frames
+                local spacingToAdd = (row - 1) * spacing.Vertical
+                top = (previous:GetBottom() + yApplied) - spacingToAdd
             end
 
             if top then
@@ -66,12 +76,10 @@ local function Positions(frames, spacing, start)
         else
             row = 1
             yApplied = 0
-            currentBlockHeight = frame:GetHeight()
-        end
-
-        if currentBlockHeight >= blockHeight then
             currentBlockHeight = 0
         end
+
+        currentBlockHeight = currentBlockHeight + frame:GetHeight()
     end
 
     local column = 1
@@ -156,13 +164,13 @@ end
 
 ---Applies spacing to frames that are organised in 'flat' mode.
 ---Flat mode is where frames are all placed relative to 1 point, i.e. the parent container.
-local function Flat(frames, spacing)
+local function Flat(frames, spacing, blockHeight)
     if #frames == 0 then
         return
     end
 
     -- calculate the desired positions (with spacing added)
-    local positions = Positions(frames, spacing)
+    local positions = Positions(frames, spacing, nil, blockHeight)
 
     for frame, to in pairs(positions) do
         local xDelta = to.Left and (to.Left - frame:GetLeft()) or 0
@@ -322,6 +330,11 @@ local function ApplyRaidSpacing()
     end
 
     local players, pets = fsFrame:GetRaidFrames()
+
+    if #players == 0 and #pets == 0 then
+        return
+    end
+
     local together = fsFrame:KeepGroupsTogether(true)
 
     if not together then
@@ -354,7 +367,10 @@ local function ApplyRaidSpacing()
         return
     end
 
-    Flat(pets, spacing)
+    -- manually specify the block height to the player frames height
+    -- otherwise it would auto detect the pet frame height
+    local blockHeight = #players > 0 and players[1]:GetHeight() or nil
+    Flat(pets, spacing, blockHeight)
 
     if fsFrame:HorizontalLayout(true) then
         local bottomGroup = fsEnumerable:From(groups):Min(function(x)
