@@ -1,5 +1,4 @@
 local _, addon = ...
-local empty = nil
 
 ---@class Enumerable
 ---@field Next function
@@ -10,15 +9,6 @@ local metatable = {
 }
 
 addon.Enumerable = M
-
----Returns an empty singleton instance.
-function M:Empty()
-    if not empty then
-        empty = M:New()
-    end
-
-    return empty
-end
 
 ---Returns an Enumerable instance from the specified items.
 ---@param auto table|function|Enumerable
@@ -67,7 +57,7 @@ end
 function M:Map(apply)
     local iterator = function()
         local next = self.Next()
-        if not next then
+        if next == nil then
             return nil
         end
 
@@ -82,17 +72,22 @@ end
 function M:Flatten()
     local next = nil
     local index = nil
-    local iterator = function()
-        if not index or index > #next then
-            next = self.Next()
-            index = 1
-            if not next then
-                return nil
-            end
-        end
 
-        local item = next[index]
-        index = index + 1
+    local iterator = function()
+        local item = nil
+
+        while item == nil do
+            if not index or index > #next then
+                next = self.Next()
+                index = 1
+                if next == nil then
+                    return nil
+                end
+            end
+
+            item = next[index]
+            index = index + 1
+        end
 
         return item
     end
@@ -170,7 +165,7 @@ end
 ---@return boolean
 function M:All(predicate)
     local next = self.Next()
-    if not next then
+    if next == nil then
         return false
     end
 

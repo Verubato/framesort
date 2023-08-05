@@ -4,12 +4,8 @@ local fsUnit = addon.Unit
 local M = {}
 addon.Frame = M
 
-local function IsValidUnitFrame(frame, getUnit)
-    return not frame:IsForbidden() and frame:GetTop() ~= nil and frame:GetLeft() ~= nil and getUnit(frame) ~= nil
-end
-
-local function IsValidGroupFrame(frame)
-    return not frame:IsForbidden() and frame:GetTop() ~= nil and frame:GetLeft() ~= nil and string.match(frame:GetName() or "", "CompactRaidGroup")
+local function EmptyUnit(_)
+    return "none"
 end
 
 local function GetUnit(frame)
@@ -18,153 +14,143 @@ local function GetUnit(frame)
     return frame.unit
 end
 
-local function ExtractFrames(container, getUnit, checkGroups, visibleOnly)
-    local children = { container:GetChildren() }
-    local frames = fsEnumerable:From(children)
-
-    if checkGroups then
-        local fromGroup = fsEnumerable
-            :From(children)
-            :Where(IsValidGroupFrame)
-            :Map(function(group)
-                return { group:GetChildren() }
-            end)
-            :Flatten()
-
-        frames = frames:Concat(fromGroup)
+local function IsValidUnitFrame(frame)
+    if not frame then
+        return false
     end
 
-    if visibleOnly then
-        frames = frames:Where(function(x)
-            return x:IsVisible()
-        end)
+    if frame:IsForbidden() then
+        return false
     end
 
-    return frames:Where(function(frame)
-        return IsValidUnitFrame(frame, getUnit)
-    end)
+    if frame:GetTop() == nil or frame:GetLeft() == nil then
+        return false
+    end
+
+    if frame.inUse ~= nil and not frame.inUse then
+        return false
+    end
+
+    if frame.frameType and frame.frameType == "target" then
+        -- this frame is invisible when the tain/assist hasn't got anything targeted
+        -- but we still want to include this frame for spacing reasons
+        return true
+    end
+
+    if GetUnit(frame) == nil then
+        return false
+    end
+
+    if not frame:IsVisible() then
+        return false
+    end
+
+    return true
 end
 
----Returns the set of frames from the specified container.
----@param checkGroups boolean true to inspect groups, otherwise false.
----@return table[] players, table[] pets, fun(frame: table): string
-local function GetUnitFrames(container, checkGroups, visibleOnly)
-    if not container or container:IsForbidden() or not container:IsVisible() then
-        local empty = fsEnumerable:Empty():ToTable()
-        return empty, empty, function(_)
-            return "none"
-        end
+local function IsValidGroupFrame(frame)
+    if not frame then
+        return false
     end
 
-    local frames = ExtractFrames(container, GetUnit, checkGroups, visibleOnly):ToTable()
-    local players = fsEnumerable
-        :From(frames)
-        :Where(function(x)
-            -- a mind , falsecontrolled player is considered both a player and a pet and will have 2 frames
-            -- so we want include their player frame but exclude their pet frame
-            local unit = GetUnit(x)
-            return unit and UnitIsPlayer(unit) and not fsUnit:IsPet(unit)
-        end)
-        :ToTable()
-    local pets = fsEnumerable
-        :From(frames)
-        :Where(function(x)
-            local unit = GetUnit(x)
-            return unit and fsUnit:IsPet(unit)
-        end)
-        :ToTable()
+    if frame:IsForbidden() then
+        return false
+    end
 
-    return players, pets, GetUnit
+    if frame:GetTop() == nil or frame:GetLeft() == nil then
+        return false
+    end
+
+    if not frame:IsVisible() then
+        return false
+    end
+
+    return string.match(frame:GetName() or "", "CompactRaidGroup") ~= nil
 end
 
----Returns the set of raid frame group frames.
----@return table[] groups
-function M:GetGroups(container)
+local function GetFrames(container, filter)
     if not container or container:IsForbidden() or not container:IsVisible() then
-        return fsEnumerable:Empty():ToTable()
+        return {}, EmptyUnit
     end
+
+    filter = filter or IsValidUnitFrame
 
     return fsEnumerable
         :From({ container:GetChildren() })
-        :Where(function(x)
-            return IsValidGroupFrame(x) and x:IsVisible()
+        :Where(function(frame)
+            return filter(frame)
         end)
+        :ToTable(), GetUnit
+end
+
+local function Find(filter)
+    local party = GetFrames(CompactPartyFrame, filter)
+    local raid = GetFrames(CompactRaidFrameContainer, filter)
+    local groups = M:GetRaidGroups()
+    local groupedMembers = fsEnumerable
+        :From(groups)
+        :Map(function(group)
+            return GetFrames(group, filter)
+        end)
+        :Flatten()
         :ToTable()
+
+    return fsEnumerable:From(party):Concat(raid):Concat(groupedMembers):ToTable()
 end
 
 ---Returns the set of party frames.
----@return table[] players, table[] pets, fun(frame: table): string
+---@return table[] frames, fun(frame: table): string a function to extract the unit token from a given frame.
 function M:GetPartyFrames()
-    return GetUnitFrames(CompactPartyFrame, false, true)
+    return GetFrames(CompactPartyFrame)
 end
 
----Returns the set of raid frames.
----@return table[] players, table[] pets, fun(frame: table): string
+---Returns the set of non-grouped raid frames.
+---@return table[] frames, fun(frame: table): string a function to extract the unit token from a given frame.
 function M:GetRaidFrames()
-    return GetUnitFrames(CompactRaidFrameContainer, M:KeepGroupsTogether(true), true)
+    return GetFrames(CompactRaidFrameContainer)
 end
 
----Returns the set of enemy arena frames.
----@return table[] players, table[] pets, fun(frame: table): string
-function M:GetEnemyArenaFrames()
-    return GetUnitFrames(CompactArenaFrame, false, true)
-end
-
----Returns party frames if visible, otherwise raid frames.
-function M:GetFrames()
-    local party, pets, getUnit = M:GetPartyFrames()
-    if #party > 0 then
-        return party, pets, getUnit
-    end
-
-    return M:GetRaidFrames()
+---Returns the set of member frames within a raid group frame.
+---@return table[] frames, fun(frame: table): string a function to extract the unit token from a given frame.
+function M:GetRaidGroupMembers(group)
+    return GetFrames(group)
 end
 
 ---Returns the set of raid frame group frames.
 ---@return table[] groups
-function M:GetRaidFrameGroups()
-    return M:GetGroups(CompactRaidFrameContainer)
+function M:GetRaidGroups()
+    local groups, _ = GetFrames(CompactRaidFrameContainer, IsValidGroupFrame)
+    return groups
 end
 
----Returns the set of member frames within a raid group frame.
----@return table[] units
-function M:GetRaidFrameGroupMembers(group)
-    return ExtractFrames(group, GetUnit, false, true):ToTable()
+---Returns the set of enemy arena frames.
+---@return table[] players, fun(frame: table): string
+function M:GetEnemyArenaFrames()
+    return GetFrames(CompactArenaFrame)
+end
+
+---Returns all frames (from both party and raid, including groups).
+---@return table[] players, fun(frame: table): string
+function M:GetFrames()
+    return Find(IsValidUnitFrame), GetUnit
 end
 
 ---Returns the player compact raid frame.
----@return table? playerFrame
+---@return table? playerFrame, fun(frame: table): string
 function M:GetPlayerFrame()
-    local party, _, getUnit = GetUnitFrames(CompactPartyFrame, false, false)
-    local members = party
-
-    if #party == 0 then
-        local raid, _, raidGetUnit = GetUnitFrames(CompactRaidFrameContainer, false, false)
-        members = raid
-        getUnit = raidGetUnit
-    end
-
-    if #members == 0 then
-        return nil
-    end
-
-    -- find the player frame
-    local players = fsEnumerable
-        :From(members)
-        :Where(function(frame)
-            local unit = getUnit(frame)
-            -- a player can have more than one frame if they occupy a vehicle
-            -- as both the player and vehicle pet frame are shown
-            return unit and UnitIsUnit("player", unit) and not fsUnit:IsPet(unit)
-        end)
-        :ToTable()
+    local players = Find(function(frame)
+        local unit = GetUnit(frame)
+        -- a player can have more than one frame if they occupy a vehicle
+        -- as both the player and vehicle pet frame are shown
+        return unit and UnitIsUnit("player", unit) and not fsUnit:IsPet(unit)
+    end)
 
     if #players == 1 then
-        return players[1]
+        return players[1], GetUnit
     end
 
     return fsEnumerable:From(players):First(function(x)
-        return x:IsVisible()
+        return x:IsVisible(), GetUnit
     end)
 end
 
@@ -239,7 +225,7 @@ end
 
 ---Returns true if all the frames have the same anchor.
 ---@param frames table[] frames in any particular order
----@return boolean flat
+---@return boolean
 function M:IsFlat(frames)
     if #frames == 0 then
         return false
@@ -263,38 +249,50 @@ function M:ShowPets()
     return CompactRaidFrameManager_GetSetting("DisplayPets")
 end
 
----Returns true if groups are kept together.
+---Returns true if frames are grouped.
 ---@return boolean
-function M:KeepGroupsTogether(isRaid)
+function M:IsPartyGrouped()
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        if not isRaid then
-            return false
-        end
+        return false
+    end
 
+    return CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
+end
+
+---Returns true if frames are grouped.
+---@return boolean
+function M:IsRaidGrouped()
+    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         local raidGroupDisplayType = EditModeManagerFrame:GetSettingValue(Enum.EditModeSystem.UnitFrame, Enum.EditModeUnitFrameSystemIndices.Raid, Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
         return raidGroupDisplayType == Enum.RaidGroupDisplayType.SeparateGroupsVertical or raidGroupDisplayType == Enum.RaidGroupDisplayType.SeparateGroupsHorizontal
-    else
-        return CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
     end
+
+    return CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
 end
 
 ---Returns true if the frames are using horizontal layout.
----@param isRaid boolean true for raid frames, false for party.
-function M:HorizontalLayout(isRaid)
+---@return boolean
+function M:PartyHorizontalLayout()
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        if isRaid then
-            local displayType = EditModeManagerFrame:GetSettingValue(Enum.EditModeSystem.UnitFrame, Enum.EditModeUnitFrameSystemIndices.Raid, Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
-
-            return displayType == Enum.RaidGroupDisplayType.SeparateGroupsHorizontal or displayType == Enum.RaidGroupDisplayType.CombineGroupsHorizontal
-        else
-            return EditModeManagerFrame:GetSettingValueBool(Enum.EditModeSystem.UnitFrame, Enum.EditModeUnitFrameSystemIndices.Party, Enum.EditModeUnitFrameSetting.UseHorizontalGroups)
-        end
-    else
-        return CompactRaidFrameManager_GetSetting("HorizontalGroups")
+        return EditModeManagerFrame:GetSettingValueBool(Enum.EditModeSystem.UnitFrame, Enum.EditModeUnitFrameSystemIndices.Party, Enum.EditModeUnitFrameSetting.UseHorizontalGroups)
     end
+
+    return CompactRaidFrameManager_GetSetting("HorizontalGroups")
+end
+
+---Returns true if the frames are using horizontal layout.
+---@return boolean
+function M:RaidHorizontalLayout()
+    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+        local displayType = EditModeManagerFrame:GetSettingValue(Enum.EditModeSystem.UnitFrame, Enum.EditModeUnitFrameSystemIndices.Raid, Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
+        return displayType == Enum.RaidGroupDisplayType.SeparateGroupsHorizontal or displayType == Enum.RaidGroupDisplayType.CombineGroupsHorizontal
+    end
+
+    return CompactRaidFrameManager_GetSetting("HorizontalGroups")
 end
 
 ---Returns true if using raid-style party frames.
+---@return boolean
 function M:IsUsingRaidStyleFrames()
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         return EditModeManagerFrame:UseRaidStylePartyFrames()

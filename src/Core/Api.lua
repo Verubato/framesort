@@ -63,18 +63,24 @@ end
 
 ---Returns a collection of raid frames ordered by their visual representation.
 function Api.v1.Sorting:GetRaidFrames()
-    local frames = fsFrame:GetRaidFrames()
-    return VisualOrder(frames)
-end
-
----Returns a collection of party or raid frames (depending which are shown) ordered by their visual representation.
-function Api.v1.Sorting:GetFrames()
-    local frames = self:GetPartyFrames()
-    if #frames > 0 then
-        return frames
+    if not fsFrame:IsRaidGrouped() then
+        local frames = fsFrame:GetRaidFrames()
+        return VisualOrder(frames)
     end
 
-    return self:GetRaidFrames()
+    return fsEnumerable
+        :From(fsFrame:GetRaidGroups())
+        :Map(function(group)
+            return fsFrame:GetRaidGroupMembers(group)
+        end)
+        :Flatten()
+        :ToTable()
+end
+
+---Returns a collection all frames (from both party and raid).
+function Api.v1.Sorting:GetFrames()
+    local frames = fsFrame:GetFrames()
+    return VisualOrder(frames)
 end
 
 ---Gets the player sort mode.
