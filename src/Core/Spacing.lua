@@ -5,7 +5,7 @@ local fsFrame = addon.Frame
 local fsCompare = addon.Compare
 local fsMath = addon.Math
 local fsEnumerable = addon.Enumerable
-local log = addon.Log
+local fsLog = addon.Log
 local previousSpacing = {}
 local M = {}
 addon.Spacing = M
@@ -31,7 +31,8 @@ local function Positions(frames, spacing, start, blockHeight)
             return x:GetHeight()
         end)
 
-        blockHeight = tallestFrame:GetHeight()
+        -- subtract 1 to make sure the normal sized frames exceed the block size
+        blockHeight = tallestFrame:GetHeight() - 1
     end
 
     local orderedLeftTop = fsEnumerable
@@ -410,7 +411,7 @@ local function ApplyRaidSpacing()
 
     -- manually specify the block height to the player frames height
     -- otherwise it would auto detect the pet frame height
-    Flat(ungrouped, spacing, start, blockHeight)
+    Flat(ungrouped, spacing, start, blockHeight - 1)
 end
 
 local function ApplyEnemyArenaSpacing()
