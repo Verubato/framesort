@@ -19,10 +19,11 @@ local function CanUpdate()
 end
 
 local function GetTargets()
-    local players, _, getUnit = fsFrame:GetFrames()
-    if #players > 0 then
+    local frames, getUnit = fsFrame:GetFrames()
+
+    if #frames > 0 then
         return fsEnumerable
-            :From(players)
+            :From(frames)
             :OrderBy(function(x, y)
                 return fsCompare:CompareTopLeftFuzzy(x, y)
             end)

@@ -66,8 +66,8 @@ local function ConflictingAddons()
     return nil
 end
 
-local function SupportsKeepTogether()
-    return addon.Options.SortingMethod.TaintlessEnabled or not fsFrame:KeepGroupsTogether()
+local function SupportsGroups()
+    return addon.Options.SortingMethod.TaintlessEnabled or (not fsFrame:IsRaidGrouped() and not fsFrame:IsPartyGrouped())
 end
 
 local function CanSeeFrames()
@@ -75,13 +75,8 @@ local function CanSeeFrames()
         return true
     end
 
-    local party = fsFrame:GetPartyFrames()
-    if #party > 0 then
-        return true
-    end
-
-    local raid = fsFrame:GetRaidFrames()
-    return #raid > 0
+    local frames = fsFrame:GetFrames()
+    return #frames > 0
 end
 
 ---Returns true if the environment/settings is in a good state, otherwise false.
@@ -102,7 +97,7 @@ function M:IsHealthy()
     }
 
     results[#results + 1] = {
-        Passed = SupportsKeepTogether(),
+        Passed = SupportsGroups(),
         Description = "'Keep Groups Together' setting disabled, or using Taintless sorting",
         Help = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and "Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"
             or "Disable the 'Keep Groups Together' raid profile setting",

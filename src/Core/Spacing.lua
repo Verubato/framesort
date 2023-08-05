@@ -1,9 +1,11 @@
 local _, addon = ...
+local fsUnit = addon.Unit
 local fsSort = addon.Sorting
 local fsFrame = addon.Frame
 local fsCompare = addon.Compare
 local fsMath = addon.Math
 local fsEnumerable = addon.Enumerable
+local log = addon.Log
 local previousSpacing = {}
 local M = {}
 addon.Spacing = M
@@ -174,6 +176,11 @@ local function Flat(frames, spacing, start, blockHeight)
         return
     end
 
+    if not fsFrame:IsFlat(frames) then
+        fsLog:Error(string.format("Cannot space frames as they are not arranged in a flattened layout."))
+        return
+    end
+
     -- calculate the desired positions (with spacing added)
     local positions = Positions(frames, spacing, start, blockHeight)
 
@@ -187,7 +194,7 @@ local function Flat(frames, spacing, start, blockHeight)
     end
 end
 
-local function Chain(frames, spacing, above)
+local function Chain(frames, spacing, start)
     if #frames == 0 then
         return
     end
@@ -198,6 +205,7 @@ local function Chain(frames, spacing, above)
     -- being able to run this in combat has the benefit that if blizzard reset/redraw frames mid-combat, we can reapply our sorting/spacing!
     local root = fsFrame:ToFrameChain(frames)
     if not root.Valid then
+        fsLog:Error(string.format("Cannot space frames as they are not arranged in a chain layout."))
         return
     end
 
@@ -209,18 +217,10 @@ local function Chain(frames, spacing, above)
         end)
         :First()
 
-    local start = nil
-
-    if above then
-        start = {
-            Top = above:GetBottom() - spacing.Vertical,
-        }
-    else
-        start = {
-            Top = first:GetTop(),
-            Left = first:GetLeft(),
-        }
-    end
+    start = start or {
+        Top = first:GetTop(),
+        Left = first:GetLeft(),
+    }
 
     local positions = Positions(frames, spacing, start)
 
@@ -266,7 +266,17 @@ local function ApplyPartySpacing()
         return
     end
 
-    local players, pets = fsFrame:GetPartyFrames()
+    local frames, getUnit = fsFrame:GetPartyFrames()
+    local players = fsEnumerable
+        :From(frames)
+        :Where(function(frame)
+            local unit = getUnit(frame)
+            -- a unit can be both a player and a pet
+            -- e.g. when occupying a vehicle
+            -- so we want to filter out the pets
+            return UnitIsPlayer(unit) and not fsUnit:IsPet(unit)
+        end)
+        :ToTable()
 
     Chain(players, spacing)
     StorePreviousSpacing(container, spacing)
@@ -275,17 +285,45 @@ local function ApplyPartySpacing()
         return
     end
 
-    local above = nil
-    if not fsFrame:HorizontalLayout(false) then
-        above = fsEnumerable
+    local pets = fsEnumerable
+        :From(frames)
+        :Where(function(frame)
+            local unit = getUnit(frame)
+            return fsUnit:IsPet(unit)
+        end)
+        :ToTable()
+
+    local start = nil
+
+    if fsFrame:PartyHorizontalLayout() then
+        local left = fsEnumerable
             :From(players)
             :OrderBy(function(x, y)
                 return fsCompare:CompareBottomLeftFuzzy(x, y)
             end)
             :First()
+
+        if left then
+            start = {
+                Left = left:GetLeft(),
+            }
+        end
+    else
+        local above = fsEnumerable
+            :From(players)
+            :OrderBy(function(x, y)
+                return fsCompare:CompareBottomLeftFuzzy(x, y)
+            end)
+            :First()
+
+        if above then
+            start = {
+                Top = above:GetBottom() - spacing.Vertical,
+            }
+        end
     end
 
-    Chain(pets, spacing, above)
+    Chain(pets, spacing, start)
 end
 
 local function ApplyRaidSpacing()
@@ -296,38 +334,38 @@ local function ApplyRaidSpacing()
         return
     end
 
-    local players, pets = fsFrame:GetRaidFrames()
+    if not fsFrame:IsRaidGrouped() then
+        local frames = fsFrame:GetRaidFrames()
 
-    if #players == 0 and #pets == 0 then
-        return
-    end
-
-    local together = fsFrame:KeepGroupsTogether(true)
-
-    if not together then
-        if fsFrame:ShowPets() then
-            local all = fsEnumerable:From(players):Concat(pets):ToTable()
-            Flat(all, spacing)
-        else
-            Flat(players, spacing)
+        if #frames == 0 then
+            return
         end
 
+        Flat(frames, spacing)
         StorePreviousSpacing(container, spacing)
         return
     end
 
-    local groups = fsFrame:GetGroups(container)
-    if #groups > 0 then
-        for _, group in ipairs(groups) do
-            local members = fsFrame:GetRaidFrameGroupMembers(group)
-            Chain(members, spacing)
-        end
+    local groups = fsFrame:GetRaidGroups()
+    local ungrouped = fsFrame:GetRaidFrames()
 
-        Flat(groups, spacing)
-    else
-        Chain(players, spacing)
+    if #groups == 0 then
+        Chain(ungrouped, spacing)
+        StorePreviousSpacing(container, spacing)
+        return
     end
 
+    local blockHeight = 0
+    for _, group in ipairs(groups) do
+        local members = fsFrame:GetRaidGroupMembers(group)
+
+        if #members > 0 then
+            blockHeight = math.max(blockHeight, members[1]:GetHeight())
+            Chain(members, spacing)
+        end
+    end
+
+    Flat(groups, spacing)
     StorePreviousSpacing(container, spacing)
 
     if not fsFrame:ShowPets() then
@@ -336,11 +374,11 @@ local function ApplyRaidSpacing()
 
     local start = {}
 
-    if fsFrame:HorizontalLayout(true) then
+    if fsFrame:RaidHorizontalLayout() then
         local bottomGroup = fsEnumerable:From(groups):Min(function(x)
             return x:GetBottom()
         end)
-        local bottom = bottomGroup and fsEnumerable:From(fsFrame:GetRaidFrameGroupMembers(bottomGroup)):Min(function(x)
+        local bottom = bottomGroup and fsEnumerable:From(fsFrame:GetRaidGroupMembers(bottomGroup)):Min(function(x)
             return x:GetBottom()
         end)
 
@@ -351,13 +389,13 @@ local function ApplyRaidSpacing()
         local rightGroup = fsEnumerable:From(groups):Max(function(x)
             return x:GetRight()
         end)
-        local right = rightGroup and fsEnumerable:From(fsFrame:GetRaidFrameGroupMembers(rightGroup)):Max(function(x)
+        local right = rightGroup and fsEnumerable:From(fsFrame:GetRaidGroupMembers(rightGroup)):Max(function(x)
             return x:GetRight()
         end)
         local topGroup = fsEnumerable:From(groups):Max(function(x)
             return x:GetTop()
         end)
-        local top = topGroup and fsEnumerable:From(fsFrame:GetRaidFrameGroupMembers(topGroup)):Max(function(x)
+        local top = topGroup and fsEnumerable:From(fsFrame:GetRaidGroupMembers(topGroup)):Max(function(x)
             return x:GetTop()
         end)
 
@@ -372,8 +410,7 @@ local function ApplyRaidSpacing()
 
     -- manually specify the block height to the player frames height
     -- otherwise it would auto detect the pet frame height
-    local blockHeight = #players > 0 and players[1]:GetHeight() or nil
-    Flat(pets, spacing, start, blockHeight)
+    Flat(ungrouped, spacing, start, blockHeight)
 end
 
 local function ApplyEnemyArenaSpacing()
@@ -384,10 +421,9 @@ local function ApplyEnemyArenaSpacing()
         return
     end
 
-    local players, pets, _ = fsFrame:GetEnemyArenaFrames()
-    local all = fsEnumerable:From(players):Concat(pets):ToTable()
+    local frames = fsFrame:GetEnemyArenaFrames()
 
-    Flat(all, spacing)
+    Flat(frames, spacing)
     StorePreviousSpacing(container, spacing)
 end
 
