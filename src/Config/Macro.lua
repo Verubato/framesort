@@ -53,14 +53,17 @@ function fsBuilder:BuildMacroOptions(parent)
 
     local examples = {
         [[#showtooltip
-#FrameSort Frame1
-/cast [@frame1] Dispel;]],
+#FrameSort Mouseover, Target, Healer
+/cast [@mouseover,help][@target,help][@healer,exists] Blessing of Sanctuary]],
 
-        [[#FrameSort Target, Healer
-/cast [@target,help][@healer,exists] Blessing of Protection]],
+        [[#showtooltip
+#FrameSort Frame1, Frame2, Player
+/cast [mod:ctrl,@frame1][mod:shift,@frame2][mod:alt,@player][] Dispel]],
 
-        [[#FrameSort EnemyHealer, Target
-/cast [mod:shift,@enemyhealer][@target] Storm Bolt;]],
+        [[#FrameSort EnemyHealer, EnemyHealer
+/cast [@doesntmatter] Shadowstep;
+/cast [@placeholder] Kick;
+]],
     }
 
     local padding = 10
