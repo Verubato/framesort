@@ -22,6 +22,8 @@ addon.Events = {
     -- Retail only even that's fired at the start of each arena match/round when the opponent specs have been loaded.
     ARENA_PREP_OPPONENT_SPECIALIZATIONS = "ARENA_PREP_OPPONENT_SPECIALIZATIONS",
 
+    ARENA_OPPONENT_UPDATE = "ARENA_OPPONENT_UPDATE",
+
     -- Special event that's fired when the user closes edit mode.
     -- Can only be used directly on EventRegistry and not via RegisterScript()
     EditModeExit = "EditMode.Exit",
