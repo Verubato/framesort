@@ -418,14 +418,12 @@ local function ApplyEnemyArenaSpacing()
     local container = CompactArenaFrame
     local spacing = addon.Options.Appearance.EnemyArena.Spacing
 
-    if not container or not ShouldSpace(container, spacing) then
-        return
+    if ShouldSpace(container, spacing) then
+        local frames = fsFrame:GetEnemyArenaFrames()
+
+        Chain(frames, spacing)
+        StorePreviousSpacing(container, spacing)
     end
-
-    local frames = fsFrame:GetEnemyArenaFrames()
-
-    Flat(frames, spacing)
-    StorePreviousSpacing(container, spacing)
 end
 
 ---Applies spacing to party and raid frames.
@@ -451,6 +449,8 @@ function addon:InitSpacing()
     eventFrame:RegisterEvent(addon.Events.UNIT_PET)
 
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+        eventFrame:RegisterEvent(addon.Events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
+        eventFrame:RegisterEvent(addon.Events.ARENA_OPPONENT_UPDATE)
         EventRegistry:RegisterCallback(addon.Events.EditModeExit, Run)
     end
 end
