@@ -34,25 +34,29 @@ local function SortingFunctionsTampered()
 end
 
 local function ConflictingAddons()
-    if CompactRaidFrameContainer then
-        local issecure, taintedAddon = issecurevariable("CompactRaidFrameContainer")
+    local raidContainer, raidContainerName = fsFrame:GetRaidFramesContainer()
+    if raidContainer then
+        local issecure, taintedAddon = issecurevariable(raidContainerName)
         if not issecure and taintedAddon ~= addonName then
             return AddonFriendlyName(taintedAddon)
         end
 
-        issecure, taintedAddon = issecurevariable(CompactRaidFrameContainer, "flowSortFunc")
+        -- issecurevariable returns true if the variable is nil or doesn't exist on the table
+        -- so it'll still work if the container isn't Blizzard's
+        issecure, taintedAddon = issecurevariable(raidContainer, "flowSortFunc")
         if not issecure and taintedAddon ~= addonName then
             return AddonFriendlyName(taintedAddon)
         end
     end
 
-    if CompactPartyFrame then
-        local issecure, taintedAddon = issecurevariable("CompactPartyFrame")
+    local partyContainer, partyContainerName = fsFrame:GetPartyFramesContainer()
+    if partyContainer then
+        local issecure, taintedAddon = issecurevariable(partyContainerName)
         if not issecure and taintedAddon ~= addonName then
             return AddonFriendlyName(taintedAddon)
         end
 
-        issecure, taintedAddon = issecurevariable(CompactPartyFrame, "flowSortFunc")
+        issecure, taintedAddon = issecurevariable(partyContainer, "flowSortFunc")
         if not issecure and taintedAddon ~= addonName then
             return AddonFriendlyName(taintedAddon)
         end

@@ -173,15 +173,6 @@ end
 ---Applies spacing to frames that are organised in 'flat' mode.
 ---Flat mode is where frames are all placed relative to 1 point, i.e. the parent container.
 local function Flat(frames, spacing, start, blockHeight)
-    if #frames == 0 then
-        return
-    end
-
-    if not fsFrame:IsFlat(frames) then
-        fsLog:Error(string.format("Cannot space frames as they are not arranged in a flattened layout."))
-        return
-    end
-
     -- calculate the desired positions (with spacing added)
     local positions = Positions(frames, spacing, start, blockHeight)
 
@@ -195,20 +186,12 @@ local function Flat(frames, spacing, start, blockHeight)
     end
 end
 
-local function Chain(frames, spacing, start)
-    if #frames == 0 then
-        return
-    end
-
+local function Chain(frames, chain, spacing, start)
     -- why all this complexity instead of just a simple sequence of SetPoint() calls?
     -- it's because SetPoint() can't be called in combat whereas AdjustPointsOffset() can
     -- SetPoint() is just completely disallowed (by unsecure code) in combat, even if only changing x/y points
     -- being able to run this in combat has the benefit that if blizzard reset/redraw frames mid-combat, we can reapply our sorting/spacing!
-    local root = fsFrame:ToFrameChain(frames)
-    if not root.Valid then
-        fsLog:Error(string.format("Cannot space frames as they are not arranged in a chain layout."))
-        return
-    end
+    local root = chain
 
     -- store the top frame position before any movements
     local first = fsEnumerable
@@ -244,29 +227,63 @@ local function Chain(frames, spacing, start)
     end
 end
 
-local function ShouldSpace(container, spacing)
-    local previous = previousSpacing[container]
+local function ShouldSpace(name, spacing)
+    local previous = previousSpacing[name]
     local previousNonZero = previous and (previous.Horizontal ~= 0 or previous.Vertical ~= 0)
     local zeroSpacing = spacing.Horizontal == 0 and spacing.Vertical == 0
 
     return previousNonZero or not zeroSpacing
 end
 
-local function StorePreviousSpacing(container, spacing)
-    previousSpacing[container] = {
+local function StorePreviousSpacing(name, spacing)
+    previousSpacing[name] = {
         Horizontal = spacing.Horizontal,
         Vertical = spacing.Vertical,
     }
 end
 
-local function ApplyPartySpacing()
-    local container = CompactPartyFrame
-    local spacing = addon.Options.Appearance.Party.Spacing
-
-    if not container or not ShouldSpace(container, spacing) then
+local function Space(name, frames, spacing, layoutTypeHint, start, blockHeight)
+    if #frames == 0 then
         return
     end
 
+    if not ShouldSpace(name, spacing) then
+        return
+    end
+
+    if layoutTypeHint == addon.LayoutType.Flat then
+        if fsFrame:IsFlat(frames) then
+            Flat(frames, spacing, start, blockHeight)
+            StorePreviousSpacing(name, spacing)
+            return
+        end
+
+        local chain = fsFrame:ToFrameChain(frames)
+        if chain.Valid then
+            Chain(frames, chain, spacing, start)
+            StorePreviousSpacing(name, spacing)
+            return
+        end
+    elseif layoutTypeHint == addon.LayoutType.Chain then
+        local chain = fsFrame:ToFrameChain(frames)
+        if chain.Valid then
+            Chain(frames, chain, spacing, start)
+            StorePreviousSpacing(name, spacing)
+            return
+        end
+
+        if fsFrame:IsFlat(frames) then
+            Flat(frames, spacing, start, blockHeight)
+            StorePreviousSpacing(name, spacing)
+            return
+        end
+    end
+
+    fsLog:Error(string.format("Unable to apply spacing to frames '%s' as they aren't arranged in one of the layout types.", name))
+end
+
+local function ApplyPartySpacing()
+    local spacing = addon.Options.Appearance.Party.Spacing
     local frames, getUnit = fsFrame:GetPartyFrames()
     local players = fsEnumerable
         :From(frames)
@@ -279,8 +296,7 @@ local function ApplyPartySpacing()
         end)
         :ToTable()
 
-    Chain(players, spacing)
-    StorePreviousSpacing(container, spacing)
+    Space("Party-Players", players, spacing, addon.LayoutType.Chain)
 
     if not fsFrame:ShowPets() then
         return
@@ -324,26 +340,16 @@ local function ApplyPartySpacing()
         end
     end
 
-    Chain(pets, spacing, start)
+    Space("Party-Pets", pets, spacing, addon.LayoutType.Chain, start)
 end
 
 local function ApplyRaidSpacing()
-    local container = CompactRaidFrameContainer
     local spacing = addon.Options.Appearance.Raid.Spacing
-
-    if not container or not ShouldSpace(container, spacing) then
-        return
-    end
 
     if not fsFrame:IsRaidGrouped() then
         local frames = fsFrame:GetRaidFrames()
 
-        if #frames == 0 then
-            return
-        end
-
-        Flat(frames, spacing)
-        StorePreviousSpacing(container, spacing)
+        Space("Raid-All", frames, spacing, addon.LayoutType.Flat)
         return
     end
 
@@ -351,8 +357,7 @@ local function ApplyRaidSpacing()
     local ungrouped = fsFrame:GetRaidFrames()
 
     if #groups == 0 then
-        Chain(ungrouped, spacing)
-        StorePreviousSpacing(container, spacing)
+        Space("Raid-SingleGroup", ungrouped, spacing, addon.LayoutType.Chain)
         return
     end
 
@@ -362,12 +367,11 @@ local function ApplyRaidSpacing()
 
         if #members > 0 then
             blockHeight = math.max(blockHeight, members[1]:GetHeight())
-            Chain(members, spacing)
+            Space(group:GetName(), members, spacing, addon.LayoutType.Chain, nil)
         end
     end
 
-    Flat(groups, spacing)
-    StorePreviousSpacing(container, spacing)
+    Space("Groups", groups, spacing, addon.LayoutType.Flat)
 
     if not fsFrame:ShowPets() then
         return
@@ -411,19 +415,14 @@ local function ApplyRaidSpacing()
 
     -- manually specify the block height to the player frames height
     -- otherwise it would auto detect the pet frame height
-    Flat(ungrouped, spacing, start, blockHeight - 1)
+    Space("Raid-Ungrouped", frames, spacing, addon.LayoutType.Flat, start, blockHeight - 1)
 end
 
 local function ApplyEnemyArenaSpacing()
-    local container = CompactArenaFrame
     local spacing = addon.Options.Appearance.EnemyArena.Spacing
+    local frames = fsFrame:GetEnemyArenaFrames()
 
-    if ShouldSpace(container, spacing) then
-        local frames = fsFrame:GetEnemyArenaFrames()
-
-        Chain(frames, spacing)
-        StorePreviousSpacing(container, spacing)
-    end
+    Space("EnemyArena", frames, spacing, addon.LayoutType.Chain)
 end
 
 ---Applies spacing to party and raid frames.

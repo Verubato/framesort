@@ -98,16 +98,33 @@ local function Find(filter)
     return fsEnumerable:From(party):Concat(raid):Concat(groupedMembers):ToTable()
 end
 
+---Returns the main container object for party frames.
+function M:GetPartyFramesContainer()
+    return CompactPartyFrame, "CompactPartyFrame"
+end
+
+---Returns the main container object for raid frames.
+function M:GetRaidFramesContainer()
+    return CompactRaidFrameContainer, "CompactRaidFrameContainer"
+end
+
+---Returns the main container object for raid frames.
+function M:GetEnemyArenaFramesContainer()
+    return CompactArenaFrame, "CompactArenaFrame"
+end
+
 ---Returns the set of party frames.
 ---@return table[] frames, fun(frame: table): string a function to extract the unit token from a given frame.
 function M:GetPartyFrames()
-    return GetFrames(CompactPartyFrame)
+    local container = M:GetPartyFramesContainer()
+    return GetFrames(container)
 end
 
 ---Returns the set of non-grouped raid frames.
 ---@return table[] frames, fun(frame: table): string a function to extract the unit token from a given frame.
 function M:GetRaidFrames()
-    return GetFrames(CompactRaidFrameContainer)
+    local container = M:GetRaidFramesContainer()
+    return GetFrames(container)
 end
 
 ---Returns the set of member frames within a raid group frame.
@@ -119,14 +136,16 @@ end
 ---Returns the set of raid frame group frames.
 ---@return table[] groups
 function M:GetRaidGroups()
-    local groups, _ = GetFrames(CompactRaidFrameContainer, IsValidGroupFrame)
+    local container = M:GetRaidFramesContainer()
+    local groups, _ = GetFrames(container, IsValidGroupFrame)
     return groups
 end
 
 ---Returns the set of enemy arena frames.
 ---@return table[] players, fun(frame: table): string
 function M:GetEnemyArenaFrames()
-    return GetFrames(CompactArenaFrame)
+    local container = M:GetEnemyArenaFramesContainer()
+    return GetFrames(container)
 end
 
 ---Returns all frames (from both party and raid, including groups).
