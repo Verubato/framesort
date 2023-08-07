@@ -46,13 +46,15 @@ end
 ---Determines whether party sorting can be performed.
 ---@return boolean
 local function CanSortParty()
-    return CompactPartyFrame and not CompactPartyFrame:IsForbidden() and CompactPartyFrame:IsVisible() and CanSort(false)
+    local container = fsFrame:GetPartyFramesContainer()
+    return container and not container:IsForbidden() and container:IsVisible() and CanSort(false)
 end
 
 ---Determines whether raid sorting can be performed.
 ---@return boolean
 local function CanSortRaid()
-    return CompactRaidFrameContainer and not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() and CanSort(true)
+    local container = fsFrame:GetRaidFramesContainer()
+    return container and not container:IsForbidden() and container:IsVisible() and CanSort(true)
 end
 
 ---Calls the post sorting callbacks.
@@ -299,20 +301,22 @@ local function TrySortTraditional()
     end
 
     local sorted = false
+    local partyContainer = fsFrame:GetPartyFramesContainer()
+    local raidContainer = fsFrame:GetRaidFramesContainer()
 
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         if CanSortRaid() then
-            CompactRaidFrameContainer:SetFlowSortFunction(sortFunc)
+            raidContainer:SetFlowSortFunction(sortFunc)
             sorted = true
         end
 
         if CanSortParty() then
-            CompactPartyFrame:SetFlowSortFunction(sortFunc)
+            partyContainer:SetFlowSortFunction(sortFunc)
             sorted = sorted or true
         end
     else
         if CanSortRaid() then
-            CompactRaidFrameContainer_SetFlowSortFunction(CompactRaidFrameContainer, sortFunc)
+            CompactRaidFrameContainer_SetFlowSortFunction(raidContainer, sortFunc)
             sorted = true
         end
     end
