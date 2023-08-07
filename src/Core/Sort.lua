@@ -22,12 +22,6 @@ local function CanSort(isRaid)
         return false
     end
 
-    local groupSize = GetNumGroupMembers()
-    if groupSize <= 0 then
-        fsLog:Warning("Can't sort because group has 0 members.")
-        return false
-    end
-
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         if EditModeManagerFrame.editModeActive then
             fsLog:Debug("Not sorting while edit mode active.")
