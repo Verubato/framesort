@@ -262,6 +262,7 @@ local function Space(name, frames, spacing, layoutTypeHint, start, blockHeight)
         if chain.Valid then
             Chain(frames, chain, spacing, start)
             StorePreviousSpacing(name, spacing)
+            fsLog:Debug(string.format("Layout hint for frames '%s' is flat but was it was actually a chain.", name))
             return
         end
     elseif layoutTypeHint == addon.LayoutType.Chain then
@@ -275,11 +276,12 @@ local function Space(name, frames, spacing, layoutTypeHint, start, blockHeight)
         if fsFrame:IsFlat(frames) then
             Flat(frames, spacing, start, blockHeight)
             StorePreviousSpacing(name, spacing)
+            fsLog:Debug(string.format("Layout hint for frames '%s' is a chain but was it was actually flat.", name))
             return
         end
     end
 
-    fsLog:Error(string.format("Unable to apply spacing to frames '%s' as they aren't arranged in one of the layout types.", name))
+    fsLog:Error(string.format("Unable to apply spacing to frames '%s' as they aren't arranged in one of the supported layout types.", name))
 end
 
 local function ApplyPartySpacing()
@@ -415,7 +417,7 @@ local function ApplyRaidSpacing()
 
     -- manually specify the block height to the player frames height
     -- otherwise it would auto detect the pet frame height
-    Space("Raid-Ungrouped", frames, spacing, addon.LayoutType.Flat, start, blockHeight - 1)
+    Space("Raid-Ungrouped", ungrouped, spacing, addon.LayoutType.Flat, start, blockHeight - 1)
 end
 
 local function ApplyEnemyArenaSpacing()
