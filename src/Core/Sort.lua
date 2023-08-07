@@ -34,7 +34,8 @@ local function CanSort(isRaid)
         return false
     end
 
-    return true
+    local _, enabled = fsCompare:GetSortFunction()
+    return enabled
 end
 
 ---Determines whether party sorting can be performed.
@@ -60,14 +61,10 @@ end
 
 ---Rearranges frames in order of the specified units.
 ---@param frames table[] the set of frames to rearrange.
+---@param enumerateOrder table[] the enumeration order for applying the spacing.
 ---@param units string[] unit ids in the desired order.
----@param isChain boolean true if the set of frames are chained.
 ---@param getUnit fun(frame: table): string function to extract the unit from the given frame
-local function RearrangeFrames(frames, units, isChain, getUnit)
-    if #frames == 0 then
-        return
-    end
-
+local function RearrangeFrames(frames, enumerateOrder, units, getUnit)
     local sorted = fsEnumerable
         :From(frames)
         :OrderBy(function(x, y)
@@ -83,22 +80,6 @@ local function RearrangeFrames(frames, units, isChain, getUnit)
             }
         end)
         :ToTable()
-
-    local enumerateOrder = sorted
-
-    if isChain then
-        local chain = fsFrame:ToFrameChain(frames)
-
-        if not chain.Valid then
-            fsLog:Error(string.format("Cannot sort frames as they are not arranged in a chain layout."))
-            return
-        end
-
-        enumerateOrder = fsFrame:FramesFromChain(chain)
-    elseif not fsFrame:IsFlat(frames) then
-        fsLog:Error(string.format("Cannot sort frames as they are not arranged in a flattened layout."))
-        return
-    end
 
     for _, source in ipairs(enumerateOrder) do
         local _, unitIndex = fsEnumerable:From(units):First(function(x)
@@ -116,11 +97,49 @@ local function RearrangeFrames(frames, units, isChain, getUnit)
     end
 end
 
+local function Sort(name, frames, layoutTypeHint, units, getUnit)
+    if #frames == 0 then
+        return false
+    end
+
+    if layoutTypeHint == addon.LayoutType.Flat then
+        if fsFrame:IsFlat(frames) then
+            RearrangeFrames(frames, frames, units, getUnit)
+            return true
+        end
+
+        local chain = fsFrame:ToFrameChain(frames)
+        if chain.Valid then
+            local enumerateOrder = fsFrame:FramesFromChain(chain)
+            RearrangeFrames(frames, enumerateOrder, units, getUnit)
+
+            fsLog:Debug(string.format("Layout hint for frames '%s' is flat but was it was actually a chain.", name))
+            return true
+        end
+    elseif layoutTypeHint == addon.LayoutType.Chain then
+        local chain = fsFrame:ToFrameChain(frames)
+        if chain.Valid then
+            local enumerateOrder = fsFrame:FramesFromChain(chain)
+            RearrangeFrames(frames, enumerateOrder, units, getUnit)
+            return true
+        end
+
+        if fsFrame:IsFlat(frames) then
+            RearrangeFrames(frames, frames, units, getUnit)
+            fsLog:Debug(string.format("Layout hint for frames '%s' is a chain but was it was actually flat.", name))
+            return true
+        end
+    end
+
+    fsLog:Error(string.format("Unable to sort frames '%s' as they aren't arranged in one of the supported layout types.", name))
+    return false
+end
+
 ---Returns a sorted array of pet units from the given ordered player units.
 ---@param playerUnits string[]
 ---@param petUnits string[]
 ---@return string[] pet unit tokens
-local function SortPets(playerUnits, petUnits)
+local function SortPetUnits(playerUnits, petUnits)
     -- this is O(n^2) but it's tiny data so doesn't really matter
     -- might refactor in the future to a better algorithm
     return fsEnumerable
@@ -138,12 +157,8 @@ end
 
 ---Sorts raid frames.
 ---@return boolean sorted true if frames were sorted, otherwise false.
-local function LayoutRaid()
+local function SortRaid()
     local sortFunction = fsCompare:GetSortFunction()
-
-    if not sortFunction then
-        return false
-    end
 
     if fsFrame:IsRaidGrouped() then
         local groups = fsFrame:GetRaidGroups()
@@ -155,18 +170,15 @@ local function LayoutRaid()
             local frames, getUnit = fsFrame:GetRaidGroupMembers(group)
             local units = fsEnumerable:From(frames):Map(getUnit):OrderBy(sortFunction):ToTable()
 
-            RearrangeFrames(frames, units, true, getUnit)
+            if not Sort(group:GetName(), frames, addon.LayoutType.Chain, units, getUnit) then
+                return false
+            end
         end
 
         return true
     end
 
     local frames, getUnit = fsFrame:GetRaidFrames()
-
-    if #frames == 0 then
-        return false
-    end
-
     local players = fsEnumerable
         :From(frames)
         :Where(function(frame)
@@ -180,14 +192,16 @@ local function LayoutRaid()
 
     local units = fsEnumerable:From(players):Map(getUnit):OrderBy(sortFunction):ToTable()
 
-    RearrangeFrames(players, units, false, getUnit)
-    return true
+    return Sort("Raid", players, addon.LayoutType.Flat, units, getUnit)
 end
 
 ---Sorts party pet frames.
 ---@return boolean sorted true if frames were sorted, otherwise false.
-local function LayoutPartyPets(sortedPlayerUnits, playerFrames, petFrames, getUnit)
-    if #petFrames == 0 or #playerFrames == 0 then
+local function SortPartyPets(sortedPlayerUnits, playerFrames, petFrames, getUnit)
+    local petUnits = fsEnumerable:From(petFrames):Map(getUnit):ToTable()
+    local sortedPetUnits = SortPetUnits(sortedPlayerUnits, petUnits)
+
+    if not Sort("Party-Pets", petFrames, addon.LayoutType.Chain, sortedPetUnits, getUnit) then
         return false
     end
 
@@ -195,11 +209,6 @@ local function LayoutPartyPets(sortedPlayerUnits, playerFrames, petFrames, getUn
     if not chain.Valid then
         return false
     end
-
-    local petUnits = fsEnumerable:From(petFrames):Map(getUnit):ToTable()
-    local sortedPetUnits = SortPets(sortedPlayerUnits, petUnits)
-
-    RearrangeFrames(petFrames, sortedPetUnits, true, getUnit)
 
     -- next move the frame chain as a group beneath the player frames
     local rootPet = chain.Value
@@ -244,19 +253,9 @@ end
 
 ---Sorts party frames.
 ---@return boolean sorted true if frames were sorted, otherwise false.
-local function LayoutParty()
+local function SortParty()
     local sortFunction = fsCompare:GetSortFunction()
-
-    if not sortFunction then
-        return false
-    end
-
     local frames, getUnit = fsFrame:GetPartyFrames()
-
-    if #frames == 0 then
-        return false
-    end
-
     local players = fsEnumerable
         :From(frames)
         :Where(function(frame)
@@ -267,6 +266,17 @@ local function LayoutParty()
             return UnitIsPlayer(unit) and not fsUnit:IsPet(unit)
         end)
         :ToTable()
+
+    local playerUnits = fsEnumerable:From(players):Map(getUnit):OrderBy(sortFunction):ToTable()
+
+    if not Sort("Party-Players", players, addon.LayoutType.Chain, playerUnits, getUnit) then
+        return false
+    end
+
+    if not fsFrame:ShowPets() then
+        return true
+    end
+
     local pets = fsEnumerable
         :From(frames)
         :Where(function(frame)
@@ -275,42 +285,30 @@ local function LayoutParty()
         end)
         :ToTable()
 
-    local playerUnits = fsEnumerable:From(players):Map(getUnit):OrderBy(sortFunction):ToTable()
-
-    RearrangeFrames(players, playerUnits, true, getUnit)
-
-    if fsFrame:ShowPets() then
-        return LayoutPartyPets(playerUnits, players, pets, getUnit)
-    end
-
-    return true
+    return SortPartyPets(playerUnits, players, pets, getUnit)
 end
 
 ---Attempts to sort the party/raid frames using the traditional method.
 ---@return boolean sorted true if sorted, otherwise false.
 local function TrySortTraditional()
-    local sortFunc = fsCompare:GetSortFunction()
-    if sortFunc == nil then
-        return false
-    end
-
     local sorted = false
+    local sortFunction = fsCompare:GetSortFunction()
     local partyContainer = fsFrame:GetPartyFramesContainer()
     local raidContainer = fsFrame:GetRaidFramesContainer()
 
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         if CanSortRaid() then
-            raidContainer:SetFlowSortFunction(sortFunc)
+            raidContainer:SetFlowSortFunction(sortFunction)
             sorted = true
         end
 
         if CanSortParty() then
-            partyContainer:SetFlowSortFunction(sortFunc)
+            partyContainer:SetFlowSortFunction(sortFunction)
             sorted = sorted or true
         end
     else
         if CanSortRaid() then
-            CompactRaidFrameContainer_SetFlowSortFunction(raidContainer, sortFunc)
+            CompactRaidFrameContainer_SetFlowSortFunction(raidContainer, sortFunction)
             sorted = true
         end
     end
@@ -324,11 +322,11 @@ local function TrySortTaintless()
     local sorted = false
 
     if CanSortParty() then
-        sorted = LayoutParty()
+        sorted = SortParty()
     end
 
     if CanSortRaid() then
-        sorted = sorted or LayoutRaid()
+        sorted = sorted or SortRaid()
     end
 
     return sorted

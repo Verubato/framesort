@@ -6,21 +6,25 @@ local fuzzyDecimalPlaces = 0
 local M = {}
 addon.Compare = M
 
+local function EmptyCompare(x, y)
+    return x < y
+end
+
 ---Returns a function that accepts two parameters of unit tokens and returns true if the left token should be ordered before the right.
 ---Sorting is based on the player's instance and configured options.
 ---Nil may be returned if sorting is not enabled for the player's current instance.
----@return function?
+---@return function sort, boolean enabled
 function M:GetSortFunction()
     local enabled, playerSortMode, groupSortMode, reverse = M:GetSortMode()
 
     if not enabled then
-        return nil
+        return EmptyCompare, false
     end
 
     if playerSortMode ~= addon.PlayerSortMode.Middle then
         return function(x, y)
             return M:Compare(x, y, playerSortMode, groupSortMode, reverse)
-        end
+        end, true
     end
 
     -- we need to pre-sort to determine where the middle actually is
@@ -31,7 +35,7 @@ function M:GetSortFunction()
 
     return function(x, y)
         return M:Compare(x, y, playerSortMode, groupSortMode, reverse, units)
-    end
+    end, true
 end
 
 ---Returns the sort mode from the configured options for the current instance.
@@ -48,12 +52,10 @@ function M:GetSortMode()
         return addon.Options.Dungeon.Enabled, addon.Options.Dungeon.PlayerSortMode, addon.Options.Dungeon.GroupSortMode, addon.Options.Dungeon.Reverse
     elseif inInstance and (instanceType == "raid" or instanceType == "pvp") then
         return addon.Options.Raid.Enabled, addon.Options.Raid.PlayerSortMode, addon.Options.Raid.GroupSortMode, addon.Options.Raid.Reverse
-    elseif (inInstance and instanceType == "scenario") or not inInstance then
-        -- use the world sorting rules for scenarios
-        return addon.Options.World.Enabled, addon.Options.World.PlayerSortMode, addon.Options.World.GroupSortMode, addon.Options.World.Reverse
     end
 
-    return false, nil, nil, nil
+    -- default to world rules for all other instance types
+    return addon.Options.World.Enabled, addon.Options.World.PlayerSortMode, addon.Options.World.GroupSortMode, addon.Options.World.Reverse
 end
 
 ---Returns true if the left token should be ordered before the right token.
