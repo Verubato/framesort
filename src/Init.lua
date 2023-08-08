@@ -23,6 +23,7 @@ local function Init()
     addon:InitTargeting()
     addon:InitMacros()
     addon:InitApi()
+    FS = addon
 end
 
 ---Listens for our to be loaded and then initialises it.

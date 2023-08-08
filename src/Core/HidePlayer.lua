@@ -1,4 +1,5 @@
 local _, addon = ...
+local fsLog = addon.Log
 local fsSort = addon.Sorting
 local fsFrame = addon.Frame
 local fsCompare = addon.Compare
@@ -27,6 +28,7 @@ local function Run()
     local player = fsFrame:PlayerRaidFrame()
 
     if not player or player:IsForbidden() then
+        fsLog:Warning("Couldn't find player raid frame.")
         return
     end
 
