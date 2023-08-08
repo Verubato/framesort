@@ -116,14 +116,46 @@ end
 ---Returns the player raid frame.
 ---@return table? playerFrame
 function M:PlayerRaidFrame()
-    local frames = M:AllFriendlyFrames()
-    local found = fsEnumerable:From(frames):First(function(frameWithUnit)
+    local isPlayer = function(frame, getUnit)
+        local unit = getUnit(frame)
         -- a player can have more than one frame if they occupy a vehicle
         -- as both the player and vehicle pet frame are shown
-        return (frameWithUnit.Unit == "player" or UnitIsUnit(frameWithUnit.Unit, "player")) and not fsUnit:IsPet(frameWithUnit.Unit)
+        return (unit == "player" or UnitIsUnit(unit, "player")) and not fsUnit:IsPet(unit)
+    end
+
+    local party, partyGetUnit = M:PartyFrames()
+    local found = fsEnumerable:From(party):First(function(frame)
+        return isPlayer(frame, partyGetUnit)
     end)
 
-    return found and found.Frame
+    if found then
+        return found
+    end
+
+    if M:RaidGrouped() then
+        local groups = M:RaidGroups()
+        for _, group in ipairs(groups) do
+            local members, raidGetUnit = M:RaidGroupMembers(group)
+            found = fsEnumerable:From(members):First(function(frame)
+                return isPlayer(frame, raidGetUnit)
+            end)
+
+            if found then
+                return found
+            end
+        end
+    else
+        local raid, raidGetUnit = M:RaidFrames()
+        found = fsEnumerable:From(raid):First(function(frame)
+            return isPlayer(frame, raidGetUnit)
+        end)
+
+        if found then
+            return found
+        end
+    end
+
+    return nil
 end
 
 ---Returns both party and raid frames.
@@ -131,28 +163,45 @@ end
 function M:AllFriendlyFrames()
     local party, partyGetUnit = M:PartyFrames()
     local raid, raidGetUnit = M:RaidFrames()
+    local groups = M:RaidGroups()
 
-    local partyWithUnit = fsEnumerable
-        :From(party)
-        :Map(function(frame)
-            return {
-                Frame = frame,
-                Unit = partyGetUnit(frame),
-            }
-        end)
-        :ToTable()
+    local all = fsEnumerable:From(party):Map(function(frame)
+        return {
+            Frame = frame,
+            Unit = partyGetUnit(frame),
+        }
+    end)
 
-    local raidWithUnit = fsEnumerable
-        :From(raid)
-        :Map(function(frame)
+    if M:RaidGrouped() then
+        local groupMembersWithUnit = fsEnumerable
+            :From(groups)
+            :Map(function(group)
+                local members, groupGetUnit = M:RaidGroupMembers(group)
+                return fsEnumerable
+                    :From(members)
+                    :Map(function(frame)
+                        return {
+                            Frame = frame,
+                            Unit = groupGetUnit(frame),
+                        }
+                    end)
+                    :ToTable()
+            end)
+            :Flatten()
+
+        all = all:Concat(groupMembersWithUnit)
+    else
+        local raidWithUnit = fsEnumerable:From(raid):Map(function(frame)
             return {
                 Frame = frame,
                 Unit = raidGetUnit(frame),
             }
         end)
-        :ToTable()
 
-    return fsEnumerable:From(partyWithUnit):Concat(raidWithUnit):ToTable()
+        all = all:Concat(raidWithUnit)
+    end
+
+    return all:ToTable()
 end
 
 ---Returns true if pets are shown in party frames.
@@ -340,11 +389,11 @@ function M:IsValidUnitFrame(frame, getUnit)
     end
 
     -- we may have hidden the player frame, but for other frames we don't want them
-    if unit ~= "player" and not frame:IsVisible() then
-        return false
+    if unit == "player" or UnitIsUnit(unit, "player") then
+        return true
     end
 
-    return true
+    return frame:IsVisible()
 end
 
 ---Returns a collection of unit frames from the specified container.

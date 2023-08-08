@@ -37,11 +37,11 @@ local function IsValidUnitFrame(frame)
     end
 
     -- we may have hidden the player frame, but for other frames we don't want them
-    if unit ~= "player" and not frame:IsVisible() then
-        return false
+    if unit == "player" or UnitIsUnit(unit, "player") then
+        return true
     end
 
-    return true
+    return frame:IsVisible()
 end
 
 local function IsValidGroupFrame(frame)
