@@ -111,6 +111,7 @@ function fsBuilder:BuildMacroOptions(parent)
         " - EnemyFrame1, EnemyFrame2, EnemyFrame3, etc. - Retail only (doesn't work in Wotlk and Classic).",
         " - BottomFrame",
         " - Tank, Healer, DPS.",
+        " - OtherDps - The first DPS that's not you.",
         " - EnemyTank, EnemyHealer, EnemyDPS - Retail only (doesn't work in Wotlk and Classic).",
         " - Add a number to choose the Nth target, e.g., DPS2 selects the 2nd DPS.",
         " - Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work.",

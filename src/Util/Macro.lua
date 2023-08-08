@@ -134,6 +134,13 @@ local function UnitForSelector(selector, friendlyUnits, enemyUnits)
         return "none"
     end
 
+    -- other dps
+    if string.match(selectorLower, "otherdps") then
+        return fsEnumerable:From(friendlyUnits):Nth(number or 1, function(x)
+            return UnitGroupRolesAssigned(x) == WowRole.DPS and not UnitIsUnit(x, "player")
+        end) or "none"
+    end
+
     local role = nil
     if tank then
         role = WowRole.Tank
