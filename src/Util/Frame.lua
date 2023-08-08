@@ -12,19 +12,19 @@ end
 
 local function PartyFramesProvider()
     return fsEnumerable:From(addon.FrameProviders.All):First(function(provider)
-        return provider:PartyFramesEnabled()
+        return provider:Enabled() and provider:PartyFramesEnabled()
     end)
 end
 
 local function RaidFramesProvider()
     return fsEnumerable:From(addon.FrameProviders.All):First(function(provider)
-        return provider:RaidFramesEnabled()
+        return provider:Enabled() and provider:RaidFramesEnabled()
     end)
 end
 
 local function EnemyArenaFramesProvider()
     return fsEnumerable:From(addon.FrameProviders.All):First(function(provider)
-        return provider:EnemyArenaFramesEnabled()
+        return provider:Enabled() and provider:EnemyArenaFramesEnabled()
     end)
 end
 
