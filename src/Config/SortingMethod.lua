@@ -32,7 +32,8 @@ function fsBuilder:BuildSortingMethodOptions(parent)
     panel.parent = parent.name
 
     local taintless = CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
-    taintless:SetPoint("TOPLEFT", panel, verticalSpacing, -verticalSpacing)
+    -- not sure why, but checkbox left seems to be off by about 4 units by default
+    taintless:SetPoint("TOPLEFT", panel, verticalSpacing - 4, -verticalSpacing + 4)
     fsBuilder:TextShim(taintless)
     taintless.Text:SetText("Taintless")
     taintless.Text:SetFontObject("GameFontNormalLarge")

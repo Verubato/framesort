@@ -106,10 +106,9 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
     enabled.Text:SetText(" " .. labelText)
     enabled.Text:SetFontObject("GameFontNormalLarge")
     enabled:SetChecked(options.Enabled)
-    enabled:HookScript("OnClick", function()
-        options.Enabled = enabled:GetChecked()
-        fsSort:TrySort()
-    end)
+
+    local dynamicAnchor = parentPanel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+    dynamicAnchor:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4)
 
     local playerLabel = parentPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
     playerLabel:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, -verticalSpacing)
@@ -237,7 +236,48 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         rev:SetChecked(options.Reverse)
     end)
 
-    return modeLabel
+    local controls = {
+        playerLabel,
+        top,
+        middle,
+        bottom,
+        hidden,
+        modeLabel,
+        group,
+        role,
+        alpha,
+        rev,
+    }
+
+    local function showHide(show)
+        for _, control in ipairs(controls) do
+            control:SetShown(show)
+        end
+
+        if show then
+            fsSort:TrySort()
+
+            dynamicAnchor:SetPoint("TOPLEFT", modeLabel, "BOTTOMLEFT")
+        else
+            dynamicAnchor:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, 0)
+        end
+    end
+
+    enabled:HookScript("OnClick", function()
+        local checked = enabled:GetChecked()
+
+        options.Enabled = checked
+
+        showHide(checked)
+
+        if checked then
+            fsSort:TrySort()
+        end
+    end)
+
+    showHide(enabled:GetChecked())
+
+    return dynamicAnchor
 end
 
 function fsBuilder:BuildSortingOptions(panel)
