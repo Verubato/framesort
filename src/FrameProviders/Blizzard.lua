@@ -99,6 +99,11 @@ function M:Name()
     return "Blizzard"
 end
 
+function M:Priority()
+    -- lower priority than other frame addons
+    return 99
+end
+
 function M:Enabled()
     if not CompactPartyFrame or not CompactRaidFrameContainer then
         return false
