@@ -11,21 +11,36 @@ local function EmptyUnit(_)
 end
 
 local function PartyFramesProvider()
-    return fsEnumerable:From(addon.FrameProviders.All):First(function(provider)
-        return provider:Enabled() and provider:PartyFramesEnabled()
-    end)
+    return fsEnumerable
+        :From(addon.FrameProviders.All)
+        :OrderBy(function(x, y)
+            return x:Priorty() <= y:Priority()
+        end)
+        :First(function(provider)
+            return provider:Enabled() and provider:PartyFramesEnabled()
+        end)
 end
 
 local function RaidFramesProvider()
-    return fsEnumerable:From(addon.FrameProviders.All):First(function(provider)
-        return provider:Enabled() and provider:RaidFramesEnabled()
-    end)
+    return fsEnumerable
+        :From(addon.FrameProviders.All)
+        :OrderBy(function(x, y)
+            return x:Priorty() < y:Priority()
+        end)
+        :First(function(provider)
+            return provider:Enabled() and provider:RaidFramesEnabled()
+        end)
 end
 
 local function EnemyArenaFramesProvider()
-    return fsEnumerable:From(addon.FrameProviders.All):First(function(provider)
-        return provider:Enabled() and provider:EnemyArenaFramesEnabled()
-    end)
+    return fsEnumerable
+        :From(addon.FrameProviders.All)
+        :OrderBy(function(x, y)
+            return x:Priorty() < y:Priority()
+        end)
+        :First(function(provider)
+            return provider:Enabled() and provider:EnemyArenaFramesEnabled()
+        end)
 end
 
 ---Returns the set of party frames.
