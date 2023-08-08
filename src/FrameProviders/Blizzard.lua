@@ -30,11 +30,14 @@ local function IsValidUnitFrame(frame)
         return true
     end
 
-    if M:GetUnit(frame) == nil then
+    local unit = M:GetUnit(frame)
+
+    if unit == nil then
         return false
     end
 
-    if not frame:IsVisible() then
+    -- we may have hidden the player frame, but for other frames we don't want them
+    if unit ~= "player" and not frame:IsVisible() then
         return false
     end
 
@@ -76,23 +79,8 @@ local function GetFrames(container, filter)
         :ToTable()
 end
 
-local function Find(filter)
-    local party = GetFrames(CompactPartyFrame, filter)
-    local raid = GetFrames(CompactRaidFrameContainer, filter)
-    local groups = M:RaidGroups()
-    local groupedMembers = fsEnumerable
-        :From(groups)
-        :Map(function(group)
-            return GetFrames(group, filter)
-        end)
-        :Flatten()
-        :ToTable()
-
-    return fsEnumerable:From(party):Concat(raid):Concat(groupedMembers):ToTable()
-end
-
-local function IsEnabled(container)
-    return container and not container:IsForbidden() and container:IsVisible() and container:IsEventRegistered("GROUP_ROSTER_UPDATE")
+local function Visible(container)
+    return container and not container:IsForbidden() and container:IsVisible()
 end
 
 function M:Name()
@@ -101,7 +89,7 @@ end
 
 function M:Priority()
     -- lower priority than other frame addons
-    return 99
+    return 9
 end
 
 function M:Enabled()
@@ -110,11 +98,6 @@ function M:Enabled()
     end
 
     -- frame addons will usually disable blizzard via unsubscribing group update events
-    -- ShadowedUnitFrames disables this event
-    if not UIParent:IsEventRegistered("GROUP_ROSTER_UPDATE") then
-        return false
-    end
-
     if not CompactPartyFrame:IsEventRegistered("GROUP_ROSTER_UPDATE") then
         return false
     end
@@ -123,20 +106,19 @@ function M:Enabled()
         return false
     end
 
-    return UIParent and UIParent:IsEventRegistered("GROUP_ROSTER_UPDATE")
+    return UIParent:IsEventRegistered("GROUP_ROSTER_UPDATE")
 end
 
 function M:PartyFramesEnabled()
-    return IsEnabled(CompactPartyFrame)
+    return Visible(CompactPartyFrame) and CompactPartyFrame:IsEventRegistered("GROUP_ROSTER_UPDATE")
 end
 
 function M:RaidFramesEnabled()
-    return IsEnabled(CompactRaidFrameContainer)
+    return Visible(CompactRaidFrameContainer) and CompactRaidFrameContainer:IsEventRegistered("GROUP_ROSTER_UPDATE")
 end
 
 function M:EnemyArenaFramesEnabled()
-    local enabled = GetCVarBool("showArenaEnemyFrames")
-    return enabled and IsEnabled(CompactArenaFrame)
+    return Visible(CompactArenaFrame) and CompactArenaFrame:IsEventRegistered("ARENA_OPPONENT_UPDATE")
 end
 
 function M:GetUnit(frame)
@@ -162,23 +144,6 @@ end
 
 function M:EnemyArenaFrames()
     return GetFrames(CompactArenaFrame)
-end
-
-function M:PlayerRaidFrame()
-    local players = Find(function(frame)
-        local unit = M:GetUnit(frame)
-        -- a player can have more than one frame if they occupy a vehicle
-        -- as both the player and vehicle pet frame are shown
-        return unit and UnitIsUnit("player", unit) and not fsUnit:IsPet(unit)
-    end)
-
-    if #players == 1 then
-        return players[1]
-    end
-
-    return fsEnumerable:From(players):First(function(x)
-        return x:IsVisible()
-    end)
 end
 
 function M:ShowPartyPets()

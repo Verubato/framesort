@@ -95,7 +95,7 @@ function M:IsHealthy()
     local addonsString = addon.FrameProviders.All[1]:Name()
 
     for i = 2, #addon.FrameProviders.All do
-        local provider = addon.Frame.All[i]
+        local provider = addon.FrameProviders.All[i]
         addonsString = addonsString .. ", " .. provider:Name()
     end
 

@@ -1,6 +1,6 @@
 local _, addon = ...
 addon.OptionsBuilder = {
-    VerticalSpacing = 15,
+    VerticalSpacing = 13,
     HorizontalSpacing = 50,
 }
 local fsBuilder = addon.OptionsBuilder
@@ -9,6 +9,7 @@ local fsHide = addon.HidePlayer
 local fsHealth = addon.Health
 local verticalSpacing = fsBuilder.VerticalSpacing
 local horizontalSpacing = fsBuilder.HorizontalSpacing
+local labelWidth = 50
 
 function fsBuilder:TextShim(frame)
     if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
@@ -97,8 +98,17 @@ end
 ---@param pointOffset table a UI component used as a relative position anchor for the new components.
 ---@param labelText string the text to display on the enabled checkbox.
 ---@param options table the configuration table
+---@param hasPlayer boolean?
+---@param hasAlpha boolean?
 ---@return table The bottom left most control to use for anchoring subsequent UI components.
-local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, options)
+local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, options, hasPlayer, hasAlpha)
+    if hasPlayer == nil then
+        hasPlayer = true
+    end
+    if hasAlpha == nil then
+        hasAlpha = true
+    end
+
     local enabled = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     -- not sure why, but checkbox left seems to be off by about 4 units by default
     enabled:SetPoint("TOPLEFT", pointOffset, "BOTTOMLEFT", -4, -verticalSpacing)
@@ -110,70 +120,87 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
     local dynamicAnchor = parentPanel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
     dynamicAnchor:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4)
 
-    local playerLabel = parentPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-    playerLabel:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, -verticalSpacing)
-    playerLabel:SetText("Player: ")
+    local playerLabel = nil
+    local top = nil
+    local middle = nil
+    local bottom = nil
+    local hidden = nil
 
-    local top = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-    fsBuilder:TextShim(top)
-    top.Text:SetText("Top")
-    top:SetPoint("LEFT", playerLabel, "RIGHT", horizontalSpacing / 2, 0)
-    top:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Top)
+    if hasPlayer then
+        playerLabel = parentPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+        playerLabel:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, -verticalSpacing)
+        playerLabel:SetText("Player:")
+        playerLabel:SetJustifyH("LEFT")
+        playerLabel:SetWidth(labelWidth)
 
-    local middle = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-    fsBuilder:TextShim(middle)
-    middle.Text:SetText("Middle")
-    middle:SetPoint("LEFT", top, "RIGHT", horizontalSpacing, 0)
-    middle:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Middle)
+        top = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
+        fsBuilder:TextShim(top)
+        top.Text:SetText("Top")
+        top:SetPoint("LEFT", playerLabel, "RIGHT", horizontalSpacing / 2, 0)
+        top:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Top)
 
-    local bottom = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-    fsBuilder:TextShim(bottom)
-    bottom.Text:SetText("Bottom")
-    bottom:SetPoint("LEFT", middle, "RIGHT", horizontalSpacing, 0)
-    bottom:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Bottom)
+        middle = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
+        fsBuilder:TextShim(middle)
+        middle.Text:SetText("Middle")
+        middle:SetPoint("LEFT", top, "RIGHT", horizontalSpacing, 0)
+        middle:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Middle)
 
-    local hidden = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-    fsBuilder:TextShim(hidden)
-    hidden.Text:SetText("Hidden")
-    hidden:SetPoint("LEFT", bottom, "RIGHT", horizontalSpacing, 0)
-    hidden:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Hidden)
+        bottom = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
+        fsBuilder:TextShim(bottom)
+        bottom.Text:SetText("Bottom")
+        bottom:SetPoint("LEFT", middle, "RIGHT", horizontalSpacing, 0)
+        bottom:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Bottom)
 
-    local playerModes = {
-        [top] = addon.PlayerSortMode.Top,
-        [middle] = addon.PlayerSortMode.Middle,
-        [bottom] = addon.PlayerSortMode.Bottom,
-        [hidden] = addon.PlayerSortMode.Hidden,
-    }
+        hidden = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
+        fsBuilder:TextShim(hidden)
+        hidden.Text:SetText("Hidden")
+        hidden:SetPoint("LEFT", bottom, "RIGHT", horizontalSpacing, 0)
+        hidden:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Hidden)
 
-    local function onPlayerClick(sender)
-        -- uncheck the others
-        for chkbox, _ in pairs(playerModes) do
-            if chkbox ~= sender then
-                chkbox:SetChecked(false)
+        local playerModes = {
+            [top] = addon.PlayerSortMode.Top,
+            [middle] = addon.PlayerSortMode.Middle,
+            [bottom] = addon.PlayerSortMode.Bottom,
+            [hidden] = addon.PlayerSortMode.Hidden,
+        }
+
+        local function onPlayerClick(sender)
+            -- uncheck the others
+            for chkbox, _ in pairs(playerModes) do
+                if chkbox ~= sender then
+                    chkbox:SetChecked(false)
+                end
             end
+
+            options.PlayerSortMode = sender:GetChecked() and playerModes[sender] or ""
+            fsSort:TrySort()
+            fsHide:ShowHidePlayer()
         end
 
-        options.PlayerSortMode = sender:GetChecked() and playerModes[sender] or ""
-        fsSort:TrySort()
-        fsHide:ShowHidePlayer()
-    end
-
-    for chkbox, _ in pairs(playerModes) do
-        chkbox:HookScript("OnClick", onPlayerClick)
+        for chkbox, _ in pairs(playerModes) do
+            chkbox:HookScript("OnClick", onPlayerClick)
+        end
     end
 
     local modeLabel = parentPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-    modeLabel:SetPoint("TOPLEFT", playerLabel, "BOTTOMLEFT", 0, -verticalSpacing * 1.5)
-    modeLabel:SetText("Sort: ")
+
+    if hasPlayer then
+        modeLabel:SetPoint("TOPLEFT", playerLabel, "BOTTOMLEFT", 0, -verticalSpacing * 1.5)
+    else
+        modeLabel:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, -verticalSpacing)
+    end
+
+    modeLabel:SetText("Sort:")
+    modeLabel:SetJustifyH("LEFT")
+    modeLabel:SetWidth(labelWidth)
 
     -- why use checkboxes instead of a dropdown box?
     -- because the dropdown box control has taint issues that haven't been fixed for years
     -- also it seems to have become much worse in dragonflight
     -- so while a dropdown would be better ui design, it's too buggy to use at the moment
     local group = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-    group:SetPoint("LEFT", top, "LEFT")
-    -- TODO: not sure why this doesn't align well even when aligning TOP/BOTTOM, so just hacking in a +10 to fix it for now
-    group:SetPoint("TOP", modeLabel, "TOP", 0, 10)
+    group:SetPoint("LEFT", modeLabel, "RIGHT", horizontalSpacing / 2, 0)
+
     fsBuilder:TextShim(group)
     group.Text:SetText(addon.GroupSortMode.Group)
     group:SetChecked(options.GroupSortMode == addon.GroupSortMode.Group)
@@ -184,23 +211,27 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
     role.Text:SetText(addon.GroupSortMode.Role)
     role:SetChecked(options.GroupSortMode == addon.GroupSortMode.Role)
 
-    local alpha = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-    alpha:SetPoint("LEFT", role, "RIGHT", horizontalSpacing, 0)
-    fsBuilder:TextShim(alpha)
-    alpha.Text:SetText("Alpha")
-    alpha:SetChecked(options.GroupSortMode == addon.GroupSortMode.Alphabetical)
-
-    local rev = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-    rev:SetPoint("LEFT", alpha, "RIGHT", horizontalSpacing, 0)
-    fsBuilder:TextShim(rev)
-    rev.Text:SetText("Reverse")
-    rev:SetChecked(options.Reverse)
-
+    local alpha = nil
     local modes = {
         [group] = addon.GroupSortMode.Group,
         [role] = addon.GroupSortMode.Role,
-        [alpha] = addon.GroupSortMode.Alphabetical,
     }
+
+    if hasAlpha then
+        alpha = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
+        alpha:SetPoint("LEFT", role, "RIGHT", horizontalSpacing, 0)
+        fsBuilder:TextShim(alpha)
+        alpha.Text:SetText("Alpha")
+        alpha:SetChecked(options.GroupSortMode == addon.GroupSortMode.Alphabetical)
+
+        modes[alpha] = addon.GroupSortMode.Alphabetical
+    end
+
+    local reverse = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
+    reverse:SetPoint("LEFT", alpha or role, "RIGHT", horizontalSpacing, 0)
+    fsBuilder:TextShim(reverse)
+    reverse.Text:SetText("Reverse")
+    reverse:SetChecked(options.Reverse)
 
     local function onModeClick(sender)
         -- uncheck the others
@@ -218,22 +249,30 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         chkbox:HookScript("OnClick", onModeClick)
     end
 
-    rev:HookScript("OnClick", function()
-        options.Reverse = rev:GetChecked()
+    reverse:HookScript("OnClick", function()
+        options.Reverse = reverse:GetChecked()
         fsSort:TrySort()
     end)
 
     parentPanel:HookScript("OnShow", function()
         -- update checkboxes on show, in case the api updated them
         enabled:SetChecked(options.Enabled)
-        top:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Top)
-        middle:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Middle)
-        bottom:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Bottom)
-        hidden:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Hidden)
+
+        if hasPlayer then
+            top:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Top)
+            middle:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Middle)
+            bottom:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Bottom)
+            hidden:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Hidden)
+        end
+
         group:SetChecked(options.GroupSortMode == addon.GroupSortMode.Group)
         role:SetChecked(options.GroupSortMode == addon.GroupSortMode.Role)
-        alpha:SetChecked(options.GroupSortMode == addon.GroupSortMode.Alphabetical)
-        rev:SetChecked(options.Reverse)
+
+        if hasAlpha then
+            alpha:SetChecked(options.GroupSortMode == addon.GroupSortMode.Alphabetical)
+        end
+
+        reverse:SetChecked(options.Reverse)
     end)
 
     local controls = {
@@ -246,12 +285,14 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         group,
         role,
         alpha,
-        rev,
+        reverse,
     }
 
     local function showHide(show)
-        for _, control in ipairs(controls) do
-            control:SetShown(show)
+        for _, control in pairs(controls) do
+            if control then
+                control:SetShown(show)
+            end
         end
 
         if show then
@@ -275,7 +316,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         end
     end)
 
-    showHide(enabled:GetChecked())
+    showHide(options.Enabled)
 
     return dynamicAnchor
 end
@@ -285,6 +326,7 @@ function fsBuilder:BuildSortingOptions(panel)
 
     if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
         anchor = BuildSortModeCheckboxes(panel, anchor, "Arena", addon.Options.Arena)
+        anchor = BuildSortModeCheckboxes(panel, anchor, "*EXPERIMENTAL* Enemy Arena (GladiusEx, sArena, Blizzard)", addon.Options.EnemyArena, false, false)
     end
 
     anchor = BuildSortModeCheckboxes(panel, anchor, "Dungeon (mythics, 5-mans)", addon.Options.Dungeon)
@@ -294,12 +336,24 @@ end
 
 ---Initialises the addon options.
 function addon:InitOptions()
-    local panel = CreateFrame("Frame")
+    local panel = CreateFrame("ScrollFrame", nil, nil, "UIPanelScrollFrameTemplate")
     panel.name = "FrameSort"
+
+    local main = CreateFrame("Frame")
+
+    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+        main:SetWidth(SettingsPanel.Container:GetWidth())
+        main:SetHeight(SettingsPanel.Container:GetHeight())
+    else
+        main:SetWidth(InterfaceOptionsFramePanelContainer:GetWidth())
+        main:SetHeight(InterfaceOptionsFramePanelContainer:GetHeight())
+    end
+
+    panel:SetScrollChild(main)
 
     InterfaceOptions_AddCategory(panel)
 
-    fsBuilder:BuildSortingOptions(panel)
+    fsBuilder:BuildSortingOptions(main)
     fsBuilder:BuildSortingMethodOptions(panel)
     fsBuilder:BuildKeybindingOptions(panel)
     fsBuilder:BuildMacroOptions(panel)

@@ -25,8 +25,6 @@ function M:test_upgrade_options_version2()
         PartySortEnabled = true,
     }
 
-    upgrader:UpgradeToVersion2(options)
-
     local expected = {
         ArenaEnabled = true,
         ArenaPlayerSortMode = "Top",
@@ -44,6 +42,7 @@ function M:test_upgrade_options_version2()
         Version = 2,
     }
 
+    upgrader:UpgradeToVersion2(options)
     assertEquals(options, expected)
 end
 
@@ -65,8 +64,6 @@ function M:test_upgrade_options_version3()
         Version = 2,
     }
 
-    upgrader:UpgradeToVersion3(options)
-
     local expected = {
         ArenaEnabled = true,
         ArenaPlayerSortMode = "Top",
@@ -85,6 +82,7 @@ function M:test_upgrade_options_version3()
         Version = 3,
     }
 
+    upgrader:UpgradeToVersion3(options)
     assertEquals(options, expected)
 end
 
@@ -106,8 +104,6 @@ function M:test_upgrade_options_version4()
         ExperimentalEnabled = false,
         Version = 3,
     }
-
-    upgrader:UpgradeToVersion4(options)
 
     local expected = {
         ArenaEnabled = true,
@@ -131,6 +127,7 @@ function M:test_upgrade_options_version4()
         Version = 4,
     }
 
+    upgrader:UpgradeToVersion4(options)
     assertEquals(options, expected)
 end
 
@@ -159,8 +156,6 @@ function M:test_upgrade_options_version5()
         },
         Version = 4,
     }
-
-    upgrader:UpgradeToVersion5(options)
 
     local expected = {
         Arena = {
@@ -191,6 +186,7 @@ function M:test_upgrade_options_version5()
         Version = 5,
     }
 
+    upgrader:UpgradeToVersion5(options)
     assertEquals(options, expected)
 end
 
@@ -223,8 +219,6 @@ function M:test_upgrade_options_version6()
         },
         Version = 5,
     }
-
-    upgrader:UpgradeToVersion6(options)
 
     local expected = {
         Arena = {
@@ -269,6 +263,7 @@ function M:test_upgrade_options_version6()
         Version = 6,
     }
 
+    upgrader:UpgradeToVersion6(options)
     assertEquals(options, expected)
 end
 
@@ -316,8 +311,6 @@ function M:test_upgrade_options_version7()
         Version = 6,
     }
 
-    upgrader:UpgradeToVersion7(options)
-
     local expected = {
         Arena = {
             Enabled = true,
@@ -361,6 +354,7 @@ function M:test_upgrade_options_version7()
         Version = 7,
     }
 
+    upgrader:UpgradeToVersion7(options)
     assertEquals(options, expected)
 end
 
@@ -407,8 +401,6 @@ function M:test_upgrade_options_version8()
         },
         Version = 7,
     }
-
-    upgrader:UpgradeToVersion8(options)
 
     local expected = {
         Arena = {
@@ -457,6 +449,7 @@ function M:test_upgrade_options_version8()
         Version = 8,
     }
 
+    upgrader:UpgradeToVersion8(options)
     assertEquals(options, expected)
 end
 
@@ -508,8 +501,6 @@ function M:test_upgrade_options_version9()
         Version = 8,
     }
 
-    upgrader:UpgradeToVersion9(options)
-
     local expected = {
         Logging = {
             Enabled = false,
@@ -559,6 +550,7 @@ function M:test_upgrade_options_version9()
         Version = 9,
     }
 
+    upgrader:UpgradeToVersion9(options)
     assertEquals(options, expected)
 end
 
@@ -621,8 +613,6 @@ function M:test_upgrade_options_version10()
         Version = 9,
     }
 
-    upgrader:UpgradeToVersion10(options)
-
     local expected = {
         Logging = {
             Enabled = false,
@@ -672,6 +662,7 @@ function M:test_upgrade_options_version10()
         Version = 10,
     }
 
+    upgrader:UpgradeToVersion10(options)
     assertEquals(options, expected)
 end
 
@@ -724,8 +715,6 @@ function M:test_upgrade_options_version11()
         },
         Version = 10,
     }
-
-    upgrader:UpgradeToVersion11(options)
 
     local expected = {
         Logging = {
@@ -781,6 +770,128 @@ function M:test_upgrade_options_version11()
         },
         Version = 11,
     }
+
+    upgrader:UpgradeToVersion11(options)
+    assertEquals(options, expected)
+end
+
+function M:test_upgrade_options_version12()
+    local options = {
+        Logging = {
+            Enabled = false,
+        },
+        Arena = {
+            Enabled = true,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Group",
+            Reverse = false,
+        },
+        Dungeon = {
+            Enabled = true,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Group",
+            Reverse = false,
+        },
+        World = {
+            Enabled = true,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Group",
+            Reverse = false,
+        },
+        Raid = {
+            Enabled = false,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Role",
+            Reverse = false,
+        },
+        SortingMethod = {
+            TaintlessEnabled = true,
+            TraditionalEnabled = false,
+        },
+        Appearance = {
+            Party = {
+                Spacing = {
+                    Horizontal = 0,
+                    Vertical = 0,
+                },
+            },
+            Raid = {
+                Spacing = {
+                    Horizontal = 0,
+                    Vertical = 0,
+                },
+            },
+            EnemyArena = {
+                Spacing = {
+                    Horizontal = 0,
+                    Vertical = 0,
+                },
+            },
+        },
+        Version = 11,
+    }
+
+    local expected = {
+        Logging = {
+            Enabled = false,
+        },
+        Arena = {
+            Enabled = true,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Group",
+            Reverse = false,
+        },
+        EnemyArena = {
+            Enabled = false,
+            GroupSortMode = "Group",
+            Reverse = false,
+        },
+        Dungeon = {
+            Enabled = true,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Group",
+            Reverse = false,
+        },
+        World = {
+            Enabled = true,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Group",
+            Reverse = false,
+        },
+        Raid = {
+            Enabled = false,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Role",
+            Reverse = false,
+        },
+        SortingMethod = {
+            TaintlessEnabled = true,
+            TraditionalEnabled = false,
+        },
+        Appearance = {
+            Party = {
+                Spacing = {
+                    Horizontal = 0,
+                    Vertical = 0,
+                },
+            },
+            Raid = {
+                Spacing = {
+                    Horizontal = 0,
+                    Vertical = 0,
+                },
+            },
+            EnemyArena = {
+                Spacing = {
+                    Horizontal = 0,
+                    Vertical = 0,
+                },
+            },
+        },
+        Version = 12,
+    }
+
+    upgrader:UpgradeToVersion12(options)
 
     assertEquals(options, expected)
 end

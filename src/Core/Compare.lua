@@ -3,6 +3,7 @@ local fsUnit = addon.Unit
 local fsMath = addon.Math
 local fsEnumerable = addon.Enumerable
 local fuzzyDecimalPlaces = 0
+local roleValues = { MAINTANK = 1, MAINASSIST = 2, TANK = 3, HEALER = 4, DAMAGER = 5, NONE = 6 }
 local M = {}
 addon.Compare = M
 
@@ -10,31 +11,70 @@ local function EmptyCompare(x, y)
     return x < y
 end
 
+---Returns true if the specified token is ordered after the mid point.
+---@param token string
+---@param sortedUnits table
+---@return boolean
+local function CompareMiddle(token, sortedUnits)
+    -- index of the token we are comparing with
+    local index = fsEnumerable:From(sortedUnits):IndexOf(token)
+
+    -- most likely a non-existant unit
+    if not index then
+        return false
+    end
+
+    -- 0 based
+    index = index - 1
+
+    local mid = math.floor(#sortedUnits / 2)
+    return index > mid
+end
+
 ---Returns a function that accepts two parameters of unit tokens and returns true if the left token should be ordered before the right.
----Sorting is based on the player's instance and configured options.
----Nil may be returned if sorting is not enabled for the player's current instance.
----@return function sort, boolean enabled
-function M:SortFunction()
+---Sorting is based on the current instance and configured options.
+---@param units string[]? the set of all unit tokens, only required if the player sort mode is "Middle"
+---@return function sort
+function M:SortFunction(units)
     local enabled, playerSortMode, groupSortMode, reverse = M:SortMode()
 
     if not enabled then
-        return EmptyCompare, false
+        return EmptyCompare
     end
 
     if playerSortMode ~= addon.PlayerSortMode.Middle then
         return function(x, y)
             return M:Compare(x, y, playerSortMode, groupSortMode, reverse)
-        end, true
+        end
     end
 
+    units = units or fsUnit:GetUnits()
+
     -- we need to pre-sort to determine where the middle actually is
-    local units = fsUnit:GetUnits()
-    table.sort(units, function(x, y)
-        return M:Compare(x, y, addon.PlayerSortMode.Top, groupSortMode, reverse)
-    end)
+    -- making use of Enumerable:OrderBy() so we don't re-order the original array
+    units = fsEnumerable
+        :From(units)
+        :OrderBy(function(x, y)
+            return M:Compare(x, y, addon.PlayerSortMode.Top, groupSortMode, reverse)
+        end)
+        :ToTable()
 
     return function(x, y)
         return M:Compare(x, y, playerSortMode, groupSortMode, reverse, units)
+    end
+end
+
+---Returns a function that accepts two parameters of unit tokens and returns true if the left token should be ordered before the right.
+---@return function sort, boolean enabled
+function M:EnemySortFunction()
+    local enabled, groupSortMode, reverse = addon.Options.EnemyArena.Enabled, addon.Options.EnemyArena.GroupSortMode, addon.Options.EnemyArena.Reverse
+
+    if not enabled then
+        return EmptyCompare, false
+    end
+
+    return function(x, y)
+        return M:EnemyCompare(x, y, groupSortMode, reverse)
     end, true
 end
 
@@ -68,31 +108,34 @@ end
 ---@param preSortedUnits table?
 ---@return boolean
 function M:Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse, preSortedUnits)
-    if not UnitExists(leftToken) then
-        return false
-    end
-    if not UnitExists(rightToken) then
-        return true
+    -- if not in a group, we might be in test mode
+    if IsInGroup() then
+        if not UnitExists(leftToken) then
+            return false
+        end
+        if not UnitExists(rightToken) then
+            return true
+        end
     end
 
     if playerSortMode and playerSortMode ~= "" then
-        if UnitIsUnit(leftToken, "player") then
+        if leftToken == "player" or UnitIsUnit(leftToken, "player") then
             if playerSortMode == addon.PlayerSortMode.Hidden then
                 return false
             elseif playerSortMode == addon.PlayerSortMode.Middle then
                 assert(preSortedUnits ~= nil)
-                return M:CompareMiddle(rightToken, preSortedUnits)
+                return CompareMiddle(rightToken, preSortedUnits)
             else
                 return playerSortMode == addon.PlayerSortMode.Top
             end
         end
 
-        if UnitIsUnit(rightToken, "player") then
+        if rightToken == "player" or UnitIsUnit(rightToken, "player") then
             if playerSortMode == addon.PlayerSortMode.Hidden then
                 return true
             elseif playerSortMode == addon.PlayerSortMode.Middle then
                 assert(preSortedUnits ~= nil)
-                return not M:CompareMiddle(leftToken, preSortedUnits)
+                return not CompareMiddle(leftToken, preSortedUnits)
             else
                 return playerSortMode == addon.PlayerSortMode.Bottom
             end
@@ -105,37 +148,70 @@ function M:Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse
         rightToken = tmp
     end
 
-    if groupSortMode and groupSortMode ~= "" then
-        if groupSortMode == addon.GroupSortMode.Group then
-            return CRFSort_Group(leftToken, rightToken)
-        elseif groupSortMode == addon.GroupSortMode.Role then
-            return CRFSort_Role(leftToken, rightToken)
-        elseif groupSortMode == addon.GroupSortMode.Alphabetical then
-            return CRFSort_Alphabetical(leftToken, rightToken)
-        end
+    if groupSortMode == addon.GroupSortMode.Group then
+        return CRFSort_Group(leftToken, rightToken)
+    elseif groupSortMode == addon.GroupSortMode.Role then
+        return CRFSort_Role(leftToken, rightToken)
+    elseif groupSortMode == addon.GroupSortMode.Alphabetical then
+        return CRFSort_Alphabetical(leftToken, rightToken)
     end
 
     return leftToken < rightToken
 end
 
----Returns true if the specified token is ordered after the mid point.
----@param token string
----@param sortedUnits table
+---Returns true if the left token should be ordered before the right token.
+---@param leftToken string
+---@param rightToken string
+---@param groupSortMode? string
+---@param reverse boolean?
 ---@return boolean
-function M:CompareMiddle(token, sortedUnits)
-    -- index of the token we are comparing with
-    local index = fsEnumerable:From(sortedUnits):IndexOf(token)
-
-    -- most likely a non-existant unit
-    if not index then
-        return false
+function M:EnemyCompare(leftToken, rightToken, groupSortMode, reverse)
+    -- if not in a group, we might be in test mode
+    if IsInGroup() then
+        if not UnitExists(leftToken) then
+            return false
+        end
+        if not UnitExists(rightToken) then
+            return true
+        end
     end
 
-    -- 0 based
-    index = index - 1
+    if reverse then
+        local tmp = leftToken
+        leftToken = rightToken
+        rightToken = tmp
+    end
 
-    local mid = math.floor(#sortedUnits / 2)
-    return index > mid
+    local leftStr = string.match(leftToken, "%d+")
+    local rightStr = string.match(rightToken, "%d+")
+
+    if not leftStr or not rightStr then
+        return leftToken < rightToken
+    end
+
+    local leftNumber = tonumber(leftStr)
+    local rightNumber = tonumber(rightStr)
+
+    if groupSortMode == addon.GroupSortMode.Group then
+        return leftNumber < rightNumber
+    end
+
+    local inInstance, instanceType = IsInInstance()
+
+    if groupSortMode == addon.GroupSortMode.Role and inInstance and instanceType == "arena" and WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+        local leftSpecId = GetArenaOpponentSpec(leftNumber)
+        local rightSpecId = GetArenaOpponentSpec(rightNumber)
+
+        if leftSpecId and rightSpecId then
+            local _, _, _, _, leftRole, _, _ = GetSpecializationInfoByID(leftSpecId)
+            local _, _, _, _, rightRole, _, _ = GetSpecializationInfoByID(rightSpecId)
+            local leftValue, rightValue = roleValues[leftRole], roleValues[rightRole]
+
+            return leftValue < rightValue
+        end
+    end
+
+    return leftToken < rightToken
 end
 
 ---Returns true if the left frame is "earlier" than the right frame.

@@ -1,6 +1,8 @@
 local _, addon = ...
 local fsEnumerable = addon.Enumerable
+local fsUnit = addon.Unit
 local M = {}
+
 addon.Frame = M
 addon.FrameProviders = {
     All = {},
@@ -14,7 +16,7 @@ local function PartyFramesProvider()
     return fsEnumerable
         :From(addon.FrameProviders.All)
         :OrderBy(function(x, y)
-            return x:Priorty() <= y:Priority()
+            return x:Priority() <= y:Priority()
         end)
         :First(function(provider)
             return provider:Enabled() and provider:PartyFramesEnabled()
@@ -25,7 +27,7 @@ local function RaidFramesProvider()
     return fsEnumerable
         :From(addon.FrameProviders.All)
         :OrderBy(function(x, y)
-            return x:Priorty() < y:Priority()
+            return x:Priority() < y:Priority()
         end)
         :First(function(provider)
             return provider:Enabled() and provider:RaidFramesEnabled()
@@ -36,7 +38,7 @@ local function EnemyArenaFramesProvider()
     return fsEnumerable
         :From(addon.FrameProviders.All)
         :OrderBy(function(x, y)
-            return x:Priorty() < y:Priority()
+            return x:Priority() < y:Priority()
         end)
         :First(function(provider)
             return provider:Enabled() and provider:EnemyArenaFramesEnabled()
@@ -114,21 +116,14 @@ end
 ---Returns the player raid frame.
 ---@return table? playerFrame
 function M:PlayerRaidFrame()
-    local providers = fsEnumerable
-        :From(addon.FrameProviders.All)
-        :Where(function(provider)
-            return provider:PartyFramesEnabled() or provider:RaidFramesEnabled()
-        end)
-        :ToTable()
+    local frames = M:AllFriendlyFrames()
+    local found = fsEnumerable:From(frames):First(function(frameWithUnit)
+        -- a player can have more than one frame if they occupy a vehicle
+        -- as both the player and vehicle pet frame are shown
+        return (frameWithUnit.Unit == "player" or UnitIsUnit(frameWithUnit.Unit, "player")) and not fsUnit:IsPet(frameWithUnit.Unit)
+    end)
 
-    for _, provider in ipairs(providers) do
-        local player = provider:PlayerRaidFrame()
-        if player then
-            return player
-        end
-    end
-
-    return nil
+    return found and found.Frame
 end
 
 ---Returns both party and raid frames.
@@ -319,4 +314,52 @@ function M:IsFlat(frames)
     end
 
     return true
+end
+
+---Returns true if the specified frame is a valid unit frame.
+---@param frame table
+---@param getUnit fun(frame: table): string
+---@return boolean
+function M:IsValidUnitFrame(frame, getUnit)
+    if not frame then
+        return false
+    end
+
+    if frame:IsForbidden() then
+        return false
+    end
+
+    if frame:GetTop() == nil or frame:GetLeft() == nil then
+        return false
+    end
+
+    local unit = getUnit(frame)
+
+    if unit == nil then
+        return false
+    end
+
+    -- we may have hidden the player frame, but for other frames we don't want them
+    if unit ~= "player" and not frame:IsVisible() then
+        return false
+    end
+
+    return true
+end
+
+---Returns a collection of unit frames from the specified container.
+---@param container table
+---@param getUnit fun(frame: table): string
+---@return table
+function M:ChildUnitFrames(container, getUnit)
+    if not container or container:IsForbidden() or not container:IsVisible() then
+        return {}
+    end
+
+    return fsEnumerable
+        :From({ container:GetChildren() })
+        :Where(function(frame)
+            return M:IsValidUnitFrame(frame, getUnit)
+        end)
+        :ToTable()
 end
