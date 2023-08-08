@@ -286,7 +286,7 @@ end
 
 local function ApplyPartySpacing()
     local spacing = addon.Options.Appearance.Party.Spacing
-    local frames, getUnit = fsFrame:GetPartyFrames()
+    local frames, getUnit = fsFrame:PartyFrames()
     local players = fsEnumerable
         :From(frames)
         :Where(function(frame)
@@ -300,7 +300,7 @@ local function ApplyPartySpacing()
 
     Space("Party-Players", players, spacing, addon.LayoutType.Chain)
 
-    if not fsFrame:ShowPets() then
+    if not fsFrame:ShowPartyPets() then
         return
     end
 
@@ -348,15 +348,15 @@ end
 local function ApplyRaidSpacing()
     local spacing = addon.Options.Appearance.Raid.Spacing
 
-    if not fsFrame:IsRaidGrouped() then
-        local frames = fsFrame:GetRaidFrames()
+    if not fsFrame:RaidGrouped() then
+        local frames = fsFrame:RaidFrames()
 
         Space("Raid-All", frames, spacing, addon.LayoutType.Flat)
         return
     end
 
-    local groups = fsFrame:GetRaidGroups()
-    local ungrouped = fsFrame:GetRaidFrames()
+    local groups = fsFrame:RaidGroups()
+    local ungrouped = fsFrame:RaidFrames()
 
     if #groups == 0 then
         Space("Raid-SingleGroup", ungrouped, spacing, addon.LayoutType.Chain)
@@ -365,7 +365,7 @@ local function ApplyRaidSpacing()
 
     local blockHeight = 0
     for _, group in ipairs(groups) do
-        local members = fsFrame:GetRaidGroupMembers(group)
+        local members = fsFrame:RaidGroupMembers(group)
 
         if #members > 0 then
             blockHeight = math.max(blockHeight, members[1]:GetHeight())
@@ -375,7 +375,7 @@ local function ApplyRaidSpacing()
 
     Space("Groups", groups, spacing, addon.LayoutType.Flat)
 
-    if not fsFrame:ShowPets() then
+    if not fsFrame:ShowRaidPets() then
         return
     end
 
@@ -385,7 +385,7 @@ local function ApplyRaidSpacing()
         local bottomGroup = fsEnumerable:From(groups):Min(function(x)
             return x:GetBottom()
         end)
-        local bottom = bottomGroup and fsEnumerable:From(fsFrame:GetRaidGroupMembers(bottomGroup)):Min(function(x)
+        local bottom = bottomGroup and fsEnumerable:From(fsFrame:RaidGroupMembers(bottomGroup)):Min(function(x)
             return x:GetBottom()
         end)
 
@@ -396,13 +396,13 @@ local function ApplyRaidSpacing()
         local rightGroup = fsEnumerable:From(groups):Max(function(x)
             return x:GetRight()
         end)
-        local right = rightGroup and fsEnumerable:From(fsFrame:GetRaidGroupMembers(rightGroup)):Max(function(x)
+        local right = rightGroup and fsEnumerable:From(fsFrame:RaidGroupMembers(rightGroup)):Max(function(x)
             return x:GetRight()
         end)
         local topGroup = fsEnumerable:From(groups):Max(function(x)
             return x:GetTop()
         end)
-        local top = topGroup and fsEnumerable:From(fsFrame:GetRaidGroupMembers(topGroup)):Max(function(x)
+        local top = topGroup and fsEnumerable:From(fsFrame:RaidGroupMembers(topGroup)):Max(function(x)
             return x:GetTop()
         end)
 
@@ -422,7 +422,7 @@ end
 
 local function ApplyEnemyArenaSpacing()
     local spacing = addon.Options.Appearance.EnemyArena.Spacing
-    local frames = fsFrame:GetEnemyArenaFrames()
+    local frames = fsFrame:EnemyArenaFrames()
 
     Space("EnemyArena", frames, spacing, addon.LayoutType.Chain)
 end

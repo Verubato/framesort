@@ -8,6 +8,7 @@
     <Script file="Util\Unit.lua"/>
     <Script file="Util\Frame.lua"/>
     <Script file="Util\Macro.lua"/>
+    <Script file="FrameProviders\Blizzard.lua"/>
     <Script file="Core\Compare.lua"/>
     <Script file="Core\Sort.lua"/>
     <Script file="Core\Spacing.lua"/>

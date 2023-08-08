@@ -19,20 +19,22 @@ local function CanUpdate()
 end
 
 local function GetTargets()
-    local frames, getUnit = fsFrame:GetFrames()
+    local frames = fsFrame:AllFriendlyFrames()
 
-    if #frames > 0 then
-        return fsEnumerable
-            :From(frames)
-            :OrderBy(function(x, y)
-                return fsCompare:CompareTopLeftFuzzy(x, y)
-            end)
-            :Map(getUnit)
-            :ToTable()
+    if #frames == 0 then
+        -- fallback to retrieve the group units
+        return fsUnit:GetUnits()
     end
 
-    -- fallback to retrieve the group units
-    return fsUnit:GetUnits()
+    return fsEnumerable
+        :From(frames)
+        :OrderBy(function(x, y)
+            return fsCompare:CompareTopLeftFuzzy(x.Frame, y.Frame)
+        end)
+        :Map(function(x)
+            return x.Unit
+        end)
+        :ToTable()
 end
 
 local function UpdateTargets()

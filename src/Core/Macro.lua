@@ -22,20 +22,22 @@ local function CanUpdate()
 end
 
 local function GetTargets()
-    local frames, getUnit = fsFrame:GetFrames()
+    local frames = fsFrame:AllFriendlyFrames()
 
-    if #frames > 0 then
-        return fsEnumerable
-            :From(frames)
-            :OrderBy(function(x, y)
-                return fsCompare:CompareTopLeftFuzzy(x, y)
-            end)
-            :Map(getUnit)
-            :ToTable()
+    if #frames == 0 then
+        -- fallback to retrieve the group units
+        return fsUnit:GetUnits()
     end
 
-    -- fallback to retrieve the group units
-    return fsUnit:GetUnits()
+    return fsEnumerable
+        :From(frames)
+        :OrderBy(function(x, y)
+            return fsCompare:CompareTopLeftFuzzy(x.Frame, y.Frame)
+        end)
+        :Map(function(x)
+            return x.Unit
+        end)
+        :ToTable()
 end
 
 local function InspectMacro(slot)
@@ -63,9 +65,9 @@ local function ScanMacros()
     for slot = 1, maxMacros do
         -- if we've already inspected this macro and it's not a framesort macro
         -- then skip attempting to re-process it
-        local probablyFsMacro = isFsMacroCache[slot] == nil or isFsMacroCache[slot]
+        local shouldInspect = isFsMacroCache[slot] == nil or isFsMacroCache[slot]
 
-        if probablyFsMacro then
+        if shouldInspect then
             isFsMacroCache[slot] = InspectMacro(slot)
         end
     end

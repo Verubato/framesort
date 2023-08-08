@@ -34,29 +34,29 @@ local function SortingFunctionsTampered()
 end
 
 local function ConflictingAddons()
-    local raidContainer, raidContainerName = fsFrame:GetRaidFramesContainer()
-    if raidContainer then
-        local issecure, taintedAddon = issecurevariable(raidContainerName)
+    if not addon.FrameProviders.Blizzard:Enabled() then
+        return false
+    end
+
+    if CompactRaidFrameContainer then
+        local issecure, taintedAddon = issecurevariable("CompactRaidFrameContainer")
         if not issecure and taintedAddon ~= addonName then
             return AddonFriendlyName(taintedAddon)
         end
 
-        -- issecurevariable returns true if the variable is nil or doesn't exist on the table
-        -- so it'll still work if the container isn't Blizzard's
-        issecure, taintedAddon = issecurevariable(raidContainer, "flowSortFunc")
+        issecure, taintedAddon = issecurevariable(CompactRaidFrameContainer, "flowSortFunc")
         if not issecure and taintedAddon ~= addonName then
             return AddonFriendlyName(taintedAddon)
         end
     end
 
-    local partyContainer, partyContainerName = fsFrame:GetPartyFramesContainer()
-    if partyContainer then
-        local issecure, taintedAddon = issecurevariable(partyContainerName)
+    if CompactPartyFrame then
+        local issecure, taintedAddon = issecurevariable("CompactPartyFrame")
         if not issecure and taintedAddon ~= addonName then
             return AddonFriendlyName(taintedAddon)
         end
 
-        issecure, taintedAddon = issecurevariable(partyContainer, "flowSortFunc")
+        issecure, taintedAddon = issecurevariable(CompactPartyFrame, "flowSortFunc")
         if not issecure and taintedAddon ~= addonName then
             return AddonFriendlyName(taintedAddon)
         end
@@ -71,7 +71,7 @@ local function ConflictingAddons()
 end
 
 local function SupportsGroups()
-    return addon.Options.SortingMethod.TaintlessEnabled or (not fsFrame:IsRaidGrouped() and not fsFrame:IsPartyGrouped())
+    return addon.Options.SortingMethod.TaintlessEnabled or (not fsFrame:RaidGrouped() and not fsFrame:PartyGrouped())
 end
 
 local function CanSeeFrames()
@@ -79,8 +79,10 @@ local function CanSeeFrames()
         return true
     end
 
-    local frames = fsFrame:GetFrames()
-    return #frames > 0
+    local party = fsFrame:PartyFrames()
+    local raid = fsFrame:RaidFrames()
+
+    return #party > 0 or #raid > 0
 end
 
 ---Returns true if the environment/settings is in a good state, otherwise false.
@@ -88,24 +90,35 @@ end
 function M:IsHealthy()
     local results = {}
 
+    assert(#addon.FrameProviders.All > 0)
+
+    local addonsString = addon.FrameProviders.All[1]:Name()
+
+    for i = 2, #addon.FrameProviders.All do
+        local provider = addon.Frame.All[i]
+        addonsString = addonsString .. ", " .. provider:Name()
+    end
+
     results[#results + 1] = {
         Passed = CanSeeFrames(),
-        Description = "Default Blizzard frames are being used",
-        Help = "FrameSort currently only supports the default Blizzard frames",
+        Description = "Can detect frames",
+        Help = "FrameSort currently supports frames from these addons: " .. addonsString,
     }
 
-    results[#results + 1] = {
-        Passed = fsFrame:IsUsingRaidStyleFrames(),
-        Description = "Using Raid-Style Party Frames",
-        Help = "Please enable 'Use Raid-Style Party Frames' in the Blizzard settings",
-    }
+    if addon.FrameProviders.Blizzard:Enabled() then
+        results[#results + 1] = {
+            Passed = addon.FrameProviders.Blizzard:UsingRaidStyleFrames(),
+            Description = "Using Raid-Style Party Frames",
+            Help = "Please enable 'Use Raid-Style Party Frames' in the Blizzard settings",
+        }
 
-    results[#results + 1] = {
-        Passed = SupportsGroups(),
-        Description = "'Keep Groups Together' setting disabled, or using Taintless sorting",
-        Help = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and "Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"
-            or "Disable the 'Keep Groups Together' raid profile setting",
-    }
+        results[#results + 1] = {
+            Passed = SupportsGroups(),
+            Description = "'Keep Groups Together' setting disabled, or using Taintless sorting",
+            Help = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and "Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"
+                or "Disable the 'Keep Groups Together' raid profile setting",
+        }
+    end
 
     local conflictingSorter = SortingFunctionsTampered()
     results[#results + 1] = {

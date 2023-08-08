@@ -9,9 +9,7 @@ local callbacks = {}
 local M = {}
 addon.Sorting = M
 
----Determines whether general sorting can be performed.
----@return boolean
-local function CanSort(isRaid)
+local function CanSort()
     if not IsInGroup() then
         return false
     end
@@ -29,27 +27,8 @@ local function CanSort(isRaid)
         end
     end
 
-    if not addon.Options.SortingMethod.TaintlessEnabled and (isRaid and fsFrame:IsRaidGrouped() or (not isRaid and fsFrame:IsPartyGrouped())) then
-        fsLog:Warning("Cannot perform non-taintless sorting when the 'Keep Groups Together' setting is enabled.")
-        return false
-    end
-
-    local _, enabled = fsCompare:GetSortFunction()
+    local _, enabled = fsCompare:SortFunction()
     return enabled
-end
-
----Determines whether party sorting can be performed.
----@return boolean
-local function CanSortParty()
-    local container = fsFrame:GetPartyFramesContainer()
-    return container and not container:IsForbidden() and container:IsVisible() and CanSort(false)
-end
-
----Determines whether raid sorting can be performed.
----@return boolean
-local function CanSortRaid()
-    local container = fsFrame:GetRaidFramesContainer()
-    return container and not container:IsForbidden() and container:IsVisible() and CanSort(true)
 end
 
 ---Calls the post sorting callbacks.
@@ -158,16 +137,16 @@ end
 ---Sorts raid frames.
 ---@return boolean sorted true if frames were sorted, otherwise false.
 local function SortRaid()
-    local sortFunction = fsCompare:GetSortFunction()
+    local sortFunction = fsCompare:SortFunction()
 
-    if fsFrame:IsRaidGrouped() then
-        local groups = fsFrame:GetRaidGroups()
+    if fsFrame:RaidGrouped() then
+        local groups = fsFrame:RaidGroups()
         if #groups == 0 then
             return false
         end
 
         for _, group in ipairs(groups) do
-            local frames, getUnit = fsFrame:GetRaidGroupMembers(group)
+            local frames, getUnit = fsFrame:RaidGroupMembers(group)
             local units = fsEnumerable:From(frames):Map(getUnit):OrderBy(sortFunction):ToTable()
 
             if not Sort(group:GetName(), frames, addon.LayoutType.Chain, units, getUnit) then
@@ -178,7 +157,7 @@ local function SortRaid()
         return true
     end
 
-    local frames, getUnit = fsFrame:GetRaidFrames()
+    local frames, getUnit = fsFrame:RaidFrames()
     local players = fsEnumerable
         :From(frames)
         :Where(function(frame)
@@ -254,8 +233,8 @@ end
 ---Sorts party frames.
 ---@return boolean sorted true if frames were sorted, otherwise false.
 local function SortParty()
-    local sortFunction = fsCompare:GetSortFunction()
-    local frames, getUnit = fsFrame:GetPartyFrames()
+    local sortFunction = fsCompare:SortFunction()
+    local frames, getUnit = fsFrame:PartyFrames()
     local players = fsEnumerable
         :From(frames)
         :Where(function(frame)
@@ -273,7 +252,7 @@ local function SortParty()
         return false
     end
 
-    if not fsFrame:ShowPets() then
+    if not fsFrame:ShowPartyPets() then
         return true
     end
 
@@ -288,27 +267,30 @@ local function SortParty()
     return SortPartyPets(playerUnits, players, pets, getUnit)
 end
 
----Attempts to sort the party/raid frames using the traditional method.
+---Attempts to sort Blizzard frames using the traditional method.
 ---@return boolean sorted true if sorted, otherwise false.
 local function TrySortTraditional()
+    if fsFrame:RaidGrouped() or fsFrame:PartyGrouped() then
+        fsLog:Warning("Cannot perform traditional sorting when the 'Keep Groups Together' setting is enabled.")
+        return false
+    end
+
     local sorted = false
-    local sortFunction = fsCompare:GetSortFunction()
-    local partyContainer = fsFrame:GetPartyFramesContainer()
-    local raidContainer = fsFrame:GetRaidFramesContainer()
+    local sortFunction = fsCompare:SortFunction()
 
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        if CanSortRaid() then
-            raidContainer:SetFlowSortFunction(sortFunction)
+        if addon.FrameProviders.Blizzard:RaidFramesEnabled() then
+            CompactRaidFrameContainer:SetFlowSortFunction(sortFunction)
             sorted = true
         end
 
-        if CanSortParty() then
-            partyContainer:SetFlowSortFunction(sortFunction)
+        if addon.FrameProviders.Blizzard:PartyFramesEnabled() then
+            CompactPartyFrame:SetFlowSortFunction(sortFunction)
             sorted = sorted or true
         end
     else
-        if CanSortRaid() then
-            CompactRaidFrameContainer_SetFlowSortFunction(raidContainer, sortFunction)
+        if addon.FrameProviders.Blizzard:RaidFramesEnabled() then
+            CompactRaidFrameContainer_SetFlowSortFunction(CompactRaidFrameContainer, sortFunction)
             sorted = true
         end
     end
@@ -316,20 +298,10 @@ local function TrySortTraditional()
     return sorted
 end
 
----Attempts to sort the party/raid frames using the taintless method.
+---Attempts to sort frames using the taintless method.
 ---@return boolean sorted true if sorted, otherwise false.
 local function TrySortTaintless()
-    local sorted = false
-
-    if CanSortParty() then
-        sorted = SortParty()
-    end
-
-    if CanSortRaid() then
-        sorted = sorted or SortRaid()
-    end
-
-    return sorted
+    return SortParty() or SortRaid()
 end
 
 ---Listens for events where we should perform a sort.
@@ -357,6 +329,10 @@ end
 ---Attempts to sort the party/raid frames.
 ---@return boolean sorted true if sorted, otherwise false.
 function M:TrySort()
+    if not CanSort() then
+        return false
+    end
+
     local sorted = false
 
     if addon.Options.SortingMethod.TaintlessEnabled then

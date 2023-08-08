@@ -26,13 +26,13 @@ local function Run()
         return
     end
 
-    local player = fsFrame:GetPlayerFrame()
+    local player = fsFrame:PlayerRaidFrame()
 
     if not player or player:IsForbidden() then
         return
     end
 
-    local enabled, mode, _, _ = fsCompare:GetSortMode()
+    local enabled, mode, _, _ = fsCompare:SortMode()
 
     if not enabled then
         return
