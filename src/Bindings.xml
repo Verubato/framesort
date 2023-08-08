@@ -5,4 +5,7 @@
   <Binding name="CLICK FSTarget4:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
   <Binding name="CLICK FSTarget5:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
   <Binding name="CLICK FSTargetBottom:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
+  <Binding name="CLICK FSTargetEnemy1:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
+  <Binding name="CLICK FSTargetEnemy2:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
+  <Binding name="CLICK FSTargetEnemy3:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
 </Bindings>

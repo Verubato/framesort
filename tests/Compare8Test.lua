@@ -21,6 +21,7 @@ function M:setUp()
     -- raids don't have a "player" token, so we'll just say we're raid2
     local playerToken = "raid2"
     local members = mock:GenerateUnits(8)
+    IsInGroup = function() return true end
     UnitExists = function(unit)
         return unit == "player" or mock:UnitExists(unit, members)
     end

@@ -4,7 +4,7 @@ addon.Unit = M
 
 ---Gets a table of group member unit tokens that exist (UnitExists()).
 ---@return string[]
-function M:GetUnits()
+function M:FriendlyUnits()
     local members = {}
 
     if not IsInGroup() then
@@ -25,6 +25,21 @@ function M:GetUnits()
         if UnitExists(unit) then
             table.insert(members, unit)
         end
+    end
+
+    return members
+end
+
+---Gets a table of enemy unit tokens that may or may not exist.
+---@return string[]
+function M:EnemyUnits()
+    local members = {}
+    local prefix = "arena"
+    local toGenerate = 5
+
+    for i = 1, toGenerate do
+        local unit = prefix .. i
+        table.insert(members, unit)
     end
 
     return members

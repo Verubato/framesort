@@ -20,6 +20,7 @@ local M = {}
 function M:setUp()
     -- wow api mocks
     local members = mock:GenerateUnits(3)
+    IsInGroup = function() return true end
     UnitExists = function(unit)
         return mock:UnitExists(unit, members)
     end

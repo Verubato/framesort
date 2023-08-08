@@ -288,11 +288,11 @@ end
 
 local function ApplyPartySpacing()
     local spacing = addon.Options.Appearance.Party.Spacing
-    local frames, getUnit = blizzardFrames:PartyFrames()
+    local frames = blizzardFrames:PartyFrames()
     local players = fsEnumerable
         :From(frames)
         :Where(function(frame)
-            local unit = getUnit(frame)
+            local unit = blizzardFrames:GetUnit(frame)
             -- a unit can be both a player and a pet
             -- e.g. when occupying a vehicle
             -- so we want to filter out the pets
@@ -309,7 +309,7 @@ local function ApplyPartySpacing()
     local pets = fsEnumerable
         :From(frames)
         :Where(function(frame)
-            local unit = getUnit(frame)
+            local unit = blizzardFrames:GetUnit(frame)
             return fsUnit:IsPet(unit)
         end)
         :ToTable()
