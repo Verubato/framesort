@@ -6,12 +6,10 @@ local M = {}
 addon.HidePlayer = M
 
 local function CanUpdate()
-    if not IsInGroup() then
-        return false
-    end
     if InCombatLockdown() then
         return false
     end
+
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         if EditModeManagerFrame.editModeActive then
             return false

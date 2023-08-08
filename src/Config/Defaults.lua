@@ -2,13 +2,18 @@ local _, addon = ...
 
 ---Default configuration.
 addon.Defaults = {
-    Version = 11,
+    Version = 12,
     Logging = {
         Enabled = false,
     },
     Arena = {
         Enabled = true,
         PlayerSortMode = addon.PlayerSortMode.Top,
+        GroupSortMode = addon.GroupSortMode.Group,
+        Reverse = false,
+    },
+    EnemyArena = {
+        Enabled = false,
         GroupSortMode = addon.GroupSortMode.Group,
         Reverse = false,
     },

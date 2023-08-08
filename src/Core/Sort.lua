@@ -10,10 +10,6 @@ local M = {}
 addon.Sorting = M
 
 local function CanSort()
-    if not IsInGroup() then
-        return false
-    end
-
     -- can't make changes during combat
     if InCombatLockdown() and not addon.Options.SortingMethod.TaintlessEnabled then
         fsLog:Warning("Cannot perform non-taintless sorting during combat.")
@@ -27,8 +23,13 @@ local function CanSort()
         end
     end
 
-    local _, enabled = fsCompare:SortFunction()
-    return enabled
+    local enabled, _, _, _ = fsCompare:SortMode()
+
+    if not enabled then
+        return false
+    end
+
+    return true
 end
 
 ---Calls the post sorting callbacks.
@@ -63,7 +64,8 @@ local function RearrangeFrames(frames, enumerateOrder, units, getUnit)
     local movedAny = false
     for _, source in ipairs(enumerateOrder) do
         local _, unitIndex = fsEnumerable:From(units):First(function(x)
-            return UnitIsUnit(x, getUnit(source))
+            local unit = getUnit(source)
+            return x == unit or UnitIsUnit(x, unit)
         end)
 
         if unitIndex then
@@ -144,7 +146,6 @@ end
 ---Sorts raid frames.
 ---@return boolean sorted true if frames were sorted, otherwise false.
 local function SortRaid()
-    local sortFunction = fsCompare:SortFunction()
     local sorted = false
 
     if fsFrame:RaidGrouped() then
@@ -155,7 +156,10 @@ local function SortRaid()
 
         for _, group in ipairs(groups) do
             local frames, getUnit = fsFrame:RaidGroupMembers(group)
-            local units = fsEnumerable:From(frames):Map(getUnit):OrderBy(sortFunction):ToTable()
+            local units = fsEnumerable:From(frames):Map(getUnit):ToTable()
+            local sortFunction = fsCompare:SortFunction(units)
+
+            table.sort(units, sortFunction)
 
             if Sort(group:GetName(), frames, addon.LayoutType.Chain, units, getUnit) then
                 sorted = true
@@ -177,7 +181,10 @@ local function SortRaid()
         end)
         :ToTable()
 
-    local units = fsEnumerable:From(players):Map(getUnit):OrderBy(sortFunction):ToTable()
+    local units = fsEnumerable:From(players):Map(getUnit):ToTable()
+    local sortFunction = fsCompare:SortFunction(units)
+
+    table.sort(units, sortFunction)
 
     return Sort("Raid", players, addon.LayoutType.Flat, units, getUnit)
 end
@@ -242,12 +249,17 @@ end
 ---@return boolean sorted true if frames were sorted, otherwise false.
 local function SortParty()
     local sortedPlayers = false
-    local sortFunction = fsCompare:SortFunction()
     local frames, getUnit = fsFrame:PartyFrames()
     local players = fsEnumerable
         :From(frames)
         :Where(function(frame)
             local unit = getUnit(frame)
+
+            -- might be in test mode
+            if not IsInGroup() then
+                return not fsUnit:IsPet(unit)
+            end
+
             -- a unit can be both a player and a pet
             -- e.g. when occupying a vehicle
             -- so we want to filter out the pets
@@ -255,7 +267,10 @@ local function SortParty()
         end)
         :ToTable()
 
-    local playerUnits = fsEnumerable:From(players):Map(getUnit):OrderBy(sortFunction):ToTable()
+    local playerUnits = fsEnumerable:From(players):Map(getUnit):ToTable()
+    local sortFunction = fsCompare:SortFunction(playerUnits)
+
+    table.sort(playerUnits, sortFunction)
 
     sortedPlayers = Sort("Party-Players", players, addon.LayoutType.Chain, playerUnits, getUnit)
 
@@ -273,6 +288,32 @@ local function SortParty()
 
     local sortedPets = SortPartyPets(playerUnits, players, pets, getUnit)
     return sortedPlayers or sortedPets
+end
+
+---Sorts enemy arena frames.
+---@return boolean sorted true if frames were sorted, otherwise false.
+local function SortEnemyArena()
+    local sortFunction = fsCompare:EnemySortFunction()
+    local frames, getUnit = fsFrame:EnemyArenaFrames()
+    local players = fsEnumerable
+        :From(frames)
+        :Where(function(frame)
+            local unit = getUnit(frame)
+
+            -- might be in test mode
+            if not IsInGroup() then
+                return not fsUnit:IsPet(unit)
+            end
+            -- a unit can be both a player and a pet
+            -- e.g. when occupying a vehicle
+            -- so we want to filter out the pets
+            return UnitIsPlayer(unit) and not fsUnit:IsPet(unit)
+        end)
+        :ToTable()
+
+    local playerUnits = fsEnumerable:From(players):Map(getUnit):OrderBy(sortFunction):ToTable()
+
+    return Sort("EnemyArena-Players", players, addon.LayoutType.Chain, playerUnits, getUnit)
 end
 
 ---Attempts to sort Blizzard frames using the traditional method.
@@ -337,7 +378,7 @@ function M:RegisterPostSortCallback(callback)
     callbacks[#callbacks + 1] = callback
 end
 
----Attempts to sort the party/raid frames.
+---Attempts to sort all frames.
 ---@return boolean sorted true if sorted, otherwise false.
 function M:TrySort()
     if not CanSort() then
@@ -348,8 +389,13 @@ function M:TrySort()
 
     if addon.Options.SortingMethod.TaintlessEnabled then
         sorted = TrySortTaintless()
-    else
+    elseif addon.FrameProviders.Blizzard:Enabled() then
         sorted = TrySortTraditional()
+    end
+
+    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+        local arenaSorted = SortEnemyArena()
+        sorted = sorted or arenaSorted
     end
 
     if sorted then

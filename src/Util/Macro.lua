@@ -101,6 +101,10 @@ local function UnitForSelector(selector, friendlyUnits)
 
     -- enemy arena
     if string.match(selectorLower, "enemy") then
+        if WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE then
+            return "none"
+        end
+
         local count = GetNumArenaOpponentSpecs()
         if not count or count <= 0 then
             return "none"

@@ -251,6 +251,18 @@ function M:UpgradeToVersion11(options)
     options.Version = 11
 end
 
+function M:UpgradeToVersion12(options)
+    assert(options.Version == 11)
+
+    options.EnemyArena = {
+        Enabled = false,
+        GroupSortMode = addon.GroupSortMode.Group,
+        Reverse = false,
+    }
+
+    options.Version = 12
+end
+
 local upgradeFunctions = {
     Version2 = M.UpgradeToVersion2,
     Version3 = M.UpgradeToVersion3,
@@ -262,6 +274,7 @@ local upgradeFunctions = {
     Version9 = M.UpgradeToVersion9,
     Version10 = M.UpgradeToVersion10,
     Version11 = M.UpgradeToVersion11,
+    Version12 = M.UpgradeToVersion12,
 }
 
 ---Upgrades saved options to the current version.
