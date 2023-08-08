@@ -161,6 +161,22 @@ function M:test_frame_123456()
     assertEquals(fsMacro:GetNewBody(macroText, units), expected)
 end
 
+function M:test_enemy_frame_123456()
+    local units = { "arena2", "arena3", "arena1" }
+    local macroText = [[
+        #showtooltip
+        #FrameSort EnemyFrame1 EnemyFrame2 EnemyFrame3
+        /cast [mod:ctrl,@a][mod:shift,@b][nomod,@c] Spell
+    ]]
+    local expected = [[
+        #showtooltip
+        #FrameSort EnemyFrame1 EnemyFrame2 EnemyFrame3
+        /cast [mod:ctrl,@arena2][mod:shift,@arena3][nomod,@arena1] Spell
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, {}, units), expected)
+end
+
 function M:test_player()
     local units = { "player", "party1", "party2", "party3", "party4" }
 
