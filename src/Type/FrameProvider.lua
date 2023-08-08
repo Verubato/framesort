@@ -1,0 +1,19 @@
+---@class FrameProvider
+---@field Name fun(self: table): string
+---@field Enabled fun(self: table): boolean
+---@field PartyFramesEnabled fun(self: table): boolean
+---@field RaidFramesEnabled fun(self: table): boolean
+---@field EnemyArenaFramesEnabled fun(self: table): boolean
+---@field GetUnit fun(self: table, frame: table): string?
+---@field PartyFrames fun(self: table): table[]
+---@field RaidFrames fun(self: table): table[]
+---@field RaidGroups fun(self: table): table[]
+---@field RaidGroupMembers fun(self: table, group: table): table[]
+---@field EnemyArenaFrames fun(self: table): table[]
+---@field PlayerRaidFrame fun(self: table): table?
+---@field ShowPartyPets fun(self: table): boolean
+---@field ShowRaidPets fun(self: table): boolean
+---@field PartyGrouped fun(self: table): boolean
+---@field RaidGrouped fun(self: table): boolean
+---@field PartyHorizontalLayout fun(self: table): boolean
+---@field RaidHorizontalLayout fun(self: table): boolean

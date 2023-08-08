@@ -57,21 +57,21 @@ end
 
 ---Returns a collection of party frames ordered by their visual representation.
 function Api.v1.Sorting:GetPartyFrames()
-    local frames = fsFrame:GetPartyFrames()
+    local frames = fsFrame:PartyFrames()
     return VisualOrder(frames)
 end
 
 ---Returns a collection of raid frames ordered by their visual representation.
 function Api.v1.Sorting:GetRaidFrames()
-    if not fsFrame:IsRaidGrouped() then
-        local frames = fsFrame:GetRaidFrames()
+    if not fsFrame:RaidGrouped() then
+        local frames = fsFrame:RaidFrames()
         return VisualOrder(frames)
     end
 
     return fsEnumerable
-        :From(fsFrame:GetRaidGroups())
+        :From(fsFrame:RaidGroups())
         :Map(function(group)
-            return fsFrame:GetRaidGroupMembers(group)
+            return fsFrame:RaidGroupMembers(group)
         end)
         :Flatten()
         :ToTable()
@@ -79,8 +79,11 @@ end
 
 ---Returns a collection all frames (from both party and raid).
 function Api.v1.Sorting:GetFrames()
-    local frames = fsFrame:GetFrames()
-    return VisualOrder(frames)
+    local party = fsFrame:PartyFrames()
+    local raid = fsFrame:RaidFrames()
+    local all = fsEnumerable:From(party):Concat(raid):ToTable()
+
+    return VisualOrder(all)
 end
 
 ---Gets the player sort mode.

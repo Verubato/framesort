@@ -14,8 +14,8 @@ end
 ---Sorting is based on the player's instance and configured options.
 ---Nil may be returned if sorting is not enabled for the player's current instance.
 ---@return function sort, boolean enabled
-function M:GetSortFunction()
-    local enabled, playerSortMode, groupSortMode, reverse = M:GetSortMode()
+function M:SortFunction()
+    local enabled, playerSortMode, groupSortMode, reverse = M:SortMode()
 
     if not enabled then
         return EmptyCompare, false
@@ -43,7 +43,7 @@ end
 ---@return PlayerSortMode? playerMode the player sort mode.
 ---@return GroupSortMode? groupMode the group sort mode.
 ---@return boolean? reverse whether the sorting is reversed.
-function M:GetSortMode()
+function M:SortMode()
     local inInstance, instanceType = IsInInstance()
 
     if inInstance and instanceType == "arena" then
