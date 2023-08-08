@@ -326,6 +326,31 @@ function M:test_dps()
     assertEquals(fsMacro:GetNewBody(macroText, units), expected)
 end
 
+function M:test_other_dps()
+    local units = { "player", "party1", "party2" }
+
+    UnitGroupRolesAssigned = function(x)
+        if x == "party1" then
+            return "HEALER"
+        end
+
+        return "DAMAGER"
+    end
+
+    local macroText = [[
+        #showtooltip
+        #framesort OtherDPS
+        /cast [@none] Spell;
+    ]]
+    local expected = [[
+        #showtooltip
+        #framesort OtherDPS
+        /cast [@party2] Spell;
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+end
+
 function M:test_target()
     local units = { "player", "party1", "party2" }
 
