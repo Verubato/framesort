@@ -9,29 +9,6 @@ local callbacks = {}
 local M = {}
 addon.Sorting = M
 
-local function CanSort()
-    -- can't make changes during combat
-    if InCombatLockdown() and not addon.Options.SortingMethod.TaintlessEnabled then
-        fsLog:Warning("Cannot perform non-taintless sorting during combat.")
-        return false
-    end
-
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        if EditModeManagerFrame.editModeActive then
-            fsLog:Debug("Not sorting while edit mode active.")
-            return false
-        end
-    end
-
-    local enabled, _, _, _ = fsCompare:SortMode()
-
-    if not enabled then
-        return false
-    end
-
-    return true
-end
-
 ---Calls the post sorting callbacks.
 local function InvokeCallbacks()
     for _, callback in pairs(callbacks) do
@@ -255,15 +232,23 @@ local function SortParty()
         :Where(function(frame)
             local unit = getUnit(frame)
 
+            if not unit then
+                return false
+            end
+
+            if fsUnit:IsPet(unit) then
+                return false
+            end
+
             -- might be in test mode
             if not IsInGroup() then
-                return not fsUnit:IsPet(unit)
+                return true
             end
 
             -- a unit can be both a player and a pet
             -- e.g. when occupying a vehicle
             -- so we want to filter out the pets
-            return UnitIsPlayer(unit) and not fsUnit:IsPet(unit)
+            return UnitIsPlayer(unit)
         end)
         :ToTable()
 
@@ -282,7 +267,7 @@ local function SortParty()
         :From(frames)
         :Where(function(frame)
             local unit = getUnit(frame)
-            return fsUnit:IsPet(unit)
+            return unit and fsUnit:IsPet(unit)
         end)
         :ToTable()
 
@@ -300,14 +285,7 @@ local function SortEnemyArena()
         :Where(function(frame)
             local unit = getUnit(frame)
 
-            -- might be in test mode
-            if not IsInGroup() then
-                return not fsUnit:IsPet(unit)
-            end
-            -- a unit can be both a player and a pet
-            -- e.g. when occupying a vehicle
-            -- so we want to filter out the pets
-            return UnitIsPlayer(unit) and not fsUnit:IsPet(unit)
+            return unit and not fsUnit:IsPet(unit)
         end)
         :ToTable()
 
@@ -381,19 +359,32 @@ end
 ---Attempts to sort all frames.
 ---@return boolean sorted true if sorted, otherwise false.
 function M:TrySort()
-    if not CanSort() then
+    -- can't make changes during combat
+    if InCombatLockdown() and not addon.Options.SortingMethod.TaintlessEnabled then
+        fsLog:Warning("Cannot perform non-taintless sorting during combat.")
         return false
     end
 
-    local sorted = false
-
-    if addon.Options.SortingMethod.TaintlessEnabled then
-        sorted = TrySortTaintless()
-    elseif addon.FrameProviders.Blizzard:Enabled() then
-        sorted = TrySortTraditional()
+    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+        if EditModeManagerFrame.editModeActive then
+            fsLog:Debug("Not sorting while edit mode active.")
+            return false
+        end
     end
 
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+    local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
+    local enemyEnabled, _, _ = fsCompare:EnemySortMode()
+    local sorted = false
+
+    if friendlyEnabled then
+        if addon.Options.SortingMethod.TaintlessEnabled then
+            sorted = TrySortTaintless()
+        elseif addon.FrameProviders.Blizzard:Enabled() then
+            sorted = TrySortTraditional()
+        end
+    end
+
+    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and enemyEnabled then
         local arenaSorted = SortEnemyArena()
         sorted = sorted or arenaSorted
     end

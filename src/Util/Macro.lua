@@ -80,7 +80,7 @@ local function GetSelectors(body)
     return selectors
 end
 
-local function UnitForSelector(selector, friendlyUnits)
+local function UnitForSelector(selector, friendlyUnits, enemyUnits)
     local selectorLower = string.lower(selector)
     local numberStr = string.match(selector, "%d+")
     local number = numberStr and tonumber(numberStr) or nil
@@ -88,6 +88,11 @@ local function UnitForSelector(selector, friendlyUnits)
     -- bottom frame
     if string.match(selectorLower, "bottomframe") then
         return number and friendlyUnits[#friendlyUnits] or "none"
+    end
+
+    -- enemy frame
+    if string.match(selectorLower, "enemyframe") then
+        return number and enemyUnits[number] or "none"
     end
 
     -- frame
@@ -154,14 +159,15 @@ end
 
 ---Returns a copy of the macro body with the new unit inserted.
 ---@param body string the current macro body.
----@param units string[] sorted unit ids.
+---@param friendlyUnits string[] sorted friendly unit ids.
+---@param enemyUnits string[] sorted enemy unit ids.
 ---@return string? the new macro body, or nil if invalid
-function M:GetNewBody(body, units)
+function M:GetNewBody(body, friendlyUnits, enemyUnits)
     local newBody = body
     local selectors = GetSelectors(body)
 
     for i, selector in ipairs(selectors) do
-        local unit = UnitForSelector(selector, units)
+        local unit = UnitForSelector(selector, friendlyUnits, enemyUnits)
         local tmp = ReplaceSelector(newBody, unit, i)
 
         if tmp then

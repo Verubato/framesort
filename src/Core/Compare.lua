@@ -36,7 +36,7 @@ end
 ---@param units string[]? the set of all unit tokens, only required if the player sort mode is "Middle"
 ---@return function sort
 function M:SortFunction(units)
-    local enabled, playerSortMode, groupSortMode, reverse = M:SortMode()
+    local enabled, playerSortMode, groupSortMode, reverse = M:FriendlySortMode()
 
     if not enabled then
         return EmptyCompare
@@ -48,7 +48,7 @@ function M:SortFunction(units)
         end
     end
 
-    units = units or fsUnit:GetUnits()
+    units = units or fsUnit:FriendlyUnits()
 
     -- we need to pre-sort to determine where the middle actually is
     -- making use of Enumerable:OrderBy() so we don't re-order the original array
@@ -65,17 +65,17 @@ function M:SortFunction(units)
 end
 
 ---Returns a function that accepts two parameters of unit tokens and returns true if the left token should be ordered before the right.
----@return function sort, boolean enabled
+---@return function sort
 function M:EnemySortFunction()
-    local enabled, groupSortMode, reverse = addon.Options.EnemyArena.Enabled, addon.Options.EnemyArena.GroupSortMode, addon.Options.EnemyArena.Reverse
+    local enabled, groupSortMode, reverse = M:EnemySortMode()
 
     if not enabled then
-        return EmptyCompare, false
+        return EmptyCompare
     end
 
     return function(x, y)
         return M:EnemyCompare(x, y, groupSortMode, reverse)
-    end, true
+    end
 end
 
 ---Returns the sort mode from the configured options for the current instance.
@@ -83,7 +83,7 @@ end
 ---@return PlayerSortMode? playerMode the player sort mode.
 ---@return GroupSortMode? groupMode the group sort mode.
 ---@return boolean? reverse whether the sorting is reversed.
-function M:SortMode()
+function M:FriendlySortMode()
     local inInstance, instanceType = IsInInstance()
 
     if inInstance and instanceType == "arena" then
@@ -98,6 +98,20 @@ function M:SortMode()
     return addon.Options.World.Enabled, addon.Options.World.PlayerSortMode, addon.Options.World.GroupSortMode, addon.Options.World.Reverse
 end
 
+---Returns the sort mode from the configured options for the current instance.
+---@return boolean enabled whether sorting is enabled.
+---@return GroupSortMode? groupMode the group sort mode.
+---@return boolean? reverse whether the sorting is reversed.
+function M:EnemySortMode()
+    local inInstance, instanceType = IsInInstance()
+
+    if inInstance and instanceType == "arena" then
+        return addon.Options.EnemyArena.Enabled, addon.Options.EnemyArena.GroupSortMode, addon.Options.EnemyArena.Reverse
+    end
+
+    return false, nil, nil
+end
+
 ---Returns true if the left token should be ordered before the right token.
 ---preSortedUnits is required if playerSortMode == Middle.
 ---@param leftToken string
@@ -108,16 +122,6 @@ end
 ---@param preSortedUnits table?
 ---@return boolean
 function M:Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse, preSortedUnits)
-    -- if not in a group, we might be in test mode
-    if IsInGroup() then
-        if not UnitExists(leftToken) then
-            return false
-        end
-        if not UnitExists(rightToken) then
-            return true
-        end
-    end
-
     if playerSortMode and playerSortMode ~= "" then
         if leftToken == "player" or UnitIsUnit(leftToken, "player") then
             if playerSortMode == addon.PlayerSortMode.Hidden then
@@ -166,16 +170,6 @@ end
 ---@param reverse boolean?
 ---@return boolean
 function M:EnemyCompare(leftToken, rightToken, groupSortMode, reverse)
-    -- if not in a group, we might be in test mode
-    if IsInGroup() then
-        if not UnitExists(leftToken) then
-            return false
-        end
-        if not UnitExists(rightToken) then
-            return true
-        end
-    end
-
     if reverse then
         local tmp = leftToken
         leftToken = rightToken

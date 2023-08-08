@@ -21,12 +21,12 @@ local function CanUpdate()
     return true
 end
 
-local function GetTargets()
+local function FriendlyTargets()
     local frames = fsFrame:AllFriendlyFrames()
 
     if #frames == 0 then
         -- fallback to retrieve the group units
-        return fsUnit:GetUnits()
+        return fsUnit:FriendlyUnits()
     end
 
     return fsEnumerable
@@ -40,6 +40,24 @@ local function GetTargets()
         :ToTable()
 end
 
+local function EnemyTargets()
+    local frames, getUnit = fsFrame:EnemyArenaFrames()
+
+    if #frames == 0 then
+        return fsUnit:EnemyUnits()
+    end
+
+    return fsEnumerable
+        :From(frames)
+        :OrderBy(function(x, y)
+            return fsCompare:CompareTopLeftFuzzy(x, y)
+        end)
+        :Map(function(x)
+            return getUnit(x)
+        end)
+        :ToTable()
+end
+
 local function InspectMacro(slot)
     local _, _, body = GetMacroInfo(slot)
 
@@ -47,8 +65,9 @@ local function InspectMacro(slot)
         return false
     end
 
-    local units = GetTargets()
-    local newBody = fsMacro:GetNewBody(body, units)
+    local friendlyUnits = FriendlyTargets()
+    local enemyUnits = EnemyTargets()
+    local newBody = fsMacro:GetNewBody(body, friendlyUnits, enemyUnits)
 
     if not newBody then
         return false

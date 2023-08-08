@@ -5,6 +5,9 @@ _G["BINDING_NAME_CLICK FSTarget3:LeftButton"] = "Target frame 3"
 _G["BINDING_NAME_CLICK FSTarget4:LeftButton"] = "Target frame 4"
 _G["BINDING_NAME_CLICK FSTarget5:LeftButton"] = "Target frame 5"
 _G["BINDING_NAME_CLICK FSTargetBottom:LeftButton"] = "Target bottom frame"
+_G["BINDING_NAME_CLICK FSTargetEnemy1:LeftButton"] = "Target enemy frame 1"
+_G["BINDING_NAME_CLICK FSTargetEnemy2:LeftButton"] = "Target enemy frame 2"
+_G["BINDING_NAME_CLICK FSTargetEnemy3:LeftButton"] = "Target enemy frame 3"
 
 local _, addon = ...
 local fsBuilder = addon.OptionsBuilder

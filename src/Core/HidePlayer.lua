@@ -30,7 +30,7 @@ local function Run()
         return
     end
 
-    local enabled, mode, _, _ = fsCompare:SortMode()
+    local enabled, mode, _, _ = fsCompare:FriendlySortMode()
 
     if not enabled then
         return
