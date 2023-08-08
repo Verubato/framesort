@@ -108,9 +108,10 @@ function fsBuilder:BuildMacroOptions(parent)
     local notes = {
         "Supported variables:",
         " - Frame1, Frame2, Frame3, etc.",
+        " - EnemyFrame1, EnemyFrame2, EnemyFrame3, etc. - Retail only (doesn't work in Wotlk and Classic).",
         " - BottomFrame",
         " - Tank, Healer, DPS.",
-        " - EnemyTank, EnemyHealer, EnemyDPS - These do not work in Classic and Wotlk.",
+        " - EnemyTank, EnemyHealer, EnemyDPS - Retail only (doesn't work in Wotlk and Classic).",
         " - Add a number to choose the Nth target, e.g., DPS2 selects the 2nd DPS.",
         " - Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work.",
     }
