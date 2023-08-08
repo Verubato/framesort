@@ -1,6 +1,8 @@
 local _, addon = ...
 local fsUnit = addon.Unit
 local fsSort = addon.Sorting
+---@type FrameProvider
+local blizzardFrames = addon.FrameProviders.Blizzard
 local fsFrame = addon.Frame
 local fsCompare = addon.Compare
 local fsMath = addon.Math
@@ -286,7 +288,7 @@ end
 
 local function ApplyPartySpacing()
     local spacing = addon.Options.Appearance.Party.Spacing
-    local frames, getUnit = fsFrame:PartyFrames()
+    local frames, getUnit = blizzardFrames:PartyFrames()
     local players = fsEnumerable
         :From(frames)
         :Where(function(frame)
@@ -300,7 +302,7 @@ local function ApplyPartySpacing()
 
     Space("Party-Players", players, spacing, addon.LayoutType.Chain)
 
-    if not fsFrame:ShowPartyPets() then
+    if not blizzardFrames:ShowPartyPets() then
         return
     end
 
@@ -314,7 +316,7 @@ local function ApplyPartySpacing()
 
     local start = nil
 
-    if fsFrame:PartyHorizontalLayout() then
+    if blizzardFrames:PartyHorizontalLayout() then
         local left = fsEnumerable
             :From(players)
             :OrderBy(function(x, y)
@@ -348,15 +350,15 @@ end
 local function ApplyRaidSpacing()
     local spacing = addon.Options.Appearance.Raid.Spacing
 
-    if not fsFrame:RaidGrouped() then
-        local frames = fsFrame:RaidFrames()
+    if not blizzardFrames:RaidGrouped() then
+        local frames = blizzardFrames:RaidFrames()
 
         Space("Raid-All", frames, spacing, addon.LayoutType.Flat)
         return
     end
 
-    local groups = fsFrame:RaidGroups()
-    local ungrouped = fsFrame:RaidFrames()
+    local groups = blizzardFrames:RaidGroups()
+    local ungrouped = blizzardFrames:RaidFrames()
 
     if #groups == 0 then
         Space("Raid-SingleGroup", ungrouped, spacing, addon.LayoutType.Chain)
@@ -365,7 +367,7 @@ local function ApplyRaidSpacing()
 
     local blockHeight = 0
     for _, group in ipairs(groups) do
-        local members = fsFrame:RaidGroupMembers(group)
+        local members = blizzardFrames:RaidGroupMembers(group)
 
         if #members > 0 then
             blockHeight = math.max(blockHeight, members[1]:GetHeight())
@@ -375,17 +377,17 @@ local function ApplyRaidSpacing()
 
     Space("Groups", groups, spacing, addon.LayoutType.Flat)
 
-    if not fsFrame:ShowRaidPets() then
+    if not blizzardFrames:ShowRaidPets() then
         return
     end
 
     local start = {}
 
-    if fsFrame:RaidHorizontalLayout() then
+    if blizzardFrames:RaidHorizontalLayout() then
         local bottomGroup = fsEnumerable:From(groups):Min(function(x)
             return x:GetBottom()
         end)
-        local bottom = bottomGroup and fsEnumerable:From(fsFrame:RaidGroupMembers(bottomGroup)):Min(function(x)
+        local bottom = bottomGroup and fsEnumerable:From(blizzardFrames:RaidGroupMembers(bottomGroup)):Min(function(x)
             return x:GetBottom()
         end)
 
@@ -396,13 +398,13 @@ local function ApplyRaidSpacing()
         local rightGroup = fsEnumerable:From(groups):Max(function(x)
             return x:GetRight()
         end)
-        local right = rightGroup and fsEnumerable:From(fsFrame:RaidGroupMembers(rightGroup)):Max(function(x)
+        local right = rightGroup and fsEnumerable:From(blizzardFrames:RaidGroupMembers(rightGroup)):Max(function(x)
             return x:GetRight()
         end)
         local topGroup = fsEnumerable:From(groups):Max(function(x)
             return x:GetTop()
         end)
-        local top = topGroup and fsEnumerable:From(fsFrame:RaidGroupMembers(topGroup)):Max(function(x)
+        local top = topGroup and fsEnumerable:From(blizzardFrames:RaidGroupMembers(topGroup)):Max(function(x)
             return x:GetTop()
         end)
 
@@ -422,16 +424,28 @@ end
 
 local function ApplyEnemyArenaSpacing()
     local spacing = addon.Options.Appearance.EnemyArena.Spacing
-    local frames = fsFrame:EnemyArenaFrames()
+    local frames = blizzardFrames:EnemyArenaFrames()
 
     Space("EnemyArena", frames, spacing, addon.LayoutType.Chain)
 end
 
 ---Applies spacing to party and raid frames.
 function M:ApplySpacing()
-    ApplyPartySpacing()
-    ApplyRaidSpacing()
-    ApplyEnemyArenaSpacing()
+    if not blizzardFrames:Enabled() then
+        return
+    end
+
+    if blizzardFrames:PartyFramesEnabled() then
+        ApplyPartySpacing()
+    end
+
+    if blizzardFrames:RaidFramesEnabled() then
+        ApplyRaidSpacing()
+    end
+
+    if blizzardFrames:EnemyArenaFramesEnabled() then
+        ApplyEnemyArenaSpacing()
+    end
 end
 
 local function Run()

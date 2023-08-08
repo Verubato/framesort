@@ -146,11 +146,15 @@ function fsBuilder:BuildSpacingOptions(parent)
     spacingTitle:SetPoint("TOPLEFT", panel, verticalSpacing, -verticalSpacing)
     spacingTitle:SetText("Spacing")
 
-    local spacingDescription = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-    spacingDescription:SetPoint("TOPLEFT", spacingTitle, "BOTTOMLEFT", 0, -verticalSpacing)
-    spacingDescription:SetText("Add some spacing between party/raid frames.")
+    local descriptionLine1 = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+    descriptionLine1:SetPoint("TOPLEFT", spacingTitle, "BOTTOMLEFT", 0, -verticalSpacing)
+    descriptionLine1:SetText("Add some spacing between party/raid frames.")
 
-    local anchor = spacingDescription
+    local descriptionLine2 = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+    descriptionLine2:SetPoint("TOPLEFT", descriptionLine1, "BOTTOMLEFT", 0, -verticalSpacing)
+    descriptionLine2:SetText("This only applies to Blizzard frames.")
+
+    local anchor = descriptionLine2
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         -- for retail
         anchor = BuildSpacingOptions(panel, anchor, "Party", addon.Options.Appearance.Party.Spacing, true, true, 0)
