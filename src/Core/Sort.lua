@@ -60,6 +60,7 @@ local function RearrangeFrames(frames, enumerateOrder, units, getUnit)
         end)
         :ToTable()
 
+    local movedAny = false
     for _, source in ipairs(enumerateOrder) do
         local _, unitIndex = fsEnumerable:From(units):First(function(x)
             return UnitIsUnit(x, getUnit(source))
@@ -71,9 +72,14 @@ local function RearrangeFrames(frames, enumerateOrder, units, getUnit)
             local xDelta = to.Left - from.Left
             local yDelta = to.Top - from.Top
 
-            source:AdjustPointsOffset(xDelta, yDelta)
+            if xDelta ~= 0 or yDelta ~= 0 then
+                source:AdjustPointsOffset(xDelta, yDelta)
+                movedAny = true
+            end
         end
     end
+
+    return movedAny
 end
 
 local function Sort(name, frames, layoutTypeHint, units, getUnit)
@@ -81,32 +87,33 @@ local function Sort(name, frames, layoutTypeHint, units, getUnit)
         return false
     end
 
+    local sorted = false
     if layoutTypeHint == addon.LayoutType.Flat then
         if fsFrame:IsFlat(frames) then
-            RearrangeFrames(frames, frames, units, getUnit)
-            return true
+            sorted = RearrangeFrames(frames, frames, units, getUnit)
+            return sorted
         end
 
         local chain = fsFrame:ToFrameChain(frames)
         if chain.Valid then
             local enumerateOrder = fsFrame:FramesFromChain(chain)
-            RearrangeFrames(frames, enumerateOrder, units, getUnit)
+            sorted = RearrangeFrames(frames, enumerateOrder, units, getUnit)
 
             fsLog:Debug(string.format("Layout hint for frames '%s' is flat but was it was actually a chain.", name))
-            return true
+            return sorted
         end
     elseif layoutTypeHint == addon.LayoutType.Chain then
         local chain = fsFrame:ToFrameChain(frames)
         if chain.Valid then
             local enumerateOrder = fsFrame:FramesFromChain(chain)
-            RearrangeFrames(frames, enumerateOrder, units, getUnit)
-            return true
+            sorted = RearrangeFrames(frames, enumerateOrder, units, getUnit)
+            return sorted
         end
 
         if fsFrame:IsFlat(frames) then
-            RearrangeFrames(frames, frames, units, getUnit)
+            sorted = RearrangeFrames(frames, frames, units, getUnit)
             fsLog:Debug(string.format("Layout hint for frames '%s' is a chain but was it was actually flat.", name))
-            return true
+            return sorted
         end
     end
 
@@ -138,6 +145,7 @@ end
 ---@return boolean sorted true if frames were sorted, otherwise false.
 local function SortRaid()
     local sortFunction = fsCompare:SortFunction()
+    local sorted = false
 
     if fsFrame:RaidGrouped() then
         local groups = fsFrame:RaidGroups()
@@ -149,12 +157,12 @@ local function SortRaid()
             local frames, getUnit = fsFrame:RaidGroupMembers(group)
             local units = fsEnumerable:From(frames):Map(getUnit):OrderBy(sortFunction):ToTable()
 
-            if not Sort(group:GetName(), frames, addon.LayoutType.Chain, units, getUnit) then
-                return false
+            if Sort(group:GetName(), frames, addon.LayoutType.Chain, units, getUnit) then
+                sorted = true
             end
         end
 
-        return true
+        return sorted
     end
 
     local frames, getUnit = fsFrame:RaidFrames()
@@ -233,6 +241,7 @@ end
 ---Sorts party frames.
 ---@return boolean sorted true if frames were sorted, otherwise false.
 local function SortParty()
+    local sortedPlayers = false
     local sortFunction = fsCompare:SortFunction()
     local frames, getUnit = fsFrame:PartyFrames()
     local players = fsEnumerable
@@ -248,12 +257,10 @@ local function SortParty()
 
     local playerUnits = fsEnumerable:From(players):Map(getUnit):OrderBy(sortFunction):ToTable()
 
-    if not Sort("Party-Players", players, addon.LayoutType.Chain, playerUnits, getUnit) then
-        return false
-    end
+    sortedPlayers = Sort("Party-Players", players, addon.LayoutType.Chain, playerUnits, getUnit)
 
     if not fsFrame:ShowPartyPets() then
-        return true
+        return sortedPlayers
     end
 
     local pets = fsEnumerable
@@ -264,7 +271,8 @@ local function SortParty()
         end)
         :ToTable()
 
-    return SortPartyPets(playerUnits, players, pets, getUnit)
+    local sortedPets = SortPartyPets(playerUnits, players, pets, getUnit)
+    return sortedPlayers or sortedPets
 end
 
 ---Attempts to sort Blizzard frames using the traditional method.
@@ -301,7 +309,10 @@ end
 ---Attempts to sort frames using the taintless method.
 ---@return boolean sorted true if sorted, otherwise false.
 local function TrySortTaintless()
-    return SortParty() or SortRaid()
+    local sortedParty = SortParty()
+    local sortedRaid = SortRaid()
+
+    return sortedParty or sortedRaid
 end
 
 ---Listens for events where we should perform a sort.
