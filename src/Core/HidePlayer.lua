@@ -28,7 +28,10 @@ local function Run()
     local player = fsFrame:PlayerRaidFrame()
 
     if not player or player:IsForbidden() then
-        fsLog:Warning("Couldn't find player raid frame.")
+        if IsInGroup() then
+            fsLog:Warning("Couldn't find player raid frame.")
+        end
+
         return
     end
 
