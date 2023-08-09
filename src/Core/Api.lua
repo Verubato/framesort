@@ -63,7 +63,7 @@ end
 
 ---Returns a collection of raid frames ordered by their visual representation.
 function Api.v1.Sorting:GetRaidFrames()
-    if not fsFrame:RaidGrouped() then
+    if not fsFrame:IsRaidGrouped() then
         local frames = fsFrame:RaidFrames()
         return VisualOrder(frames)
     end

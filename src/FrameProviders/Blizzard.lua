@@ -154,7 +154,7 @@ function M:ShowRaidPets()
     return CompactRaidFrameManager_GetSetting("DisplayPets")
 end
 
-function M:PartyGrouped()
+function M:IsPartyGrouped()
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         return false
     end
@@ -162,7 +162,7 @@ function M:PartyGrouped()
     return CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
 end
 
-function M:RaidGrouped()
+function M:IsRaidGrouped()
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         local raidGroupDisplayType = EditModeManagerFrame:GetSettingValue(Enum.EditModeSystem.UnitFrame, Enum.EditModeUnitFrameSystemIndices.Raid, Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
         return raidGroupDisplayType == Enum.RaidGroupDisplayType.SeparateGroupsVertical or raidGroupDisplayType == Enum.RaidGroupDisplayType.SeparateGroupsHorizontal
@@ -171,7 +171,7 @@ function M:RaidGrouped()
     return CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
 end
 
-function M:PartyHorizontalLayout()
+function M:IsPartyHorizontalLayout()
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         return EditModeManagerFrame:GetSettingValueBool(Enum.EditModeSystem.UnitFrame, Enum.EditModeUnitFrameSystemIndices.Party, Enum.EditModeUnitFrameSetting.UseHorizontalGroups)
     end
@@ -179,7 +179,7 @@ function M:PartyHorizontalLayout()
     return CompactRaidFrameManager_GetSetting("HorizontalGroups")
 end
 
-function M:RaidHorizontalLayout()
+function M:IsRaidHorizontalLayout()
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         local displayType = EditModeManagerFrame:GetSettingValue(Enum.EditModeSystem.UnitFrame, Enum.EditModeUnitFrameSystemIndices.Raid, Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
         return displayType == Enum.RaidGroupDisplayType.SeparateGroupsHorizontal or displayType == Enum.RaidGroupDisplayType.CombineGroupsHorizontal
@@ -188,7 +188,7 @@ function M:RaidHorizontalLayout()
     return CompactRaidFrameManager_GetSetting("HorizontalGroups")
 end
 
-function M:UsingRaidStyleFrames()
+function M:IsUsingRaidStyleFrames()
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         return EditModeManagerFrame:UseRaidStylePartyFrames()
     else

@@ -132,7 +132,7 @@ function M:PlayerRaidFrame()
         return found
     end
 
-    if M:RaidGrouped() then
+    if M:IsRaidGrouped() then
         local groups = M:RaidGroups()
         for _, group in ipairs(groups) do
             local members, raidGetUnit = M:RaidGroupMembers(group)
@@ -172,7 +172,7 @@ function M:AllFriendlyFrames()
         }
     end)
 
-    if M:RaidGrouped() then
+    if M:IsRaidGrouped() then
         local groupMembersWithUnit = fsEnumerable
             :From(groups)
             :Map(function(group)
@@ -230,50 +230,50 @@ end
 
 ---Returns true if frames are grouped.
 ---@return boolean
-function M:PartyGrouped()
+function M:IsPartyGrouped()
     local provider = PartyFramesProvider()
 
     if not provider then
         return false
     end
 
-    return provider:PartyGrouped()
+    return provider:IsPartyGrouped()
 end
 
 ---Returns true if frames are grouped.
 ---@return boolean
-function M:RaidGrouped()
+function M:IsRaidGrouped()
     local provider = RaidFramesProvider()
 
     if not provider then
         return false
     end
 
-    return provider:RaidGrouped()
+    return provider:IsRaidGrouped()
 end
 
 ---Returns true if the frames are using horizontal layout.
 ---@return boolean
-function M:PartyHorizontalLayout()
+function M:IsPartyHorizontalLayout()
     local provider = PartyFramesProvider()
 
     if not provider then
         return false
     end
 
-    return provider:PartyHorizontalLayout()
+    return provider:IsPartyHorizontalLayout()
 end
 
 ---Returns true if the frames are using horizontal layout.
 ---@return boolean
-function M:RaidHorizontalLayout()
+function M:IsRaidHorizontalLayout()
     local provider = RaidFramesProvider()
 
     if not provider then
         return false
     end
 
-    return provider:RaidHorizontalLayout()
+    return provider:IsRaidHorizontalLayout()
 end
 
 ---Returns the frames in order of their relative positioning to each other.
