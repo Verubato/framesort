@@ -230,18 +230,6 @@ end
 
 ---Returns true if frames are grouped.
 ---@return boolean
-function M:IsPartyGrouped()
-    local provider = PartyFramesProvider()
-
-    if not provider then
-        return false
-    end
-
-    return provider:IsPartyGrouped()
-end
-
----Returns true if frames are grouped.
----@return boolean
 function M:IsRaidGrouped()
     local provider = RaidFramesProvider()
 

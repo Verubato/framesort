@@ -14,9 +14,9 @@ function addon:InitApi()
     FrameSortApi = Api
 end
 
-local function VisualOrder(frames)
+local function VisualOrder(framesOrFunction)
     return fsEnumerable
-        :From(frames)
+        :From(framesOrFunction)
         :OrderBy(function(x, y)
             return fsCompare:CompareTopLeftFuzzy(x, y)
         end)
@@ -68,20 +68,21 @@ function Api.v1.Sorting:GetRaidFrames()
         return VisualOrder(frames)
     end
 
-    return fsEnumerable
+    local all = fsEnumerable
         :From(fsFrame:RaidGroups())
         :Map(function(group)
             return fsFrame:RaidGroupMembers(group)
         end)
         :Flatten()
-        :ToTable()
+
+    return VisualOrder(all)
 end
 
 ---Returns a collection all frames (from both party and raid).
 function Api.v1.Sorting:GetFrames()
     local party = fsFrame:PartyFrames()
     local raid = fsFrame:RaidFrames()
-    local all = fsEnumerable:From(party):Concat(raid):ToTable()
+    local all = fsEnumerable:From(party):Concat(raid)
 
     return VisualOrder(all)
 end

@@ -13,7 +13,6 @@
 ---@field EnemyArenaFrames fun(self: table): table[] Returns a collection of enemy arena frames.
 ---@field ShowPartyPets fun(self: table): boolean Whether party pets are enabled.
 ---@field ShowRaidPets fun(self: table): boolean Whether raid pets are enabled.
----@field IsPartyGrouped fun(self: table): boolean Whether the party is grouped.
 ---@field IsRaidGrouped fun(self: table): boolean Whether the raid is grouped.
 ---@field IsPartyHorizontalLayout fun(self: table): boolean Whether the party layout is horizontal.
 ---@field IsRaidHorizontalLayout fun(self: table): boolean Whether the raid layout is horizontal.

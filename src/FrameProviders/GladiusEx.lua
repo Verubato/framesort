@@ -66,10 +66,6 @@ function M:ShowRaidPets()
     return false
 end
 
-function M:IsPartyGrouped()
-    return false
-end
-
 function M:IsRaidGrouped()
     return false
 end

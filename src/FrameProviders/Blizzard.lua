@@ -1,6 +1,5 @@
 local _, addon = ...
 local fsEnumerable = addon.Enumerable
-local fsUnit = addon.Unit
 
 local M = {}
 
@@ -138,8 +137,7 @@ function M:RaidGroupMembers(group)
 end
 
 function M:RaidGroups()
-    local groups, _ = GetFrames(CompactRaidFrameContainer, IsValidGroupFrame)
-    return groups
+    return GetFrames(CompactRaidFrameContainer, IsValidGroupFrame)
 end
 
 function M:EnemyArenaFrames()
@@ -152,14 +150,6 @@ end
 
 function M:ShowRaidPets()
     return CompactRaidFrameManager_GetSetting("DisplayPets")
-end
-
-function M:IsPartyGrouped()
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        return false
-    end
-
-    return CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
 end
 
 function M:IsRaidGrouped()
