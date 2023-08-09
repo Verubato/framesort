@@ -71,7 +71,7 @@ local function ConflictingAddons()
 end
 
 local function SupportsGroups()
-    return addon.Options.SortingMethod.TaintlessEnabled or (not fsFrame:RaidGrouped() and not fsFrame:PartyGrouped())
+    return addon.Options.SortingMethod.TaintlessEnabled or (not fsFrame:IsRaidGrouped() and not fsFrame:IsPartyGrouped())
 end
 
 local function CanSeeFrames()
@@ -107,7 +107,7 @@ function M:IsHealthy()
 
     if addon.FrameProviders.Blizzard:Enabled() then
         results[#results + 1] = {
-            Passed = addon.FrameProviders.Blizzard:UsingRaidStyleFrames(),
+            Passed = addon.FrameProviders.Blizzard:IsUsingRaidStyleFrames(),
             Description = "Using Raid-Style Party Frames",
             Help = "Please enable 'Use Raid-Style Party Frames' in the Blizzard settings",
         }

@@ -125,7 +125,7 @@ end
 local function SortRaid()
     local sorted = false
 
-    if fsFrame:RaidGrouped() then
+    if fsFrame:IsRaidGrouped() then
         local groups = fsFrame:RaidGroups()
         if #groups == 0 then
             return false
@@ -183,7 +183,7 @@ local function SortPartyPets(sortedPlayerUnits, playerFrames, petFrames, getUnit
 
     -- next move the frame chain as a group beneath the player frames
     local rootPet = chain.Value
-    if fsFrame:PartyHorizontalLayout() then
+    if fsFrame:IsPartyHorizontalLayout() then
         local leftPlayer = fsEnumerable
             :From(playerFrames)
             :OrderBy(function(x, y)
@@ -297,7 +297,7 @@ end
 ---Attempts to sort Blizzard frames using the traditional method.
 ---@return boolean sorted true if sorted, otherwise false.
 local function TrySortTraditional()
-    if fsFrame:RaidGrouped() or fsFrame:PartyGrouped() then
+    if fsFrame:IsRaidGrouped() or fsFrame:IsPartyGrouped() then
         fsLog:Warning("Cannot perform traditional sorting when the 'Keep Groups Together' setting is enabled.")
         return false
     end

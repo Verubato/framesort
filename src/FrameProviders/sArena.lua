@@ -70,18 +70,18 @@ function M:ShowRaidPets()
     return false
 end
 
-function M:PartyGrouped()
+function M:IsPartyGrouped()
     return false
 end
 
-function M:RaidGrouped()
+function M:IsRaidGrouped()
     return false
 end
 
-function M:PartyHorizontalLayout()
+function M:IsPartyHorizontalLayout()
     return false
 end
 
-function M:RaidHorizontalLayout()
+function M:IsRaidHorizontalLayout()
     return false
 end

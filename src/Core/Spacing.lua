@@ -316,7 +316,7 @@ local function ApplyPartySpacing()
 
     local start = nil
 
-    if blizzardFrames:PartyHorizontalLayout() then
+    if blizzardFrames:IsPartyHorizontalLayout() then
         local left = fsEnumerable
             :From(players)
             :OrderBy(function(x, y)
@@ -350,7 +350,7 @@ end
 local function ApplyRaidSpacing()
     local spacing = addon.Options.Appearance.Raid.Spacing
 
-    if not blizzardFrames:RaidGrouped() then
+    if not blizzardFrames:IsRaidGrouped() then
         local frames = blizzardFrames:RaidFrames()
 
         Space("Raid-All", frames, spacing, addon.LayoutType.Flat)
@@ -383,7 +383,7 @@ local function ApplyRaidSpacing()
 
     local start = {}
 
-    if blizzardFrames:RaidHorizontalLayout() then
+    if blizzardFrames:IsRaidHorizontalLayout() then
         local bottomGroup = fsEnumerable:From(groups):Min(function(x)
             return x:GetBottom()
         end)
