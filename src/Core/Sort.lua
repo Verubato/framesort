@@ -171,14 +171,11 @@ end
 local function SortPartyPets(sortedPlayerUnits, playerFrames, petFrames, getUnit)
     local petUnits = fsEnumerable:From(petFrames):Map(getUnit):ToTable()
     local sortedPetUnits = SortPetUnits(sortedPlayerUnits, petUnits)
-
-    if not Sort("Party-Pets", petFrames, addon.LayoutType.Chain, sortedPetUnits, getUnit) then
-        return false
-    end
+    local sorted = Sort("Party-Pets", petFrames, addon.LayoutType.Chain, sortedPetUnits, getUnit)
 
     local chain = fsFrame:ToFrameChain(petFrames)
     if not chain.Valid then
-        return false
+        return sorted
     end
 
     -- next move the frame chain as a group beneath the player frames
@@ -199,7 +196,11 @@ local function SortPartyPets(sortedPlayerUnits, playerFrames, petFrames, getUnit
             :First()
 
         local xDelta = leftPlayer:GetLeft() - leftPet:GetLeft()
-        rootPet:AdjustPointsOffset(xDelta, 0)
+
+        if xDelta ~= 0 then
+            rootPet:AdjustPointsOffset(xDelta, 0)
+            sorted = true
+        end
     else
         local bottomPlayer = fsEnumerable
             :From(playerFrames)
@@ -216,10 +217,13 @@ local function SortPartyPets(sortedPlayerUnits, playerFrames, petFrames, getUnit
             :First()
 
         local yDelta = bottomPlayer:GetBottom() - topPet:GetTop()
-        rootPet:AdjustPointsOffset(0, yDelta)
+        if yDelta ~= 0 then
+            rootPet:AdjustPointsOffset(0, yDelta)
+            sorted = true
+        end
     end
 
-    return true
+    return sorted
 end
 
 ---Sorts party frames.
