@@ -297,7 +297,7 @@ end
 ---Attempts to sort Blizzard frames using the traditional method.
 ---@return boolean sorted true if sorted, otherwise false.
 local function TrySortTraditional()
-    if fsFrame:IsRaidGrouped() or fsFrame:IsPartyGrouped() then
+    if fsFrame:IsRaidGrouped() then
         fsLog:Warning("Cannot perform traditional sorting when the 'Keep Groups Together' setting is enabled.")
         return false
     end

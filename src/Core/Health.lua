@@ -71,7 +71,7 @@ local function ConflictingAddons()
 end
 
 local function SupportsGroups()
-    return addon.Options.SortingMethod.TaintlessEnabled or (not fsFrame:IsRaidGrouped() and not fsFrame:IsPartyGrouped())
+    return addon.Options.SortingMethod.TaintlessEnabled or not addon.FrameProviders.Blizzard:IsRaidGrouped()
 end
 
 local function CanSeeFrames()
