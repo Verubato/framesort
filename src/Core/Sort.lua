@@ -429,11 +429,12 @@ function M:TrySort()
         end
     end
 
+    local sorted = false
     if addon.Options.SortingMethod.TraditionalEnabled then
-        return TrySortTraditional()
+        sorted = TrySortTraditional()
+    else
+        sorted = TrySortTaintless()
     end
-
-    local sorted = TrySortTaintless()
 
     if sorted then
         InvokeCallbacks()
