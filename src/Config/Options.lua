@@ -326,6 +326,9 @@ function fsBuilder:BuildSortingOptions(panel)
 
     if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
         anchor = BuildSortModeCheckboxes(panel, anchor, "Arena", addon.Options.Arena)
+    end
+
+    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
         anchor = BuildSortModeCheckboxes(panel, anchor, "*EXPERIMENTAL* Enemy Arena (GladiusEx, sArena, Blizzard)", addon.Options.EnemyArena, false, false)
     end
 
