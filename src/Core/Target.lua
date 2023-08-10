@@ -27,7 +27,9 @@ local function GetFrames(provider)
     local frames = {}
     if provider:PartyFramesEnabled() then
         frames = provider:PartyFrames()
-    elseif provider:RaidFramesEnabled() then
+    end
+
+    if #frames == 0 and provider:RaidFramesEnabled() then
         frames = fsFrame:AllRaidFrames(provider)
     end
 
@@ -85,7 +87,7 @@ function M:FriendlyTargets()
         return fsEnumerable
             :From(frames)
             :OrderBy(function(x, y)
-                return fsCompare:CompareTopLeftFuzzy(x.Frame, y.Frame)
+                return fsCompare:CompareTopLeftFuzzy(x, y)
             end)
             :Map(function(x)
                 return frameProvider:GetUnit(x)
@@ -127,7 +129,7 @@ function M:EnemyTargets()
         return fsEnumerable
             :From(frames)
             :OrderBy(function(x, y)
-                return fsCompare:CompareTopLeftFuzzy(x.Frame, y.Frame)
+                return fsCompare:CompareTopLeftFuzzy(x, y)
             end)
             :Map(function(x)
                 return frameProvider:GetUnit(x)
