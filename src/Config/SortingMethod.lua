@@ -55,12 +55,13 @@ function fsBuilder:BuildSortingMethodOptions(parent)
         "No taint (technical term for addons interfering with Blizzard's UI code).",
         "No Lua errors.",
         "No UI lockups.",
-        "Can sort when groups are kept together.",
+        "Can sort grouped raid frames.",
+        "Can sort frames from other addons.",
     })
 
     anchor = BuildDottedList(panel, anchor, "Cons: ", {
         "May break with Blizzard patches.",
-        "May not work well with other addons that expect the traditional method.",
+        "May not work well with other addons and WeakAuras that expect the traditional method.",
     })
 
     local traditional = CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
@@ -84,15 +85,15 @@ function fsBuilder:BuildSortingMethodOptions(parent)
     end
 
     anchor = BuildDottedList(panel, anchor, "Pros: ", {
-        "Probably more reliable as it leverages Blizzard's internal sorting methods.",
-        "If Blizzard were to resolve their UI issues, this would likely become the recommended mode.",
+        "Probably more stable/reliable as it leverages Blizzard's internal sorting methods.",
     })
 
     anchor = BuildDottedList(panel, anchor, "Cons: ", {
         "Will cause Lua errors, this is normal and can be ignored in most cases.",
         "BugSack will report the occasional ADDON_ACTION_BLOCKED error from FrameSort.",
         "May sporadically lockup certain parts of the UI.",
-        "Can't sort when groups are kept together.",
+        "Can't sort grouped raid frames.",
+        "Can't sort frames from other addons.",
     })
 
     local reloadReminder = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
