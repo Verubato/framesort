@@ -191,17 +191,31 @@ local function SortPartyPets(provider, sortedPlayerUnits, playerFrames, petFrame
     if provider:IsPartyHorizontalLayout() then
         local leftPlayer = fsEnumerable
             :From(playerFrames)
+            :Where(function(x)
+                return x:IsVisible()
+            end)
             :OrderBy(function(x, y)
                 return fsCompare:CompareBottomLeftFuzzy(x, y)
             end)
             :First()
 
+        if not leftPlayer then
+            return sorted
+        end
+
         local leftPet = fsEnumerable
             :From(petFrames)
+            :Where(function(x)
+                return x:IsVisible()
+            end)
             :OrderBy(function(x, y)
                 return fsCompare:CompareBottomLeftFuzzy(x, y)
             end)
             :First()
+
+        if not leftPet then
+            return sorted
+        end
 
         local xDelta = leftPlayer:GetLeft() - leftPet:GetLeft()
 
@@ -212,17 +226,31 @@ local function SortPartyPets(provider, sortedPlayerUnits, playerFrames, petFrame
     else
         local bottomPlayer = fsEnumerable
             :From(playerFrames)
+            :Where(function(x)
+                return x:IsVisible()
+            end)
             :OrderBy(function(x, y)
                 return fsCompare:CompareBottomLeftFuzzy(x, y)
             end)
             :First()
 
+        if not bottomPlayer then
+            return sorted
+        end
+
         local topPet = fsEnumerable
             :From(petFrames)
+            :Where(function(x)
+                return x:IsVisible()
+            end)
             :OrderBy(function(x, y)
                 return fsCompare:CompareTopLeftFuzzy(x, y)
             end)
             :First()
+
+        if not topPet then
+            return sorted
+        end
 
         local yDelta = bottomPlayer:GetBottom() - topPet:GetTop()
         if yDelta ~= 0 then
