@@ -1,7 +1,6 @@
 ---@class FrameProvider
 ---@field Name fun(self: table): string Returns the display name for this provider.
 ---@field Enabled fun(self: table): boolean Whether the provider is enabled.
----@field Priority fun(self: table): number A lower number = higher priority.
 ---@field PartyFramesEnabled fun(self: table): boolean Whether party frames are enabled.
 ---@field RaidFramesEnabled fun(self: table): boolean Whether raid frames are enabled.
 ---@field EnemyArenaFramesEnabled fun(self: table): boolean Whether enemy arena frames are enabled.

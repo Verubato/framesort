@@ -3,8 +3,8 @@ local fsFrame = addon.Frame
 
 local M = {}
 
-addon.FrameProviders.GladiusEx = M
-table.insert(addon.FrameProviders.All, M)
+fsFrame.Providers.GladiusEx = M
+table.insert(fsFrame.Providers.All, M)
 
 local function GetUnit(frame)
     return frame.unit
@@ -12,10 +12,6 @@ end
 
 function M:Name()
     return "GladiusEx"
-end
-
-function M:Priority()
-    return 1
 end
 
 function M:Enabled()

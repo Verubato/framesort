@@ -1,5 +1,4 @@
 local addonName, addon = ...
-local fsFrame = addon.Frame
 local fsEnumerable = addon.Enumerable
 local M = {}
 addon.Health = M
@@ -34,7 +33,7 @@ local function SortingFunctionsTampered()
 end
 
 local function ConflictingAddons()
-    if not addon.FrameProviders.Blizzard:Enabled() then
+    if not addon.Frame.Providers.Blizzard:Enabled() then
         return false
     end
 
@@ -71,7 +70,7 @@ local function ConflictingAddons()
 end
 
 local function SupportsGroups()
-    return addon.Options.SortingMethod.TaintlessEnabled or not addon.FrameProviders.Blizzard:IsRaidGrouped()
+    return addon.Options.SortingMethod.TaintlessEnabled or not addon.Frame.Providers.Blizzard:IsRaidGrouped()
 end
 
 local function CanSeeFrames()
@@ -79,10 +78,23 @@ local function CanSeeFrames()
         return true
     end
 
-    local party = fsFrame:PartyFrames()
-    local raid = fsFrame:RaidFrames()
+    for _, provider in pairs(addon.Frame.Providers:Enabled()) do
+        if provider:PartyFramesEnabled() then
+            local party = provider:PartyFrames()
+            if #party > 0 then
+                return true
+            end
+        end
 
-    return #party > 0 or #raid > 0
+        if provider:RaidFramesEnabled() then
+            local raid = provider:RaidFrames()
+            if #raid > 0 then
+                return true
+            end
+        end
+    end
+
+    return false
 end
 
 ---Returns true if the environment/settings is in a good state, otherwise false.
@@ -90,12 +102,12 @@ end
 function M:IsHealthy()
     local results = {}
 
-    assert(#addon.FrameProviders.All > 0)
+    assert(#addon.Frame.Providers.All > 0)
 
-    local addonsString = addon.FrameProviders.All[1]:Name()
+    local addonsString = addon.Frame.Providers.All[1]:Name()
 
-    for i = 2, #addon.FrameProviders.All do
-        local provider = addon.FrameProviders.All[i]
+    for i = 2, #addon.Frame.Providers.All do
+        local provider = addon.Frame.Providers.All[i]
         addonsString = addonsString .. ", " .. provider:Name()
     end
 
@@ -105,9 +117,9 @@ function M:IsHealthy()
         Help = "FrameSort currently supports frames from these addons: " .. addonsString,
     }
 
-    if addon.FrameProviders.Blizzard:Enabled() then
+    if addon.Frame.Providers.Blizzard:Enabled() then
         results[#results + 1] = {
-            Passed = addon.FrameProviders.Blizzard:IsUsingRaidStyleFrames(),
+            Passed = addon.Frame.Providers.Blizzard:IsUsingRaidStyleFrames(),
             Description = "Using Raid-Style Party Frames",
             Help = "Please enable 'Use Raid-Style Party Frames' in the Blizzard settings",
         }

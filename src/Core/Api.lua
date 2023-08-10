@@ -1,7 +1,7 @@
 local _, addon = ...
-local fsFrame = addon.Frame
 local fsEnumerable = addon.Enumerable
 local fsCompare = addon.Compare
+local blizzard = addon.Frame.Providers.Blizzard
 
 local Api = {
     v1 = {
@@ -55,36 +55,37 @@ function Api.v1.Sorting:RegisterPostSortCallback(callback)
     addon.Sorting:RegisterPostSortCallback(callback)
 end
 
----Returns a collection of party frames ordered by their visual representation.
+---Returns a collection of Blizzard party frames ordered by their visual representation.
 function Api.v1.Sorting:GetPartyFrames()
-    local frames = fsFrame:PartyFrames()
+    local frames = blizzard:PartyFrames()
     return VisualOrder(frames)
 end
 
----Returns a collection of raid frames ordered by their visual representation.
+---Returns a collection of Blizzard raid frames ordered by their visual representation.
 function Api.v1.Sorting:GetRaidFrames()
-    if not fsFrame:IsRaidGrouped() then
-        local frames = fsFrame:RaidFrames()
+    if not blizzard:IsRaidGrouped() then
+        local frames = blizzard:RaidFrames()
         return VisualOrder(frames)
     end
 
     local all = fsEnumerable
-        :From(fsFrame:RaidGroups())
+        :From(blizzard:RaidGroups())
         :Map(function(group)
-            return fsFrame:RaidGroupMembers(group)
+            return blizzard:RaidGroupMembers(group)
         end)
         :Flatten()
 
     return VisualOrder(all)
 end
 
----Returns a collection all frames (from both party and raid).
+---Returns party frames if there are any, otherwise raid frames.
 function Api.v1.Sorting:GetFrames()
-    local party = fsFrame:PartyFrames()
-    local raid = fsFrame:RaidFrames()
-    local all = fsEnumerable:From(party):Concat(raid)
+    local party = Api.v1.Sorting:GetPartyFrames()
+    if #party > 0 then
+        return party
+    end
 
-    return VisualOrder(all)
+    return Api.v1.Sorting:GetRaidFrames()
 end
 
 ---Gets the player sort mode.
