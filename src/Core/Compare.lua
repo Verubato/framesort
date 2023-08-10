@@ -193,6 +193,16 @@ end
 ---@param preSortedUnits table?
 ---@return boolean
 function M:Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse, preSortedUnits)
+    -- if not in a group, we might be in test mode
+    if IsInGroup() then
+        if not UnitExists(leftToken) then
+            return false
+        end
+        if not UnitExists(rightToken) then
+            return true
+        end
+    end
+
     if playerSortMode and playerSortMode ~= "" then
         if leftToken == "player" or UnitIsUnit(leftToken, "player") then
             if playerSortMode == addon.PlayerSortMode.Hidden then
