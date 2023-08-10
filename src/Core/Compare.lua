@@ -11,6 +11,77 @@ local function EmptyCompare(x, y)
     return x < y
 end
 
+function CompareAlphabetical(leftToken, rightToken)
+    local name1, name2 = UnitName(leftToken), UnitName(rightToken)
+    if name1 and name2 then
+        return name1 < name2
+    elseif name1 or name2 then
+        return name1
+    end
+
+    return leftToken < rightToken
+end
+
+local function CompareGroup(leftToken, rightToken)
+    local leftStr = string.match(leftToken, "%d+")
+    local rightStr = string.match(rightToken, "%d+")
+
+    if not leftStr or not rightStr then
+        return leftToken < rightToken
+    end
+
+    local leftNumber = tonumber(leftStr)
+    local rightNumber = tonumber(rightStr)
+
+    return leftNumber < rightNumber
+end
+
+local function CompareRole(leftToken, rightToken)
+    local isArena = string.match(leftToken, "arena")
+    local leftRole, rightRole = nil, nil
+
+    if isArena then
+        local leftStr = string.match(leftToken, "%d+")
+        local rightStr = string.match(rightToken, "%d+")
+
+        if not leftStr or not rightStr then
+            return leftToken < rightToken
+        end
+
+        local leftNumber = tonumber(leftStr)
+        local rightNumber = tonumber(rightStr)
+        local leftSpecId = GetArenaOpponentSpec(leftNumber)
+        local rightSpecId = GetArenaOpponentSpec(rightNumber)
+
+        if leftSpecId and rightSpecId then
+            _, _, _, _, leftRole, _, _ = GetSpecializationInfoByID(leftSpecId)
+            _, _, _, _, rightRole, _, _ = GetSpecializationInfoByID(rightSpecId)
+        end
+    else
+        local leftId, rightId = UnitInRaid(leftToken), UnitInRaid(rightToken)
+
+        if leftId then
+            leftRole = select(10, GetRaidRosterInfo(leftId))
+        end
+
+        if rightId then
+            rightRole = select(10, GetRaidRosterInfo(rightId))
+        end
+
+        leftRole = leftRole or UnitGroupRolesAssigned(leftToken)
+        rightRole = rightRole or UnitGroupRolesAssigned(rightToken)
+    end
+
+    if leftRole and rightRole then
+        local leftValue, rightValue = roleValues[leftRole], roleValues[rightRole]
+        if leftValue ~= rightValue then
+            return leftValue < rightValue
+        end
+    end
+
+    return leftToken < rightToken
+end
+
 ---Returns true if the specified token is ordered after the mid point.
 ---@param token string
 ---@param sortedUnits table
@@ -153,11 +224,11 @@ function M:Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse
     end
 
     if groupSortMode == addon.GroupSortMode.Group then
-        return CRFSort_Group(leftToken, rightToken)
+        return CompareGroup(leftToken, rightToken)
     elseif groupSortMode == addon.GroupSortMode.Role then
-        return CRFSort_Role(leftToken, rightToken)
+        return CompareRole(leftToken, rightToken)
     elseif groupSortMode == addon.GroupSortMode.Alphabetical then
-        return CRFSort_Alphabetical(leftToken, rightToken)
+        return CompareAlphabetical(leftToken, rightToken)
     end
 
     return leftToken < rightToken
@@ -176,33 +247,14 @@ function M:EnemyCompare(leftToken, rightToken, groupSortMode, reverse)
         rightToken = tmp
     end
 
-    local leftStr = string.match(leftToken, "%d+")
-    local rightStr = string.match(rightToken, "%d+")
-
-    if not leftStr or not rightStr then
-        return leftToken < rightToken
-    end
-
-    local leftNumber = tonumber(leftStr)
-    local rightNumber = tonumber(rightStr)
-
     if groupSortMode == addon.GroupSortMode.Group then
-        return leftNumber < rightNumber
+        return CompareGroup(leftToken, rightToken)
     end
 
     local inInstance, instanceType = IsInInstance()
 
     if groupSortMode == addon.GroupSortMode.Role and inInstance and instanceType == "arena" and WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        local leftSpecId = GetArenaOpponentSpec(leftNumber)
-        local rightSpecId = GetArenaOpponentSpec(rightNumber)
-
-        if leftSpecId and rightSpecId then
-            local _, _, _, _, leftRole, _, _ = GetSpecializationInfoByID(leftSpecId)
-            local _, _, _, _, rightRole, _, _ = GetSpecializationInfoByID(rightSpecId)
-            local leftValue, rightValue = roleValues[leftRole], roleValues[rightRole]
-
-            return leftValue < rightValue
-        end
+        return CompareRole(leftToken, rightToken)
     end
 
     return leftToken < rightToken
