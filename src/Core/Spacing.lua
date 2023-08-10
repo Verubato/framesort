@@ -319,6 +319,9 @@ local function ApplyPartySpacing()
     if blizzardFrames:IsPartyHorizontalLayout() then
         local left = fsEnumerable
             :From(players)
+            :Where(function(x)
+                return x:IsVisible()
+            end)
             :OrderBy(function(x, y)
                 return fsCompare:CompareBottomLeftFuzzy(x, y)
             end)
@@ -332,6 +335,9 @@ local function ApplyPartySpacing()
     else
         local above = fsEnumerable
             :From(players)
+            :Where(function(x)
+                return x:IsVisible()
+            end)
             :OrderBy(function(x, y)
                 return fsCompare:CompareBottomLeftFuzzy(x, y)
             end)

@@ -173,8 +173,8 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
             end
 
             options.PlayerSortMode = sender:GetChecked() and playerModes[sender] or ""
-            fsSort:TrySort()
             fsHide:ShowHidePlayer()
+            fsSort:TrySort()
         end
 
         for chkbox, _ in pairs(playerModes) do
