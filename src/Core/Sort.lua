@@ -121,18 +121,23 @@ local function SortPetUnits(playerUnits, petUnits)
 end
 
 ---Sorts raid frames.
+---@param provider FrameProvider
 ---@return boolean sorted true if frames were sorted, otherwise false.
-local function SortRaid()
+local function SortRaid(provider)
     local sorted = false
 
-    if fsFrame:IsRaidGrouped() then
-        local groups = fsFrame:RaidGroups()
+    local getUnit = function(frame)
+        return provider:GetUnit(frame)
+    end
+
+    if provider:IsRaidGrouped() then
+        local groups = provider:RaidGroups()
         if #groups == 0 then
             return false
         end
 
         for _, group in ipairs(groups) do
-            local frames, getUnit = fsFrame:RaidGroupMembers(group)
+            local frames = provider:RaidGroupMembers(group)
             local units = fsEnumerable:From(frames):Map(getUnit):ToTable()
             local sortFunction = fsCompare:SortFunction(units)
 
@@ -146,15 +151,15 @@ local function SortRaid()
         return sorted
     end
 
-    local frames, getUnit = fsFrame:RaidFrames()
+    local frames = provider:RaidFrames()
     local players = fsEnumerable
         :From(frames)
         :Where(function(frame)
-            local unit = getUnit(frame)
+            local unit = provider:GetUnit(frame)
             -- a unit can be both a player and a pet
             -- e.g. when occupying a vehicle
             -- so we want to filter out the pets
-            return UnitIsPlayer(unit) and not fsUnit:IsPet(unit)
+            return unit and UnitIsPlayer(unit) and not fsUnit:IsPet(unit)
         end)
         :ToTable()
 
@@ -168,7 +173,10 @@ end
 
 ---Sorts party pet frames.
 ---@return boolean sorted true if frames were sorted, otherwise false.
-local function SortPartyPets(sortedPlayerUnits, playerFrames, petFrames, getUnit)
+local function SortPartyPets(provider, sortedPlayerUnits, playerFrames, petFrames)
+    local getUnit = function(frame)
+        return provider:GetUnit(frame)
+    end
     local petUnits = fsEnumerable:From(petFrames):Map(getUnit):ToTable()
     local sortedPetUnits = SortPetUnits(sortedPlayerUnits, petUnits)
     local sorted = Sort("Party-Pets", petFrames, addon.LayoutType.Chain, sortedPetUnits, getUnit)
@@ -180,7 +188,7 @@ local function SortPartyPets(sortedPlayerUnits, playerFrames, petFrames, getUnit
 
     -- next move the frame chain as a group beneath the player frames
     local rootPet = chain.Value
-    if fsFrame:IsPartyHorizontalLayout() then
+    if provider:IsPartyHorizontalLayout() then
         local leftPlayer = fsEnumerable
             :From(playerFrames)
             :OrderBy(function(x, y)
@@ -227,14 +235,20 @@ local function SortPartyPets(sortedPlayerUnits, playerFrames, petFrames, getUnit
 end
 
 ---Sorts party frames.
+---@param provider FrameProvider
 ---@return boolean sorted true if frames were sorted, otherwise false.
-local function SortParty()
+local function SortParty(provider)
     local sortedPlayers = false
-    local frames, getUnit = fsFrame:PartyFrames()
+    local frames = provider:PartyFrames()
+
+    local getUnit = function(frame)
+        return provider:GetUnit(frame)
+    end
+
     local players = fsEnumerable
         :From(frames)
         :Where(function(frame)
-            local unit = getUnit(frame)
+            local unit = provider:GetUnit(frame)
 
             if not unit then
                 return false
@@ -263,31 +277,35 @@ local function SortParty()
 
     sortedPlayers = Sort("Party-Players", players, addon.LayoutType.Chain, playerUnits, getUnit)
 
-    if not fsFrame:ShowPartyPets() then
+    if not provider:ShowPartyPets() then
         return sortedPlayers
     end
 
     local pets = fsEnumerable
         :From(frames)
         :Where(function(frame)
-            local unit = getUnit(frame)
+            local unit = provider:GetUnit(frame)
             return unit and fsUnit:IsPet(unit)
         end)
         :ToTable()
 
-    local sortedPets = SortPartyPets(playerUnits, players, pets, getUnit)
+    local sortedPets = SortPartyPets(provider, playerUnits, players, pets)
     return sortedPlayers or sortedPets
 end
 
 ---Sorts enemy arena frames.
+---@param provider FrameProvider
 ---@return boolean sorted true if frames were sorted, otherwise false.
-local function SortEnemyArena()
+local function SortEnemyArena(provider)
     local sortFunction = fsCompare:EnemySortFunction()
-    local frames, getUnit = fsFrame:EnemyArenaFrames()
+    local getUnit = function(frame)
+        return provider:GetUnit(frame)
+    end
+    local frames = provider:EnemyArenaFrames()
     local players = fsEnumerable
         :From(frames)
         :Where(function(frame)
-            local unit = getUnit(frame)
+            local unit = provider:GetUnit(frame)
 
             return unit and not fsUnit:IsPet(unit)
         end)
@@ -301,8 +319,19 @@ end
 ---Attempts to sort Blizzard frames using the traditional method.
 ---@return boolean sorted true if sorted, otherwise false.
 local function TrySortTraditional()
-    if fsFrame:IsRaidGrouped() then
+    local blizzard = addon.Frame.Providers.Blizzard
+
+    if not blizzard:Enabled() then
+        return false
+    end
+
+    if blizzard:IsRaidGrouped() then
         fsLog:Warning("Cannot perform traditional sorting when the 'Keep Groups Together' setting is enabled.")
+        return false
+    end
+
+    local enabled, _, _, _ = fsCompare:FriendlySortMode()
+    if not enabled then
         return false
     end
 
@@ -310,17 +339,17 @@ local function TrySortTraditional()
     local sortFunction = fsCompare:SortFunction()
 
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        if addon.FrameProviders.Blizzard:RaidFramesEnabled() then
+        if blizzard:RaidFramesEnabled() then
             CompactRaidFrameContainer:SetFlowSortFunction(sortFunction)
             sorted = true
         end
 
-        if addon.FrameProviders.Blizzard:PartyFramesEnabled() then
+        if blizzard:PartyFramesEnabled() then
             CompactPartyFrame:SetFlowSortFunction(sortFunction)
             sorted = sorted or true
         end
     else
-        if addon.FrameProviders.Blizzard:RaidFramesEnabled() then
+        if blizzard:RaidFramesEnabled() then
             CompactRaidFrameContainer_SetFlowSortFunction(CompactRaidFrameContainer, sortFunction)
             sorted = true
         end
@@ -332,10 +361,34 @@ end
 ---Attempts to sort frames using the taintless method.
 ---@return boolean sorted true if sorted, otherwise false.
 local function TrySortTaintless()
-    local sortedParty = SortParty()
-    local sortedRaid = SortRaid()
+    local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
+    local enemyEnabled, _, _ = fsCompare:EnemySortMode()
 
-    return sortedParty or sortedRaid
+    if not friendlyEnabled and not enemyEnabled then
+        return false
+    end
+
+    local sorted = false
+    for _, provider in pairs(addon.Frame.Providers:Enabled()) do
+        if friendlyEnabled then
+            if provider:PartyFramesEnabled() then
+                local sortedParty = SortParty(provider)
+                sorted = sorted or sortedParty
+            end
+
+            if provider:RaidFramesEnabled() then
+                local sortedRaid = SortRaid(provider)
+                sorted = sorted or sortedRaid
+            end
+        end
+
+        if enemyEnabled and WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+            local arenaSorted = SortEnemyArena(provider)
+            sorted = sorted or arenaSorted
+        end
+    end
+
+    return sorted
 end
 
 ---Listens for events where we should perform a sort.
@@ -376,22 +429,11 @@ function M:TrySort()
         end
     end
 
-    local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
-    local enemyEnabled, _, _ = fsCompare:EnemySortMode()
-    local sorted = false
-
-    if friendlyEnabled then
-        if addon.Options.SortingMethod.TaintlessEnabled then
-            sorted = TrySortTaintless()
-        elseif addon.FrameProviders.Blizzard:Enabled() then
-            sorted = TrySortTraditional()
-        end
+    if addon.Options.SortingMethod.TraditionalEnabled then
+        return TrySortTraditional()
     end
 
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and enemyEnabled then
-        local arenaSorted = SortEnemyArena()
-        sorted = sorted or arenaSorted
-    end
+    local sorted = TrySortTaintless()
 
     if sorted then
         InvokeCallbacks()

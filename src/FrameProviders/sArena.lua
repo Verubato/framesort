@@ -2,8 +2,8 @@ local _, addon = ...
 local fsFrame = addon.Frame
 local M = {}
 
-addon.FrameProviders.sArena = M
-table.insert(addon.FrameProviders.All, M)
+fsFrame.Providers.sArena = M
+table.insert(fsFrame.Providers.All, M)
 
 local function GetUnit(frame)
     return frame.unit
@@ -11,10 +11,6 @@ end
 
 function M:Name()
     return "sArena"
-end
-
-function M:Priority()
-    return 1
 end
 
 function M:Enabled()

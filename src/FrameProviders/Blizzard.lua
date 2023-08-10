@@ -1,10 +1,11 @@
 local _, addon = ...
+local fsFrame = addon.Frame
 local fsEnumerable = addon.Enumerable
 
 local M = {}
 
-addon.FrameProviders.Blizzard = M
-table.insert(addon.FrameProviders.All, M)
+fsFrame.Providers.Blizzard = M
+table.insert(fsFrame.Providers.All, M)
 
 local function IsValidUnitFrame(frame)
     if not frame then
@@ -84,11 +85,6 @@ end
 
 function M:Name()
     return "Blizzard"
-end
-
-function M:Priority()
-    -- lower priority than other frame addons
-    return 9
 end
 
 function M:Enabled()

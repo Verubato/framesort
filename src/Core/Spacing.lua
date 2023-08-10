@@ -2,7 +2,7 @@ local _, addon = ...
 local fsUnit = addon.Unit
 local fsSort = addon.Sorting
 ---@type FrameProvider
-local blizzardFrames = addon.FrameProviders.Blizzard
+local blizzardFrames = addon.Frame.Providers.Blizzard
 local fsFrame = addon.Frame
 local fsCompare = addon.Compare
 local fsMath = addon.Math

@@ -14,8 +14,8 @@
     <Script file="Core\Compare.lua"/>
     <Script file="Core\Sort.lua"/>
     <Script file="Core\Spacing.lua"/>
-    <Script file="Core\Macro.lua"/>
     <Script file="Core\Target.lua"/>
+    <Script file="Core\Macro.lua"/>
     <Script file="Core\HidePlayer.lua"/>
     <Script file="Core\Health.lua"/>
     <Script file="Core\Api.lua"/>

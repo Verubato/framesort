@@ -1,267 +1,41 @@
 local _, addon = ...
 local fsEnumerable = addon.Enumerable
-local fsUnit = addon.Unit
-local M = {}
-
-addon.Frame = M
-addon.FrameProviders = {
-    All = {},
+local M = {
+    Providers = {
+        All = {},
+    },
 }
 
-local function EmptyUnit(_)
-    return "none"
-end
+addon.Frame = M
 
-local function PartyFramesProvider()
+function M.Providers:Enabled()
     return fsEnumerable
-        :From(addon.FrameProviders.All)
-        :OrderBy(function(x, y)
-            return x:Priority() <= y:Priority()
+        :From(M.Providers.All)
+        :Where(function(provider)
+            return provider:Enabled()
         end)
-        :First(function(provider)
-            return provider:Enabled() and provider:PartyFramesEnabled()
-        end)
+        :ToTable()
 end
 
-local function RaidFramesProvider()
-    return fsEnumerable
-        :From(addon.FrameProviders.All)
-        :OrderBy(function(x, y)
-            return x:Priority() < y:Priority()
-        end)
-        :First(function(provider)
-            return provider:Enabled() and provider:RaidFramesEnabled()
-        end)
-end
-
-local function EnemyArenaFramesProvider()
-    return fsEnumerable
-        :From(addon.FrameProviders.All)
-        :OrderBy(function(x, y)
-            return x:Priority() < y:Priority()
-        end)
-        :First(function(provider)
-            return provider:Enabled() and provider:EnemyArenaFramesEnabled()
-        end)
-end
-
----Returns the set of party frames.
----@return table[] frames, fun(frame: table): string a function to extract the unit token from a given frame.
-function M:PartyFrames()
-    local provider = PartyFramesProvider()
-
-    if not provider then
-        return {}, EmptyUnit
-    end
-
-    return provider:PartyFrames(), function(x)
-        return provider:GetUnit(x)
-    end
-end
-
----Returns the set of non-grouped raid frames.
----@return table[] frames, fun(frame: table): string a function to extract the unit token from a given frame.
-function M:RaidFrames()
-    local provider = RaidFramesProvider()
-
-    if not provider then
-        return {}, EmptyUnit
-    end
-
-    return provider:RaidFrames(), function(x)
-        return provider:GetUnit(x)
-    end
-end
-
----Returns the set of member frames within a raid group frame.
----@return table[] frames, fun(frame: table): string a function to extract the unit token from a given frame.
-function M:RaidGroupMembers(group)
-    local provider = RaidFramesProvider()
-
-    if not provider then
-        return {}, EmptyUnit
-    end
-
-    return provider:RaidGroupMembers(group), function(x)
-        return provider:GetUnit(x)
-    end
-end
-
----Returns the set of raid frame group frames.
----@return table[] groups
-function M:RaidGroups()
-    local provider = RaidFramesProvider()
-
-    if not provider then
+---Returns all raid frames (including grouped members).
+---@param provider FrameProvider
+---@return table[]
+function M:AllRaidFrames(provider)
+    if not provider:RaidFramesEnabled() then
         return {}
     end
 
-    return provider:RaidGroups()
-end
-
----Returns the set of enemy arena frames.
----@return table[] players, fun(frame: table): string
-function M:EnemyArenaFrames()
-    local provider = EnemyArenaFramesProvider()
-
-    if not provider then
-        return {}, EmptyUnit
+    if not provider:IsRaidGrouped() then
+        return provider:RaidFrames()
     end
 
-    return provider:EnemyArenaFrames(), function(x)
-        return provider:GetUnit(x)
-    end
-end
-
----Returns the player raid frame.
----@return table? playerFrame
-function M:PlayerRaidFrame()
-    local isPlayer = function(frame, getUnit)
-        local unit = getUnit(frame)
-        -- a player can have more than one frame if they occupy a vehicle
-        -- as both the player and vehicle pet frame are shown
-        return (unit == "player" or UnitIsUnit(unit, "player")) and not fsUnit:IsPet(unit)
-    end
-
-    local party, partyGetUnit = M:PartyFrames()
-    local found = fsEnumerable:From(party):First(function(frame)
-        return isPlayer(frame, partyGetUnit)
-    end)
-
-    if found then
-        return found
-    end
-
-    if M:IsRaidGrouped() then
-        local groups = M:RaidGroups()
-        for _, group in ipairs(groups) do
-            local members, raidGetUnit = M:RaidGroupMembers(group)
-            found = fsEnumerable:From(members):First(function(frame)
-                return isPlayer(frame, raidGetUnit)
-            end)
-
-            if found then
-                return found
-            end
-        end
-    else
-        local raid, raidGetUnit = M:RaidFrames()
-        found = fsEnumerable:From(raid):First(function(frame)
-            return isPlayer(frame, raidGetUnit)
+    return fsEnumerable
+        :From(provider:RaidGroups())
+        :Map(function(group)
+            return provider:RaidGroupMembers(group)
         end)
-
-        if found then
-            return found
-        end
-    end
-
-    return nil
-end
-
----Returns both party and raid frames.
----@return FrameWithUnit[]
-function M:AllFriendlyFrames()
-    local party, partyGetUnit = M:PartyFrames()
-    local raid, raidGetUnit = M:RaidFrames()
-    local groups = M:RaidGroups()
-
-    local all = fsEnumerable:From(party):Map(function(frame)
-        return {
-            Frame = frame,
-            Unit = partyGetUnit(frame),
-        }
-    end)
-
-    if M:IsRaidGrouped() then
-        local groupMembersWithUnit = fsEnumerable
-            :From(groups)
-            :Map(function(group)
-                local members, groupGetUnit = M:RaidGroupMembers(group)
-                return fsEnumerable
-                    :From(members)
-                    :Map(function(frame)
-                        return {
-                            Frame = frame,
-                            Unit = groupGetUnit(frame),
-                        }
-                    end)
-                    :ToTable()
-            end)
-            :Flatten()
-
-        all = all:Concat(groupMembersWithUnit)
-    else
-        local raidWithUnit = fsEnumerable:From(raid):Map(function(frame)
-            return {
-                Frame = frame,
-                Unit = raidGetUnit(frame),
-            }
-        end)
-
-        all = all:Concat(raidWithUnit)
-    end
-
-    return all:ToTable()
-end
-
----Returns true if pets are shown in party frames.
----@return boolean
-function M:ShowPartyPets()
-    local provider = PartyFramesProvider()
-
-    if not provider then
-        return false
-    end
-
-    return provider:ShowPartyPets()
-end
-
----Returns true if pets are shown in raid frames.
----@return boolean
-function M:ShowRaidPets()
-    local provider = RaidFramesProvider()
-
-    if not provider then
-        return false
-    end
-
-    return provider:ShowRaidPets()
-end
-
----Returns true if frames are grouped.
----@return boolean
-function M:IsRaidGrouped()
-    local provider = RaidFramesProvider()
-
-    if not provider then
-        return false
-    end
-
-    return provider:IsRaidGrouped()
-end
-
----Returns true if the frames are using horizontal layout.
----@return boolean
-function M:IsPartyHorizontalLayout()
-    local provider = PartyFramesProvider()
-
-    if not provider then
-        return false
-    end
-
-    return provider:IsPartyHorizontalLayout()
-end
-
----Returns true if the frames are using horizontal layout.
----@return boolean
-function M:IsRaidHorizontalLayout()
-    local provider = RaidFramesProvider()
-
-    if not provider then
-        return false
-    end
-
-    return provider:IsRaidHorizontalLayout()
+        :Flatten()
+        :ToTable()
 end
 
 ---Returns the frames in order of their relative positioning to each other.

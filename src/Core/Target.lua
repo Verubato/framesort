@@ -11,6 +11,8 @@ local targetFramesButtons = {}
 local targetEnemyCount = 3
 local targetEnemyButtons = {}
 local targetBottomFrameButton = nil
+local M = {}
+addon.Target = M
 
 local function CanUpdate()
     if InCombatLockdown() then
@@ -21,45 +23,19 @@ local function CanUpdate()
     return true
 end
 
-local function FriendlyTargets()
-    local frames = fsFrame:AllFriendlyFrames()
-
-    if #frames == 0 then
-        -- fallback to retrieve the group units
-        return fsUnit:FriendlyUnits()
+local function GetFrames(provider)
+    local frames = {}
+    if provider:PartyFramesEnabled() then
+        frames = provider:PartyFrames()
+    elseif provider:RaidFramesEnabled() then
+        frames = fsFrame:AllRaidFrames(provider)
     end
 
-    return fsEnumerable
-        :From(frames)
-        :OrderBy(function(x, y)
-            return fsCompare:CompareTopLeftFuzzy(x.Frame, y.Frame)
-        end)
-        :Map(function(x)
-            return x.Unit
-        end)
-        :ToTable()
-end
-
-local function EnemyTargets()
-    local frames, getUnit = fsFrame:EnemyArenaFrames()
-
-    if #frames == 0 then
-        return fsUnit:EnemyUnits()
-    end
-
-    return fsEnumerable
-        :From(frames)
-        :OrderBy(function(x, y)
-            return fsCompare:CompareTopLeftFuzzy(x, y)
-        end)
-        :Map(function(x)
-            return getUnit(x)
-        end)
-        :ToTable()
+    return frames
 end
 
 local function UpdateTargets()
-    local friendlyUnits = FriendlyTargets()
+    local friendlyUnits = M:FriendlyTargets()
 
     -- if units has less than 5 items it's still fine as units[i] will just be nil
     for i, btn in ipairs(targetFramesButtons) do
@@ -70,7 +46,7 @@ local function UpdateTargets()
 
     targetBottomFrameButton:SetAttribute("unit", friendlyUnits[#friendlyUnits] or "none")
 
-    local enemyunits = EnemyTargets()
+    local enemyunits = M:EnemyTargets()
 
     for i, btn in ipairs(targetEnemyButtons) do
         local unit = enemyunits[i]
@@ -87,6 +63,80 @@ local function Run()
     end
 
     UpdateTargets()
+end
+
+function M:FriendlyTargets()
+    -- prefer Blizzard frames
+    local frames = GetFrames(fsFrame.Providers.Blizzard)
+    local frameProvider = fsFrame.Providers.Blizzard
+
+    if #frames == 0 then
+        for _, provider in pairs(fsFrame.Providers:Enabled()) do
+            frames = GetFrames(provider)
+            frameProvider = provider
+
+            if #frames > 0 then
+                break
+            end
+        end
+    end
+
+    if #frames > 0 then
+        return fsEnumerable
+            :From(frames)
+            :OrderBy(function(x, y)
+                return fsCompare:CompareTopLeftFuzzy(x.Frame, y.Frame)
+            end)
+            :Map(function(x)
+                return frameProvider:GetUnit(x)
+            end)
+            :ToTable()
+    end
+
+    -- fallback to party/raid123
+    return fsUnit:FriendlyUnits()
+end
+
+function M:EnemyTargets()
+    -- prefer GladiusEx/sArena
+    local preferred = fsEnumerable
+        :From(fsFrame.Providers:Enabled())
+        :Where(function(provider)
+            return provider ~= fsFrame.Providers.Blizzard and provider:EnemyArenaFramesEnabled()
+        end)
+        :ToTable()
+
+    local frames = {}
+    local frameProvider = nil
+
+    for _, provider in pairs(preferred) do
+        frames = provider:EnemyArenaFrames()
+        frameProvider = provider
+
+        if #frames > 0 then
+            break
+        end
+    end
+
+    if #frames == 0 then
+        frames = GetFrames(fsFrame.Providers.Blizzard)
+        frameProvider = fsFrame.Providers.Blizzard
+    end
+
+    if #frames > 0 then
+        return fsEnumerable
+            :From(frames)
+            :OrderBy(function(x, y)
+                return fsCompare:CompareTopLeftFuzzy(x.Frame, y.Frame)
+            end)
+            :Map(function(x)
+                return frameProvider:GetUnit(x)
+            end)
+            :ToTable()
+    end
+
+    -- fallback to arena123
+    return fsUnit:EnemyUnits()
 end
 
 ---Initialises the targeting frames feature.

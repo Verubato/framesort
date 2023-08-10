@@ -1,10 +1,7 @@
 local _, addon = ...
-local fsUnit = addon.Unit
 local fsSort = addon.Sorting
-local fsEnumerable = addon.Enumerable
 local fsMacro = addon.Macro
-local fsFrame = addon.Frame
-local fsCompare = addon.Compare
+local fsTarget = addon.Target
 local fsLog = addon.Log
 local maxMacros = 138
 local isSelfEditingMacro = false
@@ -21,43 +18,6 @@ local function CanUpdate()
     return true
 end
 
-local function FriendlyTargets()
-    local frames = fsFrame:AllFriendlyFrames()
-
-    if #frames == 0 then
-        -- fallback to retrieve the group units
-        return fsUnit:FriendlyUnits()
-    end
-
-    return fsEnumerable
-        :From(frames)
-        :OrderBy(function(x, y)
-            return fsCompare:CompareTopLeftFuzzy(x.Frame, y.Frame)
-        end)
-        :Map(function(x)
-            return x.Unit
-        end)
-        :ToTable()
-end
-
-local function EnemyTargets()
-    local frames, getUnit = fsFrame:EnemyArenaFrames()
-
-    if #frames == 0 then
-        return fsUnit:EnemyUnits()
-    end
-
-    return fsEnumerable
-        :From(frames)
-        :OrderBy(function(x, y)
-            return fsCompare:CompareTopLeftFuzzy(x, y)
-        end)
-        :Map(function(x)
-            return getUnit(x)
-        end)
-        :ToTable()
-end
-
 local function InspectMacro(slot)
     local _, _, body = GetMacroInfo(slot)
 
@@ -65,8 +25,8 @@ local function InspectMacro(slot)
         return false
     end
 
-    local friendlyUnits = FriendlyTargets()
-    local enemyUnits = EnemyTargets()
+    local friendlyUnits = fsTarget:FriendlyTargets()
+    local enemyUnits = fsTarget:EnemyTargets()
     local newBody = fsMacro:GetNewBody(body, friendlyUnits, enemyUnits)
 
     if not newBody then
