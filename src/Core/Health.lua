@@ -34,7 +34,7 @@ end
 
 local function ConflictingAddons()
     if not addon.Frame.Providers.Blizzard:Enabled() then
-        return false
+        return nil
     end
 
     if CompactRaidFrameContainer then
@@ -136,14 +136,14 @@ function M:IsHealthy()
     results[#results + 1] = {
         Passed = conflictingSorter == nil,
         Description = "Blizzard sorting functions not tampered with",
-        Help = string.format("%s may cause conflicts, consider disabling it", conflictingSorter or ""),
+        Help = string.format("\"%s\" may cause conflicts, consider disabling it", conflictingSorter or "(unknown)"),
     }
 
     local conflictingAddon = ConflictingAddons()
     results[#results + 1] = {
         Passed = conflictingAddon == nil,
         Description = "No conflicting addons",
-        Help = string.format("%s may cause conflicts, consider disabling it", conflictingAddon or ""),
+        Help = string.format("\"%s\" may cause conflicts, consider disabling it", conflictingAddon or "(unknown)"),
     }
 
     return fsEnumerable:From(results):All(function(x)
