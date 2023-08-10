@@ -56,6 +56,7 @@ function fsBuilder:BuildSortingMethodOptions(parent)
         "No Lua errors.",
         "No UI lockups.",
         "Can sort grouped raid frames.",
+        "Can sort pet frames.",
         "Can sort frames from other addons.",
     })
 
@@ -93,6 +94,7 @@ function fsBuilder:BuildSortingMethodOptions(parent)
         "BugSack will report the occasional ADDON_ACTION_BLOCKED error from FrameSort.",
         "May sporadically lockup certain parts of the UI.",
         "Can't sort grouped raid frames.",
+        "Can't sort pet frames.",
         "Can't sort frames from other addons.",
     })
 
