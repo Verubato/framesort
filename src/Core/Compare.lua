@@ -174,13 +174,7 @@ end
 ---@return GroupSortMode? groupMode the group sort mode.
 ---@return boolean? reverse whether the sorting is reversed.
 function M:EnemySortMode()
-    local inInstance, instanceType = IsInInstance()
-
-    if inInstance and instanceType == "arena" then
-        return addon.Options.EnemyArena.Enabled, addon.Options.EnemyArena.GroupSortMode, addon.Options.EnemyArena.Reverse
-    end
-
-    return false, nil, nil
+    return addon.Options.EnemyArena.Enabled, addon.Options.EnemyArena.GroupSortMode, addon.Options.EnemyArena.Reverse
 end
 
 ---Returns true if the left token should be ordered before the right token.
