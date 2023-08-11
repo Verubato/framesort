@@ -21,10 +21,6 @@ end
 ---@param provider FrameProvider
 ---@return table[]
 function M:AllRaidFrames(provider)
-    if not provider:RaidFramesEnabled() then
-        return {}
-    end
-
     if not provider:IsRaidGrouped() then
         return provider:RaidFrames()
     end

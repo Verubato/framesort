@@ -21,19 +21,6 @@ function M:Enabled()
     return sArena ~= nil
 end
 
-function M:PartyFramesEnabled()
-    return false
-end
-
-function M:RaidFramesEnabled()
-    return false
-end
-
-function M:EnemyArenaFramesEnabled()
-    -- it seems the main container is always visible, so also check one of the children
-    return sArena and not sArena:IsForbidden() and sArena:IsVisible() and sArenaEnemyFrame1 and sArenaEnemyFrame1:IsVisible()
-end
-
 function M:GetUnit(frame)
     return GetUnit(frame)
 end

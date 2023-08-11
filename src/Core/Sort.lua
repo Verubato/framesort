@@ -268,7 +268,6 @@ end
 local function SortParty(provider)
     local sortedPlayers = false
     local frames = provider:PartyFrames()
-
     local getUnit = function(frame)
         return provider:GetUnit(frame)
     end
@@ -367,17 +366,17 @@ local function TrySortTraditional()
     local sortFunction = fsCompare:SortFunction()
 
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        if blizzard:RaidFramesEnabled() then
+        if CompactRaidFrameContainer and not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
             CompactRaidFrameContainer:SetFlowSortFunction(sortFunction)
             sorted = true
         end
 
-        if blizzard:PartyFramesEnabled() then
+        if CompactPartyFrame and not CompactPartyFrame:IsForbidden() and CompactPartyFrame:IsVisible() then
             CompactPartyFrame:SetFlowSortFunction(sortFunction)
             sorted = sorted or true
         end
     else
-        if blizzard:RaidFramesEnabled() then
+        if CompactRaidFrameContainer and not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
             CompactRaidFrameContainer_SetFlowSortFunction(CompactRaidFrameContainer, sortFunction)
             sorted = true
         end
@@ -399,15 +398,10 @@ local function TrySortTaintless()
     local sorted = false
     for _, provider in pairs(addon.Frame.Providers:Enabled()) do
         if friendlyEnabled then
-            if provider:PartyFramesEnabled() then
-                local sortedParty = SortParty(provider)
-                sorted = sorted or sortedParty
-            end
+            local sortedParty = SortParty(provider)
+            local sortedRaid = SortRaid(provider)
 
-            if provider:RaidFramesEnabled() then
-                local sortedRaid = SortRaid(provider)
-                sorted = sorted or sortedRaid
-            end
+            sorted = sorted or sortedRaid or sortedParty
         end
 
         if enemyEnabled and WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then

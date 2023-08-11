@@ -441,17 +441,9 @@ function M:ApplySpacing()
         return
     end
 
-    if blizzardFrames:PartyFramesEnabled() then
-        ApplyPartySpacing()
-    end
-
-    if blizzardFrames:RaidFramesEnabled() then
-        ApplyRaidSpacing()
-    end
-
-    if blizzardFrames:EnemyArenaFramesEnabled() then
-        ApplyEnemyArenaSpacing()
-    end
+    ApplyPartySpacing()
+    ApplyRaidSpacing()
+    ApplyEnemyArenaSpacing()
 end
 
 local function Run()
