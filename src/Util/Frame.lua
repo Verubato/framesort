@@ -170,3 +170,21 @@ function M:ChildUnitFrames(container, getUnit)
         end)
         :ToTable()
 end
+
+---Returns true if the set of frames are in a horizontal layout.
+---Only works for single row or column layouts, multiple columns will return false.
+function M:IsHorizontalLayout(frames)
+    if #frames == 0 then
+        return false
+    end
+
+    local top = frames[1]:GetTop()
+    for i = 2, #frames do
+        local frame = frames[i]
+        if frame:GetTop() ~= top then
+            return false
+        end
+    end
+
+    return true
+end
