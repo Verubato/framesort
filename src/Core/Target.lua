@@ -24,12 +24,8 @@ local function CanUpdate()
 end
 
 local function GetFrames(provider)
-    local frames = {}
-    if provider:PartyFramesEnabled() then
-        frames = provider:PartyFrames()
-    end
-
-    if #frames == 0 and provider:RaidFramesEnabled() then
+    local frames = provider:PartyFrames()
+    if #frames == 0 then
         frames = fsFrame:AllRaidFrames(provider)
     end
 
@@ -104,7 +100,7 @@ function M:EnemyTargets()
     local preferred = fsEnumerable
         :From(fsFrame.Providers:Enabled())
         :Where(function(provider)
-            return provider ~= fsFrame.Providers.Blizzard and provider:EnemyArenaFramesEnabled()
+            return provider ~= fsFrame.Providers.Blizzard
         end)
         :ToTable()
 

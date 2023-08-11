@@ -1,9 +1,6 @@
 ---@class FrameProvider
 ---@field Name fun(self: table): string Returns the display name for this provider.
 ---@field Enabled fun(self: table): boolean Whether the provider is enabled.
----@field PartyFramesEnabled fun(self: table): boolean Whether party frames are enabled.
----@field RaidFramesEnabled fun(self: table): boolean Whether raid frames are enabled.
----@field EnemyArenaFramesEnabled fun(self: table): boolean Whether enemy arena frames are enabled.
 ---@field GetUnit fun(self: table, frame: table): string? A function that accepts a frame from this provider and returns the unit token.
 ---@field PartyFrames fun(self: table): table[] Returns a collection of party frames.
 ---@field RaidFrames fun(self: table): table[] Returns a collection of raid frames.

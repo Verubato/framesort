@@ -18,18 +18,6 @@ function M:Enabled()
     return GetAddOnEnableState(nil, "GladiusEx") ~= 0
 end
 
-function M:PartyFramesEnabled()
-    return GladiusExPartyFrame and not GladiusExPartyFrame:IsForbidden() and GladiusExPartyFrame:IsVisible()
-end
-
-function M:RaidFramesEnabled()
-    return false
-end
-
-function M:EnemyArenaFramesEnabled()
-    return GladiusExArenaFrame and not GladiusExArenaFrame:IsForbidden() and GladiusExArenaFrame:IsVisible()
-end
-
 function M:GetUnit(frame)
     return GetUnit(frame)
 end

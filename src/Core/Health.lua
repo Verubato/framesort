@@ -79,18 +79,14 @@ local function CanSeeFrames()
     end
 
     for _, provider in pairs(addon.Frame.Providers:Enabled()) do
-        if provider:PartyFramesEnabled() then
-            local party = provider:PartyFrames()
-            if #party > 0 then
-                return true
-            end
+        local party = provider:PartyFrames()
+        if #party > 0 then
+            return true
         end
 
-        if provider:RaidFramesEnabled() then
-            local raid = provider:RaidFrames()
-            if #raid > 0 then
-                return true
-            end
+        local raid = provider:RaidFrames()
+        if #raid > 0 then
+            return true
         end
     end
 
@@ -136,14 +132,14 @@ function M:IsHealthy()
     results[#results + 1] = {
         Passed = conflictingSorter == nil,
         Description = "Blizzard sorting functions not tampered with",
-        Help = string.format("\"%s\" may cause conflicts, consider disabling it", conflictingSorter or "(unknown)"),
+        Help = string.format('"%s" may cause conflicts, consider disabling it', conflictingSorter or "(unknown)"),
     }
 
     local conflictingAddon = ConflictingAddons()
     results[#results + 1] = {
         Passed = conflictingAddon == nil,
         Description = "No conflicting addons",
-        Help = string.format("\"%s\" may cause conflicts, consider disabling it", conflictingAddon or "(unknown)"),
+        Help = string.format('"%s" may cause conflicts, consider disabling it', conflictingAddon or "(unknown)"),
     }
 
     return fsEnumerable:From(results):All(function(x)
