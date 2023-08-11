@@ -53,11 +53,3 @@ end
 function M:IsRaidGrouped()
     return false
 end
-
-function M:IsPartyHorizontalLayout()
-    return false
-end
-
-function M:IsRaidHorizontalLayout()
-    return false
-end

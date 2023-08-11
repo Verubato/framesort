@@ -188,7 +188,7 @@ local function SortPartyPets(provider, sortedPlayerUnits, playerFrames, petFrame
 
     -- next move the frame chain as a group beneath the player frames
     local rootPet = chain.Value
-    if provider:IsPartyHorizontalLayout() then
+    if fsFrame:IsHorizontalLayout(playerFrames) then
         local leftPlayer = fsEnumerable
             :From(playerFrames)
             :Where(function(x)

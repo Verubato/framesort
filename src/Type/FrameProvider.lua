@@ -10,5 +10,3 @@
 ---@field ShowPartyPets fun(self: table): boolean Whether party pets are enabled.
 ---@field ShowRaidPets fun(self: table): boolean Whether raid pets are enabled.
 ---@field IsRaidGrouped fun(self: table): boolean Whether the raid is grouped.
----@field IsPartyHorizontalLayout fun(self: table): boolean Whether the party layout is horizontal.
----@field IsRaidHorizontalLayout fun(self: table): boolean Whether the raid layout is horizontal.
