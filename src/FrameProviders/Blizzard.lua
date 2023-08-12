@@ -1,48 +1,12 @@
 local _, addon = ...
 local fsFrame = addon.Frame
 local fsEnumerable = addon.Enumerable
+local fsUnit = addon.Unit
 local M = {}
 local callbacks = {}
 
 fsFrame.Providers.Blizzard = M
 table.insert(fsFrame.Providers.All, M)
-
-local function IsValidUnitFrame(frame)
-    if not frame then
-        return false
-    end
-
-    if frame:IsForbidden() then
-        return false
-    end
-
-    if frame:GetTop() == nil or frame:GetLeft() == nil then
-        return false
-    end
-
-    if frame.inUse ~= nil and not frame.inUse then
-        return false
-    end
-
-    if frame.frameType and frame.frameType == "target" then
-        -- this frame is invisible when the tain/assist hasn't got anything targeted
-        -- but we still want to include this frame for spacing reasons
-        return true
-    end
-
-    local unit = M:GetUnit(frame)
-
-    if unit == nil then
-        return false
-    end
-
-    -- we may have hidden the player frame, but for other frames we don't want them
-    if unit == "player" or UnitIsUnit(unit, "player") then
-        return true
-    end
-
-    return frame:IsVisible()
-end
 
 local function IsValidGroupFrame(frame)
     if not frame then
@@ -69,7 +33,11 @@ local function GetFrames(container, filter)
         return {}
     end
 
-    filter = filter or IsValidUnitFrame
+    filter = filter or function(frame)
+        return fsFrame:IsValidUnitFrame(frame, function(x)
+            return M:GetUnit(x)
+        end)
+    end
 
     return fsEnumerable
         :From({ container:GetChildren() })
@@ -151,6 +119,37 @@ end
 
 function M:EnemyArenaFrames()
     return GetFrames(CompactArenaFrame)
+end
+
+function M:PlayerRaidFrames()
+    local isPlayer = function(frame)
+        local unit = M:GetUnit(frame)
+        -- a player can have more than one frame if they occupy a vehicle
+        -- as both the player and vehicle pet frame are shown
+        return unit and (unit == "player" or UnitIsUnit(unit, "player")) and not fsUnit:IsPet(unit)
+    end
+
+    local party = GetFrames(CompactPartyFrame, isPlayer)
+    if #party > 0 then
+        return party
+    end
+
+    if M:IsRaidGrouped() then
+        local groups = M:RaidGroups()
+        for _, group in ipairs(groups) do
+            local members = GetFrames(group, isPlayer)
+            if #members > 0 then
+                return members
+            end
+        end
+    else
+        local raid = GetFrames(CompactRaidFrameContainer, isPlayer)
+        if #raid > 0 then
+            return raid
+        end
+    end
+
+    return {}
 end
 
 function M:ShowPartyPets()

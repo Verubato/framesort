@@ -1,6 +1,5 @@
 local _, addon = ...
 local fsFrame = addon.Frame
-local fsEnumerable = addon.Enumerable
 local M = {}
 local callbacks = {}
 local fsPlugin = nil

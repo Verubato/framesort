@@ -147,17 +147,7 @@ function M:IsValidUnitFrame(frame, getUnit)
     end
 
     local unit = getUnit(frame)
-
-    if unit == nil then
-        return false
-    end
-
-    -- we may have hidden the player frame, but for other frames we don't want them
-    if unit == "player" or UnitIsUnit(unit, "player") then
-        return true
-    end
-
-    return frame:IsVisible()
+    return unit ~= nil
 end
 
 ---Returns a collection of unit frames from the specified container.

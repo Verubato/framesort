@@ -1,7 +1,6 @@
 local _, addon = ...
 local fsUnit = addon.Unit
 local fsSort = addon.Sorting
----@type FrameProvider
 local blizzardFrames = addon.Frame.Providers.Blizzard
 local fsFrame = addon.Frame
 local fsCompare = addon.Compare
@@ -319,13 +318,12 @@ local function ApplyPartySpacing()
     if blizzardFrames:IsPartyHorizontalLayout() then
         local left = fsEnumerable
             :From(players)
-            :Where(function(x)
-                return x:IsVisible()
-            end)
             :OrderBy(function(x, y)
                 return fsCompare:CompareBottomLeftFuzzy(x, y)
             end)
-            :First()
+            :First(function(x)
+                return x:IsVisible()
+            end)
 
         if left then
             start = {
@@ -335,13 +333,12 @@ local function ApplyPartySpacing()
     else
         local above = fsEnumerable
             :From(players)
-            :Where(function(x)
-                return x:IsVisible()
-            end)
             :OrderBy(function(x, y)
                 return fsCompare:CompareBottomLeftFuzzy(x, y)
             end)
-            :First()
+            :First(function(x)
+                return x:IsVisible()
+            end)
 
         if above then
             start = {

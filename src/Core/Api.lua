@@ -17,6 +17,7 @@ end
 local function VisualOrder(framesOrFunction)
     return fsEnumerable
         :From(framesOrFunction)
+        :Where(function(x) return x:IsVisible() end)
         :OrderBy(function(x, y)
             return fsCompare:CompareTopLeftFuzzy(x, y)
         end)
