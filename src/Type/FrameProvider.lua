@@ -11,4 +11,4 @@
 ---@field ShowPartyPets fun(self: table): boolean Whether party pets are enabled.
 ---@field ShowRaidPets fun(self: table): boolean Whether raid pets are enabled.
 ---@field IsRaidGrouped fun(self: table): boolean Whether the raid is grouped.
----@field RegisterCallback fun(self: table, callback: fun(provider: FrameProvider): boolean) Registers a callback to be invoked when sorting is required.
+---@field RegisterCallback fun(self: table, callback: fun(provider: FrameProvider)) Registers a callback to be invoked when sorting is required.

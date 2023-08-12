@@ -191,13 +191,12 @@ local function SortPartyPets(provider, sortedPlayerUnits, playerFrames, petFrame
     if fsFrame:IsHorizontalLayout(playerFrames) then
         local leftPlayer = fsEnumerable
             :From(playerFrames)
-            :Where(function(x)
-                return x:IsVisible()
-            end)
             :OrderBy(function(x, y)
                 return fsCompare:CompareBottomLeftFuzzy(x, y)
             end)
-            :First()
+            :First(function(x)
+                return x:IsVisible()
+            end)
 
         if not leftPlayer then
             return sorted
@@ -205,13 +204,12 @@ local function SortPartyPets(provider, sortedPlayerUnits, playerFrames, petFrame
 
         local leftPet = fsEnumerable
             :From(petFrames)
-            :Where(function(x)
-                return x:IsVisible()
-            end)
             :OrderBy(function(x, y)
                 return fsCompare:CompareBottomLeftFuzzy(x, y)
             end)
-            :First()
+            :First(function(x)
+                return x:IsVisible()
+            end)
 
         if not leftPet then
             return sorted
@@ -226,13 +224,12 @@ local function SortPartyPets(provider, sortedPlayerUnits, playerFrames, petFrame
     else
         local bottomPlayer = fsEnumerable
             :From(playerFrames)
-            :Where(function(x)
-                return x:IsVisible()
-            end)
             :OrderBy(function(x, y)
                 return fsCompare:CompareBottomLeftFuzzy(x, y)
             end)
-            :First()
+            :First(function(x)
+                return x:IsVisible()
+            end)
 
         if not bottomPlayer then
             return sorted
@@ -240,13 +237,12 @@ local function SortPartyPets(provider, sortedPlayerUnits, playerFrames, petFrame
 
         local topPet = fsEnumerable
             :From(petFrames)
-            :Where(function(x)
-                return x:IsVisible()
-            end)
             :OrderBy(function(x, y)
                 return fsCompare:CompareTopLeftFuzzy(x, y)
             end)
-            :First()
+            :First(function(x)
+                return x:IsVisible()
+            end)
 
         if not topPet then
             return sorted
@@ -281,6 +277,9 @@ local function SortParty(provider)
                 return false
             end
 
+            -- a unit can be both a player and a pet
+            -- e.g. when occupying a vehicle
+            -- so we want to filter out the pets
             if fsUnit:IsPet(unit) then
                 return false
             end
@@ -290,9 +289,6 @@ local function SortParty(provider)
                 return true
             end
 
-            -- a unit can be both a player and a pet
-            -- e.g. when occupying a vehicle
-            -- so we want to filter out the pets
             return UnitIsPlayer(unit)
         end)
         :ToTable()
@@ -311,6 +307,10 @@ local function SortParty(provider)
     local pets = fsEnumerable
         :From(frames)
         :Where(function(frame)
+            if not frame:IsVisible() then
+                return false
+            end
+
             local unit = provider:GetUnit(frame)
             return unit and fsUnit:IsPet(unit)
         end)
@@ -438,7 +438,9 @@ local function OnProviderRequiresSort(provider)
         sorted = sorted or SortEnemyArena(provider)
     end
 
-    return sorted
+    if sorted then
+        InvokeCallbacks()
+    end
 end
 
 ---Register a callback to invoke after sorting has been performed.

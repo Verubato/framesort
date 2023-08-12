@@ -1,9 +1,7 @@
 local _, addon = ...
-local fsUnit = addon.Unit
-local fsSort = addon.Sorting
 local fsFrame = addon.Frame
+local blizzard = fsFrame.Providers.Blizzard
 local fsCompare = addon.Compare
-local fsEnumerable = addon.Enumerable
 local fsLog = addon.Log
 local M = {}
 addon.HidePlayer = M
@@ -22,50 +20,15 @@ local function CanUpdate()
     return true
 end
 
-function FindPlayer(provider)
-    local isPlayer = function(frame)
-        local unit = provider:GetUnit(frame)
-        -- a player can have more than one frame if they occupy a vehicle
-        -- as both the player and vehicle pet frame are shown
-        return (unit == "player" or UnitIsUnit(unit, "player")) and not fsUnit:IsPet(unit)
+local function UpdatePlayer(player, mode)
+    if player:IsVisible() and mode == addon.PlayerSortMode.Hidden then
+        player:Hide()
+    elseif not player:IsVisible() and mode ~= addon.PlayerSortMode.Hidden then
+        player:Show()
     end
-
-    local party = provider:PartyFrames()
-    local found = fsEnumerable:From(party):First(function(frame)
-        return isPlayer(frame)
-    end)
-
-    if found then
-        return found
-    end
-
-    if provider:IsRaidGrouped() then
-        local groups = provider:RaidGroups()
-        for _, group in ipairs(groups) do
-            local members = provider:RaidGroupMembers(group)
-            found = fsEnumerable:From(members):First(function(frame)
-                return isPlayer(frame)
-            end)
-
-            if found then
-                return found
-            end
-        end
-    else
-        local raid = provider:RaidFrames()
-        found = fsEnumerable:From(raid):First(function(frame)
-            return isPlayer(frame)
-        end)
-
-        if found then
-            return found
-        end
-    end
-
-    return nil
 end
 
-local function Run()
+local function Run(maybePlayer)
     if not CanUpdate() then
         return
     end
@@ -75,18 +38,31 @@ local function Run()
         return
     end
 
-    local found = false
-    for _, provider in pairs(fsFrame.Providers:Enabled()) do
-        local player = FindPlayer(provider)
-
-        if player and not player:IsForbidden() then
-            player:SetShown(mode ~= addon.PlayerSortMode.Hidden)
-            found = true
+    if maybePlayer then
+        local unit = blizzard:GetUnit(maybePlayer)
+        if not unit or not UnitIsUnit("player", unit) then
+            return
         end
+
+        UpdatePlayer(maybePlayer, mode)
+        return
     end
 
-    if not found and IsInGroup() then
+    local frames = blizzard:PlayerRaidFrames()
+
+    if #frames == 0 and IsInGroup() then
         fsLog:Warning("Couldn't find player raid frame.")
+        return
+    end
+
+    for _, player in ipairs(frames) do
+        UpdatePlayer(player, mode)
+    end
+end
+
+local function OnUpdateVisible(frame)
+    if frame then
+        Run(frame)
     end
 end
 
@@ -97,10 +73,6 @@ end
 
 ---Initialises the player show/hide module.
 function addon:InitPlayerHiding()
-    local eventFrame = CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", Run)
-    eventFrame:RegisterEvent(addon.Events.PLAYER_ENTERING_WORLD)
-    eventFrame:RegisterEvent(addon.Events.GROUP_ROSTER_UPDATE)
-    eventFrame:RegisterEvent(addon.Events.PLAYER_REGEN_ENABLED)
-    fsSort:RegisterPostSortCallback(Run)
+    hooksecurefunc("CompactUnitFrame_UpdateVisible", OnUpdateVisible)
+    blizzard:RegisterCallback(Run)
 end
