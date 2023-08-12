@@ -413,20 +413,32 @@ local function TrySortTaintless()
     return sorted
 end
 
----Listens for events where we should perform a sort.
----@param eventName string
-local function OnEvent(_, eventName)
-    -- only attempt to run after combat ends if one is pending
-    if eventName == "PLAYER_REGEN_ENABLED" and not sortPending then
+---Invokes sorting when combat drops if required.
+local function OnCombatEnded()
+    if not sortPending then
         return
     end
 
     M:TrySort()
 end
 
----Event hook on exiting edit mode.
-local function OnEditModeExited()
-    M:TrySort()
+local function OnProviderRequiresSort(provider)
+    local sorted = false
+    local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
+    local enemyEnabled, _, _ = fsCompare:EnemySortMode()
+
+    if friendlyEnabled then
+        local sortedParty = SortParty(provider)
+        local sortedRaid = SortRaid(provider)
+
+        sorted = sortedParty or sortedRaid
+    end
+
+    if enemyEnabled then
+        sorted = sorted or SortEnemyArena(provider)
+    end
+
+    return sorted
 end
 
 ---Register a callback to invoke after sorting has been performed.
@@ -468,15 +480,11 @@ end
 
 ---Initialises the sorting module.
 function addon:InitSorting()
-    local eventFrame = CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", OnEvent)
-    eventFrame:RegisterEvent(addon.Events.PLAYER_REGEN_ENABLED)
-    eventFrame:RegisterEvent(addon.Events.PLAYER_ENTERING_WORLD)
-    eventFrame:RegisterEvent(addon.Events.GROUP_ROSTER_UPDATE)
-    eventFrame:RegisterEvent(addon.Events.PLAYER_ROLES_ASSIGNED)
-    eventFrame:RegisterEvent(addon.Events.UNIT_PET)
-
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        EventRegistry:RegisterCallback(addon.Events.EditModeExit, OnEditModeExited)
+    for _, provider in pairs(fsFrame.Providers:Enabled()) do
+        provider:RegisterCallback(OnProviderRequiresSort)
     end
+
+    local eventFrame = CreateFrame("Frame")
+    eventFrame:HookScript("OnEvent", OnCombatEnded)
+    eventFrame:RegisterEvent(addon.Events.PLAYER_REGEN_ENABLED)
 end
