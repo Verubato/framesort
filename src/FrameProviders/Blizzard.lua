@@ -66,12 +66,18 @@ function M:Name()
 end
 
 function M:Enabled()
-    if not CompactPartyFrame or not CompactRaidFrameContainer then
-        return false
+    local enabled = false
+
+    if CompactPartyFrame then
+        -- frame addons will usually disable blizzard via unsubscribing group update events
+        enabled = CompactPartyFrame:IsEventRegistered("GROUP_ROSTER_UPDATE")
     end
 
-    -- frame addons will usually disable blizzard via unsubscribing group update events
-    return CompactPartyFrame:IsEventRegistered("GROUP_ROSTER_UPDATE") or CompactRaidFrameContainer:IsEventRegistered("GROUP_ROSTER_UPDATE")
+    if CompactRaidFrameContainer then
+        enabled = enabled or CompactRaidFrameContainer:IsEventRegistered("GROUP_ROSTER_UPDATE")
+    end
+
+    return enabled
 end
 
 function M:Init()
