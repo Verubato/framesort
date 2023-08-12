@@ -329,7 +329,7 @@ function fsBuilder:BuildSortingOptions(panel)
     end
 
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        anchor = BuildSortModeCheckboxes(panel, anchor, "*EXPERIMENTAL* Enemy Arena (GladiusEx, sArena, Blizzard)", addon.Options.EnemyArena, false, false)
+        anchor = BuildSortModeCheckboxes(panel, anchor, "Enemy Arena (GladiusEx, sArena, Blizzard)", addon.Options.EnemyArena, false, false)
     end
 
     anchor = BuildSortModeCheckboxes(panel, anchor, "Dungeon (mythics, 5-mans)", addon.Options.Dungeon)
@@ -361,6 +361,7 @@ function addon:InitOptions()
     fsBuilder:BuildKeybindingOptions(panel)
     fsBuilder:BuildMacroOptions(panel)
     fsBuilder:BuildSpacingOptions(panel)
+    fsBuilder:BuildIntegrationOptions(panel)
     fsBuilder:BuildHealthCheck(panel)
 
     SLASH_FRAMESORT1 = "/fs"
