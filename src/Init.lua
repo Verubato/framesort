@@ -17,6 +17,7 @@ end
 local function Init()
     InitSavedVars()
     addon:InitOptions()
+    addon:InitFrameProviders()
     addon:InitSorting()
     addon:InitPlayerHiding()
     addon:InitSpacing()

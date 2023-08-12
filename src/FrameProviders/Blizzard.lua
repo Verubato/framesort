@@ -1,8 +1,8 @@
 local _, addon = ...
 local fsFrame = addon.Frame
 local fsEnumerable = addon.Enumerable
-
 local M = {}
+local callbacks = {}
 
 fsFrame.Providers.Blizzard = M
 table.insert(fsFrame.Providers.All, M)
@@ -79,6 +79,20 @@ local function GetFrames(container, filter)
         :ToTable()
 end
 
+local function InvokeCallbacks()
+    for _, callback in pairs(callbacks) do
+        callback(M)
+    end
+end
+
+local function OnEvent()
+    InvokeCallbacks()
+end
+
+local function OnEditModeExited()
+    InvokeCallbacks()
+end
+
 function M:Name()
     return "Blizzard"
 end
@@ -90,6 +104,29 @@ function M:Enabled()
 
     -- frame addons will usually disable blizzard via unsubscribing group update events
     return CompactPartyFrame:IsEventRegistered("GROUP_ROSTER_UPDATE") or CompactRaidFrameContainer:IsEventRegistered("GROUP_ROSTER_UPDATE")
+end
+
+function M:Init()
+    if not M:Enabled() then
+        return
+    end
+
+    local eventFrame = CreateFrame("Frame")
+    eventFrame:HookScript("OnEvent", OnEvent)
+    eventFrame:RegisterEvent(addon.Events.PLAYER_ENTERING_WORLD)
+    eventFrame:RegisterEvent(addon.Events.GROUP_ROSTER_UPDATE)
+    eventFrame:RegisterEvent(addon.Events.PLAYER_ROLES_ASSIGNED)
+    eventFrame:RegisterEvent(addon.Events.UNIT_PET)
+
+    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+        EventRegistry:RegisterCallback(addon.Events.EditModeExit, OnEditModeExited)
+        eventFrame:RegisterEvent(addon.Events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
+        eventFrame:RegisterEvent(addon.Events.ARENA_OPPONENT_UPDATE)
+    end
+end
+
+function M:RegisterCallback(callback)
+    callbacks[#callbacks + 1] = callback
 end
 
 function M:GetUnit(frame)

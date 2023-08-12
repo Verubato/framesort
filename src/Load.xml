@@ -11,6 +11,7 @@
     <Script file="FrameProviders\Blizzard.lua"/>
     <Script file="FrameProviders\sArena.lua"/>
     <Script file="FrameProviders\GladiusEx.lua"/>
+    <Script file="FrameProviders\ElvUI.lua"/>
     <Script file="Core\Compare.lua"/>
     <Script file="Core\Sort.lua"/>
     <Script file="Core\Spacing.lua"/>

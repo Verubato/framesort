@@ -17,6 +17,12 @@ function M.Providers:Enabled()
         :ToTable()
 end
 
+function addon:InitFrameProviders()
+    for _, provider in pairs(M.Providers.All) do
+        provider:Init()
+    end
+end
+
 ---Returns all raid frames (including grouped members).
 ---@param provider FrameProvider
 ---@return table[]

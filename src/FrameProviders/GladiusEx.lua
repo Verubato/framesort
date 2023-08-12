@@ -1,7 +1,7 @@
 local _, addon = ...
 local fsFrame = addon.Frame
-
 local M = {}
+local callbacks = {}
 
 fsFrame.Providers.GladiusEx = M
 table.insert(fsFrame.Providers.All, M)
@@ -10,12 +10,37 @@ local function GetUnit(frame)
     return frame.unit
 end
 
+local function OnEvent()
+    for _, callback in pairs(callbacks) do
+        callback(M)
+    end
+end
+
 function M:Name()
     return "GladiusEx"
 end
 
 function M:Enabled()
     return GetAddOnEnableState(nil, "GladiusEx") ~= 0
+end
+
+function M:Init()
+    if not M:Enabled() then
+        return
+    end
+
+    local eventFrame = CreateFrame("Frame")
+    eventFrame:HookScript("OnEvent", OnEvent)
+    eventFrame:RegisterEvent(addon.Events.PLAYER_ENTERING_WORLD)
+    eventFrame:RegisterEvent(addon.Events.GROUP_ROSTER_UPDATE)
+    eventFrame:RegisterEvent(addon.Events.PLAYER_ROLES_ASSIGNED)
+    eventFrame:RegisterEvent(addon.Events.UNIT_PET)
+    eventFrame:RegisterEvent(addon.Events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
+    eventFrame:RegisterEvent(addon.Events.ARENA_OPPONENT_UPDATE)
+end
+
+function M:RegisterCallback(callback)
+    callbacks[#callbacks + 1] = callback
 end
 
 function M:GetUnit(frame)
