@@ -10,7 +10,7 @@ local function GetUnit(frame)
     return frame.unit
 end
 
-local function OnEvent()
+local function Update()
     for _, callback in pairs(callbacks) do
         callback(M)
     end
@@ -34,7 +34,7 @@ function M:Init()
     end
 
     local eventFrame = CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", OnEvent)
+    eventFrame:HookScript("OnEvent", Update)
     eventFrame:RegisterEvent(addon.Events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
     eventFrame:RegisterEvent(addon.Events.ARENA_OPPONENT_UPDATE)
 end
