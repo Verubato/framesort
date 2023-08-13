@@ -10,7 +10,7 @@ local function GetUnit(frame)
     return frame.unit
 end
 
-local function OnEvent()
+local function Update()
     for _, callback in pairs(callbacks) do
         callback(M)
     end
@@ -30,7 +30,7 @@ function M:Init()
     end
 
     local eventFrame = CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", OnEvent)
+    eventFrame:HookScript("OnEvent", Update)
     eventFrame:RegisterEvent(addon.Events.PLAYER_ENTERING_WORLD)
     eventFrame:RegisterEvent(addon.Events.GROUP_ROSTER_UPDATE)
     eventFrame:RegisterEvent(addon.Events.PLAYER_ROLES_ASSIGNED)

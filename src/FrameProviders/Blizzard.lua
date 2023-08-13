@@ -47,18 +47,10 @@ local function GetFrames(container, filter)
         :ToTable()
 end
 
-local function InvokeCallbacks()
+local function Update()
     for _, callback in pairs(callbacks) do
         callback(M)
     end
-end
-
-local function OnEvent()
-    InvokeCallbacks()
-end
-
-local function OnEditModeExited()
-    InvokeCallbacks()
 end
 
 function M:Name()
@@ -86,14 +78,14 @@ function M:Init()
     end
 
     local eventFrame = CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", OnEvent)
+    eventFrame:HookScript("OnEvent", Update)
     eventFrame:RegisterEvent(addon.Events.PLAYER_ENTERING_WORLD)
     eventFrame:RegisterEvent(addon.Events.GROUP_ROSTER_UPDATE)
     eventFrame:RegisterEvent(addon.Events.PLAYER_ROLES_ASSIGNED)
     eventFrame:RegisterEvent(addon.Events.UNIT_PET)
 
     if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        EventRegistry:RegisterCallback(addon.Events.EditModeExit, OnEditModeExited)
+        EventRegistry:RegisterCallback(addon.Events.EditModeExit, Update)
         eventFrame:RegisterEvent(addon.Events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
         eventFrame:RegisterEvent(addon.Events.ARENA_OPPONENT_UPDATE)
     end
