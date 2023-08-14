@@ -79,13 +79,33 @@ local function CanSeeFrames()
     end
 
     for _, provider in pairs(addon.Frame.Providers:Enabled()) do
-        local party = provider:PartyFrames()
-        if #party > 0 then
+        local anyParty = fsEnumerable:From(provider:PartyFrames()):Any(function(x)
+            return x:IsVisible()
+        end)
+
+        if anyParty then
             return true
         end
 
-        local raid = provider:RaidFrames()
-        if #raid > 0 then
+        local anyRaid = false
+
+        if not provider:IsRaidGrouped() then
+            anyRaid = fsEnumerable:From(provider:RaidFrames()):Any(function(x)
+                return x:IsVisible()
+            end)
+        else
+            anyRaid = fsEnumerable
+                :From(provider:RaidGroups())
+                :Map(function(group)
+                    return provider:RaidGroupMembers(group)
+                end)
+                :Flatten()
+                :Any(function(x)
+                    return x:IsVisible()
+                end)
+        end
+
+        if anyRaid then
             return true
         end
     end

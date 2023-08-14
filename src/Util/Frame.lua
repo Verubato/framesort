@@ -23,23 +23,6 @@ function addon:InitFrameProviders()
     end
 end
 
----Returns all raid frames (including grouped members).
----@param provider FrameProvider
----@return table[]
-function M:AllRaidFrames(provider)
-    if not provider:IsRaidGrouped() then
-        return provider:RaidFrames()
-    end
-
-    return fsEnumerable
-        :From(provider:RaidGroups())
-        :Map(function(group)
-            return provider:RaidGroupMembers(group)
-        end)
-        :Flatten()
-        :ToTable()
-end
-
 ---Returns the frames in order of their relative positioning to each other.
 ---@param frames table[] frames in any particular order
 ---@return LinkedListNode root in order of parent -> child -> child -> child

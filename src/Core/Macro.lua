@@ -1,4 +1,5 @@
 local _, addon = ...
+local fsFrame = addon.Frame
 local fsSort = addon.Sorting
 local fsMacro = addon.Macro
 local fsTarget = addon.Target
@@ -84,21 +85,15 @@ end
 
 ---Initialises the macros module.
 function addon:InitMacros()
-    local eventFrame = CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", Run)
-    eventFrame:RegisterEvent(addon.Events.PLAYER_ENTERING_WORLD)
-    eventFrame:RegisterEvent(addon.Events.GROUP_ROSTER_UPDATE)
-    eventFrame:RegisterEvent(addon.Events.PLAYER_ROLES_ASSIGNED)
-
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        eventFrame:RegisterEvent(addon.Events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
+    for _, provider in ipairs(fsFrame.Providers:Enabled()) do
+        provider:RegisterCallback(Run)
     end
-
-    local endCombatFrame = CreateFrame("Frame")
-    endCombatFrame:HookScript("OnEvent", CombatEnded)
-    endCombatFrame:RegisterEvent(addon.Events.PLAYER_REGEN_ENABLED)
 
     fsSort:RegisterPostSortCallback(Run)
 
     hooksecurefunc("EditMacro", OnEditMacro)
+
+    local endCombatFrame = CreateFrame("Frame")
+    endCombatFrame:HookScript("OnEvent", CombatEnded)
+    endCombatFrame:RegisterEvent(addon.Events.PLAYER_REGEN_ENABLED)
 end
