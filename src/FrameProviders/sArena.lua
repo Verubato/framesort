@@ -21,11 +21,7 @@ function M:Name()
 end
 
 function M:Enabled()
-    if GetAddOnEnableState(nil, "sArena Updated") == 0 then
-        return false
-    end
-
-    return sArena ~= nil
+    return GetAddOnEnableState(nil, "sArena Updated") ~= 0
 end
 
 function M:Init()
@@ -37,6 +33,7 @@ function M:Init()
     eventFrame:HookScript("OnEvent", Update)
     eventFrame:RegisterEvent(addon.Events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
     eventFrame:RegisterEvent(addon.Events.ARENA_OPPONENT_UPDATE)
+    eventFrame:RegisterEvent(addon.Events.PLAYER_ENTERING_WORLD)
 end
 
 function M:RegisterCallback(callback)
