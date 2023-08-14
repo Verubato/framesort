@@ -1,5 +1,6 @@
 local _, addon = ...
 local fsFrame = addon.Frame
+local fsLog = addon.Log
 local M = {}
 local callbacks = {}
 local fsPlugin = nil
@@ -36,6 +37,14 @@ local function Update()
     end
 end
 
+local function OnSecureGroupHeaderUpdate(header)
+    if header ~= ElvUF_PartyGroup1 then
+        return
+    end
+
+    Update()
+end
+
 function M:Name()
     return "ElvUI"
 end
@@ -50,8 +59,8 @@ function M:Init()
     end
 
     local E, _, _, P, _ = unpack(ElvUI)
-    local UF = E:GetModule("UnitFrames")
     local EP = LibStub("LibElvUIPlugin-1.0")
+    local UF = E:GetModule("UnitFrames")
 
     fsPlugin = E:NewModule(pluginName, "AceHook-3.0")
 
@@ -61,6 +70,36 @@ function M:Init()
 
     function fsPlugin:Initialize()
         EP:RegisterPlugin(pluginName, fsPlugin.InsertOptions)
+
+        -- party frames are secure unit buttons that change visibility based on a secure state driver
+        -- so we can't rely on event handling to determine when updates are required
+        -- instead we hook OnShow/OnHide for each of the secure unit button frames
+        fsPlugin:SecureHook(UF, "LoadUnits", function()
+            if not ElvUF_PartyGroup1 then
+                fsLog:Error("ElvUF_PartyGroup1 container is nil")
+                return
+            end
+
+            local expectedChildren = 6
+            local children = ElvUF_PartyGroup1 and { ElvUF_PartyGroup1:GetChildren() } or {}
+
+            if #children == 0 then
+                fsLog:Error("ElvUF_PartyGroup1 unexpectedly has 0 children where it should have " .. expectedChildren)
+                return
+            end
+
+            if #children ~= expectedChildren then
+                fsLog:Error(string.format("ElvUF_PartyGroup1 unexpectedly has %d children where it should have %d", #children, expectedChildren))
+                -- don't return, might as well try with however many child frames there are
+            end
+
+            for _, child in ipairs(children) do
+                child:HookScript("OnShow", Update)
+                child:HookScript("OnHide", Update)
+            end
+
+            fsPlugin:SecureHook("SecureGroupHeader_Update", OnSecureGroupHeaderUpdate)
+        end)
     end
 
     function fsPlugin:InsertOptions()
@@ -83,32 +122,9 @@ function M:Init()
                 },
             },
         }
-
-        E.Options.args.unitframe.args.groupUnits.args.party.args.generalGroup.args.sortingGroup.args.groupBy.values.FRAMESORT = "FrameSort"
-        E.Options.args.unitframe.args.groupUnits.args.party.args.generalGroup.args.sortingGroup.args.sortDir.values.FRAMESORT = "FrameSort"
-        E.Options.args.unitframe.args.groupUnits.args.party.args.generalGroup.args.sortingGroup.args.sortMethod.values.FRAMESORT = "FrameSort"
-
-        UF.headerGroupBy.FRAMESORT = function(header)
-            header:SetAttribute("sortMethod", nil)
-            header:SetAttribute("groupBy", nil)
-            header:SetAttribute("sortDir", nil)
-        end
     end
 
     E:RegisterModule(pluginName)
-
-    local eventFrame = CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", Update)
-    eventFrame:RegisterEvent(addon.Events.PLAYER_ENTERING_WORLD)
-    eventFrame:RegisterEvent(addon.Events.GROUP_ROSTER_UPDATE)
-    eventFrame:RegisterEvent(addon.Events.PLAYER_ROLES_ASSIGNED)
-    eventFrame:RegisterEvent(addon.Events.UNIT_PET)
-
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        EventRegistry:RegisterCallback(addon.Events.EditModeExit, Update)
-        eventFrame:RegisterEvent(addon.Events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
-        eventFrame:RegisterEvent(addon.Events.ARENA_OPPONENT_UPDATE)
-    end
 end
 
 function M:RegisterCallback(callback)

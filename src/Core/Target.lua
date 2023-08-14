@@ -92,11 +92,16 @@ local function CombatEnded()
 end
 
 function M:FriendlyTargets()
-    -- prefer Blizzard frames
-    local frames = GetFrames(fsFrame.Providers.Blizzard)
-    local frameProvider = fsFrame.Providers.Blizzard
+    local frames = nil
+    local frameProvider = nil
 
-    if #frames == 0 then
+    -- prefer Blizzard frames
+    if fsFrame.Providers.Blizzard:Enabled() then
+        frames = GetFrames(fsFrame.Providers.Blizzard)
+        frameProvider = fsFrame.Providers.Blizzard
+    end
+
+    if not frames or #frames == 0 then
         for _, provider in pairs(fsFrame.Providers:Enabled()) do
             frames = GetFrames(provider)
             frameProvider = provider
@@ -107,7 +112,7 @@ function M:FriendlyTargets()
         end
     end
 
-    if #frames > 0 then
+    if frames and #frames > 0 then
         return fsEnumerable
             :From(frames)
             :OrderBy(function(x, y)
@@ -149,7 +154,7 @@ function M:EnemyTargets()
         end
     end
 
-    if #frames == 0 then
+    if #frames == 0 and fsFrame.Providers.Blizzard:Enabled() then
         frames = fsEnumerable
             :From(fsFrame.Providers.Blizzard:EnemyArenaFrames())
             :Where(function(x)
