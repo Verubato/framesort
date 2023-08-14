@@ -7,6 +7,10 @@ local M = {}
 addon.HidePlayer = M
 
 local function CanUpdate()
+    if not blizzard:Enabled() then
+        return false
+    end
+
     if InCombatLockdown() then
         return false
     end
