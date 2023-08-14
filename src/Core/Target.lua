@@ -11,6 +11,7 @@ local targetFramesButtons = {}
 local targetEnemyCount = 3
 local targetEnemyButtons = {}
 local targetBottomFrameButton = nil
+local updatePending = false
 local M = {}
 addon.Target = M
 
@@ -24,9 +25,28 @@ local function CanUpdate()
 end
 
 local function GetFrames(provider)
-    local frames = provider:PartyFrames()
+    local whereVisible = function(frames)
+        return fsEnumerable
+            :From(frames)
+            :Where(function(x)
+                return x:IsVisible()
+            end)
+            :ToTable()
+    end
+
+    local frames = whereVisible(provider:PartyFrames())
+
     if #frames == 0 then
-        frames = fsFrame:AllRaidFrames(provider)
+        if not provider:IsRaidGrouped() then
+            frames = whereVisible(provider:RaidFrames())
+        else
+            frames = whereVisible(fsEnumerable
+                :From(provider:RaidGroups())
+                :Map(function(group)
+                    return provider:RaidGroupMembers(group)
+                end)
+                :Flatten())
+        end
     end
 
     return frames
@@ -57,10 +77,18 @@ end
 
 local function Run()
     if not CanUpdate() then
+        updatePending = true
         return
     end
 
     UpdateTargets()
+    updatePending = false
+end
+
+local function CombatEnded()
+    if updatePending then
+        Run()
+    end
 end
 
 function M:FriendlyTargets()
@@ -108,7 +136,12 @@ function M:EnemyTargets()
     local frameProvider = nil
 
     for _, provider in pairs(preferred) do
-        frames = provider:EnemyArenaFrames()
+        frames = fsEnumerable
+            :From(provider:EnemyArenaFrames())
+            :Where(function(x)
+                return x:IsVisible()
+            end)
+            :ToTable()
         frameProvider = provider
 
         if #frames > 0 then
@@ -117,7 +150,13 @@ function M:EnemyTargets()
     end
 
     if #frames == 0 then
-        frames = GetFrames(fsFrame.Providers.Blizzard)
+        frames = fsEnumerable
+            :From(fsFrame.Providers.Blizzard:EnemyArenaFrames())
+            :Where(function(x)
+                return x:IsVisible()
+            end)
+            :ToTable()
+
         frameProvider = fsFrame.Providers.Blizzard
     end
 
@@ -163,16 +202,13 @@ function addon:InitTargeting()
     targetBottomFrameButton:SetAttribute("type", "target")
     targetBottomFrameButton:SetAttribute("unit", "none")
 
-    local eventFrame = CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", Run)
-    eventFrame:RegisterEvent(addon.Events.PLAYER_ENTERING_WORLD)
-    eventFrame:RegisterEvent(addon.Events.GROUP_ROSTER_UPDATE)
-    eventFrame:RegisterEvent(addon.Events.PLAYER_REGEN_ENABLED)
-
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        eventFrame:RegisterEvent(addon.Events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
-        eventFrame:RegisterEvent(addon.Events.ARENA_OPPONENT_UPDATE)
+    for _, provider in ipairs(fsFrame.Providers:Enabled()) do
+        provider:RegisterCallback(Run)
     end
 
     fsSort:RegisterPostSortCallback(Run)
+
+    local endCombatFrame = CreateFrame("Frame")
+    endCombatFrame:HookScript("OnEvent", CombatEnded)
+    endCombatFrame:RegisterEvent(addon.Events.PLAYER_REGEN_ENABLED)
 end
