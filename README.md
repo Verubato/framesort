@@ -1,17 +1,16 @@
 # FrameSort #
 
-A simple World of Warcraft add-on that places the player frame (you) at the top/middle/bottom (configurable) of the party/raid frames.
+A simple WoW add-on that sorts party/raid frames and places you at the top/middle/bottom.
 
 ## Features ##
 
 * Place the player frame at the top, middle, or bottom.
-* Works for both raid-style party and regular raid frames.
 * Sort the remaining frames by group/role/alphabetical.
-* Setup different sorting rules for arena, bgs, world, and raids.
-* Taintless sorting method to avoid taint/UI issues.
-* Set keybindings to target frames based on their visually ordered representation rather than their party number.
+* Works with Blizzard, GladiusEx, sArena, and ElvUI frames.
+* Keybindings to target frames based on their visual position rather than their party number.
+* Macro variables for @Healer, @EnemyHealer, @Frame, and more.
 * Add spacing between frames.
-* Macro support for @frame targeting.
+* Taintless sorting to avoid taint/UI issues.
 * Supports Retail, Wotlk, and Classic.
 
 ## Screenshots ##
