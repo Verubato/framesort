@@ -1,5 +1,6 @@
 local _, addon = ...
 local fsFrame = addon.Frame
+local fsScheduler = addon.Scheduler
 local M = {}
 local callbacks = {}
 
@@ -16,11 +17,20 @@ local function Update()
     end
 end
 
+local function UpdateNextFrame()
+    -- wait for GladiusEx to update their frames before we perform a sort
+    fsScheduler:RunNextFrame(Update)
+end
+
 function M:Name()
     return "GladiusEx"
 end
 
 function M:Enabled()
+    if WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE then
+        return false
+    end
+
     return GetAddOnEnableState(nil, "GladiusEx") ~= 0
 end
 
@@ -30,7 +40,7 @@ function M:Init()
     end
 
     local eventFrame = CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", Update)
+    eventFrame:HookScript("OnEvent", UpdateNextFrame)
     eventFrame:RegisterEvent(addon.Events.PLAYER_ENTERING_WORLD)
     eventFrame:RegisterEvent(addon.Events.GROUP_ROSTER_UPDATE)
     eventFrame:RegisterEvent(addon.Events.PLAYER_ROLES_ASSIGNED)

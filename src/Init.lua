@@ -24,6 +24,7 @@ local function Init()
     addon:InitTargeting()
     addon:InitMacros()
     addon:InitApi()
+    addon:InitScheduler()
 end
 
 ---Listens for our to be loaded and then initialises it.

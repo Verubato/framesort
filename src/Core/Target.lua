@@ -2,6 +2,7 @@ local _, addon = ...
 local fsUnit = addon.Unit
 local fsSort = addon.Sorting
 local fsEnumerable = addon.Enumerable
+local fsScheduler = addon.Scheduler
 local fsFrame = addon.Frame
 local fsCompare = addon.Compare
 local fsLog = addon.Log
@@ -11,18 +12,8 @@ local targetFramesButtons = {}
 local targetEnemyCount = 3
 local targetEnemyButtons = {}
 local targetBottomFrameButton = nil
-local updatePending = false
 local M = {}
 addon.Target = M
-
-local function CanUpdate()
-    if InCombatLockdown() then
-        fsLog:Warning("Can't update targets during combat.")
-        return false
-    end
-
-    return true
-end
 
 local function GetFrames(provider)
     local whereVisible = function(frames)
@@ -76,19 +67,13 @@ local function UpdateTargets()
 end
 
 local function Run()
-    if not CanUpdate() then
-        updatePending = true
+    if InCombatLockdown() then
+        fsLog:Warning("Can't update targets during combat.")
+        fsScheduler:RunWhenCombatEnds(UpdateTargets)
         return
     end
 
     UpdateTargets()
-    updatePending = false
-end
-
-local function CombatEnded()
-    if updatePending then
-        Run()
-    end
 end
 
 function M:FriendlyTargets()
@@ -212,8 +197,4 @@ function addon:InitTargeting()
     end
 
     fsSort:RegisterPostSortCallback(Run)
-
-    local endCombatFrame = CreateFrame("Frame")
-    endCombatFrame:HookScript("OnEvent", CombatEnded)
-    endCombatFrame:RegisterEvent(addon.Events.PLAYER_REGEN_ENABLED)
 end

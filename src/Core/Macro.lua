@@ -1,21 +1,15 @@
 local _, addon = ...
+local fsScheduler = addon.Scheduler
 local fsFrame = addon.Frame
 local fsSort = addon.Sorting
 local fsMacro = addon.Macro
 local fsTarget = addon.Target
-local fsLog = addon.Log
 local maxMacros = 138
 local isSelfEditingMacro = false
-local updatePending = false
 ---@type table<number, boolean>
 local isFsMacroCache = {}
 
 local function CanUpdate()
-    if InCombatLockdown() then
-        fsLog:Warning("Can't update macros during combat.")
-        return false
-    end
-
     return true
 end
 
@@ -59,8 +53,11 @@ local function OnEditMacro(slot, _, _, _)
         return
     end
 
-    if not CanUpdate() then
-        updatePending = true
+    if InCombatLockdown() then
+        fsScheduler:RunWhenCombatEnds(function()
+            isFsMacroCache[slot] = InspectMacro(slot)
+        end)
+        fsLog:Warning("Can't update macros during combat.")
         return
     end
 
@@ -68,19 +65,13 @@ local function OnEditMacro(slot, _, _, _)
 end
 
 local function Run()
-    if not CanUpdate() then
-        updatePending = true
+    if InCombatLockdown() then
+        fsScheduler:RunWhenCombatEnds(ScanMacros)
+        fsLog:Warning("Can't update macros during combat.")
         return
     end
 
     ScanMacros()
-    updatePending = false
-end
-
-local function CombatEnded()
-    if updatePending then
-        Run()
-    end
 end
 
 ---Initialises the macros module.
@@ -92,8 +83,4 @@ function addon:InitMacros()
     fsSort:RegisterPostSortCallback(Run)
 
     hooksecurefunc("EditMacro", OnEditMacro)
-
-    local endCombatFrame = CreateFrame("Frame")
-    endCombatFrame:HookScript("OnEvent", CombatEnded)
-    endCombatFrame:RegisterEvent(addon.Events.PLAYER_REGEN_ENABLED)
 end
