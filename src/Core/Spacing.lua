@@ -308,6 +308,10 @@ local function ApplyPartySpacing()
     local pets = fsEnumerable
         :From(frames)
         :Where(function(frame)
+            if not frame:IsVisible() then
+                return false
+            end
+
             local unit = blizzardFrames:GetUnit(frame)
             return fsUnit:IsPet(unit)
         end)
