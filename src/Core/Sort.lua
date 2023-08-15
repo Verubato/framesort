@@ -1,10 +1,10 @@
 local _, addon = ...
+local fsScheduler = addon.Scheduler
 local fsUnit = addon.Unit
 local fsCompare = addon.Compare
 local fsFrame = addon.Frame
 local fsEnumerable = addon.Enumerable
 local fsLog = addon.Log
-local sortPending = false
 local callbacks = {}
 local M = {}
 addon.Sorting = M
@@ -413,15 +413,6 @@ local function TrySortTaintless()
     return sorted
 end
 
----Invokes sorting when combat drops if required.
-local function OnCombatEnded()
-    if not sortPending then
-        return
-    end
-
-    M:TrySort()
-end
-
 local function OnProviderRequiresSort(provider)
     local sorted = false
     local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
@@ -454,6 +445,9 @@ end
 function M:TrySort()
     -- can't make changes during combat
     if InCombatLockdown() and not addon.Options.SortingMethod.TaintlessEnabled then
+        fsScheduler:RunWhenCombatEnds(function()
+            M:TrySort()
+        end)
         fsLog:Warning("Cannot perform non-taintless sorting during combat.")
         return false
     end
@@ -476,7 +470,6 @@ function M:TrySort()
         InvokeCallbacks()
     end
 
-    sortPending = not sorted
     return sorted
 end
 
@@ -485,8 +478,4 @@ function addon:InitSorting()
     for _, provider in pairs(fsFrame.Providers:Enabled()) do
         provider:RegisterCallback(OnProviderRequiresSort)
     end
-
-    local eventFrame = CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", OnCombatEnded)
-    eventFrame:RegisterEvent(addon.Events.PLAYER_REGEN_ENABLED)
 end

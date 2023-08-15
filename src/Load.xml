@@ -8,6 +8,7 @@
     <Script file="Util\Unit.lua"/>
     <Script file="Util\Frame.lua"/>
     <Script file="Util\Macro.lua"/>
+    <Script file="Util\Scheduler.lua"/>
     <Script file="FrameProviders\Blizzard.lua"/>
     <Script file="FrameProviders\sArena.lua"/>
     <Script file="FrameProviders\GladiusEx.lua"/>
