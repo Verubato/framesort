@@ -4,14 +4,11 @@ local fsFrame = addon.Frame
 local fsSort = addon.Sorting
 local fsMacro = addon.Macro
 local fsTarget = addon.Target
+local fsLog = addon.Log
 local maxMacros = 138
 local isSelfEditingMacro = false
 ---@type table<number, boolean>
 local isFsMacroCache = {}
-
-local function CanUpdate()
-    return true
-end
 
 local function InspectMacro(slot)
     local _, _, body = GetMacroInfo(slot)
