@@ -35,8 +35,14 @@ local function OnLoadAddon(_, _, name)
         return
     end
 
+    if addon.Loaded then
+        return
+    end
+
     Init()
+
     loader:UnregisterEvent("ADDON_LOADED")
+    addon.Loaded = true
 end
 
 loader = wow.CreateFrame("Frame")

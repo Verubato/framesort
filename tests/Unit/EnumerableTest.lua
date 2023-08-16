@@ -3,16 +3,10 @@ local deps = {
 }
 
 local addon = {}
-for _, fileName in ipairs(deps) do
-    local module = loadfile("..\\src\\" .. fileName)
-    if module == nil then
-        error("Failed to load " .. fileName)
-    end
-    module("UnitTest", addon)
-end
+local helper = require("Helper")
+helper:LoadDependencies(addon, deps)
 
 local fsEnumerable = addon.Enumerable
-
 local M = {}
 
 function M:test_new_instance()
