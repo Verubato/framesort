@@ -2,44 +2,66 @@
 local _, addon = ...
 ---@type WoW
 addon.WoW = {
-    CreateFrame = CreateFrame,
-    InterfaceOptions_AddCategory = InterfaceOptions_AddCategory,
-    InterfaceOptionsFrame_OpenToCategory = InterfaceOptionsFrame_OpenToCategory,
-    GetMacroInfo = GetMacroInfo,
+    -- constants
     WOW_PROJECT_ID = WOW_PROJECT_ID,
     WOW_PROJECT_CLASSIC = WOW_PROJECT_CLASSIC,
     WOW_PROJECT_MAINLINE = WOW_PROJECT_MAINLINE,
-    SlashCmdList = SlashCmdList,
-    SettingsPanel = SettingsPanel,
-    InterfaceOptionsFramePanelContainer = InterfaceOptionsFramePanelContainer,
-    ReloadUI = ReloadUI,
+    MAX_RAID_MEMBERS = MAX_RAID_MEMBERS or 40,
+    MEMBERS_PER_RAID_GROUP = MEMBERS_PER_RAID_GROUP or 5,
+
+    -- frames
+    CreateFrame = CreateFrame,
+    UIParent = UIParent,
     CompactPartyFrame = CompactPartyFrame,
     CompactRaidFrameContainer = CompactRaidFrameContainer,
     CompactArenaFrame = CompactArenaFrame,
-    UnitName = UnitName,
-    UnitInRaid = UnitInRaid,
-    GetRaidRosterInfo = GetRaidRosterInfo,
-    IsInInstance = IsInInstance,
-    issecurevariable = issecurevariable,
-    GetAddOnEnableState = GetAddOnEnableState,
-    InCombatLockdown = InCombatLockdown,
-    RegisterAttributeDriver = RegisterAttributeDriver,
-    EditMacro = EditMacro,
-    UnitIsPlayer = UnitIsPlayer,
     CompactRaidFrameContainer_SetFlowSortFunction = CompactRaidFrameContainer_SetFlowSortFunction,
-    EditModeManagerFrame = EditModeManagerFrame,
-    EventRegistry = EventRegistry,
-    UIParent = UIParent,
     CompactRaidFrameManager_GetSetting = CompactRaidFrameManager_GetSetting,
-    Enum = Enum,
+    EditModeManagerFrame = EditModeManagerFrame,
+
+    -- settings
+    SlashCmdList = SlashCmdList,
+    SettingsPanel = SettingsPanel,
+    InterfaceOptions_AddCategory = InterfaceOptions_AddCategory,
+    InterfaceOptionsFrame_OpenToCategory = InterfaceOptionsFrame_OpenToCategory,
+    InterfaceOptionsFramePanelContainer = InterfaceOptionsFramePanelContainer,
     GetCVarBool = GetCVarBool,
-    wipe = wipe,
-    C_Timer = C_Timer,
+    Enum = Enum,
+    EventRegistry = EventRegistry,
+
+    -- macro
+    GetMacroInfo = GetMacroInfo,
+    EditMacro = EditMacro,
+
+    -- unit functions
+    UnitName = UnitName,
+    UnitExists = UnitExists,
+    UnitIsUnit = UnitIsUnit,
+    UnitInRaid = UnitInRaid,
+    UnitIsPlayer = UnitIsPlayer,
+    GetRaidRosterInfo = GetRaidRosterInfo,
+    GetNumArenaOpponentSpecs = GetNumArenaOpponentSpecs,
+    GetArenaOpponentSpec = GetArenaOpponentSpec,
+    GetSpecializationInfoByID = GetSpecializationInfoByID,
+    UnitGroupRolesAssigned = UnitGroupRolesAssigned,
+
+    -- state functions
+    IsInInstance = IsInInstance,
     IsInGroup = IsInGroup,
     IsInRaid = IsInRaid,
-    UnitExists = UnitExists,
-    MAX_RAID_MEMBERS = MAX_RAID_MEMBERS or 40,
-    MEMBERS_PER_RAID_GROUP = MEMBERS_PER_RAID_GROUP or 5,
+    InCombatLockdown = InCombatLockdown,
+
+    -- utility
+    ReloadUI = ReloadUI,
+    C_Timer = C_Timer,
+    wipe = wipe,
     CopyTable = CopyTable,
+
+    -- secure functions
+    issecurevariable = issecurevariable,
     hooksecurefunc = hooksecurefunc,
+    RegisterAttributeDriver = RegisterAttributeDriver,
+
+    -- addon related
+    GetAddOnEnableState = GetAddOnEnableState,
 }
