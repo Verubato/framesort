@@ -1,3 +1,4 @@
+---@meta
 ---@class HealthCheckResult
 ---@field Passed boolean true if passed, otherwise false.
 ---@field Description string description of the health check.

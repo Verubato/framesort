@@ -1,3 +1,4 @@
+---@meta
 ---@class LinkedListNode
 ---@field Next LinkedListNode? the next node
 ---@field Previous LinkedListNode? the previous node

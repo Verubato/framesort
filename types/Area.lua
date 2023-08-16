@@ -1,3 +1,4 @@
+---@meta
 ---@alias Area
 ---| "Arena"
 ---| "Dungeon"

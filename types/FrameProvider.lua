@@ -1,3 +1,4 @@
+---@meta
 ---@class FrameProvider
 ---@field Name fun(self: table): string Returns the display name for this provider.
 ---@field Init fun(self: table) Performs any initialisation logic the provider might have.
