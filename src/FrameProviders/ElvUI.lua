@@ -1,4 +1,6 @@
 local _, addon = ...
+---@type WoW
+local wow = addon.WoW
 local fsFrame = addon.Frame
 local fsLog = addon.Log
 local M = {}
@@ -14,6 +16,7 @@ local function GetUnit(frame)
 end
 
 local function IntegrationEnabled()
+    ---@diagnostic disable-next-line: undefined-global
     local E = ElvUI[1]
 
     if not E or not E.db or not E.db.FrameSort then
@@ -24,7 +27,7 @@ local function IntegrationEnabled()
 end
 
 local function PluginEnabled()
-    return GetAddOnEnableState(nil, "ElvUI") ~= 0
+    return wow.GetAddOnEnableState(nil, "ElvUI") ~= 0
 end
 
 local function Update()
@@ -38,6 +41,7 @@ local function Update()
 end
 
 local function OnSecureGroupHeaderUpdate(header)
+    ---@diagnostic disable-next-line: undefined-global
     if header ~= ElvUF_PartyGroup1 then
         return
     end
@@ -58,7 +62,9 @@ function M:Init()
         return
     end
 
+    ---@diagnostic disable-next-line: undefined-global
     local E, _, _, P, _ = unpack(ElvUI)
+    ---@diagnostic disable-next-line: undefined-global
     local EP = LibStub("LibElvUIPlugin-1.0")
     local UF = E:GetModule("UnitFrames")
 
@@ -75,12 +81,14 @@ function M:Init()
         -- so we can't rely on event handling to determine when updates are required
         -- instead we hook OnShow/OnHide for each of the secure unit button frames
         fsPlugin:SecureHook(UF, "LoadUnits", function()
+            ---@diagnostic disable-next-line: undefined-global
             if not ElvUF_PartyGroup1 then
                 fsLog:Error("ElvUF_PartyGroup1 container is nil")
                 return
             end
 
             local expectedChildren = 6
+            ---@diagnostic disable-next-line: undefined-global
             local children = ElvUF_PartyGroup1 and { ElvUF_PartyGroup1:GetChildren() } or {}
 
             if #children == 0 then
@@ -136,6 +144,7 @@ function M:GetUnit(frame)
 end
 
 function M:PartyFrames()
+    ---@diagnostic disable-next-line: undefined-global
     return fsFrame:ChildUnitFrames(ElvUF_PartyGroup1, GetUnit)
 end
 

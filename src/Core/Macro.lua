@@ -1,4 +1,6 @@
 local _, addon = ...
+---@type WoW
+local wow = addon.WoW
 local fsScheduler = addon.Scheduler
 local fsFrame = addon.Frame
 local fsSort = addon.Sorting
@@ -10,11 +12,11 @@ local isSelfEditingMacro = false
 ---@type table<number, boolean>
 local isFsMacroCache = {}
 
-local function InspectMacro(slot)
-    local _, _, body = GetMacroInfo(slot)
+local function UpdateMacro(id)
+    local _, _, body = wow.GetMacroInfo(id)
 
     if not body or not fsMacro:IsFrameSortMacro(body) then
-        return false
+        return false, 0
     end
 
     local friendlyUnits = fsTarget:FriendlyTargets()
@@ -22,47 +24,50 @@ local function InspectMacro(slot)
     local newBody = fsMacro:GetNewBody(body, friendlyUnits, enemyUnits)
 
     if not newBody then
-        return false
+        return false, 0
     end
 
     isSelfEditingMacro = true
-    EditMacro(slot, nil, nil, newBody)
+    local newId = wow.EditMacro(id, nil, nil, newBody)
     isSelfEditingMacro = false
 
-    return true
+    return true, newId
 end
 
 local function ScanMacros()
-    for slot = 1, maxMacros do
+    for id = 1, maxMacros do
         -- if we've already inspected this macro and it's not a framesort macro
         -- then skip attempting to re-process it
-        local shouldInspect = isFsMacroCache[slot] == nil or isFsMacroCache[slot]
+        local shouldInspect = isFsMacroCache[id] == nil or isFsMacroCache[id]
 
         if shouldInspect then
-            isFsMacroCache[slot] = InspectMacro(slot)
+            local isFsMacro, newId = UpdateMacro(id)
+            isFsMacroCache[newId] = isFsMacro
         end
     end
 end
 
-local function OnEditMacro(slot, _, _, _)
+local function OnEditMacro(id, _, _, _)
     -- prevent recursion from EditMacro hook
     if isSelfEditingMacro then
         return
     end
 
-    if InCombatLockdown() then
+    if wow.InCombatLockdown() then
         fsScheduler:RunWhenCombatEnds(function()
-            isFsMacroCache[slot] = InspectMacro(slot)
+            local isFsMacro, newId = UpdateMacro(id)
+            isFsMacroCache[newId] = isFsMacro
         end)
         fsLog:Warning("Can't update macros during combat.")
         return
     end
 
-    isFsMacroCache[slot] = InspectMacro(slot)
+    local isFsMacro, newId = UpdateMacro(id)
+    isFsMacroCache[newId] = isFsMacro
 end
 
 local function Run()
-    if InCombatLockdown() then
+    if wow.InCombatLockdown() then
         fsScheduler:RunWhenCombatEnds(ScanMacros)
         fsLog:Warning("Can't update macros during combat.")
         return
@@ -79,5 +84,5 @@ function addon:InitMacros()
 
     fsSort:RegisterPostSortCallback(Run)
 
-    hooksecurefunc("EditMacro", OnEditMacro)
+    wow.hooksecurefunc("EditMacro", OnEditMacro)
 end

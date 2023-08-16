@@ -1,4 +1,6 @@
 local _, addon = ...
+---@type WoW
+local wow = addon.WoW
 local fsEnumerable = addon.Enumerable
 local M = {}
 addon.Macro = M
@@ -106,11 +108,11 @@ local function UnitForSelector(selector, friendlyUnits, enemyUnits)
 
     -- enemy arena
     if string.match(selectorLower, "enemy") then
-        if WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE then
+        if wow.WOW_PROJECT_ID ~= wow.WOW_PROJECT_MAINLINE then
             return "none"
         end
 
-        local count = GetNumArenaOpponentSpecs()
+        local count = wow.GetNumArenaOpponentSpecs()
         if not count or count <= 0 then
             return "none"
         end
@@ -121,8 +123,8 @@ local function UnitForSelector(selector, friendlyUnits, enemyUnits)
         end
 
         local arenaId = fsEnumerable:From(ids):Nth(number or 1, function(x)
-            local specId = GetArenaOpponentSpec(x)
-            local _, _, _, _, role, _, _ = GetSpecializationInfoByID(specId)
+            local specId = wow.GetArenaOpponentSpec(x)
+            local _, _, _, _, role, _, _ = wow.GetSpecializationInfoByID(specId)
 
             return (tank and role == WowRole.Tank) or (healer and role == WowRole.Healer) or (dps and role == WowRole.DPS)
         end)
@@ -137,7 +139,7 @@ local function UnitForSelector(selector, friendlyUnits, enemyUnits)
     -- other dps
     if string.match(selectorLower, "otherdps") then
         return fsEnumerable:From(friendlyUnits):Nth(number or 1, function(x)
-            return UnitGroupRolesAssigned(x) == WowRole.DPS and not UnitIsUnit(x, "player")
+            return wow.UnitGroupRolesAssigned(x) == WowRole.DPS and not wow.UnitIsUnit(x, "player")
         end) or "none"
     end
 
@@ -153,7 +155,7 @@ local function UnitForSelector(selector, friendlyUnits, enemyUnits)
     -- role
     if role then
         return fsEnumerable:From(friendlyUnits):Nth(number or 1, function(x)
-            return UnitGroupRolesAssigned(x) == role
+            return wow.UnitGroupRolesAssigned(x) == role
         end) or "none"
     end
 

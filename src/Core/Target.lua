@@ -1,4 +1,6 @@
 local _, addon = ...
+---@type WoW
+local wow = addon.WoW
 local fsUnit = addon.Unit
 local fsSort = addon.Sorting
 local fsEnumerable = addon.Enumerable
@@ -67,7 +69,7 @@ local function UpdateTargets()
 end
 
 local function Run()
-    if InCombatLockdown() then
+    if wow.InCombatLockdown() then
         fsLog:Warning("Can't update targets during combat.")
         fsScheduler:RunWhenCombatEnds(UpdateTargets)
         return
@@ -169,7 +171,7 @@ end
 ---Initialises the targeting frames feature.
 function addon:InitTargeting()
     for i = 1, targetFriendlyCount do
-        local button = CreateFrame("Button", prefix .. i, UIParent, "SecureActionButtonTemplate")
+        local button = wow.CreateFrame("Button", prefix .. i, wow.UIParent, "SecureActionButtonTemplate")
         button:RegisterForClicks("AnyDown")
         button:SetAttribute("type", "target")
         button:SetAttribute("unit", "none")
@@ -178,7 +180,7 @@ function addon:InitTargeting()
     end
 
     for i = 1, targetEnemyCount do
-        local button = CreateFrame("Button", prefix .. "Enemy" .. i, UIParent, "SecureActionButtonTemplate")
+        local button = wow.CreateFrame("Button", prefix .. "Enemy" .. i, wow.UIParent, "SecureActionButtonTemplate")
         button:RegisterForClicks("AnyDown")
         button:SetAttribute("type", "target")
         button:SetAttribute("unit", "none")
@@ -187,7 +189,7 @@ function addon:InitTargeting()
     end
 
     -- target bottom
-    targetBottomFrameButton = CreateFrame("Button", prefix .. "Bottom", UIParent, "SecureActionButtonTemplate")
+    targetBottomFrameButton = wow.CreateFrame("Button", prefix .. "Bottom", wow.UIParent, "SecureActionButtonTemplate")
     targetBottomFrameButton:RegisterForClicks("AnyDown")
     targetBottomFrameButton:SetAttribute("type", "target")
     targetBottomFrameButton:SetAttribute("unit", "none")

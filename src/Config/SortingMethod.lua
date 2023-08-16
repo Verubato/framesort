@@ -1,4 +1,6 @@
 local _, addon = ...
+---@type WoW
+local wow = addon.WoW
 local fsBuilder = addon.OptionsBuilder
 local verticalSpacing = fsBuilder.VerticalSpacing
 
@@ -27,11 +29,11 @@ end
 ---Adds the sorting mode options panel.
 ---@param parent table the parent UI panel.
 function fsBuilder:BuildSortingMethodOptions(parent)
-    local panel = CreateFrame("Frame", "FrameSortSortingMethod", parent)
+    local panel = wow.CreateFrame("Frame", "FrameSortSortingMethod", parent)
     panel.name = "Sorting Method"
     panel.parent = parent.name
 
-    local taintless = CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
+    local taintless = wow.CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
     -- not sure why, but checkbox left seems to be off by about 4 units by default
     taintless:SetPoint("TOPLEFT", panel, verticalSpacing - 4, -verticalSpacing + 4)
     fsBuilder:TextShim(taintless)
@@ -65,7 +67,7 @@ function fsBuilder:BuildSortingMethodOptions(parent)
         "May not work well with other addons and WeakAuras that expect the traditional method.",
     })
 
-    local traditional = CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
+    local traditional = wow.CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
     traditional:SetPoint("TOPLEFT", anchor, 0, -verticalSpacing * 2)
     fsBuilder:TextShim(traditional)
     traditional.Text:SetText("Traditional")
@@ -102,12 +104,12 @@ function fsBuilder:BuildSortingMethodOptions(parent)
     reloadReminder:SetPoint("TOPLEFT", anchor, 0, -verticalSpacing * 2)
     reloadReminder:SetText("Please reload after changing these settings.")
 
-    local reloadButton = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
+    local reloadButton = wow.CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
     reloadButton:SetPoint("TOPLEFT", reloadReminder, 0, -verticalSpacing * 1.5)
     reloadButton:SetWidth(100)
     reloadButton:SetText("Reload")
     reloadButton:HookScript("OnClick", function()
-        ReloadUI()
+        wow.ReloadUI()
     end)
     reloadButton:SetShown(false)
 
@@ -125,5 +127,5 @@ function fsBuilder:BuildSortingMethodOptions(parent)
         reloadButton:SetShown(true)
     end)
 
-    InterfaceOptions_AddCategory(panel)
+    wow.InterfaceOptions_AddCategory(panel)
 end

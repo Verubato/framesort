@@ -1,4 +1,6 @@
 local addonName, addon = ...
+---@type WoW
+local wow = addon.WoW
 local fsEnumerable = addon.Enumerable
 local M = {}
 addon.Health = M
@@ -23,7 +25,7 @@ local function SortingFunctionsTampered()
     }
 
     for _, f in ipairs(functions) do
-        local issecure, taintedAddon = issecurevariable(f)
+        local issecure, taintedAddon = wow.issecurevariable(f)
         if not issecure then
             return AddonFriendlyName(taintedAddon)
         end
@@ -37,32 +39,32 @@ local function ConflictingAddons()
         return nil
     end
 
-    if CompactRaidFrameContainer then
-        local issecure, taintedAddon = issecurevariable("CompactRaidFrameContainer")
+    if wow.CompactRaidFrameContainer then
+        local issecure, taintedAddon = wow.issecurevariable("CompactRaidFrameContainer")
         if not issecure and taintedAddon ~= addonName then
             return AddonFriendlyName(taintedAddon)
         end
 
-        issecure, taintedAddon = issecurevariable(CompactRaidFrameContainer, "flowSortFunc")
+        issecure, taintedAddon = wow.issecurevariable(wow.CompactRaidFrameContainer, "flowSortFunc")
         if not issecure and taintedAddon ~= addonName then
             return AddonFriendlyName(taintedAddon)
         end
     end
 
-    if CompactPartyFrame then
-        local issecure, taintedAddon = issecurevariable("CompactPartyFrame")
+    if wow.CompactPartyFrame then
+        local issecure, taintedAddon = wow.issecurevariable("CompactPartyFrame")
         if not issecure and taintedAddon ~= addonName then
             return AddonFriendlyName(taintedAddon)
         end
 
-        issecure, taintedAddon = issecurevariable(CompactPartyFrame, "flowSortFunc")
+        issecure, taintedAddon = wow.issecurevariable(wow.CompactPartyFrame, "flowSortFunc")
         if not issecure and taintedAddon ~= addonName then
             return AddonFriendlyName(taintedAddon)
         end
     end
 
     -- running both at the same time would cause issues
-    if GetAddOnEnableState(nil, "SortGroup") ~= 0 then
+    if wow.GetAddOnEnableState(nil, "SortGroup") ~= 0 then
         return "SortGroup"
     end
 
@@ -74,7 +76,7 @@ local function SupportsGroups()
 end
 
 local function CanSeeFrames()
-    if not IsInGroup() then
+    if not wow.IsInGroup() then
         return true
     end
 
@@ -143,7 +145,7 @@ function M:IsHealthy()
         results[#results + 1] = {
             Passed = SupportsGroups(),
             Description = "'Keep Groups Together' setting disabled, or using Taintless sorting",
-            Help = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and "Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"
+            Help = wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE and "Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"
                 or "Disable the 'Keep Groups Together' raid profile setting",
         }
     end

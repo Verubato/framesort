@@ -41,7 +41,7 @@ end
 ---@param area Area
 local function ValidateArea(area)
     if area ~= "Arena" and area ~= "Dungeon" and area ~= "Raid" and area ~= "World" then
-        error("Invalid area: " .. (mode or "nil"))
+        error("Invalid area: " .. (area or "nil"))
     end
 end
 

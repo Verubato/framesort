@@ -1,4 +1,6 @@
 local _, addon = ...
+---@type WoW
+local wow = addon.WoW
 local fsFrame = addon.Frame
 local fsScheduler = addon.Scheduler
 local blizzard = fsFrame.Providers.Blizzard
@@ -9,9 +11,9 @@ addon.HidePlayer = M
 
 local function UpdatePlayer(player, mode)
     if player:IsVisible() and mode == addon.PlayerSortMode.Hidden then
-        RegisterAttributeDriver(player, "state-visibility", "hide")
+        wow.RegisterAttributeDriver(player, "state-visibility", "hide")
     elseif not player:IsVisible() and mode ~= addon.PlayerSortMode.Hidden then
-        RegisterAttributeDriver(player, "state-visibility", "show")
+        wow.RegisterAttributeDriver(player, "state-visibility", "show")
     end
 end
 
@@ -25,14 +27,14 @@ local function Run()
         return
     end
 
-    if InCombatLockdown() then
+    if wow.InCombatLockdown() then
         fsScheduler:RunWhenCombatEnds(Run)
         return
     end
 
     local frames = blizzard:PlayerRaidFrames()
 
-    if #frames == 0 and IsInGroup() then
+    if #frames == 0 and wow.IsInGroup() then
         fsLog:Warning("Couldn't find player raid frame.")
         return
     end

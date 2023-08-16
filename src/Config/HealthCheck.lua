@@ -1,4 +1,6 @@
 local _, addon = ...
+---@type WoW
+local wow = addon.WoW
 local fsBuilder = addon.OptionsBuilder
 local verticalSpacing = fsBuilder.VerticalSpacing
 local fsHealth = addon.Health
@@ -7,7 +9,7 @@ local lines = {}
 ---Adds the health check options panel.
 ---@param parent table the parent UI panel.
 function fsBuilder:BuildHealthCheck(parent)
-    local panel = CreateFrame("Frame", "FrameSortHealthCheck", parent)
+    local panel = wow.CreateFrame("Frame", "FrameSortHealthCheck", parent)
     panel.name = "Health Check"
     panel.parent = parent.name
 
@@ -68,7 +70,7 @@ function fsBuilder:BuildHealthCheck(parent)
         end
     end)
 
-    InterfaceOptions_AddCategory(panel)
+    wow.InterfaceOptions_AddCategory(panel)
 
     return panel
 end

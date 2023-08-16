@@ -1,4 +1,6 @@
 local _, addon = ...
+---@type WoW
+local wow = addon.WoW
 local fsFrame = addon.Frame
 local fsScheduler = addon.Scheduler
 local M = {}
@@ -27,11 +29,11 @@ function M:Name()
 end
 
 function M:Enabled()
-    if WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE then
+    if wow.WOW_PROJECT_ID ~= wow.WOW_PROJECT_MAINLINE then
         return false
     end
 
-    return GetAddOnEnableState(nil, "sArena Updated") ~= 0
+    return wow.GetAddOnEnableState(nil, "sArena Updated") ~= 0
 end
 
 function M:Init()
@@ -39,7 +41,7 @@ function M:Init()
         return
     end
 
-    local eventFrame = CreateFrame("Frame")
+    local eventFrame = wow.CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", UpdateNextFrame)
     eventFrame:RegisterEvent(addon.Events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
     eventFrame:RegisterEvent(addon.Events.ARENA_OPPONENT_UPDATE)
@@ -71,6 +73,7 @@ function M:RaidGroups()
 end
 
 function M:EnemyArenaFrames()
+    ---@diagnostic disable-next-line: undefined-global
     return fsFrame:ChildUnitFrames(sArena, GetUnit)
 end
 

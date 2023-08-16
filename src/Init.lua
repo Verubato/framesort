@@ -1,4 +1,5 @@
 local addonName, addon = ...
+local wow = addon.WoW
 local loader = nil
 
 local function InitSavedVars()
@@ -6,7 +7,7 @@ local function InitSavedVars()
         FrameSortDB = {}
     end
     if not FrameSortDB.Options then
-        FrameSortDB.Options = CopyTable(addon.Defaults)
+        FrameSortDB.Options = wow.CopyTable(addon.Defaults)
     end
 
     addon.Options = FrameSortDB.Options
@@ -38,6 +39,6 @@ local function OnLoadAddon(_, _, name)
     loader:UnregisterEvent("ADDON_LOADED")
 end
 
-loader = CreateFrame("Frame")
+loader = wow.CreateFrame("Frame")
 loader:HookScript("OnEvent", OnLoadAddon)
 loader:RegisterEvent("ADDON_LOADED")
