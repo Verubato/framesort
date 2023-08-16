@@ -1,0 +1,42 @@
+---@meta
+---@class WoW
+---@field CreateFrame fun(frameType: string, name: string?, parent: table?, template: string?, id: number?): frame: table
+---@field InterfaceOptions_AddCategory fun(panel: table)
+---@field InterfaceOptionsFrame_OpenToCategory fun(panel: table)
+---@field GetMacroInfo fun(id: string|number): name: string, icon: number, body: string
+---@field WOW_PROJECT_ID string
+---@field WOW_PROJECT_CLASSIC string
+---@field WOW_PROJECT_MAINLINE string
+---@field SlashCmdList table
+---@field SettingsPanel table
+---@field InterfaceOptionsFramePanelContainer table
+---@field ReloadUI fun()
+---@field CompactPartyFrame table
+---@field CompactRaidFrameContainer table
+---@field CompactArenaFrame table
+---@field UnitName fun(unit: string): string
+---@field UnitInRaid fun(unit: string): index: number?
+---@field GetRaidRosterInfo fun(id: number): ...
+---@field IsInInstance fun(): boolean
+---@field issecurevariable fun(tableOrName: table|string, name: string?): isSecure: boolean, taint: string?
+---@field GetAddOnEnableState fun(character: string?, addon: string): number
+---@field InCombatLockdown fun(): boolean
+---@field RegisterAttributeDriver fun(frame: table, attribute: string, conditional: string)
+---@field EditMacro fun(macroInfo: number|string, name: string?, icon: number|string?, body: string?): macroId: number
+---@field UnitIsPlayer fun(unit: string): boolean
+---@field CompactRaidFrameContainer_SetFlowSortFunction fun(container: table, sortFunction: fun(unit1: string, unit2: string): boolean)
+---@field EditModeManagerFrame table
+---@field EventRegistry table
+---@field UIParent table
+---@field CompactRaidFrameManager_GetSetting fun(name: string): boolean
+---@field Enum table
+---@field GetCVarBool fun(name: string): boolean?
+---@field wipe fun(table: table): table
+---@field C_Timer table
+---@field IsInGroup fun(): boolean
+---@field IsInRaid fun(): boolean
+---@field UnitExists fun(unit: string): boolean
+---@field MAX_RAID_MEMBERS number
+---@field MEMBERS_PER_RAID_GROUP number
+---@field CopyTable fun(table: table): table
+---@field hooksecurefunc fun(...)

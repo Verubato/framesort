@@ -1,4 +1,6 @@
 local _, addon = ...
+---@type WoW
+local wow = addon.WoW
 local fsFrame = addon.Frame
 local fsScheduler = addon.Scheduler
 local M = {}
@@ -27,11 +29,11 @@ function M:Name()
 end
 
 function M:Enabled()
-    if WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE then
+    if wow.WOW_PROJECT_ID ~= wow.WOW_PROJECT_MAINLINE then
         return false
     end
 
-    return GetAddOnEnableState(nil, "GladiusEx") ~= 0
+    return wow.GetAddOnEnableState(nil, "GladiusEx") ~= 0
 end
 
 function M:Init()
@@ -39,7 +41,7 @@ function M:Init()
         return
     end
 
-    local eventFrame = CreateFrame("Frame")
+    local eventFrame = wow.CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", UpdateNextFrame)
     eventFrame:RegisterEvent(addon.Events.PLAYER_ENTERING_WORLD)
     eventFrame:RegisterEvent(addon.Events.GROUP_ROSTER_UPDATE)
@@ -58,6 +60,7 @@ function M:GetUnit(frame)
 end
 
 function M:PartyFrames()
+    ---@diagnostic disable-next-line: undefined-global
     return fsFrame:ChildUnitFrames(GladiusExPartyFrame, GetUnit)
 end
 
@@ -74,6 +77,7 @@ function M:RaidGroups()
 end
 
 function M:EnemyArenaFrames()
+    ---@diagnostic disable-next-line: undefined-global
     return fsFrame:ChildUnitFrames(GladiusExArenaFrame, GetUnit)
 end
 

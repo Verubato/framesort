@@ -1,4 +1,6 @@
 local _, addon = ...
+---@type WoW
+local wow = addon.WoW
 local fsUnit = addon.Unit
 local fsMath = addon.Math
 local fsEnumerable = addon.Enumerable
@@ -12,11 +14,9 @@ local function EmptyCompare(x, y)
 end
 
 function CompareAlphabetical(leftToken, rightToken)
-    local name1, name2 = UnitName(leftToken), UnitName(rightToken)
+    local name1, name2 = wow.UnitName(leftToken), wow.UnitName(rightToken)
     if name1 and name2 then
         return name1 < name2
-    elseif name1 or name2 then
-        return name1
     end
 
     return leftToken < rightToken
@@ -50,26 +50,31 @@ local function CompareRole(leftToken, rightToken)
 
         local leftNumber = tonumber(leftStr)
         local rightNumber = tonumber(rightStr)
-        local leftSpecId = GetArenaOpponentSpec(leftNumber)
-        local rightSpecId = GetArenaOpponentSpec(rightNumber)
+
+        if not leftNumber or not rightNumber then
+            return leftToken < rightToken
+        end
+
+        local leftSpecId = wow.GetArenaOpponentSpec(leftNumber)
+        local rightSpecId = wow.GetArenaOpponentSpec(rightNumber)
 
         if leftSpecId and rightSpecId then
-            _, _, _, _, leftRole, _, _ = GetSpecializationInfoByID(leftSpecId)
-            _, _, _, _, rightRole, _, _ = GetSpecializationInfoByID(rightSpecId)
+            _, _, _, _, leftRole, _, _ = wow.GetSpecializationInfoByID(leftSpecId)
+            _, _, _, _, rightRole, _, _ = wow.GetSpecializationInfoByID(rightSpecId)
         end
     else
-        local leftId, rightId = UnitInRaid(leftToken), UnitInRaid(rightToken)
+        local leftId, rightId = wow.UnitInRaid(leftToken), wow.UnitInRaid(rightToken)
 
         if leftId then
-            leftRole = select(10, GetRaidRosterInfo(leftId))
+            leftRole = select(10, wow.GetRaidRosterInfo(leftId))
         end
 
         if rightId then
-            rightRole = select(10, GetRaidRosterInfo(rightId))
+            rightRole = select(10, wow.GetRaidRosterInfo(rightId))
         end
 
-        leftRole = leftRole or UnitGroupRolesAssigned(leftToken)
-        rightRole = rightRole or UnitGroupRolesAssigned(rightToken)
+        leftRole = leftRole or wow.UnitGroupRolesAssigned(leftToken)
+        rightRole = rightRole or wow.UnitGroupRolesAssigned(rightToken)
     end
 
     if leftRole and rightRole then
@@ -155,7 +160,7 @@ end
 ---@return GroupSortMode? groupMode the group sort mode.
 ---@return boolean? reverse whether the sorting is reversed.
 function M:FriendlySortMode()
-    local inInstance, instanceType = IsInInstance()
+    local inInstance, instanceType = wow.IsInInstance()
 
     if inInstance and instanceType == "arena" then
         return addon.Options.Arena.Enabled, addon.Options.Arena.PlayerSortMode, addon.Options.Arena.GroupSortMode, addon.Options.Arena.Reverse
@@ -188,17 +193,17 @@ end
 ---@return boolean
 function M:Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse, preSortedUnits)
     -- if not in a group, we might be in test mode
-    if IsInGroup() then
-        if not UnitExists(leftToken) then
+    if wow.IsInGroup() then
+        if not wow.UnitExists(leftToken) then
             return false
         end
-        if not UnitExists(rightToken) then
+        if not wow.UnitExists(rightToken) then
             return true
         end
     end
 
     if playerSortMode and playerSortMode ~= "" then
-        if leftToken == "player" or UnitIsUnit(leftToken, "player") then
+        if leftToken == "player" or wow.UnitIsUnit(leftToken, "player") then
             if playerSortMode == addon.PlayerSortMode.Hidden then
                 return false
             elseif playerSortMode == addon.PlayerSortMode.Middle then
@@ -209,7 +214,7 @@ function M:Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse
             end
         end
 
-        if rightToken == "player" or UnitIsUnit(rightToken, "player") then
+        if rightToken == "player" or wow.UnitIsUnit(rightToken, "player") then
             if playerSortMode == addon.PlayerSortMode.Hidden then
                 return true
             elseif playerSortMode == addon.PlayerSortMode.Middle then
@@ -255,9 +260,9 @@ function M:EnemyCompare(leftToken, rightToken, groupSortMode, reverse)
         return CompareGroup(leftToken, rightToken)
     end
 
-    local inInstance, instanceType = IsInInstance()
+    local inInstance, instanceType = wow.IsInInstance()
 
-    if groupSortMode == addon.GroupSortMode.Role and inInstance and instanceType == "arena" and WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+    if groupSortMode == addon.GroupSortMode.Role and inInstance and instanceType == "arena" and wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
         return CompareRole(leftToken, rightToken)
     end
 

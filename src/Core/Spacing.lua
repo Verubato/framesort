@@ -1,4 +1,6 @@
 local _, addon = ...
+---@type WoW
+local wow = addon.WoW
 local fsUnit = addon.Unit
 local fsSort = addon.Sorting
 local blizzardFrames = addon.Frame.Providers.Blizzard
@@ -295,7 +297,7 @@ local function ApplyPartySpacing()
             -- a unit can be both a player and a pet
             -- e.g. when occupying a vehicle
             -- so we want to filter out the pets
-            return UnitIsPlayer(unit) and not fsUnit:IsPet(unit)
+            return wow.UnitIsPlayer(unit) and not fsUnit:IsPet(unit)
         end)
         :ToTable()
 
@@ -455,16 +457,16 @@ end
 function addon:InitSpacing()
     fsSort:RegisterPostSortCallback(Run)
 
-    local eventFrame = CreateFrame("Frame")
+    local eventFrame = wow.CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", Run)
     eventFrame:RegisterEvent(addon.Events.PLAYER_ENTERING_WORLD)
     eventFrame:RegisterEvent(addon.Events.GROUP_ROSTER_UPDATE)
     eventFrame:RegisterEvent(addon.Events.PLAYER_ROLES_ASSIGNED)
     eventFrame:RegisterEvent(addon.Events.UNIT_PET)
 
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+    if wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
         eventFrame:RegisterEvent(addon.Events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
         eventFrame:RegisterEvent(addon.Events.ARENA_OPPONENT_UPDATE)
-        EventRegistry:RegisterCallback(addon.Events.EditModeExit, Run)
+        wow.EventRegistry:RegisterCallback(addon.Events.EditModeExit, Run)
     end
 end

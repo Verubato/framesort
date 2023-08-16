@@ -1,4 +1,6 @@
 local _, addon = ...
+---@type WoW
+local wow = addon.WoW
 local fsFrame = addon.Frame
 local fsEnumerable = addon.Enumerable
 local fsUnit = addon.Unit
@@ -60,13 +62,13 @@ end
 function M:Enabled()
     local enabled = false
 
-    if CompactPartyFrame then
+    if wow.CompactPartyFrame then
         -- frame addons will usually disable blizzard via unsubscribing group update events
-        enabled = CompactPartyFrame:IsEventRegistered("GROUP_ROSTER_UPDATE")
+        enabled = wow.CompactPartyFrame:IsEventRegistered("GROUP_ROSTER_UPDATE")
     end
 
-    if CompactRaidFrameContainer then
-        enabled = enabled or CompactRaidFrameContainer:IsEventRegistered("GROUP_ROSTER_UPDATE")
+    if wow.CompactRaidFrameContainer then
+        enabled = enabled or wow.CompactRaidFrameContainer:IsEventRegistered("GROUP_ROSTER_UPDATE")
     end
 
     return enabled
@@ -77,15 +79,15 @@ function M:Init()
         return
     end
 
-    local eventFrame = CreateFrame("Frame")
+    local eventFrame = wow.CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", Update)
     eventFrame:RegisterEvent(addon.Events.PLAYER_ENTERING_WORLD)
     eventFrame:RegisterEvent(addon.Events.GROUP_ROSTER_UPDATE)
     eventFrame:RegisterEvent(addon.Events.PLAYER_ROLES_ASSIGNED)
     eventFrame:RegisterEvent(addon.Events.UNIT_PET)
 
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        EventRegistry:RegisterCallback(addon.Events.EditModeExit, Update)
+    if wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
+        wow.EventRegistry:RegisterCallback(addon.Events.EditModeExit, Update)
         eventFrame:RegisterEvent(addon.Events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
         eventFrame:RegisterEvent(addon.Events.ARENA_OPPONENT_UPDATE)
     end
@@ -100,11 +102,11 @@ function M:GetUnit(frame)
 end
 
 function M:PartyFrames()
-    return GetFrames(CompactPartyFrame)
+    return GetFrames(wow.CompactPartyFrame)
 end
 
 function M:RaidFrames()
-    return GetFrames(CompactRaidFrameContainer)
+    return GetFrames(wow.CompactRaidFrameContainer)
 end
 
 function M:RaidGroupMembers(group)
@@ -112,11 +114,11 @@ function M:RaidGroupMembers(group)
 end
 
 function M:RaidGroups()
-    return GetFrames(CompactRaidFrameContainer, IsValidGroupFrame)
+    return GetFrames(wow.CompactRaidFrameContainer, IsValidGroupFrame)
 end
 
 function M:EnemyArenaFrames()
-    return GetFrames(CompactArenaFrame)
+    return GetFrames(wow.CompactArenaFrame)
 end
 
 function M:PlayerRaidFrames()
@@ -124,10 +126,10 @@ function M:PlayerRaidFrames()
         local unit = M:GetUnit(frame)
         -- a player can have more than one frame if they occupy a vehicle
         -- as both the player and vehicle pet frame are shown
-        return unit and (unit == "player" or UnitIsUnit(unit, "player")) and not fsUnit:IsPet(unit)
+        return unit and (unit == "player" or wow.UnitIsUnit(unit, "player")) and not fsUnit:IsPet(unit)
     end
 
-    local party = GetFrames(CompactPartyFrame, isPlayer)
+    local party = GetFrames(wow.CompactPartyFrame, isPlayer)
     if #party > 0 then
         return party
     end
@@ -141,7 +143,7 @@ function M:PlayerRaidFrames()
             end
         end
     else
-        local raid = GetFrames(CompactRaidFrameContainer, isPlayer)
+        local raid = GetFrames(wow.CompactRaidFrameContainer, isPlayer)
         if #raid > 0 then
             return raid
         end
@@ -155,39 +157,40 @@ function M:ShowPartyPets()
 end
 
 function M:ShowRaidPets()
-    return CompactRaidFrameManager_GetSetting("DisplayPets")
+    return wow.CompactRaidFrameManager_GetSetting("DisplayPets")
 end
 
 function M:IsRaidGrouped()
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        local raidGroupDisplayType = EditModeManagerFrame:GetSettingValue(Enum.EditModeSystem.UnitFrame, Enum.EditModeUnitFrameSystemIndices.Raid, Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
-        return raidGroupDisplayType == Enum.RaidGroupDisplayType.SeparateGroupsVertical or raidGroupDisplayType == Enum.RaidGroupDisplayType.SeparateGroupsHorizontal
+    if wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
+        local raidGroupDisplayType =
+            wow.EditModeManagerFrame:GetSettingValue(wow.Enum.EditModeSystem.UnitFrame, wow.Enum.EditModeUnitFrameSystemIndices.Raid, wow.Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
+        return raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsVertical or raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsHorizontal
     end
 
-    return CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
+    return wow.CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
 end
 
 function M:IsPartyHorizontalLayout()
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        return EditModeManagerFrame:GetSettingValueBool(Enum.EditModeSystem.UnitFrame, Enum.EditModeUnitFrameSystemIndices.Party, Enum.EditModeUnitFrameSetting.UseHorizontalGroups)
+    if wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
+        return wow.EditModeManagerFrame:GetSettingValueBool(wow.Enum.EditModeSystem.UnitFrame, wow.Enum.EditModeUnitFrameSystemIndices.Party, wow.Enum.EditModeUnitFrameSetting.UseHorizontalGroups)
     end
 
-    return CompactRaidFrameManager_GetSetting("HorizontalGroups")
+    return wow.CompactRaidFrameManager_GetSetting("HorizontalGroups")
 end
 
 function M:IsRaidHorizontalLayout()
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        local displayType = EditModeManagerFrame:GetSettingValue(Enum.EditModeSystem.UnitFrame, Enum.EditModeUnitFrameSystemIndices.Raid, Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
-        return displayType == Enum.RaidGroupDisplayType.SeparateGroupsHorizontal or displayType == Enum.RaidGroupDisplayType.CombineGroupsHorizontal
+    if wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
+        local displayType = wow.EditModeManagerFrame:GetSettingValue(wow.Enum.EditModeSystem.UnitFrame, wow.Enum.EditModeUnitFrameSystemIndices.Raid, wow.Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
+        return displayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsHorizontal or displayType == wow.Enum.RaidGroupDisplayType.CombineGroupsHorizontal
     end
 
-    return CompactRaidFrameManager_GetSetting("HorizontalGroups")
+    return wow.CompactRaidFrameManager_GetSetting("HorizontalGroups")
 end
 
 function M:IsUsingRaidStyleFrames()
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        return EditModeManagerFrame:UseRaidStylePartyFrames()
+    if wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
+        return wow.EditModeManagerFrame:UseRaidStylePartyFrames()
     else
-        return GetCVarBool("useCompactPartyFrames")
+        return wow.GetCVarBool("useCompactPartyFrames")
     end
 end

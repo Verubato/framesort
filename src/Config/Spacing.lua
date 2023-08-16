@@ -1,4 +1,6 @@
 local _, addon = ...
+---@type WoW
+local wow = addon.WoW
 local fsBuilder = addon.OptionsBuilder
 local fsSpacing = addon.Spacing
 local verticalSpacing = fsBuilder.VerticalSpacing
@@ -56,11 +58,11 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
         label:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
         label:SetText("Horizontal")
 
-        local slider = CreateFrame("Slider", "sld" .. name .. "XSpacing", panel, "OptionsSliderTemplate")
+        local slider = wow.CreateFrame("Slider", "sld" .. name .. "XSpacing", panel, "OptionsSliderTemplate")
         slider:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -verticalSpacing)
         ConfigureSlider(slider, spacing.Horizontal)
 
-        local box = CreateFrame("EditBox", nil, panel, "InputBoxTemplate")
+        local box = wow.CreateFrame("EditBox", nil, panel, "InputBoxTemplate")
         box:SetPoint("CENTER", slider, "CENTER", 0, 30)
         ConfigureEditBox(box, spacing.Horizontal)
 
@@ -96,11 +98,11 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
         label:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
         label:SetText("Vertical")
 
-        local slider = CreateFrame("Slider", "sld" .. name .. "YSpacing", panel, "OptionsSliderTemplate")
+        local slider = wow.CreateFrame("Slider", "sld" .. name .. "YSpacing", panel, "OptionsSliderTemplate")
         slider:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -verticalSpacing)
         ConfigureSlider(slider, spacing.Vertical)
 
-        local box = CreateFrame("EditBox", nil, panel, "InputBoxTemplate")
+        local box = wow.CreateFrame("EditBox", nil, panel, "InputBoxTemplate")
         box:SetPoint("CENTER", slider, "CENTER", 0, 30)
         ConfigureEditBox(box, spacing.Vertical)
 
@@ -138,7 +140,7 @@ end
 ---Adds the spacing options panel.
 ---@param parent table the parent UI panel.
 function fsBuilder:BuildSpacingOptions(parent)
-    local panel = CreateFrame("Frame", "FrameSortSpacing", parent)
+    local panel = wow.CreateFrame("Frame", "FrameSortSpacing", parent)
     panel.name = "Spacing"
     panel.parent = parent.name
 
@@ -155,17 +157,17 @@ function fsBuilder:BuildSpacingOptions(parent)
     descriptionLine2:SetText("This only applies to Blizzard frames.")
 
     local anchor = descriptionLine2
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+    if wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
         -- for retail
         anchor = BuildSpacingOptions(panel, anchor, "Party", addon.Options.Appearance.Party.Spacing, true, true, 0)
     end
 
-    local title = WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and "Raid" or "Group"
+    local title = wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE and "Raid" or "Group"
     anchor = BuildSpacingOptions(panel, anchor, title, addon.Options.Appearance.Raid.Spacing, true, true, verticalSpacing)
 
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE and CompactArenaFrame then
+    if wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE and wow.CompactArenaFrame then
         anchor = BuildSpacingOptions(panel, anchor, "Enemy Arena", addon.Options.Appearance.EnemyArena.Spacing, false, true, verticalSpacing)
     end
 
-    InterfaceOptions_AddCategory(panel)
+    wow.InterfaceOptions_AddCategory(panel)
 end

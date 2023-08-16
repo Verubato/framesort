@@ -1,4 +1,5 @@
 local _, addon = ...
+local wow = addon.WoW
 local fsBuilder = addon.OptionsBuilder
 local fsMacro = addon.Macro
 local maxMacros = 138
@@ -8,7 +9,7 @@ local function CountMacros()
     local count = 0
 
     for i = 1, maxMacros do
-        local _, _, body = GetMacroInfo(i)
+        local _, _, body = wow.GetMacroInfo(i)
 
         if body and fsMacro:IsFrameSortMacro(body) then
             count = count + 1
@@ -21,7 +22,7 @@ end
 ---Adds the macro options panel.
 ---@param parent table the parent UI panel.
 function fsBuilder:BuildMacroOptions(parent)
-    local panel = CreateFrame("Frame", "FrameSortMacros", parent)
+    local panel = wow.CreateFrame("Frame", "FrameSortMacros", parent)
     panel.name = "Macros"
     panel.parent = parent.name
 
@@ -72,7 +73,7 @@ function fsBuilder:BuildMacroOptions(parent)
         header:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
         header:SetText(string.format("Example %d", i))
 
-        local box = CreateFrame("EditBox", nil, panel)
+        local box = wow.CreateFrame("EditBox", nil, panel)
         box:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -verticalSpacing)
         box:SetSize(500, 1)
         box:SetFontObject("GameFontWhite")
@@ -95,7 +96,7 @@ function fsBuilder:BuildMacroOptions(parent)
         end)
         box:SetTextInsets(padding, padding, padding, padding)
 
-        local bg = CreateFrame("Frame", nil, panel, "BackdropTemplate")
+        local bg = wow.CreateFrame("Frame", nil, panel, "BackdropTemplate")
         bg:SetBackdrop({
             edgeFile = "Interface\\Glues\\Common\\TextPanel-Border",
             edgeSize = 16,
@@ -124,5 +125,5 @@ function fsBuilder:BuildMacroOptions(parent)
         anchor = description
     end
 
-    InterfaceOptions_AddCategory(panel)
+    wow.InterfaceOptions_AddCategory(panel)
 end

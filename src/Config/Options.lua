@@ -1,4 +1,6 @@
 local _, addon = ...
+---@type WoW
+local wow = addon.WoW
 addon.OptionsBuilder = {
     VerticalSpacing = 13,
     HorizontalSpacing = 50,
@@ -12,7 +14,7 @@ local horizontalSpacing = fsBuilder.HorizontalSpacing
 local labelWidth = 50
 
 function fsBuilder:TextShim(frame)
-    if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+    if wow.WOW_PROJECT_ID ~= wow.WOW_PROJECT_CLASSIC then
         return
     end
 
@@ -86,7 +88,7 @@ local function BuiltTitle(panel)
 
     panel:HookScript("OnShow", onShow)
 
-    local loader = CreateFrame("Frame", nil, panel)
+    local loader = wow.CreateFrame("Frame", nil, panel)
     loader:HookScript("OnEvent", onShow)
     loader:RegisterEvent("PLAYER_ENTERING_WORLD")
 
@@ -109,7 +111,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         hasAlpha = true
     end
 
-    local enabled = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
+    local enabled = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     -- not sure why, but checkbox left seems to be off by about 4 units by default
     enabled:SetPoint("TOPLEFT", pointOffset, "BOTTOMLEFT", -4, -verticalSpacing)
     fsBuilder:TextShim(enabled)
@@ -133,25 +135,25 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         playerLabel:SetJustifyH("LEFT")
         playerLabel:SetWidth(labelWidth)
 
-        top = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
+        top = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
         fsBuilder:TextShim(top)
         top.Text:SetText("Top")
         top:SetPoint("LEFT", playerLabel, "RIGHT", horizontalSpacing / 2, 0)
         top:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Top)
 
-        middle = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
+        middle = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
         fsBuilder:TextShim(middle)
         middle.Text:SetText("Middle")
         middle:SetPoint("LEFT", top, "RIGHT", horizontalSpacing, 0)
         middle:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Middle)
 
-        bottom = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
+        bottom = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
         fsBuilder:TextShim(bottom)
         bottom.Text:SetText("Bottom")
         bottom:SetPoint("LEFT", middle, "RIGHT", horizontalSpacing, 0)
         bottom:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Bottom)
 
-        hidden = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
+        hidden = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
         fsBuilder:TextShim(hidden)
         hidden.Text:SetText("Hidden")
         hidden:SetPoint("LEFT", bottom, "RIGHT", horizontalSpacing, 0)
@@ -198,14 +200,14 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
     -- because the dropdown box control has taint issues that haven't been fixed for years
     -- also it seems to have become much worse in dragonflight
     -- so while a dropdown would be better ui design, it's too buggy to use at the moment
-    local group = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
+    local group = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     group:SetPoint("LEFT", modeLabel, "RIGHT", horizontalSpacing / 2, 0)
 
     fsBuilder:TextShim(group)
     group.Text:SetText(addon.GroupSortMode.Group)
     group:SetChecked(options.GroupSortMode == addon.GroupSortMode.Group)
 
-    local role = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
+    local role = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     role:SetPoint("LEFT", group, "RIGHT", horizontalSpacing, 0)
     fsBuilder:TextShim(role)
     role.Text:SetText(addon.GroupSortMode.Role)
@@ -218,7 +220,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
     }
 
     if hasAlpha then
-        alpha = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
+        alpha = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
         alpha:SetPoint("LEFT", role, "RIGHT", horizontalSpacing, 0)
         fsBuilder:TextShim(alpha)
         alpha.Text:SetText("Alpha")
@@ -227,7 +229,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         modes[alpha] = addon.GroupSortMode.Alphabetical
     end
 
-    local reverse = CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
+    local reverse = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     reverse:SetPoint("LEFT", alpha or role, "RIGHT", horizontalSpacing, 0)
     fsBuilder:TextShim(reverse)
     reverse.Text:SetText("Reverse")
@@ -324,11 +326,11 @@ end
 function fsBuilder:BuildSortingOptions(panel)
     local anchor = BuiltTitle(panel)
 
-    if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+    if wow.WOW_PROJECT_ID ~= wow.WOW_PROJECT_CLASSIC then
         anchor = BuildSortModeCheckboxes(panel, anchor, "Arena", addon.Options.Arena)
     end
 
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+    if wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
         anchor = BuildSortModeCheckboxes(panel, anchor, "Enemy Arena (GladiusEx, sArena, Blizzard)", addon.Options.EnemyArena, false, false)
     end
 
@@ -339,22 +341,22 @@ end
 
 ---Initialises the addon options.
 function addon:InitOptions()
-    local panel = CreateFrame("ScrollFrame", nil, nil, "UIPanelScrollFrameTemplate")
+    local panel = wow.CreateFrame("ScrollFrame", nil, nil, "UIPanelScrollFrameTemplate")
     panel.name = "FrameSort"
 
-    local main = CreateFrame("Frame")
+    local main = wow.CreateFrame("Frame")
 
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        main:SetWidth(SettingsPanel.Container:GetWidth())
-        main:SetHeight(SettingsPanel.Container:GetHeight())
+    if wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
+        main:SetWidth(wow.SettingsPanel.Container:GetWidth())
+        main:SetHeight(wow.SettingsPanel.Container:GetHeight())
     else
-        main:SetWidth(InterfaceOptionsFramePanelContainer:GetWidth())
-        main:SetHeight(InterfaceOptionsFramePanelContainer:GetHeight())
+        main:SetWidth(wow.InterfaceOptionsFramePanelContainer:GetWidth())
+        main:SetHeight(wow.InterfaceOptionsFramePanelContainer:GetHeight())
     end
 
     panel:SetScrollChild(main)
 
-    InterfaceOptions_AddCategory(panel)
+    wow.InterfaceOptions_AddCategory(panel)
 
     fsBuilder:BuildSortingOptions(main)
     fsBuilder:BuildSortingMethodOptions(panel)
@@ -367,13 +369,13 @@ function addon:InitOptions()
     SLASH_FRAMESORT1 = "/fs"
     SLASH_FRAMESORT2 = "/framesort"
 
-    SlashCmdList.FRAMESORT = function()
-        InterfaceOptionsFrame_OpenToCategory(panel)
+    wow.SlashCmdList.FRAMESORT = function()
+        wow.InterfaceOptionsFrame_OpenToCategory(panel)
 
         -- workaround the classic bug where the first call opens the Game interface
         -- and a second call is required
-        if WOW_PROJECT_ID ~= WOW_PROJECT_MAINLINE then
-            InterfaceOptionsFrame_OpenToCategory(panel)
+        if wow.WOW_PROJECT_ID ~= wow.WOW_PROJECT_MAINLINE then
+            wow.InterfaceOptionsFrame_OpenToCategory(panel)
         end
     end
 end

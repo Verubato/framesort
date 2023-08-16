@@ -1,4 +1,6 @@
 local _, addon = ...
+---@type WoW
+local wow = addon.WoW
 local fsScheduler = addon.Scheduler
 local fsUnit = addon.Unit
 local fsCompare = addon.Compare
@@ -159,7 +161,7 @@ local function SortRaid(provider)
             -- a unit can be both a player and a pet
             -- e.g. when occupying a vehicle
             -- so we want to filter out the pets
-            return unit and UnitIsPlayer(unit) and not fsUnit:IsPet(unit)
+            return unit and wow.UnitIsPlayer(unit) and not fsUnit:IsPet(unit)
         end)
         :ToTable()
 
@@ -289,7 +291,7 @@ local function SortParty(provider)
                 return true
             end
 
-            return UnitIsPlayer(unit)
+            return wow.UnitIsPlayer(unit)
         end)
         :ToTable()
 
@@ -365,19 +367,19 @@ local function TrySortTraditional()
     local sorted = false
     local sortFunction = fsCompare:SortFunction()
 
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        if CompactRaidFrameContainer and not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
-            CompactRaidFrameContainer:SetFlowSortFunction(sortFunction)
+    if wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
+        if wow.CompactRaidFrameContainer and not wow.CompactRaidFrameContainer:IsForbidden() and wow.CompactRaidFrameContainer:IsVisible() then
+            wow.CompactRaidFrameContainer:SetFlowSortFunction(sortFunction)
             sorted = true
         end
 
-        if CompactPartyFrame and not CompactPartyFrame:IsForbidden() and CompactPartyFrame:IsVisible() then
-            CompactPartyFrame:SetFlowSortFunction(sortFunction)
+        if wow.CompactPartyFrame and not wow.CompactPartyFrame:IsForbidden() and wow.CompactPartyFrame:IsVisible() then
+            wow.CompactPartyFrame:SetFlowSortFunction(sortFunction)
             sorted = sorted or true
         end
     else
-        if CompactRaidFrameContainer and not CompactRaidFrameContainer:IsForbidden() and CompactRaidFrameContainer:IsVisible() then
-            CompactRaidFrameContainer_SetFlowSortFunction(CompactRaidFrameContainer, sortFunction)
+        if wow.CompactRaidFrameContainer and not wow.CompactRaidFrameContainer:IsForbidden() and wow.CompactRaidFrameContainer:IsVisible() then
+            wow.CompactRaidFrameContainer_SetFlowSortFunction(wow.CompactRaidFrameContainer, sortFunction)
             sorted = true
         end
     end
@@ -404,7 +406,7 @@ local function TrySortTaintless()
             sorted = sorted or sortedRaid or sortedParty
         end
 
-        if enemyEnabled and WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
+        if enemyEnabled and wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
             local arenaSorted = SortEnemyArena(provider)
             sorted = sorted or arenaSorted
         end
@@ -444,7 +446,7 @@ end
 ---@return boolean sorted true if sorted, otherwise false.
 function M:TrySort()
     -- can't make changes during combat
-    if InCombatLockdown() and not addon.Options.SortingMethod.TaintlessEnabled then
+    if wow.InCombatLockdown() and not addon.Options.SortingMethod.TaintlessEnabled then
         fsScheduler:RunWhenCombatEnds(function()
             M:TrySort()
         end)
@@ -452,8 +454,8 @@ function M:TrySort()
         return false
     end
 
-    if WOW_PROJECT_ID == WOW_PROJECT_MAINLINE then
-        if EditModeManagerFrame.editModeActive then
+    if wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
+        if wow.EditModeManagerFrame.editModeActive then
             fsLog:Debug("Not sorting while edit mode active.")
             return false
         end

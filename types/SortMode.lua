@@ -1,0 +1,11 @@
+---@meta
+---@alias GroupSortMode
+---| "Group"
+---| "Role"
+---| "Alphabetical"
+
+---@alias PlayerSortMode
+---| "Top"
+---| "Middle"
+---| "Bottom"
+---| "Hidden"

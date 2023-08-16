@@ -1,4 +1,6 @@
 local _, addon = ...
+---@type WoW
+local wow = addon.WoW
 local M = {}
 addon.Unit = M
 
@@ -7,13 +9,13 @@ addon.Unit = M
 function M:FriendlyUnits()
     local members = {}
 
-    if not IsInGroup() then
+    if not wow.IsInGroup() then
         return members
     end
 
-    local isRaid = IsInRaid()
+    local isRaid = wow.IsInRaid()
     local prefix = isRaid and "raid" or "party"
-    local toGenerate = isRaid and MAX_RAID_MEMBERS or (MEMBERS_PER_RAID_GROUP - 1)
+    local toGenerate = isRaid and wow.MAX_RAID_MEMBERS or (wow.MEMBERS_PER_RAID_GROUP - 1)
 
     -- raids don't have the "player" token frame
     if not isRaid then
@@ -22,7 +24,7 @@ function M:FriendlyUnits()
 
     for i = 1, toGenerate do
         local unit = prefix .. i
-        if UnitExists(unit) then
+        if wow.UnitExists(unit) then
             table.insert(members, unit)
         end
     end
