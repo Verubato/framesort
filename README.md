@@ -1,6 +1,6 @@
 # FrameSort #
 
-A simple WoW addon that sorts party/raid frames and places you at the top/middle/bottom.
+A simple WoW addon that sorts party/raid/arena frames and places you at the top/middle/bottom.
 
 ## Features ##
 
