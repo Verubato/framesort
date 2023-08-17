@@ -1,9 +1,7 @@
 local _, addon = ...
 ---@type WoW
 local wow = addon.WoW
-local fsFrame = addon.Frame
 local fsScheduler = addon.Scheduler
-local blizzard = fsFrame.Providers.Blizzard
 local fsCompare = addon.Compare
 local fsLog = addon.Log
 ---@class PlayerVisibilityController
@@ -19,6 +17,8 @@ local function UpdatePlayer(player, mode)
 end
 
 local function Run()
+    local blizzard = addon.Frame.Providers.Blizzard
+
     if not blizzard:Enabled() then
         return
     end
@@ -52,5 +52,6 @@ end
 
 ---Initialises the player show/hide module.
 function addon:InitPlayerHiding()
+    local blizzard = addon.Frame.Providers.Blizzard
     blizzard:RegisterCallback(Run)
 end

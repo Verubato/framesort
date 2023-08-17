@@ -2,6 +2,10 @@
 return {
     Frames = {},
     Callbacks = {},
+    Reset = function(self)
+        self.Frames = {}
+        self.Callbacks = {}
+    end,
     Name = function()
         return "Test"
     end,
@@ -33,6 +37,17 @@ return {
     EnemyArenaFrames = function(self)
         return self.Frames
     end,
+    PlayerRaidFrames = function(self)
+        local frames = {}
+        for _, frame in ipairs(self.Frames) do
+            if frame.unit == "player" then
+                frames[#frames + 1] = frame
+            end
+        end
+
+        return frames
+    end,
+    IsUsingRaidStyleFrames = function() return true end,
     RaidGroupMembers = function()
         return {}
     end,

@@ -5,6 +5,7 @@ local M = {}
 
 function M:setup()
     addon:InitSavedVars()
+    addon:InitFrameProviders()
     addon:InitScheduler()
     addon:InitMacros()
 

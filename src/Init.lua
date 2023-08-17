@@ -28,6 +28,8 @@ function addon:Init()
     addon:InitMacros()
     addon:InitApi()
     addon:InitScheduler()
+
+    addon.Loaded = true
 end
 
 ---Listens for our to be loaded and then initialises it.
@@ -42,9 +44,7 @@ local function OnLoadAddon(_, _, name)
     end
 
     addon:Init()
-
     loader:UnregisterEvent("ADDON_LOADED")
-    addon.Loaded = true
 end
 
 loader = wow.CreateFrame("Frame")
