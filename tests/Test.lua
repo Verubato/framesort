@@ -10,7 +10,7 @@ TestOptionsUpgrader = require("Unit\\UpgradeOptionsTest")
 TestEnumerable = require("Unit\\EnumerableTest")
 
 -- component tests
-TestAddon = require("Component\\Addon")
+TestAddon = require("Component\\All")
 TestMacro = require("Component\\Macro")
 
 os.exit(luaunit:run())

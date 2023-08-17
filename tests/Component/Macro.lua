@@ -1,17 +1,7 @@
----@diagnostic disable: duplicate-set-field
+local addon = require("Addon")
+local wow = addon.WoW
+local provider = addon.Frame.Providers.Test
 local M = {}
-local helper = require("Helper")
-local wow = require("Mock\\WoW")
-local provider = require("Mock\\FrameProvider")
-local addon = { WoW = wow }
-
-local dependencies = helper:DependenciesFromXml()
-helper:LoadDependencies(addon, dependencies)
-
-if not addon.Frame.Providers.Test then
-    addon.Frame.Providers.Test = provider
-    addon.Frame.Providers.All[#addon.Frame.Providers.All + 1] = provider
-end
 
 function M:setup()
     addon:InitSavedVars()
@@ -69,9 +59,7 @@ function M:setup()
 end
 
 function M:teardown()
-    wow:Reset()
-    provider.Frames = {}
-    provider.Callbacks = {}
+    addon:Reset()
 end
 
 function M:test_macro_updates_on_provider_callback()
