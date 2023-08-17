@@ -2,7 +2,7 @@ local addonName, addon = ...
 local wow = addon.WoW
 local loader = nil
 
-local function InitSavedVars()
+function addon:InitSavedVars()
     if not FrameSortDB then
         FrameSortDB = {}
     end
@@ -15,8 +15,8 @@ local function InitSavedVars()
 end
 
 ---Initialises the addon.
-local function Init()
-    InitSavedVars()
+function addon:Init()
+    addon:InitSavedVars()
     addon:InitOptions()
     addon:InitFrameProviders()
     addon:InitSorting()
@@ -39,7 +39,7 @@ local function OnLoadAddon(_, _, name)
         return
     end
 
-    Init()
+    addon:Init()
 
     loader:UnregisterEvent("ADDON_LOADED")
     addon.Loaded = true

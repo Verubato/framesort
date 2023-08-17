@@ -35,7 +35,19 @@ function M:RegisterEvent(event)
     self.EventRegistrations[#self.EventRegistrations + 1] = event
 end
 
-function M:FireEvent(...)
+function M:FireEvent(event, ...)
+    local registered = false
+    for _, registration in ipairs(self.EventRegistrations) do
+        if registration == event then
+            registered = true
+            break
+        end
+    end
+
+    if not registered then
+        return
+    end
+
     for _, hook in ipairs(self.ScriptHooks) do
         if hook.Event == "OnEvent" then
             hook.Callback(...)

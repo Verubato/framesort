@@ -3,9 +3,13 @@ local frameMock = require("Mock\\Frame")
 local timer = require("Mock\\Timer")
 local wow = {
     -- mock fields
-    Frames = {},
-    SecureHooks = {},
-    AttributeDrivers = {},
+    State = {
+        Frames = {},
+        SecureHooks = {},
+        AttributeDrivers = {},
+        MockInCombat = false,
+        Macros = {},
+    },
 
     -- constants
     WOW_PROJECT_ID = "RETAIL",
@@ -64,14 +68,6 @@ local wow = {
         },
     },
     EventRegistry = void,
-
-    -- macro
-    GetMacroInfo = function()
-        return nil
-    end,
-    EditMacro = function()
-        return 0
-    end,
 
     -- unit functions
     UnitName = function()
@@ -136,9 +132,6 @@ local wow = {
     IsInRaid = function()
         return false
     end,
-    InCombatLockdown = function()
-        return false
-    end,
 
     -- utility
     ReloadUI = function() end,
@@ -171,25 +164,37 @@ local wow = {
     end,
 }
 
+function wow:Reset()
+    self.State.Frames = {}
+    self.State.SecureHooks = {}
+    self.State.AttributeDrivers = {}
+    self.State.Macros = {}
+    self.State.MockInCombat = false
+end
+
+wow.InCombatLockdown = function()
+    return wow.State.MockInCombat
+end
+
 wow.CreateFrame = function()
     local frame = {}
     setmetatable(frame, {
         __index = frameMock,
     })
 
-    wow.Frames[#wow.Frames + 1] = frame
+    wow.State.Frames[#wow.State.Frames + 1] = frame
 
     return frame
 end
 
 wow.hooksecurefunc = function(table, name, callback)
     if type(table) == "string" then
-        table = _G
-        name = table
         callback = name
+        name = table
+        table = _G
     end
 
-    wow.SecureHooks[#wow.SecureHooks + 1] = {
+    wow.State.SecureHooks[#wow.State.SecureHooks + 1] = {
         Table = table,
         Name = name,
         Callback = callback,
@@ -197,10 +202,69 @@ wow.hooksecurefunc = function(table, name, callback)
 end
 
 wow.RegisterAttributeDriver = function(frame, attribute, conditional)
-    wow.AttributeDrivers[#wow.AttributeDrivers + 1] = {
+    assertEquals(wow.InCombatLockdown(), false)
+
+    wow.State.AttributeDrivers[#wow.State.AttributeDrivers + 1] = {
         Frame = frame,
         Attribute = attribute,
         Conditional = conditional,
+    }
+end
+
+-- macro
+wow.GetMacroInfo = function(id)
+    local macro = wow.State.Macros[id]
+    if not macro then
+        return nil, nil, nil
+    end
+
+    macro.TimesRetrieved = macro.TimesRetrieved + 1
+
+    return macro.Name, macro.Icon, macro.Body
+end
+
+wow.EditMacro = function(id, name, icon, body)
+    assertEquals(wow.InCombatLockdown(), false)
+
+    local macro = wow.State.Macros[id]
+    if not macro then
+        macro = {}
+        wow.State.Macros[id] = macro
+    end
+
+    macro.Id = id
+    macro.Name = name
+    macro.Icon = icon
+    macro.Body = body
+
+    return id
+end
+
+function wow:FireEvent(event, ...)
+    assert(#wow.State.Frames > 0, "No frames have been created")
+
+    for _, frame in ipairs(wow.State.Frames) do
+        frame:FireEvent(event, ...)
+    end
+end
+
+function wow:InvokeSecureHooks(name, ...)
+    assert(#wow.State.SecureHooks > 0, "No secure hooks have been registered")
+
+    for _, hook in ipairs(wow.State.SecureHooks) do
+        if hook.Name == name then
+            hook.Callback(...)
+        end
+    end
+end
+
+function wow:LoadMacro(id, name, icon, body)
+    wow.State.Macros[id] = {
+        Id = id,
+        Name = name,
+        Icon = icon,
+        Body = body,
+        TimesRetrieved = 0,
     }
 end
 

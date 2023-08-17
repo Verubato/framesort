@@ -20,9 +20,7 @@ end
 function M:LoadDependencies(addonTable, dependencies)
     for _, fileName in ipairs(dependencies) do
         local module = loadfile("..\\src\\" .. fileName)
-        if module == nil then
-            error("Failed to load " .. fileName)
-        end
+        assert(module ~= nil, "Failed to load " .. fileName)
 
         module(M.AddonName, addonTable)
     end

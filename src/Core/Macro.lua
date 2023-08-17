@@ -10,13 +10,13 @@ local fsLog = addon.Log
 local maxMacros = 138
 local isSelfEditingMacro = false
 ---@type table<number, boolean>
-local isFsMacroCache = {}
+local isFsMacroCache = nil
 
 local function UpdateMacro(id)
     local _, _, body = wow.GetMacroInfo(id)
 
     if not body or not fsMacro:IsFrameSortMacro(body) then
-        return false, 0
+        return false, id
     end
 
     local friendlyUnits = fsTarget:FriendlyTargets()
@@ -24,7 +24,7 @@ local function UpdateMacro(id)
     local newBody = fsMacro:GetNewBody(body, friendlyUnits, enemyUnits)
 
     if not newBody then
-        return false, 0
+        return false, id
     end
 
     isSelfEditingMacro = true
@@ -78,11 +78,12 @@ end
 
 ---Initialises the macros module.
 function addon:InitMacros()
+    isFsMacroCache = {}
+
     for _, provider in ipairs(fsFrame.Providers:Enabled()) do
         provider:RegisterCallback(Run)
     end
 
     fsSort:RegisterPostSortCallback(Run)
-
     wow.hooksecurefunc("EditMacro", OnEditMacro)
 end
