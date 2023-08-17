@@ -315,11 +315,11 @@ addon.OptionsBuilder.Sorting = {
     Build = function(_, parent)
         local anchor = BuiltTitle(parent)
 
-        if wow.WOW_PROJECT_ID ~= wow.WOW_PROJECT_CLASSIC then
+        if not wow.IsClassic() then
             anchor = BuildSortModeCheckboxes(parent, anchor, "Arena", addon.Options.Arena)
         end
 
-        if wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
+        if wow.IsRetail() then
             anchor = BuildSortModeCheckboxes(parent, anchor, "Enemy Arena (GladiusEx, sArena, Blizzard)", addon.Options.EnemyArena, false, false)
         end
 

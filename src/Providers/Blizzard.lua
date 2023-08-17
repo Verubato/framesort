@@ -89,7 +89,7 @@ function M:Init()
     eventFrame:RegisterEvent(addon.Events.PLAYER_ROLES_ASSIGNED)
     eventFrame:RegisterEvent(addon.Events.UNIT_PET)
 
-    if wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
+    if wow.IsRetail() then
         wow.EventRegistry:RegisterCallback(addon.Events.EditModeExit, Update)
         eventFrame:RegisterEvent(addon.Events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
         eventFrame:RegisterEvent(addon.Events.ARENA_OPPONENT_UPDATE)
@@ -164,7 +164,7 @@ function M:ShowRaidPets()
 end
 
 function M:IsRaidGrouped()
-    if wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
+    if wow.IsRetail() then
         local raidGroupDisplayType =
             wow.EditModeManagerFrame:GetSettingValue(wow.Enum.EditModeSystem.UnitFrame, wow.Enum.EditModeUnitFrameSystemIndices.Raid, wow.Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
         return raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsVertical or raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsHorizontal
@@ -174,7 +174,7 @@ function M:IsRaidGrouped()
 end
 
 function M:IsPartyHorizontalLayout()
-    if wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
+    if wow.IsRetail() then
         return wow.EditModeManagerFrame:GetSettingValueBool(wow.Enum.EditModeSystem.UnitFrame, wow.Enum.EditModeUnitFrameSystemIndices.Party, wow.Enum.EditModeUnitFrameSetting.UseHorizontalGroups)
     end
 
@@ -182,7 +182,7 @@ function M:IsPartyHorizontalLayout()
 end
 
 function M:IsRaidHorizontalLayout()
-    if wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
+    if wow.IsRetail() then
         local displayType =
             wow.EditModeManagerFrame:GetSettingValue(wow.Enum.EditModeSystem.UnitFrame, wow.Enum.EditModeUnitFrameSystemIndices.Raid, wow.Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
         return displayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsHorizontal or displayType == wow.Enum.RaidGroupDisplayType.CombineGroupsHorizontal
@@ -192,7 +192,7 @@ function M:IsRaidHorizontalLayout()
 end
 
 function M:IsUsingRaidStyleFrames()
-    if wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
+    if wow.IsRetail() then
         return wow.EditModeManagerFrame:UseRaidStylePartyFrames()
     else
         return wow.GetCVarBool("useCompactPartyFrames")

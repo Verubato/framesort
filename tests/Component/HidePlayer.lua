@@ -1,4 +1,5 @@
 local addon = require("Addon")
+---@type WowMock
 local wow = addon.WoW
 local provider = addon.Frame.Providers.Test
 local realBlizzardProvider = addon.Frame.Providers.Blizzard

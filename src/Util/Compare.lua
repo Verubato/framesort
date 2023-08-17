@@ -264,7 +264,7 @@ function M:EnemyCompare(leftToken, rightToken, groupSortMode, reverse)
 
     local inInstance, instanceType = wow.IsInInstance()
 
-    if groupSortMode == addon.GroupSortMode.Role and inInstance and instanceType == "arena" and wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
+    if groupSortMode == addon.GroupSortMode.Role and inInstance and instanceType == "arena" and wow.IsRetail() then
         return CompareRole(leftToken, rightToken)
     end
 

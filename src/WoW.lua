@@ -71,4 +71,10 @@ addon.WoW = {
     IsRetail = function()
         return WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
     end,
+    IsWotlk = function()
+        return WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
+    end,
+    IsClassic = function()
+        return WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
+    end,
 }

@@ -30,11 +30,7 @@ function M:Name()
 end
 
 function M:Enabled()
-    if wow.WOW_PROJECT_ID ~= wow.WOW_PROJECT_MAINLINE then
-        return false
-    end
-
-    return wow.GetAddOnEnableState(nil, "GladiusEx") ~= 0
+    return wow.IsRetail() and wow.GetAddOnEnableState(nil, "GladiusEx") ~= 0
 end
 
 function M:Init()

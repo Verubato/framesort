@@ -30,7 +30,7 @@ local function AddSubCategory(panel)
 end
 
 function M:TextShim(frame)
-    if wow.WOW_PROJECT_ID ~= wow.WOW_PROJECT_CLASSIC then
+    if not wow.IsClassic() then
         return
     end
 
