@@ -11,10 +11,10 @@
     <Script file="Util\Macro.lua"/>
     <Script file="Util\Scheduler.lua"/>
     <Script file="Util\Compare.lua"/>
-    <Script file="FrameProviders\Blizzard.lua"/>
-    <Script file="FrameProviders\sArena.lua"/>
-    <Script file="FrameProviders\GladiusEx.lua"/>
-    <Script file="FrameProviders\ElvUI.lua"/>
+    <Script file="Providers\Blizzard.lua"/>
+    <Script file="Providers\sArena.lua"/>
+    <Script file="Providers\GladiusEx.lua"/>
+    <Script file="Providers\ElvUI.lua"/>
     <Script file="Core\Sort.lua"/>
     <Script file="Core\HidePlayer.lua"/>
     <Script file="Core\Spacing.lua"/>
