@@ -10,10 +10,8 @@ local fsFrame = addon.Frame
 local fsCompare = addon.Compare
 local fsLog = addon.Log
 local prefix = "FSTarget"
-local targetFriendlyCount = 5
-local targetFramesButtons = {}
-local targetEnemyCount = 3
-local targetEnemyButtons = {}
+local targetFramesButtons = nil
+local targetEnemyButtons = nil
 local targetBottomFrameButton = nil
 ---@class TargetController
 local M = {}
@@ -172,6 +170,12 @@ end
 
 ---Initialises the targeting frames feature.
 function addon:InitTargeting()
+    local targetFriendlyCount = 5
+    local targetEnemyCount = 3
+
+    targetFramesButtons = {}
+    targetEnemyButtons = {}
+
     for i = 1, targetFriendlyCount do
         local button = wow.CreateFrame("Button", prefix .. i, wow.UIParent, "SecureActionButtonTemplate")
         button:RegisterForClicks("AnyDown")

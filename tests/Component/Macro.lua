@@ -10,7 +10,7 @@ function M:setup()
     addon:InitMacros()
 
     local framesParent = {}
-    provider.Frames = {
+    provider.State.PartyFrames = {
         {
             unit = "player",
             IsVisible = function()

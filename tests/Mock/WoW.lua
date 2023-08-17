@@ -178,12 +178,8 @@ wow.InCombatLockdown = function()
     return wow.State.MockInCombat
 end
 
-wow.CreateFrame = function()
-    local frame = {}
-    setmetatable(frame, {
-        __index = frameMock,
-    })
-
+wow.CreateFrame = function(type, name, parent, template)
+    local frame = frameMock:New(type, name, parent, template)
     wow.State.Frames[#wow.State.Frames + 1] = frame
 
     return frame

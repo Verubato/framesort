@@ -1,10 +1,16 @@
 ---@type FrameProvider
 return {
-    Frames = {},
-    Callbacks = {},
+    State = {
+        PartyFrames = {},
+        RaidFrames = {},
+        EnemyArenaFrames = {},
+        Callbacks = {},
+    },
     Reset = function(self)
-        self.Frames = {}
-        self.Callbacks = {}
+        self.State.Callbacks = {}
+        self.State.PartyFrames = {}
+        self.State.RaidFrames = {}
+        self.State.EnemyArenaFrames = {}
     end,
     Name = function()
         return "Test"
@@ -17,13 +23,13 @@ return {
         return frame.unit
     end,
     RaidFrames = function(self)
-        return self.Frames
+        return self.State.RaidFrames
     end,
     RaidGroups = function()
         return {}
     end,
     PartyFrames = function(self)
-        return self.Frames
+        return self.State.PartyFrames
     end,
     ShowPartyPets = function()
         return false
@@ -35,11 +41,18 @@ return {
         return false
     end,
     EnemyArenaFrames = function(self)
-        return self.Frames
+        return self.State.EnemyArenaFrames
     end,
     PlayerRaidFrames = function(self)
         local frames = {}
-        for _, frame in ipairs(self.Frames) do
+
+        for _, frame in ipairs(self.State.PartyFrames) do
+            if frame.unit == "player" then
+                frames[#frames + 1] = frame
+            end
+        end
+
+        for _, frame in ipairs(self.State.RaidFrames) do
             if frame.unit == "player" then
                 frames[#frames + 1] = frame
             end
@@ -52,10 +65,10 @@ return {
         return {}
     end,
     RegisterCallback = function(self, callback)
-        self.Callbacks[#self.Callbacks + 1] = callback
+        self.State.Callbacks[#self.State.Callbacks + 1] = callback
     end,
     FireCallbacks = function(self)
-        for _, callback in ipairs(self.Callbacks) do
+        for _, callback in ipairs(self.State.Callbacks) do
             callback(self)
         end
     end,
