@@ -353,21 +353,3 @@ function M:Concat(other)
 
     return M:From(iterator)
 end
-
----Compares the two arrays and returns true if their items are equivalent, otherwise false.
----@param left any[]
----@param right any[]
----@return boolean
-function M:ArrayEquals(left, right)
-    if #left ~= #right then
-        return false
-    end
-
-    for i = 0, #left do
-        if left[i] ~= right[i] then
-            return false
-        end
-    end
-
-    return true
-end
