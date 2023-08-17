@@ -6,13 +6,6 @@ local wow = addon.WoW
 local M = {
     VerticalSpacing = 13,
     HorizontalSpacing = 50,
-    Health = {},
-    Macro = {},
-    Sorting = {},
-    Spacing = {},
-    Keybinding = {},
-    Integration = {},
-    SortingMethod = {},
 }
 addon.OptionsBuilder = M
 
