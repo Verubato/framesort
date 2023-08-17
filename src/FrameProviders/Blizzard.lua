@@ -6,7 +6,7 @@ local fsFrame = addon.Frame
 local fsEnumerable = addon.Enumerable
 local fsUnit = addon.Unit
 local M = {}
-local callbacks = {}
+local callbacks = nil
 
 fsFrame.Providers.Blizzard = M
 table.insert(fsFrame.Providers.All, M)
@@ -79,6 +79,8 @@ function M:Init()
     if not M:Enabled() then
         return
     end
+
+    callbacks = {}
 
     local eventFrame = wow.CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", Update)
@@ -181,7 +183,8 @@ end
 
 function M:IsRaidHorizontalLayout()
     if wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
-        local displayType = wow.EditModeManagerFrame:GetSettingValue(wow.Enum.EditModeSystem.UnitFrame, wow.Enum.EditModeUnitFrameSystemIndices.Raid, wow.Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
+        local displayType =
+            wow.EditModeManagerFrame:GetSettingValue(wow.Enum.EditModeSystem.UnitFrame, wow.Enum.EditModeUnitFrameSystemIndices.Raid, wow.Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
         return displayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsHorizontal or displayType == wow.Enum.RaidGroupDisplayType.CombineGroupsHorizontal
     end
 

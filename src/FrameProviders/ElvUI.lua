@@ -5,7 +5,7 @@ local wow = addon.WoW
 local fsFrame = addon.Frame
 local fsLog = addon.Log
 local M = {}
-local callbacks = {}
+local callbacks = nil
 local fsPlugin = nil
 local pluginName = "FrameSort"
 
@@ -62,6 +62,8 @@ function M:Init()
     if not PluginEnabled() then
         return
     end
+
+    callbacks = {}
 
     ---@diagnostic disable-next-line: undefined-global
     local E, _, _, P, _ = unpack(ElvUI)

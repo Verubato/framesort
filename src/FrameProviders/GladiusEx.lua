@@ -5,7 +5,7 @@ local wow = addon.WoW
 local fsFrame = addon.Frame
 local fsScheduler = addon.Scheduler
 local M = {}
-local callbacks = {}
+local callbacks = nil
 
 fsFrame.Providers.GladiusEx = M
 table.insert(fsFrame.Providers.All, M)
@@ -41,6 +41,8 @@ function M:Init()
     if not M:Enabled() then
         return
     end
+
+    callbacks = {}
 
     local eventFrame = wow.CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", UpdateNextFrame)

@@ -11,8 +11,7 @@ addon.Frame.Providers.All[#addon.Frame.Providers.All + 1] = provider
 
 function addon:Reset()
     wow:Reset()
-    provider.Frames = {}
-    provider.Callbacks = {}
+    provider:Reset()
 end
 
 return addon

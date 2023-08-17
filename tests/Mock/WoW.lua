@@ -170,6 +170,8 @@ function wow:Reset()
     self.State.AttributeDrivers = {}
     self.State.Macros = {}
     self.State.MockInCombat = false
+
+    timer:Reset()
 end
 
 wow.InCombatLockdown = function()
