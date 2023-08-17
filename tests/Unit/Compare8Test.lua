@@ -1,7 +1,7 @@
 local deps = {
-    "Util\\Enumerable.lua",
     "Type\\SortMode.lua",
-    "Core\\Compare.lua",
+    "Util\\Enumerable.lua",
+    "Util\\Compare.lua",
 }
 
 local addon = nil

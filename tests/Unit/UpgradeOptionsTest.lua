@@ -1,6 +1,6 @@
 local deps = {
-    "Config\\OptionsUpgrader.lua",
     "Type\\SortMode.lua",
+    "Config\\OptionsUpgrader.lua",
     "Config\\Defaults.lua",
 }
 
