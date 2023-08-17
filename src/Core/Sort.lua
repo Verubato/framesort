@@ -44,7 +44,7 @@ local function RearrangeFrames(frames, enumerateOrder, units, getUnit)
     for _, source in ipairs(enumerateOrder) do
         local _, unitIndex = fsEnumerable:From(units):First(function(x)
             local unit = getUnit(source)
-            return x == unit or UnitIsUnit(x, unit)
+            return x == unit or wow.UnitIsUnit(x, unit)
         end)
 
         if unitIndex then
@@ -116,7 +116,7 @@ local function SortPetUnits(playerUnits, petUnits)
         end)
         :Where(function(petFromPlayer)
             return fsEnumerable:From(petUnits):Any(function(pet)
-                return UnitIsUnit(pet, petFromPlayer)
+                return wow.UnitIsUnit(pet, petFromPlayer)
             end)
         end)
         :ToTable()
@@ -287,7 +287,7 @@ local function SortParty(provider)
             end
 
             -- might be in test mode
-            if not IsInGroup() then
+            if not wow.IsInGroup() then
                 return true
             end
 

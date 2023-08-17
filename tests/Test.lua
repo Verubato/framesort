@@ -11,5 +11,6 @@ TestEnumerable = require("Unit\\EnumerableTest")
 
 -- component tests
 TestAddon = require("Component\\Addon")
+TestMacro = require("Component\\Macro")
 
 os.exit(luaunit:run())
