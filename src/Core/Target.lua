@@ -1,3 +1,4 @@
+---@type string, Addon
 local _, addon = ...
 ---@type WoW
 local wow = addon.WoW
@@ -14,6 +15,7 @@ local targetFramesButtons = {}
 local targetEnemyCount = 3
 local targetEnemyButtons = {}
 local targetBottomFrameButton = nil
+---@class TargetController
 local M = {}
 addon.Target = M
 

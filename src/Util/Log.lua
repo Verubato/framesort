@@ -2,6 +2,7 @@ local _, addon = ...
 local logLevelDebug = "Debug"
 local logLevelWarning = "Warning"
 local logLevelError = "Error"
+---@class Log
 local M = {}
 addon.Log = M
 

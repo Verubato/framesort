@@ -1,0 +1,33 @@
+---@meta
+---@class Addon
+---@field WoW WoW
+---@field Log Log
+---@field Sorting SortingController
+---@field HidePlayer PlayerVisibilityController
+---@field Spacing SpacingController
+---@field Target TargetController
+---@field Frame FrameUtil
+---@field Macro MacroUtil
+---@field Unit UnitUtil
+---@field OptionsBuilder OptionsBuilder
+---@field Scheduler Scheduler
+---@field Events Events
+---@field Enumerable Enumerable
+---@field Defaults OptionDefaults
+---@field Options OptionDefaults
+---@field Math Math
+---@field Compare Compare
+---@field Health HealthChecker
+---@field PlayerSortMode PlayerSortMode
+---@field GroupSortMode GroupSortMode
+---@field OptionsUpgrader OptionsUpgrader
+---@field InitSavedVars fun(self: table)
+---@field InitOptions fun(self: table)
+---@field InitFrameProviders fun(self: table)
+---@field InitSorting fun(self: table)
+---@field InitPlayerHiding fun(self: table)
+---@field InitSpacing fun(self: table)
+---@field InitTargeting fun(self: table)
+---@field InitMacros fun(self: table)
+---@field InitApi fun(self: table)
+---@field InitScheduler fun(self: table)

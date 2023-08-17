@@ -1,0 +1,3 @@
+---@meta
+---@class OptionsPanel
+---@field Build fun(self: table, parent: table): panel: table

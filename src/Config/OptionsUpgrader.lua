@@ -1,5 +1,7 @@
+---@type string, Addon
 local _, addon = ...
 local fsLog = addon.Log
+---@class OptionsUpgrader
 local M = {}
 
 addon.OptionsUpgrader = M
@@ -278,7 +280,7 @@ local upgradeFunctions = {
 }
 
 ---Upgrades saved options to the current version.
-function addon:UpgradeOptions(options)
+function M:UpgradeOptions(options)
     while (options.Version or 1) < addon.Defaults.Version do
         local nextVersion = (options.Version or 1) + 1
         local next = upgradeFunctions["Version" .. nextVersion]

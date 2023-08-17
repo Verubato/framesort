@@ -8,6 +8,7 @@ local fsFrame = addon.Frame
 local fsEnumerable = addon.Enumerable
 local fsLog = addon.Log
 local callbacks = {}
+---@class SortingController
 local M = {}
 addon.Sorting = M
 

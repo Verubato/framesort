@@ -1,9 +1,9 @@
+---@type string, Addon
 local _, addon = ...
 ---@type WoW
 local wow = addon.WoW
-local fsBuilder = addon.OptionsBuilder
 local fsSpacing = addon.Spacing
-local verticalSpacing = fsBuilder.VerticalSpacing
+local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
 local minSpacing = 0
 local maxSpacing = 100
 
@@ -137,9 +137,7 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
     return anchor
 end
 
----Adds the spacing options panel.
----@param parent table the parent UI panel.
-function fsBuilder:BuildSpacingOptions(parent)
+function addon.OptionsBuilder.Spacing:Build(parent)
     local panel = wow.CreateFrame("Frame", "FrameSortSpacing", parent)
     panel.name = "Spacing"
     panel.parent = parent.name
@@ -170,4 +168,6 @@ function fsBuilder:BuildSpacingOptions(parent)
     end
 
     wow.InterfaceOptions_AddCategory(panel)
+
+    return panel
 end

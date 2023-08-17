@@ -10,6 +10,7 @@ local fsMath = addon.Math
 local fsEnumerable = addon.Enumerable
 local fsLog = addon.Log
 local previousSpacing = {}
+---@class SpacingController
 local M = {}
 addon.Spacing = M
 

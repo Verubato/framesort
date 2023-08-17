@@ -1,12 +1,10 @@
+---@type string, Addon
 local _, addon = ...
 ---@type WoW
 local wow = addon.WoW
-local fsBuilder = addon.OptionsBuilder
-local verticalSpacing = fsBuilder.VerticalSpacing
+local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
 
----Adds the integrations options panel.
----@param parent table the parent UI panel.
-function fsBuilder:BuildIntegrationOptions(parent)
+function addon.OptionsBuilder.Integration:Build(parent)
     local panel = wow.CreateFrame("Frame", "FrameSortSortingIntegrations", parent)
     panel.name = "Integrations"
     panel.parent = parent.name
@@ -51,4 +49,6 @@ function fsBuilder:BuildIntegrationOptions(parent)
     end
 
     wow.InterfaceOptions_AddCategory(panel)
+
+    return panel
 end

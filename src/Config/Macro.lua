@@ -1,9 +1,9 @@
+---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW
-local fsBuilder = addon.OptionsBuilder
 local fsMacro = addon.Macro
 local maxMacros = 138
-local verticalSpacing = fsBuilder.VerticalSpacing
+local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
 
 local function CountMacros()
     local count = 0
@@ -19,9 +19,7 @@ local function CountMacros()
     return count
 end
 
----Adds the macro options panel.
----@param parent table the parent UI panel.
-function fsBuilder:BuildMacroOptions(parent)
+function addon.OptionsBuilder.Macro:Build(parent)
     local panel = wow.CreateFrame("Frame", "FrameSortMacros", parent)
     panel.name = "Macros"
     panel.parent = parent.name
@@ -126,4 +124,6 @@ function fsBuilder:BuildMacroOptions(parent)
     end
 
     wow.InterfaceOptions_AddCategory(panel)
+
+    return panel
 end

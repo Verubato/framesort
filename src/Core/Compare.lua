@@ -1,3 +1,4 @@
+---@type string, Addon
 local _, addon = ...
 ---@type WoW
 local wow = addon.WoW
@@ -6,6 +7,7 @@ local fsMath = addon.Math
 local fsEnumerable = addon.Enumerable
 local fuzzyDecimalPlaces = 0
 local roleValues = { MAINTANK = 1, MAINASSIST = 2, TANK = 3, HEALER = 4, DAMAGER = 5, NONE = 6 }
+---@class Compare
 local M = {}
 addon.Compare = M
 

@@ -1,5 +1,7 @@
+---@type string, Addon
 local _, addon = ...
 local fsEnumerable = addon.Enumerable
+---@class FrameUtil
 local M = {
     Providers = {
         All = {},

@@ -1,6 +1,7 @@
+---@type string, Addon
 local _, addon = ...
 
----Default configuration.
+---@class OptionDefaults
 addon.Defaults = {
     Version = 12,
     Logging = {

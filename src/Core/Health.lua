@@ -2,6 +2,7 @@ local addonName, addon = ...
 ---@type WoW
 local wow = addon.WoW
 local fsEnumerable = addon.Enumerable
+---@class HealthChecker
 local M = {}
 addon.Health = M
 

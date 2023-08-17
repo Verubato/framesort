@@ -1,8 +1,10 @@
+---@type string, Addon
 local _, addon = ...
 local fsEnumerable = addon.Enumerable
 local fsCompare = addon.Compare
 local blizzard = addon.Frame.Providers.Blizzard
 
+---@class Api
 local Api = {
     v1 = {
         Sorting = {},
@@ -17,7 +19,9 @@ end
 local function VisualOrder(framesOrFunction)
     return fsEnumerable
         :From(framesOrFunction)
-        :Where(function(x) return x:IsVisible() end)
+        :Where(function(x)
+            return x:IsVisible()
+        end)
         :OrderBy(function(x, y)
             return fsCompare:CompareTopLeftFuzzy(x, y)
         end)

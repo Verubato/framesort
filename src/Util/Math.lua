@@ -1,4 +1,6 @@
+---@typ string, Addon
 local _, addon = ...
+---@class Math
 local M = {}
 addon.Math = M
 

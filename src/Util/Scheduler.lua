@@ -1,6 +1,8 @@
+---@type string, Addon
 local _, addon = ...
 ---@type WoW
 local wow = addon.WoW
+---@class Scheduler
 local M = {}
 local fsEnumerable = addon.Enumerable
 addon.Scheduler = M
