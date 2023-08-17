@@ -3,18 +3,12 @@ local _, addon = ...
 local fsEnumerable = addon.Enumerable
 local fsCompare = addon.Compare
 local blizzard = addon.Frame.Providers.Blizzard
-
----@class Api
-local Api = {
-    v1 = {
-        Sorting = {},
-        Options = {},
-    },
+---@class ApiV1
+local M = {
+    Sorting = {},
+    Options = {},
 }
-
-function addon:InitApi()
-    FrameSortApi = Api
-end
+addon.Api.v1 = M
 
 local function VisualOrder(framesOrFunction)
     return fsEnumerable
@@ -51,7 +45,7 @@ end
 
 ---Register a callback to invoke after sorting has been performed.
 ---@param callback function
-function Api.v1.Sorting:RegisterPostSortCallback(callback)
+function M.Sorting:RegisterPostSortCallback(callback)
     if not callback then
         error("Callback function must not be nil.")
         return
@@ -61,13 +55,13 @@ function Api.v1.Sorting:RegisterPostSortCallback(callback)
 end
 
 ---Returns a collection of Blizzard party frames ordered by their visual representation.
-function Api.v1.Sorting:GetPartyFrames()
+function M.Sorting:GetPartyFrames()
     local frames = blizzard:PartyFrames()
     return VisualOrder(frames)
 end
 
 ---Returns a collection of Blizzard raid frames ordered by their visual representation.
-function Api.v1.Sorting:GetRaidFrames()
+function M.Sorting:GetRaidFrames()
     if not blizzard:IsRaidGrouped() then
         local frames = blizzard:RaidFrames()
         return VisualOrder(frames)
@@ -84,18 +78,18 @@ function Api.v1.Sorting:GetRaidFrames()
 end
 
 ---Returns party frames if there are any, otherwise raid frames.
-function Api.v1.Sorting:GetFrames()
-    local party = Api.v1.Sorting:GetPartyFrames()
+function M.Sorting:GetFrames()
+    local party = M.Sorting:GetPartyFrames()
     if #party > 0 then
         return party
     end
 
-    return Api.v1.Sorting:GetRaidFrames()
+    return M.Sorting:GetRaidFrames()
 end
 
 ---Gets the player sort mode.
 ---@param area Area
-function Api.v1.Options:GetPlayerSortMode(area)
+function M.Options:GetPlayerSortMode(area)
     ValidateArea(area)
 
     local table = addon.Options[area]
@@ -105,7 +99,7 @@ end
 ---Sets the player sort mode.
 ---@param area Area
 ---@param mode PlayerSortMode
-function Api.v1.Options:SetPlayerSortMode(area, mode)
+function M.Options:SetPlayerSortMode(area, mode)
     ValidateArea(area)
     ValidatePlayerSortMode(mode)
 
@@ -118,7 +112,7 @@ end
 ---Sets the group sort mode.
 ---@param area Area
 ---@param mode GroupSortMode
-function Api.v1.Options:SetGroupSortMode(area, mode)
+function M.Options:SetGroupSortMode(area, mode)
     ValidateArea(area)
     ValidateGroupSortMode(mode)
 
@@ -130,7 +124,7 @@ end
 
 ---Gets the group sort mode.
 ---@param area Area
-function Api.v1.Options:GetGroupSortMode(area)
+function M.Options:GetGroupSortMode(area)
     ValidateArea(area)
 
     local table = addon.Options[area]
@@ -139,7 +133,7 @@ end
 
 ---Gets the Enabled flag.
 ---@param area Area
-function Api.v1.Options:GetEnabled(area)
+function M.Options:GetEnabled(area)
     ValidateArea(area)
 
     local table = addon.Options[area]
@@ -149,7 +143,7 @@ end
 ---Enables/disables sorting.
 ---@param area Area
 ---@param enabled boolean
-function Api.v1.Options:SetEnabled(area, enabled)
+function M.Options:SetEnabled(area, enabled)
     ValidateArea(area)
 
     local table = addon.Options[area]
@@ -162,7 +156,7 @@ end
 
 ---Enables/disables reverse sorting.
 ---@param area Area
-function Api.v1.Options:GetReverse(area)
+function M.Options:GetReverse(area)
     ValidateArea(area)
 
     local table = addon.Options[area]
@@ -172,7 +166,7 @@ end
 ---Enables/disables reverse sorting.
 ---@param area Area
 ---@param reverse boolean
-function Api.v1.Options:SetReverse(area, reverse)
+function M.Options:SetReverse(area, reverse)
     ValidateArea(area)
 
     local table = addon.Options[area]

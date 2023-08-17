@@ -1,6 +1,7 @@
 ---@meta
 ---@class Addon
 ---@field WoW WoW
+---@field Api Api
 ---@field Log Log
 ---@field Sorting SortingController
 ---@field HidePlayer PlayerVisibilityController

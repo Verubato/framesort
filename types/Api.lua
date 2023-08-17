@@ -1,0 +1,3 @@
+---@meta
+---@class Api
+---@field v1 ApiV1

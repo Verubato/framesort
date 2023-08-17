@@ -1,0 +1,3 @@
+---@meta
+---@class Module
+---@field Init fun()
