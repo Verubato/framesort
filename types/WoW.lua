@@ -57,3 +57,5 @@
 ---@field GetAddOnEnableState fun(character: string?, addon: string): number
 -- non-blizzard
 ---@field IsRetail fun(): boolean
+---@field IsClassic fun(): boolean
+---@field IsWotlk fun(): boolean

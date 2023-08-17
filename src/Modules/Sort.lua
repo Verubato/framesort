@@ -368,7 +368,7 @@ local function TrySortTraditional()
     local sorted = false
     local sortFunction = fsCompare:SortFunction()
 
-    if wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
+    if wow.IsRetail() then
         if wow.CompactRaidFrameContainer and not wow.CompactRaidFrameContainer:IsForbidden() and wow.CompactRaidFrameContainer:IsVisible() then
             wow.CompactRaidFrameContainer:SetFlowSortFunction(sortFunction)
             sorted = true
@@ -407,7 +407,7 @@ local function TrySortTaintless()
             sorted = sorted or sortedRaid or sortedParty
         end
 
-        if enemyEnabled and wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
+        if enemyEnabled and wow.IsRetail() then
             local arenaSorted = SortEnemyArena(provider)
             sorted = sorted or arenaSorted
         end
@@ -455,7 +455,7 @@ function M:TrySort()
         return false
     end
 
-    if wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
+    if wow.IsRetail() then
         if wow.EditModeManagerFrame.editModeActive then
             fsLog:Debug("Not sorting while edit mode active.")
             return false

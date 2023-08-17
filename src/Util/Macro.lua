@@ -110,7 +110,7 @@ local function UnitForSelector(selector, friendlyUnits, enemyUnits)
 
     -- enemy arena
     if string.match(selectorLower, "enemy") then
-        if wow.WOW_PROJECT_ID ~= wow.WOW_PROJECT_MAINLINE then
+        if not wow.IsRetail() then
             return "none"
         end
 

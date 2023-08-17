@@ -465,7 +465,7 @@ function addon:InitSpacing()
     eventFrame:RegisterEvent(addon.Events.PLAYER_ROLES_ASSIGNED)
     eventFrame:RegisterEvent(addon.Events.UNIT_PET)
 
-    if wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
+    if wow.IsRetail() then
         eventFrame:RegisterEvent(addon.Events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
         eventFrame:RegisterEvent(addon.Events.ARENA_OPPONENT_UPDATE)
         wow.EventRegistry:RegisterCallback(addon.Events.EditModeExit, Run)

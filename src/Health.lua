@@ -146,8 +146,7 @@ function M:IsHealthy()
         results[#results + 1] = {
             Passed = SupportsGroups(),
             Description = "'Keep Groups Together' setting disabled, or using Taintless sorting",
-            Help = wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE and "Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"
-                or "Disable the 'Keep Groups Together' raid profile setting",
+            Help = wow.IsRetail() and "Change the raid display mode to one of the 'Combined Groups' options via Edit Mode" or "Disable the 'Keep Groups Together' raid profile setting",
         }
     end
 

@@ -157,15 +157,15 @@ addon.OptionsBuilder.Spacing = {
         descriptionLine2:SetText("This only applies to Blizzard frames.")
 
         local anchor = descriptionLine2
-        if wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
+        if wow.IsRetail() then
             -- for retail
             anchor = BuildSpacingOptions(panel, anchor, "Party", addon.Options.Appearance.Party.Spacing, true, true, 0)
         end
 
-        local title = wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE and "Raid" or "Group"
+        local title = wow.IsRetail() and "Raid" or "Group"
         anchor = BuildSpacingOptions(panel, anchor, title, addon.Options.Appearance.Raid.Spacing, true, true, verticalSpacing)
 
-        if wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE and wow.CompactArenaFrame then
+        if wow.IsRetail() and wow.CompactArenaFrame then
             anchor = BuildSpacingOptions(panel, anchor, "Enemy Arena", addon.Options.Appearance.EnemyArena.Spacing, false, true, verticalSpacing)
         end
 
