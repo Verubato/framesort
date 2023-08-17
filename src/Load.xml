@@ -18,7 +18,7 @@
     <Script file="Modules\Sort.lua"/>
     <Script file="Modules\HidePlayer.lua"/>
     <Script file="Modules\Spacing.lua"/>
-    <Script file="Modules\Target.lua"/>
+    <Script file="Modules\Targeting.lua"/>
     <Script file="Modules\Macro.lua"/>
     <Script file="Api\Api.lua"/>
     <Script file="Api\v1.lua"/>
