@@ -21,7 +21,8 @@
     <Script file="Core\Target.lua"/>
     <Script file="Core\Macro.lua"/>
     <Script file="Core\Health.lua"/>
-    <Script file="Core\Api.lua"/>
+    <Script file="Api\Api.lua"/>
+    <Script file="Api\v1.lua"/>
     <Script file="Config\Defaults.lua"/>
     <Script file="Config\OptionsUpgrader.lua"/>
     <Script file="Config\Options.lua"/>
