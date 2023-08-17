@@ -23,7 +23,7 @@ end
 
 function M:test_player_hides_on_provider_callback()
     local framesParent = {}
-    provider.Frames = {
+    provider.State.PartyFrames = {
         {
             unit = "player",
             IsVisible = function()
@@ -79,14 +79,14 @@ function M:test_player_hides_on_provider_callback()
     assertEquals(#wow.State.AttributeDrivers, 1)
 
     local driver = wow.State.AttributeDrivers[1]
-    assertEquals(driver.Frame, provider.Frames[1])
+    assertEquals(driver.Frame, provider.State.PartyFrames[1])
     assertEquals(driver.Attribute, "state-visibility")
     assertEquals(driver.Conditional, "hide")
 end
 
 function M:test_player_shows_on_provider_callback()
     local framesParent = {}
-    provider.Frames = {
+    provider.State.PartyFrames = {
         {
             unit = "player",
             IsVisible = function()
@@ -142,14 +142,14 @@ function M:test_player_shows_on_provider_callback()
     assertEquals(#wow.State.AttributeDrivers, 1)
 
     local driver = wow.State.AttributeDrivers[1]
-    assertEquals(driver.Frame, provider.Frames[1])
+    assertEquals(driver.Frame, provider.State.PartyFrames[1])
     assertEquals(driver.Attribute, "state-visibility")
     assertEquals(driver.Conditional, "show")
 end
 
 function M:test_player_hides_after_combat()
     local framesParent = {}
-    provider.Frames = {
+    provider.State.PartyFrames = {
         {
             unit = "player",
             IsVisible = function()
@@ -209,14 +209,14 @@ function M:test_player_hides_after_combat()
     wow:FireEvent(addon.Events.PLAYER_REGEN_ENABLED)
 
     local driver = wow.State.AttributeDrivers[1]
-    assertEquals(driver.Frame, provider.Frames[1])
+    assertEquals(driver.Frame, provider.State.PartyFrames[1])
     assertEquals(driver.Attribute, "state-visibility")
     assertEquals(driver.Conditional, "hide")
 end
 
 function M:test_player_shows_after_combat()
     local framesParent = {}
-    provider.Frames = {
+    provider.State.PartyFrames = {
         {
             unit = "player",
             IsVisible = function()
@@ -268,7 +268,7 @@ function M:test_player_shows_after_combat()
     addon.Options.World.PlayerSortMode = "Top"
     wow.State.MockInCombat = true
 
-    assertEquals(#provider.Callbacks, 1)
+    assertEquals(#provider.State.Callbacks, 1)
     provider:FireCallbacks()
 
     assertEquals(#wow.State.AttributeDrivers, 0)
@@ -279,7 +279,7 @@ function M:test_player_shows_after_combat()
     assertEquals(#wow.State.AttributeDrivers, 1)
 
     local driver = wow.State.AttributeDrivers[1]
-    assertEquals(driver.Frame, provider.Frames[1])
+    assertEquals(driver.Frame, provider.State.PartyFrames[1])
     assertEquals(driver.Attribute, "state-visibility")
     assertEquals(driver.Conditional, "show")
 end
