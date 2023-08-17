@@ -12,7 +12,7 @@ local metatable = {
 addon.Enumerable = M
 
 ---Returns an Enumerable instance from the specified items.
----@param auto table|function|Enumerable
+---@param auto table|function
 ---@return Enumerable
 function M:From(auto)
     local t = type(auto)

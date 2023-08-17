@@ -61,8 +61,8 @@ local function CompareRole(leftToken, rightToken)
         local rightSpecId = wow.GetArenaOpponentSpec(rightNumber)
 
         if leftSpecId and rightSpecId then
-            _, _, _, _, leftRole, _, _ = wow.GetSpecializationInfoByID(leftSpecId)
-            _, _, _, _, rightRole, _, _ = wow.GetSpecializationInfoByID(rightSpecId)
+            leftRole = select(5, wow.GetSpecializationInfoByID(leftSpecId))
+            rightRole = select(5, wow.GetSpecializationInfoByID(rightSpecId))
         end
     else
         local leftId, rightId = wow.UnitInRaid(leftToken), wow.UnitInRaid(rightToken)
@@ -158,8 +158,8 @@ end
 
 ---Returns the sort mode from the configured options for the current instance.
 ---@return boolean enabled whether sorting is enabled.
----@return PlayerSortMode? playerMode the player sort mode.
----@return GroupSortMode? groupMode the group sort mode.
+---@return string? playerMode the player sort mode.
+---@return string? groupMode the group sort mode.
 ---@return boolean? reverse whether the sorting is reversed.
 function M:FriendlySortMode()
     local inInstance, instanceType = wow.IsInInstance()
@@ -178,7 +178,7 @@ end
 
 ---Returns the sort mode from the configured options for the current instance.
 ---@return boolean enabled whether sorting is enabled.
----@return GroupSortMode? groupMode the group sort mode.
+---@return string? groupMode the group sort mode.
 ---@return boolean? reverse whether the sorting is reversed.
 function M:EnemySortMode()
     return addon.Options.EnemyArena.Enabled, addon.Options.EnemyArena.GroupSortMode, addon.Options.EnemyArena.Reverse
