@@ -1,4 +1,5 @@
 ---@diagnostic disable: undefined-global
+---@type string, Addon
 local _, addon = ...
 ---@type WoW
 addon.WoW = {

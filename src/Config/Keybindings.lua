@@ -9,15 +9,13 @@ _G["BINDING_NAME_CLICK FSTargetEnemy1:LeftButton"] = "Target enemy frame 1"
 _G["BINDING_NAME_CLICK FSTargetEnemy2:LeftButton"] = "Target enemy frame 2"
 _G["BINDING_NAME_CLICK FSTargetEnemy3:LeftButton"] = "Target enemy frame 3"
 
+---@type string, Addon
 local _, addon = ...
 ---@type WoW
 local wow = addon.WoW
-local fsBuilder = addon.OptionsBuilder
-local verticalSpacing = fsBuilder.VerticalSpacing
+local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
 
----Adds the keybinding options description panel.
----@param parent table the parent UI panel.
-function fsBuilder:BuildKeybindingOptions(parent)
+function addon.OptionsBuilder.Keybinding:Build(parent)
     local panel = wow.CreateFrame("Frame", "FrameSortKeybindings", parent)
     panel.name = "Keybindings"
     panel.parent = parent.name
@@ -57,4 +55,6 @@ function fsBuilder:BuildKeybindingOptions(parent)
     end
 
     wow.InterfaceOptions_AddCategory(panel)
+
+    return panel
 end

@@ -6,6 +6,7 @@ local fsScheduler = addon.Scheduler
 local blizzard = fsFrame.Providers.Blizzard
 local fsCompare = addon.Compare
 local fsLog = addon.Log
+---@class PlayerVisibilityController
 local M = {}
 addon.HidePlayer = M
 

@@ -25,6 +25,7 @@
     <Script file="Config\Defaults.lua"/>
     <Script file="Config\OptionsUpgrader.lua"/>
     <Script file="Config\Options.lua"/>
+    <Script file="Config\Sorting.lua"/>
     <Script file="Config\Spacing.lua"/>
     <Script file="Config\Keybindings.lua"/>
     <Script file="Config\Macro.lua"/>

@@ -1,3 +1,4 @@
+---@type string, Addon
 local _, addon = ...
 
 ---@class Enumerable

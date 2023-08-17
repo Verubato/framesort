@@ -1,7 +1,9 @@
+---@type string, Addon
 local _, addon = ...
 ---@type WoW
 local wow = addon.WoW
 local fsEnumerable = addon.Enumerable
+---@class MacroUtil
 local M = {}
 addon.Macro = M
 

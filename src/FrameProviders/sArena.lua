@@ -1,3 +1,4 @@
+---@type string, Addon
 local _, addon = ...
 ---@type WoW
 local wow = addon.WoW

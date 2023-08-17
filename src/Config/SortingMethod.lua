@@ -1,8 +1,8 @@
+---@type string, Addon
 local _, addon = ...
 ---@type WoW
 local wow = addon.WoW
-local fsBuilder = addon.OptionsBuilder
-local verticalSpacing = fsBuilder.VerticalSpacing
+local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
 
 ---Adds a dot point list for each string item in lines
 ---@param panel table the parent panel
@@ -26,9 +26,7 @@ local function BuildDottedList(panel, anchor, titleText, lines)
     return anchor
 end
 
----Adds the sorting mode options panel.
----@param parent table the parent UI panel.
-function fsBuilder:BuildSortingMethodOptions(parent)
+function addon.OptionsBuilder.SortingMethod:Build(parent)
     local panel = wow.CreateFrame("Frame", "FrameSortSortingMethod", parent)
     panel.name = "Sorting Method"
     panel.parent = parent.name
@@ -36,7 +34,7 @@ function fsBuilder:BuildSortingMethodOptions(parent)
     local taintless = wow.CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
     -- not sure why, but checkbox left seems to be off by about 4 units by default
     taintless:SetPoint("TOPLEFT", panel, verticalSpacing - 4, -verticalSpacing + 4)
-    fsBuilder:TextShim(taintless)
+    addon.OptionsBuilder:TextShim(taintless)
     taintless.Text:SetText("Taintless")
     taintless.Text:SetFontObject("GameFontNormalLarge")
     taintless:SetChecked(addon.Options.SortingMethod.TaintlessEnabled)
@@ -69,7 +67,7 @@ function fsBuilder:BuildSortingMethodOptions(parent)
 
     local traditional = wow.CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
     traditional:SetPoint("TOPLEFT", anchor, 0, -verticalSpacing * 2)
-    fsBuilder:TextShim(traditional)
+    addon.OptionsBuilder:TextShim(traditional)
     traditional.Text:SetText("Traditional")
     traditional.Text:SetFontObject("GameFontNormalLarge")
     traditional:SetChecked(addon.Options.SortingMethod.TraditionalEnabled)
@@ -128,4 +126,6 @@ function fsBuilder:BuildSortingMethodOptions(parent)
     end)
 
     wow.InterfaceOptions_AddCategory(panel)
+
+    return panel
 end

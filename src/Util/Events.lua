@@ -1,4 +1,6 @@
+---@type string, Addon
 local _, addon = ...
+---@class Events
 addon.Events = {
     -- Fired after ending combat, as regen rates return to normal.
     -- Useful for determining when a player has left combat.

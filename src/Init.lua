@@ -1,4 +1,6 @@
+---@type string, Addon
 local addonName, addon = ...
+---@type WoW
 local wow = addon.WoW
 local loader = nil
 
@@ -11,7 +13,7 @@ function addon:InitSavedVars()
     end
 
     addon.Options = FrameSortDB.Options
-    addon:UpgradeOptions(addon.Options)
+    addon.OptionsUpgrader:UpgradeOptions(addon.Options)
 end
 
 ---Initialises the addon.
