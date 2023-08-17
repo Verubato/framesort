@@ -169,8 +169,6 @@ addon.OptionsBuilder.Spacing = {
             anchor = BuildSpacingOptions(panel, anchor, "Enemy Arena", addon.Options.Appearance.EnemyArena.Spacing, false, true, verticalSpacing)
         end
 
-        wow.InterfaceOptions_AddCategory(panel)
-
         return panel
     end,
 }

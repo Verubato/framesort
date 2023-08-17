@@ -69,8 +69,6 @@ addon.OptionsBuilder.Health = {
             end
         end)
 
-        wow.InterfaceOptions_AddCategory(panel)
-
         return panel
     end,
 }

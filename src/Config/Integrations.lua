@@ -48,8 +48,6 @@ addon.OptionsBuilder.Integration = {
             anchor = description
         end
 
-        wow.InterfaceOptions_AddCategory(panel)
-
         return panel
     end,
 }

@@ -124,8 +124,6 @@ addon.OptionsBuilder.Macro = {
             anchor = description
         end
 
-        wow.InterfaceOptions_AddCategory(panel)
-
         return panel
     end,
 }

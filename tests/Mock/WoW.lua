@@ -28,6 +28,7 @@ local wow = {
         return nil
     end,
     EditModeManagerFrame = void,
+    Settings = void,
 
     -- settings
     SlashCmdList = void,
@@ -161,6 +162,11 @@ local wow = {
     -- addon related
     GetAddOnEnableState = function()
         return 0
+    end,
+
+    -- non-blizzard
+    IsRetail = function()
+        return true
     end,
 }
 

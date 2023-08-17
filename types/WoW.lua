@@ -24,6 +24,7 @@
 ---@field GetCVarBool fun(name: string): boolean?
 ---@field Enum table
 ---@field EventRegistry table
+---@field Settings table
 -- macro
 ---@field GetMacroInfo fun(id: string|number): name: string, icon: number, body: string
 ---@field EditMacro fun(macroInfo: number|string, name: string?, icon: number|string?, body: string?): macroId: number
@@ -54,3 +55,5 @@
 ---@field RegisterAttributeDriver fun(frame: table, attribute: string, conditional: string)
 -- addon related
 ---@field GetAddOnEnableState fun(character: string?, addon: string): number
+-- non-blizzard
+---@field IsRetail fun(): boolean
