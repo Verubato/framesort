@@ -9,6 +9,26 @@ local M = {
 }
 addon.OptionsBuilder = M
 
+local function AddCategory(panel)
+    if wow.IsRetail() then
+        local category = wow.Settings.RegisterCanvasLayoutCategory(panel, panel.name, panel.name)
+        category.ID = panel.name
+        wow.Settings.RegisterAddOnCategory(category)
+    else
+        wow.InterfaceOptions_AddCategory(panel)
+    end
+end
+
+local function AddSubCategory(panel)
+    if wow.IsRetail() then
+        local category = wow.Settings.GetCategory(panel.parent)
+        local subcategory = wow.Settings.RegisterCanvasLayoutSubcategory(category, panel, panel.name, panel.name)
+        subcategory.ID = panel.name
+    else
+        wow.InterfaceOptions_AddCategory(panel)
+    end
+end
+
 function M:TextShim(frame)
     if wow.WOW_PROJECT_ID ~= wow.WOW_PROJECT_CLASSIC then
         return
@@ -24,7 +44,7 @@ function addon:InitOptions()
 
     local main = wow.CreateFrame("Frame")
 
-    if wow.WOW_PROJECT_ID == wow.WOW_PROJECT_MAINLINE then
+    if wow.IsRetail() then
         main:SetWidth(wow.SettingsPanel.Container:GetWidth())
         main:SetHeight(wow.SettingsPanel.Container:GetHeight())
     else
@@ -34,25 +54,34 @@ function addon:InitOptions()
 
     panel:SetScrollChild(main)
 
-    wow.InterfaceOptions_AddCategory(panel)
+    AddCategory(panel)
 
     M.Sorting:Build(main)
-    M.SortingMethod:Build(panel)
-    M.Keybinding:Build(panel)
-    M.Macro:Build(panel)
-    M.Spacing:Build(panel)
-    M.Integration:Build(panel)
-    M.Health:Build(panel)
+
+    local sortingMethod = M.SortingMethod:Build(panel)
+    local keybinding = M.Keybinding:Build(panel)
+    local macro = M.Macro:Build(panel)
+    local spacing = M.Spacing:Build(panel)
+    local integration = M.Integration:Build(panel)
+    local health = M.Health:Build(panel)
+
+    AddSubCategory(sortingMethod)
+    AddSubCategory(keybinding)
+    AddSubCategory(macro)
+    AddSubCategory(spacing)
+    AddSubCategory(integration)
+    AddSubCategory(health)
 
     SLASH_FRAMESORT1 = "/fs"
     SLASH_FRAMESORT2 = "/framesort"
 
     wow.SlashCmdList.FRAMESORT = function()
-        wow.InterfaceOptionsFrame_OpenToCategory(panel)
-
-        -- workaround the classic bug where the first call opens the Game interface
-        -- and a second call is required
-        if wow.WOW_PROJECT_ID ~= wow.WOW_PROJECT_MAINLINE then
+        if wow.IsRetail() then
+            wow.Settings.OpenToCategory(panel.name)
+        else
+            -- workaround the classic bug where the first call opens the Game interface
+            -- and a second call is required
+            wow.InterfaceOptionsFrame_OpenToCategory(panel)
             wow.InterfaceOptionsFrame_OpenToCategory(panel)
         end
     end

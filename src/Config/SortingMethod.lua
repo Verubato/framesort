@@ -127,8 +127,6 @@ addon.OptionsBuilder.SortingMethod = {
             reloadButton:SetShown(true)
         end)
 
-        wow.InterfaceOptions_AddCategory(panel)
-
         return panel
     end,
 }

@@ -29,6 +29,7 @@ addon.WoW = {
     GetCVarBool = GetCVarBool,
     Enum = Enum,
     EventRegistry = EventRegistry,
+    Settings = Settings,
 
     -- macro
     GetMacroInfo = GetMacroInfo,
@@ -65,4 +66,9 @@ addon.WoW = {
 
     -- addon related
     GetAddOnEnableState = GetAddOnEnableState,
+
+    -- non-blizzard methods
+    IsRetail = function()
+        return WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
+    end,
 }
