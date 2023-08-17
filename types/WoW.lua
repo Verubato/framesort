@@ -36,7 +36,7 @@
 ---@field GetRaidRosterInfo fun(id: number): ...
 ---@field GetNumArenaOpponentSpecs fun(): number
 ---@field GetArenaOpponentSpec fun(id: number): specID: number, gender: number
----@field GetSpecializationInfoByID fun(specIndex: number, isInspect: boolean?, isPet: boolean?, inspectTarget: string?, sex: number?): id: number, name: string, description: string, icon: number, role: string
+---@field GetSpecializationInfoByID fun(specIndex: number): id: number, name: string, description: string, icon: number, role: string, classFile: string, className: string
 ---@field UnitGroupRolesAssigned fun(unit: string): role: string
 -- state functions
 ---@field IsInInstance fun(): boolean
