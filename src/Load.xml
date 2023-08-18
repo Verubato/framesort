@@ -24,7 +24,7 @@
     <Script file="Api\v1.lua"/>
     <Script file="Health.lua"/>
     <Script file="Config\Defaults.lua"/>
-    <Script file="Config\OptionsUpgrader.lua"/>
+    <Script file="Config\Upgrader.lua"/>
     <Script file="Config\Options.lua"/>
     <Script file="Config\Sorting.lua"/>
     <Script file="Config\Spacing.lua"/>
