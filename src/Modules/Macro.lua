@@ -11,7 +11,7 @@ local fsLog = addon.Log
 local maxMacros = 138
 local isSelfEditingMacro = false
 ---@type table<number, boolean>
-local isFsMacroCache = nil
+local isFsMacroCache = {}
 
 local function UpdateMacro(id)
     local _, _, body = wow.GetMacroInfo(id)
@@ -79,7 +79,9 @@ end
 
 ---Initialises the macros module.
 function addon:InitMacros()
-    isFsMacroCache = {}
+    if #isFsMacroCache > 0 then
+        isFsMacroCache = {}
+    end
 
     for _, provider in ipairs(fsFrame.Providers:Enabled()) do
         provider:RegisterCallback(Run)

@@ -36,7 +36,9 @@ function M:RunWhenCombatEnds(callback)
 end
 
 function addon:InitScheduler()
-    combatEndCallbacks = {}
+    if #combatEndCallbacks > 0 then
+        combatEndCallbacks = {}
+    end
 
     local eventFrame = wow.CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", OnCombatEnded)

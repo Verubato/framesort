@@ -6,7 +6,7 @@ local fsFrame = addon.Frame
 local fsEnumerable = addon.Enumerable
 local fsUnit = addon.Unit
 local M = {}
-local callbacks = nil
+local callbacks = {}
 
 fsFrame.Providers.Blizzard = M
 table.insert(fsFrame.Providers.All, M)
@@ -80,7 +80,9 @@ function M:Init()
         return
     end
 
-    callbacks = {}
+    if #callbacks > 0 then
+        callbacks = {}
+    end
 
     local eventFrame = wow.CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", Update)
