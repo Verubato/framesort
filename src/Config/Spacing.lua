@@ -5,6 +5,8 @@ local wow = addon.WoW
 local fsSpacing = addon.Spacing
 local minSpacing = 0
 local maxSpacing = 100
+local M = {}
+addon.OptionsBuilder.Spacing = M
 
 local function ConfigureSlider(slider, value)
     slider:SetOrientation("HORIZONTAL")
@@ -137,38 +139,36 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
     return anchor
 end
 
-addon.OptionsBuilder.Spacing = {
-    Build = function(_, parent)
-        local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
-        local panel = wow.CreateFrame("Frame", "FrameSortSpacing", parent)
-        panel.name = "Spacing"
-        panel.parent = parent.name
+function M:Build(parent)
+    local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
+    local panel = wow.CreateFrame("Frame", "FrameSortSpacing", parent)
+    panel.name = "Spacing"
+    panel.parent = parent.name
 
-        local spacingTitle = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
-        spacingTitle:SetPoint("TOPLEFT", panel, verticalSpacing, -verticalSpacing)
-        spacingTitle:SetText("Spacing")
+    local spacingTitle = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+    spacingTitle:SetPoint("TOPLEFT", panel, verticalSpacing, -verticalSpacing)
+    spacingTitle:SetText("Spacing")
 
-        local descriptionLine1 = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-        descriptionLine1:SetPoint("TOPLEFT", spacingTitle, "BOTTOMLEFT", 0, -verticalSpacing)
-        descriptionLine1:SetText("Add some spacing between party/raid frames.")
+    local descriptionLine1 = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+    descriptionLine1:SetPoint("TOPLEFT", spacingTitle, "BOTTOMLEFT", 0, -verticalSpacing)
+    descriptionLine1:SetText("Add some spacing between party/raid frames.")
 
-        local descriptionLine2 = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-        descriptionLine2:SetPoint("TOPLEFT", descriptionLine1, "BOTTOMLEFT", 0, -verticalSpacing)
-        descriptionLine2:SetText("This only applies to Blizzard frames.")
+    local descriptionLine2 = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+    descriptionLine2:SetPoint("TOPLEFT", descriptionLine1, "BOTTOMLEFT", 0, -verticalSpacing)
+    descriptionLine2:SetText("This only applies to Blizzard frames.")
 
-        local anchor = descriptionLine2
-        if wow.IsRetail() then
-            -- for retail
-            anchor = BuildSpacingOptions(panel, anchor, "Party", addon.Options.Appearance.Party.Spacing, true, true, 0)
-        end
+    local anchor = descriptionLine2
+    if wow.IsRetail() then
+        -- for retail
+        anchor = BuildSpacingOptions(panel, anchor, "Party", addon.Options.Appearance.Party.Spacing, true, true, 0)
+    end
 
-        local title = wow.IsRetail() and "Raid" or "Group"
-        anchor = BuildSpacingOptions(panel, anchor, title, addon.Options.Appearance.Raid.Spacing, true, true, verticalSpacing)
+    local title = wow.IsRetail() and "Raid" or "Group"
+    anchor = BuildSpacingOptions(panel, anchor, title, addon.Options.Appearance.Raid.Spacing, true, true, verticalSpacing)
 
-        if wow.IsRetail() and wow.CompactArenaFrame then
-            anchor = BuildSpacingOptions(panel, anchor, "Enemy Arena", addon.Options.Appearance.EnemyArena.Spacing, false, true, verticalSpacing)
-        end
+    if wow.IsRetail() and wow.CompactArenaFrame then
+        anchor = BuildSpacingOptions(panel, anchor, "Enemy Arena", addon.Options.Appearance.EnemyArena.Spacing, false, true, verticalSpacing)
+    end
 
-        return panel
-    end,
-}
+    return panel
+end
