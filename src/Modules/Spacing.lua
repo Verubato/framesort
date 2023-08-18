@@ -456,6 +456,10 @@ end
 
 ---Initialises the spacing module.
 function addon:InitSpacing()
+    if #previousSpacing > 0 then
+        previousSpacing = {}
+    end
+
     fsSort:RegisterPostSortCallback(Run)
 
     local eventFrame = wow.CreateFrame("Frame")

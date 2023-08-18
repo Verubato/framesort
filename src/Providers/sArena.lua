@@ -5,7 +5,7 @@ local wow = addon.WoW
 local fsFrame = addon.Frame
 local fsScheduler = addon.Scheduler
 local M = {}
-local callbacks = nil
+local callbacks = {}
 
 fsFrame.Providers.sArena = M
 table.insert(fsFrame.Providers.All, M)
@@ -38,7 +38,9 @@ function M:Init()
         return
     end
 
-    callbacks = {}
+    if #callbacks > 0 then
+        callbacks = {}
+    end
 
     local eventFrame = wow.CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", UpdateNextFrame)
