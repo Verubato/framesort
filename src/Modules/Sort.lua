@@ -478,6 +478,8 @@ end
 
 ---Initialises the sorting module.
 function addon:InitSorting()
+    callbacks = {}
+
     for _, provider in pairs(fsFrame.Providers:Enabled()) do
         provider:RegisterCallback(OnProviderRequiresSort)
     end

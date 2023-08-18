@@ -36,6 +36,8 @@ function M:RunWhenCombatEnds(callback)
 end
 
 function addon:InitScheduler()
+    combatEndCallbacks = {}
+
     local eventFrame = wow.CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", OnCombatEnded)
     eventFrame:RegisterEvent(addon.Events.PLAYER_REGEN_ENABLED)
