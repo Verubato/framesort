@@ -8,6 +8,8 @@ local fsHealth = addon.Health
 local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
 local horizontalSpacing = addon.OptionsBuilder.HorizontalSpacing
 local labelWidth = 50
+local M = {}
+addon.OptionsBuilder.Sorting = M
 
 ---Adds the title UI components.
 ---@param panel table the parent UI panel.
@@ -311,22 +313,20 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
     return dynamicAnchor
 end
 
-addon.OptionsBuilder.Sorting = {
-    Build = function(_, parent)
-        local anchor = BuiltTitle(parent)
+function M:Build(parent)
+    local anchor = BuiltTitle(parent)
 
-        if not wow.IsClassic() then
-            anchor = BuildSortModeCheckboxes(parent, anchor, "Arena", addon.Options.Arena)
-        end
+    if not wow.IsClassic() then
+        anchor = BuildSortModeCheckboxes(parent, anchor, "Arena", addon.Options.Arena)
+    end
 
-        if wow.IsRetail() then
-            anchor = BuildSortModeCheckboxes(parent, anchor, "Enemy Arena (GladiusEx, sArena, Blizzard)", addon.Options.EnemyArena, false, false)
-        end
+    if wow.IsRetail() then
+        anchor = BuildSortModeCheckboxes(parent, anchor, "Enemy Arena (GladiusEx, sArena, Blizzard)", addon.Options.EnemyArena, false, false)
+    end
 
-        anchor = BuildSortModeCheckboxes(parent, anchor, "Dungeon (mythics, 5-mans)", addon.Options.Dungeon)
-        anchor = BuildSortModeCheckboxes(parent, anchor, "Raid (battlegrounds, raids)", addon.Options.Raid)
-        anchor = BuildSortModeCheckboxes(parent, anchor, "World (non-instance groups)", addon.Options.World)
+    anchor = BuildSortModeCheckboxes(parent, anchor, "Dungeon (mythics, 5-mans)", addon.Options.Dungeon)
+    anchor = BuildSortModeCheckboxes(parent, anchor, "Raid (battlegrounds, raids)", addon.Options.Raid)
+    anchor = BuildSortModeCheckboxes(parent, anchor, "World (non-instance groups)", addon.Options.World)
 
-        return parent
-    end,
-}
+    return parent
+end
