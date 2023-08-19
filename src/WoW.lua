@@ -14,6 +14,7 @@ addon.WoW = {
     CreateFrame = CreateFrame,
     UIParent = UIParent,
     CompactPartyFrame = CompactPartyFrame,
+    PartyFrame = PartyFrame,
     CompactRaidFrameContainer = CompactRaidFrameContainer,
     CompactArenaFrame = CompactArenaFrame,
     CompactRaidFrameContainer_SetFlowSortFunction = CompactRaidFrameContainer_SetFlowSortFunction,
