@@ -48,8 +48,14 @@ function M:Build(parent)
 
             line.Description:SetText(result.Description .. "...")
             line.Description:SetPoint("TOPLEFT", anchor, 0, -verticalSpacing * 2)
-            line.Result:SetText(result.Passed and "Passed!" or "Failed")
-            line.Result:SetFontObject(result.Passed and "GameFontGreen" or "GameFontRed")
+
+            if result.Applicable then
+                line.Result:SetText(result.Passed and "Passed!" or "Failed")
+                line.Result:SetFontObject(result.Passed and "GameFontGreen" or "GameFontRed")
+            else
+                line.Result:SetText("N/A")
+                line.Result:SetFontObject("GameFontGreen")
+            end
 
             anchor = line.Description
         end
@@ -61,9 +67,9 @@ function M:Build(parent)
         for i, result in ipairs(results) do
             local line = lines[i]
             line.Help:SetText(result.Help and (" - " .. result.Help .. ".") or "")
-            line.Help:SetShown(not result.Passed)
+            line.Help:SetShown(result.Applicable and not result.Passed)
 
-            if not result.Passed then
+            if result.Applicable and not result.Passed then
                 line.Help:SetPoint("TOPLEFT", anchor, 0, -verticalSpacing * 2)
                 anchor = line.Help
             end

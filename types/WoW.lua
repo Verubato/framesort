@@ -10,6 +10,7 @@
 ---@field CreateFrame fun(frameType: string, name: string?, parent: table?, template: string?, id: number?): frame: table
 ---@field UIParent table
 ---@field CompactPartyFrame table
+---@field PartyFrame table
 ---@field CompactRaidFrameContainer table
 ---@field CompactArenaFrame table
 ---@field CompactRaidFrameContainer_SetFlowSortFunction fun(container: table, sortFunction: fun(unit1: string, unit2: string): boolean)

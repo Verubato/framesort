@@ -22,6 +22,7 @@ local wow = {
     -- frames
     UIParent = void,
     CompactPartyFrame = void,
+    PartyFrame = void,
     CompactRaidFrameContainer = void,
     CompactArenaFrame = void,
     CompactRaidFrameContainer_SetFlowSortFunction = function() end,

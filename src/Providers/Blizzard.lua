@@ -51,15 +51,25 @@ local function Filter(frames, filter)
 end
 
 local function PartyFrames(filter)
-    local container = wow.CompactPartyFrame
-    if not container or not container.memberUnitFrames or container:IsForbidden() or not container:IsVisible() then
-        return {}
+    if M:IsUsingRaidStyleFrames() then
+        local container = wow.CompactPartyFrame
+        if not container or not container.memberUnitFrames or container:IsForbidden() or not container:IsVisible() then
+            return {}
+        end
+
+        local players = Filter(container.memberUnitFrames, filter)
+        local pets = container.petUnitFrames and Filter(container.petUnitFrames, filter) or {}
+
+        return fsEnumerable:From(players):Concat(pets):ToTable()
+    else
+        local container = wow.PartyFrame
+        if not container or container:IsForbidden() or not container:IsVisible() then
+            return {}
+        end
+
+        local frames = { container:GetChildren() }
+        return Filter(frames, filter)
     end
-
-    local players = Filter(container.memberUnitFrames, filter)
-    local pets = container.petUnitFrames and Filter(container.petUnitFrames, filter) or {}
-
-    return fsEnumerable:From(players):Concat(pets):ToTable()
 end
 
 local function EnemyArenaFrames(filter)
