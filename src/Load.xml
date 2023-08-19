@@ -1,7 +1,7 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/..\FrameXML\UI.xsd">
     <Script file="WoW.lua"/>
-    <Script file="Type\SortMode.lua"/>
-    <Script file="Type\LayoutType.lua"/>
+    <Script file="Types\SortMode.lua"/>
+    <Script file="Types\LayoutType.lua"/>
     <Script file="Util\Log.lua"/>
     <Script file="Util\Events.lua"/>
     <Script file="Util\Enumerable.lua"/>
