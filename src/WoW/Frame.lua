@@ -1,33 +1,14 @@
 ---@type string, Addon
 local _, addon = ...
-local fsEnumerable = addon.Enumerable
+local fsEnumerable = addon.Collections.Enumerable
 ---@class FrameUtil
-local M = {
-    Providers = {
-        All = {},
-    },
-}
+local M = {}
 
-addon.Frame = M
-
-function M.Providers:Enabled()
-    return fsEnumerable
-        :From(M.Providers.All)
-        :Where(function(provider)
-            return provider:Enabled()
-        end)
-        :ToTable()
-end
-
-function addon:InitFrameProviders()
-    for _, provider in pairs(M.Providers.All) do
-        provider:Init()
-    end
-end
+addon.WoW.Frame = M
 
 ---Returns the frames in order of their relative positioning to each other.
 ---@param frames table[] frames in any particular order
----@return LinkedListNode root in order of parent -> child -> child -> child
+---@return FrameChain root in order of parent -> child -> child -> child
 function M:ToFrameChain(frames)
     local invalid = { Valid = false }
 
@@ -80,7 +61,7 @@ function M:ToFrameChain(frames)
 end
 
 ---Returns an ordered set of frames from the given chain
----@param chain LinkedListNode root
+---@param chain FrameChain root
 function M:FramesFromChain(chain)
     local frames = {}
     local next = chain
@@ -88,6 +69,7 @@ function M:FramesFromChain(chain)
     while next do
         frames[#frames + 1] = next.Value
 
+        ---@diagnostic disable-next-line: cast-local-type
         next = next.Next
     end
 

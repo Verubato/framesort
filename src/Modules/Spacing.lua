@@ -1,18 +1,20 @@
+---@type string, Addon
 local _, addon = ...
----@type WoW
-local wow = addon.WoW
-local fsUnit = addon.Unit
-local fsSort = addon.Sorting
-local blizzardFrames = addon.Frame.Providers.Blizzard
-local fsFrame = addon.Frame
-local fsCompare = addon.Compare
-local fsMath = addon.Math
-local fsEnumerable = addon.Enumerable
-local fsLog = addon.Log
+local wow = addon.WoW.Api
+local fsSort = addon.Modules.Sorting
+local fsConfig = addon.Configuration
+local fsUnit = addon.WoW.Unit
+local fsFrame = addon.WoW.Frame
+local fsCompare = addon.Collections.Comparer
+local fsMath = addon.Numerics.Math
+local fsEnumerable = addon.Collections.Enumerable
+local fsLog = addon.Logging.Log
+local events = addon.WoW.Api.Events
+local blizzardFrames = addon.Providers.Blizzard
 local previousSpacing = {}
----@class SpacingController
+---@class SpacingModule: Initialise
 local M = {}
-addon.Spacing = M
+addon.Modules.Spacing = M
 
 ---Calculates the desired positions of the frames with spacing applied.
 ---The returning table is sparse, so if there are no changes required to a frame then it won't have an entry.
@@ -255,7 +257,7 @@ local function Space(name, frames, spacing, layoutTypeHint, start, blockHeight)
         return
     end
 
-    if layoutTypeHint == addon.LayoutType.Flat then
+    if layoutTypeHint == fsConfig.LayoutType.Flat then
         if fsFrame:IsFlat(frames) then
             Flat(frames, spacing, start, blockHeight)
             StorePreviousSpacing(name, spacing)
@@ -269,7 +271,7 @@ local function Space(name, frames, spacing, layoutTypeHint, start, blockHeight)
             fsLog:Debug(string.format("Layout hint for frames '%s' is flat but was it was actually a chain.", name))
             return
         end
-    elseif layoutTypeHint == addon.LayoutType.Chain then
+    elseif layoutTypeHint == fsConfig.LayoutType.Chain then
         local chain = fsFrame:ToFrameChain(frames)
         if chain.Valid then
             Chain(frames, chain, spacing, start)
@@ -289,7 +291,7 @@ local function Space(name, frames, spacing, layoutTypeHint, start, blockHeight)
 end
 
 local function ApplyPartySpacing()
-    local spacing = addon.Options.Appearance.Party.Spacing
+    local spacing = addon.DB.Options.Appearance.Party.Spacing
     local frames = blizzardFrames:PartyFrames()
     local players = fsEnumerable
         :From(frames)
@@ -302,7 +304,7 @@ local function ApplyPartySpacing()
         end)
         :ToTable()
 
-    Space("Party-Players", players, spacing, addon.LayoutType.Chain)
+    Space("Party-Players", players, spacing, fsConfig.LayoutType.Chain)
 
     if not blizzardFrames:ShowPartyPets() then
         return
@@ -354,16 +356,16 @@ local function ApplyPartySpacing()
         end
     end
 
-    Space("Party-Pets", pets, spacing, addon.LayoutType.Chain, start)
+    Space("Party-Pets", pets, spacing, fsConfig.LayoutType.Chain, start)
 end
 
 local function ApplyRaidSpacing()
-    local spacing = addon.Options.Appearance.Raid.Spacing
+    local spacing = addon.DB.Options.Appearance.Raid.Spacing
 
     if not blizzardFrames:IsRaidGrouped() then
         local frames = blizzardFrames:RaidFrames()
 
-        Space("Raid-All", frames, spacing, addon.LayoutType.Flat)
+        Space("Raid-All", frames, spacing, fsConfig.LayoutType.Flat)
         return
     end
 
@@ -371,7 +373,7 @@ local function ApplyRaidSpacing()
     local ungrouped = blizzardFrames:RaidFrames()
 
     if #groups == 0 then
-        Space("Raid-SingleGroup", ungrouped, spacing, addon.LayoutType.Chain)
+        Space("Raid-SingleGroup", ungrouped, spacing, fsConfig.LayoutType.Chain)
         return
     end
 
@@ -381,11 +383,11 @@ local function ApplyRaidSpacing()
 
         if #members > 0 then
             blockHeight = math.max(blockHeight, members[1]:GetHeight())
-            Space(group:GetName(), members, spacing, addon.LayoutType.Chain, nil)
+            Space(group:GetName(), members, spacing, fsConfig.LayoutType.Chain, nil)
         end
     end
 
-    Space("Groups", groups, spacing, addon.LayoutType.Flat)
+    Space("Groups", groups, spacing, fsConfig.LayoutType.Flat)
 
     if not blizzardFrames:ShowRaidPets() then
         return
@@ -429,14 +431,14 @@ local function ApplyRaidSpacing()
 
     -- manually specify the block height to the player frames height
     -- otherwise it would auto detect the pet frame height
-    Space("Raid-Ungrouped", ungrouped, spacing, addon.LayoutType.Flat, start, blockHeight - 1)
+    Space("Raid-Ungrouped", ungrouped, spacing, fsConfig.LayoutType.Flat, start, blockHeight - 1)
 end
 
 local function ApplyEnemyArenaSpacing()
-    local spacing = addon.Options.Appearance.EnemyArena.Spacing
+    local spacing = addon.DB.Options.Appearance.EnemyArena.Spacing
     local frames = blizzardFrames:EnemyArenaFrames()
 
-    Space("EnemyArena", frames, spacing, addon.LayoutType.Chain)
+    Space("EnemyArena", frames, spacing, fsConfig.LayoutType.Chain)
 end
 
 ---Applies spacing to party and raid frames.
@@ -454,8 +456,7 @@ local function Run()
     M:ApplySpacing()
 end
 
----Initialises the spacing module.
-function addon:InitSpacing()
+function M:Init()
     if #previousSpacing > 0 then
         previousSpacing = {}
     end
@@ -464,14 +465,14 @@ function addon:InitSpacing()
 
     local eventFrame = wow.CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", Run)
-    eventFrame:RegisterEvent(addon.Events.PLAYER_ENTERING_WORLD)
-    eventFrame:RegisterEvent(addon.Events.GROUP_ROSTER_UPDATE)
-    eventFrame:RegisterEvent(addon.Events.PLAYER_ROLES_ASSIGNED)
-    eventFrame:RegisterEvent(addon.Events.UNIT_PET)
+    eventFrame:RegisterEvent(events.PLAYER_ENTERING_WORLD)
+    eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
+    eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
+    eventFrame:RegisterEvent(events.UNIT_PET)
 
     if wow.IsRetail() then
-        eventFrame:RegisterEvent(addon.Events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
-        eventFrame:RegisterEvent(addon.Events.ARENA_OPPONENT_UPDATE)
-        wow.EventRegistry:RegisterCallback(addon.Events.EditModeExit, Run)
+        eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
+        eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
+        wow.EventRegistry:RegisterCallback(events.EditModeExit, Run)
     end
 end

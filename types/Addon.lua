@@ -1,34 +1,54 @@
 ---@meta
 ---@class Addon
----@field WoW WoW
 ---@field Api Api
+---@field Configuration Configuration
+---@field Collections Collections
+---@field DB DB
+---@field Health Health
+---@field Logging Logging
+---@field Modules Modules
+---@field Numerics Numerics
+---@field Providers Providers
+---@field Scheduling Scheduling
+---@field WoW WoW
+---@field Loaded boolean
+---@field Init fun(self: table)
+---@field InitDB fun(self: table)
+
+---@meta
+---@class Api: Initialise
+---@field v1 ApiV1
+
+---@class Collections
+---@field Enumerable Enumerable
+---@field Comparer Comparer
+
+---@meta
+---@class DB
+---@field Options Options
+
+---@class Logging
 ---@field Log Log
----@field Sorting SortingController
----@field HidePlayer PlayerVisibilityController
----@field Spacing SpacingController
----@field Target TargetController
+
+---@class Health
+---@field HealthCheck HealthChecker
+
+---@class Numerics
+---@field Math Math
+
+---@meta
+---@class Modules
+---@field Sorting SortingModule
+---@field Spacing SpacingModule
+---@field HidePlayer HidePlayerModule
+---@field Targeting TargetingModule
+---@field Macro Initialise
+
+---@class Scheduling
+---@field Scheduler Scheduler
+
+---@class WoW
+---@field Api WowApi
 ---@field Frame FrameUtil
 ---@field Macro MacroUtil
 ---@field Unit UnitUtil
----@field OptionsBuilder OptionsBuilder
----@field Scheduler Scheduler
----@field Events Events
----@field Enumerable Enumerable
----@field Defaults OptionDefaults
----@field Options OptionDefaults
----@field Math Math
----@field Compare Compare
----@field Health HealthChecker
----@field PlayerSortMode PlayerSortMode
----@field GroupSortMode GroupSortMode
----@field OptionsUpgrader OptionsUpgrader
----@field InitSavedVars fun(self: table)
----@field InitOptions fun(self: table)
----@field InitFrameProviders fun(self: table)
----@field InitSorting fun(self: table)
----@field InitPlayerHiding fun(self: table)
----@field InitSpacing fun(self: table)
----@field InitTargeting fun(self: table)
----@field InitMacros fun(self: table)
----@field InitApi fun(self: table)
----@field InitScheduler fun(self: table)

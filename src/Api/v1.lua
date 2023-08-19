@@ -1,8 +1,11 @@
 ---@type string, Addon
 local _, addon = ...
-local fsEnumerable = addon.Enumerable
-local fsCompare = addon.Compare
-local blizzard = addon.Frame.Providers.Blizzard
+local fsEnumerable = addon.Collections.Enumerable
+local fsCompare = addon.Collections.Comparer
+local fsSort = addon.Modules.Sorting
+local fsConfig = addon.Configuration
+local blizzard = addon.Providers.Blizzard
+
 ---@class ApiV1
 local M = {
     Sorting = {},
@@ -24,14 +27,14 @@ end
 
 ---@param mode PlayerSortMode
 local function ValidatePlayerSortMode(mode)
-    if mode ~= addon.PlayerSortMode.Top and mode ~= addon.PlayerSortMode.Middle and mode ~= addon.PlayerSortMode.Bottom and mode ~= addon.PlayerSortMode.Hidden then
+    if mode ~= fsConfig.PlayerSortMode.Top and mode ~= fsConfig.PlayerSortMode.Middle and mode ~= fsConfig.PlayerSortMode.Bottom and mode ~= fsConfig.PlayerSortMode.Hidden then
         error("Invalid player sort mode: " .. (mode or "nil"))
     end
 end
 
 ---@param mode GroupSortMode
 local function ValidateGroupSortMode(mode)
-    if mode ~= addon.GroupSortMode.Group and mode ~= addon.GroupSortMode.Role and mode ~= addon.GroupSortMode.Alphabetical then
+    if mode ~= fsConfig.GroupSortMode.Group and mode ~= fsConfig.GroupSortMode.Role and mode ~= fsConfig.GroupSortMode.Alphabetical then
         error("Invalid group sort mode: " .. (mode or "nil"))
     end
 end
@@ -51,7 +54,7 @@ function M.Sorting:RegisterPostSortCallback(callback)
         return
     end
 
-    addon.Sorting:RegisterPostSortCallback(callback)
+    fsSort:RegisterPostSortCallback(callback)
 end
 
 ---Returns a collection of Blizzard party frames ordered by their visual representation.
@@ -92,7 +95,7 @@ end
 function M.Options:GetPlayerSortMode(area)
     ValidateArea(area)
 
-    local table = addon.Options[area]
+    local table = addon.DB.Options[area]
     return table.PlayerSortMode
 end
 
@@ -103,10 +106,10 @@ function M.Options:SetPlayerSortMode(area, mode)
     ValidateArea(area)
     ValidatePlayerSortMode(mode)
 
-    local table = addon.Options[area]
+    local table = addon.DB.Options[area]
     table.PlayerSortMode = mode
 
-    addon.Sorting:TrySort()
+    fsSort:TrySort()
 end
 
 ---Sets the group sort mode.
@@ -116,10 +119,10 @@ function M.Options:SetGroupSortMode(area, mode)
     ValidateArea(area)
     ValidateGroupSortMode(mode)
 
-    local table = addon.Options[area]
+    local table = addon.DB.Options[area]
     table.GroupSortMode = mode
 
-    addon.Sorting:TrySort()
+    fsSort:TrySort()
 end
 
 ---Gets the group sort mode.
@@ -127,7 +130,7 @@ end
 function M.Options:GetGroupSortMode(area)
     ValidateArea(area)
 
-    local table = addon.Options[area]
+    local table = addon.DB.Options[area]
     return table.GroupSortMode
 end
 
@@ -136,7 +139,7 @@ end
 function M.Options:GetEnabled(area)
     ValidateArea(area)
 
-    local table = addon.Options[area]
+    local table = addon.DB.Options[area]
     return table.Enabled
 end
 
@@ -146,11 +149,11 @@ end
 function M.Options:SetEnabled(area, enabled)
     ValidateArea(area)
 
-    local table = addon.Options[area]
+    local table = addon.DB.Options[area]
     table.Enabled = enabled
 
     if enabled then
-        addon.Sorting:TrySort()
+        fsSort:TrySort()
     end
 end
 
@@ -159,7 +162,7 @@ end
 function M.Options:GetReverse(area)
     ValidateArea(area)
 
-    local table = addon.Options[area]
+    local table = addon.DB.Options[area]
     return table.Reverse
 end
 
@@ -169,8 +172,8 @@ end
 function M.Options:SetReverse(area, reverse)
     ValidateArea(area)
 
-    local table = addon.Options[area]
+    local table = addon.DB.Options[area]
     table.Reverse = reverse
 
-    addon.Sorting:TrySort()
+    fsSort:TrySort()
 end

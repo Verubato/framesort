@@ -1,23 +1,25 @@
+---@type string, Addon
 local _, addon = ...
----@type WoW
-local wow = addon.WoW
-local fsScheduler = addon.Scheduler
-local fsCompare = addon.Compare
-local fsLog = addon.Log
----@class PlayerVisibilityController
+local wow = addon.WoW.Api
+local fsScheduler = addon.Scheduling.Scheduler
+local fsCompare = addon.Collections.Comparer
+local fsConfig = addon.Configuration
+local fsProviders = addon.Providers
+local fsLog = addon.Logging.Log
+---@class HidePlayerModule: Initialise
 local M = {}
-addon.HidePlayer = M
+addon.Modules.HidePlayer = M
 
 local function UpdatePlayer(player, mode)
-    if player:IsVisible() and mode == addon.PlayerSortMode.Hidden then
+    if player:IsVisible() and mode == fsConfig.PlayerSortMode.Hidden then
         wow.RegisterAttributeDriver(player, "state-visibility", "hide")
-    elseif not player:IsVisible() and mode ~= addon.PlayerSortMode.Hidden then
+    elseif not player:IsVisible() and mode ~= fsConfig.PlayerSortMode.Hidden then
         wow.RegisterAttributeDriver(player, "state-visibility", "show")
     end
 end
 
 local function Run()
-    local blizzard = addon.Frame.Providers.Blizzard
+    local blizzard = fsProviders.Blizzard
 
     if not blizzard:Enabled() then
         return
@@ -50,8 +52,7 @@ function M:ShowHidePlayer()
     Run()
 end
 
----Initialises the player show/hide module.
-function addon:InitPlayerHiding()
-    local blizzard = addon.Frame.Providers.Blizzard
+function M:Init()
+    local blizzard = fsProviders.Blizzard
     blizzard:RegisterCallback(Run)
 end

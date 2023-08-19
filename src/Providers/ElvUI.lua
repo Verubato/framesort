@@ -1,16 +1,16 @@
 ---@type string, Addon
 local _, addon = ...
----@type WoW
-local wow = addon.WoW
-local fsFrame = addon.Frame
-local fsLog = addon.Log
+local wow = addon.WoW.Api
+local fsFrame = addon.WoW.Frame
+local fsLog = addon.Logging.Log
+local fsProviders = addon.Providers
 local M = {}
 local callbacks = {}
 local fsPlugin = nil
 local pluginName = "FrameSort"
 
-fsFrame.Providers.ElvUI = M
-table.insert(fsFrame.Providers.All, M)
+fsProviders.ElvUI = M
+table.insert(fsProviders.All, M)
 
 local function GetUnit(frame)
     return frame.unit

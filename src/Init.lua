@@ -1,33 +1,32 @@
 ---@type string, Addon
 local addonName, addon = ...
----@type WoW
-local wow = addon.WoW
+local wow = addon.WoW.Api
 local loader = nil
 
-function addon:InitSavedVars()
+function addon:InitDB()
     if not FrameSortDB then
         FrameSortDB = {}
     end
     if not FrameSortDB.Options then
-        FrameSortDB.Options = wow.CopyTable(addon.Defaults)
+        FrameSortDB.Options = wow.CopyTable(addon.Configuration.Defaults)
     end
 
-    addon.Options = FrameSortDB.Options
-    addon.OptionsUpgrader:UpgradeOptions(addon.Options)
+    addon.DB = FrameSortDB
+    addon.Configuration.Upgrader:UpgradeOptions(addon.DB.Options)
 end
 
 ---Initialises the addon.
 function addon:Init()
-    addon:InitSavedVars()
-    addon:InitOptions()
-    addon:InitFrameProviders()
-    addon:InitSorting()
-    addon:InitPlayerHiding()
-    addon:InitSpacing()
-    addon:InitTargeting()
-    addon:InitMacros()
-    addon:InitApi()
-    addon:InitScheduler()
+    addon:InitDB()
+    addon.Configuration:Init()
+    addon.Providers:Init()
+    addon.Modules.Sorting:Init()
+    addon.Modules.HidePlayer:Init()
+    addon.Modules.Spacing:Init()
+    addon.Modules.Targeting:Init()
+    addon.Modules.Macro:Init()
+    addon.Api:Init()
+    addon.Scheduling.Scheduler:Init()
 
     addon.Loaded = true
 end
@@ -36,10 +35,6 @@ end
 ---@param name string the name of the addon being loaded.
 local function OnLoadAddon(_, _, name)
     if name ~= addonName then
-        return
-    end
-
-    if addon.Loaded then
         return
     end
 

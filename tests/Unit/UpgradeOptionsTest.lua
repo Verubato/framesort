@@ -1,14 +1,19 @@
 local deps = {
-    "Types\\SortMode.lua",
+    "Logging\\Log.lua",
+    "Configuration\\SortMode.lua",
     "Configuration\\Upgrader.lua",
     "Configuration\\Defaults.lua",
 }
 
-local addon = {}
+local addon = {
+    Configuration = {},
+    Logging = {},
+    Utils = {},
+}
 local helper = require("Helper")
 helper:LoadDependencies(addon, deps)
 
-local upgrader = addon.OptionsUpgrader
+local upgrader = addon.Configuration.Upgrader
 local M = {}
 
 function M:test_upgrade_options_version2()

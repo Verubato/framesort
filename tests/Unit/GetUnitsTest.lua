@@ -1,37 +1,42 @@
 local deps = {
-    "Util\\Unit.lua",
+    "WoW\\Unit.lua",
 }
 
 local addon = nil
 local helper = nil
+local fsUnit = nil
 local M = {}
 
-function M:setUp()
-    addon = { WoW = {} }
+function M:setup()
+    addon = {
+        WoW = { Api = {} },
+    }
 
     helper = require("Helper")
     helper:LoadDependencies(addon, deps)
 
-    addon.WoW.MAX_RAID_MEMBERS = 40
-    addon.WoW.MEMBERS_PER_RAID_GROUP = 5
+    addon.WoW.Api.MAX_RAID_MEMBERS = 40
+    addon.WoW.Api.MEMBERS_PER_RAID_GROUP = 5
 
-    addon.WoW.IsInGroup = function()
+    addon.WoW.Api.IsInGroup = function()
         return true
     end
+
+    fsUnit = addon.WoW.Unit
 end
 
 function M:test_party_full()
-    addon.WoW.IsInRaid = function()
+    addon.WoW.Api.IsInRaid = function()
         return false
     end
 
     local count = 5
     local members = helper:GenerateUnits(count)
-    addon.WoW.UnitExists = function(x)
+    addon.WoW.Api.UnitExists = function(x)
         return helper:UnitExists(x, members)
     end
 
-    local units = addon.Unit:FriendlyUnits()
+    local units = fsUnit:FriendlyUnits()
 
     assertEquals(#units, count)
     assertEquals(units[1], "player")
@@ -42,31 +47,31 @@ function M:test_party_full()
 end
 
 function M:test_party_empty()
-    addon.WoW.IsInRaid = function()
+    addon.WoW.Api.IsInRaid = function()
         return false
     end
-    addon.WoW.UnitExists = function(_)
+    addon.WoW.Api.UnitExists = function(_)
         return false
     end
 
-    local units = addon.Unit:FriendlyUnits()
+    local units = fsUnit:FriendlyUnits()
 
     -- the player token will always exist
     assertEquals(#units, 1)
 end
 
 function M:test_party3()
-    addon.WoW.IsInRaid = function()
+    addon.WoW.Api.IsInRaid = function()
         return false
     end
 
     local count = 3
     local members = helper:GenerateUnits(count)
-    addon.WoW.UnitExists = function(x)
+    addon.WoW.Api.UnitExists = function(x)
         return helper:UnitExists(x, members)
     end
 
-    local units = addon.Unit:FriendlyUnits()
+    local units = fsUnit:FriendlyUnits()
 
     assertEquals(#units, count)
     assertEquals(units[1], "player")
@@ -77,17 +82,17 @@ function M:test_party3()
 end
 
 function M:test_raid_full()
-    addon.WoW.IsInRaid = function()
+    addon.WoW.Api.IsInRaid = function()
         return true
     end
 
     local count = 40
     local members = helper:GenerateUnits(count, true)
-    addon.WoW.UnitExists = function(x)
+    addon.WoW.Api.UnitExists = function(x)
         return helper:UnitExists(x, members)
     end
 
-    local units = addon.Unit:FriendlyUnits()
+    local units = fsUnit:FriendlyUnits()
 
     assertEquals(#units, count)
 
@@ -97,30 +102,30 @@ function M:test_raid_full()
 end
 
 function M:test_raid_empty()
-    addon.WoW.IsInRaid = function()
+    addon.WoW.Api.IsInRaid = function()
         return true
     end
-    addon.WoW.UnitExists = function(_)
+    addon.WoW.Api.UnitExists = function(_)
         return false
     end
 
-    local units = addon.Unit:FriendlyUnits()
+    local units = fsUnit:FriendlyUnits()
 
     assertEquals(#units, 0)
 end
 
 function M:test_raid3()
-    addon.WoW.IsInRaid = function()
+    addon.WoW.Api.IsInRaid = function()
         return true
     end
 
     local count = 3
     local members = helper:GenerateUnits(count, true)
-    addon.WoW.UnitExists = function(x)
+    addon.WoW.Api.UnitExists = function(x)
         return helper:UnitExists(x, members)
     end
 
-    local units = addon.Unit:FriendlyUnits()
+    local units = fsUnit:FriendlyUnits()
 
     assertEquals(#units, count)
 

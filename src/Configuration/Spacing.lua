@@ -1,12 +1,12 @@
 ---@type string, Addon
 local _, addon = ...
----@type WoW
-local wow = addon.WoW
-local fsSpacing = addon.Spacing
+local fsConfig = addon.Configuration
+local fsSpacing = addon.Modules.Spacing
+local wow = addon.WoW.Api
 local minSpacing = 0
 local maxSpacing = 100
 local M = {}
-addon.OptionsBuilder.Spacing = M
+fsConfig.Spacing = M
 
 local function ConfigureSlider(slider, value)
     slider:SetOrientation("HORIZONTAL")
@@ -33,7 +33,7 @@ local function ConfigureEditBox(box, value)
 end
 
 local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, addY, additionalTopSpacing)
-    local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
+    local verticalSpacing = fsConfig.VerticalSpacing
     local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", parentAnchor, "BOTTOMLEFT", 0, -(verticalSpacing + additionalTopSpacing))
     title:SetText(name)
@@ -140,7 +140,7 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
 end
 
 function M:Build(parent)
-    local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
+    local verticalSpacing = fsConfig.VerticalSpacing
     local panel = wow.CreateFrame("Frame", "FrameSortSpacing", parent)
     panel.name = "Spacing"
     panel.parent = parent.name
@@ -160,14 +160,14 @@ function M:Build(parent)
     local anchor = descriptionLine2
     if wow.IsRetail() then
         -- for retail
-        anchor = BuildSpacingOptions(panel, anchor, "Party", addon.Options.Appearance.Party.Spacing, true, true, 0)
+        anchor = BuildSpacingOptions(panel, anchor, "Party", addon.DB.Options.Appearance.Party.Spacing, true, true, 0)
     end
 
     local title = wow.IsRetail() and "Raid" or "Group"
-    anchor = BuildSpacingOptions(panel, anchor, title, addon.Options.Appearance.Raid.Spacing, true, true, verticalSpacing)
+    anchor = BuildSpacingOptions(panel, anchor, title, addon.DB.Options.Appearance.Raid.Spacing, true, true, verticalSpacing)
 
     if wow.IsRetail() and wow.CompactArenaFrame then
-        anchor = BuildSpacingOptions(panel, anchor, "Enemy Arena", addon.Options.Appearance.EnemyArena.Spacing, false, true, verticalSpacing)
+        anchor = BuildSpacingOptions(panel, anchor, "Enemy Arena", addon.DB.Options.Appearance.EnemyArena.Spacing, false, true, verticalSpacing)
     end
 
     return panel

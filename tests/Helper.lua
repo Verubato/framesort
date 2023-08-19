@@ -9,7 +9,7 @@ function M:DependenciesFromXml()
     for line in io.lines(xmlFilePath) do
         local file = string.match(line, [[file="(.*)"]])
 
-        if file ~= "WoW.lua" then
+        if file ~= "WoW\\WoW.lua" and file ~= "Namespace.lua" then
             dependencies[#dependencies + 1] = file
         end
     end

@@ -1,0 +1,3 @@
+---@meta
+---@class FrameChain: LinkedListNode
+---@field Valid boolean

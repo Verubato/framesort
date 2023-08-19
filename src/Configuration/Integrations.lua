@@ -1,16 +1,16 @@
 ---@type string, Addon
 local _, addon = ...
----@type WoW
-local wow = addon.WoW
+local wow = addon.WoW.Api
+local fsConfig = addon.Configuration
 local M = {}
-addon.OptionsBuilder.Integration = M
+fsConfig.Integration = M
 
 function M:Build(parent)
     local panel = wow.CreateFrame("Frame", "FrameSortSortingIntegrations", parent)
     panel.name = "Integrations"
     panel.parent = parent.name
 
-    local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
+    local verticalSpacing = fsConfig.VerticalSpacing
     local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
     title:SetText("Integrations")

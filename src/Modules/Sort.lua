@@ -1,16 +1,18 @@
+---@type string, Addon
 local _, addon = ...
----@type WoW
-local wow = addon.WoW
-local fsScheduler = addon.Scheduler
-local fsUnit = addon.Unit
-local fsCompare = addon.Compare
-local fsFrame = addon.Frame
-local fsEnumerable = addon.Enumerable
-local fsLog = addon.Log
+local wow = addon.WoW.Api
+local fsScheduler = addon.Scheduling.Scheduler
+local fsUnit = addon.WoW.Unit
+local fsCompare = addon.Collections.Comparer
+local fsFrame = addon.WoW.Frame
+local fsEnumerable = addon.Collections.Enumerable
+local fsLog = addon.Logging.Log
+local fsConfig = addon.Configuration
+local fsProviders = addon.Providers
 local callbacks = {}
----@class SortingController
+---@class SortingModule: Initialise
 local M = {}
-addon.Sorting = M
+addon.Modules.Sorting = M
 
 ---Calls the post sorting callbacks.
 local function InvokeCallbacks()
@@ -70,7 +72,7 @@ local function Sort(name, frames, layoutTypeHint, units, getUnit)
     end
 
     local sorted = false
-    if layoutTypeHint == addon.LayoutType.Flat then
+    if layoutTypeHint == fsConfig.LayoutType.Flat then
         if fsFrame:IsFlat(frames) then
             sorted = RearrangeFrames(frames, frames, units, getUnit)
             return sorted
@@ -84,7 +86,7 @@ local function Sort(name, frames, layoutTypeHint, units, getUnit)
             fsLog:Debug(string.format("Layout hint for frames '%s' is flat but was it was actually a chain.", name))
             return sorted
         end
-    elseif layoutTypeHint == addon.LayoutType.Chain then
+    elseif layoutTypeHint == fsConfig.LayoutType.Chain then
         local chain = fsFrame:ToFrameChain(frames)
         if chain.Valid then
             local enumerateOrder = fsFrame:FramesFromChain(chain)
@@ -146,7 +148,7 @@ local function SortRaid(provider)
 
             table.sort(units, sortFunction)
 
-            if Sort(group:GetName(), frames, addon.LayoutType.Chain, units, getUnit) then
+            if Sort(group:GetName(), frames, fsConfig.LayoutType.Chain, units, getUnit) then
                 sorted = true
             end
         end
@@ -171,7 +173,7 @@ local function SortRaid(provider)
 
     table.sort(units, sortFunction)
 
-    return Sort("Raid", players, addon.LayoutType.Flat, units, getUnit)
+    return Sort("Raid", players, fsConfig.LayoutType.Flat, units, getUnit)
 end
 
 ---Sorts party pet frames.
@@ -182,7 +184,7 @@ local function SortPartyPets(provider, sortedPlayerUnits, playerFrames, petFrame
     end
     local petUnits = fsEnumerable:From(petFrames):Map(getUnit):ToTable()
     local sortedPetUnits = SortPetUnits(sortedPlayerUnits, petUnits)
-    local sorted = Sort("Party-Pets", petFrames, addon.LayoutType.Chain, sortedPetUnits, getUnit)
+    local sorted = Sort("Party-Pets", petFrames, fsConfig.LayoutType.Chain, sortedPetUnits, getUnit)
 
     local chain = fsFrame:ToFrameChain(petFrames)
     if not chain.Valid then
@@ -191,6 +193,8 @@ local function SortPartyPets(provider, sortedPlayerUnits, playerFrames, petFrame
 
     -- next move the frame chain as a group beneath the player frames
     local rootPet = chain.Value
+    assert(rootPet ~= nil)
+
     if fsFrame:IsHorizontalLayout(playerFrames) then
         local leftPlayer = fsEnumerable
             :From(playerFrames)
@@ -301,7 +305,7 @@ local function SortParty(provider)
 
     table.sort(playerUnits, sortFunction)
 
-    sortedPlayers = Sort("Party-Players", players, addon.LayoutType.Chain, playerUnits, getUnit)
+    sortedPlayers = Sort("Party-Players", players, fsConfig.LayoutType.Chain, playerUnits, getUnit)
 
     if not provider:ShowPartyPets() then
         return sortedPlayers
@@ -343,13 +347,13 @@ local function SortEnemyArena(provider)
 
     local playerUnits = fsEnumerable:From(players):Map(getUnit):OrderBy(sortFunction):ToTable()
 
-    return Sort("EnemyArena-Players", players, addon.LayoutType.Chain, playerUnits, getUnit)
+    return Sort("EnemyArena-Players", players, fsConfig.LayoutType.Chain, playerUnits, getUnit)
 end
 
 ---Attempts to sort Blizzard frames using the traditional method.
 ---@return boolean sorted true if sorted, otherwise false.
 local function TrySortTraditional()
-    local blizzard = addon.Frame.Providers.Blizzard
+    local blizzard = fsProviders.Blizzard
 
     if not blizzard:Enabled() then
         return false
@@ -399,7 +403,7 @@ local function TrySortTaintless()
     end
 
     local sorted = false
-    for _, provider in pairs(addon.Frame.Providers:Enabled()) do
+    for _, provider in pairs(fsProviders:Enabled()) do
         if friendlyEnabled then
             local sortedParty = SortParty(provider)
             local sortedRaid = SortRaid(provider)
@@ -447,7 +451,7 @@ end
 ---@return boolean sorted true if sorted, otherwise false.
 function M:TrySort()
     -- can't make changes during combat
-    if wow.InCombatLockdown() and not addon.Options.SortingMethod.TaintlessEnabled then
+    if wow.InCombatLockdown() and not addon.DB.Options.SortingMethod.TaintlessEnabled then
         fsScheduler:RunWhenCombatEnds(function()
             M:TrySort()
         end)
@@ -463,7 +467,7 @@ function M:TrySort()
     end
 
     local sorted = false
-    if addon.Options.SortingMethod.TraditionalEnabled then
+    if addon.DB.Options.SortingMethod.TraditionalEnabled then
         sorted = TrySortTraditional()
     else
         sorted = TrySortTaintless()
@@ -476,13 +480,12 @@ function M:TrySort()
     return sorted
 end
 
----Initialises the sorting module.
-function addon:InitSorting()
+function M:Init()
     if #callbacks > 0 then
         callbacks = {}
     end
 
-    for _, provider in pairs(fsFrame.Providers:Enabled()) do
+    for _, provider in pairs(fsProviders:Enabled()) do
         provider:RegisterCallback(OnProviderRequiresSort)
     end
 end

@@ -1,12 +1,15 @@
 local deps = {
-    "Util\\Enumerable.lua",
+    "Collections\\Enumerable.lua",
 }
 
-local addon = {}
+local addon = {
+    Utils = {},
+    Collections = {},
+}
 local helper = require("Helper")
 helper:LoadDependencies(addon, deps)
 
-local fsEnumerable = addon.Enumerable
+local fsEnumerable = addon.Collections.Enumerable
 local M = {}
 
 function M:test_new_instance()

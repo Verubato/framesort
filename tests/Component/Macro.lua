@@ -1,14 +1,15 @@
+---@type AddonMock
 local addon = require("Addon")
 ---@type WowMock
-local wow = addon.WoW
-local provider = addon.Frame.Providers.Test
+local wow = addon.WoW.Api
+local provider = addon.Providers.Test
 local M = {}
 
 function M:setup()
-    addon:InitSavedVars()
-    addon:InitFrameProviders()
-    addon:InitScheduler()
-    addon:InitMacros()
+    addon:InitDB()
+    addon.Providers:Init()
+    addon.Scheduling.Scheduler:Init()
+    addon.Modules.Macro:Init()
 
     local framesParent = {}
     provider.State.PartyFrames = {
@@ -117,7 +118,7 @@ function M:test_macro_updates_for_provider_after_combat()
     assertEquals(macro, wow.State.Macros[1].Body)
 
     wow.State.MockInCombat = false
-    wow:FireEvent(addon.Events.PLAYER_REGEN_ENABLED)
+    wow:FireEvent(wow.Events.PLAYER_REGEN_ENABLED)
 
     -- should have changed now that combat dropped
     assertEquals(
@@ -144,7 +145,7 @@ function M:test_macro_updates_for_hook_after_combat()
     assertEquals(macro, wow.State.Macros[1].Body)
 
     wow.State.MockInCombat = false
-    wow:FireEvent(addon.Events.PLAYER_REGEN_ENABLED)
+    wow:FireEvent(wow.Events.PLAYER_REGEN_ENABLED)
 
     -- should have changed now that combat dropped
     assertEquals(

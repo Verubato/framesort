@@ -1,16 +1,33 @@
 local helper = require("Helper")
 local wow = require("Mock\\WoW")
 local provider = require("Mock\\FrameProvider")
-local addon = { WoW = wow }
+---@class AddonMock: Addon
+local addon = {
+    Api = {},
+    Collections = {},
+    Configuration = {},
+    Health = {},
+    Logging = {},
+    Modules = {},
+    Numerics = {},
+    Providers = {
+        All = {},
+    },
+    Scheduling = {},
+    Utils = {},
+    WoW = {
+        Api = wow
+    },
+}
 
 local dependencies = helper:DependenciesFromXml()
 helper:LoadDependencies(addon, dependencies)
 
-addon.Frame.Providers.Test = provider
-addon.Frame.Providers.All[#addon.Frame.Providers.All + 1] = provider
+addon.Providers.Test = provider
+addon.Providers.All[#addon.Providers.All + 1] = provider
 
 function addon:Reset()
-    wow:Reset()
+    addon.WoW.Api:Reset()
     provider:Reset()
 end
 

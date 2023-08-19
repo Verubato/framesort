@@ -1,15 +1,17 @@
 ---@type string, Addon
 local _, addon = ...
----@type WoW
-local wow = addon.WoW
-local fsFrame = addon.Frame
-local fsEnumerable = addon.Enumerable
-local fsUnit = addon.Unit
+local wow = addon.WoW.Api
+local fsFrame = addon.WoW.Frame
+local fsEnumerable = addon.Collections.Enumerable
+local fsUnit = addon.WoW.Unit
+local fsProviders = addon.Providers
+local events = addon.WoW.Api.Events
+---@class BlizzardFrameProvider: FrameProvider
 local M = {}
 local callbacks = {}
 
-fsFrame.Providers.Blizzard = M
-table.insert(fsFrame.Providers.All, M)
+fsProviders.Blizzard = M
+table.insert(fsProviders.All, M)
 
 local function IsValidGroupFrame(frame)
     if not frame then
@@ -126,15 +128,15 @@ function M:Init()
 
     local eventFrame = wow.CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", Update)
-    eventFrame:RegisterEvent(addon.Events.PLAYER_ENTERING_WORLD)
-    eventFrame:RegisterEvent(addon.Events.GROUP_ROSTER_UPDATE)
-    eventFrame:RegisterEvent(addon.Events.PLAYER_ROLES_ASSIGNED)
-    eventFrame:RegisterEvent(addon.Events.UNIT_PET)
+    eventFrame:RegisterEvent(events.PLAYER_ENTERING_WORLD)
+    eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
+    eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
+    eventFrame:RegisterEvent(events.UNIT_PET)
 
     if wow.IsRetail() then
-        wow.EventRegistry:RegisterCallback(addon.Events.EditModeExit, Update)
-        eventFrame:RegisterEvent(addon.Events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
-        eventFrame:RegisterEvent(addon.Events.ARENA_OPPONENT_UPDATE)
+        wow.EventRegistry:RegisterCallback(events.EditModeExit, Update)
+        eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
+        eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
     end
 end
 

@@ -13,3 +13,11 @@
 ---@field ShowRaidPets fun(self: table): boolean Whether raid pets are enabled.
 ---@field IsRaidGrouped fun(self: table): boolean Whether the raid is grouped.
 ---@field RegisterCallback fun(self: table, callback: fun(provider: FrameProvider)) Registers a callback to be invoked when sorting is required.
+
+---@class Providers: Initialise
+---@field Blizzard BlizzardFrameProvider
+---@field sArena FrameProvider
+---@field GladiusEx FrameProvider
+---@field ElvUI FrameProvider
+---@field All FrameProvider[]
+---@field Enabled fun(self: table): FrameProvider[]

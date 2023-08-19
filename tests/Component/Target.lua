@@ -1,14 +1,13 @@
 local addon = require("Addon")
----@type WowMock
-local wow = addon.WoW
-local provider = addon.Frame.Providers.Test
+local wow = addon.WoW.Api
+local provider = addon.Providers.Test
 local M = {}
 
 function M:setup()
-    addon:InitSavedVars()
-    addon:InitFrameProviders()
-    addon:InitScheduler()
-    addon:InitTargeting()
+    addon:InitDB()
+    addon.Providers:Init()
+    addon.Scheduling.Scheduler:Init()
+    addon.Modules.Targeting:Init()
 
     local framesParent = {}
     provider.State.PartyFrames = {
@@ -210,7 +209,7 @@ function M:test_targets_update_after_combat()
     end
 
     wow.State.MockInCombat = false
-    wow:FireEvent(addon.Events.PLAYER_REGEN_ENABLED)
+    wow:FireEvent(wow.Events.PLAYER_REGEN_ENABLED)
 
     assertEquals(friendlyButtons[1]:GetAttribute("unit"), "player")
     assertEquals(friendlyButtons[2]:GetAttribute("unit"), "party2")

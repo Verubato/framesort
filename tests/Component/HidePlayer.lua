@@ -1,25 +1,25 @@
+---@type AddonMock
 local addon = require("Addon")
----@type WowMock
-local wow = addon.WoW
-local provider = addon.Frame.Providers.Test
-local realBlizzardProvider = addon.Frame.Providers.Blizzard
+local wow = addon.WoW.Api
+local provider = addon.Providers.Test
+local realBlizzardProvider = addon.Providers.Blizzard
 local M = {}
 
 function M:setup()
-    addon.Frame.Providers.Blizzard = provider
+    addon.Providers.Blizzard = provider
 
-    addon:InitSavedVars()
-    addon:InitFrameProviders()
-    addon:InitScheduler()
-    addon:InitPlayerHiding()
+    addon:InitDB()
+    addon.Providers:Init()
+    addon.Scheduling.Scheduler:Init()
+    addon.Modules.HidePlayer:Init()
 end
 
 function M:teardown()
     addon:Reset()
 
-    addon.Frame.Providers.Blizzard = realBlizzardProvider
-    addon.Options.World.Enabled = addon.Defaults.World.Enabled
-    addon.Options.World.PlayerSortMode = addon.Defaults.World.PlayerSortMode
+    addon.Providers.Blizzard = realBlizzardProvider
+    addon.DB.Options.World.Enabled = addon.Configuration.Defaults.World.Enabled
+    addon.DB.Options.World.PlayerSortMode = addon.Configuration.Defaults.World.PlayerSortMode
 end
 
 function M:test_player_hides_on_provider_callback()
@@ -72,8 +72,8 @@ function M:test_player_hides_on_provider_callback()
         },
     }
 
-    addon.Options.World.Enabled = true
-    addon.Options.World.PlayerSortMode = "Hidden"
+    addon.DB.Options.World.Enabled = true
+    addon.DB.Options.World.PlayerSortMode = "Hidden"
 
     provider:FireCallbacks()
 
@@ -135,8 +135,8 @@ function M:test_player_shows_on_provider_callback()
         },
     }
 
-    addon.Options.World.Enabled = true
-    addon.Options.World.PlayerSortMode = "Top"
+    addon.DB.Options.World.Enabled = true
+    addon.DB.Options.World.PlayerSortMode = "Top"
 
     provider:FireCallbacks()
 
@@ -198,8 +198,8 @@ function M:test_player_hides_after_combat()
         },
     }
 
-    addon.Options.World.Enabled = true
-    addon.Options.World.PlayerSortMode = "Hidden"
+    addon.DB.Options.World.Enabled = true
+    addon.DB.Options.World.PlayerSortMode = "Hidden"
     wow.State.MockInCombat = true
 
     provider:FireCallbacks()
@@ -207,7 +207,7 @@ function M:test_player_hides_after_combat()
     assertEquals(#wow.State.AttributeDrivers, 0)
 
     wow.State.MockInCombat = false
-    wow:FireEvent(addon.Events.PLAYER_REGEN_ENABLED)
+    wow:FireEvent(wow.Events.PLAYER_REGEN_ENABLED)
 
     local driver = wow.State.AttributeDrivers[1]
     assertEquals(driver.Frame, provider.State.PartyFrames[1])
@@ -265,8 +265,8 @@ function M:test_player_shows_after_combat()
         },
     }
 
-    addon.Options.World.Enabled = true
-    addon.Options.World.PlayerSortMode = "Top"
+    addon.DB.Options.World.Enabled = true
+    addon.DB.Options.World.PlayerSortMode = "Top"
     wow.State.MockInCombat = true
 
     assertEquals(#provider.State.Callbacks, 1)
@@ -275,7 +275,7 @@ function M:test_player_shows_after_combat()
     assertEquals(#wow.State.AttributeDrivers, 0)
 
     wow.State.MockInCombat = false
-    wow:FireEvent(addon.Events.PLAYER_REGEN_ENABLED)
+    wow:FireEvent(wow.Events.PLAYER_REGEN_ENABLED)
 
     assertEquals(#wow.State.AttributeDrivers, 1)
 
