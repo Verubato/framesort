@@ -15,7 +15,7 @@ local function EmptyCompare(x, y)
     return x < y
 end
 
-function CompareAlphabetical(leftToken, rightToken)
+local function CompareAlphabetical(leftToken, rightToken)
     local name1, name2 = wow.UnitName(leftToken), wow.UnitName(rightToken)
     if name1 and name2 then
         return name1 < name2
