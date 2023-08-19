@@ -1,5 +1,5 @@
 local deps = {
-    "Type\\SortMode.lua",
+    "Types\\SortMode.lua",
     "Util\\Enumerable.lua",
     "Util\\Compare.lua",
 }
