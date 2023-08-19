@@ -1,7 +1,7 @@
 local deps = {
     "Types\\SortMode.lua",
-    "Config\\Upgrader.lua",
-    "Config\\Defaults.lua",
+    "Configuration\\Upgrader.lua",
+    "Configuration\\Defaults.lua",
 }
 
 local addon = {}

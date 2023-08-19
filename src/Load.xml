@@ -23,15 +23,15 @@
     <Script file="Modules\Macro.lua"/>
     <Script file="Api\Api.lua"/>
     <Script file="Api\v1.lua"/>
-    <Script file="Config\Defaults.lua"/>
-    <Script file="Config\Upgrader.lua"/>
-    <Script file="Config\Options.lua"/>
-    <Script file="Config\Sorting.lua"/>
-    <Script file="Config\Spacing.lua"/>
-    <Script file="Config\Keybindings.lua"/>
-    <Script file="Config\Macro.lua"/>
-    <Script file="Config\SortingMethod.lua"/>
-    <Script file="Config\Integrations.lua"/>
-    <Script file="Config\HealthCheck.lua"/>
+    <Script file="Configuration\Defaults.lua"/>
+    <Script file="Configuration\Upgrader.lua"/>
+    <Script file="Configuration\Options.lua"/>
+    <Script file="Configuration\Sorting.lua"/>
+    <Script file="Configuration\Spacing.lua"/>
+    <Script file="Configuration\Keybindings.lua"/>
+    <Script file="Configuration\Macro.lua"/>
+    <Script file="Configuration\SortingMethod.lua"/>
+    <Script file="Configuration\Integrations.lua"/>
+    <Script file="Configuration\HealthCheck.lua"/>
     <Script file="Init.lua"/>
 </Ui>
