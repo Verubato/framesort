@@ -1,15 +1,15 @@
 ---@type string, Addon
 local _, addon = ...
----@type WoW
-local wow = addon.WoW
-local fsSort = addon.Sorting
-local fsHide = addon.HidePlayer
-local fsHealth = addon.Health
-local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
-local horizontalSpacing = addon.OptionsBuilder.HorizontalSpacing
+local wow = addon.WoW.Api
+local fsHealth = addon.Health.HealthCheck
+local fsConfig = addon.Configuration
+local fsSort = addon.Modules.Sorting
+local fsHide = addon.Modules.HidePlayer
+local verticalSpacing = fsConfig.VerticalSpacing
+local horizontalSpacing = fsConfig.HorizontalSpacing
 local labelWidth = 50
 local M = {}
-addon.OptionsBuilder.Sorting = M
+fsConfig.Sorting = M
 
 ---Adds the title UI components.
 ---@param panel table the parent UI panel.
@@ -104,7 +104,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
     local enabled = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     -- not sure why, but checkbox left seems to be off by about 4 units by default
     enabled:SetPoint("TOPLEFT", pointOffset, "BOTTOMLEFT", -4, -verticalSpacing)
-    addon.OptionsBuilder:TextShim(enabled)
+    fsConfig:TextShim(enabled)
     enabled.Text:SetText(" " .. labelText)
     enabled.Text:SetFontObject("GameFontNormalLarge")
     enabled:SetChecked(options.Enabled)
@@ -126,34 +126,34 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         playerLabel:SetWidth(labelWidth)
 
         top = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-        addon.OptionsBuilder:TextShim(top)
+        fsConfig:TextShim(top)
         top.Text:SetText("Top")
         top:SetPoint("LEFT", playerLabel, "RIGHT", horizontalSpacing / 2, 0)
-        top:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Top)
+        top:SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Top)
 
         middle = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-        addon.OptionsBuilder:TextShim(middle)
+        fsConfig:TextShim(middle)
         middle.Text:SetText("Middle")
         middle:SetPoint("LEFT", top, "RIGHT", horizontalSpacing, 0)
-        middle:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Middle)
+        middle:SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Middle)
 
         bottom = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-        addon.OptionsBuilder:TextShim(bottom)
+        fsConfig:TextShim(bottom)
         bottom.Text:SetText("Bottom")
         bottom:SetPoint("LEFT", middle, "RIGHT", horizontalSpacing, 0)
-        bottom:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Bottom)
+        bottom:SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Bottom)
 
         hidden = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-        addon.OptionsBuilder:TextShim(hidden)
+        fsConfig:TextShim(hidden)
         hidden.Text:SetText("Hidden")
         hidden:SetPoint("LEFT", bottom, "RIGHT", horizontalSpacing, 0)
-        hidden:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Hidden)
+        hidden:SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Hidden)
 
         local playerModes = {
-            [top] = addon.PlayerSortMode.Top,
-            [middle] = addon.PlayerSortMode.Middle,
-            [bottom] = addon.PlayerSortMode.Bottom,
-            [hidden] = addon.PlayerSortMode.Hidden,
+            [top] = fsConfig.PlayerSortMode.Top,
+            [middle] = fsConfig.PlayerSortMode.Middle,
+            [bottom] = fsConfig.PlayerSortMode.Bottom,
+            [hidden] = fsConfig.PlayerSortMode.Hidden,
         }
 
         local function onPlayerClick(sender)
@@ -193,35 +193,35 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
     local group = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     group:SetPoint("LEFT", modeLabel, "RIGHT", horizontalSpacing / 2, 0)
 
-    addon.OptionsBuilder:TextShim(group)
-    group.Text:SetText(addon.GroupSortMode.Group)
-    group:SetChecked(options.GroupSortMode == addon.GroupSortMode.Group)
+    fsConfig:TextShim(group)
+    group.Text:SetText(fsConfig.GroupSortMode.Group)
+    group:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Group)
 
     local role = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     role:SetPoint("LEFT", group, "RIGHT", horizontalSpacing, 0)
-    addon.OptionsBuilder:TextShim(role)
-    role.Text:SetText(addon.GroupSortMode.Role)
-    role:SetChecked(options.GroupSortMode == addon.GroupSortMode.Role)
+    fsConfig:TextShim(role)
+    role.Text:SetText(fsConfig.GroupSortMode.Role)
+    role:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Role)
 
     local alpha = nil
     local modes = {
-        [group] = addon.GroupSortMode.Group,
-        [role] = addon.GroupSortMode.Role,
+        [group] = fsConfig.GroupSortMode.Group,
+        [role] = fsConfig.GroupSortMode.Role,
     }
 
     if hasAlpha then
         alpha = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
         alpha:SetPoint("LEFT", role, "RIGHT", horizontalSpacing, 0)
-        addon.OptionsBuilder:TextShim(alpha)
+        fsConfig:TextShim(alpha)
         alpha.Text:SetText("Alpha")
-        alpha:SetChecked(options.GroupSortMode == addon.GroupSortMode.Alphabetical)
+        alpha:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Alphabetical)
 
-        modes[alpha] = addon.GroupSortMode.Alphabetical
+        modes[alpha] = fsConfig.GroupSortMode.Alphabetical
     end
 
     local reverse = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     reverse:SetPoint("LEFT", alpha or role, "RIGHT", horizontalSpacing, 0)
-    addon.OptionsBuilder:TextShim(reverse)
+    fsConfig:TextShim(reverse)
     reverse.Text:SetText("Reverse")
     reverse:SetChecked(options.Reverse)
 
@@ -251,17 +251,17 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         enabled:SetChecked(options.Enabled)
 
         if hasPlayer then
-            top:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Top)
-            middle:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Middle)
-            bottom:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Bottom)
-            hidden:SetChecked(options.PlayerSortMode == addon.PlayerSortMode.Hidden)
+            top:SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Top)
+            middle:SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Middle)
+            bottom:SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Bottom)
+            hidden:SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Hidden)
         end
 
-        group:SetChecked(options.GroupSortMode == addon.GroupSortMode.Group)
-        role:SetChecked(options.GroupSortMode == addon.GroupSortMode.Role)
+        group:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Group)
+        role:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Role)
 
         if hasAlpha then
-            alpha:SetChecked(options.GroupSortMode == addon.GroupSortMode.Alphabetical)
+            alpha:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Alphabetical)
         end
 
         reverse:SetChecked(options.Reverse)
@@ -317,16 +317,16 @@ function M:Build(parent)
     local anchor = BuiltTitle(parent)
 
     if not wow.IsClassic() then
-        anchor = BuildSortModeCheckboxes(parent, anchor, "Arena", addon.Options.Arena)
+        anchor = BuildSortModeCheckboxes(parent, anchor, "Arena", addon.DB.Options.Arena)
     end
 
     if wow.IsRetail() then
-        anchor = BuildSortModeCheckboxes(parent, anchor, "Enemy Arena (GladiusEx, sArena, Blizzard)", addon.Options.EnemyArena, false, false)
+        anchor = BuildSortModeCheckboxes(parent, anchor, "Enemy Arena (GladiusEx, sArena, Blizzard)", addon.DB.Options.EnemyArena, false, false)
     end
 
-    anchor = BuildSortModeCheckboxes(parent, anchor, "Dungeon (mythics, 5-mans)", addon.Options.Dungeon)
-    anchor = BuildSortModeCheckboxes(parent, anchor, "Raid (battlegrounds, raids)", addon.Options.Raid)
-    anchor = BuildSortModeCheckboxes(parent, anchor, "World (non-instance groups)", addon.Options.World)
+    anchor = BuildSortModeCheckboxes(parent, anchor, "Dungeon (mythics, 5-mans)", addon.DB.Options.Dungeon)
+    anchor = BuildSortModeCheckboxes(parent, anchor, "Raid (battlegrounds, raids)", addon.DB.Options.Raid)
+    anchor = BuildSortModeCheckboxes(parent, anchor, "World (non-instance groups)", addon.DB.Options.World)
 
     return parent
 end

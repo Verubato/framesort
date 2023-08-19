@@ -11,13 +11,13 @@ _G["BINDING_NAME_CLICK FSTargetEnemy3:LeftButton"] = "Target enemy frame 3"
 
 ---@type string, Addon
 local _, addon = ...
----@type WoW
-local wow = addon.WoW
+local fsConfig = addon.Configuration
+local wow = addon.WoW.Api
 local M = {}
-addon.OptionsBuilder.Keybinding = M
+fsConfig.Keybinding = M
 
 function M:Build(parent)
-    local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
+    local verticalSpacing = fsConfig.VerticalSpacing
     local panel = wow.CreateFrame("Frame", "FrameSortKeybindings", parent)
     panel.name = "Keybindings"
     panel.parent = parent.name

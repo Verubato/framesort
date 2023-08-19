@@ -1,13 +1,10 @@
 ---@type string, Addon
 local _, addon = ...
----@type WoW
-local wow = addon.WoW
----@class OptionsBuilder
-local M = {
-    VerticalSpacing = 13,
-    HorizontalSpacing = 50,
-}
-addon.OptionsBuilder = M
+local fsConfig = addon.Configuration
+local wow = addon.WoW.Api
+
+fsConfig.VerticalSpacing = 13
+fsConfig.HorizontalSpacing = 50
 
 local function AddCategory(panel)
     if wow.IsRetail() then
@@ -29,7 +26,7 @@ local function AddSubCategory(panel)
     end
 end
 
-function M:TextShim(frame)
+function fsConfig:TextShim(frame)
     if not wow.IsClassic() then
         return
     end
@@ -37,8 +34,7 @@ function M:TextShim(frame)
     frame.Text = frame.text
 end
 
----Initialises the addon options.
-function addon:InitOptions()
+function fsConfig:Init()
     local panel = wow.CreateFrame("ScrollFrame", nil, nil, "UIPanelScrollFrameTemplate")
     panel.name = "FrameSort"
 
@@ -56,14 +52,14 @@ function addon:InitOptions()
 
     AddCategory(panel)
 
-    M.Sorting:Build(main)
+    fsConfig.Sorting:Build(main)
 
-    local sortingMethod = M.SortingMethod:Build(panel)
-    local keybinding = M.Keybinding:Build(panel)
-    local macro = M.Macro:Build(panel)
-    local spacing = M.Spacing:Build(panel)
-    local integration = M.Integration:Build(panel)
-    local health = M.Health:Build(panel)
+    local sortingMethod = fsConfig.SortingMethod:Build(panel)
+    local keybinding = fsConfig.Keybinding:Build(panel)
+    local macro = fsConfig.Macro:Build(panel)
+    local spacing = fsConfig.Spacing:Build(panel)
+    local integration = fsConfig.Integration:Build(panel)
+    local health = fsConfig.Health:Build(panel)
 
     AddSubCategory(sortingMethod)
     AddSubCategory(keybinding)

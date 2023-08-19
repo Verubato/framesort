@@ -1,17 +1,19 @@
 ---@type string, Addon
 local _, addon = ...
----@type WoW
-local wow = addon.WoW
-local fsScheduler = addon.Scheduler
-local fsFrame = addon.Frame
-local fsSort = addon.Sorting
-local fsMacro = addon.Macro
-local fsTarget = addon.Target
-local fsLog = addon.Log
+local wow = addon.WoW.Api
+local fsScheduler = addon.Scheduling.Scheduler
+local fsMacro = addon.WoW.Macro
+local fsLog = addon.Logging.Log
+local fsTarget = addon.Modules.Targeting
+local fsSort = addon.Modules.Sorting
+local fsProviders = addon.Providers
 local maxMacros = 138
 local isSelfEditingMacro = false
 ---@type table<number, boolean>
 local isFsMacroCache = {}
+---@class MacroModule: Initialise
+local M = {}
+addon.Modules.Macro = M
 
 local function UpdateMacro(id)
     local _, _, body = wow.GetMacroInfo(id)
@@ -77,13 +79,12 @@ local function Run()
     ScanMacros()
 end
 
----Initialises the macros module.
-function addon:InitMacros()
+function M:Init()
     if #isFsMacroCache > 0 then
         isFsMacroCache = {}
     end
 
-    for _, provider in ipairs(fsFrame.Providers:Enabled()) do
+    for _, provider in ipairs(fsProviders:Enabled()) do
         provider:RegisterCallback(Run)
     end
 

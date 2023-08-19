@@ -176,6 +176,17 @@ local wow = {
     IsClassic = function()
         return false
     end,
+
+    Events = {
+        PLAYER_REGEN_ENABLED = "PLAYER_REGEN_ENABLED",
+        PLAYER_ENTERING_WORLD = "PLAYER_ENTERING_WORLD",
+        GROUP_ROSTER_UPDATE = "GROUP_ROSTER_UPDATE",
+        PLAYER_ROLES_ASSIGNED = "PLAYER_ROLES_ASSIGNED",
+        UNIT_PET = "UNIT_PET",
+        ARENA_PREP_OPPONENT_SPECIALIZATIONS = "ARENA_PREP_OPPONENT_SPECIALIZATIONS",
+        ARENA_OPPONENT_UPDATE = "ARENA_OPPONENT_UPDATE",
+        EditModeExit = "EditMode.Exit",
+    },
 }
 
 function wow:Reset()

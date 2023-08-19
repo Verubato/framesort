@@ -1,21 +1,20 @@
 ---@type string, Addon
 local _, addon = ...
----@type WoW
-local wow = addon.WoW
-local fsUnit = addon.Unit
-local fsSort = addon.Sorting
-local fsEnumerable = addon.Enumerable
-local fsScheduler = addon.Scheduler
-local fsFrame = addon.Frame
-local fsCompare = addon.Compare
-local fsLog = addon.Log
+local wow = addon.WoW.Api
+local fsProviders = addon.Providers
+local fsUnit = addon.WoW.Unit
+local fsSort = addon.Modules.Sorting
+local fsEnumerable = addon.Collections.Enumerable
+local fsScheduler = addon.Scheduling.Scheduler
+local fsCompare = addon.Collections.Comparer
+local fsLog = addon.Logging.Log
 local prefix = "FSTarget"
 local targetFramesButtons = {}
 local targetEnemyButtons = {}
 local targetBottomFrameButton = nil
----@class TargetController
+---@class TargetingModule: Initialise
 local M = {}
-addon.Target = M
+addon.Modules.Targeting = M
 
 local function GetFrames(provider)
     local whereVisible = function(frames)
@@ -83,13 +82,13 @@ function M:FriendlyTargets()
     local frameProvider = nil
 
     -- prefer Blizzard frames
-    if fsFrame.Providers.Blizzard:Enabled() then
-        frames = GetFrames(fsFrame.Providers.Blizzard)
-        frameProvider = fsFrame.Providers.Blizzard
+    if fsProviders.Blizzard:Enabled() then
+        frames = GetFrames(fsProviders.Blizzard)
+        frameProvider = fsProviders.Blizzard
     end
 
     if not frames or #frames == 0 then
-        for _, provider in pairs(fsFrame.Providers:Enabled()) do
+        for _, provider in pairs(fsProviders:Enabled()) do
             frames = GetFrames(provider)
             frameProvider = provider
 
@@ -118,9 +117,9 @@ end
 function M:EnemyTargets()
     -- prefer GladiusEx/sArena
     local preferred = fsEnumerable
-        :From(fsFrame.Providers:Enabled())
+        :From(fsProviders:Enabled())
         :Where(function(provider)
-            return provider ~= fsFrame.Providers.Blizzard
+            return provider ~= fsProviders.Blizzard
         end)
         :ToTable()
 
@@ -141,15 +140,15 @@ function M:EnemyTargets()
         end
     end
 
-    if #frames == 0 and fsFrame.Providers.Blizzard:Enabled() then
+    if #frames == 0 and fsProviders.Blizzard:Enabled() then
         frames = fsEnumerable
-            :From(fsFrame.Providers.Blizzard:EnemyArenaFrames())
+            :From(fsProviders.Blizzard:EnemyArenaFrames())
             :Where(function(x)
                 return x:IsVisible()
             end)
             :ToTable()
 
-        frameProvider = fsFrame.Providers.Blizzard
+        frameProvider = fsProviders.Blizzard
     end
 
     if #frames > 0 then
@@ -168,8 +167,7 @@ function M:EnemyTargets()
     return fsUnit:EnemyUnits()
 end
 
----Initialises the targeting frames feature.
-function addon:InitTargeting()
+function M:Init()
     local targetFriendlyCount = 5
     local targetEnemyCount = 3
 
@@ -204,7 +202,7 @@ function addon:InitTargeting()
     targetBottomFrameButton:SetAttribute("type", "target")
     targetBottomFrameButton:SetAttribute("unit", "none")
 
-    for _, provider in ipairs(fsFrame.Providers:Enabled()) do
+    for _, provider in ipairs(fsProviders:Enabled()) do
         provider:RegisterCallback(Run)
     end
 

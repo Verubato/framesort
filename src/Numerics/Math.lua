@@ -2,7 +2,7 @@
 local _, addon = ...
 ---@class Math
 local M = {}
-addon.Math = M
+addon.Numerics.Math = M
 
 ---Rounds a number to the specified number of decimal places
 ---@param number number the number to round

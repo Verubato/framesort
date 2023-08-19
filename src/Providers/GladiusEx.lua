@@ -1,14 +1,15 @@
 ---@type string, Addon
 local _, addon = ...
----@type WoW
-local wow = addon.WoW
-local fsFrame = addon.Frame
-local fsScheduler = addon.Scheduler
+local wow = addon.WoW.Api
+local fsFrame = addon.WoW.Frame
+local fsScheduler = addon.Scheduling.Scheduler
+local fsProviders = addon.Providers
+local events = addon.WoW.Api.Events
 local M = {}
 local callbacks = {}
 
-fsFrame.Providers.GladiusEx = M
-table.insert(fsFrame.Providers.All, M)
+fsProviders.GladiusEx = M
+table.insert(fsProviders.All, M)
 
 local function GetUnit(frame)
     return frame.unit
@@ -44,12 +45,12 @@ function M:Init()
 
     local eventFrame = wow.CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", UpdateNextFrame)
-    eventFrame:RegisterEvent(addon.Events.PLAYER_ENTERING_WORLD)
-    eventFrame:RegisterEvent(addon.Events.GROUP_ROSTER_UPDATE)
-    eventFrame:RegisterEvent(addon.Events.PLAYER_ROLES_ASSIGNED)
-    eventFrame:RegisterEvent(addon.Events.UNIT_PET)
-    eventFrame:RegisterEvent(addon.Events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
-    eventFrame:RegisterEvent(addon.Events.ARENA_OPPONENT_UPDATE)
+    eventFrame:RegisterEvent(events.PLAYER_ENTERING_WORLD)
+    eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
+    eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
+    eventFrame:RegisterEvent(events.UNIT_PET)
+    eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
+    eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
 end
 
 function M:RegisterCallback(callback)

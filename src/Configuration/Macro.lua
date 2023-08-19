@@ -1,10 +1,11 @@
 ---@type string, Addon
 local _, addon = ...
-local wow = addon.WoW
-local fsMacro = addon.Macro
+local wow = addon.WoW.Api
+local fsMacro = addon.WoW.Macro
+local fsConfig = addon.Configuration
 local maxMacros = 138
 local M = {}
-addon.OptionsBuilder.Macro = M
+fsConfig.Macro = M
 
 local function CountMacros()
     local count = 0
@@ -21,7 +22,7 @@ local function CountMacros()
 end
 
 function M:Build(parent)
-    local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
+    local verticalSpacing = fsConfig.VerticalSpacing
     local panel = wow.CreateFrame("Frame", "FrameSortMacros", parent)
     panel.name = "Macros"
     panel.parent = parent.name

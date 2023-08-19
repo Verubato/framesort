@@ -1,10 +1,9 @@
 ---@type string, Addon
 local _, addon = ...
----@type WoW
-local wow = addon.WoW
+local wow = addon.WoW.Api
 ---@class UnitUtil
 local M = {}
-addon.Unit = M
+addon.WoW.Unit = M
 
 ---Gets a table of group member unit tokens that exist (UnitExists()).
 ---@return string[]

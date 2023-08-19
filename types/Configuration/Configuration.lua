@@ -1,8 +1,14 @@
 ---@meta
----@class OptionsBuilder
+---@class Configuration
+---@field Init fun(self: table)
 ---@field HorizontalSpacing number
 ---@field VerticalSpacing number
 ---@field TextShim fun(self: table, frame: table)
+---@field Defaults Options
+---@field PlayerSortMode PlayerSortMode
+---@field GroupSortMode GroupSortMode
+---@field LayoutType LayoutType
+---@field Upgrader OptionsUpgrader
 ---@field Sorting OptionsPanel
 ---@field Spacing OptionsPanel
 ---@field Health OptionsPanel

@@ -1,10 +1,11 @@
+---@type string, Addon
 local addonName, addon = ...
----@type WoW
-local wow = addon.WoW
-local fsEnumerable = addon.Enumerable
+local wow = addon.WoW.Api
+local fsEnumerable = addon.Collections.Enumerable
+local fsProviders = addon.Providers
 ---@class HealthChecker
 local M = {}
-addon.Health = M
+addon.Health.HealthCheck = M
 
 local function AddonFriendlyName(name)
     if not name then
@@ -36,7 +37,7 @@ local function SortingFunctionsTampered()
 end
 
 local function ConflictingAddons()
-    if not addon.Frame.Providers.Blizzard:Enabled() then
+    if not fsProviders.Blizzard:Enabled() then
         return nil
     end
 
@@ -77,7 +78,7 @@ local function CanSeeFrames()
         return true
     end
 
-    for _, provider in pairs(addon.Frame.Providers:Enabled()) do
+    for _, provider in pairs(fsProviders:Enabled()) do
         local anyParty = fsEnumerable:From(provider:PartyFrames()):Any(function(x)
             return x:IsVisible()
         end)
@@ -117,12 +118,12 @@ end
 function M:IsHealthy()
     local results = {}
 
-    assert(#addon.Frame.Providers.All > 0)
+    assert(#fsProviders.All > 0)
 
-    local addonsString = addon.Frame.Providers.All[1]:Name()
+    local addonsString = fsProviders.All[1]:Name()
 
-    for i = 2, #addon.Frame.Providers.All do
-        local provider = addon.Frame.Providers.All[i]
+    for i = 2, #fsProviders.All do
+        local provider = fsProviders.All[i]
         addonsString = addonsString .. ", " .. provider:Name()
     end
 
@@ -134,22 +135,22 @@ function M:IsHealthy()
     }
 
     results[#results + 1] = {
-        Applicable = addon.Options.SortingMethod.TraditionalEnabled,
-        Passed = addon.Frame.Providers.Blizzard:IsUsingRaidStyleFrames(),
+        Applicable = addon.DB.Options.SortingMethod.TraditionalEnabled,
+        Passed = fsProviders.Blizzard:IsUsingRaidStyleFrames(),
         Description = "Using Raid-Style Party Frames",
         Help = "Please enable 'Use Raid-Style Party Frames' in the Blizzard settings",
     }
 
     results[#results + 1] = {
-        Applicable = addon.Options.SortingMethod.TraditionalEnabled,
-        Passed = not addon.Frame.Providers.Blizzard.IsRaidGrouped(),
+        Applicable = addon.DB.Options.SortingMethod.TraditionalEnabled,
+        Passed = not fsProviders.Blizzard:IsRaidGrouped(),
         Description = "Keep Groups Together setting disabled",
         Help = wow.IsRetail() and "Change the raid display mode to one of the 'Combined Groups' options via Edit Mode" or "Disable the 'Keep Groups Together' raid profile setting",
     }
 
     local conflictingSorter = SortingFunctionsTampered()
     results[#results + 1] = {
-        Applicable = addon.Options.SortingMethod.TraditionalEnabled,
+        Applicable = addon.DB.Options.SortingMethod.TraditionalEnabled,
         Passed = conflictingSorter == nil,
         Description = "Blizzard sorting functions not tampered with",
         Help = string.format('"%s" may cause conflicts, consider disabling it', conflictingSorter or "(unknown)"),

@@ -1,15 +1,15 @@
 ---@type string, Addon
 local _, addon = ...
----@type WoW
-local wow = addon.WoW
-local fsUnit = addon.Unit
-local fsMath = addon.Math
-local fsEnumerable = addon.Enumerable
+local wow = addon.WoW.Api
+local fsUnit = addon.WoW.Unit
+local fsMath = addon.Numerics.Math
+local fsEnumerable = addon.Collections.Enumerable
+local fsConfig = addon.Configuration
 local fuzzyDecimalPlaces = 0
 local roleValues = { MAINTANK = 1, MAINASSIST = 2, TANK = 3, HEALER = 4, DAMAGER = 5, NONE = 6 }
----@class Compare
+---@class Comparer
 local M = {}
-addon.Compare = M
+addon.Collections.Comparer = M
 
 local function EmptyCompare(x, y)
     return x < y
@@ -120,7 +120,7 @@ function M:SortFunction(units)
         return EmptyCompare
     end
 
-    if playerSortMode ~= addon.PlayerSortMode.Middle then
+    if playerSortMode ~= fsConfig.PlayerSortMode.Middle then
         return function(x, y)
             return M:Compare(x, y, playerSortMode, groupSortMode, reverse)
         end
@@ -133,7 +133,7 @@ function M:SortFunction(units)
     units = fsEnumerable
         :From(units)
         :OrderBy(function(x, y)
-            return M:Compare(x, y, addon.PlayerSortMode.Top, groupSortMode, reverse)
+            return M:Compare(x, y, fsConfig.PlayerSortMode.Top, groupSortMode, reverse)
         end)
         :ToTable()
 
@@ -165,15 +165,15 @@ function M:FriendlySortMode()
     local inInstance, instanceType = wow.IsInInstance()
 
     if inInstance and instanceType == "arena" then
-        return addon.Options.Arena.Enabled, addon.Options.Arena.PlayerSortMode, addon.Options.Arena.GroupSortMode, addon.Options.Arena.Reverse
+        return addon.DB.Options.Arena.Enabled, addon.DB.Options.Arena.PlayerSortMode, addon.DB.Options.Arena.GroupSortMode, addon.DB.Options.Arena.Reverse
     elseif inInstance and instanceType == "party" then
-        return addon.Options.Dungeon.Enabled, addon.Options.Dungeon.PlayerSortMode, addon.Options.Dungeon.GroupSortMode, addon.Options.Dungeon.Reverse
+        return addon.DB.Options.Dungeon.Enabled, addon.DB.Options.Dungeon.PlayerSortMode, addon.DB.Options.Dungeon.GroupSortMode, addon.DB.Options.Dungeon.Reverse
     elseif inInstance and (instanceType == "raid" or instanceType == "pvp") then
-        return addon.Options.Raid.Enabled, addon.Options.Raid.PlayerSortMode, addon.Options.Raid.GroupSortMode, addon.Options.Raid.Reverse
+        return addon.DB.Options.Raid.Enabled, addon.DB.Options.Raid.PlayerSortMode, addon.DB.Options.Raid.GroupSortMode, addon.DB.Options.Raid.Reverse
     end
 
     -- default to world rules for all other instance types
-    return addon.Options.World.Enabled, addon.Options.World.PlayerSortMode, addon.Options.World.GroupSortMode, addon.Options.World.Reverse
+    return addon.DB.Options.World.Enabled, addon.DB.Options.World.PlayerSortMode, addon.DB.Options.World.GroupSortMode, addon.DB.Options.World.Reverse
 end
 
 ---Returns the sort mode from the configured options for the current instance.
@@ -181,7 +181,7 @@ end
 ---@return string? groupMode the group sort mode.
 ---@return boolean? reverse whether the sorting is reversed.
 function M:EnemySortMode()
-    return addon.Options.EnemyArena.Enabled, addon.Options.EnemyArena.GroupSortMode, addon.Options.EnemyArena.Reverse
+    return addon.DB.Options.EnemyArena.Enabled, addon.DB.Options.EnemyArena.GroupSortMode, addon.DB.Options.EnemyArena.Reverse
 end
 
 ---Returns true if the left token should be ordered before the right token.
@@ -206,24 +206,24 @@ function M:Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse
 
     if playerSortMode and playerSortMode ~= "" then
         if leftToken == "player" or wow.UnitIsUnit(leftToken, "player") then
-            if playerSortMode == addon.PlayerSortMode.Hidden then
+            if playerSortMode == fsConfig.PlayerSortMode.Hidden then
                 return false
-            elseif playerSortMode == addon.PlayerSortMode.Middle then
+            elseif playerSortMode == fsConfig.PlayerSortMode.Middle then
                 assert(preSortedUnits ~= nil)
                 return CompareMiddle(rightToken, preSortedUnits)
             else
-                return playerSortMode == addon.PlayerSortMode.Top
+                return playerSortMode == fsConfig.PlayerSortMode.Top
             end
         end
 
         if rightToken == "player" or wow.UnitIsUnit(rightToken, "player") then
-            if playerSortMode == addon.PlayerSortMode.Hidden then
+            if playerSortMode == fsConfig.PlayerSortMode.Hidden then
                 return true
-            elseif playerSortMode == addon.PlayerSortMode.Middle then
+            elseif playerSortMode == fsConfig.PlayerSortMode.Middle then
                 assert(preSortedUnits ~= nil)
                 return not CompareMiddle(leftToken, preSortedUnits)
             else
-                return playerSortMode == addon.PlayerSortMode.Bottom
+                return playerSortMode == fsConfig.PlayerSortMode.Bottom
             end
         end
     end
@@ -234,11 +234,11 @@ function M:Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse
         rightToken = tmp
     end
 
-    if groupSortMode == addon.GroupSortMode.Group then
+    if groupSortMode == fsConfig.GroupSortMode.Group then
         return CompareGroup(leftToken, rightToken)
-    elseif groupSortMode == addon.GroupSortMode.Role then
+    elseif groupSortMode == fsConfig.GroupSortMode.Role then
         return CompareRole(leftToken, rightToken)
-    elseif groupSortMode == addon.GroupSortMode.Alphabetical then
+    elseif groupSortMode == fsConfig.GroupSortMode.Alphabetical then
         return CompareAlphabetical(leftToken, rightToken)
     end
 
@@ -258,13 +258,13 @@ function M:EnemyCompare(leftToken, rightToken, groupSortMode, reverse)
         rightToken = tmp
     end
 
-    if groupSortMode == addon.GroupSortMode.Group then
+    if groupSortMode == fsConfig.GroupSortMode.Group then
         return CompareGroup(leftToken, rightToken)
     end
 
     local inInstance, instanceType = wow.IsInInstance()
 
-    if groupSortMode == addon.GroupSortMode.Role and inInstance and instanceType == "arena" and wow.IsRetail() then
+    if groupSortMode == fsConfig.GroupSortMode.Role and inInstance and instanceType == "arena" and wow.IsRetail() then
         return CompareRole(leftToken, rightToken)
     end
 

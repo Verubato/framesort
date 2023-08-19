@@ -1,10 +1,11 @@
 ---@type string, Addon
 local _, addon = ...
-local fsLog = addon.Log
+local fsLog = addon.Logging.Log
+local fsConfig = addon.Configuration
 ---@class OptionsUpgrader
 local M = {}
 
-addon.OptionsUpgrader = M
+addon.Configuration.Upgrader = M
 
 function M:UpgradeToVersion2(options)
     assert(options.Version == nil or options.Version == 1)
@@ -189,26 +190,26 @@ function M:UpgradeToVersion10(options)
         },
         Arena = {
             Enabled = true,
-            PlayerSortMode = addon.PlayerSortMode.Top,
-            GroupSortMode = addon.GroupSortMode.Group,
+            PlayerSortMode = fsConfig.PlayerSortMode.Top,
+            GroupSortMode = fsConfig.GroupSortMode.Group,
             Reverse = false,
         },
         Dungeon = {
             Enabled = true,
-            PlayerSortMode = addon.PlayerSortMode.Top,
-            GroupSortMode = addon.GroupSortMode.Role,
+            PlayerSortMode = fsConfig.PlayerSortMode.Top,
+            GroupSortMode = fsConfig.GroupSortMode.Role,
             Reverse = false,
         },
         World = {
             Enabled = true,
-            PlayerSortMode = addon.PlayerSortMode.Top,
-            GroupSortMode = addon.GroupSortMode.Group,
+            PlayerSortMode = fsConfig.PlayerSortMode.Top,
+            GroupSortMode = fsConfig.GroupSortMode.Group,
             Reverse = false,
         },
         Raid = {
             Enabled = false,
-            PlayerSortMode = addon.PlayerSortMode.Top,
-            GroupSortMode = addon.GroupSortMode.Role,
+            PlayerSortMode = fsConfig.PlayerSortMode.Top,
+            GroupSortMode = fsConfig.GroupSortMode.Role,
             Reverse = false,
         },
         SortingMethod = {
@@ -258,7 +259,7 @@ function M:UpgradeToVersion12(options)
 
     options.EnemyArena = {
         Enabled = false,
-        GroupSortMode = addon.GroupSortMode.Group,
+        GroupSortMode = fsConfig.GroupSortMode.Group,
         Reverse = false,
     }
 
@@ -281,7 +282,7 @@ local upgradeFunctions = {
 
 ---Upgrades saved options to the current version.
 function M:UpgradeOptions(options)
-    while (options.Version or 1) < addon.Defaults.Version do
+    while (options.Version or 1) < fsConfig.Defaults.Version do
         local nextVersion = (options.Version or 1) + 1
         local next = upgradeFunctions["Version" .. nextVersion]
         assert(next ~= nil)

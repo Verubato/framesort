@@ -1,5 +1,5 @@
 ---@meta
----@class WoW
+---@class WowApi
 -- constants
 ---@field WOW_PROJECT_ID string
 ---@field WOW_PROJECT_CLASSIC string
@@ -60,3 +60,4 @@
 ---@field IsRetail fun(): boolean
 ---@field IsClassic fun(): boolean
 ---@field IsWotlk fun(): boolean
+---@field Events WowEvents

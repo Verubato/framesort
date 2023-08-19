@@ -1,14 +1,14 @@
 ---@type string, Addon
 local _, addon = ...
----@type WoW
-local wow = addon.WoW
-local fsHealth = addon.Health
+local wow = addon.WoW.Api
+local fsHealth = addon.Health.HealthCheck
+local fsConfig = addon.Configuration
 local lines = {}
 local M = {}
-addon.OptionsBuilder.Health = M
+fsConfig.Health = M
 
 function M:Build(parent)
-    local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
+    local verticalSpacing = fsConfig.VerticalSpacing
     local panel = wow.CreateFrame("Frame", "FrameSortHealthCheck", parent)
     panel.name = "Health Check"
     panel.parent = parent.name

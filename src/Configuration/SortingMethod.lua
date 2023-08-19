@@ -1,9 +1,9 @@
 ---@type string, Addon
 local _, addon = ...
----@type WoW
-local wow = addon.WoW
+local fsConfig = addon.Configuration
+local wow = addon.WoW.Api
 local M = {}
-addon.OptionsBuilder.SortingMethod = M
+fsConfig.SortingMethod = M
 
 ---Adds a dot point list for each string item in lines
 ---@param panel table the parent panel
@@ -12,7 +12,7 @@ addon.OptionsBuilder.SortingMethod = M
 ---@param lines table
 ---@return table returns the anchor of the bottom item.
 local function BuildDottedList(panel, anchor, titleText, lines)
-    local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
+    local verticalSpacing = fsConfig.VerticalSpacing
     local title = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
     title:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
     title:SetText(titleText)
@@ -29,7 +29,7 @@ local function BuildDottedList(panel, anchor, titleText, lines)
 end
 
 function M:Build(parent)
-    local verticalSpacing = addon.OptionsBuilder.VerticalSpacing
+    local verticalSpacing = fsConfig.VerticalSpacing
     local panel = wow.CreateFrame("Frame", "FrameSortSortingMethod", parent)
     panel.name = "Sorting Method"
     panel.parent = parent.name
@@ -37,10 +37,10 @@ function M:Build(parent)
     local taintless = wow.CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
     -- not sure why, but checkbox left seems to be off by about 4 units by default
     taintless:SetPoint("TOPLEFT", panel, verticalSpacing - 4, -verticalSpacing + 4)
-    addon.OptionsBuilder:TextShim(taintless)
+    fsConfig:TextShim(taintless)
     taintless.Text:SetText("Taintless")
     taintless.Text:SetFontObject("GameFontNormalLarge")
-    taintless:SetChecked(addon.Options.SortingMethod.TaintlessEnabled)
+    taintless:SetChecked(addon.DB.Options.SortingMethod.TaintlessEnabled)
 
     local taintlessLines = {
         "A brand new sorting mode that shouldn't bug/lock/taint the UI.",
@@ -70,10 +70,10 @@ function M:Build(parent)
 
     local traditional = wow.CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
     traditional:SetPoint("TOPLEFT", anchor, 0, -verticalSpacing * 2)
-    addon.OptionsBuilder:TextShim(traditional)
+    fsConfig:TextShim(traditional)
     traditional.Text:SetText("Traditional")
     traditional.Text:SetFontObject("GameFontNormalLarge")
-    traditional:SetChecked(addon.Options.SortingMethod.TraditionalEnabled)
+    traditional:SetChecked(addon.DB.Options.SortingMethod.TraditionalEnabled)
 
     local traditionalLines = {
         "This is the standard sorting mode that addons and macros have used for 10+ years.",
@@ -115,15 +115,15 @@ function M:Build(parent)
     reloadButton:SetShown(false)
 
     taintless:HookScript("OnClick", function()
-        addon.Options.SortingMethod.TaintlessEnabled = taintless:GetChecked()
-        addon.Options.SortingMethod.TraditionalEnabled = not taintless:GetChecked()
+        addon.DB.Options.SortingMethod.TaintlessEnabled = taintless:GetChecked()
+        addon.DB.Options.SortingMethod.TraditionalEnabled = not taintless:GetChecked()
         traditional:SetChecked(not taintless:GetChecked())
         reloadButton:SetShown(true)
     end)
 
     traditional:HookScript("OnClick", function()
-        addon.Options.SortingMethod.TraditionalEnabled = traditional:GetChecked()
-        addon.Options.SortingMethod.TaintlessEnabled = not traditional:GetChecked()
+        addon.DB.Options.SortingMethod.TraditionalEnabled = traditional:GetChecked()
+        addon.DB.Options.SortingMethod.TaintlessEnabled = not traditional:GetChecked()
         taintless:SetChecked(not traditional:GetChecked())
         reloadButton:SetShown(true)
     end)

@@ -1,11 +1,11 @@
 ---@type string, Addon
 local _, addon = ...
----@type WoW
-local wow = addon.WoW
----@class Scheduler
+local wow = addon.WoW.Api
+local fsEnumerable = addon.Collections.Enumerable
+local events = addon.WoW.Api.Events
+---@class Scheduler: Initialise
 local M = {}
-local fsEnumerable = addon.Enumerable
-addon.Scheduler = M
+addon.Scheduling.Scheduler = M
 
 local combatEndCallbacks = {}
 
@@ -35,12 +35,12 @@ function M:RunWhenCombatEnds(callback)
     combatEndCallbacks[#combatEndCallbacks + 1] = callback
 end
 
-function addon:InitScheduler()
+function M:Init()
     if #combatEndCallbacks > 0 then
         combatEndCallbacks = {}
     end
 
     local eventFrame = wow.CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", OnCombatEnded)
-    eventFrame:RegisterEvent(addon.Events.PLAYER_REGEN_ENABLED)
+    eventFrame:RegisterEvent(events.PLAYER_REGEN_ENABLED)
 end

@@ -4,10 +4,10 @@ local logLevelWarning = "Warning"
 local logLevelError = "Error"
 ---@class Log
 local M = {}
-addon.Log = M
+addon.Logging.Log = M
 
 local function Write(msg, level)
-    if not addon.Options.Logging or not addon.Options.Logging.Enabled then
+    if not addon.DB.Options.Logging or not addon.DB.Options.Logging.Enabled then
         return
     end
 

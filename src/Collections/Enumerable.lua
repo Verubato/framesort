@@ -9,7 +9,7 @@ local metatable = {
     __index = M,
 }
 
-addon.Enumerable = M
+addon.Collections.Enumerable = M
 
 ---Returns an Enumerable instance from the specified items.
 ---@param auto table|function
@@ -53,7 +53,7 @@ function M:New()
 end
 
 ---Maps a sequence from one type into another.
----@param apply fun(item: any)
+---@param apply fun(item: any): any
 ---@return Enumerable
 function M:Map(apply)
     local iterator = function()
@@ -97,7 +97,7 @@ function M:Flatten()
 end
 
 ---Filters a sequence.
----@param predicate fun(item: any): boolean
+---@param predicate fun(item: any): boolean?
 ---@return Enumerable
 function M:Where(predicate)
     local iterator = function()
