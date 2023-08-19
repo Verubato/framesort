@@ -3,20 +3,16 @@ local deps = {
     "Util\\Macro.lua",
 }
 
-local addon = nil
+local addon = {
+    WoW = require("Mock\\WoW"),
+}
+local helper = require("Helper")
+helper:LoadDependencies(addon, deps)
 local M = {}
 
 function M:setup()
-    addon = { WoW = {} }
-
-    local helper = require("Helper")
-    helper:LoadDependencies(addon, deps)
-
     addon.WoW.IsInGroup = function()
         return true
-    end
-    addon.WoW.UnitIsUnit = function(left, right)
-        return left == right
     end
 end
 
@@ -649,16 +645,16 @@ function M:test_multiline()
     local macroText = [[
         #showtooltip
         #framesort Frame1, Frame2, Frame3
-        /cast [mod:shift,@a] Spell;
-        /cast [mod:shift,@b] Spell;
-        /cast [mod:shift,@c] Spell;
+        /cast [@a,exists] Spell;
+        /cast [@b,exists] Spell;
+        /cast [@c,exists] Spell;
     ]]
     local expected = [[
         #showtooltip
         #framesort Frame1, Frame2, Frame3
-        /cast [mod:shift,@player] Spell;
-        /cast [mod:shift,@party1] Spell;
-        /cast [mod:shift,@party2] Spell;
+        /cast [@player,exists] Spell;
+        /cast [@party1,exists] Spell;
+        /cast [@party2,exists] Spell;
     ]]
 
     assertEquals(addon.Macro:GetNewBody(macroText, units), expected)
@@ -666,26 +662,81 @@ function M:test_multiline()
     macroText = [[
         #showtooltip
         #framesort Frame1, Frame2, Frame3
-        /cast [mod:shift,@a] Spell;
+        /cast [@a,exists] Spell;
 
         #comment
-        /cast [mod:shift,@b] Spell;
+        /cast [@b,exists] Spell;
 
         # asdf
 
-        /cast [mod:shift,@c] Spell;
+        /cast [@c,exists] Spell;
     ]]
     expected = [[
         #showtooltip
         #framesort Frame1, Frame2, Frame3
-        /cast [mod:shift,@player] Spell;
+        /cast [@player,exists] Spell;
 
         #comment
-        /cast [mod:shift,@party1] Spell;
+        /cast [@party1,exists] Spell;
 
         # asdf
 
-        /cast [mod:shift,@party2] Spell;
+        /cast [@party2,exists] Spell;
+    ]]
+
+    assertEquals(addon.Macro:GetNewBody(macroText, units), expected)
+end
+
+function M:test_long_syntax()
+    local units = { "player", "party1", "party2" }
+
+    local macroText = [[
+        #showtooltip
+        #framesort Frame1, Frame2, Frame3
+        /cast [target=a,exists] Spell;
+        /cast [target=b,exists] Spell;
+        /cast [target=something,exists] Spell;
+    ]]
+    local expected = [[
+        #showtooltip
+        #framesort Frame1, Frame2, Frame3
+        /cast [target=player,exists] Spell;
+        /cast [target=party1,exists] Spell;
+        /cast [target=party2,exists] Spell;
+    ]]
+
+    assertEquals(addon.Macro:GetNewBody(macroText, units), expected)
+end
+
+function M:test_syntax_combination()
+    local units = { "player", "party1", "party2" }
+
+    local macroText = [[
+        #showtooltip
+        #framesort Frame1, Frame2, Frame3
+        /cast [target=a,exists] Spell;
+        /cast [@b,exists] Spell;
+        /cast [target=something,exists] Spell;
+    ]]
+    local expected = [[
+        #showtooltip
+        #framesort Frame1, Frame2, Frame3
+        /cast [target=player,exists] Spell;
+        /cast [@party1,exists] Spell;
+        /cast [target=party2,exists] Spell;
+    ]]
+
+    assertEquals(addon.Macro:GetNewBody(macroText, units), expected)
+
+    macroText = [[
+        #showtooltip
+        #framesort Frame1, Frame2, Frame3, player
+        /cast [target=a, @b, @c, target=@d] Spell;
+    ]]
+    expected = [[
+        #showtooltip
+        #framesort Frame1, Frame2, Frame3, player
+        /cast [target=player, @party1, @party2, target=@player] Spell;
     ]]
 
     assertEquals(addon.Macro:GetNewBody(macroText, units), expected)

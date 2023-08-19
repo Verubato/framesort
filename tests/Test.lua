@@ -1,18 +1,18 @@
 local luaunit = require("luaunit")
 
 -- unit tests
-Test3Members = require("Unit\\Compare3Test")
-Test5Members = require("Unit\\Compare5Test")
-Test8Members = require("Unit\\Compare8Test")
-TestGetUnits = require("Unit\\GetUnitsTest")
-TestMacro = require("Unit\\MacroTest")
-TestOptionsUpgrader = require("Unit\\UpgradeOptionsTest")
-TestEnumerable = require("Unit\\EnumerableTest")
+TestUnit3Members = require("Unit\\Compare3Test")
+TestUnit5Members = require("Unit\\Compare5Test")
+TestUnit8Members = require("Unit\\Compare8Test")
+TestUnitGetUnits = require("Unit\\GetUnitsTest")
+TestUnitMacro = require("Unit\\MacroTest")
+TestUnitOptionsUpgrader = require("Unit\\UpgradeOptionsTest")
+TestUnitEnumerable = require("Unit\\EnumerableTest")
 
 -- component tests
-TestAddon = require("Component\\All")
-TestMacro = require("Component\\Macro")
-TestHidePlayer = require("Component\\HidePlayer")
-TestTargeting = require("Component\\Target")
+TestComponentTestAddon = require("Component\\All")
+TestComponentTestMacro = require("Component\\Macro")
+TestComponentTestHidePlayer = require("Component\\HidePlayer")
+TestComponentTestTargeting = require("Component\\Target")
 
 os.exit(luaunit:run())

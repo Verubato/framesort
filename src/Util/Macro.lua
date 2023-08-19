@@ -7,6 +7,12 @@ local fsEnumerable = addon.Enumerable
 local M = {}
 addon.Macro = M
 
+local shortSyntax = "@"
+local longSyntax = "target="
+local alphanumericWord = "([%w]+)"
+local shortPattern = shortSyntax .. alphanumericWord
+local longPattern = longSyntax .. alphanumericWord
+
 local WowRole = {
     Tank = "TANK",
     Healer = "HEALER",
@@ -26,17 +32,23 @@ local function NthSelector(str, occurrence)
     while n < occurrence do
         n = n + 1
 
-        startPos, endPos = string.find(str, "@", endPos and endPos + 1 or nil)
-        if not startPos or not endPos then
+        local shortStartPos, shortEndPos = string.find(str, shortPattern, endPos and endPos + 1 or nil)
+        local longStartPos, longEndPos = string.find(str, longPattern, endPos and endPos + 1 or nil)
+
+        -- check to see which selector comes first in the macro
+        -- return the earliest
+        if shortStartPos and shortStartPos <= (longStartPos or shortStartPos) then
+            startPos = shortStartPos
+            endPos = shortEndPos
+        elseif longStartPos and longStartPos <= (shortStartPos or longStartPos) then
+            -- skip past the "target=" to the unit
+            longStartPos = longStartPos + string.len(longSyntax) - 1
+
+            startPos = longStartPos
+            endPos = longEndPos
+        else
             return nil, nil
         end
-    end
-
-    local unitStartPos, unitEndPos = string.find(str, "^%w+", endPos + 1)
-    if unitStartPos and unitEndPos then
-        -- return the start pos of "@"
-        -- and the end pos of the unit
-        return startPos, unitEndPos
     end
 
     return startPos, endPos
