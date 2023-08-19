@@ -11,6 +11,7 @@
     <Script file="Util\Macro.lua"/>
     <Script file="Util\Scheduler.lua"/>
     <Script file="Util\Compare.lua"/>
+    <Script file="Util\Health.lua"/>
     <Script file="Providers\Blizzard.lua"/>
     <Script file="Providers\sArena.lua"/>
     <Script file="Providers\GladiusEx.lua"/>
@@ -22,7 +23,6 @@
     <Script file="Modules\Macro.lua"/>
     <Script file="Api\Api.lua"/>
     <Script file="Api\v1.lua"/>
-    <Script file="Health.lua"/>
     <Script file="Config\Defaults.lua"/>
     <Script file="Config\Upgrader.lua"/>
     <Script file="Config\Options.lua"/>
