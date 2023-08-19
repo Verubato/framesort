@@ -123,6 +123,10 @@ function M:IsValidUnitFrame(frame, getUnit)
         return false
     end
 
+    if type(frame) ~= "table" then
+        return false
+    end
+
     if frame:IsForbidden() then
         return false
     end

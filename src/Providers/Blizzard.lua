@@ -16,6 +16,10 @@ local function IsValidGroupFrame(frame)
         return false
     end
 
+    if type(frame) ~= "table" then
+        return false
+    end
+
     if frame:IsForbidden() then
         return false
     end
@@ -31,11 +35,7 @@ local function IsValidGroupFrame(frame)
     return string.match(frame:GetName() or "", "CompactRaidGroup") ~= nil
 end
 
-local function GetFrames(container, filter)
-    if not container or container:IsForbidden() or not container:IsVisible() then
-        return {}
-    end
-
+local function Filter(frames, filter)
     filter = filter or function(frame)
         return fsFrame:IsValidUnitFrame(frame, function(x)
             return M:GetUnit(x)
@@ -43,11 +43,41 @@ local function GetFrames(container, filter)
     end
 
     return fsEnumerable
-        :From({ container:GetChildren() })
+        :From(frames)
         :Where(function(frame)
             return filter(frame)
         end)
         :ToTable()
+end
+
+local function PartyFrames(filter)
+    local container = wow.CompactPartyFrame
+    if not container or not container.memberUnitFrames or container:IsForbidden() or not container:IsVisible() then
+        return {}
+    end
+
+    local players = Filter(container.memberUnitFrames, filter)
+    local pets = container.petUnitFrames and Filter(container.petUnitFrames, filter) or {}
+
+    return fsEnumerable:From(players):Concat(pets):ToTable()
+end
+
+local function EnemyArenaFrames(filter)
+    local container = wow.CompactArenaFrame
+    if not container or not container.memberUnitFrames or container:IsForbidden() or not container:IsVisible() then
+        return {}
+    end
+
+    return Filter(container.memberUnitFrames, filter)
+end
+
+local function RaidFrames(filter)
+    local container = wow.CompactRaidFrameContainer
+    if not container or not container.flowFrames or container:IsForbidden() or not container:IsVisible() then
+        return {}
+    end
+
+    return Filter(container.flowFrames, filter)
 end
 
 local function Update()
@@ -107,23 +137,32 @@ function M:GetUnit(frame)
 end
 
 function M:PartyFrames()
-    return GetFrames(wow.CompactPartyFrame)
-end
-
-function M:RaidFrames()
-    return GetFrames(wow.CompactRaidFrameContainer)
-end
-
-function M:RaidGroupMembers(group)
-    return GetFrames(group)
-end
-
-function M:RaidGroups()
-    return GetFrames(wow.CompactRaidFrameContainer, IsValidGroupFrame)
+    return PartyFrames()
 end
 
 function M:EnemyArenaFrames()
-    return GetFrames(wow.CompactArenaFrame)
+    return EnemyArenaFrames()
+end
+
+function M:RaidFrames()
+    return RaidFrames()
+end
+
+function M:RaidGroupMembers(group)
+    if not group or not group.memberUnitFrames then
+        return {}
+    end
+
+    return Filter(group.memberUnitFrames)
+end
+
+function M:RaidGroups()
+    local container = wow.CompactRaidFrameContainer
+    if not container or not container.flowFrames or container:IsForbidden() or not container:IsVisible() then
+        return {}
+    end
+
+    return Filter(container.flowFrames, IsValidGroupFrame)
 end
 
 function M:PlayerRaidFrames()
@@ -134,7 +173,7 @@ function M:PlayerRaidFrames()
         return unit and (unit == "player" or wow.UnitIsUnit(unit, "player")) and not fsUnit:IsPet(unit)
     end
 
-    local party = GetFrames(wow.CompactPartyFrame, isPlayer)
+    local party = PartyFrames(isPlayer)
     if #party > 0 then
         return party
     end
@@ -142,13 +181,13 @@ function M:PlayerRaidFrames()
     if M:IsRaidGrouped() then
         local groups = M:RaidGroups()
         for _, group in ipairs(groups) do
-            local members = GetFrames(group, isPlayer)
+            local members = Filter(group, isPlayer)
             if #members > 0 then
                 return members
             end
         end
     else
-        local raid = GetFrames(wow.CompactRaidFrameContainer, isPlayer)
+        local raid = RaidFrames(isPlayer)
         if #raid > 0 then
             return raid
         end
