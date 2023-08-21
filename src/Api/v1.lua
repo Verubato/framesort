@@ -4,7 +4,6 @@ local fsEnumerable = addon.Collections.Enumerable
 local fsCompare = addon.Collections.Comparer
 local fsSort = addon.Modules.Sorting
 local fsConfig = addon.Configuration
-local blizzard = addon.Providers.Blizzard
 
 ---@class ApiV1
 local M = {
@@ -59,12 +58,14 @@ end
 
 ---Returns a collection of Blizzard party frames ordered by their visual representation.
 function M.Sorting:GetPartyFrames()
+    local blizzard = addon.Providers.Blizzard
     local frames = blizzard:PartyFrames()
     return VisualOrder(frames)
 end
 
 ---Returns a collection of Blizzard raid frames ordered by their visual representation.
 function M.Sorting:GetRaidFrames()
+    local blizzard = addon.Providers.Blizzard
     if not blizzard:IsRaidGrouped() then
         local frames = blizzard:RaidFrames()
         return VisualOrder(frames)
