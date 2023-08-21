@@ -25,6 +25,16 @@ function M:New(type, name, parent, template)
             EventRegistrations = {},
             Attributes = {},
             Text = "",
+            Visible = true,
+            Position = {
+                Top = 0,
+                Left = 0,
+                Right = 0,
+                Bottom = 0,
+                Point = "TOPLEFT",
+                RelativeTo = nil,
+                RelativeToPoint = "TOPLEFT",
+            }
         },
         Type = type,
         Name = name,
@@ -64,6 +74,29 @@ end
 
 function M:RegisterEvent(event)
     self.State.EventRegistrations[#self.State.EventRegistrations + 1] = event
+end
+
+function M:GetPoint()
+    local pos = self.State.Position
+    return pos.Point, pos.RelativeTo, pos.RelativeToPoint, pos.Left, pos.Top
+end
+
+function M:GetLeft()
+    return self.State.Position.Left
+end
+
+function M:AdjustPointsOffset(x, y)
+    local pos = self.State.Position
+    pos.Top = pos.Top + y
+    pos.Left = pos.Left + x
+end
+
+function M:GetTop()
+    return self.State.Position.Top
+end
+
+function M:IsVisible()
+    return self.State.Visible
 end
 
 function M:FireEvent(event, ...)

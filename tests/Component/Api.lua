@@ -1,4 +1,5 @@
 local addon = require("Addon")
+local frame = require("Mock\\Frame")
 local provider = addon.Providers.Test
 local fsConfig = addon.Configuration
 local realBlizzardProvider = addon.Providers.Blizzard
@@ -10,104 +11,30 @@ function M:setup()
     addon.Api:Init()
     addon.Providers:Init()
 
-    local framesParent = {}
+    local partyContainer = frame:New()
+    local player = frame:New("Frame", nil, partyContainer, nil)
+    player.State.Position.Top = 300
+    player.unit = "player"
+
+    local p1 = frame:New("Frame", nil, partyContainer, nil)
+    p1.State.Position.Top = 100
+    p1.unit = "party1"
+
+    local p2 = frame:New("Frame", nil, partyContainer, nil)
+    p2.State.Position.Top = 200
+    p2.unit = "party2"
+
     provider.State.PartyFrames = {
-        {
-            unit = "player",
-            IsVisible = function()
-                return true
-            end,
-            GetTop = function()
-                return 300
-            end,
-            GetLeft = function()
-                return 0
-            end,
-            GetPoint = function()
-                return "TOPLEFT", framesParent, "TOPLEFT", 0, 300
-            end,
-        },
-        {
-            unit = "party1",
-            IsVisible = function()
-                return true
-            end,
-            GetTop = function()
-                return 100
-            end,
-            GetLeft = function()
-                return 0
-            end,
-            GetPoint = function()
-                return "TOPLEFT", framesParent, "TOPLEFT", 0, 200
-            end,
-        },
-        {
-            unit = "party2",
-            IsVisible = function()
-                return true
-            end,
-            GetTop = function()
-                return 200
-            end,
-            GetLeft = function()
-                return 0
-            end,
-            GetPoint = function()
-                return "TOPLEFT", framesParent, "TOPLEFT", 0, 100
-            end,
-        },
+        player,
+        p1,
+        p2,
     }
 
-    local raidFramesParent = {}
     provider.State.RaidFrames = {
-        {
-            unit = "player",
-            IsVisible = function()
-                return true
-            end,
-            GetTop = function()
-                return 300
-            end,
-            GetLeft = function()
-                return 0
-            end,
-            GetPoint = function()
-                return "TOPLEFT", raidFramesParent, "TOPLEFT", 0, 300
-            end,
-        },
-        {
-            unit = "party1",
-            IsVisible = function()
-                return true
-            end,
-            GetTop = function()
-                return 100
-            end,
-            GetLeft = function()
-                return 0
-            end,
-            GetPoint = function()
-                return "TOPLEFT", raidFramesParent, "TOPLEFT", 0, 200
-            end,
-        },
-        {
-            unit = "party2",
-            IsVisible = function()
-                return true
-            end,
-            GetTop = function()
-                return 200
-            end,
-            GetLeft = function()
-                return 0
-            end,
-            GetPoint = function()
-                return "TOPLEFT", raidFramesParent, "TOPLEFT", 0, 100
-            end,
-        },
+        player,
+        p1,
+        p2,
     }
-
 end
 
 function M:teardown()
