@@ -9,5 +9,4 @@ addon.Modules = {}
 addon.Numerics = {}
 addon.Providers = { All = {} }
 addon.Scheduling = {}
-addon.Utils = {}
 addon.WoW = {}
