@@ -32,7 +32,7 @@
     <Script file="Health\HealthCheck.lua"/>
 
     <!-- Load modules -->
-    <Script file="Modules\Sort.lua"/>
+    <Script file="Modules\Sorting.lua"/>
     <Script file="Modules\HidePlayer.lua"/>
     <Script file="Modules\Spacing.lua"/>
     <Script file="Modules\Targeting.lua"/>
