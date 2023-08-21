@@ -205,6 +205,10 @@ wow.InCombatLockdown = function()
     return wow.State.MockInCombat
 end
 
+wow.UnitIsPlayer = function(unit)
+    return not string.match(unit, "*pet*")
+end
+
 wow.CreateFrame = function(type, name, parent, template)
     local frame = frameMock:New(type, name, parent, template)
     wow.State.Frames[#wow.State.Frames + 1] = frame
