@@ -199,6 +199,8 @@ function wow:Reset()
     timer:Reset()
 end
 
+wow.EditModeManagerFrame.editModeActive = false
+
 wow.InCombatLockdown = function()
     return wow.State.MockInCombat
 end
