@@ -16,5 +16,6 @@ TestComponentTestMacro = require("Component\\Macro")
 TestComponentTestHidePlayer = require("Component\\HidePlayer")
 TestComponentTestTargeting = require("Component\\Targeting")
 TestComponentTestSorting = require("Component\\Sorting")
+TestComponentTestSpacing = require("Component\\Spacing")
 
 os.exit(luaunit:run())

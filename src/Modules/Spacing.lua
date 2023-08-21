@@ -9,8 +9,8 @@ local fsCompare = addon.Collections.Comparer
 local fsMath = addon.Numerics.Math
 local fsEnumerable = addon.Collections.Enumerable
 local fsLog = addon.Logging.Log
+local fsProviders = addon.Providers
 local events = addon.WoW.Api.Events
-local blizzardFrames = addon.Providers.Blizzard
 local previousSpacing = {}
 ---@class SpacingModule: Initialise
 local M = {}
@@ -291,12 +291,13 @@ local function Space(name, frames, spacing, layoutTypeHint, start, blockHeight)
 end
 
 local function ApplyPartySpacing()
+    local blizzard = addon.Providers.Blizzard
     local spacing = addon.DB.Options.Appearance.Party.Spacing
-    local frames = blizzardFrames:PartyFrames()
+    local frames = blizzard:PartyFrames()
     local players = fsEnumerable
         :From(frames)
         :Where(function(frame)
-            local unit = blizzardFrames:GetUnit(frame)
+            local unit = blizzard:GetUnit(frame)
             -- a unit can be both a player and a pet
             -- e.g. when occupying a vehicle
             -- so we want to filter out the pets
@@ -306,7 +307,7 @@ local function ApplyPartySpacing()
 
     Space("Party-Players", players, spacing, fsConfig.LayoutType.Chain)
 
-    if not blizzardFrames:ShowPartyPets() then
+    if not blizzard:ShowPartyPets() then
         return
     end
 
@@ -317,14 +318,14 @@ local function ApplyPartySpacing()
                 return false
             end
 
-            local unit = blizzardFrames:GetUnit(frame)
+            local unit = blizzard:GetUnit(frame)
             return fsUnit:IsPet(unit)
         end)
         :ToTable()
 
     local start = nil
 
-    if blizzardFrames:IsPartyHorizontalLayout() then
+    if blizzard:IsPartyHorizontalLayout() then
         local left = fsEnumerable
             :From(players)
             :OrderBy(function(x, y)
@@ -360,17 +361,18 @@ local function ApplyPartySpacing()
 end
 
 local function ApplyRaidSpacing()
+    local blizzard = addon.Providers.Blizzard
     local spacing = addon.DB.Options.Appearance.Raid.Spacing
 
-    if not blizzardFrames:IsRaidGrouped() then
-        local frames = blizzardFrames:RaidFrames()
+    if not blizzard:IsRaidGrouped() then
+        local frames = blizzard:RaidFrames()
 
         Space("Raid-All", frames, spacing, fsConfig.LayoutType.Flat)
         return
     end
 
-    local groups = blizzardFrames:RaidGroups()
-    local ungrouped = blizzardFrames:RaidFrames()
+    local groups = blizzard:RaidGroups()
+    local ungrouped = blizzard:RaidFrames()
 
     if #groups == 0 then
         Space("Raid-SingleGroup", ungrouped, spacing, fsConfig.LayoutType.Chain)
@@ -379,7 +381,7 @@ local function ApplyRaidSpacing()
 
     local blockHeight = 0
     for _, group in ipairs(groups) do
-        local members = blizzardFrames:RaidGroupMembers(group)
+        local members = blizzard:RaidGroupMembers(group)
 
         if #members > 0 then
             blockHeight = math.max(blockHeight, members[1]:GetHeight())
@@ -389,17 +391,17 @@ local function ApplyRaidSpacing()
 
     Space("Groups", groups, spacing, fsConfig.LayoutType.Flat)
 
-    if not blizzardFrames:ShowRaidPets() then
+    if not blizzard:ShowRaidPets() then
         return
     end
 
     local start = {}
 
-    if blizzardFrames:IsRaidHorizontalLayout() then
+    if blizzard:IsRaidHorizontalLayout() then
         local bottomGroup = fsEnumerable:From(groups):Min(function(x)
             return x:GetBottom()
         end)
-        local bottom = bottomGroup and fsEnumerable:From(blizzardFrames:RaidGroupMembers(bottomGroup)):Min(function(x)
+        local bottom = bottomGroup and fsEnumerable:From(blizzard:RaidGroupMembers(bottomGroup)):Min(function(x)
             return x:GetBottom()
         end)
 
@@ -410,13 +412,13 @@ local function ApplyRaidSpacing()
         local rightGroup = fsEnumerable:From(groups):Max(function(x)
             return x:GetRight()
         end)
-        local right = rightGroup and fsEnumerable:From(blizzardFrames:RaidGroupMembers(rightGroup)):Max(function(x)
+        local right = rightGroup and fsEnumerable:From(blizzard:RaidGroupMembers(rightGroup)):Max(function(x)
             return x:GetRight()
         end)
         local topGroup = fsEnumerable:From(groups):Max(function(x)
             return x:GetTop()
         end)
-        local top = topGroup and fsEnumerable:From(blizzardFrames:RaidGroupMembers(topGroup)):Max(function(x)
+        local top = topGroup and fsEnumerable:From(blizzard:RaidGroupMembers(topGroup)):Max(function(x)
             return x:GetTop()
         end)
 
@@ -435,15 +437,17 @@ local function ApplyRaidSpacing()
 end
 
 local function ApplyEnemyArenaSpacing()
+    local blizzard = fsProviders.Blizzard
     local spacing = addon.DB.Options.Appearance.EnemyArena.Spacing
-    local frames = blizzardFrames:EnemyArenaFrames()
+    local frames = blizzard:EnemyArenaFrames()
 
     Space("EnemyArena", frames, spacing, fsConfig.LayoutType.Chain)
 end
 
 ---Applies spacing to party and raid frames.
 function M:ApplySpacing()
-    if not blizzardFrames:Enabled() then
+    local blizzard = fsProviders.Blizzard
+    if not blizzard:Enabled() then
         return
     end
 

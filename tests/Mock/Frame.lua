@@ -34,7 +34,7 @@ function M:New(type, name, parent, template)
                 Point = "TOPLEFT",
                 RelativeTo = nil,
                 RelativeToPoint = "TOPLEFT",
-            }
+            },
         },
         Type = type,
         Name = name,
@@ -81,18 +81,26 @@ function M:GetPoint()
     return pos.Point, pos.RelativeTo, pos.RelativeToPoint, pos.Left, pos.Top
 end
 
-function M:GetLeft()
-    return self.State.Position.Left
-end
-
 function M:AdjustPointsOffset(x, y)
     local pos = self.State.Position
     pos.Top = pos.Top + y
     pos.Left = pos.Left + x
 end
 
+function M:GetLeft()
+    return self.State.Position.Left
+end
+
+function M:GetHeight()
+    return self.State.Position.Bottom - self.State.Position.Top
+end
+
 function M:GetTop()
     return self.State.Position.Top
+end
+
+function M:GetBottom()
+    return self.State.Position.Bottom
 end
 
 function M:IsVisible()
