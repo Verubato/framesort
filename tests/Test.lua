@@ -14,6 +14,7 @@ TestComponentTestAddon = require("Component\\All")
 TestComponentTestApi = require("Component\\Api")
 TestComponentTestMacro = require("Component\\Macro")
 TestComponentTestHidePlayer = require("Component\\HidePlayer")
-TestComponentTestTargeting = require("Component\\Target")
+TestComponentTestTargeting = require("Component\\Targeting")
+TestComponentTestSorting = require("Component\\Sorting")
 
 os.exit(luaunit:run())
