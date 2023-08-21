@@ -11,6 +11,7 @@ TestUnitEnumerable = require("Unit\\EnumerableTest")
 
 -- component tests
 TestComponentTestAddon = require("Component\\All")
+TestComponentTestApi = require("Component\\Api")
 TestComponentTestMacro = require("Component\\Macro")
 TestComponentTestHidePlayer = require("Component\\HidePlayer")
 TestComponentTestTargeting = require("Component\\Target")

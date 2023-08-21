@@ -5,8 +5,8 @@
 ---@field VerticalSpacing number
 ---@field TextShim fun(self: table, frame: table)
 ---@field Defaults Options
----@field PlayerSortMode PlayerSortMode
----@field GroupSortMode GroupSortMode
+---@field PlayerSortMode PlayerSortModeEnum
+---@field GroupSortMode GroupSortModeEnum
 ---@field LayoutType LayoutType
 ---@field Upgrader OptionsUpgrader
 ---@field Sorting OptionsPanel
