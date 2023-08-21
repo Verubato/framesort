@@ -92,6 +92,14 @@ local function RaidFrames(filter)
     return Filter(container.flowFrames, filter)
 end
 
+local function GroupFrames(group, filter)
+    if not group or not group.memberUnitFrames or group:IsForbidden() or not group:IsVisible() then
+        return {}
+    end
+
+    return Filter(group.memberUnitFrames, filter)
+end
+
 local function Update()
     for _, callback in pairs(callbacks) do
         callback(M)
@@ -161,11 +169,7 @@ function M:RaidFrames()
 end
 
 function M:RaidGroupMembers(group)
-    if not group or not group.memberUnitFrames then
-        return {}
-    end
-
-    return Filter(group.memberUnitFrames)
+    return GroupFrames(group)
 end
 
 function M:RaidGroups()
@@ -193,7 +197,7 @@ function M:PlayerRaidFrames()
     if M:IsRaidGrouped() then
         local groups = M:RaidGroups()
         for _, group in ipairs(groups) do
-            local members = Filter(group, isPlayer)
+            local members = GroupFrames(group, isPlayer)
             if #members > 0 then
                 return members
             end
