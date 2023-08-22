@@ -35,3 +35,8 @@ The addon can be installed via:
 * [Wago.io](https://addons.wago.io/addons/framesort)
 * [WowUp](https://wowup.io/)
 * [Manually](https://github.com/Verubato/framesort/releases/latest)
+
+## Support ##
+
+* [Discord](https://discord.gg/UruPTPHHxK)
+* [GitHub](https://github.com/Verubato/framesort/issues)
