@@ -180,7 +180,11 @@ function M:Init()
 
     for i = 1, targetFriendlyCount do
         local button = wow.CreateFrame("Button", prefix .. i, wow.UIParent, "SecureActionButtonTemplate")
-        button:RegisterForClicks("AnyDown")
+        -- If the ActionButtonUseKeyDown cvar is set to 0, then button down triggers don't work
+        -- seems to be a Blizzard bug since Dragonflight:
+        -- https://us.forums.blizzard.com/en/wow/t/dragonflight-click-bindings-broken/1361972/8
+        -- Adding "AnyUp" fixes it
+        button:RegisterForClicks("AnyDown", "AnyUp")
         button:SetAttribute("type", "target")
         button:SetAttribute("unit", "none")
 
@@ -189,7 +193,7 @@ function M:Init()
 
     for i = 1, targetEnemyCount do
         local button = wow.CreateFrame("Button", prefix .. "Enemy" .. i, wow.UIParent, "SecureActionButtonTemplate")
-        button:RegisterForClicks("AnyDown")
+        button:RegisterForClicks("AnyDown", "AnyUp")
         button:SetAttribute("type", "target")
         button:SetAttribute("unit", "none")
 
@@ -198,7 +202,7 @@ function M:Init()
 
     -- target bottom
     targetBottomFrameButton = wow.CreateFrame("Button", prefix .. "Bottom", wow.UIParent, "SecureActionButtonTemplate")
-    targetBottomFrameButton:RegisterForClicks("AnyDown")
+    targetBottomFrameButton:RegisterForClicks("AnyDown", "AnyUp")
     targetBottomFrameButton:SetAttribute("type", "target")
     targetBottomFrameButton:SetAttribute("unit", "none")
 
