@@ -27,11 +27,9 @@ local function AddSubCategory(panel)
 end
 
 function fsConfig:TextShim(frame)
-    if not wow.IsClassic() then
-        return
+    if not frame.Text and frame.text then
+        frame.Text = frame.text
     end
-
-    frame.Text = frame.text
 end
 
 function fsConfig:Init()
