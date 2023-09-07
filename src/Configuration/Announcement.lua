@@ -13,7 +13,7 @@ function M:Build(panel)
 
     local important = panel:CreateFontString(nil, "ARTWORK", "GameFontRedLarge")
     important:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -verticalSpacing)
-    important:SetText("Blizzard patch 10.1.7 has broken FrameSort very badly.")
+    important:SetText("Blizzard patch 10.1.7 has broken FrameSort.")
 
     local more = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
     more:SetPoint("TOPLEFT", important, "BOTTOMLEFT", 0, -verticalSpacing)
@@ -54,9 +54,9 @@ function M:Build(panel)
 
     local suggestion = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
     suggestion:SetPoint("TOPLEFT", box, "BOTTOMLEFT", 0, -verticalSpacing)
-    suggestion:SetText("As an interim, you might like to try your luck with the Traditional sorting method instead of Taintless.")
+    suggestion:SetText("As a workaround, you might like the Traditional sorting method instead of Taintless.")
 
     local fin = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
     fin:SetPoint("TOPLEFT", suggestion, "BOTTOMLEFT", 0, -verticalSpacing)
-    fin:SetText("Hang in there bros while I try to find a workaround/solution.")
+    fin:SetText("Hang in there bros while I try to find a solution.")
 end
