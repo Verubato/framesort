@@ -8,6 +8,7 @@
 ---@field GroupSortMode GroupSortModeEnum
 ---@field LayoutType LayoutType
 ---@field Upgrader OptionsUpgrader
+---@field Announcement OptionsPanel
 ---@field Sorting OptionsPanel
 ---@field Spacing OptionsPanel
 ---@field Health OptionsPanel

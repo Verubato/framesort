@@ -46,6 +46,7 @@
     <Script file="Configuration\Options.lua"/>
     <Script file="Configuration\Defaults.lua"/>
     <Script file="Configuration\Upgrader.lua"/>
+    <Script file="Configuration\Announcement.lua"/>
     <Script file="Configuration\Sorting.lua"/>
     <Script file="Configuration\Spacing.lua"/>
     <Script file="Configuration\Keybindings.lua"/>

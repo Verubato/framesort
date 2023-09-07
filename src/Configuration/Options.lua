@@ -44,8 +44,9 @@ function fsConfig:Init()
 
     AddCategory(panel)
 
-    fsConfig.Sorting:Build(main)
+    fsConfig.Announcement:Build(main)
 
+    local sortingRules = fsConfig.Sorting:Build(panel)
     local sortingMethod = fsConfig.SortingMethod:Build(panel)
     local keybinding = fsConfig.Keybinding:Build(panel)
     local macro = fsConfig.Macro:Build(panel)
@@ -53,6 +54,7 @@ function fsConfig:Init()
     local integration = fsConfig.Integration:Build(panel)
     local health = fsConfig.Health:Build(panel)
 
+    AddSubCategory(sortingRules)
     AddSubCategory(sortingMethod)
     AddSubCategory(keybinding)
     AddSubCategory(macro)
