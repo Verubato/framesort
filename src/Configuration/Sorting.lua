@@ -305,19 +305,23 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
 end
 
 function M:Build(parent)
-    local anchor = BuiltTitle(parent)
+    local panel = wow.CreateFrame("Frame", "FrameSortSortingRules", parent)
+    panel.name = "Rules"
+    panel.parent = parent.name
+
+    local anchor = BuiltTitle(panel)
 
     if not wow.IsClassic() then
-        anchor = BuildSortModeCheckboxes(parent, anchor, "Arena", addon.DB.Options.Arena)
+        anchor = BuildSortModeCheckboxes(panel, anchor, "Arena", addon.DB.Options.Arena)
     end
 
     if wow.IsRetail() then
-        anchor = BuildSortModeCheckboxes(parent, anchor, "Enemy Arena (GladiusEx, sArena, Blizzard)", addon.DB.Options.EnemyArena, false, false)
+        anchor = BuildSortModeCheckboxes(panel, anchor, "Enemy Arena (GladiusEx, sArena, Blizzard)", addon.DB.Options.EnemyArena, false, false)
     end
 
-    anchor = BuildSortModeCheckboxes(parent, anchor, "Dungeon (mythics, 5-mans)", addon.DB.Options.Dungeon)
-    anchor = BuildSortModeCheckboxes(parent, anchor, "Raid (battlegrounds, raids)", addon.DB.Options.Raid)
-    anchor = BuildSortModeCheckboxes(parent, anchor, "World (non-instance groups)", addon.DB.Options.World)
+    anchor = BuildSortModeCheckboxes(panel, anchor, "Dungeon (mythics, 5-mans)", addon.DB.Options.Dungeon)
+    anchor = BuildSortModeCheckboxes(panel, anchor, "Raid (battlegrounds, raids)", addon.DB.Options.Raid)
+    anchor = BuildSortModeCheckboxes(panel, anchor, "World (non-instance groups)", addon.DB.Options.World)
 
-    return parent
+    return panel
 end
