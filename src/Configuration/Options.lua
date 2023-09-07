@@ -26,12 +26,6 @@ local function AddSubCategory(panel)
     end
 end
 
-function fsConfig:TextShim(frame)
-    if not frame.Text and frame.text then
-        frame.Text = frame.text
-    end
-end
-
 function fsConfig:Init()
     local panel = wow.CreateFrame("ScrollFrame", nil, nil, "UIPanelScrollFrameTemplate")
     panel.name = "FrameSort"
