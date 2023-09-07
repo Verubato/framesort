@@ -30,6 +30,7 @@ local function ConfigureEditBox(box, value)
     box:SetCursorPosition(0)
     box:SetJustifyH("CENTER")
     box:SetNumeric(true)
+    box:SetCursorPosition(0)
 end
 
 local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, addY, additionalTopSpacing)
@@ -49,8 +50,8 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
 
         local text = tostring(value)
         box:SetFontObject("GameFontWhite")
-
         box:SetText(text)
+
         slider:SetValue(value)
         return value
     end
