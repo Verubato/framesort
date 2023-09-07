@@ -353,17 +353,6 @@ end
 ---Attempts to sort Blizzard frames using the traditional method.
 ---@return boolean sorted true if sorted, otherwise false.
 local function TrySortTraditional()
-    local blizzard = fsProviders.Blizzard
-
-    if not blizzard:Enabled() then
-        return false
-    end
-
-    if blizzard:IsRaidGrouped() then
-        fsLog:Warning("Cannot perform traditional sorting when the 'Keep Groups Together' setting is enabled.")
-        return false
-    end
-
     local enabled, _, _, _ = fsCompare:FriendlySortMode()
     if not enabled then
         return false
@@ -392,35 +381,7 @@ local function TrySortTraditional()
     return sorted
 end
 
----Attempts to sort frames using the taintless method.
----@return boolean sorted true if sorted, otherwise false.
-local function TrySortTaintless()
-    local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
-    local enemyEnabled, _, _ = fsCompare:EnemySortMode()
-
-    if not friendlyEnabled and not enemyEnabled then
-        return false
-    end
-
-    local sorted = false
-    for _, provider in pairs(fsProviders:Enabled()) do
-        if friendlyEnabled then
-            local sortedParty = SortParty(provider)
-            local sortedRaid = SortRaid(provider)
-
-            sorted = sorted or sortedRaid or sortedParty
-        end
-
-        if enemyEnabled and wow.IsRetail() then
-            local arenaSorted = SortEnemyArena(provider)
-            sorted = sorted or arenaSorted
-        end
-    end
-
-    return sorted
-end
-
-local function OnProviderRequiresSort(provider)
+function TrySortTaintless(provider)
     local sorted = false
     local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
     local enemyEnabled, _, _ = fsCompare:EnemySortMode()
@@ -429,16 +390,19 @@ local function OnProviderRequiresSort(provider)
         local sortedParty = SortParty(provider)
         local sortedRaid = SortRaid(provider)
 
-        sorted = sortedParty or sortedRaid
+        sorted = sorted or sortedRaid or sortedParty
     end
 
-    if enemyEnabled then
-        sorted = sorted or SortEnemyArena(provider)
+    if enemyEnabled and wow.IsRetail() then
+        local arenaSorted = SortEnemyArena(provider)
+        sorted = sorted or arenaSorted
     end
 
-    if sorted then
-        InvokeCallbacks()
-    end
+    return sorted
+end
+
+local function OnProviderRequiresSort(provider)
+    M:TrySort(provider)
 end
 
 ---Register a callback to invoke after sorting has been performed.
@@ -449,28 +413,43 @@ end
 
 ---Attempts to sort all frames.
 ---@return boolean sorted true if sorted, otherwise false.
-function M:TrySort()
-    -- can't make changes during combat
-    if wow.InCombatLockdown() and not addon.DB.Options.SortingMethod.TaintlessEnabled then
-        fsScheduler:RunWhenCombatEnds(function()
-            M:TrySort()
-        end)
-        fsLog:Warning("Cannot perform non-taintless sorting during combat.")
+---@param provider FrameProvider? optionally specify the provider to sort, otherwise sorts all providers.
+function M:TrySort(provider)
+    local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
+    local enemyEnabled, _, _ = fsCompare:EnemySortMode()
+
+    if not friendlyEnabled and not enemyEnabled then
         return false
     end
 
-    if wow.IsRetail() then
-        if wow.EditModeManagerFrame.editModeActive then
-            fsLog:Debug("Not sorting while edit mode active.")
-            return false
-        end
+    if wow.InCombatLockdown() then
+        fsLog:Warning("Cannot perform sorting during combat.")
+        -- can't make changes during combat
+        fsScheduler:RunWhenCombatEnds(function()
+            M:TrySort(provider)
+        end)
+
+        return false
+    end
+
+    if wow.IsRetail() and wow.EditModeManagerFrame.editModeActive then
+        fsLog:Debug("Not sorting while edit mode active.")
+        return false
     end
 
     local sorted = false
-    if addon.DB.Options.SortingMethod.TraditionalEnabled then
-        sorted = TrySortTraditional()
-    else
-        sorted = TrySortTaintless()
+    local providers = provider and { provider } or fsProviders:Enabled()
+
+    for _, p in ipairs(providers) do
+        local providerSorted = false
+
+        if p == fsProviders.Blizzard and addon.DB.Options.SortingMethod.TraditionalEnabled then
+            providerSorted = TrySortTraditional()
+        else
+            providerSorted = TrySortTaintless(p)
+        end
+
+        sorted = sorted or providerSorted
     end
 
     if sorted then
@@ -485,7 +464,7 @@ function M:Init()
         callbacks = {}
     end
 
-    for _, provider in pairs(fsProviders:Enabled()) do
+    for _, provider in ipairs(fsProviders:Enabled()) do
         provider:RegisterCallback(OnProviderRequiresSort)
     end
 end
