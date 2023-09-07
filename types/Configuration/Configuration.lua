@@ -3,7 +3,6 @@
 ---@field Init fun(self: table)
 ---@field HorizontalSpacing number
 ---@field VerticalSpacing number
----@field TextShim fun(self: table, frame: table)
 ---@field Defaults Options
 ---@field PlayerSortMode PlayerSortModeEnum
 ---@field GroupSortMode GroupSortModeEnum

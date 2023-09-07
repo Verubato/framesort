@@ -104,7 +104,6 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
     local enabled = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     -- not sure why, but checkbox left seems to be off by about 4 units by default
     enabled:SetPoint("TOPLEFT", pointOffset, "BOTTOMLEFT", -4, -verticalSpacing)
-    fsConfig:TextShim(enabled)
     enabled.Text:SetText(" " .. labelText)
     enabled.Text:SetFontObject("GameFontNormalLarge")
     enabled:SetChecked(options.Enabled)
@@ -126,25 +125,21 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         playerLabel:SetWidth(labelWidth)
 
         top = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-        fsConfig:TextShim(top)
         top.Text:SetText("Top")
         top:SetPoint("LEFT", playerLabel, "RIGHT", horizontalSpacing / 2, 0)
         top:SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Top)
 
         middle = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-        fsConfig:TextShim(middle)
         middle.Text:SetText("Middle")
         middle:SetPoint("LEFT", top, "RIGHT", horizontalSpacing, 0)
         middle:SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Middle)
 
         bottom = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-        fsConfig:TextShim(bottom)
         bottom.Text:SetText("Bottom")
         bottom:SetPoint("LEFT", middle, "RIGHT", horizontalSpacing, 0)
         bottom:SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Bottom)
 
         hidden = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-        fsConfig:TextShim(hidden)
         hidden.Text:SetText("Hidden")
         hidden:SetPoint("LEFT", bottom, "RIGHT", horizontalSpacing, 0)
         hidden:SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Hidden)
@@ -193,13 +188,11 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
     local group = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     group:SetPoint("LEFT", modeLabel, "RIGHT", horizontalSpacing / 2, 0)
 
-    fsConfig:TextShim(group)
     group.Text:SetText(fsConfig.GroupSortMode.Group)
     group:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Group)
 
     local role = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     role:SetPoint("LEFT", group, "RIGHT", horizontalSpacing, 0)
-    fsConfig:TextShim(role)
     role.Text:SetText(fsConfig.GroupSortMode.Role)
     role:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Role)
 
@@ -212,7 +205,6 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
     if hasAlpha then
         alpha = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
         alpha:SetPoint("LEFT", role, "RIGHT", horizontalSpacing, 0)
-        fsConfig:TextShim(alpha)
         alpha.Text:SetText("Alpha")
         alpha:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Alphabetical)
 
@@ -221,7 +213,6 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
 
     local reverse = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     reverse:SetPoint("LEFT", alpha or role, "RIGHT", horizontalSpacing, 0)
-    fsConfig:TextShim(reverse)
     reverse.Text:SetText("Reverse")
     reverse:SetChecked(options.Reverse)
 

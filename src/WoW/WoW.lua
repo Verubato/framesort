@@ -1,7 +1,7 @@
 ---@diagnostic disable: undefined-global
 ---@type string, Addon
 local _, addon = ...
-addon.WoW.Api = {
+local wow = {
     -- constants
     WOW_PROJECT_ID = WOW_PROJECT_ID,
     WOW_PROJECT_CLASSIC = WOW_PROJECT_CLASSIC,
@@ -69,13 +69,17 @@ addon.WoW.Api = {
 
     -- non-blizzard related
     IsRetail = function()
-        return WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
+        return WOW_PROJECT_ID ~= nil and WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
     end,
     IsWotlk = function()
-        return WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
+        return WOW_PROJECT_ID ~= nil and WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
     end,
     IsClassic = function()
-        return WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
+        return WOW_PROJECT_ID ~= nil and WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
+    end,
+    IsWotlkPrivate = function()
+        local version = GetBuildInfo()
+        return version == "3.3.5"
     end,
 
     ---@class WowEvents
@@ -109,3 +113,17 @@ addon.WoW.Api = {
         EditModeExit = "EditMode.Exit",
     },
 }
+
+addon.WoW.Api = wow
+
+-- shims for older versions
+if wow.IsClassic() then
+    wow.CreateFrame = function(frameType, name, parent, template, id)
+        local frame = CreateFrame(frameType, name, parent, template, id)
+        if not frame.Text and frame.text then
+            frame.Text = frame.text
+        end
+
+        return frame
+    end
+end
