@@ -10,6 +10,7 @@ local fsMath = addon.Numerics.Math
 local fsEnumerable = addon.Collections.Enumerable
 local fsLog = addon.Logging.Log
 local fsProviders = addon.Providers
+local fsScheduler = addon.Scheduling.Scheduler
 local events = addon.WoW.Api.Events
 local previousSpacing = {}
 ---@class SpacingModule: Initialise
@@ -450,6 +451,9 @@ function M:ApplySpacing()
     if not blizzard:Enabled() then
         return
     end
+    if wow.InCombatLockdown() then
+        return
+    end
 
     ApplyPartySpacing()
     ApplyRaidSpacing()
@@ -457,7 +461,13 @@ function M:ApplySpacing()
 end
 
 local function Run()
-    M:ApplySpacing()
+    if wow.InCombatLockdown() then
+        fsScheduler:RunWhenCombatEnds(function()
+            M:ApplySpacing()
+        end)
+    else
+        M:ApplySpacing()
+    end
 end
 
 function M:Init()
@@ -473,6 +483,7 @@ function M:Init()
     eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
     eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
     eventFrame:RegisterEvent(events.UNIT_PET)
+    eventFrame:RegisterEvent(events.PLAYER_REGEN_ENABLED)
 
     if wow.IsRetail() then
         eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
