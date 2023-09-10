@@ -63,6 +63,8 @@ local wow = {
     issecurevariable = issecurevariable,
     hooksecurefunc = hooksecurefunc,
     RegisterAttributeDriver = RegisterAttributeDriver,
+    SecureHandlerWrapScript = SecureHandlerWrapScript,
+    SecureHandlerSetFrameRef = SecureHandlerSetFrameRef,
 
     -- addon related
     GetAddOnEnableState = GetAddOnEnableState,

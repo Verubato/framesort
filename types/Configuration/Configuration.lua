@@ -13,6 +13,6 @@
 ---@field Spacing OptionsPanel
 ---@field Health OptionsPanel
 ---@field Keybinding OptionsPanel
----@field SortingMethod OptionsPanel
+---@field SortingMethod SortingMethodOptions
 ---@field Macro OptionsPanel
 ---@field Integration OptionsPanel

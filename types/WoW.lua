@@ -54,6 +54,8 @@
 ---@field issecurevariable fun(tableOrName: table|string, name: string?): isSecure: boolean, taint: string?
 ---@field hooksecurefunc fun(...)
 ---@field RegisterAttributeDriver fun(frame: table, attribute: string, conditional: string)
+---@field SecureHandlerWrapScript fun(frame, script, header, preBody, postBody)
+---@field SecureHandlerSetFrameRef fun(frame, label, refFrame)
 -- addon related
 ---@field GetAddOnEnableState fun(character: string?, addon: string): number
 -- non-blizzard

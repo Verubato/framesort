@@ -1,5 +1,6 @@
 local deps = {
     "Logging\\Log.lua",
+    "Configuration\\SortingMethod.lua",
     "Configuration\\SortMode.lua",
     "Configuration\\Upgrader.lua",
     "Configuration\\Defaults.lua",
@@ -892,6 +893,129 @@ function M:test_upgrade_options_version12()
     }
 
     upgrader:UpgradeToVersion12(options)
+
+    assertEquals(options, expected)
+end
+
+function M:test_upgrade_options_version13()
+    local options = {
+        Logging = {
+            Enabled = false,
+        },
+        Arena = {
+            Enabled = true,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Group",
+            Reverse = false,
+        },
+        EnemyArena = {
+            Enabled = false,
+            GroupSortMode = "Group",
+            Reverse = false,
+        },
+        Dungeon = {
+            Enabled = true,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Group",
+            Reverse = false,
+        },
+        World = {
+            Enabled = true,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Group",
+            Reverse = false,
+        },
+        Raid = {
+            Enabled = false,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Role",
+            Reverse = false,
+        },
+        SortingMethod = {
+            TaintlessEnabled = true,
+            TraditionalEnabled = false,
+        },
+        Appearance = {
+            Party = {
+                Spacing = {
+                    Horizontal = 0,
+                    Vertical = 0,
+                },
+            },
+            Raid = {
+                Spacing = {
+                    Horizontal = 0,
+                    Vertical = 0,
+                },
+            },
+            EnemyArena = {
+                Spacing = {
+                    Horizontal = 0,
+                    Vertical = 0,
+                },
+            },
+        },
+        Version = 12,
+    }
+
+    upgrader:UpgradeToVersion13(options)
+
+    local expected = {
+        Logging = {
+            Enabled = false,
+        },
+        Arena = {
+            Enabled = true,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Group",
+            Reverse = false,
+        },
+        EnemyArena = {
+            Enabled = false,
+            GroupSortMode = "Group",
+            Reverse = false,
+        },
+        Dungeon = {
+            Enabled = true,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Group",
+            Reverse = false,
+        },
+        World = {
+            Enabled = true,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Group",
+            Reverse = false,
+        },
+        Raid = {
+            Enabled = false,
+            PlayerSortMode = "Top",
+            GroupSortMode = "Role",
+            Reverse = false,
+        },
+        SortingMethod = 2,
+        Appearance = {
+            Party = {
+                Spacing = {
+                    Horizontal = 0,
+                    Vertical = 0,
+                },
+            },
+            Raid = {
+                Spacing = {
+                    Horizontal = 0,
+                    Vertical = 0,
+                },
+            },
+            EnemyArena = {
+                Spacing = {
+                    Horizontal = 0,
+                    Vertical = 0,
+                },
+            },
+        },
+        Version = 13,
+    }
 
     assertEquals(options, expected)
 end
