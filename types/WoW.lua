@@ -56,6 +56,7 @@
 ---@field RegisterAttributeDriver fun(frame: table, attribute: string, conditional: string)
 ---@field SecureHandlerWrapScript fun(frame, script, header, preBody, postBody)
 ---@field SecureHandlerSetFrameRef fun(frame, label, refFrame)
+---@field SecureHandlerExecute fun(frame, body)
 -- addon related
 ---@field GetAddOnEnableState fun(character: string?, addon: string): number
 -- non-blizzard

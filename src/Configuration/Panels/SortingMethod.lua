@@ -41,7 +41,7 @@ function M:Build(parent)
     secure:SetChecked(addon.DB.Options.SortingMethod == M.Secure)
 
     local secureLines = {
-        "Please help me test this.",
+        "Please help me test this and let me know how it goes.",
     }
 
     local anchor = secure
@@ -84,8 +84,7 @@ function M:Build(parent)
     })
 
     anchor = BuildDottedList(panel, anchor, "Cons: ", {
-        "May break with Blizzard patches.",
-        "Since 10.1.7, frames may become unsorted during combat (fix is being worked on).",
+        "Since 10.1.7, frames may become unsorted during combat (fix/workaround is being worked on).",
     })
 
     local traditional = wow.CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")

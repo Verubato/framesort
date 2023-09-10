@@ -65,6 +65,7 @@ local wow = {
     RegisterAttributeDriver = RegisterAttributeDriver,
     SecureHandlerWrapScript = SecureHandlerWrapScript,
     SecureHandlerSetFrameRef = SecureHandlerSetFrameRef,
+    SecureHandlerExecute = SecureHandlerExecute,
 
     -- addon related
     GetAddOnEnableState = GetAddOnEnableState,
@@ -91,6 +92,10 @@ local wow = {
         -- This occurs when you are not on the hate list of any NPC, or a few seconds after the latest pvp attack that you were involved with.
         -- It seems Blizzard do an update layout after combat ends, so even for the experimental mode we also need to re-sort.
         PLAYER_REGEN_ENABLED = "PLAYER_REGEN_ENABLED",
+
+        -- Fired whenever you enter combat, as normal regen rates are disabled during combat.
+        -- This means that either you are in the hate list of a NPC or that you've been taking part in a pvp action (either as attacker or victim).
+        PLAYER_REGEN_DISABLED = "PLAYER_REGEN_DISABLED",
 
         -- Fires when the player logs in, /reloads the UI or zones between map instances.
         -- Basically whenever the loading screen appears.

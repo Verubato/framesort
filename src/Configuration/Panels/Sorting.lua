@@ -279,8 +279,6 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         end
 
         if show then
-            fsSort:TrySort()
-
             dynamicAnchor:SetPoint("TOPLEFT", modeLabel, "BOTTOMLEFT")
         else
             dynamicAnchor:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, 0)

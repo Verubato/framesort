@@ -114,6 +114,15 @@ local function CanSeeFrames()
     return false
 end
 
+local function OnlyUsingBlizzard()
+    -- TODO: make this more generic
+    if addon.DB.Options.EnemyArena.Enabled and (fsProviders.GladiusEx:Enabled() or fsProviders.sArena:Enabled()) then
+        return false
+    end
+
+    return not fsProviders.ElvUI:Enabled()
+end
+
 ---Returns true if the environment/settings is in a good state, otherwise false.
 ---@return boolean healthy,HealthCheckResult[] results
 function M:IsHealthy()
@@ -126,6 +135,23 @@ function M:IsHealthy()
     for i = 2, #fsProviders.All do
         local provider = fsProviders.All[i]
         addonsString = addonsString .. ", " .. provider:Name()
+    end
+
+    local enabledNonBlizzard = fsEnumerable
+        :From(fsProviders:Enabled())
+        :Where(function(p)
+            return p ~= fsProviders.Blizzard
+        end)
+        :ToTable()
+
+    local enabledNonBlizzardString = ""
+    if #enabledNonBlizzard > 0 then
+        enabledNonBlizzardString = enabledNonBlizzard[1]:Name()
+
+        for i = 2, #enabledNonBlizzard do
+            local provider = enabledNonBlizzard[i]
+            enabledNonBlizzardString = enabledNonBlizzardString .. ", " .. provider:Name()
+        end
     end
 
     results[#results + 1] = {
@@ -147,6 +173,13 @@ function M:IsHealthy()
         Passed = not fsProviders.Blizzard:IsRaidGrouped(),
         Description = "Keep Groups Together setting disabled",
         Help = wow.IsRetail() and "Change the raid display mode to one of the 'Combined Groups' options via Edit Mode" or "Disable the 'Keep Groups Together' raid profile setting",
+    }
+
+    results[#results + 1] = {
+        Applicable = addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Traditional,
+        Passed = OnlyUsingBlizzard(),
+        Description = "Traditional mode is applicable",
+        Help = string.format("Traditional mode can only sort Blizzard party frames, it can't sort your other frame addons: '%s'", enabledNonBlizzardString),
     }
 
     local conflictingSorter = SortingFunctionsTampered()

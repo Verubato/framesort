@@ -32,8 +32,14 @@
     <!-- Health check requires frame providers -->
     <Script file="Health\HealthCheck.lua"/>
 
+    <!-- Sorting modules -->
+    <Script file="Modules\Sorting\Positions.lua"/>
+    <Script file="Modules\Sorting\Traditional.lua"/>
+    <Script file="Modules\Sorting\Taintless.lua"/>
+    <Script file="Modules\Sorting\Secure.lua"/>
+    <Script file="Modules\Sorting\Sorting.lua"/>
+
     <!-- Load modules -->
-    <Script file="Modules\Sorting.lua"/>
     <Script file="Modules\HidePlayer.lua"/>
     <Script file="Modules\Spacing.lua"/>
     <Script file="Modules\Targeting.lua"/>
