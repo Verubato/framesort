@@ -5,6 +5,7 @@
     <!-- Load files that don't have any other dependencies -->
     <Script file="Logging\Log.lua"/>
     <Script file="Collections\Enumerable.lua"/>
+    <Script file="Configuration\SortingMethod.lua"/>
     <Script file="Configuration\LayoutType.lua"/>
     <Script file="Configuration\SortMode.lua"/>
     <Script file="Numerics\Math.lua"/>
@@ -46,14 +47,14 @@
     <Script file="Configuration\Options.lua"/>
     <Script file="Configuration\Defaults.lua"/>
     <Script file="Configuration\Upgrader.lua"/>
-    <Script file="Configuration\Announcement.lua"/>
-    <Script file="Configuration\Sorting.lua"/>
-    <Script file="Configuration\Spacing.lua"/>
-    <Script file="Configuration\Keybindings.lua"/>
-    <Script file="Configuration\Macro.lua"/>
-    <Script file="Configuration\SortingMethod.lua"/>
-    <Script file="Configuration\Integrations.lua"/>
-    <Script file="Configuration\HealthCheck.lua"/>
+    <Script file="Configuration\Panels\Announcement.lua"/>
+    <Script file="Configuration\Panels\Sorting.lua"/>
+    <Script file="Configuration\Panels\Spacing.lua"/>
+    <Script file="Configuration\Panels\Keybindings.lua"/>
+    <Script file="Configuration\Panels\Macro.lua"/>
+    <Script file="Configuration\Panels\SortingMethod.lua"/>
+    <Script file="Configuration\Panels\Integrations.lua"/>
+    <Script file="Configuration\Panels\HealthCheck.lua"/>
 
     <!-- Now initialise the addon -->
     <Script file="Init.lua"/>

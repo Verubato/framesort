@@ -381,6 +381,11 @@ local function TrySortTraditional()
     return sorted
 end
 
+function TrySortSecure(provider)
+    -- TODO
+    return false
+end
+
 function TrySortTaintless(provider)
     local sorted = false
     local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
@@ -443,10 +448,12 @@ function M:TrySort(provider)
     for _, p in ipairs(providers) do
         local providerSorted = false
 
-        if p == fsProviders.Blizzard and addon.DB.Options.SortingMethod.TraditionalEnabled then
+        if p == fsProviders.Blizzard and addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Traditional then
             providerSorted = TrySortTraditional()
-        else
+        elseif addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Taintless then
             providerSorted = TrySortTaintless(p)
+        else
+            providerSorted = TrySortSecure(p)
         end
 
         sorted = sorted or providerSorted

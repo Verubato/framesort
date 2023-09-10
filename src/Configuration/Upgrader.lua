@@ -266,6 +266,19 @@ function M:UpgradeToVersion12(options)
     options.Version = 12
 end
 
+function M:UpgradeToVersion13(options)
+    assert(options.Version == 12)
+
+    ---@diagnostic disable-next-line: undefined-field
+    if options.SortingMethod.TaintlessEnabled then
+        options.SortingMethod = fsConfig.SortingMethod.Taintless
+    else
+        options.SortingMethod = fsConfig.SortingMethod.Traditional
+    end
+
+    options.Version = 13
+end
+
 local upgradeFunctions = {
     Version2 = M.UpgradeToVersion2,
     Version3 = M.UpgradeToVersion3,
@@ -278,6 +291,7 @@ local upgradeFunctions = {
     Version10 = M.UpgradeToVersion10,
     Version11 = M.UpgradeToVersion11,
     Version12 = M.UpgradeToVersion12,
+    Version13 = M.UpgradeToVersion13,
 }
 
 ---Upgrades saved options to the current version.
