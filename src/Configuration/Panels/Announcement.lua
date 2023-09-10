@@ -15,7 +15,28 @@ function M:Build(panel)
     important:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -verticalSpacing)
     important:SetText("WoW patch 10.1.7 has broken FrameSort.")
 
-    local lines = {
+    local update2 = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalOutline")
+    update2:SetPoint("TOPLEFT", important, "BOTTOMLEFT", 0, -verticalSpacing)
+    update2:SetText("10/09/2023")
+
+    local tenthLines = {
+        "I'm working on a new sorting method called 'Secure'.",
+        "Please help test and let me know of any issues (GitHub/Curseforge/Discord).",
+    }
+
+    local anchor = update2
+    for i, text in ipairs(tenthLines) do
+        local line = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+        line:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, i == 1 and -verticalSpacing or -verticalSpacing / 2)
+        line:SetText(text)
+        anchor = line
+    end
+
+    local update1 = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalOutline")
+    update1:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
+    update1:SetText("07/09/2023")
+
+    local seventhLines = {
         "Blizzard have restricted the API method that FrameSort uses for sorting and spacing frames.",
         "The API method can no longer be used during combat.",
         "",
@@ -26,8 +47,8 @@ function M:Build(panel)
         "Further discussion on Reddit:",
     }
 
-    local anchor = important
-    for i, text in ipairs(lines) do
+    anchor = update1
+    for i, text in ipairs(seventhLines) do
         local line = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
         line:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, i == 1 and -verticalSpacing or -verticalSpacing / 2)
         line:SetText(text)
