@@ -61,7 +61,7 @@ local function StoreFrames(provider)
         data.offsetY = offsetY
 
         tinsert(frames[destination], frame)
-        frames.Points[frame] = point
+        frames.Points[frame] = data
     ]]
 
     for _, frame in ipairs(party) do
@@ -102,12 +102,13 @@ function M:Init()
     secureManager:RegisterEvent(wow.Events.PLAYER_REGEN_DISABLED)
 
     for i = 1, wow.MAX_RAID_MEMBERS do
-        wow.RegisterAttributeDriver(secureManager, "raid" .. i, string.format("[@raid%d, exists] true; false", i))
-        wow.RegisterAttributeDriver(secureManager, "raidpet" .. i, string.format("[@raidpet%d, exists] true; false", i))
+        wow.RegisterAttributeDriver(secureManager, "state-raid" .. i, string.format("[@raid%d, exists] true; false", i))
+        wow.RegisterAttributeDriver(secureManager, "state-raidpet" .. i, string.format("[@raidpet%d, exists] true; false", i))
     end
 
     for i = 1, wow.MEMBERS_PER_RAID_GROUP - 1 do
-        wow.RegisterAttributeDriver(secureManager, "party" .. i, string.format("[@party%d, exists] true; false", i))
+        wow.RegisterAttributeDriver(secureManager, "state-party" .. i, string.format("[@party%d, exists] true; false", i))
+        wow.RegisterAttributeDriver(secureManager, "state-partypet" .. i, string.format("[@partypet%d, exists] true; false", i))
     end
 
     wow.SecureHandlerWrapScript(

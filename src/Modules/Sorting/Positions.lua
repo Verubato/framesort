@@ -43,14 +43,14 @@ local function FramePoints(frames, units, getUnit)
             return x == unit or wow.UnitIsUnit(x, unit)
         end)
 
-        assert(unitIndex ~= nil)
+        if unitIndex then
+            local to = ordered[unitIndex]
 
-        local to = ordered[unitIndex]
-
-        points[source] = {
-            X = to.Left,
-            Y = to.Top,
-        }
+            points[source] = {
+                X = to.Left,
+                Y = to.Top,
+            }
+        end
     end
 
     return points
