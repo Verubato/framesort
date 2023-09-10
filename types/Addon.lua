@@ -38,7 +38,7 @@
 
 ---@meta
 ---@class Modules
----@field Sorting SortingModule
+---@field Sorting SortingModules
 ---@field Spacing SpacingModule
 ---@field HidePlayer HidePlayerModule
 ---@field Targeting TargetingModule
@@ -52,3 +52,22 @@
 ---@field Frame FrameUtil
 ---@field Macro MacroUtil
 ---@field Unit UnitUtil
+
+---@class SortingModules : Initialise
+---@field Positions PositionsModule
+---@field Traditional TraditionalSortingModule
+---@field Taintless SortingModule
+---@field Secure SortingModule
+---@field TrySort fun(self: table, provider: FrameProvider?):  boolean
+---@field RegisterPostSortCallback fun(self: table, callback: function)
+
+---@class TraditionalSortingModule
+---@field Init fun(self: table)
+---@field TrySort fun(self: table): boolean
+
+---@class SortingModule
+---@field Init fun(self: table)
+---@field TrySort fun(self: table, provider: FrameProvider): boolean
+
+---@class PositionsModule
+---@field Points fun(self: table, provider: FrameProvider): table<table, Coordinate>

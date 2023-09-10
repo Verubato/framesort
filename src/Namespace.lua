@@ -5,7 +5,9 @@ addon.Collections = {}
 addon.Configuration = {}
 addon.Health = {}
 addon.Logging = {}
-addon.Modules = {}
+addon.Modules = {
+    Sorting = {},
+}
 addon.Numerics = {}
 addon.Providers = { All = {} }
 addon.Scheduling = {}
