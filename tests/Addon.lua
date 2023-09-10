@@ -8,7 +8,9 @@ local addon = {
     Configuration = {},
     Health = {},
     Logging = {},
-    Modules = {},
+    Modules = {
+        Sorting = {}
+    },
     Numerics = {},
     Providers = {
         All = {},
