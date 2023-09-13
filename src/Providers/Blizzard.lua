@@ -54,7 +54,7 @@ end
 
 local function PartyFrames(filter)
     if M:IsUsingRaidStyleFrames() then
-        local container = wow.CompactPartyFrame
+        local container = M:PartyContainer()
         if not container or not container.memberUnitFrames or container:IsForbidden() or not container:IsVisible() then
             return {}
         end
@@ -75,7 +75,7 @@ local function PartyFrames(filter)
 end
 
 local function EnemyArenaFrames(filter)
-    local container = wow.CompactArenaFrame
+    local container = M:EnemyArenaContainer()
     if not container or not container.memberUnitFrames or container:IsForbidden() or not container:IsVisible() then
         return {}
     end
@@ -84,7 +84,7 @@ local function EnemyArenaFrames(filter)
 end
 
 local function RaidFrames(filter)
-    local container = wow.CompactRaidFrameContainer
+    local container = M:RaidContainer()
     if not container or not container.flowFrames or container:IsForbidden() or not container:IsVisible() then
         return {}
     end
@@ -111,18 +111,22 @@ function M:Name()
 end
 
 function M:Enabled()
-    local enabled = false
-
-    if wow.CompactPartyFrame then
+    local party = M:PartyContainer()
+    if party then
         -- frame addons will usually disable blizzard via unsubscribing group update events
-        enabled = wow.CompactPartyFrame:IsEventRegistered("GROUP_ROSTER_UPDATE")
+        if party:IsVisible() or party:IsEventRegistered("GROUP_ROSTER_UPDATE") then
+            return true
+        end
     end
 
-    if wow.CompactRaidFrameContainer then
-        enabled = enabled or wow.CompactRaidFrameContainer:IsEventRegistered("GROUP_ROSTER_UPDATE")
+    local raid = M:RaidContainer()
+    if raid then
+        if raid:IsVisible() or raid:IsEventRegistered("GROUP_ROSTER_UPDATE") then
+            return true
+        end
     end
 
-    return enabled
+    return false
 end
 
 function M:Init()
@@ -146,6 +150,18 @@ function M:Init()
         eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
         eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
     end
+end
+
+function M:PartyContainer()
+    return wow.CompactPartyFrame
+end
+
+function M:EnemyArenaContainer()
+    return wow.CompactArenaFrame
+end
+
+function M:RaidContainer()
+    return wow.CompactRaidFrameContainer
 end
 
 function M:RegisterCallback(callback)
@@ -173,7 +189,7 @@ function M:RaidGroupMembers(group)
 end
 
 function M:RaidGroups()
-    local container = wow.CompactRaidFrameContainer
+    local container = M:RaidContainer()
     if not container or not container.flowFrames or container:IsForbidden() or not container:IsVisible() then
         return {}
     end
