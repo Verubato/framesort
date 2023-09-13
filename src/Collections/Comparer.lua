@@ -68,11 +68,11 @@ local function CompareRole(leftToken, rightToken)
         local leftId, rightId = wow.UnitInRaid(leftToken), wow.UnitInRaid(rightToken)
 
         if leftId then
-            leftRole = select(10, wow.GetRaidRosterInfo(leftId))
+            leftRole = select(12, wow.GetRaidRosterInfo(leftId))
         end
 
         if rightId then
-            rightRole = select(10, wow.GetRaidRosterInfo(rightId))
+            rightRole = select(12, wow.GetRaidRosterInfo(rightId))
         end
 
         leftRole = leftRole or wow.UnitGroupRolesAssigned(leftToken)
