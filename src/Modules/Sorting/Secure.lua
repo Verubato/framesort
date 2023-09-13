@@ -4,27 +4,14 @@ local wow = addon.WoW.Api
 local fsSorting = addon.Modules.Sorting
 local fsCompare = addon.Collections.Comparer
 local fsProviders = addon.Providers
+local fsEnumerable = addon.Collections.Enumerable
 local M = {}
 addon.Modules.Sorting.Secure = M
 
 local secureManager = nil
 
+---@param provider FrameProvider
 local function StoreFrames(provider)
-    local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
-    local enemyEnabled, _, _ = fsCompare:EnemySortMode()
-    local party = {}
-    local raid = {}
-    local arena = {}
-
-    if friendlyEnabled then
-        party = provider:PartyFrames()
-        raid = provider:RaidFrames()
-    end
-
-    if enemyEnabled and wow.IsRetail() then
-        arena = provider:EnemyArenaFrames()
-    end
-
     secureManager:SetAttribute("provider", provider:Name())
     secureManager:Execute([[
         local provider = self:GetAttribute("provider")
@@ -45,6 +32,32 @@ local function StoreFrames(provider)
             frames.Points = wipe(frames.Points)
         end
     ]])
+
+    local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
+    local enemyEnabled, _, _ = fsCompare:EnemySortMode()
+    local party = {}
+    local raid = {}
+    local arena = {}
+
+    if friendlyEnabled then
+        party = provider:PartyFrames()
+
+        if provider:IsRaidGrouped() then
+            raid = fsEnumerable
+                :From(provider:RaidGroups())
+                :Map(function(group)
+                    return provider:RaidGroupMembers(group)
+                end)
+                :Flatten()
+                :ToTable()
+        else
+            raid = provider:RaidFrames()
+        end
+    end
+
+    if enemyEnabled and wow.IsRetail() then
+        arena = provider:EnemyArenaFrames()
+    end
 
     local addFrameScript = [[
         local provider = self:GetAttribute("provider")
@@ -73,11 +86,13 @@ local function StoreFrames(provider)
     for _, frame in ipairs(raid) do
         wow.SecureHandlerSetFrameRef(secureManager, "frame", frame)
         secureManager:SetAttribute("frameType", "Raid")
+        secureManager:Execute(addFrameScript)
     end
 
     for _, frame in ipairs(arena) do
         wow.SecureHandlerSetFrameRef(secureManager, "frame", frame)
         secureManager:SetAttribute("frameType", "Arena")
+        secureManager:Execute(addFrameScript)
     end
 end
 
@@ -94,41 +109,76 @@ function OnEvent(_, event)
 end
 
 function M:Init()
-    secureManager = wow.CreateFrame("Frame", "FrameSortGroupHeader", wow.UIParent, "SecureHandlerAttributeTemplate")
-
-    secureManager:SetFrameRef("Manager", secureManager)
-    secureManager:Execute("FramesByProvider = newtable()")
+    secureManager = wow.CreateFrame("Frame", "FrameSortGroupHeader", wow.UIParent, "SecureHandlerStateTemplate")
     secureManager:HookScript("OnEvent", OnEvent)
     secureManager:RegisterEvent(wow.Events.PLAYER_REGEN_DISABLED)
 
-    for i = 1, wow.MAX_RAID_MEMBERS do
-        wow.RegisterAttributeDriver(secureManager, "state-raid" .. i, string.format("[@raid%d, exists] true; false", i))
-        wow.RegisterAttributeDriver(secureManager, "state-raidpet" .. i, string.format("[@raidpet%d, exists] true; false", i))
-    end
+    -- TODO: why is the first frame GetPoint() returning nil values?
+    secureManager:Execute([[
+        FramesByProvider = newtable()
 
-    for i = 1, wow.MEMBERS_PER_RAID_GROUP - 1 do
-        wow.RegisterAttributeDriver(secureManager, "state-party" .. i, string.format("[@party%d, exists] true; false", i))
-        wow.RegisterAttributeDriver(secureManager, "state-partypet" .. i, string.format("[@partypet%d, exists] true; false", i))
-    end
+        Move = [==[
+            -- can only pass primitive types to secure snippets
+            local provider, type, index = ...
+            local frame = FramesByProvider[provider][type][index]
+            local to = FramesByProvider[provider].Points[frame]
+
+            -- this would be a bug if either a nil
+            if not frame or not to then return end
+
+            -- only move if the point has changed
+            local point, relativeTo, relativePoint, offsetX, offsetY = frame:GetPoint()
+            local same =
+                point == to.point and
+                relativeTo == to.relativeTo and
+                relativePoint == to.relativePoint and
+                offsetX == to.offsetX and
+                offsetY == to.offsetY
+
+            if same then return end
+
+            frame:SetPoint(to.point, to.relativeTo, to.relativePoint, to.offsetX, to.offsetY)
+        ]==]
+        ]])
 
     wow.SecureHandlerWrapScript(
         secureManager,
         "OnAttributeChanged",
         secureManager,
         [[
-        if not strmatch(name, "raid") and not strmatch(name, "party") then return end
+        if not strmatch(name, "framesort") then return end
+
+        local inCombat = SecureCmdOptionParse("[combat] true; false") == "true"
+        if not inCombat then return end
 
         for provider, frames in pairs(FramesByProvider) do
-            for _, frame in ipairs(frames.Party) do
-                local to = frames.Points[frame]
+            for i, frame in ipairs(frames.Party) do
+                self:Run(Move, provider, "Party", i)
+            end
 
-                if to and to.point and to.relativeTo and to.relativePoint then
-                    frame:SetPoint(to.point, to.relativeTo, to.relativePoint, to.offsetX, to.offsetY)
-                end
+            for i, frame in ipairs(frames.Raid) do
+                self:Run(Move, provider, "Raid", i)
+            end
+
+            for i, frame in ipairs(frames.Arena) do
+                self:Run(Move, provider, "Arena", i)
             end
         end
     ]]
     )
+
+    wow.RegisterAttributeDriver(secureManager, "state-framesort-target", "[@target, exists] true; false")
+    wow.RegisterAttributeDriver(secureManager, "state-framesort-modifier", "[mod] true; false")
+
+    for i = 1, wow.MAX_RAID_MEMBERS do
+        wow.RegisterAttributeDriver(secureManager, "state-framesort-raid" .. i, string.format("[@raid%d, exists] true; false", i))
+        wow.RegisterAttributeDriver(secureManager, "state-framesort-raidpet" .. i, string.format("[@raidpet%d, exists] true; false", i))
+    end
+
+    for i = 1, wow.MEMBERS_PER_RAID_GROUP - 1 do
+        wow.RegisterAttributeDriver(secureManager, "state-framesort-party" .. i, string.format("[@party%d, exists] true; false", i))
+        wow.RegisterAttributeDriver(secureManager, "state-framesort-partypet" .. i, string.format("[@partypet%d, exists] true; false", i))
+    end
 end
 
 ---Attempts to sort frames.
