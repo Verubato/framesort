@@ -82,7 +82,7 @@ local function RaidPoints(provider)
             MergeTable(groupAdjustments, adjustments)
         end
 
-        return adjustments:ToTable()
+        return adjustments
     end
 
     local frames = provider:RaidFrames()
