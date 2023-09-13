@@ -178,8 +178,15 @@ function M:IsHealthy()
     results[#results + 1] = {
         Applicable = addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Traditional,
         Passed = OnlyUsingBlizzard(),
-        Description = "Traditional mode is applicable",
+        Description = "Only using Blizzard frames with Traditional mode",
         Help = string.format("Traditional mode can only sort Blizzard party frames, it can't sort your other frame addons: '%s'", enabledNonBlizzardString),
+    }
+
+    results[#results + 1] = {
+        Applicable = addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Taintless,
+        Passed = not fsProviders.Blizzard:ShowRaidPets(),
+        Description = "Pet frames are disbled with Taintless mode",
+        Help = 'Please disable the "Display Pets" Blizzard setting or use a different sorting method',
     }
 
     local conflictingSorter = SortingFunctionsTampered()
