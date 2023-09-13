@@ -15,17 +15,35 @@ function M:Build(panel)
     important:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -verticalSpacing)
     important:SetText("WoW patch 10.1.7 has broken FrameSort.")
 
-    local update2 = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalOutline")
-    update2:SetPoint("TOPLEFT", important, "BOTTOMLEFT", 0, -verticalSpacing)
-    update2:SetText("10/09/2023")
+    local update3 = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalOutline")
+    update3:SetPoint("TOPLEFT", important, "BOTTOMLEFT", 0, -verticalSpacing)
+    update3:SetText("2023-09-14")
 
-    local tenthLines = {
+    local update3Lines = {
+        "Further development has been made on the new Secure sorting method which is starting to look promising.",
+        "",
+        "Taintless mode now blocks certain events that cause frames to become unsorted (e.g. pet events).",
+    }
+
+    local anchor = update3
+    for i, text in ipairs(update3Lines) do
+        local line = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+        line:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, i == 1 and -verticalSpacing or -verticalSpacing / 2)
+        line:SetText(text)
+        anchor = line
+    end
+
+    local update2 = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalOutline")
+    update2:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
+    update2:SetText("2023-09-10")
+
+    local update2Lines = {
         "I'm working on a new sorting method called 'Secure'.",
         "Please help test and let me know of any issues (GitHub/Curseforge/Discord).",
     }
 
-    local anchor = update2
-    for i, text in ipairs(tenthLines) do
+    anchor = update2
+    for i, text in ipairs(update2Lines) do
         local line = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
         line:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, i == 1 and -verticalSpacing or -verticalSpacing / 2)
         line:SetText(text)
@@ -34,9 +52,9 @@ function M:Build(panel)
 
     local update1 = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalOutline")
     update1:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
-    update1:SetText("07/09/2023")
+    update1:SetText("2023-09-07")
 
-    local seventhLines = {
+    local update1Lines = {
         "Blizzard have restricted the API method that FrameSort uses for sorting and spacing frames.",
         "The API method can no longer be used during combat.",
         "",
@@ -48,7 +66,7 @@ function M:Build(panel)
     }
 
     anchor = update1
-    for i, text in ipairs(seventhLines) do
+    for i, text in ipairs(update1Lines) do
         local line = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
         line:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, i == 1 and -verticalSpacing or -verticalSpacing / 2)
         line:SetText(text)
