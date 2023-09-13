@@ -41,7 +41,7 @@ function M:Build(parent)
     secure:SetChecked(addon.DB.Options.SortingMethod == M.Secure)
 
     local secureLines = {
-        "Feel free to test this and let me know how it goes.",
+        "Please help test this and let me know how it goes.",
     }
 
     local anchor = secure
@@ -53,10 +53,12 @@ function M:Build(parent)
     end
 
     anchor = BuildDottedList(panel, anchor, "Pros: ", {
-        "Might work with 10.1.7",
+        "Works with 10.1.7.",
+        "No taint (technical term for addons interfering with Blizzard's UI code).",
     })
 
     anchor = BuildDottedList(panel, anchor, "Cons: ", {
+        "Frames may flicker as they become unsorted and then re-sorted mid-combat.",
         "Still in development.",
     })
 
@@ -67,7 +69,7 @@ function M:Build(parent)
     taintless:SetChecked(addon.DB.Options.SortingMethod == M.Taintless)
 
     local taintlessLines = {
-        "A brand new sorting mode that doesn't bug/lock/taint the UI.",
+        "Adjusts the position of each individual frame and doesn't bug/lock/taint the UI.",
     }
 
     anchor = taintless
@@ -80,11 +82,11 @@ function M:Build(parent)
 
     anchor = BuildDottedList(panel, anchor, "Pros: ", {
         "No taint (technical term for addons interfering with Blizzard's UI code).",
-        "No UI lockups.",
     })
 
     anchor = BuildDottedList(panel, anchor, "Cons: ", {
-        "Since 10.1.7, frames may become unsorted during combat (fix/workaround is being worked on).",
+        "Since 10.1.7 frames may become unsorted.",
+        "Doesn't work well with Blizzard pet frames (use PartyPets-Fix or WeakAuras instead).",
     })
 
     local traditional = wow.CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
@@ -94,7 +96,7 @@ function M:Build(parent)
     traditional:SetChecked(addon.DB.Options.SortingMethod == M.Traditional)
 
     local traditionalLines = {
-        "This is the standard sorting mode that addons and macros have used for 10+ years.",
+        "Replaces the internal Blizzard sorting method with our own custom method.",
     }
 
     anchor = traditional
@@ -106,12 +108,12 @@ function M:Build(parent)
     end
 
     anchor = BuildDottedList(panel, anchor, "Pros: ", {
-        "Probably more stable/reliable as it leverages Blizzard's internal sorting methods.",
+        "More stable/reliable as it leverages Blizzard's internal sorting methods.",
     })
 
     anchor = BuildDottedList(panel, anchor, "Cons: ", {
-        "Will cause Lua errors, this is normal and can be ignored in most cases.",
-        "ONLY sorts Blizzard party frames, nothing else.",
+        "Will cause Lua errors which is normal and can be ignored.",
+        "Only sorts Blizzard party frames, nothing else.",
     })
 
     local reloadReminder = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
