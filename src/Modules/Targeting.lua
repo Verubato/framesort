@@ -54,6 +54,7 @@ local function UpdateTargets()
         btn:SetAttribute("unit", unit or "none")
     end
 
+    assert(targetBottomFrameButton ~= nil)
     targetBottomFrameButton:SetAttribute("unit", friendlyUnits[#friendlyUnits] or "none")
 
     local enemyunits = M:EnemyTargets()
@@ -70,7 +71,7 @@ end
 local function Run()
     if wow.InCombatLockdown() then
         fsLog:Warning("Can't update targets during combat.")
-        fsScheduler:RunWhenCombatEnds(UpdateTargets)
+        fsScheduler:RunWhenCombatEnds(UpdateTargets, "UpdateTargets")
         return
     end
 
@@ -98,7 +99,7 @@ function M:FriendlyTargets()
         end
     end
 
-    if frames and #frames > 0 then
+    if frames and #frames > 0 and frameProvider then
         return fsEnumerable
             :From(frames)
             :OrderBy(function(x, y)

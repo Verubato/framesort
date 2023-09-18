@@ -42,7 +42,7 @@ function M:TrySort(provider)
         -- can't make changes during combat
         fsScheduler:RunWhenCombatEnds(function()
             M:TrySort(provider)
-        end)
+        end, "Sort")
 
         return false
     end
