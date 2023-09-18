@@ -279,26 +279,24 @@ function M:UpgradeToVersion13(options)
     options.Version = 13
 end
 
-local upgradeFunctions = {
-    Version2 = M.UpgradeToVersion2,
-    Version3 = M.UpgradeToVersion3,
-    Version4 = M.UpgradeToVersion4,
-    Version5 = M.UpgradeToVersion5,
-    Version6 = M.UpgradeToVersion6,
-    Version7 = M.UpgradeToVersion7,
-    Version8 = M.UpgradeToVersion8,
-    Version9 = M.UpgradeToVersion9,
-    Version10 = M.UpgradeToVersion10,
-    Version11 = M.UpgradeToVersion11,
-    Version12 = M.UpgradeToVersion12,
-    Version13 = M.UpgradeToVersion13,
-}
+function M:UpgradeToVersion14(options)
+    assert(options.Version == 13)
+
+    -- move people to using Secure instead of Taintless
+    if options.SortingMethod == fsConfig.SortingMethod.Taintless then
+        options.SortingMethod = fsConfig.SortingMethod.Secure
+    end
+
+    options.Version = 14
+end
 
 ---Upgrades saved options to the current version.
 function M:UpgradeOptions(options)
     while (options.Version or 1) < fsConfig.Defaults.Version do
-        local nextVersion = (options.Version or 1) + 1
-        local next = upgradeFunctions["Version" .. nextVersion]
+        local currentVersion = options.Version or 1
+        local nextVersion = currentVersion + 1
+        local next = M["UpgradeToVersion" .. nextVersion]
+
         assert(next ~= nil)
 
         fsLog:Debug("Upgrading options to version " .. nextVersion .. ".")

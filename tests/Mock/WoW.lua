@@ -161,6 +161,10 @@ local wow = {
         return false
     end,
 
+    SecureHandlerWrapScript = function(frame, script, header, preBody, postBody) end,
+    SecureHandlerSetFrameRef = function(frame, label, refFrame) end,
+    SecureHandlerExecute = function(frame, body) end,
+
     -- addon related
     GetAddOnEnableState = function()
         return 0

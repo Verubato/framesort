@@ -12,6 +12,8 @@ local secureManager = nil
 
 ---@param provider FrameProvider
 local function StoreFrames(provider)
+    assert(secureManager ~= nil)
+
     secureManager:SetAttribute("provider", provider:Name())
     secureManager:Execute([[
         local provider = self:GetAttribute("provider")
@@ -186,10 +188,5 @@ end
 ---@param provider FrameProvider the provider to sort.
 function M:TrySort(provider)
     -- TODO: probably do our own sorting instead of using taintless
-    if not fsSorting.Taintless:TrySort(provider) then
-        return false
-    end
-
-    StoreFrames(provider)
-    return true
+    return fsSorting.Taintless:TrySort(provider)
 end
