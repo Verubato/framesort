@@ -60,7 +60,7 @@ local function OnEditMacro(id, _, _, _)
         fsScheduler:RunWhenCombatEnds(function()
             local isFsMacro, newId = UpdateMacro(id)
             isFsMacroCache[newId] = isFsMacro
-        end)
+        end, "EditMacro" .. id)
         fsLog:Warning("Can't update macros during combat.")
         return
     end
@@ -71,7 +71,7 @@ end
 
 local function Run()
     if wow.InCombatLockdown() then
-        fsScheduler:RunWhenCombatEnds(ScanMacros)
+        fsScheduler:RunWhenCombatEnds(ScanMacros, "Macro")
         fsLog:Warning("Can't update macros during combat.")
         return
     end

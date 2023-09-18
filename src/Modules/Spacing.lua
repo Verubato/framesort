@@ -464,7 +464,7 @@ local function Run()
     if wow.InCombatLockdown() then
         fsScheduler:RunWhenCombatEnds(function()
             M:ApplySpacing()
-        end)
+        end, "Space")
     else
         M:ApplySpacing()
     end

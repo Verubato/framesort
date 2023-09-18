@@ -1,21 +1,25 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
-local fsEnumerable = addon.Collections.Enumerable
 local events = addon.WoW.Api.Events
 ---@class Scheduler: Initialise
 local M = {}
 addon.Scheduling.Scheduler = M
 
 local combatEndCallbacks = {}
+local combatEndKeyedCallbacks = {}
 
 local function OnCombatEnded()
-    local copy = fsEnumerable:From(combatEndCallbacks):ToTable()
-    wow.wipe(combatEndCallbacks)
-
-    for _, callback in ipairs(copy) do
+    for _, callback in ipairs(combatEndCallbacks) do
         callback()
     end
+
+    for _, callback in pairs(combatEndKeyedCallbacks) do
+        callback()
+    end
+
+    wow.wipe(combatEndCallbacks)
+    wow.wipe(combatEndKeyedCallbacks)
 end
 
 ---Invokes the callback on the next frame.
@@ -25,19 +29,28 @@ function M:RunNextFrame(callback)
 end
 
 ---Invokes the callback once combat ends.
+---@param key string? an optional key which will ensure only the latest callback provided with the same key will be executed.
 ---@param callback fun()
-function M:RunWhenCombatEnds(callback)
+function M:RunWhenCombatEnds(callback, key)
     if not wow.InCombatLockdown() then
         callback()
         return
     end
 
-    combatEndCallbacks[#combatEndCallbacks + 1] = callback
+    if key then
+        combatEndKeyedCallbacks[key] = callback
+    else
+        combatEndCallbacks[#combatEndCallbacks + 1] = callback
+    end
 end
 
 function M:Init()
     if #combatEndCallbacks > 0 then
         combatEndCallbacks = {}
+    end
+
+    if #combatEndKeyedCallbacks > 0 then
+        combatEndKeyedCallbacks = {}
     end
 
     local eventFrame = wow.CreateFrame("Frame")

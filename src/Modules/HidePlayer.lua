@@ -31,7 +31,7 @@ local function Run()
     end
 
     if wow.InCombatLockdown() then
-        fsScheduler:RunWhenCombatEnds(Run)
+        fsScheduler:RunWhenCombatEnds(Run, "HidePlayer")
         return
     end
 
