@@ -9,6 +9,7 @@ local fsConfig = addon.Configuration
 local M = {
     Sorting = {},
     Options = {},
+    Debugging = {},
 }
 addon.Api.v1 = M
 
@@ -177,4 +178,20 @@ function M.Options:SetReverse(area, reverse)
     table.Reverse = reverse
 
     fsSort:TrySort()
+end
+
+---Enables logging and exposes the addon table to the public.
+function M.Debugging:Enable()
+    FrameSort = addon
+    addon.DB.Options.Logging.Enabled = true
+end
+
+---Disables debug mode.
+function M.Debugging:Disable()
+    if FrameSort then
+        ---@diagnostic disable-next-line: assign-type-mismatch
+        FrameSort = nil
+    end
+
+    addon.DB.Options.Logging.Enabled = false
 end

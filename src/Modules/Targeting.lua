@@ -46,31 +46,47 @@ end
 
 local function UpdateTargets()
     local friendlyUnits = M:FriendlyTargets()
+    local updatedAny = false
 
     -- if units has less than 5 items it's still fine as units[i] will just be nil
     for i, btn in ipairs(targetFramesButtons) do
-        local unit = friendlyUnits[i]
+        local new = friendlyUnits[i] or "none"
+        local current = btn:GetAttribute("unit")
 
-        btn:SetAttribute("unit", unit or "none")
+        if current ~= new then
+            btn:SetAttribute("unit", new)
+            updatedAny = true
+        end
     end
 
     assert(targetBottomFrameButton ~= nil)
-    targetBottomFrameButton:SetAttribute("unit", friendlyUnits[#friendlyUnits] or "none")
+    local bottomCurrentUnit = targetBottomFrameButton:GetAttribute("unit")
+    local bottomNewUnit = friendlyUnits[#friendlyUnits] or "none"
+
+    if bottomCurrentUnit ~= bottomNewUnit then
+        targetBottomFrameButton:SetAttribute("unit", bottomNewUnit)
+        updatedAny = true
+    end
 
     local enemyunits = M:EnemyTargets()
 
     for i, btn in ipairs(targetEnemyButtons) do
-        local unit = enemyunits[i]
+        local new = enemyunits[i] or "none"
+        local current = btn:GetAttribute("unit")
 
-        btn:SetAttribute("unit", unit or "none")
+        if current ~= new then
+            btn:SetAttribute("unit", new)
+            updatedAny = true
+        end
     end
 
-    return true
+    if updatedAny then
+        fsLog:Debug(string.format("Updated targets: %d friendly, %d enemy.", #friendlyUnits, #enemyunits))
+    end
 end
 
 local function Run()
     if wow.InCombatLockdown() then
-        fsLog:Warning("Can't update targets during combat.")
         fsScheduler:RunWhenCombatEnds(UpdateTargets, "UpdateTargets")
         return
     end

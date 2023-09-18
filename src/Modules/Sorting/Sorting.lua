@@ -38,7 +38,6 @@ function M:TrySort(provider)
     end
 
     if wow.InCombatLockdown() then
-        fsLog:Warning("Cannot perform sorting during combat.")
         -- can't make changes during combat
         fsScheduler:RunWhenCombatEnds(function()
             M:TrySort(provider)
@@ -79,6 +78,7 @@ function M:TrySort(provider)
     end
 
     if sorted then
+        fsLog:Debug("Sorted frames")
         InvokeCallbacks()
     end
 
