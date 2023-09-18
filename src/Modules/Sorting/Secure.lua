@@ -25,6 +25,7 @@ local function StoreFrames(provider)
             frames.Raid = newtable()
             frames.Arena = newtable()
             frames.Points = newtable()
+            frames.Groups = newtable()
 
             FramesByProvider[provider] = frames
         else
@@ -32,6 +33,7 @@ local function StoreFrames(provider)
             frames.Raid = wipe(frames.Raid)
             frames.Arena = wipe(frames.Arena)
             frames.Points = wipe(frames.Points)
+            frames.Groups = wipe(frames.Groups)
         end
     ]])
 
@@ -39,14 +41,16 @@ local function StoreFrames(provider)
     local enemyEnabled, _, _ = fsCompare:EnemySortMode()
     local party = {}
     local raid = {}
+    local groups = {}
     local arena = {}
 
     if friendlyEnabled then
         party = provider:PartyFrames()
 
         if provider:IsRaidGrouped() then
+            groups = provider:RaidGroups()
             raid = fsEnumerable
-                :From(provider:RaidGroups())
+                :From(groups)
                 :Map(function(group)
                     return provider:RaidGroupMembers(group)
                 end)
@@ -91,6 +95,12 @@ local function StoreFrames(provider)
         secureManager:Execute(addFrameScript)
     end
 
+    for _, frame in ipairs(groups) do
+        wow.SecureHandlerSetFrameRef(secureManager, "frame", frame)
+        secureManager:SetAttribute("frameType", "Groups")
+        secureManager:Execute(addFrameScript)
+    end
+
     for _, frame in ipairs(arena) do
         wow.SecureHandlerSetFrameRef(secureManager, "frame", frame)
         secureManager:SetAttribute("frameType", "Arena")
@@ -111,11 +121,10 @@ function OnEvent(_, event)
 end
 
 function M:Init()
-    secureManager = wow.CreateFrame("Frame", "FrameSortGroupHeader", wow.UIParent, "SecureHandlerStateTemplate")
+    secureManager = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureHandlerStateTemplate")
     secureManager:HookScript("OnEvent", OnEvent)
     secureManager:RegisterEvent(wow.Events.PLAYER_REGEN_DISABLED)
 
-    -- TODO: why is the first frame GetPoint() returning nil values?
     secureManager:Execute([[
         FramesByProvider = newtable()
 
@@ -125,10 +134,11 @@ function M:Init()
             local frame = FramesByProvider[provider][type][index]
             local to = FramesByProvider[provider].Points[frame]
 
-            -- this would be a bug if either a nil
+            -- this would be a bug if either are nil
             if not frame or not to then return end
 
             -- only move if the point has changed
+            -- it seems GetPoint() is bugged at the moment though as it returns nil values in combat
             local point, relativeTo, relativePoint, offsetX, offsetY = frame:GetPoint()
             local same =
                 point == to.point and
@@ -164,6 +174,10 @@ function M:Init()
 
             for i, frame in ipairs(frames.Arena) do
                 self:Run(Move, provider, "Arena", i)
+            end
+
+            for i, frame in ipairs(frames.Groups) do
+                self:Run(Move, provider, "Groups", i)
             end
         end
     ]]
