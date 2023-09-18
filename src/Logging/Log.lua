@@ -7,7 +7,8 @@ local M = {}
 addon.Logging.Log = M
 
 local function Write(msg, level)
-    if not addon.DB.Options.Logging or not addon.DB.Options.Logging.Enabled then
+    local enabled = addon.DB and addon.DB.Options and addon.DB.Options.Logging and addon.DB.Options.Logging.Enabled
+    if not enabled then
         return
     end
 

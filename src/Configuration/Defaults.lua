@@ -4,7 +4,7 @@ local fsConfig = addon.Configuration
 
 ---@class Options
 fsConfig.Defaults = {
-    Version = 13,
+    Version = 14,
     Logging = {
         Enabled = false,
     },
@@ -37,7 +37,7 @@ fsConfig.Defaults = {
         GroupSortMode = fsConfig.GroupSortMode.Role,
         Reverse = false,
     },
-    SortingMethod = fsConfig.SortingMethod.Taintless,
+    SortingMethod = fsConfig.SortingMethod.Secure,
     Appearance = {
         Party = {
             Spacing = {
