@@ -39,6 +39,8 @@ local function OnLoadAddon(_, _, name)
     end
 
     addon:Init()
+
+    assert(loader ~= nil)
     loader:UnregisterEvent("ADDON_LOADED")
 end
 
