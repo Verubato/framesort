@@ -10,6 +10,9 @@ function addon:InitDB()
     if not FrameSortDB.Options then
         FrameSortDB.Options = wow.CopyTable(addon.Configuration.Defaults)
     end
+    if FrameSortDB.Log then
+        FrameSortDB.Log = nil
+    end
 
     addon.DB = FrameSortDB
     addon.Configuration.Upgrader:UpgradeOptions(addon.DB.Options)
