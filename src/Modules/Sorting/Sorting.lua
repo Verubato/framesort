@@ -66,13 +66,7 @@ function M:TrySort(provider)
     local providers = provider and { provider } or fsProviders:Enabled()
 
     for _, p in ipairs(providers) do
-        local providerSorted = false
-
-        if addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Taintless then
-            providerSorted = M.Taintless:TrySort(p)
-        else
-            providerSorted = M.Secure:TrySort(p)
-        end
+        local providerSorted = M.Secure:TrySort(p)
 
         sorted = sorted or providerSorted
     end
