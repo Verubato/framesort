@@ -6,7 +6,7 @@
     <Script file="Logging\Log.lua"/>
     <Script file="Collections\Enumerable.lua"/>
     <Script file="Configuration\SortingMethod.lua"/>
-    <Script file="Configuration\LayoutType.lua"/>
+    <Script file="Configuration\LayoutStrategy.lua"/>
     <Script file="Configuration\SortMode.lua"/>
     <Script file="Numerics\Math.lua"/>
 
@@ -37,13 +37,11 @@
     <!-- Sorting modules -->
     <Script file="Modules\Sorting\Core.lua"/>
     <Script file="Modules\Sorting\Traditional.lua"/>
-    <Script file="Modules\Sorting\Taintless.lua"/>
     <Script file="Modules\Sorting\Secure.lua"/>
     <Script file="Modules\Sorting\Sorting.lua"/>
 
     <!-- Load modules -->
     <Script file="Modules\HidePlayer.lua"/>
-    <Script file="Modules\Spacing.lua"/>
     <Script file="Modules\Targeting.lua"/>
     <Script file="Modules\Macro.lua"/>
 

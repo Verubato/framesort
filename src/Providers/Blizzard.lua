@@ -5,6 +5,7 @@ local fsFrame = addon.WoW.Frame
 local fsEnumerable = addon.Collections.Enumerable
 local fsUnit = addon.WoW.Unit
 local fsProviders = addon.Providers
+local fsConfig = addon.Configuration
 local events = addon.WoW.Api.Events
 ---@class BlizzardFrameProvider: FrameProvider
 local M = {}
@@ -244,6 +245,10 @@ function M:IsRaidGrouped()
     end
 
     return wow.CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
+end
+
+function M:LayoutStrategy()
+    return fsConfig.LayoutStrategy.Hard
 end
 
 function M:IsPartyHorizontalLayout()

@@ -39,7 +39,6 @@
 ---@meta
 ---@class Modules
 ---@field Sorting SortingModules
----@field Spacing SpacingModule
 ---@field HidePlayer HidePlayerModule
 ---@field Targeting TargetingModule
 ---@field Macro Initialise
@@ -56,12 +55,11 @@
 ---@class SortingModules : Initialise
 ---@field Core CoreSortingModule
 ---@field Traditional TraditionalSortingModule
----@field Taintless SortingModule
 ---@field Secure SortingModule
 ---@field TrySort fun(self: table, provider: FrameProvider?):  boolean
 ---@field RegisterPostSortCallback fun(self: table, callback: function)
 
----@class TraditionalSortingModule : Initialise
+---@class TraditionalSortingModule
 ---@field TrySort fun(self: table): boolean
 
 ---@class SortingModule : Initialise

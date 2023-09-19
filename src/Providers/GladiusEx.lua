@@ -4,6 +4,7 @@ local wow = addon.WoW.Api
 local fsFrame = addon.WoW.Frame
 local fsScheduler = addon.Scheduling.Scheduler
 local fsProviders = addon.Providers
+local fsConfig = addon.Configuration
 local events = addon.WoW.Api.Events
 local M = {}
 local callbacks = {}
@@ -107,14 +108,21 @@ function M:IsRaidGrouped()
     return false
 end
 
+function M:LayoutStrategy()
+    return fsConfig.LayoutStrategy.Soft
+end
+
 function M:IsPartyHorizontalLayout()
+    -- not applicable as we're using the Soft layout strategy
     return false
 end
 
 function M:IsRaidHorizontalLayout()
+    -- not applicable as we're using the Soft layout strategy
     return false
 end
 
 function M:IsEnemyArenaHorizontalLayout()
+    -- not applicable as we're using the Soft layout strategy
     return false
 end

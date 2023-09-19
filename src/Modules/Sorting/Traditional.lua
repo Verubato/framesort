@@ -5,9 +5,7 @@ local fsCompare = addon.Collections.Comparer
 local M = {}
 addon.Modules.Sorting.Traditional = M
 
-function M:Init() end
-
----Attempts to sort Blizzard frames.
+---Attempts to sort Blizzard party frames.
 ---@return boolean sorted true if sorted, otherwise false.
 function M:TrySort()
     local sorted = false

@@ -4,7 +4,7 @@ local fsConfig = addon.Configuration
 
 ---@class Options
 fsConfig.Defaults = {
-    Version = 14,
+    Version = 15,
     Logging = {
         Enabled = false,
     },

@@ -119,7 +119,7 @@ function M:GetLeft()
 end
 
 function M:GetHeight()
-    return self.State.Position.Top - self.State.Position.Bottom
+    return self.State.Position.Bottom - self.State.Position.Top
 end
 
 function M:GetWidth()

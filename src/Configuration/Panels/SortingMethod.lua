@@ -41,7 +41,8 @@ function M:Build(parent)
     secure:SetChecked(addon.DB.Options.SortingMethod == M.Secure)
 
     local secureLines = {
-        "Please help test this and let me know how it goes.",
+        "Please help me test this and let me know how it goes.",
+        "Adjusts the position of each individual frame and doesn't bug/lock/taint the UI.",
     }
 
     local anchor = secure
@@ -53,40 +54,15 @@ function M:Build(parent)
     end
 
     anchor = BuildDottedList(panel, anchor, "Pros: ", {
+        "Can sort frames from other addons.",
+        "Can apply frame spacing.",
+        "No taint (technical term for addons interfering with Blizzard's UI code).",
         "Works with 10.1.7.",
-        "No taint (technical term for addons interfering with Blizzard's UI code).",
     })
 
     anchor = BuildDottedList(panel, anchor, "Cons: ", {
-        "Frames may flicker as they become unsorted and then re-sorted mid-combat.",
-        "Still in development.",
-    })
-
-    local taintless = wow.CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
-    taintless:SetPoint("TOPLEFT", anchor, -4, -verticalSpacing * 2)
-    taintless.Text:SetText("Taintless")
-    taintless.Text:SetFontObject("GameFontNormalLarge")
-    taintless:SetChecked(addon.DB.Options.SortingMethod == M.Taintless)
-
-    local taintlessLines = {
-        "Adjusts the position of each individual frame and doesn't bug/lock/taint the UI.",
-    }
-
-    anchor = taintless
-    for i, line in ipairs(taintlessLines) do
-        local description = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-        description:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", i == 1 and 4 or 0, -verticalSpacing / 2)
-        description:SetText(line)
-        anchor = description
-    end
-
-    anchor = BuildDottedList(panel, anchor, "Pros: ", {
-        "No taint (technical term for addons interfering with Blizzard's UI code).",
-    })
-
-    anchor = BuildDottedList(panel, anchor, "Cons: ", {
-        "Since 10.1.7 frames may become unsorted.",
-        "Doesn't work well with Blizzard pet frames (use PartyPets-Fix or WeakAuras instead).",
+        "Still in development since 10.1.7 broke the old method.",
+        "May break with WoW patches."
     })
 
     local traditional = wow.CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
@@ -96,7 +72,9 @@ function M:Build(parent)
     traditional:SetChecked(addon.DB.Options.SortingMethod == M.Traditional)
 
     local traditionalLines = {
-        "Replaces the internal Blizzard sorting method with our own custom method.",
+        "This is the standard sorting mode that addons and macros have used for 10+ years.",
+        "It replaces the internal Blizzard sorting method with our own.",
+        "This is the same as the \"SetFlowSortFunction\" script but with FrameSort configuration."
     }
 
     anchor = traditional
@@ -112,8 +90,9 @@ function M:Build(parent)
     })
 
     anchor = BuildDottedList(panel, anchor, "Cons: ", {
-        "Will cause Lua errors which is normal and can be ignored.",
         "Only sorts Blizzard party frames, nothing else.",
+        "Will cause Lua errors which is normal and can be ignored.",
+        "Cannot apply frame spacing.",
     })
 
     local reloadReminder = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
@@ -131,16 +110,12 @@ function M:Build(parent)
 
     local function setSortingMethod(method)
         if method == M.Secure then
-            taintless:SetChecked(false)
-            traditional:SetChecked(false)
-        elseif method == M.Taintless then
-            secure:SetChecked(false)
             traditional:SetChecked(false)
         elseif method == M.Traditional then
             secure:SetChecked(false)
-            taintless:SetChecked(false)
         end
 
+        ---@diagnostic disable-next-line: inject-field
         addon.DB.Options.SortingMethod = method
         reloadButton:SetShown(true)
     end
@@ -152,14 +127,6 @@ function M:Build(parent)
         end
 
         setSortingMethod(M.Secure)
-    end)
-    taintless:HookScript("OnClick", function()
-        if not taintless:GetChecked() then
-            taintless:SetChecked(true)
-            return
-        end
-
-        setSortingMethod(M.Taintless)
     end)
 
     traditional:HookScript("OnClick", function()

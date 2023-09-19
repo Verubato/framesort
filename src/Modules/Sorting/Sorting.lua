@@ -86,11 +86,7 @@ function M:TrySort(provider)
 end
 
 function M:Init()
-    if addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Traditional then
-        M.Traditional:Init()
-    elseif addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Taintless then
-        M.Taintless:Init()
-    elseif addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Secure then
+    if addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Secure then
         M.Secure:Init()
     end
 

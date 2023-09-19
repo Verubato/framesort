@@ -4,6 +4,7 @@ local wow = addon.WoW.Api
 local fsFrame = addon.WoW.Frame
 local fsLog = addon.Logging.Log
 local fsProviders = addon.Providers
+local fsConfig = addon.Configuration
 local M = {}
 local callbacks = {}
 local fsPlugin = nil
@@ -200,16 +201,21 @@ function M:IsRaidGrouped()
     return false
 end
 
+function M:LayoutStrategy()
+    return fsConfig.LayoutStrategy.Soft
+end
+
 function M:IsPartyHorizontalLayout()
-    -- TODO: read value from ElvUI config
+    -- not applicable as we're using the Soft layout strategy
     return false
 end
 
 function M:IsRaidHorizontalLayout()
+    -- not applicable as we're using the Soft layout strategy
     return false
 end
 
 function M:IsEnemyArenaHorizontalLayout()
-    -- TODO: read value from ElvUI config
+    -- not applicable as we're using the Soft layout strategy
     return false
 end

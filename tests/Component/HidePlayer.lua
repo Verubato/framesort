@@ -36,11 +36,7 @@ end
 
 function M:teardown()
     addon:Reset()
-
     addon.Providers.Blizzard = realBlizzardProvider
-    addon.DB.Options.World.Enabled = addon.Configuration.Defaults.World.Enabled
-    addon.DB.Options.World.PlayerSortMode = addon.Configuration.Defaults.World.PlayerSortMode
-
     provider.State.PartyFrames = {}
 end
 

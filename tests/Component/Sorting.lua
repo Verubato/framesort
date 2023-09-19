@@ -25,6 +25,8 @@ function M:setup()
         p1,
         p2,
     }
+
+    addon.Providers.Blizzard = provider
 end
 
 function M:teardown()
@@ -37,18 +39,19 @@ end
 function M:test_sort_party_frames_top()
     addon.DB.Options.World.PlayerSortMode = "Top"
     addon.DB.Options.World.GroupSortMode = "Group"
-    addon.Providers.Blizzard = provider
 
     local width = 100
     local height = 100
 
-    -- p2 -> player -> p1
+    -- player = top
+    -- p1 = middle
+    -- p2 = bottom
     p2:SetPoint("TOPLEFT", provider:PartyContainer(), "TOPLEFT", 0, 0)
-    p2:SetPosition(0, 0, -height, width)
+    p2:SetPosition(0, 0, width, -height)
     player:SetPoint("TOPLEFT", p2, "BOTTOMLEFT", 0, 0)
-    player:SetPosition(-height, 0, -height * 2, width)
+    player:SetPosition(-height, 0, width, -height * 2)
     p1:SetPoint("TOPLEFT", player, "BOTTOMLEFT", 0, 0)
-    p1:SetPosition(-height * 2, 0, -height * 3, width)
+    p1:SetPosition(-height * 2, 0, width, -height * 3)
 
     assert(fsSort:TrySort())
 
@@ -77,7 +80,7 @@ function M:test_sort_party_frames_top()
             RelativeTo = provider:PartyContainer():GetName(),
             RelativePoint = "TOPLEFT",
             XOffset = 0,
-            YOffset = 200,
+            YOffset = 100,
         })
 
     assertEquals(toPos(p2.State.Point),
@@ -86,7 +89,7 @@ function M:test_sort_party_frames_top()
             RelativeTo = provider:PartyContainer():GetName(),
             RelativePoint = "TOPLEFT",
             XOffset = 0,
-            YOffset = 500,
+            YOffset = 200,
         })
 end
 

@@ -1,7 +1,7 @@
 ---@type string, Addon
 local _, addon = ...
+local fsSorting = addon.Modules.Sorting
 local fsConfig = addon.Configuration
-local fsSpacing = addon.Modules.Spacing
 local wow = addon.WoW.Api
 local minSpacing = 0
 local maxSpacing = 100
@@ -77,7 +77,7 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
             local value = setValue(sliderValue, slider, box)
             if value then
                 spacing.Horizontal = value
-                fsSpacing:ApplySpacing()
+                fsSorting:TrySort()
             end
         end)
 
@@ -89,7 +89,7 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
             local value = setValue(box:GetText(), slider, box)
             if value then
                 spacing.Horizontal = value
-                fsSpacing:ApplySpacing()
+                fsSorting:TrySort()
             end
         end)
 
@@ -117,7 +117,7 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
             local value = setValue(sliderValue, slider, box)
             if value then
                 spacing.Vertical = value
-                fsSpacing:ApplySpacing()
+                fsSorting:TrySort()
             end
         end)
 
@@ -130,7 +130,7 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
 
             if value then
                 spacing.Vertical = value
-                fsSpacing:ApplySpacing()
+                fsSorting:TrySort()
             end
         end)
 

@@ -1,7 +1,6 @@
 local addon = require("Addon")
 local frame = require("Mock\\Frame")
 local provider = addon.Providers.Test
-local fsConfig = addon.Configuration
 local realBlizzardProvider = addon.Providers.Blizzard
 local M = {}
 
@@ -39,8 +38,6 @@ end
 
 function M:teardown()
     addon.Providers.Blizzard = realBlizzardProvider
-    addon.DB.Options.Arena.PlayerSortMode = fsConfig.Defaults.PlayerSortMode
-    addon.DB.Options.Arena.GroupSortMode = fsConfig.Defaults.GroupSortMode
     addon:Reset()
 end
 
