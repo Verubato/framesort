@@ -1,4 +1,0 @@
----@meta
----@class Coordinate
----@field X number
----@field Y number

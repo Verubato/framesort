@@ -54,20 +54,18 @@
 ---@field Unit UnitUtil
 
 ---@class SortingModules : Initialise
----@field Positions PositionsModule
+---@field Core CoreSortingModule
 ---@field Traditional TraditionalSortingModule
 ---@field Taintless SortingModule
 ---@field Secure SortingModule
 ---@field TrySort fun(self: table, provider: FrameProvider?):  boolean
 ---@field RegisterPostSortCallback fun(self: table, callback: function)
 
----@class TraditionalSortingModule
----@field Init fun(self: table)
+---@class TraditionalSortingModule : Initialise
 ---@field TrySort fun(self: table): boolean
 
----@class SortingModule
----@field Init fun(self: table)
+---@class SortingModule : Initialise
 ---@field TrySort fun(self: table, provider: FrameProvider): boolean
 
----@class PositionsModule
----@field Points fun(self: table, provider: FrameProvider): table<table, Coordinate>
+---@class CoreSortingModule
+---@field TrySort fun(self: table, provider: FrameProvider): boolean

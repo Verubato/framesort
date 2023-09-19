@@ -1,3 +1,5 @@
+local frameMock = require("Mock\\Frame")
+
 ---@type FrameProvider
 return {
     State = {
@@ -22,6 +24,15 @@ return {
     GetUnit = function(_, frame)
         return frame.unit
     end,
+    PartyContainer = function(_)
+        return frameMock:New("Frame", "PartyContainer")
+    end,
+    RaidContainer = function(_)
+        return frameMock:New("Frame", "RaidContainer")
+    end,
+    EnemyArenaContainer = function(_)
+        return frameMock:New("Frame", "EnemyArenaContainer")
+    end,
     RaidFrames = function(self)
         return self.State.RaidFrames
     end,
@@ -38,6 +49,15 @@ return {
         return false
     end,
     IsRaidGrouped = function()
+        return false
+    end,
+    IsPartyHorizontalLayout = function()
+        return false
+    end,
+    IsRaidHorizontalLayout = function()
+        return false
+    end,
+    IsEnemyArenaHorizontalLayout = function()
         return false
     end,
     EnemyArenaFrames = function(self)

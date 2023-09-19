@@ -58,6 +58,19 @@ function M:GetUnit(frame)
     return GetUnit(frame)
 end
 
+function M:PartyContainer()
+    return nil
+end
+
+function M:EnemyArenaContainer()
+    ---@diagnostic disable-next-line: undefined-global
+    return sArena
+end
+
+function M:RaidContainer()
+    return nil
+end
+
 function M:PartyFrames()
     return {}
 end
@@ -75,8 +88,7 @@ function M:RaidGroups()
 end
 
 function M:EnemyArenaFrames()
-    ---@diagnostic disable-next-line: undefined-global
-    return fsFrame:ChildUnitFrames(sArena, GetUnit)
+    return fsFrame:ChildUnitFrames(M:EnemyArenaContainer(), GetUnit)
 end
 
 function M:ShowPartyPets()
@@ -88,5 +100,17 @@ function M:ShowRaidPets()
 end
 
 function M:IsRaidGrouped()
+    return false
+end
+
+function M:IsPartyHorizontalLayout()
+    return false
+end
+
+function M:IsRaidHorizontalLayout()
+    return false
+end
+
+function M:IsEnemyArenaHorizontalLayout()
     return false
 end

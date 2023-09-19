@@ -24,7 +24,6 @@ local function StoreFrames(provider)
             frames.Party = newtable()
             frames.Raid = newtable()
             frames.Arena = newtable()
-            frames.Points = newtable()
             frames.Groups = newtable()
 
             FramesByProvider[provider] = frames
@@ -32,9 +31,11 @@ local function StoreFrames(provider)
             frames.Party = wipe(frames.Party)
             frames.Raid = wipe(frames.Raid)
             frames.Arena = wipe(frames.Arena)
-            frames.Points = wipe(frames.Points)
             frames.Groups = wipe(frames.Groups)
         end
+
+        local points = PointsByProvider[provider]
+        PointsByProvider[provider] = points and wipe(points) or newtable()
     ]])
 
     local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
@@ -68,6 +69,7 @@ local function StoreFrames(provider)
     local addFrameScript = [[
         local provider = self:GetAttribute("provider")
         local frames = FramesByProvider[provider]
+        local points = PointsByProvider[provider]
         local frame = self:GetFrameRef("frame")
         local destination = self:GetAttribute("frameType")
         local point, relativeTo, relativePoint, offsetX, offsetY = frame:GetPoint()
@@ -80,7 +82,7 @@ local function StoreFrames(provider)
         data.offsetY = offsetY
 
         tinsert(frames[destination], frame)
-        frames.Points[frame] = data
+        points[frame] = data
     ]]
 
     for _, frame in ipairs(party) do
@@ -127,30 +129,7 @@ function M:Init()
 
     secureManager:Execute([[
         FramesByProvider = newtable()
-
-        Move = [==[
-            -- can only pass primitive types to secure snippets
-            local provider, type, index = ...
-            local frame = FramesByProvider[provider][type][index]
-            local to = FramesByProvider[provider].Points[frame]
-
-            -- this would be a bug if either are nil
-            if not frame or not to then return end
-
-            -- only move if the point has changed
-            -- it seems GetPoint() is bugged at the moment though as it returns nil values in combat
-            local point, relativeTo, relativePoint, offsetX, offsetY = frame:GetPoint()
-            local same =
-                point == to.point and
-                relativeTo == to.relativeTo and
-                relativePoint == to.relativePoint and
-                offsetX == to.offsetX and
-                offsetY == to.offsetY
-
-            if same then return end
-
-            frame:SetPoint(to.point, to.relativeTo, to.relativePoint, to.offsetX, to.offsetY)
-        ]==]
+        PointsByProvider = newtable()
         ]])
 
     wow.SecureHandlerWrapScript(
@@ -163,21 +142,25 @@ function M:Init()
         local inCombat = SecureCmdOptionParse("[combat] true; false") == "true"
         if not inCombat then return end
 
-        for provider, frames in pairs(FramesByProvider) do
-            for i, frame in ipairs(frames.Party) do
-                self:Run(Move, provider, "Party", i)
-            end
+        for provider, framesByType in pairs(FramesByProvider) do
+            for type, frames in pairs(framesByType) do
+                -- first clear existing points
+                for _, frame in ipairs(frames) do
+                    local to = PointsByProvider[provider][frame]
 
-            for i, frame in ipairs(frames.Raid) do
-                self:Run(Move, provider, "Raid", i)
-            end
+                    if to then
+                        frame:ClearAllPoints()
+                    end
+                end
 
-            for i, frame in ipairs(frames.Arena) do
-                self:Run(Move, provider, "Arena", i)
-            end
+                -- now set them
+                for _, frame in ipairs(frames) do
+                    local to = PointsByProvider[provider][frame]
 
-            for i, frame in ipairs(frames.Groups) do
-                self:Run(Move, provider, "Groups", i)
+                    if to then
+                        frame:SetPoint(to.point, to.relativeTo, to.relativePoint, to.offsetX, to.offsetY)
+                    end
+                end
             end
         end
     ]]
@@ -201,6 +184,5 @@ end
 ---@return boolean sorted true if sorted, otherwise false.
 ---@param provider FrameProvider the provider to sort.
 function M:TrySort(provider)
-    -- TODO: probably do our own sorting instead of using taintless
-    return fsSorting.Taintless:TrySort(provider)
+    return fsSorting.Core:TrySort(provider)
 end

@@ -1,6 +1,8 @@
 ---@type string, Addon
 local _, addon = ...
 local fsEnumerable = addon.Collections.Enumerable
+local fsCompare = addon.Collections.Comparer
+local fsMath = addon.Numerics.Math
 ---@class FrameUtil
 local M = {}
 
@@ -55,6 +57,8 @@ function M:ToFrameChain(frames)
     if count ~= #frames then
         return invalid
     end
+
+    assert(root ~= nil)
 
     root.Valid = true
     return root
@@ -138,20 +142,50 @@ function M:ChildUnitFrames(container, getUnit)
         :ToTable()
 end
 
----Returns true if the set of frames are in a horizontal layout.
----Only works for single row or column layouts, multiple columns will return false.
-function M:IsHorizontalLayout(frames)
-    if #frames == 0 then
-        return false
-    end
+---Returns the width x height of the frames in a grid layout.
+---@return number width, number height
+function M:GridSize(frames)
+    if #frames == 0 then return 0, 0 end
+    if #frames == 1 then return 1, 1 end
 
-    local top = frames[1]:GetTop()
-    for i = 2, #frames do
-        local frame = frames[i]
-        if frame:GetTop() ~= top then
-            return false
+    local width = 1
+    local height = 1
+
+    local byCol = fsEnumerable:From(frames)
+        :OrderBy(function(x, y) return fsCompare:CompareLeftTopFuzzy(x, y) end)
+        :ToTable()
+
+    local columnHeight = 1
+    for i = 2, #byCol do
+        local frame = byCol[i]
+        local previous = byCol[i - 1]
+        local sameColumn = fsMath:Round(frame:GetLeft()) == fsMath:Round(previous:GetLeft())
+
+        if sameColumn then
+            columnHeight = columnHeight + 1
+            height = math.max(height, columnHeight)
+        else
+            columnHeight = 0
         end
     end
 
-    return true
+    local byRow = fsEnumerable:From(frames)
+        :OrderBy(function(x, y) return fsCompare:CompareTopLeftFuzzy(x, y) end)
+        :ToTable()
+
+    local rowWidth = 1
+    for i = 2, #byRow do
+        local frame = byRow[i]
+        local previous = byRow[i - 1]
+        local sameRow = fsMath:Round(frame:GetTop()) == fsMath:Round(previous:GetTop())
+
+        if sameRow then
+            rowWidth = rowWidth + 1
+            width = math.max(width, rowWidth)
+        else
+            rowWidth = 0
+        end
+    end
+
+    return width, height
 end

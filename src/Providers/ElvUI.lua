@@ -148,9 +148,21 @@ function M:GetUnit(frame)
     return GetUnit(frame)
 end
 
-function M:PartyFrames()
+function M:PartyContainer()
     ---@diagnostic disable-next-line: undefined-global
-    return fsFrame:ChildUnitFrames(ElvUF_PartyGroup1, GetUnit)
+    return ElvUF_PartyGroup1
+end
+
+function M:EnemyArenaContainer()
+    return nil
+end
+
+function M:RaidContainer()
+    return nil
+end
+
+function M:PartyFrames()
+    return fsFrame:ChildUnitFrames(M:PartyContainer(), GetUnit)
 end
 
 function M:RaidFrames()
@@ -185,5 +197,19 @@ end
 
 function M:IsRaidGrouped()
     -- not implemented
+    return false
+end
+
+function M:IsPartyHorizontalLayout()
+    -- TODO: read value from ElvUI config
+    return false
+end
+
+function M:IsRaidHorizontalLayout()
+    return false
+end
+
+function M:IsEnemyArenaHorizontalLayout()
+    -- TODO: read value from ElvUI config
     return false
 end

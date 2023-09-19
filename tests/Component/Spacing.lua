@@ -14,16 +14,19 @@ local partyContainer = frame:New()
 -- p1 = middle
 -- p2 = bottom
 local player = frame:New("Frame", nil, partyContainer, nil)
+player.State.Position.Left = 0
 player.State.Position.Top = 500
 player.State.Position.Bottom = player.State.Position.Top - frameHeight
 player.unit = "player"
 
 local p1 = frame:New("Frame", nil, partyContainer, nil)
+p1.State.Position.Left = 0
 p1.State.Position.Top = player.State.Position.Bottom
 p1.State.Position.Bottom = p1.State.Position.Top - frameHeight
 p1.unit = "party1"
 
 local p2 = frame:New("Frame", nil, partyContainer, nil)
+p2.State.Position.Left = 0
 p2.State.Position.Top = p1.State.Position.Bottom
 p2.State.Position.Bottom = p2.State.Position.Top - frameHeight
 p2.unit = "party2"
