@@ -61,9 +61,22 @@ function M:GetUnit(frame)
     return GetUnit(frame)
 end
 
-function M:PartyFrames()
+function M:PartyContainer()
     ---@diagnostic disable-next-line: undefined-global
-    return fsFrame:ChildUnitFrames(GladiusExPartyFrame, GetUnit)
+    return GladiusExPartyFrame
+end
+
+function M:EnemyArenaContainer()
+    ---@diagnostic disable-next-line: undefined-global
+    return GladiusExArenaFrame
+end
+
+function M:RaidContainer()
+    return nil
+end
+
+function M:PartyFrames()
+    return fsFrame:ChildUnitFrames(M:PartyContainer(), GetUnit)
 end
 
 function M:RaidFrames()
@@ -79,8 +92,7 @@ function M:RaidGroups()
 end
 
 function M:EnemyArenaFrames()
-    ---@diagnostic disable-next-line: undefined-global
-    return fsFrame:ChildUnitFrames(GladiusExArenaFrame, GetUnit)
+    return fsFrame:ChildUnitFrames(M:EnemyArenaContainer(), GetUnit)
 end
 
 function M:ShowPartyPets()
@@ -92,5 +104,17 @@ function M:ShowRaidPets()
 end
 
 function M:IsRaidGrouped()
+    return false
+end
+
+function M:IsPartyHorizontalLayout()
+    return false
+end
+
+function M:IsRaidHorizontalLayout()
+    return false
+end
+
+function M:IsEnemyArenaHorizontalLayout()
     return false
 end

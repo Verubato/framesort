@@ -264,6 +264,10 @@ function M:IsRaidHorizontalLayout()
     return wow.CompactRaidFrameManager_GetSetting("HorizontalGroups")
 end
 
+function M:IsEnemyArenaHorizontalLayout()
+    return false
+end
+
 function M:IsUsingRaidStyleFrames()
     if wow.IsRetail() then
         return wow.EditModeManagerFrame:UseRaidStylePartyFrames()

@@ -4,6 +4,9 @@
 ---@field Init fun(self: table) Performs any initialisation logic the provider might have.
 ---@field Enabled fun(self: table): boolean Whether the provider is enabled.
 ---@field GetUnit fun(self: table, frame: table): string? A function that accepts a frame from this provider and returns the unit token.
+---@field PartyContainer fun(self: table): table Returns the party frames container.
+---@field RaidContainer fun(self: table): table Returns the party frames container.
+---@field EnemyArenaContainer fun(self: table): table Returns the party frames container.
 ---@field PartyFrames fun(self: table): table[] Returns a collection of party frames.
 ---@field RaidFrames fun(self: table): table[] Returns a collection of raid frames.
 ---@field RaidGroups fun(self: table): table[] Returns a collection of raid groups.

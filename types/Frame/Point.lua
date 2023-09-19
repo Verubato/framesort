@@ -1,0 +1,7 @@
+---@meta
+---@class Point
+---@field Point string
+---@field RelativeTo table
+---@field RelativePoint string
+---@field XOffset number
+---@field YOffset number

@@ -13,7 +13,6 @@
     <!-- Load core wow files that other files need -->
     <Script file="WoW\WoW.lua"/>
     <Script file="WoW\Unit.lua"/>
-    <Script file="WoW\Frame.lua"/>
     <Script file="WoW\Macro.lua"/>
 
     <!-- Scheduler requires core wow files -->
@@ -21,6 +20,9 @@
 
     <!-- Comparer requires core wow files -->
     <Script file="Collections\Comparer.lua"/>
+
+    <!-- Frame requires Comparer -->
+    <Script file="WoW\Frame.lua"/>
 
     <!-- Frame providers require core wow files -->
     <Script file="Providers\Provider.lua"/>
@@ -33,7 +35,7 @@
     <Script file="Health\HealthCheck.lua"/>
 
     <!-- Sorting modules -->
-    <Script file="Modules\Sorting\Positions.lua"/>
+    <Script file="Modules\Sorting\Core.lua"/>
     <Script file="Modules\Sorting\Traditional.lua"/>
     <Script file="Modules\Sorting\Taintless.lua"/>
     <Script file="Modules\Sorting\Secure.lua"/>

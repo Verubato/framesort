@@ -258,42 +258,44 @@ local function StorePreviousSpacing(name, spacing)
 end
 
 local function Space(name, frames, spacing, layoutTypeHint, start, blockHeight)
-    if #frames == 0 then
-        return false
-    end
-
-    if not ShouldSpace(name, spacing) then
-        return false
-    end
-
-    local spaced = false
-    if layoutTypeHint == fsConfig.LayoutType.Flat then
-        if fsFrame:IsFlat(frames) then
-            spaced = Flat(frames, spacing, start, blockHeight)
-        else
-            local chain = fsFrame:ToFrameChain(frames)
-            if chain.Valid then
-                fsLog:Debug(string.format("Layout hint for frames '%s' is flat but was it was actually a chain.", name))
-                spaced = Chain(frames, chain, spacing, start)
-            end
-        end
-    elseif layoutTypeHint == fsConfig.LayoutType.Chain then
-        local chain = fsFrame:ToFrameChain(frames)
-        if chain.Valid then
-            spaced = Chain(frames, chain, spacing, start)
-        elseif fsFrame:IsFlat(frames) then
-            fsLog:Debug(string.format("Layout hint for frames '%s' is a chain but was it was actually flat.", name))
-            spaced = Flat(frames, spacing, start, blockHeight)
-        end
-    end
-
-    if spaced then
-        StorePreviousSpacing(name, spacing)
-        return spaced
-    end
-
-    fsLog:Error(string.format("Unable to apply spacing to frames '%s' as they aren't arranged in one of the supported layout types.", name))
     return false
+
+    -- if #frames == 0 then
+    --     return false
+    -- end
+    --
+    -- if not ShouldSpace(name, spacing) then
+    --     return false
+    -- end
+    --
+    -- local spaced = false
+    -- if layoutTypeHint == fsConfig.LayoutType.Flat then
+    --     if fsFrame:IsFlat(frames) then
+    --         spaced = Flat(frames, spacing, start, blockHeight)
+    --     else
+    --         local chain = fsFrame:ToFrameChain(frames)
+    --         if chain.Valid then
+    --             fsLog:Debug(string.format("Layout hint for frames '%s' is flat but was it was actually a chain.", name))
+    --             spaced = Chain(frames, chain, spacing, start)
+    --         end
+    --     end
+    -- elseif layoutTypeHint == fsConfig.LayoutType.Chain then
+    --     local chain = fsFrame:ToFrameChain(frames)
+    --     if chain.Valid then
+    --         spaced = Chain(frames, chain, spacing, start)
+    --     elseif fsFrame:IsFlat(frames) then
+    --         fsLog:Debug(string.format("Layout hint for frames '%s' is a chain but was it was actually flat.", name))
+    --         spaced = Flat(frames, spacing, start, blockHeight)
+    --     end
+    -- end
+    --
+    -- if spaced then
+    --     StorePreviousSpacing(name, spacing)
+    --     return spaced
+    -- end
+    --
+    -- fsLog:Error(string.format("Unable to apply spacing to frames '%s' as they aren't arranged in one of the supported layout types.", name))
+    -- return false
 end
 
 local function ApplyPartySpacing()

@@ -10,11 +10,7 @@ setmetatable(void, {
     end,
 })
 
-local M = {
-    GetName = function(self)
-        return self.Name
-    end,
-}
+local M = {}
 
 setmetatable(M, { __index = void })
 
@@ -26,15 +22,19 @@ function M:New(type, name, parent, template)
             Attributes = {},
             Text = "",
             Visible = true,
+            Point = {
+                Point = nil,
+                RelativeTo = nil,
+                RelativePoint = nil,
+                XOffset = 0,
+                YOffset = 0,
+            },
             Position = {
                 Top = 0,
                 Left = 0,
                 Right = 0,
                 Bottom = 0,
-                Point = "TOPLEFT",
-                RelativeTo = nil,
-                RelativeToPoint = "TOPLEFT",
-            },
+            }
         },
         Type = type,
         Name = name,
@@ -51,6 +51,10 @@ function M:New(type, name, parent, template)
     })
 
     return frame
+end
+
+function M:GetName()
+    return self.Name
 end
 
 function M:SetAttribute(name, value)
@@ -77,14 +81,37 @@ function M:RegisterEvent(event)
 end
 
 function M:GetPoint()
+    local pos = self.State.Point
+    return pos.Point, pos.RelativeTo, pos.RelativePoint, pos.Left, pos.Top
+end
+
+function M:SetPoint(point, relativeTo, relativePoint, xOffset, yOffset)
+    local pos = self.State.Point
+    pos.Point = point
+    pos.RelativeTo = relativeTo
+    pos.RelativePoint = relativePoint
+    pos.XOffset = xOffset
+    pos.YOffset = yOffset
+end
+
+function M:SetPosition(top, left, right, bottom)
     local pos = self.State.Position
-    return pos.Point, pos.RelativeTo, pos.RelativeToPoint, pos.Left, pos.Top
+    pos.Top = top
+    pos.Left = left
+    pos.Right = right
+    pos.Bottom = bottom
 end
 
 function M:AdjustPointsOffset(x, y)
+    local point = self.State.Point
+    point.YOffset = point.YOffset + y
+    point.XOffset = point.XOffset + x
+
     local pos = self.State.Position
     pos.Top = pos.Top + y
+    pos.Bottom = pos.Bottom + y
     pos.Left = pos.Left + x
+    pos.Right = pos.Right + x
 end
 
 function M:GetLeft()
@@ -92,7 +119,11 @@ function M:GetLeft()
 end
 
 function M:GetHeight()
-    return self.State.Position.Bottom - self.State.Position.Top
+    return self.State.Position.Top - self.State.Position.Bottom
+end
+
+function M:GetWidth()
+    return self.State.Position.Right - self.State.Position.Left
 end
 
 function M:GetTop()

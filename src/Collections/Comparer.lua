@@ -89,23 +89,28 @@ local function CompareRole(leftToken, rightToken)
     return leftToken < rightToken
 end
 
----Returns true if the specified token is ordered after the mid point.
+---Returns true if the specified token is ordered after the mid point of player units.
+---Pet units are ignored.
 ---@param token string
 ---@param sortedUnits table
 ---@return boolean
 local function CompareMiddle(token, sortedUnits)
+    local notPets = fsEnumerable
+        :From(sortedUnits)
+        :Where(function(unit) return not fsUnit:IsPet(unit) and wow.UnitExists(unit) end)
+        :ToTable()
+
     -- index of the token we are comparing with
-    local index = fsEnumerable:From(sortedUnits):IndexOf(token)
+    local index = fsEnumerable
+        :From(notPets)
+        :IndexOf(token)
 
     -- most likely a non-existant unit
     if not index then
         return false
     end
 
-    -- 0 based
-    index = index - 1
-
-    local mid = math.floor(#sortedUnits / 2)
+    local mid = math.floor(#notPets / 2)
     return index > mid
 end
 
@@ -132,6 +137,7 @@ function M:SortFunction(units)
     -- making use of Enumerable:OrderBy() so we don't re-order the original array
     units = fsEnumerable
         :From(units)
+        :Where(function(x) return not wow.UnitIsUnit(x, "player") end)
         :OrderBy(function(x, y)
             return M:Compare(x, y, fsConfig.PlayerSortMode.Top, groupSortMode, reverse)
         end)
@@ -202,6 +208,18 @@ function M:Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse
         if not wow.UnitExists(rightToken) then
             return true
         end
+    end
+
+    if fsUnit:IsPet(leftToken) or fsUnit:IsPet(rightToken) then
+        -- place player before pets
+        if not fsUnit:IsPet(leftToken) then return true end
+        if not fsUnit:IsPet(rightToken) then return false end
+
+        -- both are pets, compare their parent
+        local leftTokenParent = string.gsub(leftToken, "pet", "")
+        local rightTokenParent = string.gsub(rightToken, "pet", "")
+
+        return M:Compare(leftTokenParent, rightTokenParent, playerSortMode, groupSortMode, reverse, preSortedUnits)
     end
 
     if playerSortMode and playerSortMode ~= "" then
