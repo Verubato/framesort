@@ -57,12 +57,12 @@ function M:test_targets_update_on_provider_callback()
     local friendlyButtons = {}
     local enemyButtons = {}
 
-    for _, frame in ipairs(wow.State.Frames) do
-        if frame.Name and type(frame.Name) == "string" then
-            if string.match(frame.Name, "FSTarget%d") then
-                friendlyButtons[#friendlyButtons + 1] = frame
-            elseif string.match(frame.Name, "FSTargetEnemy%d") then
-                enemyButtons[#enemyButtons + 1] = frame
+    for _, f in ipairs(wow.State.Frames) do
+        if f.Name and type(f.Name) == "string" then
+            if string.match(f.Name, "FSTarget%d") then
+                friendlyButtons[#friendlyButtons + 1] = f
+            elseif string.match(f.Name, "FSTargetEnemy%d") then
+                enemyButtons[#enemyButtons + 1] = f
             end
         end
     end
@@ -78,13 +78,13 @@ function M:test_targets_update_on_provider_callback()
     assertEquals(#friendlyButtons, 5)
     assertEquals(#enemyButtons, 3)
 
-    for _, frame in ipairs(friendlyButtons) do
-        local unit = frame:GetAttribute("unit")
+    for _, f in ipairs(friendlyButtons) do
+        local unit = f:GetAttribute("unit")
         assertEquals(unit, "none")
     end
 
-    for _, frame in ipairs(enemyButtons) do
-        local unit = frame:GetAttribute("unit")
+    for _, f in ipairs(enemyButtons) do
+        local unit = f:GetAttribute("unit")
         assertEquals(unit, "none")
     end
 
@@ -105,12 +105,12 @@ function M:test_targets_update_after_combat()
     local friendlyButtons = {}
     local enemyButtons = {}
 
-    for _, frame in ipairs(wow.State.Frames) do
-        if frame.Name and type(frame.Name) == "string" then
-            if string.match(frame.Name, "FSTarget%d") then
-                friendlyButtons[#friendlyButtons + 1] = frame
-            elseif string.match(frame.Name, "FSTargetEnemy%d") then
-                enemyButtons[#enemyButtons + 1] = frame
+    for _, f in ipairs(wow.State.Frames) do
+        if f.Name and type(f.Name) == "string" then
+            if string.match(f.Name, "FSTarget%d") then
+                friendlyButtons[#friendlyButtons + 1] = f
+            elseif string.match(f.Name, "FSTargetEnemy%d") then
+                enemyButtons[#enemyButtons + 1] = f
             end
         end
     end
@@ -126,13 +126,13 @@ function M:test_targets_update_after_combat()
     assertEquals(#friendlyButtons, 5)
     assertEquals(#enemyButtons, 3)
 
-    for _, frame in ipairs(friendlyButtons) do
-        local unit = frame:GetAttribute("unit")
+    for _, f in ipairs(friendlyButtons) do
+        local unit = f:GetAttribute("unit")
         assertEquals(unit, "none")
     end
 
-    for _, frame in ipairs(enemyButtons) do
-        local unit = frame:GetAttribute("unit")
+    for _, f in ipairs(enemyButtons) do
+        local unit = f:GetAttribute("unit")
         assertEquals(unit, "none")
     end
 
@@ -140,13 +140,13 @@ function M:test_targets_update_after_combat()
     provider:FireCallbacks()
 
     -- assert nothing changed as we're in combat
-    for _, frame in ipairs(friendlyButtons) do
-        local unit = frame:GetAttribute("unit")
+    for _, f in ipairs(friendlyButtons) do
+        local unit = f:GetAttribute("unit")
         assertEquals(unit, "none")
     end
 
-    for _, frame in ipairs(enemyButtons) do
-        local unit = frame:GetAttribute("unit")
+    for _, f in ipairs(enemyButtons) do
+        local unit = f:GetAttribute("unit")
         assertEquals(unit, "none")
     end
 

@@ -1,5 +1,4 @@
 ---@meta
 ---@class SortingMethodOptions: OptionsPanel
----@field Secure integer
----@field Taintless integer
----@field Traditional integer
+---@field Secure string
+---@field Traditional string

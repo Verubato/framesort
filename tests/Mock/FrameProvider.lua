@@ -51,6 +51,11 @@ return {
     IsRaidGrouped = function()
         return false
     end,
+    LayoutStrategy = function()
+        -- Hard
+        ---@diagnostic disable-next-line: return-type-mismatch
+        return 2
+    end,
     IsPartyHorizontalLayout = function()
         return false
     end,

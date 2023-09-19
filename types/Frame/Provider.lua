@@ -15,6 +15,10 @@
 ---@field ShowPartyPets fun(self: table): boolean Whether party pets are enabled.
 ---@field ShowRaidPets fun(self: table): boolean Whether raid pets are enabled.
 ---@field IsRaidGrouped fun(self: table): boolean Whether the raid is grouped.
+---@field IsPartyHorizontalLayout fun(self: table): boolean Whether the frames are using a horizontal layout.
+---@field IsRaidHorizontalLayout fun(self: table): boolean Whether the frames are using a horizontal layout.
+---@field IsEnemyArenaHorizontalLayout fun(self: table): boolean Whether the frames are using a horizontal layout.
+---@field LayoutStrategy fun(self: table): LayoutStrategy The layout strategy that the sorting/spacing module should use.
 ---@field RegisterCallback fun(self: table, callback: fun(provider: FrameProvider)) Registers a callback to be invoked when sorting is required.
 
 ---@class Providers: Initialise

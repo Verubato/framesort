@@ -115,12 +115,32 @@ local function CanSeeFrames()
 end
 
 local function OnlyUsingBlizzard()
-    -- TODO: make this more generic
+    -- TODO: make this more generic, probs need a supporting method added to providers
     if addon.DB.Options.EnemyArena.Enabled and (fsProviders.GladiusEx:Enabled() or fsProviders.sArena:Enabled()) then
         return false
     end
 
     return not fsProviders.ElvUI:Enabled()
+end
+
+local function UsingSpacing()
+    local spacings = {}
+
+    if addon.DB.Options.World.Enabled then
+        spacings[#spacings + 1] = addon.DB.Options.Appearance.Party.Spacing
+    end
+
+    if addon.DB.Options.Raid.Enabled then
+        spacings[#spacings + 1] = addon.DB.Options.Appearance.Raid.Spacing
+    end
+
+    if addon.DB.Options.EnemyArena.Enabled then
+        spacings[#spacings + 1] = addon.DB.Options.Appearance.EnemyArena.Spacing
+    end
+
+    return fsEnumerable
+        :From(spacings)
+        :Any(function(spacing) return spacing.Vertical ~= 0 or spacing.Horizontal ~= 0 end)
 end
 
 ---Returns true if the environment/settings is in a good state, otherwise false.
@@ -179,14 +199,14 @@ function M:IsHealthy()
         Applicable = addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Traditional,
         Passed = OnlyUsingBlizzard(),
         Description = "Only using Blizzard frames with Traditional mode",
-        Help = string.format("Traditional mode can only sort Blizzard party frames, it can't sort your other frame addons: '%s'", enabledNonBlizzardString),
+        Help = string.format("Traditional mode can't sort your other frame addons: '%s'", enabledNonBlizzardString),
     }
 
     results[#results + 1] = {
-        Applicable = addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Taintless,
-        Passed = not fsProviders.Blizzard:ShowRaidPets(),
-        Description = "Pet frames are disbled with Taintless mode",
-        Help = 'Please disable the "Display Pets" Blizzard setting or use a different sorting method',
+        Applicable = addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Traditional,
+        Passed = not UsingSpacing(),
+        Description = "Using Secure sorting mode when spacing is being used.",
+        Help = "Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method.",
     }
 
     local conflictingSorter = SortingFunctionsTampered()

@@ -269,11 +269,17 @@ end
 function M:UpgradeToVersion13(options)
     assert(options.Version == 12)
 
+    local methods = {
+        Secure = 1,
+        Taintless = 2,
+        Traditional = 3
+    }
+
     ---@diagnostic disable-next-line: undefined-field
     if options.SortingMethod.TaintlessEnabled then
-        options.SortingMethod = fsConfig.SortingMethod.Taintless
+        options.SortingMethod = methods.Taintless
     else
-        options.SortingMethod = fsConfig.SortingMethod.Traditional
+        options.SortingMethod = methods.Traditional
     end
 
     options.Version = 13
@@ -282,12 +288,36 @@ end
 function M:UpgradeToVersion14(options)
     assert(options.Version == 13)
 
+    local methods = {
+        Secure = 1,
+        Taintless = 2,
+        Traditional = 3
+    }
+
     -- move people to using Secure instead of Taintless
-    if options.SortingMethod == fsConfig.SortingMethod.Taintless then
-        options.SortingMethod = fsConfig.SortingMethod.Secure
+    if options.SortingMethod == methods.Taintless then
+        options.SortingMethod = methods.Secure
     end
 
     options.Version = 14
+end
+
+function M:UpgradeToVersion15(options)
+    assert(options.Version == 14)
+
+    local methods = {
+        Secure = 1,
+        Taintless = 2,
+        Traditional = 3
+    }
+
+    if options.SortingMethod == methods.Traditional then
+        options.SortingMethod = "Traditional"
+    else
+        options.SortingMethod = "Secure"
+    end
+
+    options.Version = 15
 end
 
 ---Upgrades saved options to the current version.

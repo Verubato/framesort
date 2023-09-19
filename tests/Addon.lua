@@ -31,6 +31,7 @@ addon.Providers.All[#addon.Providers.All + 1] = provider
 function addon:Reset()
     addon.WoW.Api:Reset()
     provider:Reset()
+    addon.DB.Options = wow.CopyTable(addon.Configuration.Defaults)
 end
 
 return addon
