@@ -4,9 +4,9 @@ local wow = addon.WoW.Api
 local fsCompare = addon.Collections.Comparer
 local fsFrame = addon.WoW.Frame
 local fsEnumerable = addon.Collections.Enumerable
-local fsProviders = addon.Providers
 local fsConfig = addon.Configuration
 local fsLog = addon.Logging.Log
+local fsMath = addon.Numerics.Math
 local M = {}
 addon.Modules.Sorting.Core = M
 
@@ -24,13 +24,24 @@ end
 ---@param points table<table, Point>
 local function Move(frames, points)
     local framesToMove = {}
+    -- don't move frames if they are have minuscule position differences
+    -- it's just a rounding error and makes no visual impact
+    -- this helps preventing spam on our callbacks
+    local decimalSanity = 2
+
     -- first clear their existing point
     for _, frame in ipairs(frames) do
         local to = points[frame]
         if to then
             local point, relativeTo, relativePoint, xOffset, yOffset = frame:GetPoint()
+            local different =
+                point ~= to.Point or
+                relativeTo ~= to.RelativeTo or
+                relativePoint ~= to.RelativePoint or
+                fsMath:Round(xOffset, decimalSanity) ~= fsMath:Round(to.XOffset, decimalSanity) or
+                fsMath:Round(yOffset, decimalSanity) ~= fsMath:Round(to.YOffset, decimalSanity)
 
-            if point ~= to.Point or relativeTo ~= to.RelativeTo or relativePoint ~= to.RelativePoint or xOffset ~= to.XOffset or yOffset ~= to.YOffset then
+            if different then
                 framesToMove[#framesToMove + 1] = frame
                 frame:ClearAllPoints()
             end
