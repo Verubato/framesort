@@ -2,7 +2,7 @@ local addon = require("Addon")
 local frame = require("Mock\\Frame")
 local fsProviders = addon.Providers
 local provider = fsProviders.Test
-local fsConfig = addon.Configuration
+local realBlizzardProvider = fsProviders.Blizzard
 local fsCore = addon.Modules.Sorting.Core
 
 local M = {}
@@ -23,10 +23,13 @@ function M:setup()
         p1,
         p2,
     }
+
+    fsProviders.Blizzard = provider
 end
 
 function M:teardown()
     addon:Reset()
+    fsProviders.Blizzard = realBlizzardProvider
 end
 
 function M:test_sort_party_frames_top()
