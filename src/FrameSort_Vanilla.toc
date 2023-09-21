@@ -2,7 +2,7 @@
 ## Title: FrameSort
 ## Notes: Places the player frame at the top/middle/bottom (configurable) of party/raid frames.
 ## Author: Verz
-## Version: 5.8.3
+## Version: 5.9.0
 ## SavedVariables: FrameSortDB
 ## IconTexture: Interface\AddOns\FrameSort\Media\icon.blp
 
