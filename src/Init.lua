@@ -31,8 +31,6 @@ function addon:Init()
     addon.Scheduling.Scheduler:Init()
 
     addon.Loaded = true
-
-    FrameSort = addon
 end
 
 ---Listens for our to be loaded and then initialises it.
