@@ -7,6 +7,7 @@ local fsUnit = addon.WoW.Unit
 local fsProviders = addon.Providers
 local fsConfig = addon.Configuration
 local events = addon.WoW.Api.Events
+local fsScheduler = addon.Scheduling.Scheduler
 ---@class BlizzardFrameProvider: FrameProvider
 local M = {}
 local callbacks = {}

@@ -37,17 +37,17 @@ function M:TrySort(provider)
         return false
     end
 
+    if wow.IsRetail() and wow.EditModeManagerFrame.editModeActive then
+        fsLog:Debug("Not sorting while edit mode active.")
+        return false
+    end
+
     if wow.InCombatLockdown() then
         -- can't make changes during combat
         fsScheduler:RunWhenCombatEnds(function()
             M:TrySort(provider)
-        end, "Sort")
+        end, "Sort" .. (provider and provider:Name() or ""))
 
-        return false
-    end
-
-    if wow.IsRetail() and wow.EditModeManagerFrame.editModeActive then
-        fsLog:Debug("Not sorting while edit mode active.")
         return false
     end
 
@@ -72,7 +72,7 @@ function M:TrySort(provider)
     end
 
     if sorted then
-        fsLog:Debug("Sorted frames")
+        fsLog:Debug("Sorted frames.")
         InvokeCallbacks()
     end
 
@@ -89,6 +89,6 @@ function M:Init()
     end
 
     for _, provider in ipairs(fsProviders:Enabled()) do
-        provider:RegisterCallback(OnProviderRequiresSort)
+        provider:RegisterCallback(function() OnProviderRequiresSort(provider) end)
     end
 end

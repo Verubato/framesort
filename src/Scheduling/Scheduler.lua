@@ -18,8 +18,8 @@ local function OnCombatEnded()
         callback()
     end
 
-    wow.wipe(combatEndCallbacks)
-    wow.wipe(combatEndKeyedCallbacks)
+    combatEndCallbacks = wow.wipe(combatEndCallbacks)
+    combatEndKeyedCallbacks = wow.wipe(combatEndKeyedCallbacks)
 end
 
 ---Invokes the callback on the next frame.
