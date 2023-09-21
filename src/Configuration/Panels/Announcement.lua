@@ -11,9 +11,9 @@ function M:Build(panel)
     title:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
     title:SetText("Announcement")
 
-    local important = panel:CreateFontString(nil, "ARTWORK", "GameFontRedLarge")
+    local important = panel:CreateFontString(nil, "ARTWORK", "GameFontGreenLarge")
     important:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -verticalSpacing)
-    important:SetText("WoW patch 10.1.7 has broken FrameSort.")
+    important:SetText("FrameSort is almost stable")
 
     local anchor = important
 
@@ -22,7 +22,7 @@ function M:Build(panel)
     update4:SetText("2023-09-22")
 
     local update4Lines = {
-        "The 10.1.7 issues have mostly been resolved now =D",
+        "The 10.1.7 issues have mostly been resolved and FrameSort is usable now =D",
         "Not quite 100% yet, but getting close.",
     }
 
