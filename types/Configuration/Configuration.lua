@@ -6,7 +6,6 @@
 ---@field Defaults Options
 ---@field PlayerSortMode PlayerSortModeEnum
 ---@field GroupSortMode GroupSortModeEnum
----@field LayoutStrategy LayoutStrategy
 ---@field Upgrader OptionsUpgrader
 ---@field Announcement OptionsPanel
 ---@field Sorting OptionsPanel

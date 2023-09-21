@@ -6,7 +6,6 @@
     <Script file="Logging\Log.lua"/>
     <Script file="Collections\Enumerable.lua"/>
     <Script file="Configuration\SortingMethod.lua"/>
-    <Script file="Configuration\LayoutStrategy.lua"/>
     <Script file="Configuration\SortMode.lua"/>
     <Script file="Numerics\Math.lua"/>
 
