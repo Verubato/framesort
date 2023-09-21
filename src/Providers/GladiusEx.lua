@@ -50,8 +50,11 @@ function M:Init()
     eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
     eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
     eventFrame:RegisterEvent(events.UNIT_PET)
-    eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
-    eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
+
+    if wow.IsRetail() then
+        eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
+        eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
+    end
 end
 
 function M:RegisterCallback(callback)

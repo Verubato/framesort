@@ -46,9 +46,12 @@ function M:Init()
 
     local eventFrame = wow.CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", UpdateNextFrame)
-    eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
-    eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
     eventFrame:RegisterEvent(events.PLAYER_ENTERING_WORLD)
+
+    if wow.IsRetail() then
+        eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
+        eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
+    end
 end
 
 function M:RegisterCallback(callback)
