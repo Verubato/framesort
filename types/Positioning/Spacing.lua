@@ -1,0 +1,4 @@
+---@meta Spacing
+---@class Spacing
+---@field Horizontal number
+---@field Vertical number
