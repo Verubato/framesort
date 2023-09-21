@@ -15,8 +15,27 @@ function M:Build(panel)
     important:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -verticalSpacing)
     important:SetText("WoW patch 10.1.7 has broken FrameSort.")
 
+    local anchor = important
+
+    local update4 = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalOutline")
+    update4:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
+    update4:SetText("2023-09-22")
+
+    local update4Lines = {
+        "The 10.1.7 issues have mostly been resolved now =D",
+        "Not quite 100% yet, but getting close.",
+    }
+
+    anchor = update4
+    for i, text in ipairs(update4Lines) do
+        local line = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+        line:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, i == 1 and -verticalSpacing or -verticalSpacing / 2)
+        line:SetText(text)
+        anchor = line
+    end
+
     local update3 = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalOutline")
-    update3:SetPoint("TOPLEFT", important, "BOTTOMLEFT", 0, -verticalSpacing)
+    update3:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
     update3:SetText("2023-09-14")
 
     local update3Lines = {
@@ -25,7 +44,7 @@ function M:Build(panel)
         "Taintless mode now blocks certain events that cause frames to become unsorted (e.g. pet events).",
     }
 
-    local anchor = update3
+    anchor = update3
     for i, text in ipairs(update3Lines) do
         local line = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
         line:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, i == 1 and -verticalSpacing or -verticalSpacing / 2)

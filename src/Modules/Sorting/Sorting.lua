@@ -37,10 +37,10 @@ function M:TrySort(provider)
         return false
     end
 
-    -- if wow.IsRetail() and wow.EditModeManagerFrame.editModeActive then
-    --     fsLog:Debug("Not sorting while edit mode active.")
-    --     return false
-    -- end
+    if wow.IsRetail() and wow.EditModeManagerFrame.editModeActive then
+        fsLog:Debug("Not sorting while edit mode active.")
+        return false
+    end
 
     if wow.InCombatLockdown() then
         -- can't make changes during combat
