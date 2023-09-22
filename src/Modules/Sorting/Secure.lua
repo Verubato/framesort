@@ -9,6 +9,7 @@ local M = {}
 addon.Modules.Sorting.Secure = M
 
 local secureManager = nil
+local secureGroup = nil
 
 ---@param provider FrameProvider
 local function StoreFrames(provider)
@@ -140,10 +141,18 @@ function M:Init()
     secureManager:HookScript("OnEvent", OnEvent)
     secureManager:RegisterEvent(wow.Events.PLAYER_REGEN_DISABLED)
 
-    secureManager:Execute([=[
+    function secureManager:InvokeCallbacks()
+        fsSorting:InvokeCallbacks()
+    end
+
+    -- tables to store frames that we manage
+    secureManager:Execute([[
         FramesByProvider = newtable()
         PointsByProvider = newtable()
+        ]])
 
+    -- some utility functions
+    secureManager:Execute([=[
         Round = [[
             local number, decimalPlaces = ...
 
@@ -152,74 +161,80 @@ function M:Init()
             local mult = 10 ^ (decimalPlaces or 0)
             return math.floor(number * mult + 0.5) / mult
         ]]
+
+        InCombat = [[
+            return SecureCmdOptionParse("[combat] true; false") == "true"
+        ]]
         ]=])
 
-    function secureManager:InvokeCallbacks()
-        fsSorting:InvokeCallbacks()
-    end
+    -- main function to restore frame positions
+    secureManager:Execute([=[
+        RestoreFrames = [[
+            local sorted = false
+            -- don't move frames if they are have minuscule position differences
+            -- it's just a rounding error and makes no visual impact
+            -- this helps preventing spam on our callbacks
+            local decimalSanity = 2
 
+            for provider, framesByType in pairs(FramesByProvider) do
+                for _, frames in pairs(framesByType) do
+                    local framesToMove = newtable()
+
+                    -- first determine which frames require moving and clear their points
+                    for _, frame in ipairs(frames) do
+                        local to = PointsByProvider[provider][frame]
+                        if to then
+                            local point, relativeTo, relativePoint, offsetX, offsetY = frame:GetPoint()
+
+                            local offsetXRounded = self:Run(Round, offsetX, decimalSanity)
+                            local offsetYRounded = self:Run(Round, offsetY, decimalSanity)
+                            local toOffsetXRounded = self:Run(Round, to.offsetX, decimalSanity)
+                            local toOffsetYRounded = self:Run(Round, to.offsetY, decimalSanity)
+
+                            local different =
+                                point ~= to.point or
+                                relativeTo ~= to.relativeTo or
+                                relativePoint ~= to.relativePoint or
+                                offsetXRounded ~= toOffsetXRounded or
+                                offsetYRounded ~= toOffsetYRounded
+
+                            if different then
+                                framesToMove[#framesToMove + 1] = frame
+                                frame:ClearAllPoints()
+                            end
+                        end
+                    end
+
+                    -- now move them after all points have been cleared
+                    -- to avoid any circular dependency issues
+                    for _, frame in ipairs(framesToMove) do
+                        local to = PointsByProvider[provider][frame]
+
+                        frame:SetPoint(to.point, to.relativeTo, to.relativePoint, to.offsetX, to.offsetY)
+                    end
+
+                    sorted = sorted or #framesToMove > 0
+                end
+            end
+
+            if sorted then
+                -- notify unsecure code to invoke callbacks
+                self:CallMethod("InvokeCallbacks")
+            end
+        ]]
+        ]=])
+
+    -- triggers
     wow.SecureHandlerWrapScript(
         secureManager,
         "OnAttributeChanged",
         secureManager,
         [[
         if not strmatch(name, "framesort") then return end
+        if not self:Run(InCombat) then return end
 
-        local inCombat = SecureCmdOptionParse("[combat] true; false") == "true"
-        if not inCombat then return end
-
-        local sorted = false
-        -- don't move frames if they are have minuscule position differences
-        -- it's just a rounding error and makes no visual impact
-        -- this helps preventing spam on our callbacks
-        local decimalSanity = 2
-
-        for provider, framesByType in pairs(FramesByProvider) do
-            for _, frames in pairs(framesByType) do
-                local framesToMove = newtable()
-
-                -- first determine which frames require moving and clear their points
-                for _, frame in ipairs(frames) do
-                    local to = PointsByProvider[provider][frame]
-                    if to then
-                        local point, relativeTo, relativePoint, offsetX, offsetY = frame:GetPoint()
-
-                        local offsetXRounded = self:Run(Round, offsetX, decimalSanity)
-                        local offsetYRounded = self:Run(Round, offsetY, decimalSanity)
-                        local toOffsetXRounded = self:Run(Round, to.offsetX, decimalSanity)
-                        local toOffsetYRounded = self:Run(Round, to.offsetY, decimalSanity)
-
-                        local different =
-                            point ~= to.point or
-                            relativeTo ~= to.relativeTo or
-                            relativePoint ~= to.relativePoint or
-                            offsetXRounded ~= toOffsetXRounded or
-                            offsetYRounded ~= toOffsetYRounded
-
-                        if different then
-                            framesToMove[#framesToMove + 1] = frame
-                            frame:ClearAllPoints()
-                        end
-                    end
-                end
-
-                -- now move them after all points have been cleared
-                -- to avoid any circular dependency issues
-                for _, frame in ipairs(framesToMove) do
-                    local to = PointsByProvider[provider][frame]
-
-                    frame:SetPoint(to.point, to.relativeTo, to.relativePoint, to.offsetX, to.offsetY)
-                end
-
-                sorted = sorted or #framesToMove > 0
-            end
-        end
-
-        if sorted then
-            -- notify unsecure code to invoke callbacks
-            self:CallMethod("InvokeCallbacks")
-        end
-    ]]
+        self:Run(RestoreFrames)
+        ]]
     )
 
     wow.RegisterAttributeDriver(secureManager, "state-framesort-target", "[@target, exists] true; false")
