@@ -9,15 +9,15 @@ local fsProviders = addon.Providers
 local callbacks = {}
 local M = addon.Modules.Sorting
 
+local function OnProviderRequiresSort(provider)
+    M:TrySort(provider)
+end
+
 ---Calls the post sorting callbacks.
-local function InvokeCallbacks()
+function M:InvokeCallbacks()
     for _, callback in pairs(callbacks) do
         pcall(callback)
     end
-end
-
-local function OnProviderRequiresSort(provider)
-    M:TrySort(provider)
 end
 
 ---Register a callback to invoke after sorting has been performed.
@@ -57,7 +57,7 @@ function M:TrySort(provider)
         sorted = M.Traditional:TrySort()
 
         if sorted then
-            InvokeCallbacks()
+            M:InvokeCallbacks()
         end
 
         return sorted
@@ -73,7 +73,7 @@ function M:TrySort(provider)
 
     if sorted then
         fsLog:Debug("Sorted frames.")
-        InvokeCallbacks()
+        M:InvokeCallbacks()
     end
 
     return sorted

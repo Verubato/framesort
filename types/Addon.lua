@@ -58,6 +58,7 @@
 ---@field Secure SortingModule
 ---@field TrySort fun(self: table, provider: FrameProvider?):  boolean
 ---@field RegisterPostSortCallback fun(self: table, callback: function)
+---@field InvokeCallbacks fun(self: table)
 
 ---@class TraditionalSortingModule
 ---@field TrySort fun(self: table): boolean
