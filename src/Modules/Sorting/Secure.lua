@@ -9,45 +9,79 @@ local M = {}
 addon.Modules.Sorting.Secure = M
 
 local secureManager = nil
-local secureGroup = nil
+local groupHeader = nil
+local petHeader = nil
+
+local addFrameScript = [[
+    local provider = self:GetAttribute("provider")
+    local frames = FramesByProvider[provider]
+    local points = PointsByProvider[provider]
+    local frame = self:GetFrameRef("frame")
+    local destination = self:GetAttribute("frameType")
+    local point, relativeTo, relativePoint, offsetX, offsetY = frame:GetPoint()
+    local data = newtable()
+
+    data.point = point
+    data.relativeTo = relativeTo
+    data.relativePoint = relativePoint
+    data.offsetX = offsetX
+    data.offsetY = offsetY
+
+    tinsert(frames[destination], frame)
+    points[frame] = data
+]]
+
+local clearFramesScript = [[
+    local provider = self:GetAttribute("provider")
+    local frames = FramesByProvider[provider]
+
+    if not frames then
+        frames = newtable()
+        frames.Party = newtable()
+        frames.Raid = newtable()
+        frames.Arena = newtable()
+        frames.Groups = newtable()
+
+        FramesByProvider[provider] = frames
+    else
+        frames.Party = wipe(frames.Party)
+        frames.Raid = wipe(frames.Raid)
+        frames.Arena = wipe(frames.Arena)
+        frames.Groups = wipe(frames.Groups)
+    end
+
+    local points = PointsByProvider[provider]
+    PointsByProvider[provider] = points and wipe(points) or newtable()
+]]
+
+local function AddFrames(frames, type)
+    assert(secureManager ~= nil)
+
+    for _, frame in ipairs(frames) do
+        secureManager:SetFrameRef("frame", frame)
+        secureManager:SetAttribute("frameType", type)
+        secureManager:Execute(addFrameScript)
+    end
+end
 
 ---@param provider FrameProvider
 local function StoreFrames(provider)
     assert(secureManager ~= nil)
 
     secureManager:SetAttribute("provider", provider:Name())
-    secureManager:Execute([[
-        local provider = self:GetAttribute("provider")
-        local frames = FramesByProvider[provider]
-
-        if not frames then
-            frames = newtable()
-            frames.Party = newtable()
-            frames.Raid = newtable()
-            frames.Arena = newtable()
-            frames.Groups = newtable()
-
-            FramesByProvider[provider] = frames
-        else
-            frames.Party = wipe(frames.Party)
-            frames.Raid = wipe(frames.Raid)
-            frames.Arena = wipe(frames.Arena)
-            frames.Groups = wipe(frames.Groups)
-        end
-
-        local points = PointsByProvider[provider]
-        PointsByProvider[provider] = points and wipe(points) or newtable()
-    ]])
+    secureManager:Execute(clearFramesScript)
 
     local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
     local enemyEnabled, _, _ = fsCompare:EnemySortMode()
     local party = {}
+    local raidUngrouped = {}
     local raid = {}
     local groups = {}
     local arena = {}
 
     if friendlyEnabled then
         party = provider:PartyFrames()
+        raidUngrouped = provider:RaidFrames()
 
         if provider:IsRaidGrouped() then
             groups = provider:RaidGroups()
@@ -58,8 +92,6 @@ local function StoreFrames(provider)
                 end)
                 :Flatten()
                 :ToTable()
-        else
-            raid = provider:RaidFrames()
         end
     end
 
@@ -67,48 +99,11 @@ local function StoreFrames(provider)
         arena = provider:EnemyArenaFrames()
     end
 
-    local addFrameScript = [[
-        local provider = self:GetAttribute("provider")
-        local frames = FramesByProvider[provider]
-        local points = PointsByProvider[provider]
-        local frame = self:GetFrameRef("frame")
-        local destination = self:GetAttribute("frameType")
-        local point, relativeTo, relativePoint, offsetX, offsetY = frame:GetPoint()
-        local data = newtable()
-
-        data.point = point
-        data.relativeTo = relativeTo
-        data.relativePoint = relativePoint
-        data.offsetX = offsetX
-        data.offsetY = offsetY
-
-        tinsert(frames[destination], frame)
-        points[frame] = data
-    ]]
-
-    for _, frame in ipairs(party) do
-        wow.SecureHandlerSetFrameRef(secureManager, "frame", frame)
-        secureManager:SetAttribute("frameType", "Party")
-        secureManager:Execute(addFrameScript)
-    end
-
-    for _, frame in ipairs(raid) do
-        wow.SecureHandlerSetFrameRef(secureManager, "frame", frame)
-        secureManager:SetAttribute("frameType", "Raid")
-        secureManager:Execute(addFrameScript)
-    end
-
-    for _, frame in ipairs(groups) do
-        wow.SecureHandlerSetFrameRef(secureManager, "frame", frame)
-        secureManager:SetAttribute("frameType", "Groups")
-        secureManager:Execute(addFrameScript)
-    end
-
-    for _, frame in ipairs(arena) do
-        wow.SecureHandlerSetFrameRef(secureManager, "frame", frame)
-        secureManager:SetAttribute("frameType", "Arena")
-        secureManager:Execute(addFrameScript)
-    end
+    AddFrames(party, "Party")
+    AddFrames(raid, "Raid")
+    AddFrames(raidUngrouped, "Raid")
+    AddFrames(groups, "Groups")
+    AddFrames(arena, "Arena")
 end
 
 function OnCombatStarting()
@@ -136,8 +131,78 @@ function OnEvent(_, event)
     end
 end
 
+local function InjectSecureHelpers(secureFrame)
+    if not secureFrame.Execute then
+        function secureFrame:Execute(body)
+            return wow.SecureHandlerExecute(self, body)
+        end
+    end
+
+    if not secureFrame.WrapScript then
+        function secureFrame:WrapScript(frame, script, preBody, postBody)
+            return wow.SecureHandlerWrapScript(frame, script, self, preBody, postBody)
+        end
+    end
+
+    if not secureFrame.SetFrameRef then
+        function secureFrame:SetFrameRef(label, refFrame)
+            return wow.SecureHandlerSetFrameRef(self, label, refFrame)
+        end
+    end
+end
+
+local function ConfigureHeader(header, manager)
+    InjectSecureHelpers(header)
+    header:SetFrameRef("Manager", manager)
+
+    -- secure snippet for refreshing unit ids on frames
+    -- which we can then use to invoke our sorting
+    header:Execute([=[
+        Header = self
+        Manager = self:GetFrameRef("Manager")
+
+        RefreshUnitChange = [[
+            local unit = self:GetAttribute("unit")
+            local frame = self:GetAttribute("UnitFrame")
+
+            if frame then
+                frame:SetAttribute("unit", unit)
+            end
+
+            local manager = self:GetAttribute("Manager")
+            local run = manager:GetAttribute("state-framesort-run-toggle")
+            manager:SetAttribute("state-framesort-run-toggle", not run)
+        ]]
+    ]=])
+
+    -- show as much as possible
+    header:SetAttribute("showRaid", true)
+    header:SetAttribute("showParty", true)
+    header:SetAttribute("showPlayer", true)
+    header:SetAttribute("showSolo", true)
+
+    -- unit buttons template type
+    header:SetAttribute("template", "SecureHandlerAttributeTemplate")
+
+    -- fired when a new unit button is created
+    header:SetAttribute("initialConfigFunction", [[
+        -- self = the newly created unit button
+        self:SetWidth(0)
+        self:SetHeight(0)
+        self:SetAttribute("Header", Header)
+        self:SetAttribute("Manager", Manager)
+        self:SetAttribute("refreshUnitChange", RefreshUnitChange)
+    ]])
+
+    -- must be shown for it to work
+    header:SetPoint("TOPLEFT", wow.UIParent, "TOPLEFT")
+    header:Show()
+end
+
 function M:Init()
     secureManager = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureHandlerStateTemplate")
+    InjectSecureHelpers(secureManager)
+
     secureManager:HookScript("OnEvent", OnEvent)
     secureManager:RegisterEvent(wow.Events.PLAYER_REGEN_DISABLED)
 
@@ -149,7 +214,7 @@ function M:Init()
     secureManager:Execute([[
         FramesByProvider = newtable()
         PointsByProvider = newtable()
-        ]])
+    ]])
 
     -- some utility functions
     secureManager:Execute([=[
@@ -165,9 +230,10 @@ function M:Init()
         InCombat = [[
             return SecureCmdOptionParse("[combat] true; false") == "true"
         ]]
-        ]=])
+    ]=])
 
     -- main function to restore frame positions
+    -- TODO: see if possible to perform full sorting/spacing instead of just retaining positions
     secureManager:Execute([=[
         RestoreFrames = [[
             local sorted = false
@@ -222,20 +288,25 @@ function M:Init()
                 self:CallMethod("InvokeCallbacks")
             end
         ]]
-        ]=])
+    ]=])
 
     -- triggers
-    wow.SecureHandlerWrapScript(
+    secureManager:WrapScript(
         secureManager,
         "OnAttributeChanged",
-        secureManager,
         [[
-        if not strmatch(name, "framesort") then return end
-        if not self:Run(InCombat) then return end
+            if not strmatch(name, "framesort") then return end
+            if not self:Run(InCombat) then return end
 
-        self:Run(RestoreFrames)
+            self:Run(RestoreFrames)
         ]]
     )
+
+    groupHeader = wow.CreateFrame("Frame", nil, nil, "SecureGroupHeaderTemplate")
+    ConfigureHeader(groupHeader, secureManager)
+
+    petHeader = wow.CreateFrame("Frame", nil, nil, "SecureGroupPetHeaderTemplate")
+    ConfigureHeader(petHeader, secureManager)
 
     wow.RegisterAttributeDriver(secureManager, "state-framesort-target", "[@target, exists] true; false")
     wow.RegisterAttributeDriver(secureManager, "state-framesort-modifier", "[mod] true; false")
