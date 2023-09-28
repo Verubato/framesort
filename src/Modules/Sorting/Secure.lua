@@ -243,7 +243,7 @@ local function ConfigureHeader(header)
         for _, child in ipairs(Children) do
             local unit = child:GetAttribute("unit")
 
-            if unit and child:IsVisible() then
+            if unit then
                 frames[#frames + 1] = child
             end
         end
