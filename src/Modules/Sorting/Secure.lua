@@ -434,6 +434,8 @@ local function ConfigureHeader(header)
                 end
             end
         end
+
+        return movedAny
     ]])
 
     -- show as much as possible
@@ -569,8 +571,9 @@ local function ConfigureHeader(header)
     header:SetAttribute("FS-TrySort", [[
         local sortedOld = self:RunAttribute("FS-TrySortOld")
         local sortedNew = self:RunAttribute("FS-TrySortNew")
+        local sorted = sortedOld or sortedNew
 
-        if sortedOld or sortedNew then
+        if sorted then
             -- notify unsecure code to invoke callbacks
             self:CallMethod("InvokeCallbacks")
         end
