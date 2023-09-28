@@ -1,3 +1,4 @@
+---@diagnostic disable: undefined-global
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
@@ -17,7 +18,8 @@ local function GetUnit(frame)
 end
 
 local function IntegrationEnabled()
-    ---@diagnostic disable-next-line: undefined-global
+    if not ElvUI then return false end
+
     local E = ElvUI[1]
 
     if not E or not E.db or not E.db.FrameSort then
@@ -28,7 +30,7 @@ local function IntegrationEnabled()
 end
 
 local function PluginEnabled()
-    return wow.GetAddOnEnableState(nil, "ElvUI") ~= 0
+    return wow.GetAddOnEnableState(nil, "ElvUI") ~= 0 and ElvUI ~= nil
 end
 
 local function Update()
@@ -67,9 +69,7 @@ function M:Init()
         callbacks = {}
     end
 
-    ---@diagnostic disable-next-line: undefined-global
     local E, _, _, P, _ = unpack(ElvUI)
-    ---@diagnostic disable-next-line: undefined-global
     local EP = LibStub("LibElvUIPlugin-1.0")
     local UF = E:GetModule("UnitFrames")
 
@@ -149,7 +149,6 @@ function M:GetUnit(frame)
 end
 
 function M:PartyContainer()
-    ---@diagnostic disable-next-line: undefined-global
     return ElvUF_PartyGroup1
 end
 
