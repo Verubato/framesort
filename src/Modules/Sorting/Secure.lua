@@ -304,27 +304,23 @@ secureMethods["TrySortNew"] = [[
         return false
     end
 
-    Children = wipe(Children)
-    Frames = wipe(Frames)
-
     local sorted = false
 
     for _, container in ipairs(Containers) do
+        Children = wipe(Children)
+        Frames = wipe(Frames)
+
         -- import into the global table for filtering
-        container:GetChildList(Children)
+        container.Frame:GetChildList(Children)
 
         -- filter to unit frames
         self:RunAttribute("ExtractUnitFrames")
 
-        -- TODO: determine which units to use
-        Units = FriendlyUnits
-
         -- sort them
+        Units = container.UnitType == "Friendly" and FriendlyUnits or EnemyUnits
+
         local framesSorted = self:RunAttribute("TrySortFrames")
         sorted = sorted or framesSorted
-
-        Children = wipe(Children)
-        Frames = wipe(Frames)
     end
 
     return sorted
@@ -485,17 +481,35 @@ function OnCombatStarting()
         -- use the new sorting method for elvui
         local provider = fsProviders.ElvUI
         local containers = {
-            provider:RaidContainer(),
-            provider:PartyContainer(),
-            provider:EnemyArenaContainer()
+            {
+                Frame = provider:RaidContainer(),
+                UnitType = "Friendly",
+            },
+            {
+                Frame = provider:PartyContainer(),
+                UnitType = "Friendly"
+            },
+            {
+                Frame = provider:EnemyArenaContainer(),
+                UnitType = "Enemy"
+            }
         }
 
-        for _, container in pairs(containers) do
-            header:SetFrameRef("Container", container)
-            header:Execute([[
-                local container = self:GetFrameRef("Container")
-                Containers[#Containers + 1] = container
-            ]])
+        for _, container in ipairs(containers) do
+            if container.Frame then
+                header:SetFrameRef("Container", container.Frame)
+                header:SetAttribute("ContainerUnitType", container.UnitType)
+                header:Execute([[
+                    local frame = self:GetFrameRef("Container")
+                    local unitType = self:GetAttribute("ContainerUnitType")
+
+                    local container = newtable()
+                    container.Frame = frame
+                    container.UnitType = unitType
+
+                    Containers[#Containers + 1] = container
+                ]])
+            end
         end
     end
 
