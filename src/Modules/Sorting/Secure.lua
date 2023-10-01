@@ -9,8 +9,7 @@ local fsUnit = addon.WoW.Unit
 local M = {}
 addon.Modules.Sorting.Secure = M
 
-local headers = nil
-local test = nil
+local headers = {}
 local secureMethods = {}
 
 -- rounds a number to the specified decimal places
@@ -29,9 +28,11 @@ secureMethods["InCombat"] = [[
 ]]
 
 -- filters a set of frames to only unit frames
--- requires globals: Children
 secureMethods["ExtractUnitFrames"] = [[
+    local tableName = ...
+    local children = _G[tableName]
     local frames = newtable()
+
     for _, child in ipairs(Children) do
         local unit = child:GetAttribute("unit")
 
@@ -157,13 +158,15 @@ secureMethods["SortByVisualOrder"] = [[
 ]]
 
 -- rearranges a set of frames accoding to the pre-sorted unit positions
--- requires globals: Frames, Units
 secureMethods["TrySortFrames"] = [[
-    -- TODO: figure out proper order from GetPoint() frame chain
+    local framesTableName, unitsTableName = ...
+    local frames = _G[framesTableName]
+    local units = _G[unitsTableName]
+
     EnumerationOrder = newtable()
     OrderedFrames = newtable()
 
-    self:RunAttribute("CopyTable", "Frames", "OrderedFrames")
+    self:RunAttribute("CopyTable", framesTableName, "OrderedFrames")
     self:RunAttribute("SortByVisualOrder", "OrderedFrames")
 
     local points = newtable()
@@ -180,7 +183,7 @@ secureMethods["TrySortFrames"] = [[
         points[#points + 1] = point
     end
 
-    local isChain, rootVariableName = self:RunAttribute("FrameChain", "Frames")
+    local isChain, rootVariableName = self:RunAttribute("FrameChain", framesTableName)
     local enumerationOrder = nil
 
     if isChain then
@@ -206,7 +209,7 @@ secureMethods["TrySortFrames"] = [[
 
     for i, source in ipairs(enumerationOrder) do
         local unit = source:GetAttribute("unit")
-        local desiredIndex = self:RunAttribute("ArrayIndex", "Units", unit)
+        local desiredIndex = self:RunAttribute("ArrayIndex", unitsTableName, unit)
 
         if desiredIndex <= 0 then
             -- for any units we don't know about, e.g. players who joined mid-combat
@@ -243,10 +246,6 @@ secureMethods["TrySortFrames"] = [[
 -- places any frames that have moved back into their pre-combat sorted position
 -- requires tables: FramesByProvider, PointsByProvider
 secureMethods["TrySortOld"] = [[
-    if not self:RunAttribute("InCombat") then
-        return false
-    end
-
     local sorted = false
 
     -- don't move frames if they are have minuscule position differences
@@ -299,29 +298,51 @@ secureMethods["TrySortOld"] = [[
 ]]
 
 -- sorts frames based on the pre-combat sorted units array
--- requires tables: Containers
 secureMethods["TrySortNew"] = [[
-    if not self:RunAttribute("InCombat") then
-        return false
-    end
-
+    local containersTableName = ...
+    local containers = _G[containersTableName]
     local sorted = false
 
-    for _, container in ipairs(Containers) do
-        Children = wipe(Children)
-        Frames = wipe(Frames)
+    for _, container in ipairs(containers) do
+        if container.Frame:IsVisible() then
+            Children = wipe(Children)
+            Frames = wipe(Frames)
 
-        -- import into the global table for filtering
-        container.Frame:GetChildList(Children)
+            -- import into the global table for filtering
+            container.Frame:GetChildList(Children)
 
-        -- filter to unit frames
-        self:RunAttribute("ExtractUnitFrames")
+            -- filter to unit frames
+            self:RunAttribute("ExtractUnitFrames", "Children")
 
-        -- sort them
-        Units = container.UnitType == "Friendly" and FriendlyUnits or EnemyUnits
+            if #Frames > 0 then
+                local units = container.UnitType == "Friendly" and FriendlyUnits or EnemyUnits
 
-        local framesSorted = self:RunAttribute("TrySortFrames")
-        sorted = sorted or framesSorted
+                -- the frames might be a subset if the container is a raid group
+                -- filter units down to only those within the set of frames
+                -- as otherwise our algorithm will get confused
+                local frameUnits = newtable()
+
+                for _, frame in ipairs(Frames) do
+                    local unit = frame:GetAttribute("unit")
+                    frameUnits[unit] = true
+                end
+
+                -- now find the units in their sorted order
+                Units = newtable()
+
+                for _, unit in ipairs(units) do
+                    if frameUnits[unit] then
+                        Units[#Units + 1] = unit
+                    end
+                end
+
+                if #Units > 0 then
+                    -- sort them
+                    local framesSorted = self:RunAttribute("TrySortFrames", "Frames", "Units")
+                    sorted = sorted or framesSorted
+                end
+            end
+        end
     end
 
     return sorted
@@ -329,8 +350,12 @@ secureMethods["TrySortNew"] = [[
 
 -- top level perform sort routine
 secureMethods["TrySort"] = [[
-    local sortedOld = self:RunAttribute("TrySortOld")
-    local sortedNew = self:RunAttribute("TrySortNew")
+    if not self:RunAttribute("InCombat") then
+        return false
+    end
+
+    -- local sortedOld = self:RunAttribute("TrySortOld")
+    local sortedNew = self:RunAttribute("TrySortNew", "Containers")
     local sorted = sortedOld or sortedNew
 
     if sorted then
@@ -416,131 +441,131 @@ local function AddFrames(header, provider, frames, type)
     header:Execute([[ self:RunAttribute("AddFrames") ]])
 end
 
-local function LoadFrames(header, provider)
+local function LoadFrames()
+    local blizzard = fsProviders.Blizzard
     local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
-    local enemyEnabled, _, _ = fsCompare:EnemySortMode()
-    local party = {}
-    local raidUngrouped = {}
-    local raid = {}
+
+    if not blizzard:Enabled() or not friendlyEnabled then return end
+
+    local raidUngrouped = blizzard:RaidFrames()
     local groups = {}
-    local arena = {}
 
-    if friendlyEnabled then
-        party = provider:PartyFrames()
-        raidUngrouped = provider:RaidFrames()
+    if blizzard:IsRaidGrouped() then
+        groups = blizzard:RaidGroups()
+    end
 
-        if provider:IsRaidGrouped() then
-            groups = provider:RaidGroups()
-            raid = fsEnumerable
-                :From(groups)
-                :Map(function(group)
-                    return provider:RaidGroupMembers(group)
-                end)
-                :Flatten()
-                :ToTable()
+    for _, header in ipairs(headers) do
+        AddFrames(header, blizzard, raidUngrouped, "Raid")
+        AddFrames(header, blizzard, groups, "Groups")
+    end
+end
+
+-- TODO: move all providers to use this and delete the AddFrames() stuff
+local function LoadContainers()
+    local friendlyEnabled = fsCompare:FriendlySortMode()
+    local enemyEnabled = fsCompare:EnemySortMode()
+    local containers = {}
+
+    local elvui = fsProviders.ElvUI
+    if friendlyEnabled and elvui:Enabled() then
+        containers[#containers + 1] = {
+            Frame = elvui:PartyContainer(),
+            UnitType = "Friendly"
+        }
+    end
+
+    local blizzard = fsProviders.Blizzard
+    if blizzard:Enabled() then
+        if friendlyEnabled then
+            containers[#containers + 1] = {
+                Frame = blizzard:PartyContainer(),
+                UnitType = "Friendly"
+            }
+
+            local groups = blizzard:RaidGroups()
+
+            for _, group in ipairs(groups) do
+                containers[#containers + 1] = {
+                    Frame = group,
+                    UnitType = "Friendly"
+                }
+            end
+        end
+
+        if enemyEnabled then
+            containers[#containers + 1] = {
+                Frame = blizzard:EnemyArenaContainer(),
+                UnitType = "Enemy"
+            }
         end
     end
 
-    if enemyEnabled and wow.IsRetail() then
-        arena = provider:EnemyArenaFrames()
-    end
-
-    AddFrames(header, provider, party, "Party")
-    AddFrames(header, provider, raid, "Raid")
-    AddFrames(header, provider, raidUngrouped, "Raid")
-    AddFrames(header, provider, groups, "Groups")
-    AddFrames(header, provider, arena, "Arena")
-end
-
-local function LoadContainers(header, provider)
-    local containers = fsEnumerable:From({
-            {
-                Frame = provider:RaidContainer(),
-                UnitType = "Friendly",
-            },
-            {
-                Frame = provider:PartyContainer(),
+    local gex = fsProviders.GladiusEx
+    if gex:Enabled() then
+        if friendlyEnabled then
+            containers[#containers + 1] = {
+                Frame = gex:PartyContainer(),
                 UnitType = "Friendly"
-            },
-            {
-                Frame = provider:EnemyArenaContainer(),
+            }
+        end
+
+        if enemyEnabled then
+            containers[#containers + 1] = {
+                Frame = gex:EnemyArenaContainer(),
                 UnitType = "Enemy"
             }
-        })
+        end
+    end
+
+    local sarena = fsProviders.sArena
+    if enemyEnabled and sarena:Enabled() then
+        containers[#containers + 1] = {
+            Frame = sarena:EnemyArenaContainer(),
+            UnitType = "Enemy"
+        }
+    end
+
+    containers = fsEnumerable
+        :From(containers)
         :Where(function(x) return x.Frame ~= nil end)
         :ToTable()
 
     if #containers == 0 then return end
 
-    for i, container in ipairs(containers) do
-        header:SetFrameRef("Container" .. i, container.Frame)
-        header:SetAttribute("ContainerUnitType" .. i, container.UnitType)
-    end
-
-    header:SetAttribute("ContainersCount", #containers)
-    header:Execute([[
-        local count = self:GetAttribute("ContainersCount")
-
-        for i = 1, count do
-            local frame = self:GetFrameRef("Container" .. i)
-            local unitType = self:GetAttribute("ContainerUnitType" .. i)
-
-            local container = newtable()
-            container.Frame = frame
-            container.UnitType = unitType
-
-            Containers[#Containers + 1] = container
-        end
-    ]])
-end
-
-local function LoadUnits(header, friendlyUnits, enemyUnits)
-    for i, unit in ipairs(friendlyUnits) do
-        header:SetAttribute("FriendlyUnit" .. i, unit)
-    end
-
-    for i, unit in ipairs(enemyUnits) do
-        header:SetAttribute("EnemyUnit" .. i, unit)
-    end
-
-    header:SetAttribute("FriendlyUnitsCount", #friendlyUnits)
-    header:SetAttribute("EnemyUnitsCount", #enemyUnits)
-
-    if #friendlyUnits == 0 and #enemyUnits == 0 then return end
-
-    header:Execute([[
-        local friendlyUnitsCount = self:GetAttribute("FriendlyUnitsCount")
-        local enemyUnitsCount = self:GetAttribute("EnemyUnitsCount")
-
-        for i = 1, friendlyUnitsCount do
-            local unit = self:GetAttribute("FriendlyUnit" .. i)
-            FriendlyUnits[#FriendlyUnits + 1] = unit
-        end
-
-        for i = 1, enemyUnitsCount do
-            local unit = self:GetAttribute("EnemyUnit" .. i)
-            EnemyUnits[#EnemyUnits + 1] = unit
-        end
-    ]])
-end
-
-function OnCombatStarting()
-    assert(headers ~= nil)
-
-    -- reset state
     for _, header in ipairs(headers) do
-        header:Execute([[ self:RunAttribute("ClearState") ]])
-    end
+        for i, container in ipairs(containers) do
+            header:SetFrameRef("Container" .. i, container.Frame)
+            header:SetAttribute("ContainerUnitType" .. i, container.UnitType)
+        end
 
+        header:SetAttribute("ContainersCount", #containers)
+        header:Execute([[
+            local count = self:GetAttribute("ContainersCount")
+
+            for i = 1, count do
+                local frame = self:GetFrameRef("Container" .. i)
+                local unitType = self:GetAttribute("ContainerUnitType" .. i)
+
+                local container = newtable()
+                container.Frame = frame
+                container.UnitType = unitType
+
+                Containers[#Containers + 1] = container
+            end
+        ]])
+    end
+end
+
+local function LoadUnits()
     local friendlyEnabled = fsCompare:FriendlySortMode()
     local enemyEnabled = fsCompare:EnemySortMode()
-
-    if not friendlyEnabled and not enemyEnabled then return end
 
     -- TODO: we could transfer unit info to the restricted environment
     -- then perform the unit sort inside which would give us more control
     local friendlyUnits = friendlyEnabled and fsUnit:FriendlyUnits() or {}
     local enemyUnits = enemyEnabled and fsUnit:EnemyUnits() or {}
+
+    if #friendlyUnits == 0 and #enemyUnits == 0 then return end
 
     if friendlyEnabled then
         local friendlyCompare = fsCompare:SortFunction(friendlyUnits)
@@ -552,17 +577,36 @@ function OnCombatStarting()
         table.sort(enemyUnits, enemyCompare)
     end
 
-    -- import new state
     for _, header in ipairs(headers) do
-        LoadUnits(header, friendlyUnits, enemyUnits)
-
-        -- use the new sorting method for elvui
-        local elvui = fsProviders.ElvUI
-        if friendlyEnabled and elvui:Enabled() then
-            LoadContainers(header, elvui)
+        for i, unit in ipairs(friendlyUnits) do
+            header:SetAttribute("FriendlyUnit" .. i, unit)
         end
-    end
 
+        for i, unit in ipairs(enemyUnits) do
+            header:SetAttribute("EnemyUnit" .. i, unit)
+        end
+
+        header:SetAttribute("FriendlyUnitsCount", #friendlyUnits)
+        header:SetAttribute("EnemyUnitsCount", #enemyUnits)
+
+        header:Execute([[
+            local friendlyUnitsCount = self:GetAttribute("FriendlyUnitsCount")
+            local enemyUnitsCount = self:GetAttribute("EnemyUnitsCount")
+
+            for i = 1, friendlyUnitsCount do
+                local unit = self:GetAttribute("FriendlyUnit" .. i)
+                FriendlyUnits[#FriendlyUnits + 1] = unit
+            end
+
+            for i = 1, enemyUnitsCount do
+                local unit = self:GetAttribute("EnemyUnit" .. i)
+                EnemyUnits[#EnemyUnits + 1] = unit
+            end
+        ]])
+    end
+end
+
+local function ProtectContainers()
     for _, provider in ipairs(fsProviders:Enabled()) do
         local containers = {
             provider:RaidContainer(),
@@ -576,19 +620,32 @@ function OnCombatStarting()
         for _, container in pairs(containers) do
             container:SetProtected()
         end
-
-        -- elvui is using the new "containers" method
-        if provider ~= fsProviders.ElvUI then
-            for _, header in ipairs(headers) do
-                LoadFrames(header, provider)
-            end
-        end
     end
+end
+
+local function ClearState()
+    for _, header in ipairs(headers) do
+        header:Execute([[ self:RunAttribute("ClearState") ]])
+    end
+end
+
+local function LoadState()
+    ClearState()
+
+    local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
+    local enemyEnabled, _, _ = fsCompare:EnemySortMode()
+
+    if not friendlyEnabled and not enemyEnabled then return end
+
+    ProtectContainers()
+    LoadUnits()
+    LoadContainers()
+    LoadFrames()
 end
 
 function OnEvent(_, event)
     if event == wow.Events.PLAYER_REGEN_DISABLED then
-        OnCombatStarting()
+        LoadState()
     end
 end
 
