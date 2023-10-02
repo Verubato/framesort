@@ -55,20 +55,8 @@ function M:TrySort(provider)
 
     if addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Traditional then
         sorted = M.Traditional:TrySort()
-
-        if sorted then
-            M:InvokeCallbacks()
-        end
-
-        return sorted
-    end
-
-    local providers = provider and { provider } or fsProviders:Enabled()
-
-    for _, p in ipairs(providers) do
-        local providerSorted = M.Secure:TrySort(p)
-
-        sorted = sorted or providerSorted
+    elseif addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Secure then
+        sorted = M.Secure:TrySort(provider)
     end
 
     if sorted then
@@ -88,7 +76,7 @@ function M:Init()
         callbacks = {}
     end
 
-    for _, provider in ipairs(fsProviders:Enabled()) do
-        provider:RegisterCallback(function() OnProviderRequiresSort(provider) end)
+    for _, provider in ipairs(fsProviders.All) do
+        provider:RegisterCallback(OnProviderRequiresSort)
     end
 end

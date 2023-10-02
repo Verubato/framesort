@@ -6,7 +6,7 @@ local fsCompare = addon.Collections.Comparer
 local fsConfig = addon.Configuration
 local fsProviders = addon.Providers
 local fsLog = addon.Logging.Log
----@class HidePlayerModule: Initialise
+---@class HidePlayerModule: IInitialise
 local M = {}
 addon.Modules.HidePlayer = M
 

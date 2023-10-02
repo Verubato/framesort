@@ -20,7 +20,7 @@
 ---@field IsEnemyArenaHorizontalLayout fun(self: table): boolean Whether the frames are using a horizontal layout.
 ---@field RegisterCallback fun(self: table, callback: fun(provider: FrameProvider)) Registers a callback to be invoked when sorting is required.
 
----@class Providers: Initialise
+---@class Providers: IInitialise
 ---@field Blizzard BlizzardFrameProvider
 ---@field sArena FrameProvider
 ---@field GladiusEx FrameProvider

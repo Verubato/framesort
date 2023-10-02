@@ -6,7 +6,9 @@ addon.Configuration = {}
 addon.Health = {}
 addon.Logging = {}
 addon.Modules = {
-    Sorting = {},
+    Sorting = {
+        Secure = {}
+    }
 }
 addon.Numerics = {}
 addon.Providers = { All = {} }

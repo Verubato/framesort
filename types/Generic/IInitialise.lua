@@ -1,3 +1,3 @@
 ---@meta
----@class Initialise
+---@class IInitialise
 ---@field Init fun(self: table)

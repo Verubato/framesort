@@ -2,7 +2,7 @@
 local _, addon = ...
 local wow = addon.WoW.Api
 local events = addon.WoW.Api.Events
----@class Scheduler: Initialise
+---@class Scheduler: IInitialise
 local M = {}
 addon.Scheduling.Scheduler = M
 

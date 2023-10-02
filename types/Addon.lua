@@ -16,7 +16,7 @@
 ---@field InitDB fun(self: table)
 
 ---@meta
----@class Api: Initialise
+---@class Api: IInitialise
 ---@field v1 ApiV1
 
 ---@class Collections
@@ -41,7 +41,7 @@
 ---@field Sorting SortingModules
 ---@field HidePlayer HidePlayerModule
 ---@field Targeting TargetingModule
----@field Macro Initialise
+---@field Macro IInitialise
 
 ---@class Scheduling
 ---@field Scheduler Scheduler
@@ -52,19 +52,18 @@
 ---@field Macro MacroUtil
 ---@field Unit UnitUtil
 
----@class SortingModules : Initialise
----@field Core CoreSortingModule
----@field Traditional TraditionalSortingModule
----@field Secure SortingModule
----@field TrySort fun(self: table, provider: FrameProvider?):  boolean
+---@class SortingModules : IInitialise, ISort
+---@field Traditional ISort
+---@field Secure SecureSortingModule
 ---@field RegisterPostSortCallback fun(self: table, callback: function)
 ---@field InvokeCallbacks fun(self: table)
 
----@class TraditionalSortingModule
----@field TrySort fun(self: table): boolean
+---@class SecureSortingModule : ISort, IInitialise
+---@field InCombat IInitialise
+---@field NoCombat ISortWithInit
 
----@class SortingModule : Initialise
----@field TrySort fun(self: table, provider: FrameProvider): boolean
+---@class ISortWithInit
+---@field TrySort fun(self: table, provider: FrameProvider?): boolean
 
----@class CoreSortingModule
----@field TrySort fun(self: table, provider: FrameProvider): boolean
+---@class ISort
+---@field TrySort fun(self: table, provider: FrameProvider?): boolean

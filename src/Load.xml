@@ -34,9 +34,10 @@
     <Script file="Health\HealthCheck.lua"/>
 
     <!-- Sorting modules -->
-    <Script file="Modules\Sorting\Core.lua"/>
     <Script file="Modules\Sorting\Traditional.lua"/>
     <Script file="Modules\Sorting\Secure.lua"/>
+    <Script file="Modules\Sorting\SecureNoCombat.lua"/>
+    <Script file="Modules\Sorting\SecureInCombat.lua"/>
     <Script file="Modules\Sorting\Sorting.lua"/>
 
     <!-- Load modules -->
