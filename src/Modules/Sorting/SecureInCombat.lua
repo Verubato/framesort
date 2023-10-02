@@ -64,6 +64,7 @@ secureMethods["ExtractUnitFrames"] = [[
     end
 
     _G[destinationTableName] = unitFrames
+    return #unitFrames > 0
 ]]
 
 -- returns the index of the item within the array, or -1 if it doesn't exist
@@ -241,6 +242,8 @@ secureMethods["ApplySpacing"] = [[
     self:RunAttribute("SortPointsByTopLeft", "OrderedTopLeft")
     self:RunAttribute("SortPointsByLeftTop", "OrderedLeftTop")
 
+    local changed = false
+
     for i = 2, #OrderedLeftTop do
         local point = OrderedLeftTop[i]
         local previous = OrderedLeftTop[i - 1]
@@ -250,6 +253,7 @@ secureMethods["ApplySpacing"] = [[
             local existingSpace = point.Left - (previous.Left + previous.Width)
             local xDelta = horizontal - existingSpace
             point.Left = point.Left + xDelta
+            changed = changed or xDelta ~= 0
         end
     end
 
@@ -262,8 +266,11 @@ secureMethods["ApplySpacing"] = [[
             local existingSpace = previous.Bottom - (point.Bottom + point.Height)
             local yDelta = vertical - existingSpace
             point.Bottom = point.Bottom - yDelta
+            changed = changed or yDelta ~= 0
         end
     end
+
+    return changed
 ]]
 
 -- rearranges a set of frames accoding to the pre-sorted unit positions
@@ -337,11 +344,9 @@ secureMethods["TrySortFrames"] = [[
 
         if desiredIndex > 0 and desiredIndex <= #points then
             local left, bottom, width, height = source:GetRect()
-
             local destination = points[desiredIndex]
             local xDelta = destination.Left - left
             local yDelta = destination.Bottom - bottom
-
             local xDeltaRounded = self:RunAttribute("Round", xDelta, decimalSanity)
             local yDeltaRounded = self:RunAttribute("Round", yDelta, decimalSanity)
 
@@ -415,69 +420,82 @@ secureMethods["TrySortOld"] = [[
     return sorted
 ]]
 
+-- attempts to sort the frames within the container
+secureMethods["TrySortContainer"] = [[
+    local friendlyEnabled = self:GetAttribute("FriendlySortEnabled")
+    local enemyEnabled = self:GetAttribute("EnemySortEnabled")
+
+    local containerName, providerName = ...
+    local container = _G[containerName]
+
+    Children = newtable()
+    Frames = newtable()
+
+    -- import into the global table for filtering
+    container.Frame:GetChildList(Children)
+
+    -- blizzard frames can have non-existant units assigned, so filter them out
+    local visibleOnly = providerName == "Blizzard"
+
+    -- filter to unit frames
+    if not self:RunAttribute("ExtractUnitFrames", "Children", "Frames", visibleOnly) then
+        return false
+    end
+
+    local units = nil
+    if container.Type == "Friendly" and friendlyEnabled then
+        units = FriendlyUnits
+    elseif container.Type == "Enemy" and enemyEnabled then
+        units = EnemyUnits
+    end
+
+    units = units or newtable()
+
+    -- the frames might be a subset if the container is a raid group
+    -- filter units down to only those within the set of frames
+    -- as otherwise our algorithm will get confused
+    local frameUnits = newtable()
+
+    for _, frame in ipairs(Frames) do
+        Frame = frame
+        local unit = self:RunAttribute("GetUnit", "Frame")
+        Frame = nil
+        frameUnits[unit] = true
+    end
+
+    -- now find the units in their sorted order
+    Units = newtable()
+
+    for _, unit in ipairs(units) do
+        if frameUnits[unit] then
+            Units[#Units + 1] = unit
+        end
+    end
+
+    Spacing = container.Spacing
+
+    return self:RunAttribute("TrySortFrames", "Frames", "Units", Spacing and "Spacing")
+]]
+
 -- sorts frames based on the pre-combat sorted units array
 secureMethods["TrySortNew"] = [[
     local friendlyEnabled = self:GetAttribute("FriendlySortEnabled")
     local enemyEnabled = self:GetAttribute("EnemySortEnabled")
 
     if not friendlyEnabled and not enemyEnabled then return false end
-
-    -- check if state has been loaded
-    if not Providers
-       or not FriendlyUnits
-       or not EnemyUnits then return end
+    if not Providers then return false end
 
     local sorted = false
 
     for _, provider in pairs(Providers) do
         for _, container in ipairs(provider.Containers) do
             if container.Frame:IsVisible() then
-                Children = newtable()
-                Frames = newtable()
+                Container = container
 
-                -- import into the global table for filtering
-                container.Frame:GetChildList(Children)
+                local containerSorted = self:RunAttribute("TrySortContainer", "Container", provider.Name)
+                sorted = sorted or containerSorted
 
-                -- blizzard frames can have non-existant units assigned, so filter them out
-                local visibleOnly = provider.Name == "Blizzard"
-                -- filter to unit frames
-                self:RunAttribute("ExtractUnitFrames", "Children", "Frames", visibleOnly)
-
-                local units = nil
-                if container.UnitType == "Friendly" and friendlyEnabled then
-                    units = FriendlyUnits
-                elseif container.UnitType == "Enemy" and enemyEnabled then
-                    units = EnemyUnits
-                end
-
-                if units and #units > 0 and #Frames > 0 then
-                    -- the frames might be a subset if the container is a raid group
-                    -- filter units down to only those within the set of frames
-                    -- as otherwise our algorithm will get confused
-                    local frameUnits = newtable()
-
-                    for _, frame in ipairs(Frames) do
-                        Frame = frame
-                        local unit = self:RunAttribute("GetUnit", "Frame")
-                        Frame = nil
-                        frameUnits[unit] = true
-                    end
-
-                    -- now find the units in their sorted order
-                    Units = newtable()
-
-                    for _, unit in ipairs(units) do
-                        if frameUnits[unit] then
-                            Units[#Units + 1] = unit
-                        end
-                    end
-
-                    if #Units > 0 then
-                        Spacing = container.Spacing
-                        local framesSorted = self:RunAttribute("TrySortFrames", "Frames", "Units", Spacing and "Spacing")
-                        sorted = sorted or framesSorted
-                    end
-                end
+                Container = nil
             end
         end
     end
@@ -556,13 +574,13 @@ secureMethods["LoadProvider"] = [[
 
     for i = 1, count do
         local frame = self:GetFrameRef("Container" .. i)
-        local unitType = self:GetAttribute("ContainerUnitType" .. i)
+        local type = self:GetAttribute("ContainerType" .. i)
         local spacingHorizontal = self:GetAttribute("ContainerSpacingHorizontal" .. i)
         local spacingVertical = self:GetAttribute("ContainerSpacingVertical" .. i)
 
         local container = newtable()
         container.Frame = frame
-        container.UnitType = unitType
+        container.Type = type
 
         if spacingHorizontal or spacingVertical then
             container.Spacing = newtable()
@@ -611,75 +629,6 @@ local function AddFrames(header, provider, frames, type)
     header:Execute([[ self:RunAttribute("AddFrames") ]])
 end
 
--- TODO: delete this and use the container approach instaed
-local function LoadFrames()
-    local blizzard = fsProviders.Blizzard
-    local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
-
-    if not blizzard:Enabled() or not friendlyEnabled then return end
-
-    local raidUngrouped = blizzard:RaidFrames()
-    local groups = {}
-
-    if blizzard:IsRaidGrouped() then
-        groups = blizzard:RaidGroups()
-    end
-
-    for _, header in ipairs(headers) do
-        header:Execute([[
-            FramesByProvider = newtable()
-            PointsByProvider = newtable()
-        ]])
-
-        AddFrames(header, blizzard, raidUngrouped, "Raid")
-        AddFrames(header, blizzard, groups, "Groups")
-    end
-end
-
-local function LoadProvider(provider)
-    local appearance = addon.DB.Options.Appearance
-    local containers = {
-        {
-            Frame = provider:PartyContainer(),
-            UnitType = "Friendly",
-            Spacing = provider == fsProviders.Blizzard and appearance.Party.Spacing
-        },
-        -- {
-        --     Frame = provider:RaidContainer(),
-        --     UnitType = "Friendly",
-        --     Spacing = provider == fsProviders.Blizzard and appearance.Raid.Spacing
-        -- },
-        {
-            Frame = provider:EnemyArenaContainer(),
-            UnitType = "Enemy",
-            Spacing = provider == fsProviders.Blizzard and appearance.EnemyArena.Spacing
-        }
-    }
-
-    containers = fsEnumerable
-        :From(containers)
-        :Where(function(x) return x.Frame ~= nil end)
-        :ToTable()
-
-    for _, header in ipairs(headers) do
-        for i, container in ipairs(containers) do
-            -- to fix a current blizzard bug where GetPoint() returns nil values on secure frames when their parent's are unsecure
-            -- https://github.com/Stanzilla/WoWUIBugs/issues/470
-            -- https://github.com/Stanzilla/WoWUIBugs/issues/480
-            container.Frame:SetProtected()
-
-            header:SetFrameRef("Container" .. i, container.Frame)
-            header:SetAttribute("ContainerUnitType" .. i, container.UnitType)
-            header:SetAttribute("ContainerSpacingVertical" .. i, container.Spacing and container.Spacing.Vertical)
-            header:SetAttribute("ContainerSpacingHorizontal" .. i, container.Spacing and container.Spacing.Vertical)
-        end
-
-        header:SetAttribute("ProviderName", provider:Name())
-        header:SetAttribute("ContainersCount", #containers)
-        header:Execute([[ self:RunAttribute("LoadProvider") ]])
-    end
-end
-
 local function LoadUnits()
     -- TODO: we could transfer unit info to the restricted environment
     -- then perform the unit sort inside which would give us more control
@@ -716,10 +665,77 @@ local function SetEnabled()
     end
 end
 
+-- TODO: delete this and use the container approach instaed
+local function LoadFrames()
+    local blizzard = fsProviders.Blizzard
+    local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
+
+    if not blizzard:Enabled() or not friendlyEnabled then return end
+
+    local raidUngrouped = blizzard:RaidFrames()
+    local groups = {}
+
+    if blizzard:IsRaidGrouped() then
+        groups = blizzard:RaidGroups()
+    end
+
+    for _, header in ipairs(headers) do
+        header:Execute([[
+            FramesByProvider = newtable()
+            PointsByProvider = newtable()
+        ]])
+
+        AddFrames(header, blizzard, raidUngrouped, "Raid")
+        AddFrames(header, blizzard, groups, "Groups")
+    end
+end
+
+local function LoadProvider(provider)
+    local appearance = addon.DB.Options.Appearance
+    local containers = {
+        {
+            Frame = provider:PartyContainer(),
+            Type = "Friendly",
+            Spacing = provider == fsProviders.Blizzard and appearance.Party.Spacing
+        },
+        {
+            Frame = provider:EnemyArenaContainer(),
+            Type = "Enemy",
+            Spacing = provider == fsProviders.Blizzard and appearance.EnemyArena.Spacing
+        }
+    }
+
+    containers = fsEnumerable
+        :From(containers)
+        :Where(function(x) return x.Frame ~= nil end)
+        :ToTable()
+
+    for _, header in ipairs(headers) do
+        for i, container in ipairs(containers) do
+            -- to fix a current blizzard bug where GetPoint() returns nil values on secure frames when their parent's are unsecure
+            -- https://github.com/Stanzilla/WoWUIBugs/issues/470
+            -- https://github.com/Stanzilla/WoWUIBugs/issues/480
+            container.Frame:SetProtected()
+
+            header:SetFrameRef("Container" .. i, container.Frame)
+            header:SetAttribute("ContainerType" .. i, container.Type)
+            header:SetAttribute("ContainerSpacingVertical" .. i, container.Spacing and container.Spacing.Vertical)
+            header:SetAttribute("ContainerSpacingHorizontal" .. i, container.Spacing and container.Spacing.Horizontal)
+        end
+
+        header:SetAttribute("ProviderName", provider:Name())
+        header:SetAttribute("ContainersCount", #containers)
+        header:Execute([[ self:RunAttribute("LoadProvider") ]])
+    end
+end
+
 local function OnCombatStarting()
     SetEnabled()
-    LoadUnits()
     LoadFrames()
+end
+
+local function OnUnitChanged()
+    fsScheduler:RunWhenCombatEnds(LoadUnits, "SecureUnitsUpdate")
 end
 
 local function InjectSecureHelpers(secureFrame)
@@ -790,8 +806,6 @@ local function ConfigureHeader(header)
         self:SetHeight(0)
         self:SetAttribute("Header", Header)
 
-        -- secure snippet for refreshing unit ids on frames
-        -- which we can then use to invoke our sorting
         RefreshUnitChange = [[
             local unit = self:GetAttribute("unit")
             local header = self:GetAttribute("Header")
@@ -820,6 +834,18 @@ function M:Init()
     local combatEndFrame = wow.CreateFrame("Frame")
     combatEndFrame:HookScript("OnEvent", OnCombatStarting)
     combatEndFrame:RegisterEvent(wow.Events.PLAYER_REGEN_DISABLED)
+
+    local unitChangedFrame = wow.CreateFrame("Frame")
+    unitChangedFrame:HookScript("OnEvent", OnUnitChanged)
+    unitChangedFrame:RegisterEvent(wow.Events.GROUP_ROSTER_UPDATE)
+    unitChangedFrame:RegisterEvent(wow.Events.UNIT_PET)
+    unitChangedFrame:RegisterEvent(wow.Events.PLAYER_ROLES_ASSIGNED)
+    unitChangedFrame:RegisterEvent(wow.Events.PLAYER_ENTERING_WORLD)
+
+    if wow.IsRetail() then
+        unitChangedFrame:RegisterEvent(wow.Events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
+        unitChangedFrame:RegisterEvent(wow.Events.ARENA_OPPONENT_UPDATE)
+    end
 
     local groupHeader = wow.CreateFrame("Frame", "FrameSortGroupHeader", wow.UIParent, "SecureGroupHeaderTemplate")
     local petHeader = wow.CreateFrame("Frame", "FrameSortPetGroupHeader", wow.UIParent, "SecureGroupPetHeaderTemplate")
