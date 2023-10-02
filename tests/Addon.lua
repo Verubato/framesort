@@ -9,7 +9,9 @@ local addon = {
     Health = {},
     Logging = {},
     Modules = {
-        Sorting = {}
+        Sorting = {
+            Secure = {}
+        }
     },
     Numerics = {},
     Providers = {

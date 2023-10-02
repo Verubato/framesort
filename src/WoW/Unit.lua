@@ -1,52 +1,82 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
+local fsEnumerable = addon.Collections.Enumerable
 ---@class UnitUtil
 local M = {}
 addon.WoW.Unit = M
 
----Gets a table of group member unit tokens that exist (UnitExists()).
----@return string[]
-function M:FriendlyUnits()
-    local members = {}
+local allPartyUnitsIds = {
+    "player"
+}
+local allRaidUnitsIds = {}
+local allEnemyUnitsIds = {}
 
-    if not wow.IsInGroup() then
-        return members
+for i = 1, wow.MEMBERS_PER_RAID_GROUP do
+    allPartyUnitsIds[#allPartyUnitsIds + 1] = "party" .. i
+end
+
+for i = 1, wow.MEMBERS_PER_RAID_GROUP do
+    allPartyUnitsIds[#allPartyUnitsIds + 1] = "partypet" .. i
+end
+
+for i = 1, wow.MAX_RAID_MEMBERS do
+    allRaidUnitsIds[#allRaidUnitsIds + 1] = "raid" .. i
+end
+
+for i = 1, wow.MAX_RAID_MEMBERS do
+    allRaidUnitsIds[#allRaidUnitsIds + 1] = "raidpet" .. i
+end
+
+for i = 1, wow.MEMBERS_PER_RAID_GROUP do
+    allEnemyUnitsIds[#allEnemyUnitsIds + 1] = "arena" .. i
+end
+
+for i = 1, wow.MEMBERS_PER_RAID_GROUP do
+    allEnemyUnitsIds[#allEnemyUnitsIds + 1] = "arenapet" .. i
+end
+
+---Gets a table of group member unit tokens.
+---@return string[]
+function M:FriendlyUnits(existsOnly)
+    if existsOnly == nil then
+        existsOnly = true
     end
 
     local isRaid = wow.IsInRaid()
-    local prefix = isRaid and "raid" or "party"
-    local toGenerate = isRaid and wow.MAX_RAID_MEMBERS or (wow.MEMBERS_PER_RAID_GROUP - 1)
+    local units = isRaid and allRaidUnitsIds or allPartyUnitsIds
 
-    -- raids don't have the "player" token frame
-    if not isRaid then
-        table.insert(members, "player")
+    if not existsOnly then
+        -- return a copy of the table 
+        -- to avoid any issues with the caller changing the table
+        return wow.CopyTable(units)
     end
 
-    for i = 1, toGenerate do
-        local unit = prefix .. i
-        if wow.UnitExists(unit) then
-            table.insert(members, unit)
-        end
+    if not wow.IsInGroup() then
+        return { "player" }
     end
 
-    return members
+    return fsEnumerable
+        :From(units)
+        :Where(function(unit) return wow.UnitIsUnit(unit, "player") or wow.UnitExists(unit) end)
+        :ToTable()
 end
 
--- TODO: refactor so that FriendlyUnits() and EnemyUnits() are consistent with whether they return only units that exist or not
----Gets a table of enemy unit tokens that may or may not exist.
+---Gets a table of enemy unit tokens.
 ---@return string[]
-function M:EnemyUnits()
-    local members = {}
-    local prefix = "arena"
-    local toGenerate = 5
-
-    for i = 1, toGenerate do
-        local unit = prefix .. i
-        table.insert(members, unit)
+function M:EnemyUnits(existsOnly)
+    if existsOnly == nil then
+        existsOnly = true
     end
 
-    return members
+    if not existsOnly then
+        return wow.CopyTable(allEnemyUnitsIds);
+    end
+
+    return fsEnumerable
+        :From(allEnemyUnitsIds)
+        :Where(function(unit) return wow.UnitExists(unit) end)
+        :ToTable()
 end
 
 ---Returns true if the unit token is a pet.

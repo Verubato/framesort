@@ -49,7 +49,7 @@ secureMethods["GetUnit"] = [[
 
 -- filters a set of frames to only unit frames
 secureMethods["ExtractUnitFrames"] = [[
-    local tableName, destinationTableName = ...
+    local tableName, destinationTableName, visibleOnly = ...
     local children = _G[tableName]
     local unitFrames = newtable()
 
@@ -58,7 +58,7 @@ secureMethods["ExtractUnitFrames"] = [[
         local unit = self:RunAttribute("GetUnit", "Frame")
         Frame = nil
 
-        if unit and child:IsVisible() then
+        if unit and (child:IsVisible() or not visibleOnly) then
             unitFrames[#unitFrames + 1] = child
         end
     end
@@ -436,8 +436,10 @@ secureMethods["TrySortNew"] = [[
                 -- import into the global table for filtering
                 container.Frame:GetChildList(Children)
 
+                -- blizzard frames can have non-existant units assigned, so filter them out
+                local visibleOnly = provider.Name == "Blizzard"
                 -- filter to unit frames
-                self:RunAttribute("ExtractUnitFrames", "Children", "Frames")
+                self:RunAttribute("ExtractUnitFrames", "Children", "Frames", visibleOnly)
 
                 local units = nil
                 if container.UnitType == "Friendly" and friendlyEnabled then
