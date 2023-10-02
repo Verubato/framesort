@@ -362,6 +362,8 @@ secureMethods["TrySortFrames"] = [[
 -- places any frames that have moved back into their pre-combat sorted position
 -- requires tables: FramesByProvider, PointsByProvider
 secureMethods["TrySortOld"] = [[
+    if not FramesByProvider or not PointsByProvider then return false end
+
     local sorted = false
 
     -- don't move frames if they are have minuscule position differences
@@ -505,8 +507,6 @@ secureMethods["AddFrames"] = [[
 
     if not frames then
         frames = newtable()
-        frames.Arena = newtable()
-        frames.Party = newtable()
         frames.Raid = newtable()
         frames.Groups = newtable()
         FramesByProvider[provider] = frames
@@ -595,8 +595,6 @@ secureMethods["LoadUnits"] = [[
 secureMethods["Init"] = [[
     Header = self
     Providers = newtable()
-    FramesByProvider = newtable()
-    PointsByProvider = newtable()
 ]]
 
 local function AddFrames(header, provider, frames, type)
@@ -613,6 +611,7 @@ local function AddFrames(header, provider, frames, type)
     header:Execute([[ self:RunAttribute("AddFrames") ]])
 end
 
+-- TODO: delete this and use the container approach instaed
 local function LoadFrames()
     local blizzard = fsProviders.Blizzard
     local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
@@ -627,6 +626,11 @@ local function LoadFrames()
     end
 
     for _, header in ipairs(headers) do
+        header:Execute([[
+            FramesByProvider = newtable()
+            PointsByProvider = newtable()
+        ]])
+
         AddFrames(header, blizzard, raidUngrouped, "Raid")
         AddFrames(header, blizzard, groups, "Groups")
     end
@@ -640,11 +644,11 @@ local function LoadProvider(provider)
             UnitType = "Friendly",
             Spacing = provider == fsProviders.Blizzard and appearance.Party.Spacing
         },
-        {
-            Frame = provider:RaidContainer(),
-            UnitType = "Friendly",
-            Spacing = provider == fsProviders.Blizzard and appearance.Raid.Spacing
-        },
+        -- {
+        --     Frame = provider:RaidContainer(),
+        --     UnitType = "Friendly",
+        --     Spacing = provider == fsProviders.Blizzard and appearance.Raid.Spacing
+        -- },
         {
             Frame = provider:EnemyArenaContainer(),
             UnitType = "Enemy",
