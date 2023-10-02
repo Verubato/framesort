@@ -844,30 +844,6 @@ local function ConfigureHeader(header)
         self:SetAttribute("refreshUnitChange", RefreshUnitChange)
     ]=])
 
-    -- TODO: delete these workaround triggers once it's all fixed
-    wow.RegisterAttributeDriver(header, "state-framesort-target", "[@target, exists] true; false")
-    wow.RegisterAttributeDriver(header, "state-framesort-modifier", "[mod] true; false")
-
-    for i = 1, wow.MAX_RAID_MEMBERS do
-        wow.RegisterAttributeDriver(header, "state-framesort-raid" .. i, string.format("[@raid%d, exists] true; false", i))
-        wow.RegisterAttributeDriver(header, "state-framesort-raidpet" .. i, string.format("[@raidpet%d, exists] true; false", i))
-    end
-
-    for i = 1, wow.MEMBERS_PER_RAID_GROUP - 1 do
-        wow.RegisterAttributeDriver(header, "state-framesort-party" .. i, string.format("[@party%d, exists] true; false", i))
-        wow.RegisterAttributeDriver(header, "state-framesort-partypet" .. i, string.format("[@partypet%d, exists] true; false", i))
-    end
-
-    header:WrapScript(
-        header,
-        "OnAttributeChanged",
-        [[
-            if not strmatch(name, "framesort") then return end
-
-            self:RunAttribute("TrySort")
-        ]]
-    )
-
     -- must be shown for it to work
     header:SetPoint("TOPLEFT", wow.UIParent, "TOPLEFT")
     header:Show()
