@@ -39,7 +39,7 @@ secureMethods["GetUnit"] = [[
     if unit then return unit end
 
     local name = frame:GetName()
-    if strmatch(name, "GladiusExButtonFrame") then
+    if name and strmatch(name, "GladiusExButtonFrame") then
         unit = gsub(name, "GladiusExButtonFrame", "")
         return unit
     end
