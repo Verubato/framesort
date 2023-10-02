@@ -12,7 +12,7 @@ local prefix = "FSTarget"
 local targetFramesButtons = {}
 local targetEnemyButtons = {}
 local targetBottomFrameButton = nil
----@class TargetingModule: Initialise
+---@class TargetingModule: IInitialise
 local M = {}
 addon.Modules.Targeting = M
 

@@ -11,7 +11,7 @@ local maxMacros = 138
 local isSelfEditingMacro = false
 ---@type table<number, boolean>
 local isFsMacroCache = {}
----@class MacroModule: Initialise
+---@class MacroModule: IInitialise
 local M = {}
 addon.Modules.Macro = M
 

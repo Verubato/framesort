@@ -7,7 +7,7 @@ local fsFrame = addon.WoW.Frame
 local fsEnumerable = addon.Collections.Enumerable
 local fsMath = addon.Numerics.Math
 local M = {}
-addon.Modules.Sorting.Core = M
+addon.Modules.Sorting.Secure.NoCombat = M
 
 local function FrameSortFunction(unitSortFunction, provider)
     return function(left, right)
@@ -395,23 +395,27 @@ local function SortEnemyArena(provider)
     return SoftArrange(frames, spacing)
 end
 
----@param provider FrameProvider
+---@param provider FrameProvider?
 ---@return boolean
 function M:TrySort(provider)
     local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
     local enemyEnabled, _, _ = fsCompare:EnemySortMode()
     local sorted = false
 
-    if friendlyEnabled then
-        local sortedParty = SortParty(provider)
-        local sortedRaid = SortRaid(provider)
+    local providers = provider and { provider } or fsProviders:Enabled()
 
-        sorted = sorted or sortedParty or sortedRaid
-    end
+    for _, p in ipairs(providers) do
+        if friendlyEnabled then
+            local sortedParty = SortParty(p)
+            local sortedRaid = SortRaid(p)
 
-    if enemyEnabled and wow.IsRetail() then
-        local arenaSorted = SortEnemyArena(provider)
-        sorted = sorted or arenaSorted
+            sorted = sorted or sortedParty or sortedRaid
+        end
+
+        if enemyEnabled and wow.IsRetail() then
+            local arenaSorted = SortEnemyArena(p)
+            sorted = sorted or arenaSorted
+        end
     end
 
     return sorted

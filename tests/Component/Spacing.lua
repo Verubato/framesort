@@ -3,7 +3,7 @@ local frame = require("Mock\\Frame")
 local fsProviders = addon.Providers
 local provider = fsProviders.Test
 local realBlizzardProvider = fsProviders.Blizzard
-local fsCore = addon.Modules.Sorting.Core
+local fsSort = addon.Modules.Sorting
 
 local M = {}
 local player = frame:New("Frame", "Player")
@@ -25,6 +25,8 @@ function M:setup()
     }
 
     fsProviders.Blizzard = provider
+    ---@diagnostic disable-next-line: inject-field
+    addon.DB.Options.SortingMethod = "Secure"
 end
 
 function M:teardown()
@@ -51,8 +53,7 @@ function M:test_sort_party_frames_top()
     p2:SetPoint("TOPLEFT", provider:PartyContainer(), "TOPLEFT", 0, 0)
     p2:SetPosition(-height * 2, 0, width, -height * 3)
 
-    fsCore.Test = true
-    assert(fsCore:TrySort(provider))
+    assert(fsSort:TrySort())
 
     local function toPos(pos)
         return {
