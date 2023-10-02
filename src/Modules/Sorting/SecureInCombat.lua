@@ -6,6 +6,8 @@ local fsCompare = addon.Collections.Comparer
 local fsProviders = addon.Providers
 local fsEnumerable = addon.Collections.Enumerable
 local fsUnit = addon.WoW.Unit
+local fsScheduler = addon.Scheduling.Scheduler
+local fsLog = addon.Logging.Log
 local M = {}
 addon.Modules.Sorting.Secure.InCombat = M
 
@@ -741,6 +743,25 @@ local function ConfigureHeader(header)
         fsSorting:InvokeCallbacks()
     end
 
+    function header:UnitButtonCreated(index)
+        local children = { header:GetChildren() }
+        local frame = children[index]
+
+        if not frame then
+            fsLog:Error("Failed to find unit button " .. index)
+            return
+        end
+
+        fsScheduler:RunWhenCombatEnds(function()
+            frame:SetAttribute("_onattributechanged", [[
+                if name == "unit" then
+                    local header = self:GetAttribute("Header")
+                    header:RunAttribute("TrySort")
+                end
+            ]])
+        end)
+    end
+
     for name, snippet in pairs(secureMethods) do
         header:SetAttribute(name, snippet)
     end
@@ -772,6 +793,9 @@ local function ConfigureHeader(header)
         ]]
 
         self:SetAttribute("refreshUnitChange", RefreshUnitChange)
+
+        UnitButtonsCount = (UnitButtons or 0) + 1
+        Header:CallMethod("UnitButtonCreated", UnitButtonsCount)
     ]=])
 
     -- must be shown for it to work
