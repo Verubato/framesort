@@ -1,15 +1,22 @@
 local deps = {
+    "Collections\\Enumerable.lua",
     "WoW\\Unit.lua",
 }
 
-local addon = nil
-local helper = nil
-local fsUnit = nil
+local addon = {}
+local helper = {}
+local fsUnit = {}
 local M = {}
 
 function M:setup()
     addon = {
-        WoW = { Api = {} },
+        Collections = {},
+        WoW = {
+            Api = {
+                MAX_RAID_MEMBERS = 40,
+                MEMBERS_PER_RAID_GROUP = 5
+            }
+        },
     }
 
     helper = require("Helper")
@@ -20,6 +27,10 @@ function M:setup()
 
     addon.WoW.Api.IsInGroup = function()
         return true
+    end
+
+    addon.WoW.Api.UnitIsUnit = function(x, y)
+        return x == y
     end
 
     fsUnit = addon.WoW.Unit

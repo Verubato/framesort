@@ -128,6 +128,7 @@ function M:FriendlyTargets()
     end
 
     -- fallback to party/raid123
+    -- TODO: sort the units array
     return fsUnit:FriendlyUnits()
 end
 
@@ -181,7 +182,8 @@ function M:EnemyTargets()
     end
 
     -- fallback to arena123
-    return fsUnit:EnemyUnits()
+    -- TODO: sort the units array
+    return fsUnit:EnemyUnits(false)
 end
 
 function M:Init()

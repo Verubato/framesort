@@ -1,7 +1,7 @@
 local deps = {
+    "Collections\\Enumerable.lua",
     "Wow\\Unit.lua",
     "Configuration\\SortMode.lua",
-    "Collections\\Enumerable.lua",
     "Collections\\Comparer.lua",
 }
 
@@ -18,7 +18,10 @@ function M:setup()
         Configuration = {},
         Numerics = {},
         WoW = {
-            Api = {},
+            Api = {
+                MAX_RAID_MEMBERS = 40,
+                MEMBERS_PER_RAID_GROUP = 5
+            },
         },
         Utils = {},
     }
