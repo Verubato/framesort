@@ -27,21 +27,41 @@ secureMethods["InCombat"] = [[
     return SecureCmdOptionParse("[combat] true; false") == "true"
 ]]
 
+-- gets the unit token from a frame
+secureMethods["GetUnit"] = [[
+    local frameName = ...
+    local frame = _G[frameName]
+
+    local unit = frame:GetAttribute("unit")
+
+    if unit then return unit end
+
+    local name = frame:GetName()
+    if strmatch(name, "GladiusExButtonFrame") then
+        unit = gsub(name, "GladiusExButtonFrame", "")
+        return unit
+    end
+
+    return nil
+]]
+
 -- filters a set of frames to only unit frames
 secureMethods["ExtractUnitFrames"] = [[
-    local tableName = ...
+    local tableName, destinationTableName = ...
     local children = _G[tableName]
-    local frames = newtable()
+    local unitFrames = newtable()
 
     for _, child in ipairs(Children) do
-        local unit = child:GetAttribute("unit")
+        Frame = child
+        local unit = self:RunAttribute("GetUnit", "Frame")
+        Frame = nil
 
-        if unit then
-            frames[#frames + 1] = child
+        if unit and child:IsVisible() then
+            unitFrames[#unitFrames + 1] = child
         end
     end
 
-    Frames = frames
+    _G[destinationTableName] = unitFrames
 ]]
 
 -- returns the index of the item within the array, or -1 if it doesn't exist
@@ -64,7 +84,10 @@ secureMethods["UnitIndex"] = [[
     local frames = _G[framesArrayName]
 
     for i, frame in ipairs(frames) do
-        local frameUnit = frame:GetAttribute("unit")
+        Frame = frame
+        local frameUnit = self:RunAttribute("GetUnit", "Frame")
+        Frame = nil
+
         if frameUnit == unit then
             return i
         end
@@ -88,9 +111,8 @@ secureMethods["CopyTable"] = [[
 -- where the root node is the start of the chain
 -- and each subsequent node depends on the one before it
 -- i.e. root -> frame1 -> frame2 -> frame3
--- modifies the "Root" global variable as secure methods cannot return complex types
 secureMethods["FrameChain"] = [[
-    local framesArrayName = ...
+    local framesArrayName, rootVariableName = ...
     local frames = _G[framesArrayName]
     local nodesByFrame = newtable()
 
@@ -128,16 +150,16 @@ secureMethods["FrameChain"] = [[
     end
 
     if count ~= #frames then
-        return false, nil
+        return false
     end
 
-    Root = root
+    _G[rootVariableName] = root
 
-    return true, "Root"
+    return true
 ]]
 
 -- performs an in place sort on an array of frames by their visual order
-secureMethods["SortByVisualOrder"] = [[
+secureMethods["SortFramesByTopLeft"] = [[
     local framesArrayName = ...
     local frames = _G[framesArrayName]
 
@@ -157,9 +179,94 @@ secureMethods["SortByVisualOrder"] = [[
     end
 ]]
 
+-- performs an in place sort on an array of points by their top left coordinate
+secureMethods["SortPointsByTopLeft"] = [[
+    local pointsArrayName = ...
+    local points = _G[pointsArrayName]
+
+    for i = 1, #points do
+        for j = 1, #points - i do
+            local point = points[j]
+            local next = points[j + 1]
+
+            local topFuzzy = self:RunAttribute("Round", point.Bottom + point.Height)
+            local nextTopFuzzy = self:RunAttribute("Round", next.Bottom + next.Height)
+            local leftFuzzy = self:RunAttribute("Round", point.Left)
+            local nextLeftFuzzy = self:RunAttribute("Round", next.Left)
+
+            if topFuzzy < nextTopFuzzy or leftFuzzy > nextLeftFuzzy then
+                points[j], points[j + 1] = points[j + 1], points[j]
+            end
+        end
+    end
+]]
+
+-- performs an in place sort on an array of points by their top left coordinate
+secureMethods["SortPointsByLeftTop"] = [[
+    local pointsArrayName = ...
+    local points = _G[pointsArrayName]
+
+    for i = 1, #points do
+        for j = 1, #points - i do
+            local point = points[j]
+            local next = points[j + 1]
+
+            local topFuzzy = self:RunAttribute("Round", point.Bottom + point.Height)
+            local nextTopFuzzy = self:RunAttribute("Round", next.Bottom + next.Height)
+            local leftFuzzy = self:RunAttribute("Round", point.Left)
+            local nextLeftFuzzy = self:RunAttribute("Round", next.Left)
+
+            if leftFuzzy > nextLeftFuzzy or topFuzzy < nextTopFuzzy then
+                points[j], points[j + 1] = points[j + 1], points[j]
+            end
+        end
+    end
+]]
+
+secureMethods["ApplySpacing"] = [[
+    local pointsArrayName, spacingTableName = ...
+    local points = _G[pointsArrayName]
+    local spacing = _G[spacingTableName]
+    local horizontal = spacing.Horizontal or 0
+    local vertical = spacing.Vertical or 0
+
+    OrderedTopLeft = newtable()
+    OrderedLeftTop = newtable()
+
+    self:RunAttribute("CopyTable", pointsArrayName, "OrderedTopLeft")
+    self:RunAttribute("CopyTable", pointsArrayName, "OrderedLeftTop")
+
+    self:RunAttribute("SortPointsByTopLeft", "OrderedTopLeft")
+    self:RunAttribute("SortPointsByLeftTop", "OrderedLeftTop")
+
+    for i = 2, #OrderedLeftTop do
+        local point = OrderedLeftTop[i]
+        local previous = OrderedLeftTop[i - 1]
+        local sameRow = self:RunAttribute("Round", point.Bottom) == self:RunAttribute("Round", previous.Bottom)
+
+        if sameRow then
+            local existingSpace = point.Left - (previous.Left + previous.Width)
+            local xDelta = horizontal - existingSpace
+            point.Left = point.Left + xDelta
+        end
+    end
+
+    for i = 2, #OrderedTopLeft do
+        local point = OrderedTopLeft[i]
+        local previous = OrderedTopLeft[i - 1]
+        local sameColumn = self:RunAttribute("Round", point.Left) == self:RunAttribute("Round", previous.Left)
+
+        if sameColumn then
+            local existingSpace = previous.Bottom - (point.Bottom + point.Height)
+            local yDelta = vertical - existingSpace
+            point.Bottom = point.Bottom - yDelta
+        end
+    end
+]]
+
 -- rearranges a set of frames accoding to the pre-sorted unit positions
 secureMethods["TrySortFrames"] = [[
-    local framesTableName, unitsTableName = ...
+    local framesTableName, unitsTableName, spacingTableName = ...
     local frames = _G[framesTableName]
     local units = _G[unitsTableName]
 
@@ -167,7 +274,7 @@ secureMethods["TrySortFrames"] = [[
     OrderedFrames = newtable()
 
     self:RunAttribute("CopyTable", framesTableName, "OrderedFrames")
-    self:RunAttribute("SortByVisualOrder", "OrderedFrames")
+    self:RunAttribute("SortFramesByTopLeft", "OrderedFrames")
 
     local points = newtable()
     for _, frame in ipairs(OrderedFrames) do
@@ -178,25 +285,30 @@ secureMethods["TrySortFrames"] = [[
         point.Bottom = bottom
         point.Width = width
         point.Height = height
-        point.Top = bottom + height
 
         points[#points + 1] = point
     end
 
-    local isChain, rootVariableName = self:RunAttribute("FrameChain", framesTableName)
+    if spacingTableName then
+        Points = points
+
+        self:RunAttribute("ApplySpacing", "Points", spacingTableName)
+    end
+
+    Root = nil
+    local isChain = self:RunAttribute("FrameChain", framesTableName, "Root")
     local enumerationOrder = nil
 
     if isChain then
-        local root = _G[rootVariableName]
         enumerationOrder = newtable()
 
-        local next = root
+        local next = Root
         while next do
             enumerationOrder[#enumerationOrder + 1] = next.Value
             next = next.Next
         end
     else
-        enumerationOrder = Frames
+        enumerationOrder = OrderedFrames
     end
 
     local overflow = #Units
@@ -208,7 +320,10 @@ secureMethods["TrySortFrames"] = [[
     local decimalSanity = 2
 
     for i, source in ipairs(enumerationOrder) do
-        local unit = source:GetAttribute("unit")
+        Frame = source
+        local unit = self:RunAttribute("GetUnit", "Frame")
+        Frame = nil
+
         local desiredIndex = self:RunAttribute("ArrayIndex", unitsTableName, unit)
 
         if desiredIndex <= 0 then
@@ -220,19 +335,18 @@ secureMethods["TrySortFrames"] = [[
 
         if desiredIndex > 0 and desiredIndex <= #points then
             local left, bottom, width, height = source:GetRect()
-            local top = bottom + height
 
             local destination = points[desiredIndex]
             local xDelta = destination.Left - left
-            local yDelta = destination.Top - top
+            local yDelta = destination.Bottom - bottom
 
-            xDelta = self:RunAttribute("Round", xDelta, decimalSanity)
-            yDelta = self:RunAttribute("Round", yDelta, decimalSanity)
+            local xDeltaRounded = self:RunAttribute("Round", xDelta, decimalSanity)
+            local yDeltaRounded = self:RunAttribute("Round", yDelta, decimalSanity)
 
-            if xDelta ~= 0 or yDelta ~= 0 then
+            if xDeltaRounded ~= 0 or yDeltaRounded ~= 0 then
                 local point, relativeTo, relativePoint, offsetX, offsetY = source:GetPoint()
-                local newOffsetX = offsetX + xDelta
-                local newOffsetY = offsetY + yDelta
+                local newOffsetX = (offsetX or 0) + xDelta
+                local newOffsetY = (offsetY or 0) + yDelta
 
                 source:SetPoint(point, relativeTo, relativePoint, newOffsetX, newOffsetY)
                 movedAny = true
@@ -305,14 +419,14 @@ secureMethods["TrySortNew"] = [[
 
     for _, container in ipairs(containers) do
         if container.Frame:IsVisible() then
-            Children = wipe(Children)
-            Frames = wipe(Frames)
+            Children = newtable()
+            Frames = newtable()
 
             -- import into the global table for filtering
             container.Frame:GetChildList(Children)
 
             -- filter to unit frames
-            self:RunAttribute("ExtractUnitFrames", "Children")
+            self:RunAttribute("ExtractUnitFrames", "Children", "Frames")
 
             if #Frames > 0 then
                 local units = container.UnitType == "Friendly" and FriendlyUnits or EnemyUnits
@@ -323,7 +437,9 @@ secureMethods["TrySortNew"] = [[
                 local frameUnits = newtable()
 
                 for _, frame in ipairs(Frames) do
-                    local unit = frame:GetAttribute("unit")
+                    Frame = frame
+                    local unit = self:RunAttribute("GetUnit", "Frame")
+                    Frame = nil
                     frameUnits[unit] = true
                 end
 
@@ -336,9 +452,11 @@ secureMethods["TrySortNew"] = [[
                     end
                 end
 
+                Spacing = container.Spacing
+
                 if #Units > 0 then
                     -- sort them
-                    local framesSorted = self:RunAttribute("TrySortFrames", "Frames", "Units")
+                    local framesSorted = self:RunAttribute("TrySortFrames", "Frames", "Units", Spacing and "Spacing")
                     sorted = sorted or framesSorted
                 end
             end
@@ -346,6 +464,13 @@ secureMethods["TrySortNew"] = [[
     end
 
     return sorted
+]]
+
+-- top level perform sort routine
+secureMethods["TrySortWithoutNotify"] = [[
+    -- local sortedOld = self:RunAttribute("TrySortOld")
+    local sortedNew = self:RunAttribute("TrySortNew", "Containers")
+    return sortedOld or sortedNew
 ]]
 
 -- top level perform sort routine
@@ -412,8 +537,6 @@ secureMethods["ClearState"] = [[
     Containers = wipe(Containers)
     FriendlyUnits = wipe(FriendlyUnits)
     EnemyUnits = wipe(EnemyUnits)
-    Children = wipe(Children)
-    Frames = wipe(Frames)
 ]]
 
 secureMethods["Init"] = [[
@@ -423,8 +546,6 @@ secureMethods["Init"] = [[
     Containers = newtable()
     FriendlyUnits = newtable()
     EnemyUnits = newtable()
-    Children = newtable()
-    Frames = newtable()
 ]]
 
 local function AddFrames(header, provider, frames, type)
@@ -465,6 +586,7 @@ local function LoadContainers()
     local friendlyEnabled = fsCompare:FriendlySortMode()
     local enemyEnabled = fsCompare:EnemySortMode()
     local containers = {}
+    local appearance = addon.DB.Options.Appearance
 
     local elvui = fsProviders.ElvUI
     if friendlyEnabled and elvui:Enabled() then
@@ -479,7 +601,8 @@ local function LoadContainers()
         if friendlyEnabled then
             containers[#containers + 1] = {
                 Frame = blizzard:PartyContainer(),
-                UnitType = "Friendly"
+                UnitType = "Friendly",
+                Spacing = appearance.Party.Spacing
             }
 
             local groups = blizzard:RaidGroups()
@@ -487,7 +610,8 @@ local function LoadContainers()
             for _, group in ipairs(groups) do
                 containers[#containers + 1] = {
                     Frame = group,
-                    UnitType = "Friendly"
+                    UnitType = "Friendly",
+                    Spacing = appearance.Raid.Spacing
                 }
             end
         end
@@ -495,7 +619,8 @@ local function LoadContainers()
         if enemyEnabled then
             containers[#containers + 1] = {
                 Frame = blizzard:EnemyArenaContainer(),
-                UnitType = "Enemy"
+                UnitType = "Enemy",
+                Spacing = appearance.EnemyArena.Spacing
             }
         end
     end
@@ -536,6 +661,8 @@ local function LoadContainers()
         for i, container in ipairs(containers) do
             header:SetFrameRef("Container" .. i, container.Frame)
             header:SetAttribute("ContainerUnitType" .. i, container.UnitType)
+            header:SetAttribute("ContainerSpacingVertical" .. i, container.Spacing and container.Spacing.Vertical)
+            header:SetAttribute("ContainerSpacingHorizontal" .. i, container.Spacing and container.Spacing.Vertical)
         end
 
         header:SetAttribute("ContainersCount", #containers)
@@ -545,10 +672,18 @@ local function LoadContainers()
             for i = 1, count do
                 local frame = self:GetFrameRef("Container" .. i)
                 local unitType = self:GetAttribute("ContainerUnitType" .. i)
+                local spacingHorizontal = self:GetAttribute("ContainerSpacingHorizontal" .. i)
+                local spacingVertical = self:GetAttribute("ContainerSpacingVertical" .. i)
 
                 local container = newtable()
                 container.Frame = frame
                 container.UnitType = unitType
+
+                if spacingHorizontal or spacingVertical then
+                    container.Spacing = newtable()
+                    container.Spacing.Horizontal = spacingHorizontal or 0
+                    container.Spacing.Vertical = spacingVertical or 0
+                end
 
                 Containers[#Containers + 1] = container
             end
@@ -757,5 +892,25 @@ end
 ---@return boolean sorted true if sorted, otherwise false.
 ---@param provider FrameProvider the provider to sort.
 function M:TrySort(provider)
+    -- ClearState()
+    --
+    -- local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
+    -- local enemyEnabled, _, _ = fsCompare:EnemySortMode()
+    --
+    -- if not friendlyEnabled and not enemyEnabled then return false end
+    --
+    -- ProtectContainers()
+    -- LoadUnits()
+    -- LoadContainers()
+    -- LoadFrames()
+    --
+    -- local header = headers[1]
+    -- header:SetAttribute("TrySortResult", nil)
+    -- header:Execute([[
+    --     local sorted = self:RunAttribute("TrySortWithoutNotify")
+    --     self:SetAttribute("TrySortResult", sorted)
+    -- ]])
+    --
+    -- return header:GetAttribute("TrySortResult")
     return fsSorting.Core:TrySort(provider)
 end

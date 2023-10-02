@@ -33,6 +33,7 @@ function M:FriendlyUnits()
     return members
 end
 
+-- TODO: refactor so that FriendlyUnits() and EnemyUnits() are consistent with whether they return only units that exist or not
 ---Gets a table of enemy unit tokens that may or may not exist.
 ---@return string[]
 function M:EnemyUnits()
