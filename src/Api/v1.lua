@@ -112,6 +112,7 @@ function M.Options:SetPlayerSortMode(area, mode)
     local table = addon.DB.Options[area]
     table.PlayerSortMode = mode
 
+    fsConfig:NotifyChanged()
     fsSort:TrySort()
 end
 
@@ -125,6 +126,7 @@ function M.Options:SetGroupSortMode(area, mode)
     local table = addon.DB.Options[area]
     table.GroupSortMode = mode
 
+    fsConfig:NotifyChanged()
     fsSort:TrySort()
 end
 
@@ -155,6 +157,8 @@ function M.Options:SetEnabled(area, enabled)
     local table = addon.DB.Options[area]
     table.Enabled = enabled
 
+    fsConfig:NotifyChanged()
+
     if enabled then
         fsSort:TrySort()
     end
@@ -178,12 +182,14 @@ function M.Options:SetReverse(area, reverse)
     local table = addon.DB.Options[area]
     table.Reverse = reverse
 
+    fsConfig:NotifyChanged()
     fsSort:TrySort()
 end
 
 ---Enables/disables logging.
 function M.Logging:SetEnabled(enable)
     addon.DB.Options.Logging.Enabled = enable
+    fsConfig:NotifyChanged()
 end
 
 ---Exposes the addon table to the public when enabled.

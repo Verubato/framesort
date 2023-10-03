@@ -22,9 +22,3 @@ function M:TrySort(provider)
 
     return false
 end
-
----@return boolean
-function M:TrySpace()
-    M.InCombat:RefreshSpacing()
-    return M.NoCombat:TrySpace()
-end

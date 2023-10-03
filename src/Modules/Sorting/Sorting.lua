@@ -15,7 +15,7 @@ end
 
 ---Calls the post sorting callbacks.
 function M:InvokeCallbacks()
-    for _, callback in pairs(callbacks) do
+    for _, callback in ipairs(callbacks) do
         pcall(callback)
     end
 end
@@ -65,24 +65,6 @@ function M:TrySort(provider)
     end
 
     return sorted
-end
-
----Attempts to apply frame spacing.
----@return boolean sorted true if spacing applied, otherwise false.
-function M:TrySpace()
-    if addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Secure then
-        if wow.InCombatLockdown() then
-            fsScheduler:RunWhenCombatEnds(function()
-                M.Secure:TrySpace()
-            end, "TrySpace")
-
-            return false
-        end
-
-        return M.Secure:TrySpace()
-    end
-
-    return false
 end
 
 ---Initialises the module.

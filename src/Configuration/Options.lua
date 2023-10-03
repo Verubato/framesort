@@ -2,6 +2,7 @@
 local _, addon = ...
 local fsConfig = addon.Configuration
 local wow = addon.WoW.Api
+local callbacks = {}
 
 fsConfig.VerticalSpacing = 13
 fsConfig.HorizontalSpacing = 50
@@ -23,6 +24,16 @@ local function AddSubCategory(panel)
         subcategory.ID = panel.name
     else
         wow.InterfaceOptions_AddCategory(panel)
+    end
+end
+
+function fsConfig:RegisterConfigurationChangedCallback(callback)
+    callbacks[#callbacks + 1] = callback
+end
+
+function fsConfig:NotifyChanged()
+    for _, callback in ipairs(callbacks) do
+        pcall(callback)
     end
 end
 
@@ -74,5 +85,9 @@ function fsConfig:Init()
             wow.InterfaceOptionsFrame_OpenToCategory(panel)
             wow.InterfaceOptionsFrame_OpenToCategory(panel)
         end
+    end
+
+    if #callbacks > 0 then
+        callbacks = {}
     end
 end
