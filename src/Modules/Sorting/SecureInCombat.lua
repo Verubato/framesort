@@ -522,7 +522,7 @@ secureMethods["TrySortNew"] = [[
             if enemyEnabled then
                 containers[#containers + 1] = provider.EnemyArena
             end
-            
+
             for _, container in ipairs(containers) do
                 if container.Frame and container.Frame:IsVisible() then
                     Container = container
@@ -631,7 +631,7 @@ secureMethods["LoadUnits"] = [[
 
     local friendlyUnitsCount = self:GetAttribute("FriendlyUnitsCount")
     local enemyUnitsCount = self:GetAttribute("EnemyUnitsCount")
-    
+
     if friendlyUnitsCount then
         for i = 1, friendlyUnitsCount do
             local unit = self:GetAttribute("FriendlyUnit" .. i)
@@ -893,8 +893,10 @@ local function OnProviderUpdate(provider)
 end
 
 local function OnConfigChanged()
-    LoadSpacing()
-    LoadEnabled()
+    fsScheduler:RunWhenCombatEnds(function()
+        LoadSpacing()
+        LoadEnabled()
+    end, "SecureSortConfigChanged")
 end
 
 function M:Init()
