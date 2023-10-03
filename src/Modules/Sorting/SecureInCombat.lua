@@ -499,6 +499,12 @@ secureMethods["TrySortNew"] = [[
     if not friendlyEnabled and not enemyEnabled then return false end
     if not Providers then return false end
 
+    local loadedUnits = self:GetAttribute("LoadedUnits")
+    if not loadedUnits then
+        self:RunAttribute("LoadUnits")
+        self:SetAttribute("LoadedUnits", true)
+    end
+
     local sorted = false
 
     for _, provider in pairs(Providers) do
@@ -666,7 +672,8 @@ local function LoadUnits()
 
         header:SetAttribute("FriendlyUnitsCount", #friendlyUnits)
         header:SetAttribute("EnemyUnitsCount", #enemyUnits)
-        header:Execute([[ self:RunAttribute("LoadUnits") ]])
+        -- flag that the units need to be reloaded
+        header:SetAttribute("LoadedUnits", false)
     end
 end
 
