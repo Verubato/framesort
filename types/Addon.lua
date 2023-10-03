@@ -64,8 +64,10 @@
 ---@field InCombat InCombatSecureSorter
 ---@field NoCombat NoCombatSecureSorter
 
----@class InCombatSecureSorter : ISpace, IInitialise
 ---@class NoCombatSecureSorter : ISort, ISpace, IInitialise
+---@class InCombatSecureSorter : IInitialise
+---@field RefreshUnits fun(self: table)
+---@field RefreshSpacing fun(self: table)
 
 ---@class ISort
 ---@field TrySort fun(self: table, provider: FrameProvider?): boolean

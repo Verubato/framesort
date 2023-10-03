@@ -425,8 +425,9 @@ secureMethods["TrySortContainer"] = [[
     local friendlyEnabled = self:GetAttribute("FriendlySortEnabled")
     local enemyEnabled = self:GetAttribute("EnemySortEnabled")
 
-    local containerName, providerName = ...
-    local container = _G[containerName]
+    local containerVariable, providerVariable = ...
+    local container = _G[containerVariable]
+    local provider = _G[providerVariable]
 
     Children = newtable()
     Frames = newtable()
@@ -434,9 +435,8 @@ secureMethods["TrySortContainer"] = [[
     -- import into the global table for filtering
     container.Frame:GetChildList(Children)
 
-    -- filter to unit frames
     -- blizzard frames can have non-existant units assigned, so filter them out
-    if not self:RunAttribute("ExtractUnitFrames", "Children", "Frames", container.IsBlizzard) then
+    if not self:RunAttribute("ExtractUnitFrames", "Children", "Frames", provider.IsBlizzard) then
         return false
     end
 
@@ -454,11 +454,11 @@ secureMethods["TrySortContainer"] = [[
 
     Spacing = nil
 
-    if container.IsBlizzard then
+    if provider.IsBlizzard then
         local horizontalSpacing = self:GetAttribute(container.Type .. "SpacingHorizontal")
         local verticalSpacing = self:GetAttribute(container.Type .. "SpacingVertical")
 
-        if horizontalSpacing or verticalSpacing then
+        if (horizontalSpacing and horizontalSpacing ~= 0) or (verticalSpacing and verticalSpacing ~= 0) then
             Spacing = newtable()
             Spacing.Horizontal = horizontalSpacing
             Spacing.Vertical = verticalSpacing
@@ -493,11 +493,12 @@ secureMethods["TrySortContainer"] = [[
 
 -- sorts frames based on the pre-combat sorted units array
 secureMethods["TrySortNew"] = [[
+    if not Providers then return false end
+
     local friendlyEnabled = self:GetAttribute("FriendlySortEnabled")
     local enemyEnabled = self:GetAttribute("EnemySortEnabled")
 
     if not friendlyEnabled and not enemyEnabled then return false end
-    if not Providers then return false end
 
     local loadedUnits = self:GetAttribute("LoadedUnits")
     if not loadedUnits then
@@ -510,13 +511,26 @@ secureMethods["TrySortNew"] = [[
     for _, provider in pairs(Providers) do
         local providerEnabled = self:GetAttribute("Provider" .. provider.Name .. "Enabled")
         if providerEnabled then
-            for _, container in ipairs(provider.Containers) do
+            local containers = newtable()
+
+            if friendlyEnabled then
+                containers[#containers + 1] = provider.Party
+                containers[#containers + 1] = provider.Raid
+            end
+
+            if enemyEnabled then
+                containers[#containers + 1] = provider.EnemyArena
+            end
+            
+            for _, container in ipairs(containers) do
                 if container.Frame and container.Frame:IsVisible() then
                     Container = container
+                    Provider = provider
 
-                    local containerSorted = self:RunAttribute("TrySortContainer", "Container", provider.Name)
+                    local containerSorted = self:RunAttribute("TrySortContainer", "Container", "Provider")
                     sorted = sorted or containerSorted
 
+                    Provider = nil
                     Container = nil
                 end
             end
@@ -591,8 +605,6 @@ secureMethods["LoadProvider"] = [[
         Providers[name] = provider
     end
 
-    provider.Containers = newtable()
-
     local types = newtable()
     types[#types + 1] = "Party"
     types[#types + 1] = "Raid"
@@ -608,7 +620,6 @@ secureMethods["LoadProvider"] = [[
             data.Type = type
 
             provider[type] = data
-            provider.Containers[#provider.Containers + 1] = data
         end
     end
 ]]
@@ -619,15 +630,19 @@ secureMethods["LoadUnits"] = [[
 
     local friendlyUnitsCount = self:GetAttribute("FriendlyUnitsCount")
     local enemyUnitsCount = self:GetAttribute("EnemyUnitsCount")
-
-    for i = 1, friendlyUnitsCount do
-        local unit = self:GetAttribute("FriendlyUnit" .. i)
-        FriendlyUnits[#FriendlyUnits + 1] = unit
+    
+    if friendlyUnitsCount then
+        for i = 1, friendlyUnitsCount do
+            local unit = self:GetAttribute("FriendlyUnit" .. i)
+            FriendlyUnits[#FriendlyUnits + 1] = unit
+        end
     end
 
-    for i = 1, enemyUnitsCount do
-        local unit = self:GetAttribute("EnemyUnit" .. i)
-        EnemyUnits[#EnemyUnits + 1] = unit
+    if enemyUnitsCount then
+        for i = 1, enemyUnitsCount do
+            local unit = self:GetAttribute("EnemyUnit" .. i)
+            EnemyUnits[#EnemyUnits + 1] = unit
+        end
     end
 ]]
 
@@ -677,7 +692,7 @@ local function LoadUnits()
     end
 end
 
-local function SetEnabled()
+local function LoadEnabled()
     local friendlyEnabled = fsCompare:FriendlySortMode()
     local enemyEnabled = fsCompare:EnemySortMode()
 
@@ -691,7 +706,7 @@ local function SetEnabled()
     end
 end
 
-local function SetSpacing()
+local function LoadSpacing()
     local appearance = addon.DB.Options.Appearance
 
     for _, header in ipairs(headers) do
@@ -782,12 +797,7 @@ local function LoadProvider(provider)
 end
 
 local function OnCombatStarting()
-    SetEnabled()
-    LoadFrames()
-end
-
-local function OnUnitChanged()
-    fsScheduler:RunWhenCombatEnds(LoadUnits, "SecureUnitsUpdate")
+    LoadEnabled()
 end
 
 local function InjectSecureHelpers(secureFrame)
@@ -866,7 +876,7 @@ local function ConfigureHeader(header)
 
         self:SetAttribute("refreshUnitChange", RefreshUnitChange)
 
-        UnitButtonsCount = (UnitButtons or 0) + 1
+        UnitButtonsCount = (UnitButtonsCount or 0) + 1
         Header:CallMethod("UnitButtonCreated", UnitButtonsCount)
     ]=])
 
@@ -890,18 +900,6 @@ function M:Init()
     combatEndFrame:HookScript("OnEvent", OnCombatStarting)
     combatEndFrame:RegisterEvent(wow.Events.PLAYER_REGEN_DISABLED)
 
-    local unitChangedFrame = wow.CreateFrame("Frame")
-    unitChangedFrame:HookScript("OnEvent", OnUnitChanged)
-    unitChangedFrame:RegisterEvent(wow.Events.GROUP_ROSTER_UPDATE)
-    unitChangedFrame:RegisterEvent(wow.Events.UNIT_PET)
-    unitChangedFrame:RegisterEvent(wow.Events.PLAYER_ROLES_ASSIGNED)
-    unitChangedFrame:RegisterEvent(wow.Events.PLAYER_ENTERING_WORLD)
-
-    if wow.IsRetail() then
-        unitChangedFrame:RegisterEvent(wow.Events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
-        unitChangedFrame:RegisterEvent(wow.Events.ARENA_OPPONENT_UPDATE)
-    end
-
     local groupHeader = wow.CreateFrame("Frame", "FrameSortGroupHeader", wow.UIParent, "SecureGroupHeaderTemplate")
     local petHeader = wow.CreateFrame("Frame", "FrameSortPetGroupHeader", wow.UIParent, "SecureGroupPetHeaderTemplate")
 
@@ -916,10 +914,15 @@ function M:Init()
         provider:RegisterCallback(OnProviderUpdate)
     end
 
-    SetSpacing()
+    M:RefreshSpacing()
+    M:RefreshUnits()
 end
 
-function M:TrySpace()
-    SetSpacing()
-    return false
+function M:RefreshSpacing()
+    LoadSpacing()
+end
+
+function M:RefreshUnits()
+    LoadUnits()
+    LoadFrames()
 end
