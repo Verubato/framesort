@@ -77,7 +77,7 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
             local value = setValue(sliderValue, slider, box)
             if value then
                 spacing.Horizontal = value
-                fsSorting:TrySort()
+                fsSorting:TrySpace()
             end
         end)
 
@@ -89,7 +89,7 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
             local value = setValue(box:GetText(), slider, box)
             if value then
                 spacing.Horizontal = value
-                fsSorting:TrySort()
+                fsSorting:TrySpace()
             end
         end)
 
@@ -117,7 +117,7 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
             local value = setValue(sliderValue, slider, box)
             if value then
                 spacing.Vertical = value
-                fsSorting:TrySort()
+                fsSorting:TrySpace()
             end
         end)
 
@@ -130,7 +130,7 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
 
             if value then
                 spacing.Vertical = value
-                fsSorting:TrySort()
+                fsSorting:TrySpace()
             end
         end)
 

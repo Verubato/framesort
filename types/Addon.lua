@@ -52,18 +52,23 @@
 ---@field Macro MacroUtil
 ---@field Unit UnitUtil
 
----@class SortingModules : IInitialise, ISort
----@field Traditional ISort
+---@class SortingModules : ISort, ISpace, IInitialise
+---@field Traditional TraditionalSortingModule
 ---@field Secure SecureSortingModule
 ---@field RegisterPostSortCallback fun(self: table, callback: function)
 ---@field InvokeCallbacks fun(self: table)
 
----@class SecureSortingModule : ISort, IInitialise
----@field InCombat IInitialise
----@field NoCombat ISortWithInit
+---@class TraditionalSortingModule : ISort
 
----@class ISortWithInit
----@field TrySort fun(self: table, provider: FrameProvider?): boolean
+---@class SecureSortingModule : ISort, ISpace, IInitialise
+---@field InCombat InCombatSecureSorter
+---@field NoCombat NoCombatSecureSorter
+
+---@class InCombatSecureSorter : ISpace, IInitialise
+---@class NoCombatSecureSorter : ISort, ISpace, IInitialise
 
 ---@class ISort
 ---@field TrySort fun(self: table, provider: FrameProvider?): boolean
+
+---@class ISpace
+---@field TrySpace fun(self: table): boolean
