@@ -160,6 +160,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
             end
 
             options.PlayerSortMode = sender:GetChecked() and playerModes[sender] or ""
+            fsConfig:NotifyChanged()
             fsHide:ShowHidePlayer()
             fsSort:TrySort()
         end
@@ -225,6 +226,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         end
 
         options.GroupSortMode = sender:GetChecked() and modes[sender] or ""
+        fsConfig:NotifyChanged()
         fsSort:TrySort()
     end
 
@@ -234,6 +236,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
 
     reverse:HookScript("OnClick", function()
         options.Reverse = reverse:GetChecked()
+        fsConfig:NotifyChanged()
         fsSort:TrySort()
     end)
 
@@ -291,6 +294,8 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         options.Enabled = checked
 
         showHide(checked)
+
+        fsConfig:NotifyChanged()
 
         if checked then
             fsSort:TrySort()

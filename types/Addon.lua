@@ -60,17 +60,13 @@
 
 ---@class TraditionalSortingModule : ISort
 
----@class SecureSortingModule : ISort, ISpace, IInitialise
+---@class SecureSortingModule : ISort, IInitialise
 ---@field InCombat InCombatSecureSorter
 ---@field NoCombat NoCombatSecureSorter
 
----@class NoCombatSecureSorter : ISort, ISpace, IInitialise
+---@class NoCombatSecureSorter : ISort, IInitialise
 ---@class InCombatSecureSorter : IInitialise
 ---@field RefreshUnits fun(self: table)
----@field RefreshSpacing fun(self: table)
 
 ---@class ISort
 ---@field TrySort fun(self: table, provider: FrameProvider?): boolean
-
----@class ISpace
----@field TrySpace fun(self: table): boolean

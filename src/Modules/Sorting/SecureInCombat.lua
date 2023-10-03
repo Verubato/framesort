@@ -7,6 +7,7 @@ local fsProviders = addon.Providers
 local fsEnumerable = addon.Collections.Enumerable
 local fsUnit = addon.WoW.Unit
 local fsScheduler = addon.Scheduling.Scheduler
+local fsConfig = addon.Configuration
 local fsLog = addon.Logging.Log
 local M = {}
 addon.Modules.Sorting.Secure.InCombat = M
@@ -796,10 +797,6 @@ local function LoadProvider(provider)
     end
 end
 
-local function OnCombatStarting()
-    LoadEnabled()
-end
-
 local function InjectSecureHelpers(secureFrame)
     if not secureFrame.Execute then
         function secureFrame:Execute(body)
@@ -895,11 +892,12 @@ local function OnProviderUpdate(provider)
     LoadProvider(provider)
 end
 
-function M:Init()
-    local combatEndFrame = wow.CreateFrame("Frame")
-    combatEndFrame:HookScript("OnEvent", OnCombatStarting)
-    combatEndFrame:RegisterEvent(wow.Events.PLAYER_REGEN_DISABLED)
+local function OnConfigChanged()
+    LoadSpacing()
+    LoadEnabled()
+end
 
+function M:Init()
     local groupHeader = wow.CreateFrame("Frame", "FrameSortGroupHeader", wow.UIParent, "SecureGroupHeaderTemplate")
     local petHeader = wow.CreateFrame("Frame", "FrameSortPetGroupHeader", wow.UIParent, "SecureGroupPetHeaderTemplate")
 
@@ -914,12 +912,11 @@ function M:Init()
         provider:RegisterCallback(OnProviderUpdate)
     end
 
-    M:RefreshSpacing()
-    M:RefreshUnits()
-end
-
-function M:RefreshSpacing()
+    LoadEnabled()
     LoadSpacing()
+    LoadFrames()
+
+    fsConfig:RegisterConfigurationChangedCallback(OnConfigChanged)
 end
 
 function M:RefreshUnits()

@@ -420,8 +420,3 @@ function M:TrySort(provider)
 
     return sorted
 end
-
----@return boolean
-function M:TrySpace()
-    return M:TrySort()
-end
