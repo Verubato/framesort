@@ -46,7 +46,7 @@ function M:TrySort(provider)
         -- can't make changes during combat
         fsScheduler:RunWhenCombatEnds(function()
             M:TrySort(provider)
-        end, "Sort" .. (provider and provider:Name() or ""))
+        end, "TrySort" .. (provider and provider:Name() or ""))
 
         return false
     end
@@ -67,6 +67,25 @@ function M:TrySort(provider)
     return sorted
 end
 
+---Attempts to apply frame spacing.
+---@return boolean sorted true if spacing applied, otherwise false.
+function M:TrySpace()
+    if addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Secure then
+        if wow.InCombatLockdown() then
+            fsScheduler:RunWhenCombatEnds(function()
+                M.Secure:TrySpace()
+            end, "TrySpace")
+
+            return false
+        end
+
+        return M.Secure:TrySpace()
+    end
+
+    return false
+end
+
+---Initialises the module.
 function M:Init()
     if addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Secure then
         M.Secure:Init()

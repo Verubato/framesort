@@ -15,3 +15,5 @@
 ---@field SortingMethod SortingMethodOptions
 ---@field Macro OptionsPanel
 ---@field Integration OptionsPanel
+---@field RegisterConfigurationChangedCallback fun(self: table, callback: fun())
+---@field NotifyChanged fun(self: table)
