@@ -11,11 +11,20 @@ end
 ---@return boolean
 function M:TrySort(provider)
     -- if we're in combat, the secure sorting will trigger itself
-    return not wow.InCombatLockdown() and M.NoCombat:TrySort(provider)
+    if wow.InCombatLockdown() then
+        return false
+    end
+
+    if M.NoCombat:TrySort(provider) then
+        M.InCombat:RefreshUnits()
+        return true
+    end
+
+    return false
 end
 
 ---@return boolean
 function M:TrySpace()
-    M.InCombat:TrySpace()
+    M.InCombat:RefreshSpacing()
     return M.NoCombat:TrySpace()
 end
