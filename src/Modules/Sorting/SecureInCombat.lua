@@ -82,24 +82,6 @@ secureMethods["ArrayIndex"] = [[
     return -1
 ]]
 
--- returns the index of the unit frame within the array of frames, or -1 if it doesn't exist
-secureMethods["UnitIndex"] = [[
-    local framesVariable, unit = ...
-    local frames = _G[framesVariable]
-
-    for i, frame in ipairs(frames) do
-        Frame = frame
-        local frameUnit = self:RunAttribute("GetUnit", "Frame")
-        Frame = nil
-
-        if frameUnit == unit then
-            return i
-        end
-    end
-
-    return -1
-]]
-
 -- copies elements from one table to another
 secureMethods["CopyTable"] = [[
     local fromName, toName = ...
