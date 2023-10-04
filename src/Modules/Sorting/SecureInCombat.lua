@@ -32,8 +32,8 @@ secureMethods["InCombat"] = [[
 
 -- gets the unit token from a frame
 secureMethods["GetUnit"] = [[
-    local frameName = ...
-    local frame = _G[frameName]
+    local framesVariable = ...
+    local frame = _G[framesVariable]
 
     local unit = frame:GetAttribute("unit")
 
@@ -50,11 +50,11 @@ secureMethods["GetUnit"] = [[
 
 -- filters a set of frames to only unit frames
 secureMethods["ExtractUnitFrames"] = [[
-    local tableName, destinationTableName, visibleOnly = ...
-    local children = _G[tableName]
+    local framesVariable, destinationVariable, visibleOnly = ...
+    local children = _G[framesVariable]
     local unitFrames = newtable()
 
-    for _, child in ipairs(Children) do
+    for _, child in ipairs(children) do
         Frame = child
         local unit = self:RunAttribute("GetUnit", "Frame")
         Frame = nil
@@ -64,14 +64,14 @@ secureMethods["ExtractUnitFrames"] = [[
         end
     end
 
-    _G[destinationTableName] = unitFrames
+    _G[destinationVariable] = unitFrames
     return #unitFrames > 0
 ]]
 
 -- returns the index of the item within the array, or -1 if it doesn't exist
 secureMethods["ArrayIndex"] = [[
-    local arrayName, item = ...
-    local array = _G[arrayName]
+    local arrayVariable, item = ...
+    local array = _G[arrayVariable]
 
     for i, value in ipairs(array) do
         if value == item then
@@ -84,8 +84,8 @@ secureMethods["ArrayIndex"] = [[
 
 -- returns the index of the unit frame within the array of frames, or -1 if it doesn't exist
 secureMethods["UnitIndex"] = [[
-    local framesArrayName, unit = ...
-    local frames = _G[framesArrayName]
+    local framesVariable, unit = ...
+    local frames = _G[framesVariable]
 
     for i, frame in ipairs(frames) do
         Frame = frame
@@ -116,8 +116,8 @@ secureMethods["CopyTable"] = [[
 -- and each subsequent node depends on the one before it
 -- i.e. root -> frame1 -> frame2 -> frame3
 secureMethods["FrameChain"] = [[
-    local framesArrayName, rootVariableName = ...
-    local frames = _G[framesArrayName]
+    local framesVariable, destinationVariable = ...
+    local frames = _G[framesVariable]
     local nodesByFrame = newtable()
 
     for _, frame in pairs(frames) do
@@ -157,15 +157,15 @@ secureMethods["FrameChain"] = [[
         return false
     end
 
-    _G[rootVariableName] = root
+    _G[destinationVariable] = root
 
     return true
 ]]
 
 -- performs an in place sort on an array of frames by their visual order
 secureMethods["SortFramesByTopLeft"] = [[
-    local framesArrayName = ...
-    local frames = _G[framesArrayName]
+    local framesVariable = ...
+    local frames = _G[framesVariable]
 
     -- bubble sort because it's easier to write
     -- not going to write an Olog(n) sort algorithm in this environment
@@ -185,8 +185,8 @@ secureMethods["SortFramesByTopLeft"] = [[
 
 -- performs an in place sort on an array of points by their top left coordinate
 secureMethods["SortPointsByTopLeft"] = [[
-    local pointsArrayName = ...
-    local points = _G[pointsArrayName]
+    local pointsVariable = ...
+    local points = _G[pointsVariable]
 
     for i = 1, #points do
         for j = 1, #points - i do
@@ -207,8 +207,8 @@ secureMethods["SortPointsByTopLeft"] = [[
 
 -- performs an in place sort on an array of points by their top left coordinate
 secureMethods["SortPointsByLeftTop"] = [[
-    local pointsArrayName = ...
-    local points = _G[pointsArrayName]
+    local pointsVariable = ...
+    local points = _G[pointsVariable]
 
     for i = 1, #points do
         for j = 1, #points - i do
@@ -228,17 +228,17 @@ secureMethods["SortPointsByLeftTop"] = [[
 ]]
 
 secureMethods["ApplySpacing"] = [[
-    local pointsArrayName, spacingTableName = ...
-    local points = _G[pointsArrayName]
-    local spacing = _G[spacingTableName]
+    local pointsVariable, spacingVariable = ...
+    local points = _G[pointsVariable]
+    local spacing = _G[spacingVariable]
     local horizontal = spacing.Horizontal or 0
     local vertical = spacing.Vertical or 0
 
     OrderedTopLeft = newtable()
     OrderedLeftTop = newtable()
 
-    self:RunAttribute("CopyTable", pointsArrayName, "OrderedTopLeft")
-    self:RunAttribute("CopyTable", pointsArrayName, "OrderedLeftTop")
+    self:RunAttribute("CopyTable", pointsVariable, "OrderedTopLeft")
+    self:RunAttribute("CopyTable", pointsVariable, "OrderedLeftTop")
 
     self:RunAttribute("SortPointsByTopLeft", "OrderedTopLeft")
     self:RunAttribute("SortPointsByLeftTop", "OrderedLeftTop")
@@ -276,14 +276,14 @@ secureMethods["ApplySpacing"] = [[
 
 -- rearranges a set of frames accoding to the pre-sorted unit positions
 secureMethods["TrySortFrames"] = [[
-    local framesTableName, unitsTableName, spacingTableName = ...
-    local frames = _G[framesTableName]
-    local units = _G[unitsTableName]
+    local framesVariable, unitsVariable, spacingVariable = ...
+    local frames = _G[framesVariable]
+    local units = _G[unitsVariable]
 
     EnumerationOrder = newtable()
     OrderedFrames = newtable()
 
-    self:RunAttribute("CopyTable", framesTableName, "OrderedFrames")
+    self:RunAttribute("CopyTable", framesVariable, "OrderedFrames")
     self:RunAttribute("SortFramesByTopLeft", "OrderedFrames")
 
     local points = newtable()
@@ -299,14 +299,14 @@ secureMethods["TrySortFrames"] = [[
         points[#points + 1] = point
     end
 
-    if spacingTableName then
+    if spacingVariable then
         Points = points
 
-        self:RunAttribute("ApplySpacing", "Points", spacingTableName)
+        self:RunAttribute("ApplySpacing", "Points", spacingVariable)
     end
 
     Root = nil
-    local isChain = self:RunAttribute("FrameChain", framesTableName, "Root")
+    local isChain = self:RunAttribute("FrameChain", framesVariable, "Root")
     local enumerationOrder = nil
 
     if isChain then
@@ -334,7 +334,7 @@ secureMethods["TrySortFrames"] = [[
         local unit = self:RunAttribute("GetUnit", "Frame")
         Frame = nil
 
-        local desiredIndex = self:RunAttribute("ArrayIndex", unitsTableName, unit)
+        local desiredIndex = self:RunAttribute("ArrayIndex", unitsVariable, unit)
 
         if desiredIndex <= 0 then
             -- for any units we don't know about, e.g. players who joined mid-combat
