@@ -781,7 +781,7 @@ local function LoadProvider(provider)
         }
     }
 
-    if provider == fsProviders.Blizzard then
+    if provider == fsProviders.Blizzard and provider:IsRaidGrouped() then
         local groups = provider:RaidGroups()
 
         -- c'mon blizzard, seriously?
