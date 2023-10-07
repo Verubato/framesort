@@ -280,6 +280,63 @@ secureMethods["ApplySpacing"] = [[
 ]]
 
 -- rearranges a set of frames accoding to the pre-sorted unit positions
+secureMethods["SpaceGroups"] = [[
+    local groupsVariable, spacingVariable = ...
+    local groups = _G[groupsVariable]
+    local spacing = _G[spacingVariable]
+
+    local points = newtable()
+    local pointsByGroup = newtable()
+
+    for _, group in ipairs(groups) do
+        local point = newtable()
+        local left, bottom, width, height = group:GetRect()
+
+        point.Left = left
+        point.Bottom = bottom
+        point.Width = width
+        point.Height = height
+
+        points[#points + 1] = point
+        pointsByGroup[group] = point
+    end
+
+    GroupPoints = points
+
+    if not self:RunAttribute("ApplySpacing", "GroupPoints", spacingVariable) then
+        GroupPoints = nil
+        return false
+    end
+
+    GroupPoints = nil
+
+    local movedAny = false
+
+    for _, group in ipairs(groups) do
+        local point = pointsByGroup[group]
+        local left, bottom, _, _ = group:GetRect()
+        local xDelta = point.Left - left
+        local yDelta = point.Bottom - bottom
+        local xDeltaRounded = self:RunAttribute("Round", xDelta, DecimalSanity)
+        local yDeltaRounded = self:RunAttribute("Round", yDelta, DecimalSanity)
+
+        if xDeltaRounded ~= 0 or yDeltaRounded ~= 0 then
+            -- getting "Invalid relative frame handle" errors when using the container from GetPoint()
+            -- IsProtected() on the parent is returning "true,true" so it shouldn't be a problem
+            -- another side effect bug from #470 I assume
+            local point, _, relativePoint, offsetX, offsetY = group:GetPoint()
+            local newOffsetX = (offsetX or 0) + xDelta
+            local newOffsetY = (offsetY or 0) + yDelta
+
+            group:SetPoint(point, "$parent", relativePoint, newOffsetX, newOffsetY)
+            movedAny = true
+        end
+    end
+
+    return movedAny
+]]
+
+-- rearranges a set of frames accoding to the pre-sorted unit positions
 secureMethods["SoftArrange"] = [[
     local framesVariable, unitsVariable, spacingVariable = ...
     local frames = _G[framesVariable]
@@ -329,11 +386,6 @@ secureMethods["SoftArrange"] = [[
     local overflow = #units
     local movedAny = false
 
-    -- don't move frames if they are have minuscule position differences
-    -- it's just a rounding error and makes no visual impact
-    -- this helps preventing spam on our callbacks
-    local decimalSanity = 2
-
     for i, source in ipairs(enumerationOrder) do
         Frame = source
         local unit = self:RunAttribute("GetUnit", "Frame")
@@ -353,8 +405,8 @@ secureMethods["SoftArrange"] = [[
             local destination = points[desiredIndex]
             local xDelta = destination.Left - left
             local yDelta = destination.Bottom - bottom
-            local xDeltaRounded = self:RunAttribute("Round", xDelta, decimalSanity)
-            local yDeltaRounded = self:RunAttribute("Round", yDelta, decimalSanity)
+            local xDeltaRounded = self:RunAttribute("Round", xDelta, DecimalSanity)
+            local yDeltaRounded = self:RunAttribute("Round", yDelta, DecimalSanity)
 
             if xDeltaRounded ~= 0 or yDeltaRounded ~= 0 then
                 local point, relativeTo, relativePoint, offsetX, offsetY = source:GetPoint()
@@ -377,11 +429,6 @@ secureMethods["TrySortOld"] = [[
 
     local sorted = false
 
-    -- don't move frames if they are have minuscule position differences
-    -- it's just a rounding error and makes no visual impact
-    -- this helps preventing spam on our callbacks
-    local decimalSanity = 2
-
     for provider, framesByType in pairs(FramesByProvider) do
         for _, frames in pairs(framesByType) do
             local framesToMove = newtable()
@@ -392,10 +439,10 @@ secureMethods["TrySortOld"] = [[
                 if to then
                     local point, relativeTo, relativePoint, offsetX, offsetY = frame:GetPoint()
 
-                    local offsetXRounded = self:RunAttribute("Round", offsetX, decimalSanity)
-                    local offsetYRounded = self:RunAttribute("Round", offsetY, decimalSanity)
-                    local toOffsetXRounded = self:RunAttribute("Round", to.offsetX, decimalSanity)
-                    local toOffsetYRounded = self:RunAttribute("Round", to.offsetY, decimalSanity)
+                    local offsetXRounded = self:RunAttribute("Round", offsetX, DecimalSanity)
+                    local offsetYRounded = self:RunAttribute("Round", offsetY, DecimalSanity)
+                    local toOffsetXRounded = self:RunAttribute("Round", to.offsetX, DecimalSanity)
+                    local toOffsetYRounded = self:RunAttribute("Round", to.offsetY, DecimalSanity)
 
                     local different =
                         point ~= to.point or
@@ -424,6 +471,45 @@ secureMethods["TrySortOld"] = [[
     end
 
     return sorted
+]]
+
+secureMethods["TrySortContainerGroups"] = [[
+    local containerVariable, providerVariable = ...
+    local container = _G[containerVariable]
+    local provider = _G[providerVariable]
+
+    Groups = nil
+
+    local sorted = false
+
+    if not self:RunAttribute("ExtractGroups", containerVariable, "Groups") then
+        return false
+    end
+
+    for _, group in ipairs(Groups) do
+        GroupContainer = newtable()
+        GroupContainer.Frame = group
+        GroupContainer.Type = container.Type
+
+        local groupSorted = self:RunAttribute("TrySortContainer", "GroupContainer", providerVariable)
+        sorted = sorted or groupSorted
+
+        GroupContainer = nil
+    end
+
+    local horizontalSpacing = self:GetAttribute(container.Type .. "SpacingHorizontal")
+    local verticalSpacing = self:GetAttribute(container.Type .. "SpacingVertical")
+
+    if horizontalSpacing or verticalSpacing then
+        GroupSpacing = newtable()
+        GroupSpacing.Horizontal = horizontalSpacing
+        GroupSpacing.Vertical = verticalSpacing
+
+        local spacedGroup = self:RunAttribute("SpaceGroups", "Groups", "GroupSpacing")
+        sorted = sorted or spacedGroup
+    end
+
+    Groups = nil
 ]]
 
 -- attempts to sort the frames within the container
@@ -521,29 +607,7 @@ secureMethods["TrySortNew"] = [[
 
             if friendlyEnabled then
                 containers[#containers + 1] = provider.Party
-
-                if provider.Raid and provider.Raid.Frame then
-                    if provider.IsBlizzard then
-                        Raid = provider.Raid
-                        Groups = nil
-
-                        -- TODO: apply spacing between groups
-                        if self:RunAttribute("ExtractGroups", "Raid", "Groups") then
-                            for _, group in ipairs(Groups) do
-                                local groupContainer = newtable()
-                                groupContainer.Frame = group
-                                groupContainer.Type = provider.Raid.Type
-
-                                containers[#containers + 1] = groupContainer
-                            end
-                        end
-
-                        Raid = nil
-                        Groups = nil
-                    else
-                        containers[#containers + 1] = provider.Raid
-                    end
-                end
+                containers[#containers + 1] = provider.Raid
             end
 
             if enemyEnabled then
@@ -557,6 +621,13 @@ secureMethods["TrySortNew"] = [[
 
                     local containerSorted = self:RunAttribute("TrySortContainer", "Container", "Provider")
                     sorted = sorted or containerSorted
+
+                    local hasGroups = provider.IsBlizzard and container.Type == "Raid"
+
+                    if hasGroups then
+                        local sortedGroups = self:RunAttribute("TrySortContainerGroups", "Container", "Provider")
+                        sorted = sorted or sortedGroups
+                    end
 
                     Provider = nil
                     Container = nil
@@ -677,6 +748,11 @@ secureMethods["LoadUnits"] = [[
 secureMethods["Init"] = [[
     Header = self
     Providers = newtable()
+
+    -- don't move frames if they are have minuscule position differences
+    -- it's just a rounding error and makes no visual impact
+    -- this helps preventing spam on our callbacks
+    DecimalSanity = 2
 ]]
 
 local function AddFrames(header, provider, frames, type)
@@ -873,7 +949,7 @@ local function ConfigureHeader(header)
                 end
             ]])
 
-            -- don't need the refresh script anymore so remove it to reduc enoise
+            -- don't need the refresh script anymore so remove it to reduce enoise
             frame:SetAttribute("refreshUnitChange", nil)
         end)
     end
@@ -911,6 +987,8 @@ local function ConfigureHeader(header)
         UnitButtonsCount = (UnitButtonsCount or 0) + 1
         Header:CallMethod("UnitButtonCreated", UnitButtonsCount)
     ]=])
+
+    wow.RegisterAttributeDriver(header, "state-framesort-mod", "[mod] true; false")
 
     -- event ordering in wow is undefined, and blizzard may process GROUP_ROSTER_UPDATE events after we've been notified
     -- so add some attribute triggers to help run our code after blizzard perform their updates
