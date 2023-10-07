@@ -68,6 +68,29 @@ secureMethods["ExtractUnitFrames"] = [[
     return #unitFrames > 0
 ]]
 
+-- extracts a set of groups from a container
+secureMethods["ExtractGroups"] = [[
+    local containerTableName, destinationTableName = ...
+    local container = _G[containerTableName]
+    local children = newtable()
+
+    container.Frame:GetChildList(children)
+    if #children == 0 then return false end
+
+    local groups = newtable()
+
+    for _, child in ipairs(children) do
+        local name = child:GetName()
+
+        if child:IsVisible() and name and strmatch(name, "CompactRaidGroup") then
+            groups[#groups + 1] = child
+        end
+    end
+
+    _G[destinationTableName] = groups
+    return #groups > 0
+]]
+
 -- returns the index of the item within the array, or -1 if it doesn't exist
 secureMethods["ArrayIndex"] = [[
     local arrayVariable, item = ...
@@ -257,7 +280,7 @@ secureMethods["ApplySpacing"] = [[
 ]]
 
 -- rearranges a set of frames accoding to the pre-sorted unit positions
-secureMethods["TrySortFrames"] = [[
+secureMethods["SoftArrange"] = [[
     local framesVariable, unitsVariable, spacingVariable = ...
     local frames = _G[framesVariable]
     local units = _G[unitsVariable]
@@ -471,7 +494,7 @@ secureMethods["TrySortContainer"] = [[
         end
     end
 
-    return self:RunAttribute("TrySortFrames", "Frames", "ContainerSortedUnits", Spacing and "Spacing")
+    return self:RunAttribute("SoftArrange", "Frames", "ContainerSortedUnits", Spacing and "Spacing")
 ]]
 
 -- sorts frames based on the pre-combat sorted units array
@@ -498,7 +521,29 @@ secureMethods["TrySortNew"] = [[
 
             if friendlyEnabled then
                 containers[#containers + 1] = provider.Party
-                containers[#containers + 1] = provider.Raid
+
+                if provider.Raid and provider.Raid.Frame then
+                    if provider.IsBlizzard then
+                        Raid = provider.Raid
+                        Groups = nil
+
+                        -- TODO: apply spacing between groups
+                        if self:RunAttribute("ExtractGroups", "Raid", "Groups") then
+                            for _, group in ipairs(Groups) do
+                                local groupContainer = newtable()
+                                groupContainer.Frame = group
+                                groupContainer.Type = provider.Raid.Type
+
+                                containers[#containers + 1] = groupContainer
+                            end
+                        end
+
+                        Raid = nil
+                        Groups = nil
+                    else
+                        containers[#containers + 1] = provider.Raid
+                    end
+                end
             end
 
             if enemyEnabled then
@@ -529,7 +574,7 @@ secureMethods["TrySort"] = [[
         return false
     end
 
-    local sortedOld = self:RunAttribute("TrySortOld")
+    --local sortedOld = self:RunAttribute("TrySortOld")
     local sortedNew = self:RunAttribute("TrySortNew")
 
     if sortedOld or sortedNew then
@@ -546,7 +591,6 @@ secureMethods["AddFrames"] = [[
     if not frames then
         frames = newtable()
         frames.Raid = newtable()
-        frames.Groups = newtable()
         FramesByProvider[provider] = frames
     end
 
@@ -595,8 +639,9 @@ secureMethods["LoadProvider"] = [[
 
     for _, type in ipairs(types) do
         local frame = self:GetFrameRef(type .. "Container")
+        local hasType = self:GetAttribute(type)
 
-        if frame then
+        if frame and hasType then
             local data = newtable()
 
             data.Frame = frame
@@ -708,11 +753,6 @@ local function LoadFrames()
     if not blizzard:Enabled() or not friendlyEnabled then return end
 
     local raidUngrouped = blizzard:RaidFrames()
-    local groups = {}
-
-    if blizzard:IsRaidGrouped() then
-        groups = blizzard:RaidGroups()
-    end
 
     for _, header in ipairs(headers) do
         header:Execute([[
@@ -721,7 +761,6 @@ local function LoadFrames()
         ]])
 
         AddFrames(header, blizzard, raidUngrouped, "Raid")
-        AddFrames(header, blizzard, groups, "Groups")
     end
 end
 
@@ -742,6 +781,15 @@ local function LoadProvider(provider)
         }
     }
 
+    if provider == fsProviders.Blizzard then
+        local groups = provider:RaidGroups()
+
+        -- c'mon blizzard, seriously?
+        for _, group in ipairs(groups) do
+            group:SetProtected()
+        end
+    end
+
     -- skip loading the container if we've already loaded it
     -- 99% of the time we've already loaded it
     local shouldLoad = fsEnumerable
@@ -758,6 +806,8 @@ local function LoadProvider(provider)
         header:SetAttribute("ProviderName", provider:Name())
 
         for _, item in ipairs(data) do
+            header:SetAttribute(item.Type, item.Container and true or false)
+
             if item.Container then
                 header:SetFrameRef(item.Type .. "Container", item.Container)
             end
@@ -822,6 +872,9 @@ local function ConfigureHeader(header)
                     header:RunAttribute("TrySort")
                 end
             ]])
+
+            -- don't need the refresh script anymore so remove it to reduc enoise
+            frame:SetAttribute("refreshUnitChange", nil)
         end)
     end
 
