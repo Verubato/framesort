@@ -451,57 +451,6 @@ secureMethods["SoftArrange"] = [[
     return movedAny
 ]]
 
--- places any frames that have moved back into their pre-combat sorted position
--- requires tables: FramesByProvider, PointsByProvider
-secureMethods["TrySortOld"] = [[
-    if not FramesByProvider or not PointsByProvider then return false end
-
-    local sorted = false
-
-    for provider, framesByType in pairs(FramesByProvider) do
-        for _, frames in pairs(framesByType) do
-            local framesToMove = newtable()
-
-            -- first determine which frames require moving and clear their points
-            for _, frame in ipairs(frames) do
-                local to = PointsByProvider[provider][frame]
-                if to then
-                    local point, relativeTo, relativePoint, offsetX, offsetY = frame:GetPoint()
-
-                    local offsetXRounded = self:RunAttribute("Round", offsetX, DecimalSanity)
-                    local offsetYRounded = self:RunAttribute("Round", offsetY, DecimalSanity)
-                    local toOffsetXRounded = self:RunAttribute("Round", to.offsetX, DecimalSanity)
-                    local toOffsetYRounded = self:RunAttribute("Round", to.offsetY, DecimalSanity)
-
-                    local different =
-                        point ~= to.point or
-                        relativeTo ~= to.relativeTo or
-                        relativePoint ~= to.relativePoint or
-                        offsetXRounded ~= toOffsetXRounded or
-                        offsetYRounded ~= toOffsetYRounded
-
-                    if different then
-                        framesToMove[#framesToMove + 1] = frame
-                        frame:ClearAllPoints()
-                    end
-                end
-            end
-
-            -- now move them after all points have been cleared
-            -- to avoid any circular dependency issues
-            for _, frame in ipairs(framesToMove) do
-                local to = PointsByProvider[provider][frame]
-
-                frame:SetPoint(to.point, to.relativeTo, to.relativePoint, to.offsetX, to.offsetY)
-            end
-
-            sorted = sorted or #framesToMove > 0
-        end
-    end
-
-    return sorted
-]]
-
 secureMethods["TrySortContainerGroups"] = [[
     local containerVariable, providerVariable = ...
     local container = _G[containerVariable]
@@ -612,8 +561,9 @@ secureMethods["TrySortContainer"] = [[
     return self:RunAttribute("SoftArrange", "Frames", "ContainerSortedUnits", Spacing and "Spacing")
 ]]
 
--- sorts frames based on the pre-combat sorted units array
-secureMethods["TrySortNew"] = [[
+-- top level perform sort routine
+secureMethods["TrySort"] = [[
+    if not self:RunAttribute("InCombat") then return false end
     if not Providers then return false end
 
     local friendlyEnabled = self:GetAttribute("FriendlySortEnabled")
@@ -665,60 +615,12 @@ secureMethods["TrySortNew"] = [[
         end
     end
 
-    return sorted
-]]
-
--- top level perform sort routine
-secureMethods["TrySort"] = [[
-    if not self:RunAttribute("InCombat") then
-        return false
-    end
-
-    --local sortedOld = self:RunAttribute("TrySortOld")
-    local sortedNew = self:RunAttribute("TrySortNew")
-
-    if sortedOld or sortedNew then
+    if sorted then
         -- notify unsecure code to invoke callbacks
         self:CallMethod("InvokeCallbacks")
     end
-]]
 
--- adds a frame to be watched and to have it's pre-combat positioned restored if it moves
-secureMethods["AddFrames"] = [[
-    local provider = self:GetAttribute("Provider")
-    local frames = FramesByProvider[provider]
-
-    if not frames then
-        frames = newtable()
-        frames.Raid = newtable()
-        FramesByProvider[provider] = frames
-    end
-
-    local points = PointsByProvider[provider]
-
-    if not points then
-        points = newtable()
-        PointsByProvider[provider] = points
-    end
-
-    local count = self:GetAttribute("FramesCount")
-    local type = self:GetAttribute("FrameType")
-
-    for i = 1, count do
-        local frame = self:GetFrameRef("Frame" .. i)
-        local point, relativeTo, relativePoint, offsetX, offsetY = frame:GetPoint()
-        local data = newtable()
-
-        data.point = point
-        data.relativeTo = relativeTo
-        data.relativePoint = relativePoint
-        data.offsetX = offsetX
-        data.offsetY = offsetY
-
-        local destination = frames[type]
-        destination[#destination + 1] = frame
-        points[frame] = data
-    end
+    return sorted
 ]]
 
 secureMethods["LoadProvider"] = [[
@@ -784,20 +686,6 @@ secureMethods["Init"] = [[
     DecimalSanity = 2
 ]]
 
-local function AddFrames(header, provider, frames, type)
-    if #frames == 0 then return end
-
-    header:SetAttribute("FrameType", type)
-    header:SetAttribute("Provider", provider:Name())
-    header:SetAttribute("FramesCount", #frames)
-
-    for i, frame in ipairs(frames) do
-        header:SetFrameRef("Frame" .. i, frame)
-    end
-
-    header:Execute([[ self:RunAttribute("AddFrames") ]])
-end
-
 local function LoadUnits()
     -- TODO: we could transfer unit info to the restricted environment
     -- then perform the unit sort inside which would give us more control
@@ -847,25 +735,6 @@ local function LoadSpacing()
             header:SetAttribute(type .. "SpacingHorizontal", value.Spacing.Horizontal)
             header:SetAttribute(type .. "SpacingVertical", value.Spacing.Vertical)
         end
-    end
-end
-
--- TODO: delete this and use the container approach instaed
-local function LoadFrames()
-    local blizzard = fsProviders.Blizzard
-    local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
-
-    if not blizzard:Enabled() or not friendlyEnabled then return end
-
-    local raidUngrouped = blizzard:RaidFrames()
-
-    for _, header in ipairs(headers) do
-        header:Execute([[
-            FramesByProvider = newtable()
-            PointsByProvider = newtable()
-        ]])
-
-        AddFrames(header, blizzard, raidUngrouped, "Raid")
     end
 end
 
@@ -1082,12 +951,10 @@ function M:Init()
     LoadEnabled()
     LoadUnits()
     LoadSpacing()
-    LoadFrames()
 
     fsConfig:RegisterConfigurationChangedCallback(OnConfigChanged)
 end
 
 function M:RefreshUnits()
     LoadUnits()
-    LoadFrames()
 end
