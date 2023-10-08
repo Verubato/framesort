@@ -1051,6 +1051,7 @@ function M:Init()
     end
 
     LoadEnabled()
+    LoadUnits()
     LoadSpacing()
     LoadFrames()
 
