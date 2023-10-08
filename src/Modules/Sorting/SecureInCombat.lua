@@ -232,6 +232,42 @@ secureMethods["SortPointsByLeftTop"] = [[
     end
 ]]
 
+-- adjusts the x and y offsets of a frame
+secureMethods["AdjustPointsOffset"] = [[
+    local framesVariable, xDelta, yDelta = ...
+    local frame = _G[framesVariable]
+
+    if xDelta == 0 and yDelta == 0 then
+        return false
+    end
+
+    local point, relativeTo, relativePoint, offsetX, offsetY = frame:GetPoint()
+
+    if not point or not relativeTo or not relativePoint then
+        -- something weird going on with this frame
+        return false
+    end
+
+    local newOffsetX = (offsetX or 0) + xDelta
+    local newOffsetY = (offsetY or 0) + yDelta
+    local anchor = relativeTo
+
+    -- getting "Invalid relative frame handle" errors when using the container from GetPoint()
+    -- IsProtected() on the anchor is returning "true,true" so it shouldn't be a problem
+    -- assume it's another side effect the blizzard bug #470
+    local parent = frame:GetParent()
+    if not parent then
+        return false
+    end
+
+    if relativeTo:GetName() == parent:GetName() or frame:GetParent() == relativeTo:GetParent() then
+        anchor = "$parent"
+    end
+
+    frame:SetPoint(point, anchor, relativePoint, newOffsetX, newOffsetY)
+    return true
+]]
+
 secureMethods["ApplySpacing"] = [[
     local pointsVariable, spacingVariable = ...
     local points = _G[pointsVariable]
@@ -321,15 +357,10 @@ secureMethods["SpaceGroups"] = [[
         local yDeltaRounded = self:RunAttribute("Round", yDelta, DecimalSanity)
 
         if xDeltaRounded ~= 0 or yDeltaRounded ~= 0 then
-            -- getting "Invalid relative frame handle" errors when using the container from GetPoint()
-            -- IsProtected() on the parent is returning "true,true" so it shouldn't be a problem
-            -- another side effect bug from #470 I assume
-            local point, _, relativePoint, offsetX, offsetY = group:GetPoint()
-            local newOffsetX = (offsetX or 0) + xDelta
-            local newOffsetY = (offsetY or 0) + yDelta
-
-            group:SetPoint(point, "$parent", relativePoint, newOffsetX, newOffsetY)
-            movedAny = true
+            Group = group
+            local moved = self:RunAttribute("AdjustPointsOffset", "Group", xDelta, yDelta)
+            movedAny = movedAny or moved
+            Group = nil
         end
     end
 
@@ -409,12 +440,10 @@ secureMethods["SoftArrange"] = [[
             local yDeltaRounded = self:RunAttribute("Round", yDelta, DecimalSanity)
 
             if xDeltaRounded ~= 0 or yDeltaRounded ~= 0 then
-                local point, relativeTo, relativePoint, offsetX, offsetY = source:GetPoint()
-                local newOffsetX = (offsetX or 0) + xDelta
-                local newOffsetY = (offsetY or 0) + yDelta
-
-                source:SetPoint(point, relativeTo, relativePoint, newOffsetX, newOffsetY)
-                movedAny = true
+                Frame = source
+                local moved = self:RunAttribute("AdjustPointsOffset", "Frame", xDelta, yDelta)
+                movedAny = movedAny or moved
+                Frame = nil
             end
         end
     end
@@ -885,6 +914,11 @@ local function LoadProvider(provider)
             header:SetAttribute(item.Type, item.Container and true or false)
 
             if item.Container then
+                -- to fix a current blizzard bug where GetPoint() returns nil values on secure frames when their parent's are unsecure
+                -- https://github.com/Stanzilla/WoWUIBugs/issues/470
+                -- https://github.com/Stanzilla/WoWUIBugs/issues/480
+                item.Container:SetProtected()
+
                 header:SetFrameRef(item.Type .. "Container", item.Container)
             end
         end
@@ -896,11 +930,6 @@ local function LoadProvider(provider)
         if item.Container then
             -- flag as imported
             item.Container:SetAttribute("FrameSortLoaded", true)
-
-            -- to fix a current blizzard bug where GetPoint() returns nil values on secure frames when their parent's are unsecure
-            -- https://github.com/Stanzilla/WoWUIBugs/issues/470
-            -- https://github.com/Stanzilla/WoWUIBugs/issues/480
-            item.Container:SetProtected()
         end
     end
 end
