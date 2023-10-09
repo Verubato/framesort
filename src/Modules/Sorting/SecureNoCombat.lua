@@ -168,17 +168,12 @@ local function HardArrange(frames, container, isHorizontalLayout, spacing, offse
     end
 
     local width, height = fsFrame:GridSize(frames)
-    local tallestFrame = fsEnumerable:From(frames):Max(function(x)
-        return x:GetHeight()
-    end)
-    local widestFrame = fsEnumerable:From(frames):Max(function(x)
-        return x:GetWidth()
-    end)
     -- the block size is the largest height and width combination
     -- this is only useful when we have frames of different sizes
     -- which is the case of pet frames, where 2 pet frames can fit into 1 player frame
-    local blockHeight = tallestFrame:GetHeight()
-    local blockWidth = widestFrame:GetWidth()
+    -- we could find max height/width, but this should almost certaintly be equal to the first frame in the array
+    -- so save the cpu cycles and just use the first frame
+    local blockHeight, blockWidth = frames[1]:GetHeight(), frames[1]:GetWidth()
 
     offset = offset or {
         X = 0,
