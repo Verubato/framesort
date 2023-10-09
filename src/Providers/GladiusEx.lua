@@ -98,14 +98,6 @@ function M:EnemyArenaFrames()
     return fsFrame:ChildUnitFrames(M:EnemyArenaContainer(), GetUnit)
 end
 
-function M:ShowPartyPets()
-    return false
-end
-
-function M:ShowRaidPets()
-    return false
-end
-
 function M:IsRaidGrouped()
     return false
 end
