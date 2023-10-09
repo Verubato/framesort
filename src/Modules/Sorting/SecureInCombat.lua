@@ -59,7 +59,12 @@ secureMethods["ExtractUnitFrames"] = [[
         local unit = self:RunAttribute("GetUnit", "Frame")
         Frame = nil
 
-        if unit and (child:IsVisible() or not visibleOnly) then
+        -- in some rare cases frames can have no position, so exclude them
+        local left, bottom, width, height = child:GetRect()
+
+        if unit and
+            (child:IsVisible() or not visibleOnly) and
+            (left and bottom and width and height) then
             unitFrames[#unitFrames + 1] = child
         end
     end
@@ -81,8 +86,12 @@ secureMethods["ExtractGroups"] = [[
 
     for _, child in ipairs(children) do
         local name = child:GetName()
+        local left, bottom, width, height = child:GetRect()
 
-        if child:IsVisible() and name and strmatch(name, "CompactRaidGroup") then
+        if child:IsVisible() and
+            name and
+            strmatch(name, "CompactRaidGroup")
+            (left and bottom and width and height) then
             groups[#groups + 1] = child
         end
     end
