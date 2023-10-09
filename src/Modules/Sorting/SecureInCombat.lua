@@ -698,6 +698,8 @@ local function LoadUnits()
     manager:SetAttribute("EnemyUnitsCount", #enemyUnits)
     -- flag that the units need to be reloaded
     manager:SetAttribute("LoadedUnits", false)
+
+    fsLog:Debug("Sent units to the secure environment.")
 end
 
 local function LoadEnabled()
@@ -712,6 +714,8 @@ local function LoadEnabled()
     for _, provider in ipairs(fsProviders.All) do
         manager:SetAttribute("Provider" .. provider:Name() .. "Enabled", provider:Enabled())
     end
+
+    fsLog:Debug("Sent enabled values to the secure environment.")
 end
 
 local function LoadSpacing()
@@ -723,6 +727,8 @@ local function LoadSpacing()
         manager:SetAttribute(type .. "SpacingHorizontal", value.Spacing.Horizontal)
         manager:SetAttribute(type .. "SpacingVertical", value.Spacing.Vertical)
     end
+
+    fsLog:Debug("Sent spacing values to the secure environment.")
 end
 
 ---@param provider FrameProvider
@@ -788,6 +794,8 @@ local function LoadProvider(provider)
             item.Container:SetAttribute("FrameSortLoaded", true)
         end
     end
+
+    fsLog:Debug(string.format("Sent provider %s to the secure environment.", provider:Name()))
 end
 
 local function InjectSecureHelpers(secureFrame)
@@ -825,6 +833,42 @@ local function OnConfigChanged()
         LoadSpacing()
         LoadEnabled()
     end, "SecureSortConfigChanged")
+end
+
+local function OnBlizzardUnitFrameCreated(frame)
+    assert(manager ~= nil)
+
+    local alreadyWatching = frame:GetAttribute("FrameSortWatching")
+    if alreadyWatching then return end
+
+    local attributeHandler = [[
+        if not strmatch(name, "unit") then return end
+
+        local manager = self:GetFrameRef("FrameSortManager")
+
+        if manager then
+            manager:RunAttribute("TrySort")
+        end
+    ]]
+
+    local showHideHandler = [[
+        local manager = self:GetFrameRef("FrameSortManager")
+
+        if manager then
+            manager:RunAttribute("TrySort")
+        end
+    ]]
+
+    fsScheduler:RunWhenCombatEnds(function()
+        wow.SecureHandlerSetFrameRef(frame, "FrameSortManager", manager)
+
+        manager:WrapScript(frame, "OnAttributeChanged", attributeHandler)
+        manager:WrapScript(frame, "OnShow", showHideHandler)
+        manager:WrapScript(frame, "OnHide", showHideHandler)
+
+        frame:SetAttribute("FrameSortWatching", true)
+        fsLog:Debug("Watching frame " .. (frame:GetName() or 'nil'))
+    end)
 end
 
 function M:Init()
@@ -879,6 +923,11 @@ function M:Init()
     LoadSpacing()
 
     fsConfig:RegisterConfigurationChangedCallback(OnConfigChanged)
+
+    ---@diagnostic disable-next-line: undefined-global
+    if CompactUnitFrame_SetUpFrame then
+        wow.hooksecurefunc("CompactUnitFrame_SetUpFrame", OnBlizzardUnitFrameCreated)
+    end
 end
 
 function M:RefreshUnits()
