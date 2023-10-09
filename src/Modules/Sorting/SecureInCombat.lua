@@ -90,7 +90,7 @@ secureMethods["ExtractGroups"] = [[
 
         if child:IsVisible() and
             name and
-            strmatch(name, "CompactRaidGroup")
+            strmatch(name, "CompactRaidGroup") and
             (left and bottom and width and height) then
             groups[#groups + 1] = child
         end
