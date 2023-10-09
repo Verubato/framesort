@@ -228,14 +228,6 @@ function M:PlayerRaidFrames()
     return {}
 end
 
-function M:ShowPartyPets()
-    return M:ShowRaidPets()
-end
-
-function M:ShowRaidPets()
-    return wow.CompactRaidFrameManager_GetSetting("DisplayPets")
-end
-
 function M:IsRaidGrouped()
     if wow.IsRetail() then
         local raidGroupDisplayType =

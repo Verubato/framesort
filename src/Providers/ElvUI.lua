@@ -184,16 +184,6 @@ function M:EnemyArenaFrames()
     return {}
 end
 
-function M:ShowPartyPets()
-    -- not implemented
-    return false
-end
-
-function M:ShowRaidPets()
-    -- not implemented
-    return false
-end
-
 function M:IsRaidGrouped()
     -- not implemented
     return false

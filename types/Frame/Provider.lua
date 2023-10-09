@@ -12,8 +12,6 @@
 ---@field RaidGroups fun(self: table): table[] Returns a collection of raid groups.
 ---@field RaidGroupMembers fun(self: table, group: table): table[] Returns a collection of raid frames from the specified group.
 ---@field EnemyArenaFrames fun(self: table): table[] Returns a collection of enemy arena frames.
----@field ShowPartyPets fun(self: table): boolean Whether party pets are enabled.
----@field ShowRaidPets fun(self: table): boolean Whether raid pets are enabled.
 ---@field IsRaidGrouped fun(self: table): boolean Whether the raid is grouped.
 ---@field IsPartyHorizontalLayout fun(self: table): boolean Whether the frames are using a horizontal layout.
 ---@field IsRaidHorizontalLayout fun(self: table): boolean Whether the frames are using a horizontal layout.

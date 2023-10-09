@@ -42,12 +42,6 @@ return {
     PartyFrames = function(self)
         return self.State.PartyFrames
     end,
-    ShowPartyPets = function()
-        return false
-    end,
-    ShowRaidPets = function()
-        return false
-    end,
     IsRaidGrouped = function()
         return false
     end,
