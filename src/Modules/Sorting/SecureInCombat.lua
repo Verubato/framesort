@@ -12,7 +12,7 @@ local fsLog = addon.Logging.Log
 local M = {}
 addon.Modules.Sorting.Secure.InCombat = M
 
-local headers = {}
+local manager = nil
 local secureMethods = {}
 
 -- rounds a number to the specified decimal places
@@ -250,21 +250,8 @@ secureMethods["AdjustPointsOffset"] = [[
 
     local newOffsetX = (offsetX or 0) + xDelta
     local newOffsetY = (offsetY or 0) + yDelta
-    local anchor = relativeTo
 
-    -- getting "Invalid relative frame handle" errors when using the container from GetPoint()
-    -- IsProtected() on the anchor is returning "true,true" so it shouldn't be a problem
-    -- assume it's another side effect the blizzard bug #470
-    local parent = frame:GetParent()
-    if not parent then
-        return false
-    end
-
-    if relativeTo:GetName() == parent:GetName() or frame:GetParent() == relativeTo:GetParent() then
-        anchor = "$parent"
-    end
-
-    frame:SetPoint(point, anchor, relativePoint, newOffsetX, newOffsetY)
+    frame:SetPoint(point, relativeTo, relativePoint, newOffsetX, newOffsetY)
     return true
 ]]
 
@@ -677,7 +664,7 @@ secureMethods["LoadUnits"] = [[
 ]]
 
 secureMethods["Init"] = [[
-    Header = self
+    manager = self
     Providers = newtable()
 
     -- don't move frames if they are have minuscule position differences
@@ -687,6 +674,8 @@ secureMethods["Init"] = [[
 ]]
 
 local function LoadUnits()
+    assert(manager ~= nil)
+
     -- TODO: we could transfer unit info to the restricted environment
     -- then perform the unit sort inside which would give us more control
     local friendlyUnits = fsUnit:FriendlyUnits()
@@ -697,49 +686,49 @@ local function LoadUnits()
     table.sort(friendlyUnits, friendlyCompare)
     table.sort(enemyUnits, enemyCompare)
 
-    for _, header in ipairs(headers) do
-        for i, unit in ipairs(friendlyUnits) do
-            header:SetAttribute("FriendlyUnit" .. i, unit)
-        end
-
-        for i, unit in ipairs(enemyUnits) do
-            header:SetAttribute("EnemyUnit" .. i, unit)
-        end
-
-        header:SetAttribute("FriendlyUnitsCount", #friendlyUnits)
-        header:SetAttribute("EnemyUnitsCount", #enemyUnits)
-        -- flag that the units need to be reloaded
-        header:SetAttribute("LoadedUnits", false)
+    for i, unit in ipairs(friendlyUnits) do
+        manager:SetAttribute("FriendlyUnit" .. i, unit)
     end
+
+    for i, unit in ipairs(enemyUnits) do
+        manager:SetAttribute("EnemyUnit" .. i, unit)
+    end
+
+    manager:SetAttribute("FriendlyUnitsCount", #friendlyUnits)
+    manager:SetAttribute("EnemyUnitsCount", #enemyUnits)
+    -- flag that the units need to be reloaded
+    manager:SetAttribute("LoadedUnits", false)
 end
 
 local function LoadEnabled()
+    assert(manager ~= nil)
+
     local friendlyEnabled = fsCompare:FriendlySortMode()
     local enemyEnabled = fsCompare:EnemySortMode()
 
-    for _, header in ipairs(headers) do
-        header:SetAttribute("FriendlySortEnabled", friendlyEnabled)
-        header:SetAttribute("EnemySortEnabled", enemyEnabled)
+    manager:SetAttribute("FriendlySortEnabled", friendlyEnabled)
+    manager:SetAttribute("EnemySortEnabled", enemyEnabled)
 
-        for _, provider in ipairs(fsProviders.All) do
-            header:SetAttribute("Provider" .. provider:Name() .. "Enabled", provider:Enabled())
-        end
+    for _, provider in ipairs(fsProviders.All) do
+        manager:SetAttribute("Provider" .. provider:Name() .. "Enabled", provider:Enabled())
     end
 end
 
 local function LoadSpacing()
+    assert(manager ~= nil)
+
     local appearance = addon.DB.Options.Appearance
 
-    for _, header in ipairs(headers) do
-        for type, value in pairs(appearance) do
-            header:SetAttribute(type .. "SpacingHorizontal", value.Spacing.Horizontal)
-            header:SetAttribute(type .. "SpacingVertical", value.Spacing.Vertical)
-        end
+    for type, value in pairs(appearance) do
+        manager:SetAttribute(type .. "SpacingHorizontal", value.Spacing.Horizontal)
+        manager:SetAttribute(type .. "SpacingVertical", value.Spacing.Vertical)
     end
 end
 
 ---@param provider FrameProvider
 local function LoadProvider(provider)
+    assert(manager ~= nil)
+
     local data = {
         {
             Container = provider:PartyContainer(),
@@ -776,24 +765,22 @@ local function LoadProvider(provider)
         return
     end
 
-    for _, header in ipairs(headers) do
-        header:SetAttribute("ProviderName", provider:Name())
+    manager:SetAttribute("ProviderName", provider:Name())
 
-        for _, item in ipairs(data) do
-            header:SetAttribute(item.Type, item.Container and true or false)
+    for _, item in ipairs(data) do
+        manager:SetAttribute(item.Type, item.Container and true or false)
 
-            if item.Container then
-                -- to fix a current blizzard bug where GetPoint() returns nil values on secure frames when their parent's are unsecure
-                -- https://github.com/Stanzilla/WoWUIBugs/issues/470
-                -- https://github.com/Stanzilla/WoWUIBugs/issues/480
-                item.Container:SetProtected()
+        if item.Container then
+            -- to fix a current blizzard bug where GetPoint() returns nil values on secure frames when their parent's are unsecure
+            -- https://github.com/Stanzilla/WoWUIBugs/issues/470
+            -- https://github.com/Stanzilla/WoWUIBugs/issues/480
+            item.Container:SetProtected()
 
-                header:SetFrameRef(item.Type .. "Container", item.Container)
-            end
+            manager:SetFrameRef(item.Type .. "Container", item.Container)
         end
-
-        header:Execute([[ self:RunAttribute("LoadProvider") ]])
     end
+
+    manager:Execute([[ self:RunAttribute("LoadProvider") ]])
 
     for _, item in ipairs(data) do
         if item.Container then
@@ -823,99 +810,6 @@ local function InjectSecureHelpers(secureFrame)
     end
 end
 
-local function ConfigureHeader(header)
-    InjectSecureHelpers(header)
-
-    function header:InvokeCallbacks()
-        fsSorting:InvokeCallbacks()
-    end
-
-    function header:UnitButtonCreated(index)
-        local children = { header:GetChildren() }
-        local frame = children[index]
-
-        if not frame then
-            fsLog:Error("Failed to find unit button " .. index)
-            return
-        end
-
-        fsScheduler:RunWhenCombatEnds(function()
-            frame:SetAttribute("_onattributechanged", [[
-                if name == "unit" then
-                    local header = self:GetAttribute("Header")
-                    header:RunAttribute("TrySort")
-                end
-            ]])
-
-            -- don't need the refresh script anymore so remove it to reduce enoise
-            frame:SetAttribute("refreshUnitChange", nil)
-        end)
-    end
-
-    for name, snippet in pairs(secureMethods) do
-        header:SetAttribute(name, snippet)
-    end
-
-    header:Execute([[ self:RunAttribute("Init") ]])
-
-    -- show as much as possible
-    header:SetAttribute("showRaid", true)
-    header:SetAttribute("showParty", true)
-    header:SetAttribute("showPlayer", true)
-    header:SetAttribute("showSolo", true)
-
-    -- unit buttons template type
-    header:SetAttribute("template", "SecureHandlerAttributeTemplate")
-
-    -- fired when a new unit button is created
-    header:SetAttribute("initialConfigFunction", [=[
-        -- self = the newly created unit button
-        self:SetWidth(0)
-        self:SetHeight(0)
-        self:SetAttribute("Header", Header)
-
-        RefreshUnitChange = [[
-            local unit = self:GetAttribute("unit")
-            local header = self:GetAttribute("Header")
-            header:RunAttribute("TrySort")
-        ]]
-
-        self:SetAttribute("refreshUnitChange", RefreshUnitChange)
-
-        UnitButtonsCount = (UnitButtonsCount or 0) + 1
-        Header:CallMethod("UnitButtonCreated", UnitButtonsCount)
-    ]=])
-
-    wow.RegisterAttributeDriver(header, "state-framesort-mod", "[mod] true; false")
-
-    -- event ordering in wow is undefined, and blizzard may process GROUP_ROSTER_UPDATE events after we've been notified
-    -- so add some attribute triggers to help run our code after blizzard perform their updates
-    -- TODO: need more reliable solution to ensure our code runs after blizzard
-    for i = 1, wow.MAX_RAID_MEMBERS do
-        wow.RegisterAttributeDriver(header, "state-framesort-raid" .. i, string.format("[@raid%d, exists] true; false", i))
-        wow.RegisterAttributeDriver(header, "state-framesort-raidpet" .. i, string.format("[@raidpet%d, exists] true; false", i))
-    end
-
-    for i = 1, wow.MEMBERS_PER_RAID_GROUP - 1 do
-        wow.RegisterAttributeDriver(header, "state-framesort-party" .. i, string.format("[@party%d, exists] true; false", i))
-        wow.RegisterAttributeDriver(header, "state-framesort-partypet" .. i, string.format("[@partypet%d, exists] true; false", i))
-    end
-
-    header:WrapScript(
-        header,
-        "OnAttributeChanged",
-        [[
-            if not strmatch(name, "framesort") then return end
-
-            self:RunAttribute("TrySort")
-        ]]
-    )
-
-    -- must be shown for it to work
-    header:SetPoint("TOPLEFT", wow.UIParent, "TOPLEFT")
-    header:Show()
-end
-
 local function OnProviderUpdate(provider)
     -- don't respond to provider events during combat
     if wow.InCombatLockdown() then return end
@@ -934,14 +828,46 @@ local function OnConfigChanged()
 end
 
 function M:Init()
-    local groupHeader = wow.CreateFrame("Frame", "FrameSortGroupHeader", wow.UIParent, "SecureGroupHeaderTemplate")
-    local petHeader = wow.CreateFrame("Frame", "FrameSortPetGroupHeader", wow.UIParent, "SecureGroupPetHeaderTemplate")
+    manager = wow.CreateFrame("Frame", "FrameSortGroupmanager", wow.UIParent, "SecureHandlerStateTemplate")
 
-    headers = { groupHeader, petHeader }
+    InjectSecureHelpers(manager)
 
-    for _, header in ipairs(headers) do
-        ConfigureHeader(header)
+    function manager:InvokeCallbacks()
+        fsSorting:InvokeCallbacks()
     end
+
+    for name, snippet in pairs(secureMethods) do
+        manager:SetAttribute(name, snippet)
+    end
+
+    manager:Execute([[ self:RunAttribute("Init") ]])
+
+    -- TODO: remove the need for this dodgy workaround once we capture all frame refresh events
+    wow.RegisterAttributeDriver(manager, "state-framesort-mod", "[mod] true; false")
+
+    for i = 0, wow.MAX_RAID_MEMBERS do
+        wow.RegisterAttributeDriver(manager, "state-framesort-raid" .. i, string.format("[@raid%d, exists] true; false", i))
+        wow.RegisterAttributeDriver(manager, "state-framesort-raidpet" .. i, string.format("[@raidpet%d, exists] true; false", i))
+    end
+
+    for i = 0, wow.MEMBERS_PER_RAID_GROUP - 1 do
+        wow.RegisterAttributeDriver(manager, "state-framesort-party" .. i, string.format("[@party%d, exists] true; false", i))
+        wow.RegisterAttributeDriver(manager, "state-framesort-partypet" .. i, string.format("[@partypet%d, exists] true; false", i))
+    end
+
+    for i = 0, wow.MEMBERS_PER_RAID_GROUP - 1 do
+        wow.RegisterAttributeDriver(manager, "state-framesort-arena" .. i, string.format("[@arena%d, exists] true; false", i))
+        wow.RegisterAttributeDriver(manager, "state-framesort-arenapet" .. i, string.format("[@arenapet%d, exists] true; false", i))
+    end
+
+    manager:WrapScript(
+        manager,
+        "OnAttributeChanged",
+        [[
+            if not strmatch(name, "framesort") then return end
+
+            self:RunAttribute("TrySort")
+        ]])
 
     for _, provider in ipairs(fsProviders.All) do
         LoadProvider(provider)
