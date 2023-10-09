@@ -30,13 +30,12 @@ function M:setup()
 end
 
 function M:teardown()
-    addon.DB.Options.World.PlayerSortMode = fsConfig.Defaults.PlayerSortMode
-    addon.DB.Options.World.GroupSortMode = fsConfig.Defaults.GroupSortMode
     addon.Providers.Blizzard = realBlizzardProvider
     addon:Reset()
 end
 
 function M:test_sort_party_frames_top()
+    addon.DB.Options.World.Enabled = true
     addon.DB.Options.World.PlayerSortMode = "Top"
     addon.DB.Options.World.GroupSortMode = "Group"
 
