@@ -167,6 +167,65 @@ secureMethods["FrameChain"] = [[
     return true
 ]]
 
+-- returns the width x height of the frames in a grid layout.
+secureMethods["GridSize"] = [[
+    local framesVariable = ...
+    local frames = _G[framesVariable]
+
+    if #frames == 0 then return 0, 0 end
+    if #frames == 1 then return 1, 1 end
+
+    local width = 1
+    local height = 1
+
+    local byCol = newtable()
+    local byRow = newtable()
+
+    ByCol = byCol
+    self:RunAttribute("CopyTable", framesVariable, "ByCol")
+    self:RunAttribute("SortFramesByLeftTop", "ByCol")
+    ByCol = nil
+
+    ByRow = byRow
+    self:RunAttribute("CopyTable", framesVariable, "ByRow")
+    self:RunAttribute("SortFramesByTopLeft", "ByRow")
+    ByRow = nil
+
+    local columnHeight = 1
+    for i = 2, #byCol do
+        local frame = byCol[i]
+        local previous = byCol[i - 1]
+        local left, _, _, _ = frame:GetRect()
+        local previousLeft, _, _, _ = previous:GetRect()
+        local sameColumn = self:RunAttribute("Round", left) == self:RunAttribute("Round", previousLeft)
+
+        if sameColumn then
+            columnHeight = columnHeight + 1
+            height = max(height, columnHeight)
+        else
+            columnHeight = 0
+        end
+    end
+
+    local rowWidth = 1
+    for i = 2, #byRow do
+        local frame = byRow[i]
+        local previous = byRow[i - 1]
+        local _, bottom, _, height = frame:GetRect()
+        local _, previousBottom, _, previousHeight = previous:GetRect()
+        local sameRow = self:RunAttribute("Round", bottom + height) == self:RunAttribute("Round", previousBottom + previousHeight)
+
+        if sameRow then
+            rowWidth = rowWidth + 1
+            width = max(width, rowWidth)
+        else
+            rowWidth = 0
+        end
+    end
+
+    return width, height
+]]
+
 -- performs an in place sort on an array of frames by their visual order
 secureMethods["SortFramesByTopLeft"] = [[
     local framesVariable = ...
@@ -178,10 +237,35 @@ secureMethods["SortFramesByTopLeft"] = [[
         for j = 1, #frames - i do
             local left, bottom, width, height = frames[j]:GetRect()
             local nextLeft, nextBottom, nextWidth, nextHeight = frames[j + 1]:GetRect()
-            local top = bottom + height
-            local nextTop = nextBottom + nextHeight
 
-            if top < nextTop or left > nextLeft then
+            local topFuzzy = self:RunAttribute("Round", bottom + height)
+            local nextTopFuzzy = self:RunAttribute("Round", nextBottom + nextHeight)
+            local leftFuzzy = self:RunAttribute("Round", left)
+            local nextLeftFuzzy = self:RunAttribute("Round", nextLeft)
+
+            if topFuzzy < nextTopFuzzy or leftFuzzy > nextLeftFuzzy then
+                frames[j], frames[j + 1] = frames[j + 1], frames[j]
+            end
+        end
+    end
+]]
+
+-- performs an in place sort on an array of frames by their visual order
+secureMethods["SortFramesByLeftTop"] = [[
+    local framesVariable = ...
+    local frames = _G[framesVariable]
+
+    for i = 1, #frames do
+        for j = 1, #frames - i do
+            local left, bottom, width, height = frames[j]:GetRect()
+            local nextLeft, nextBottom, nextWidth, nextHeight = frames[j + 1]:GetRect()
+
+            local topFuzzy = self:RunAttribute("Round", bottom + height)
+            local nextTopFuzzy = self:RunAttribute("Round", nextBottom + nextHeight)
+            local leftFuzzy = self:RunAttribute("Round", left)
+            local nextLeftFuzzy = self:RunAttribute("Round", nextLeft)
+
+            if leftFuzzy > nextLeftFuzzy or topFuzzy < nextTopFuzzy then
                 frames[j], frames[j + 1] = frames[j + 1], frames[j]
             end
         end
@@ -230,6 +314,56 @@ secureMethods["SortPointsByLeftTop"] = [[
             end
         end
     end
+]]
+
+-- performs an out of place sort on an array frames by the order of the units array
+secureMethods["SortFramesByUnits"] = [[
+    local framesVariable, unitsVariable, destinationVariable = ...
+    local frames = _G[framesVariable]
+    local units = _G[unitsVariable]
+    local index = 1
+    local framesByUnit = newtable()
+    local frameWasSorted = newtable()
+
+    for i = 1, #frames do
+        local frame = frames[i]
+
+        Frame = frame
+        local unit = self:RunAttribute("GetUnit", "Frame")
+        Frame = nil
+
+        if unit then
+            framesByUnit[unit] = frame
+        else
+            framesWithoutUnits = frame
+        end
+
+        frameWasSorted[frame] = false
+    end
+
+    local sorted = newtable()
+
+    for i = 1, #units do
+        local unit = units[i]
+        local frame = framesByUnit[unit]
+
+        if frame then
+            sorted[#sorted + 1] = frame
+            frameWasSorted[frame] = true
+        end
+    end
+
+    -- we may not have all unit information
+    -- so any frames that didn't make it we can just add on to the end
+    for i = 1, #frames do
+        local frame = frames[i]
+
+        if not frameWasSorted[frame] then
+            sorted[#sorted + 1] = frame
+        end
+    end
+
+    _G[destinationVariable] = sorted
 ]]
 
 -- adjusts the x and y offsets of a frame
@@ -354,20 +488,18 @@ secureMethods["SpaceGroups"] = [[
     return movedAny
 ]]
 
--- rearranges a set of frames accoding to the pre-sorted unit positions
+-- rearranges a set of frames by only modifying the x and y offsets
 secureMethods["SoftArrange"] = [[
-    local framesVariable, unitsVariable, spacingVariable = ...
+    local framesVariable, spacingVariable = ...
     local frames = _G[framesVariable]
-    local units = _G[unitsVariable]
 
-    EnumerationOrder = newtable()
-    OrderedFrames = newtable()
+    OrderedByTopLeft = newtable()
 
-    self:RunAttribute("CopyTable", framesVariable, "OrderedFrames")
-    self:RunAttribute("SortFramesByTopLeft", "OrderedFrames")
+    self:RunAttribute("CopyTable", framesVariable, "OrderedByTopLeft")
+    self:RunAttribute("SortFramesByTopLeft", "OrderedByTopLeft")
 
     local points = newtable()
-    for _, frame in ipairs(OrderedFrames) do
+    for _, frame in ipairs(OrderedByTopLeft) do
         local point = newtable()
         local left, bottom, width, height = frame:GetRect()
 
@@ -381,41 +513,40 @@ secureMethods["SoftArrange"] = [[
 
     if spacingVariable then
         Points = points
-
         self:RunAttribute("ApplySpacing", "Points", spacingVariable)
+        Points = nil
     end
 
     Root = nil
     local isChain = self:RunAttribute("FrameChain", framesVariable, "Root")
+    local root = Root
+    Root = nil
+
     local enumerationOrder = nil
 
     if isChain then
         enumerationOrder = newtable()
 
-        local next = Root
+        local next = root
         while next do
             enumerationOrder[#enumerationOrder + 1] = next.Value
             next = next.Next
         end
     else
-        enumerationOrder = OrderedFrames
+        enumerationOrder = OrderedByTopLeft
     end
 
-    local overflow = #units
+    OrderedByTopLeft = nil
+
     local movedAny = false
 
     for i, source in ipairs(enumerationOrder) do
-        Frame = source
-        local unit = self:RunAttribute("GetUnit", "Frame")
-        Frame = nil
-
-        local desiredIndex = self:RunAttribute("ArrayIndex", unitsVariable, unit)
-
-        if desiredIndex <= 0 then
-            -- for any units we don't know about, e.g. players who joined mid-combat
-            -- just assume they are last in the sort order until combat drops
-            overflow = overflow + 1
-            desiredIndex = overflow
+        local desiredIndex = -1
+        for j = 1, #frames do
+            if source == frames[j] then
+                desiredIndex = j
+                break
+            end
         end
 
         if desiredIndex > 0 and desiredIndex <= #points then
@@ -432,10 +563,121 @@ secureMethods["SoftArrange"] = [[
                 movedAny = movedAny or moved
                 Frame = nil
             end
+        else
+            -- TODO: this would be a bug, log it
         end
     end
 
     return movedAny
+]]
+
+-- rearranges a set of frames by modifying their anchors and offsets
+secureMethods["HardArrange"] = [[
+    local framesVariable, containerVariable, spacingVariable = ...
+    local frames = _G[framesVariable]
+    local container = _G[containerVariable]
+    local spacing = spacingVariable and _G[spacingVariable]
+    local verticalSpacing = spacing and spacing.Vertical or 0
+    local horizontalSpacing = spacing and spacing.Horizontal or 0
+
+    local width, height = self:RunAttribute("GridSize", framesVariable)
+
+    -- TODO: source this value properly
+    local isHorizontalLayout = width > height
+
+    local _, _, blockWidth, blockHeight = frames[1]:GetRect()
+
+    local offset = container.Offset or newtable()
+    offset.X = offset.X or 0
+    offset.Y = offset.Y or 0
+
+    local pointsByFrame = newtable()
+    local row, col = 1, 1
+    local xOffset = offset.X
+    local yOffset = offset.Y
+    local rowHeight = 0
+    local currentBlockHeight = 0
+
+    for _, frame in ipairs(frames) do
+        local framePoint = newtable()
+        framePoint.Point = "TOPLEFT"
+        framePoint.RelativeTo = container.Frame
+        framePoint.RelativePoint = "TOPLEFT"
+        framePoint.XOffset = xOffset
+        framePoint.YOffset = yOffset
+        pointsByFrame[frame] = framePoint
+
+        local _, _, _, height = frame:GetRect()
+
+        if isHorizontalLayout then
+            col = (col + 1)
+            xOffset = xOffset + blockWidth + spacing.Horizontal
+            -- keep track of the tallest frame within the row
+            -- as the next row will be the tallest row frame + spacing
+            rowHeight = max(rowHeight, height)
+
+            -- if we've reached the end then wrap around
+            if col > width then
+                xOffset = offset.X
+                yOffset = yOffset - rowHeight - verticalSpacing
+
+                row = row + 1
+                col = 1
+                rowHeight = 0
+            end
+        else
+            currentBlockHeight = currentBlockHeight + height
+
+            -- subtract 1 for a bit of breathing room for rounding errors
+            local isNewRow = currentBlockHeight >= (blockHeight - 1)
+
+            if isNewRow then
+                currentBlockHeight = 0
+            end
+
+            if isNewRow then
+                yOffset = yOffset - height - verticalSpacing
+                row = (row + 1)
+            else
+                -- don't add spacing if we're still within a block
+                yOffset = yOffset - height
+            end
+
+            -- if we've reached the end then wrap around
+            if row > height then
+                row = 1
+                col = col + 1
+                yOffset = offset.Y
+                xOffset = xOffset + blockWidth + horizontalSpacing
+            end
+        end
+    end
+
+    local framesToMove = newtable()
+
+    for _, frame in ipairs(frames) do
+        local to = pointsByFrame[frame]
+        local point, relativeTo, relativePoint, xOffset, yOffset = frame:GetPoint()
+        local different =
+            point ~= to.Point or
+            relativeTo ~= to.RelativeTo or
+            relativePoint ~= to.RelativePoint or
+            self:RunAttribute("Round", xOffset, DecimalSanity) ~= self:RunAttribute("Round", to.XOffset, DecimalSanity) or
+            self:RunAttribute("Round", yOffset, DecimalSanity) ~= self:RunAttribute("Round", to.YOffset, DecimalSanity)
+
+        if different then
+            framesToMove[#framesToMove + 1] = frame
+            frame:ClearAllPoints()
+        end
+    end
+
+    -- now move them
+    for _, frame in ipairs(framesToMove) do
+        local to = pointsByFrame[frame]
+        frame:SetPoint(to.Point, to.RelativeTo, to.RelativePoint, to.XOffset, to.YOffset)
+    end
+
+    return #framesToMove > 0
 ]]
 
 secureMethods["TrySortContainerGroups"] = [[
@@ -497,18 +739,6 @@ secureMethods["TrySortContainer"] = [[
         return false
     end
 
-    -- the frames might be a subset if the container is a raid group
-    -- filter units down to only those within the set of frames
-    -- as otherwise our algorithm will get confused
-    local frameUnits = newtable()
-
-    for _, frame in ipairs(Frames) do
-        Frame = frame
-        local unit = self:RunAttribute("GetUnit", "Frame")
-        Frame = nil
-        frameUnits[unit] = true
-    end
-
     Spacing = nil
 
     if provider.IsBlizzard then
@@ -522,7 +752,6 @@ secureMethods["TrySortContainer"] = [[
         end
     end
 
-    ContainerSortedUnits = newtable()
     local units = nil
 
     if container.Type == "Party" then
@@ -535,17 +764,24 @@ secureMethods["TrySortContainer"] = [[
         -- TODO: log bug
     end
 
-    -- ensure units is not nil
-    units = units or newtable()
+    Units = units or newtable()
 
-    -- now find the units in their sorted order
-    for _, unit in ipairs(units) do
-        if frameUnits[unit] then
-            ContainerSortedUnits[#ContainerSortedUnits + 1] = unit
-        end
+    -- sort the frames to the desired locations
+    FramesInUnitOrder = nil
+    self:RunAttribute("SortFramesByUnits", "Frames", "Units", "FramesInUnitOrder")
+
+    local sorted = false
+
+    if container.LayoutType == "Hard" then
+        sorted = self:RunAttribute("HardArrange", "FramesInUnitOrder", containerVariable, Spacing and "Spacing")
+    else
+        sorted = self:RunAttribute("SoftArrange", "FramesInUnitOrder", Spacing and "Spacing")
     end
 
-    return self:RunAttribute("SoftArrange", "Frames", "ContainerSortedUnits", Spacing and "Spacing")
+    FramesInUnitOrder = nil
+    Spacing = nil
+
+    return sorted
 ]]
 
 -- top level perform sort routine
@@ -635,6 +871,17 @@ secureMethods["LoadProvider"] = [[
 
             data.Frame = frame
             data.Type = type
+
+            local offsetX = self:GetAttribute(type .. "OffsetX")
+            local offsetY = self:GetAttribute(type .. "OffsetY")
+
+            if offsetX or offsetY then
+                data.Offset = newtable()
+                data.Offset.X = offsetX or 0
+                data.Offset.Y = offsetY or 0
+            end
+
+            data.LayoutType = self:GetAttribute(type .. "LayoutType")
 
             provider[type] = data
         end
@@ -750,12 +997,24 @@ local function LoadProvider(provider)
         }
     }
 
-    if provider == fsProviders.Blizzard and provider:IsRaidGrouped() then
-        local groups = provider:RaidGroups()
+    if provider == fsProviders.Blizzard then
+        if provider:IsRaidGrouped() then
+            local groups = provider:RaidGroups()
 
-        -- c'mon blizzard, seriously?
-        for _, group in ipairs(groups) do
-            group:SetProtected()
+            -- c'mon blizzard, seriously?
+            for _, group in ipairs(groups) do
+                group:SetProtected()
+            end
+        end
+
+        for i = 1, #data do
+            local row = data[i]
+            local container = row.Container
+            if container.title and type(container.title) == "table" and type(container.title.GetHeight) == "function" then
+                row.Offset = {
+                    Y = -container.title:GetHeight()
+                }
+            end
         end
     end
 
@@ -782,6 +1041,9 @@ local function LoadProvider(provider)
             -- https://github.com/Stanzilla/WoWUIBugs/issues/480
             item.Container:SetProtected()
 
+            manager:SetAttribute(item.Type .. "OffsetX", item.Offset and item.Offset.X)
+            manager:SetAttribute(item.Type .. "OffsetY", item.Offset and item.Offset.Y)
+            manager:SetAttribute(item.Type .. "LayoutType", provider == fsProviders.Blizzard and "Hard" or "Soft")
             manager:SetFrameRef(item.Type .. "Container", item.Container)
         end
     end
@@ -867,7 +1129,7 @@ local function OnBlizzardUnitFrameCreated(frame)
         manager:WrapScript(frame, "OnHide", showHideHandler)
 
         frame:SetAttribute("FrameSortWatching", true)
-        fsLog:Debug("Watching frame " .. (frame:GetName() or 'nil'))
+        fsLog:Debug("Watching frame " .. (frame:GetName() or "nil"))
     end)
 end
 
