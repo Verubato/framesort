@@ -36,6 +36,7 @@ end
 
 function M:test_sort_party_frames_top()
     addon.DB.Options.Appearance.Party.Spacing.Vertical = 10
+    addon.DB.Options.World.Enabled = true
     addon.DB.Options.World.PlayerSortMode = "Top"
     addon.DB.Options.World.GroupSortMode = "Group"
 

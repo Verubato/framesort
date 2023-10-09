@@ -8,7 +8,6 @@ function M:setup()
     addon.Providers.Blizzard = provider
     addon:InitDB()
     addon.Api:Init()
-    addon.Providers:Init()
 
     local partyContainer = frame:New()
     local player = frame:New("Frame", nil, partyContainer, nil)
@@ -34,6 +33,13 @@ function M:setup()
         p1,
         p2,
     }
+
+    -- disable sorting on config changes
+    addon.DB.Options.World.Enabled = false
+    addon.DB.Options.Raid.Enabled = false
+    addon.DB.Options.Arena.Enabled = false
+    addon.DB.Options.EnemyArena.Enabled = false
+    addon.DB.Options.Dungeon.Enabled = false
 end
 
 function M:teardown()
