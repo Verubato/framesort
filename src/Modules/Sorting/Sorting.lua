@@ -78,6 +78,6 @@ function M:Init()
     end
 
     for _, provider in ipairs(fsProviders.All) do
-        provider:RegisterCallback(OnProviderRequiresSort)
+        provider:RegisterRequestSortCallback(OnProviderRequiresSort)
     end
 end

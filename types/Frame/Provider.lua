@@ -3,20 +3,9 @@
 ---@field Name fun(self: table): string Returns the display name for this provider.
 ---@field Init fun(self: table) Performs any initialisation logic the provider might have.
 ---@field Enabled fun(self: table): boolean Whether the provider is enabled.
----@field GetUnit fun(self: table, frame: table): string? A function that accepts a frame from this provider and returns the unit token.
----@field PartyContainer fun(self: table): table Returns the party frames container.
----@field RaidContainer fun(self: table): table Returns the party frames container.
----@field EnemyArenaContainer fun(self: table): table Returns the party frames container.
----@field PartyFrames fun(self: table): table[] Returns a collection of party frames.
----@field RaidFrames fun(self: table): table[] Returns a collection of raid frames.
----@field RaidGroups fun(self: table): table[] Returns a collection of raid groups.
----@field RaidGroupMembers fun(self: table, group: table): table[] Returns a collection of raid frames from the specified group.
----@field EnemyArenaFrames fun(self: table): table[] Returns a collection of enemy arena frames.
----@field IsRaidGrouped fun(self: table): boolean Whether the raid is grouped.
----@field IsPartyHorizontalLayout fun(self: table): boolean Whether the frames are using a horizontal layout.
----@field IsRaidHorizontalLayout fun(self: table): boolean Whether the frames are using a horizontal layout.
----@field IsEnemyArenaHorizontalLayout fun(self: table): boolean Whether the frames are using a horizontal layout.
----@field RegisterCallback fun(self: table, callback: fun(provider: FrameProvider)) Registers a callback to be invoked when sorting is required.
+---@field RegisterRequestSortCallback fun(self: table, callback: fun(provider: FrameProvider)) Registers a callback to be invoked when sorting is required.
+---@field RegisterContainersChangedCallback fun(self: table, callback: fun(provider: FrameProvider)) Registers a callback to be invoked when container metadata may have changed.
+---@field Containers fun(self: table): FrameContainer[]
 
 ---@class Providers: IInitialise
 ---@field Blizzard BlizzardFrameProvider

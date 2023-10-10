@@ -13,10 +13,6 @@ local pluginName = "FrameSort"
 fsProviders.ElvUI = M
 table.insert(fsProviders.All, M)
 
-local function GetUnit(frame)
-    return frame.unit
-end
-
 local function IntegrationEnabled()
     if not ElvUI then return false end
 
@@ -33,7 +29,7 @@ local function PluginEnabled()
     return wow.GetAddOnEnableState(nil, "ElvUI") ~= 0 and ElvUI ~= nil
 end
 
-local function Update()
+local function RequestSort()
     if not IntegrationEnabled() then
         return
     end
@@ -49,7 +45,7 @@ local function OnSecureGroupHeaderUpdate(header)
         return
     end
 
-    Update()
+    RequestSort()
 end
 
 function M:Name()
@@ -107,8 +103,8 @@ function M:Init()
             end
 
             for _, child in ipairs(children) do
-                child:HookScript("OnShow", Update)
-                child:HookScript("OnHide", Update)
+                child:HookScript("OnShow", RequestSort)
+                child:HookScript("OnHide", RequestSort)
             end
 
             fsPlugin:SecureHook("SecureGroupHeader_Update", OnSecureGroupHeaderUpdate)
@@ -140,51 +136,28 @@ function M:Init()
     E:RegisterModule(pluginName)
 end
 
-function M:RegisterCallback(callback)
+function M:RegisterRequestSortCallback(callback)
     callbacks[#callbacks + 1] = callback
 end
 
-function M:GetUnit(frame)
-    return GetUnit(frame)
-end
+function M:RegisterContainersChangedCallback(_) end
 
-function M:PartyContainer()
-    return ElvUF_PartyGroup1
-end
+function M:Containers()
+    ---@type FrameContainer
+    local party = {
+        Frame = ElvUF_PartyGroup1,
+        Type = fsFrame.ContainerType.Party,
+        LayoutType = fsFrame.LayoutType.Soft,
+        SupportsSpacing = false,
 
-function M:EnemyArenaContainer()
-    return nil
-end
+        -- not applicable
+        FramesOffset = function() return nil end,
+        SupportsGrouping = function() return nil end,
+        IsHorizontalLayout = function() return nil end,
+        GroupFramesOffset = function(_) return nil end
+    }
 
-function M:RaidContainer()
-    return nil
-end
-
-function M:PartyFrames()
-    return fsFrame:ChildUnitFrames(M:PartyContainer(), GetUnit)
-end
-
-function M:RaidFrames()
-    -- not implemented
-    return {}
-end
-
-function M:RaidGroupMembers(_)
-    -- not implemented
-    return {}
-end
-
-function M:RaidGroups()
-    -- not implemented
-    return {}
-end
-
-function M:EnemyArenaFrames()
-    -- not implemented
-    return {}
-end
-
-function M:IsRaidGrouped()
-    -- not implemented
-    return false
+    return {
+        party
+    }
 end

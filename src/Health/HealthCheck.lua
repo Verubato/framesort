@@ -4,6 +4,7 @@ local wow = addon.WoW.Api
 local fsEnumerable = addon.Collections.Enumerable
 local fsProviders = addon.Providers
 local fsConfig = addon.Configuration
+local fsFrame = addon.WoW.Frame
 ---@class HealthChecker
 local M = {}
 addon.Health.HealthCheck = M
@@ -80,34 +81,28 @@ local function CanSeeFrames()
     end
 
     for _, provider in pairs(fsProviders:Enabled()) do
-        local anyParty = fsEnumerable:From(provider:PartyFrames()):Any(function(x)
-            return x:IsVisible()
-        end)
+        local containers = provider:Containers()
 
-        if anyParty then
-            return true
-        end
+        for _, container in ipairs(containers) do
+            local frames = fsFrame:ExtractUnitFrames(container.Frame)
+            local anyVisible = fsEnumerable:From(frames):Any(function(frame) return frame:IsVisible() end)
 
-        local anyRaid = false
+            if anyVisible then
+                return true
+            end
 
-        if not provider:IsRaidGrouped() then
-            anyRaid = fsEnumerable:From(provider:RaidFrames()):Any(function(x)
-                return x:IsVisible()
-            end)
-        else
-            anyRaid = fsEnumerable
-                :From(provider:RaidGroups())
-                :Map(function(group)
-                    return provider:RaidGroupMembers(group)
-                end)
-                :Flatten()
-                :Any(function(x)
-                    return x:IsVisible()
-                end)
-        end
+            if container.SupportsGrouping and container:SupportsGrouping() then
+                local groups = fsFrame:ExtractGroups(container.Frame)
+                local anyVisibleInGroup = fsEnumerable
+                    :From(groups)
+                    :Map(function(group) return fsFrame:ExtractUnitFrames(group) end)
+                    :Flatten()
+                    :Any(function(frame) return frame:IsVisible() end)
 
-        if anyRaid then
-            return true
+                if anyVisibleInGroup then
+                    return true
+                end
+            end
         end
     end
 
@@ -141,6 +136,26 @@ local function UsingSpacing()
     return fsEnumerable
         :From(spacings)
         :Any(function(spacing) return spacing.Vertical ~= 0 or spacing.Horizontal ~= 0 end)
+end
+
+local function IsUsingRaidStyleFrames()
+    if wow.IsRetail() then
+        return wow.EditModeManagerFrame:UseRaidStylePartyFrames()
+    else
+        return wow.GetCVarBool("useCompactPartyFrames")
+    end
+end
+
+local function IsRaidGrouped()
+    if wow.IsRetail() then
+        local raidGroupDisplayType = wow.EditModeManagerFrame:GetSettingValue(
+            wow.Enum.EditModeSystem.UnitFrame,
+            wow.Enum.EditModeUnitFrameSystemIndices.Raid,
+            wow.Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
+        return raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsVertical or raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsHorizontal
+    end
+
+    return wow.CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
 end
 
 ---Returns true if the environment/settings is in a good state, otherwise false.
@@ -183,14 +198,14 @@ function M:IsHealthy()
 
     results[#results + 1] = {
         Applicable = addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Traditional,
-        Passed = fsProviders.Blizzard:IsUsingRaidStyleFrames(),
+        Passed = IsUsingRaidStyleFrames(),
         Description = "Using Raid-Style Party Frames",
         Help = "Please enable 'Use Raid-Style Party Frames' in the Blizzard settings",
     }
 
     results[#results + 1] = {
         Applicable = addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Traditional,
-        Passed = not fsProviders.Blizzard:IsRaidGrouped(),
+        Passed = not IsRaidGrouped(),
         Description = "Keep Groups Together setting disabled",
         Help = wow.IsRetail() and "Change the raid display mode to one of the 'Combined Groups' options via Edit Mode" or "Disable the 'Keep Groups Together' raid profile setting",
     }

@@ -3,107 +3,58 @@ local _, addon = ...
 local wow = addon.WoW.Api
 local fsFrame = addon.WoW.Frame
 local fsEnumerable = addon.Collections.Enumerable
-local fsUnit = addon.WoW.Unit
 local fsProviders = addon.Providers
 local events = addon.WoW.Api.Events
 ---@class BlizzardFrameProvider: FrameProvider
 local M = {}
-local callbacks = {}
+local sortCallbacks = {}
+local containersChangedCallbacks = {}
+local cvarsToWatch = {
+    "HorizontalGroups",
+    "KeepGroupsTogether",
+}
 
 fsProviders.Blizzard = M
 table.insert(fsProviders.All, M)
 
-local function IsValidGroupFrame(frame)
-    if not frame then
-        return false
-    end
-
-    if type(frame) ~= "table" then
-        return false
-    end
-
-    if frame:IsForbidden() then
-        return false
-    end
-
-    if frame:GetTop() == nil or frame:GetLeft() == nil then
-        return false
-    end
-
-    if not frame:IsVisible() then
-        return false
-    end
-
-    return string.match(frame:GetName() or "", "CompactRaidGroup") ~= nil
-end
-
-local function Filter(frames, filter)
-    filter = filter or function(frame)
-        return fsFrame:IsValidUnitFrame(frame, function(x)
-            return M:GetUnit(x)
-        end)
-    end
-
-    return fsEnumerable
-        :From(frames)
-        :Where(function(frame)
-            return filter(frame)
-        end)
-        :ToTable()
-end
-
-local function PartyFrames(filter)
-    if M:IsUsingRaidStyleFrames() then
-        local container = M:PartyContainer()
-        if not container or not container.memberUnitFrames or container:IsForbidden() or not container:IsVisible() then
-            return {}
-        end
-
-        local players = Filter(container.memberUnitFrames, filter)
-        local pets = container.petUnitFrames and Filter(container.petUnitFrames, filter) or {}
-
-        return fsEnumerable:From(players):Concat(pets):ToTable()
-    else
-        local container = wow.PartyFrame
-        if not container or container:IsForbidden() or not container:IsVisible() then
-            return {}
-        end
-
-        local frames = { container:GetChildren() }
-        return Filter(frames, filter)
-    end
-end
-
-local function EnemyArenaFrames(filter)
-    local container = M:EnemyArenaContainer()
-    if not container or not container.memberUnitFrames or container:IsForbidden() or not container:IsVisible() then
-        return {}
-    end
-
-    return Filter(container.memberUnitFrames, filter)
-end
-
-local function RaidFrames(filter)
-    local container = M:RaidContainer()
-    if not container or not container.flowFrames or container:IsForbidden() or not container:IsVisible() then
-        return {}
-    end
-
-    return Filter(container.flowFrames, filter)
-end
-
-local function GroupFrames(group, filter)
-    if not group or not group.memberUnitFrames or group:IsForbidden() or not group:IsVisible() then
-        return {}
-    end
-
-    return Filter(group.memberUnitFrames, filter)
-end
-
-local function Update()
-    for _, callback in pairs(callbacks) do
+local function RequestSort()
+    for _, callback in pairs(sortCallbacks) do
         callback(M)
     end
+end
+
+local function RequestUpdateContainers()
+    for _, callback in pairs(containersChangedCallbacks) do
+        callback(M)
+    end
+end
+
+local function OnEvent(_, event)
+    RequestSort()
+
+    if event == events.EDIT_MODE_LAYOUTS_UPDATED then
+        RequestUpdateContainers()
+    end
+end
+
+local function OnCvarUpdate(name, _)
+    for _, cvar in ipairs(cvarsToWatch) do
+        if name == cvar then
+            RequestUpdateContainers()
+            return
+        end
+    end
+end
+
+local function GetOffset(container)
+    if container and container.title and type(container.title) == "table" and type(container.title.GetHeight) == "function" then
+        return {
+            X = 0,
+            Y = -container.title:GetHeight()
+        }
+    end
+
+    return nil
 end
 
 function M:Name()
@@ -111,17 +62,11 @@ function M:Name()
 end
 
 function M:Enabled()
-    local party = M:PartyContainer()
-    if party then
-        -- frame addons will usually disable blizzard via unsubscribing group update events
-        if party:IsVisible() or party:IsEventRegistered("GROUP_ROSTER_UPDATE") then
-            return true
-        end
-    end
+    local containers = M:Containers()
 
-    local raid = M:RaidContainer()
-    if raid then
-        if raid:IsVisible() or raid:IsEventRegistered("GROUP_ROSTER_UPDATE") then
+    for _, container in ipairs(containers) do
+        -- frame addons will usually disable blizzard via unsubscribing group update events
+        if container.Frame:IsVisible() or container.Frame:IsEventRegistered("GROUP_ROSTER_UPDATE") then
             return true
         end
     end
@@ -134,136 +79,132 @@ function M:Init()
         return
     end
 
-    if #callbacks > 0 then
-        callbacks = {}
+    if #sortCallbacks > 0 then
+        sortCallbacks = {}
+    end
+
+    if #containersChangedCallbacks > 0 then
+        containersChangedCallbacks = {}
     end
 
     local eventFrame = wow.CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", Update)
+    eventFrame:HookScript("OnEvent", OnEvent)
     eventFrame:RegisterEvent(events.PLAYER_ENTERING_WORLD)
     eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
     eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
     eventFrame:RegisterEvent(events.UNIT_PET)
 
     if wow.IsRetail() then
-        wow.EventRegistry:RegisterCallback(events.EditModeExit, Update)
+        wow.EventRegistry:RegisterCallback(events.EditModeExit, RequestSort)
+        -- user may have changed frame settings, so request that containers be refreshed
+        wow.EventRegistry:RegisterCallback(events.EditModeExit, RequestUpdateContainers)
         eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
         eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
-    end
-end
-
-function M:PartyContainer()
-    return wow.CompactPartyFrame
-end
-
-function M:EnemyArenaContainer()
-    return wow.CompactArenaFrame
-end
-
-function M:RaidContainer()
-    return wow.CompactRaidFrameContainer
-end
-
-function M:RegisterCallback(callback)
-    callbacks[#callbacks + 1] = callback
-end
-
-function M:GetUnit(frame)
-    return frame.unit
-end
-
-function M:PartyFrames()
-    return PartyFrames()
-end
-
-function M:EnemyArenaFrames()
-    return EnemyArenaFrames()
-end
-
-function M:RaidFrames()
-    return RaidFrames()
-end
-
-function M:RaidGroupMembers(group)
-    return GroupFrames(group)
-end
-
-function M:RaidGroups()
-    local container = M:RaidContainer()
-    if not container or not container.flowFrames or container:IsForbidden() or not container:IsVisible() then
-        return {}
+        eventFrame:RegisterEvent(events.EDIT_MODE_LAYOUTS_UPDATED)
     end
 
-    return Filter(container.flowFrames, IsValidGroupFrame)
+    local cvarUpdate = wow.CreateFrame("Frame")
+    cvarUpdate:HookScript("OnEvent", OnCvarUpdate)
+    cvarUpdate:RegisterEvent(events.CVAR_UPDATE)
 end
 
-function M:PlayerRaidFrames()
-    local isPlayer = function(frame)
-        local unit = M:GetUnit(frame)
-        -- a player can have more than one frame if they occupy a vehicle
-        -- as both the player and vehicle pet frame are shown
-        return unit and (unit == "player" or wow.UnitIsUnit(unit, "player")) and not fsUnit:IsPet(unit)
-    end
+function M:RegisterRequestSortCallback(callback)
+    sortCallbacks[#sortCallbacks + 1] = callback
+end
 
-    local party = PartyFrames(isPlayer)
-    if #party > 0 then
-        return party
-    end
+function M:RegisterContainersChangedCallback(callback)
+    containersChangedCallbacks[#containersChangedCallbacks + 1] = callback
+end
 
-    if M:IsRaidGrouped() then
-        local groups = M:RaidGroups()
-        for _, group in ipairs(groups) do
-            local members = GroupFrames(group, isPlayer)
-            if #members > 0 then
-                return members
+function M:Containers()
+    ---@type FrameContainer
+    local party = {
+        Frame = wow.CompactPartyFrame,
+        Type = fsFrame.ContainerType.Party,
+        LayoutType = fsFrame.LayoutType.Hard,
+        SupportsSpacing = true,
+        SupportsGrouping = function() return false end,
+        IsHorizontalLayout = function()
+            if wow.IsRetail() then
+                return wow.EditModeManagerFrame:GetSettingValueBool(
+                    wow.Enum.EditModeSystem.UnitFrame,
+                    wow.Enum.EditModeUnitFrameSystemIndices.Party,
+                    wow.Enum.EditModeUnitFrameSetting.UseHorizontalGroups)
             end
+
+            return wow.CompactRaidFrameManager_GetSetting("HorizontalGroups")
+        end,
+        FramesOffset = function()
+            return GetOffset(wow.CompactPartyFrame)
+        end,
+        GroupFramesOffset = function(_)
+            return nil
         end
-    else
-        local raid = RaidFrames(isPlayer)
-        if #raid > 0 then
-            return raid
+    }
+
+    ---@type FrameContainer
+    local raid = {
+        Frame = wow.CompactRaidFrameContainer,
+        Type = fsFrame.ContainerType.Raid,
+        LayoutType = fsFrame.LayoutType.Hard,
+        SupportsSpacing = true,
+        SupportsGrouping = function()
+            if wow.IsRetail() then
+                local raidGroupDisplayType = wow.EditModeManagerFrame:GetSettingValue(
+                    wow.Enum.EditModeSystem.UnitFrame,
+                    wow.Enum.EditModeUnitFrameSystemIndices.Raid,
+                    wow.Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
+                return raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsVertical or raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsHorizontal
+            end
+
+            return wow.CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
+        end,
+        IsHorizontalLayout = function()
+            if wow.IsRetail() then
+                local displayType = wow.EditModeManagerFrame:GetSettingValue(
+                    wow.Enum.EditModeSystem.UnitFrame,
+                    wow.Enum.EditModeUnitFrameSystemIndices.Raid,
+                    wow.Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
+                return displayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsHorizontal or displayType == wow.Enum.RaidGroupDisplayType.CombineGroupsHorizontal
+            end
+
+            return wow.CompactRaidFrameManager_GetSetting("HorizontalGroups")
+        end,
+        FramesOffset = function()
+            return GetOffset(wow.CompactRaidFrameContainer)
+        end,
+        GroupFramesOffset = function()
+            local groups = fsFrame:ExtractGroups(wow.CompactRaidFrameContainer)
+
+            if #groups == 0 then
+                return nil
+            end
+
+            return GetOffset(groups[1])
         end
-    end
+    }
 
-    return {}
-end
+    ---@type FrameContainer
+    local arena = {
+        Frame = wow.CompactArenaFrame,
+        Type = fsFrame.ContainerType.EnemyArena,
+        LayoutType = fsFrame.LayoutType.Hard,
+        SupportsSpacing = true,
+        IsHorizontalLayout = function() return nil end,
+        SupportsGrouping = function() return nil end,
+        FramesOffset = function()
+            return GetOffset(wow.CompactArenaFrame)
+        end,
+        GroupFramesOffset = function(_)
+            return nil
+        end
+    }
 
-function M:IsRaidGrouped()
-    if wow.IsRetail() then
-        local raidGroupDisplayType =
-            wow.EditModeManagerFrame:GetSettingValue(wow.Enum.EditModeSystem.UnitFrame, wow.Enum.EditModeUnitFrameSystemIndices.Raid, wow.Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
-        return raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsVertical or raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsHorizontal
-    end
-
-    return wow.CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
-end
-
-function M:IsPartyHorizontalLayout()
-    if wow.IsRetail() then
-        return wow.EditModeManagerFrame:GetSettingValueBool(wow.Enum.EditModeSystem.UnitFrame, wow.Enum.EditModeUnitFrameSystemIndices.Party, wow.Enum.EditModeUnitFrameSetting.UseHorizontalGroups)
-    end
-
-    return wow.CompactRaidFrameManager_GetSetting("HorizontalGroups")
-end
-
-function M:IsRaidHorizontalLayout()
-    if wow.IsRetail() then
-        local displayType =
-            wow.EditModeManagerFrame:GetSettingValue(wow.Enum.EditModeSystem.UnitFrame, wow.Enum.EditModeUnitFrameSystemIndices.Raid, wow.Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
-        return displayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsHorizontal or displayType == wow.Enum.RaidGroupDisplayType.CombineGroupsHorizontal
-    end
-
-    return wow.CompactRaidFrameManager_GetSetting("HorizontalGroups")
-end
-
-function M:IsEnemyArenaHorizontalLayout()
-    return false
-end
-
-function M:IsUsingRaidStyleFrames()
-    if wow.IsRetail() then
-        return wow.EditModeManagerFrame:UseRaidStylePartyFrames()
-    else
-        return wow.GetCVarBool("useCompactPartyFrames")
-    end
+    return fsEnumerable:From({
+            party,
+            raid,
+            arena
+        })
+        :Where(function(x) return x.Frame ~= nil end)
+        :ToTable()
 end

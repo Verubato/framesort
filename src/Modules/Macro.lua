@@ -98,7 +98,7 @@ function M:Init()
     end
 
     for _, provider in ipairs(fsProviders:Enabled()) do
-        provider:RegisterCallback(Run)
+        provider:RegisterRequestSortCallback(Run)
     end
 
     fsSort:RegisterPostSortCallback(Run)

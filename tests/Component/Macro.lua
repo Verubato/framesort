@@ -1,6 +1,7 @@
 ---@type AddonMock
 local addon = require("Addon")
 local frame = require("Mock\\Frame")
+local fsFrame = addon.WoW.Frame
 local wow = addon.WoW.Api
 local provider = addon.Providers.Test
 local M = {}
@@ -11,7 +12,11 @@ function M:setup()
     addon.Scheduling.Scheduler:Init()
     addon.Modules.Macro:Init()
 
-    local partyContainer = frame:New()
+    local party = fsFrame:GetContainer(provider, fsFrame.ContainerType.Party)
+    local partyContainer = assert(party).Frame
+
+    assert(partyContainer ~= nil)
+
     local player = frame:New("Frame", nil, partyContainer, nil)
     player.State.Position.Top = 300
     player.unit = "player"
@@ -23,12 +28,6 @@ function M:setup()
     local p2 = frame:New("Frame", nil, partyContainer, nil)
     p2.State.Position.Top = 200
     p2.unit = "party2"
-
-    provider.State.PartyFrames = {
-        player,
-        p1,
-        p2,
-    }
 end
 
 function M:teardown()

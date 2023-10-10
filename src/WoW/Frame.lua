@@ -1,12 +1,53 @@
+-- TODO: move this to a better namespace
 ---@type string, Addon
 local _, addon = ...
 local fsEnumerable = addon.Collections.Enumerable
 local fsCompare = addon.Collections.Comparer
 local fsMath = addon.Numerics.Math
 ---@class FrameUtil
-local M = {}
+local M = {
+    ---@class ContainerType
+    ContainerType = {
+        Party = 1,
+        Raid = 2,
+        EnemyArena = 3
+    },
+    ---@class FrameLayoutType
+    LayoutType = {
+        ---Arrange frames by adjusting their x/y coordinates without changing the anchor.
+        Soft = 1,
+        --Arrange frames by setting their anchors.
+        Hard = 2
+    }
+}
 
 addon.WoW.Frame = M
+
+---@param provider FrameProvider
+---@param type number
+local function GetFrames(provider, type)
+    local target = M:GetContainer(provider, type)
+    if not target then return {} end
+
+    local frames = M:ExtractUnitFrames(target.Frame)
+
+    if not target.SupportsGrouping or not target:SupportsGrouping() then
+        return frames
+    end
+
+    local groups = M:ExtractGroups(target.Frame)
+    local ungrouped = fsEnumerable
+        :From(groups)
+        :Map(function(group)
+            return M:ExtractUnitFrames(group)
+        end)
+        :Flatten()
+
+    return fsEnumerable
+        :From(frames)
+        :Concat(ungrouped)
+        :ToTable()
+end
 
 ---Returns the frames in order of their relative positioning to each other.
 ---@param frames table[] frames in any particular order
@@ -100,36 +141,21 @@ function M:IsFlat(frames)
     return true
 end
 
----Returns true if the specified frame is a valid unit frame.
+--- Returns the unit token from a frame.
 ---@param frame table
----@param getUnit fun(frame: table): string
----@return boolean
-function M:IsValidUnitFrame(frame, getUnit)
-    if not frame then
-        return false
+---@return string|nil
+function M:GetFrameUnit(frame)
+    if frame.unit then
+        return frame.unit
     end
 
-    if type(frame) ~= "table" then
-        return false
-    end
-
-    if frame:IsForbidden() then
-        return false
-    end
-
-    if frame:GetTop() == nil or frame:GetLeft() == nil then
-        return false
-    end
-
-    local unit = getUnit(frame)
-    return unit ~= nil
+    return frame:GetAttribute("unit")
 end
 
 ---Returns a collection of unit frames from the specified container.
 ---@param container table
----@param getUnit fun(frame: table): string
 ---@return table
-function M:ChildUnitFrames(container, getUnit)
+function M:ExtractUnitFrames(container)
     if not container or container:IsForbidden() or not container:IsVisible() then
         return {}
     end
@@ -137,7 +163,37 @@ function M:ChildUnitFrames(container, getUnit)
     return fsEnumerable
         :From({ container:GetChildren() })
         :Where(function(frame)
-            return M:IsValidUnitFrame(frame, getUnit)
+            if type(frame) ~= "table" then return false end
+            if frame:IsForbidden() then return false end
+            if frame:GetTop() == nil or frame:GetLeft() == nil then return false end
+
+            local unit = M:GetFrameUnit(frame)
+            return unit ~= nil
+        end)
+        :ToTable()
+end
+
+---Returns a collection of groups from the specified container.
+---@param container table
+---@return table
+function M:ExtractGroups(container)
+    if not container or container:IsForbidden() or not container:IsVisible() then
+        return {}
+    end
+
+    return fsEnumerable
+        :From({ container:GetChildren() })
+        :Where(function(frame)
+            if type(frame) ~= "table" then return false end
+            if frame:IsForbidden() then return false end
+            if frame:GetTop() == nil or frame:GetLeft() == nil then return false end
+
+            local name = frame:GetName()
+
+            if not name then return false end
+
+            -- only supports blizzard groups atm
+            return string.match(name, "CompactRaidGroup")
         end)
         :ToTable()
 end
@@ -188,4 +244,39 @@ function M:GridSize(frames)
     end
 
     return width, height
+end
+
+---@param provider FrameProvider
+---@param type number
+---@return FrameContainer?
+function M:GetContainer(provider, type)
+    local containers = provider:Containers()
+
+    for _, container in ipairs(containers) do
+        if container.Type == type then
+            return container
+        end
+    end
+
+    return nil
+end
+---Returns the party frames of the specified provider.
+---@param provider FrameProvider
+---@return table[]
+function M:PartyFrames(provider)
+    return GetFrames(provider, M.ContainerType.Party)
+end
+
+---Returns the raid frames of the specified provider.
+---@param provider FrameProvider
+---@return table[]
+function M:RaidFrames(provider)
+    return GetFrames(provider, M.ContainerType.Raid)
+end
+
+---Returns the enemy arena frames of the specified provider.
+---@param provider FrameProvider
+---@return table[]
+function M:EnemyArenaFrames(provider)
+    return GetFrames(provider, M.ContainerType.EnemyArena)
 end

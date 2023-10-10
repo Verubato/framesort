@@ -8,6 +8,7 @@ local fsEnumerable = addon.Collections.Enumerable
 local fsUnit = addon.WoW.Unit
 local fsScheduler = addon.Scheduling.Scheduler
 local fsConfig = addon.Configuration
+local fsFrame = addon.WoW.Frame
 local fsLog = addon.Logging.Log
 local M = {}
 addon.Modules.Sorting.Secure.InCombat = M
@@ -398,6 +399,26 @@ secureMethods["AdjustPointsOffset"] = [[
     return true
 ]]
 
+secureMethods["SpacingForContainer"] = [[
+    local containerType = ...
+    local spacingType = nil
+
+    if containerType == ContainerType.Party then
+        spacingType = "Party"
+    elseif containerType == ContainerType.Raid then
+        spacingType = "Raid"
+    elseif containerType == ContainerType.EnemyArena then
+        spacingType = "EnemyArena"
+    else
+        return nil, nil
+    end
+
+    local horizontalSpacing = self:GetAttribute(spacingType .. "SpacingHorizontal")
+    local verticalSpacing = self:GetAttribute(spacingType .. "SpacingVertical")
+
+    return horizontalSpacing, verticalSpacing
+]]
+
 secureMethods["ApplySpacing"] = [[
     local pointsVariable, spacingVariable = ...
     local points = _G[pointsVariable]
@@ -588,15 +609,11 @@ secureMethods["HardArrange"] = [[
     local spacing = spacingVariable and _G[spacingVariable]
     local verticalSpacing = spacing and spacing.Vertical or 0
     local horizontalSpacing = spacing and spacing.Horizontal or 0
-
     local width, height = self:RunAttribute("GridSize", framesVariable)
-
-    -- TODO: source this value properly
-    local isHorizontalLayout = width > height
-
+    local isHorizontalLayout = container.IsHorizontalLayout
     local _, _, blockWidth, blockHeight = frames[1]:GetRect()
-
     local offset = container.Offset or newtable()
+
     offset.X = offset.X or 0
     offset.Y = offset.Y or 0
 
@@ -694,9 +711,8 @@ secureMethods["TrySortContainerGroups"] = [[
     local container = _G[containerVariable]
     local provider = _G[providerVariable]
 
-    Groups = nil
-
     local sorted = false
+    Groups = nil
 
     if not self:RunAttribute("ExtractGroups", containerVariable, "Groups") then
         return false
@@ -704,8 +720,17 @@ secureMethods["TrySortContainerGroups"] = [[
 
     for _, group in ipairs(Groups) do
         GroupContainer = newtable()
+        -- just copy over all the attributes to make code simpler
+        self:RunAttribute("CopyTable", containerVariable, "GroupContainer")
+
+        -- now re-write over the top
         GroupContainer.Frame = group
-        GroupContainer.Type = container.Type
+        GroupContainer.Offset = newtable()
+
+        if container.GroupOffset then
+            GroupContainer.Offset.X = container.GroupOffset.X
+            GroupContainer.Offset.Y = container.GroupOffset.Y
+        end
 
         local groupSorted = self:RunAttribute("TrySortContainer", "GroupContainer", providerVariable)
         sorted = sorted or groupSorted
@@ -713,29 +738,42 @@ secureMethods["TrySortContainerGroups"] = [[
         GroupContainer = nil
     end
 
-    local horizontalSpacing = self:GetAttribute(container.Type .. "SpacingHorizontal")
-    local verticalSpacing = self:GetAttribute(container.Type .. "SpacingVertical")
+    if container.SupportsSpacing then
+        local horizontalSpacing, verticalSpacing = self:RunAttribute("SpacingForContainer", container.Type)
 
-    if horizontalSpacing or verticalSpacing then
-        GroupSpacing = newtable()
-        GroupSpacing.Horizontal = horizontalSpacing
-        GroupSpacing.Vertical = verticalSpacing
+        if (horizontalSpacing and horizontalSpacing ~= 0) or (verticalSpacing and verticalSpacing ~= 0) then
+            GroupSpacing = newtable()
+            GroupSpacing.Horizontal = horizontalSpacing
+            GroupSpacing.Vertical = verticalSpacing
 
-        local spacedGroup = self:RunAttribute("SpaceGroups", "Groups", "GroupSpacing")
-        sorted = sorted or spacedGroup
+            local spacedGroup = self:RunAttribute("SpaceGroups", "Groups", "GroupSpacing")
+            sorted = sorted or spacedGroup
+        end
     end
 
     Groups = nil
+    return sorted
 ]]
 
 -- attempts to sort the frames within the container
 secureMethods["TrySortContainer"] = [[
     local friendlyEnabled = self:GetAttribute("FriendlySortEnabled")
     local enemyEnabled = self:GetAttribute("EnemySortEnabled")
-
     local containerVariable, providerVariable = ...
     local container = _G[containerVariable]
     local provider = _G[providerVariable]
+    local units = nil
+
+    if container.Type == ContainerType.Party then
+        units = FriendlyUnits
+    elseif container.Type == ContainerType.Raid then
+        units = FriendlyUnits
+    elseif container.Type == ContainerType.EnemyArena then
+        units = EnemyUnits
+    else
+        -- TODO: log bug
+        return false
+    end
 
     Children = newtable()
     Frames = newtable()
@@ -748,31 +786,6 @@ secureMethods["TrySortContainer"] = [[
         return false
     end
 
-    Spacing = nil
-
-    if provider.IsBlizzard then
-        local horizontalSpacing = self:GetAttribute(container.Type .. "SpacingHorizontal")
-        local verticalSpacing = self:GetAttribute(container.Type .. "SpacingVertical")
-
-        if (horizontalSpacing and horizontalSpacing ~= 0) or (verticalSpacing and verticalSpacing ~= 0) then
-            Spacing = newtable()
-            Spacing.Horizontal = horizontalSpacing
-            Spacing.Vertical = verticalSpacing
-        end
-    end
-
-    local units = nil
-
-    if container.Type == "Party" then
-        units = FriendlyUnits
-    elseif container.Type == "Raid" then
-        units = FriendlyUnits
-    elseif container.Type == "EnemyArena" then
-        units = EnemyUnits
-    else
-        -- TODO: log bug
-    end
-
     Units = units or newtable()
 
     -- sort the frames to the desired locations
@@ -781,13 +794,25 @@ secureMethods["TrySortContainer"] = [[
 
     local sorted = false
 
-    if container.LayoutType == "Hard" then
+    if container.SupportsSpacing then
+        local horizontalSpacing, verticalSpacing = self:RunAttribute("SpacingForContainer", container.Type)
+
+        if (horizontalSpacing and horizontalSpacing ~= 0) or (verticalSpacing and verticalSpacing ~= 0) then
+            Spacing = newtable()
+            Spacing.Horizontal = horizontalSpacing
+            Spacing.Vertical = verticalSpacing
+        end
+    end
+
+    if container.LayoutType == LayoutType.Hard then
         sorted = self:RunAttribute("HardArrange", "FramesInUnitOrder", containerVariable, Spacing and "Spacing")
     else
         sorted = self:RunAttribute("SoftArrange", "FramesInUnitOrder", Spacing and "Spacing")
     end
 
     FramesInUnitOrder = nil
+    Children = nil
+    Frames = nil
     Spacing = nil
 
     return sorted
@@ -796,7 +821,6 @@ secureMethods["TrySortContainer"] = [[
 -- top level perform sort routine
 secureMethods["TrySort"] = [[
     if not self:RunAttribute("InCombat") then return false end
-    if not Providers then return false end
 
     local friendlyEnabled = self:GetAttribute("FriendlySortEnabled")
     local enemyEnabled = self:GetAttribute("EnemySortEnabled")
@@ -809,42 +833,42 @@ secureMethods["TrySort"] = [[
         self:SetAttribute("LoadedUnits", true)
     end
 
-    local sorted = false
+    local toSort = newtable()
 
     for _, provider in pairs(Providers) do
         local providerEnabled = self:GetAttribute("Provider" .. provider.Name .. "Enabled")
         if providerEnabled then
-            local containers = newtable()
-
-            if friendlyEnabled then
-                containers[#containers + 1] = provider.Party
-                containers[#containers + 1] = provider.Raid
-            end
-
-            if enemyEnabled then
-                containers[#containers + 1] = provider.EnemyArena
-            end
-
-            for _, container in ipairs(containers) do
+            for _, container in ipairs(provider.Containers) do
                 if container.Frame and container.Frame:IsVisible() then
-                    Container = container
-                    Provider = provider
+                    if ((container.Type == ContainerType.Party or container.Type == ContainerType.Raid) and friendlyEnabled) or
+                        (container.Type == ContainerType.EnemyArena and enemyEnabled) then
+                        local add = newtable()
+                        add.Provider = provider
+                        add.Container = container
 
-                    local containerSorted = self:RunAttribute("TrySortContainer", "Container", "Provider")
-                    sorted = sorted or containerSorted
-
-                    local hasGroups = provider.IsBlizzard and container.Type == "Raid"
-
-                    if hasGroups then
-                        local sortedGroups = self:RunAttribute("TrySortContainerGroups", "Container", "Provider")
-                        sorted = sorted or sortedGroups
+                        toSort[#toSort + 1] = add
                     end
-
-                    Provider = nil
-                    Container = nil
                 end
             end
         end
+    end
+
+    local sorted = false
+
+    for _, item in ipairs(toSort) do
+        Container = item.Container
+        Provider = item.Provider
+
+        local containerSorted = self:RunAttribute("TrySortContainer", "Container", "Provider")
+        sorted = sorted or containerSorted
+
+        if Container.SupportsGrouping then
+            local sortedGroups = self:RunAttribute("TrySortContainerGroups", "Container", "Provider")
+            sorted = sorted or sortedGroups
+        end
+
+        Provider = nil
+        Container = nil
     end
 
     if sorted then
@@ -866,34 +890,41 @@ secureMethods["LoadProvider"] = [[
         Providers[name] = provider
     end
 
-    local types = newtable()
-    types[#types + 1] = "Party"
-    types[#types + 1] = "Raid"
-    types[#types + 1] = "EnemyArena"
+    -- replace existing containers (if any)
+    provider.Containers = newtable()
 
-    for _, type in ipairs(types) do
-        local frame = self:GetFrameRef(type .. "Container")
-        local hasType = self:GetAttribute(type)
+    local containersCount = self:GetAttribute(name .. "ContainersCount")
 
-        if frame and hasType then
-            local data = newtable()
+    for i = 1, containersCount do
+        local prefix = name .. "Container" .. i
+        local container = newtable()
 
-            data.Frame = frame
-            data.Type = type
+        container.Frame = self:GetFrameRef(prefix .. "Frame")
+        container.Type = self:GetAttribute(prefix .. "Type")
+        container.LayoutType = self:GetAttribute(prefix .. "LayoutType")
+        container.SupportsSpacing = self:GetAttribute(prefix .. "SupportsSpacing")
+        container.SupportsGrouping = self:GetAttribute(prefix .. "SupportsGrouping")
+        container.IsHorizontalLayout = self:GetAttribute(prefix .. "IsHorizontalLayout")
 
-            local offsetX = self:GetAttribute(type .. "OffsetX")
-            local offsetY = self:GetAttribute(type .. "OffsetY")
+        local offsetX = self:GetAttribute(prefix .. "OffsetX")
+        local offsetY = self:GetAttribute(prefix .. "OffsetY")
 
-            if offsetX or offsetY then
-                data.Offset = newtable()
-                data.Offset.X = offsetX or 0
-                data.Offset.Y = offsetY or 0
-            end
-
-            data.LayoutType = self:GetAttribute(type .. "LayoutType")
-
-            provider[type] = data
+        if offsetX or offsetY then
+            container.Offset = newtable()
+            container.Offset.X = offsetX or 0
+            container.Offset.Y = offsetY or 0
         end
+
+        local groupOffsetX = self:GetAttribute(prefix .. "GroupOffsetX")
+        local groupOffsetY = self:GetAttribute(prefix .. "GroupOffsetY")
+
+        if groupOffsetX or groupOffsetY then
+            container.GroupOffset = newtable()
+            container.GroupOffset.X = groupOffsetX or 0
+            container.GroupOffset.Y = groupOffsetY or 0
+        end
+
+        provider.Containers[#provider.Containers + 1] = container
     end
 ]]
 
@@ -920,13 +951,22 @@ secureMethods["LoadUnits"] = [[
 ]]
 
 secureMethods["Init"] = [[
-    manager = self
     Providers = newtable()
 
     -- don't move frames if they are have minuscule position differences
     -- it's just a rounding error and makes no visual impact
     -- this helps preventing spam on our callbacks
     DecimalSanity = 2
+
+    -- must match the enums specified in Frame.lua
+    ContainerType = newtable()
+    ContainerType.Party = 1
+    ContainerType.Raid = 2
+    ContainerType.EnemyArena = 3
+
+    LayoutType = newtable()
+    LayoutType.Soft = 1
+    LayoutType.Hard = 2
 ]]
 
 local function LoadUnits()
@@ -988,51 +1028,29 @@ local function LoadSpacing()
 end
 
 ---@param provider FrameProvider
-local function LoadProvider(provider)
+local function LoadProvider(provider, force)
     assert(manager ~= nil)
 
-    local data = {
-        {
-            Container = provider:PartyContainer(),
-            Type = "Party"
-        },
-        {
-            Container = provider:RaidContainer(),
-            Type = "Raid"
-        },
-        {
-            Container = provider:EnemyArenaContainer(),
-            Type = "EnemyArena"
-        }
-    }
+    local containers = provider:Containers()
 
     if provider == fsProviders.Blizzard then
-        if provider:IsRaidGrouped() then
-            local groups = provider:RaidGroups()
+        local raid = fsFrame:GetContainer(provider, fsFrame.ContainerType.Raid)
+        if raid then
+            local groups = fsFrame:ExtractGroups(raid.Frame)
 
             -- c'mon blizzard, seriously?
             for _, group in ipairs(groups) do
                 group:SetProtected()
             end
         end
-
-        for i = 1, #data do
-            local row = data[i]
-            local container = row.Container
-            if container.title and type(container.title) == "table" and type(container.title.GetHeight) == "function" then
-                row.Offset = {
-                    Y = -container.title:GetHeight()
-                }
-            end
-        end
     end
 
     -- skip loading the container if we've already loaded it
     -- 99% of the time we've already loaded it
-    local shouldLoad = fsEnumerable
-        :From(data)
+    local shouldLoad = force or fsEnumerable
+        :From(containers)
         :Any(function(x)
-            return x.Container and not x.Container:GetAttribute("FrameSortLoaded")
+            return x.Frame and not x.Frame:GetAttribute("FrameSortLoaded")
         end)
 
     if not shouldLoad then
@@ -1041,29 +1059,34 @@ local function LoadProvider(provider)
 
     manager:SetAttribute("ProviderName", provider:Name())
 
-    for _, item in ipairs(data) do
-        manager:SetAttribute(item.Type, item.Container and true or false)
+    for i, container in ipairs(containers) do
+        -- to fix a current blizzard bug where GetPoint() returns nil values on secure frames when their parent's are unsecure
+        -- https://github.com/Stanzilla/WoWUIBugs/issues/470
+        -- https://github.com/Stanzilla/WoWUIBugs/issues/480
+        container.Frame:SetProtected()
 
-        if item.Container then
-            -- to fix a current blizzard bug where GetPoint() returns nil values on secure frames when their parent's are unsecure
-            -- https://github.com/Stanzilla/WoWUIBugs/issues/470
-            -- https://github.com/Stanzilla/WoWUIBugs/issues/480
-            item.Container:SetProtected()
+        local offset = container.FramesOffset and container:FramesOffset()
+        local groupOffset = container.GroupFramesOffset and container:GroupFramesOffset()
+        local containerPrefix = provider:Name() .. "Container" .. i
 
-            manager:SetAttribute(item.Type .. "OffsetX", item.Offset and item.Offset.X)
-            manager:SetAttribute(item.Type .. "OffsetY", item.Offset and item.Offset.Y)
-            manager:SetAttribute(item.Type .. "LayoutType", provider == fsProviders.Blizzard and "Hard" or "Soft")
-            manager:SetFrameRef(item.Type .. "Container", item.Container)
-        end
+        manager:SetFrameRef(containerPrefix .. "Frame", container.Frame)
+        manager:SetAttribute(containerPrefix .. "Type", container.Type)
+        manager:SetAttribute(containerPrefix .. "LayoutType", container.LayoutType)
+        manager:SetAttribute(containerPrefix .. "IsHorizontalLayout", container.IsHorizontalLayout and container:IsHorizontalLayout())
+        manager:SetAttribute(containerPrefix .. "SupportsSpacing", container.SupportsSpacing)
+        manager:SetAttribute(containerPrefix .. "SupportsGrouping", container.SupportsGrouping and container:SupportsGrouping())
+        manager:SetAttribute(containerPrefix .. "OffsetX", offset and offset.X)
+        manager:SetAttribute(containerPrefix .. "OffsetY", offset and offset.Y)
+        manager:SetAttribute(containerPrefix .. "GroupOffsetX", groupOffset and groupOffset.X)
+        manager:SetAttribute(containerPrefix .. "GroupOffsetY", groupOffset and groupOffset.Y)
     end
 
+    manager:SetAttribute(provider:Name() .. "ContainersCount", #containers)
     manager:Execute([[ self:RunAttribute("LoadProvider") ]])
 
-    for _, item in ipairs(data) do
-        if item.Container then
-            -- flag as imported
-            item.Container:SetAttribute("FrameSortLoaded", true)
-        end
+    for _, item in ipairs(containers) do
+        -- flag as imported
+        item.Frame:SetAttribute("FrameSortLoaded", true)
     end
 
     fsLog:Debug(string.format("Sent provider %s to the secure environment.", provider:Name()))
@@ -1089,7 +1112,13 @@ local function InjectSecureHelpers(secureFrame)
     end
 end
 
-local function OnProviderUpdate(provider)
+local function OnProviderContainersChanged(provider)
+    fsScheduler:RunWhenCombatEnds(function()
+        LoadProvider(provider, true)
+    end)
+end
+
+local function OnProviderRequestSort(provider)
     -- don't respond to provider events during combat
     if wow.InCombatLockdown() then return end
 
@@ -1143,7 +1172,7 @@ local function OnBlizzardUnitFrameCreated(frame)
 end
 
 function M:Init()
-    manager = wow.CreateFrame("Frame", "FrameSortGroupmanager", wow.UIParent, "SecureHandlerStateTemplate")
+    manager = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureHandlerStateTemplate")
 
     InjectSecureHelpers(manager)
 
@@ -1186,7 +1215,8 @@ function M:Init()
 
     for _, provider in ipairs(fsProviders.All) do
         LoadProvider(provider)
-        provider:RegisterCallback(OnProviderUpdate)
+        provider:RegisterRequestSortCallback(OnProviderRequestSort)
+        provider:RegisterContainersChangedCallback(OnProviderContainersChanged)
     end
 
     LoadEnabled()

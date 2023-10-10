@@ -11,11 +11,7 @@ local callbacks = {}
 fsProviders.GladiusEx = M
 table.insert(fsProviders.All, M)
 
-local function GetUnit(frame)
-    return frame.unit
-end
-
-local function Update()
+local function RequestSort()
     for _, callback in pairs(callbacks) do
         callback(M)
     end
@@ -23,7 +19,7 @@ end
 
 local function UpdateNextFrame()
     -- wait for GladiusEx to update their frames before we perform a sort
-    fsScheduler:RunNextFrame(Update)
+    fsScheduler:RunNextFrame(RequestSort)
 end
 
 function M:Name()
@@ -56,48 +52,49 @@ function M:Init()
     end
 end
 
-function M:RegisterCallback(callback)
+function M:RegisterRequestSortCallback(callback)
     callbacks[#callbacks + 1] = callback
 end
 
-function M:GetUnit(frame)
-    return GetUnit(frame)
-end
+function M:RegisterContainersChangedCallback(_) end
 
-function M:PartyContainer()
+function M:Containers()
+    ---@type FrameContainer[]
+    local containers = {}
+
     ---@diagnostic disable-next-line: undefined-global
-    return GladiusExPartyFrame
-end
+    if GladiusExPartyFrame then
+        containers[#containers + 1] = {
+            ---@diagnostic disable-next-line: undefined-global
+            Frame = GladiusExPartyFrame,
+            Type = fsFrame.ContainerType.Party,
+            LayoutType = fsFrame.LayoutType.Soft,
+            SupportsSpacing = false,
 
-function M:EnemyArenaContainer()
+            -- not applicable
+            FramesOffset = function() return nil end,
+            SupportsGrouping = function() return nil end,
+            IsHorizontalLayout = function() return nil end,
+            GroupFramesOffset = function(_) return nil end
+        }
+    end
+
     ---@diagnostic disable-next-line: undefined-global
-    return GladiusExArenaFrame
-end
+    if GladiusExArenaFrame then
+        containers[#containers + 1] = {
+            ---@diagnostic disable-next-line: undefined-global
+            Frame = GladiusExArenaFrame,
+            Type = fsFrame.ContainerType.EnemyArena,
+            LayoutType = fsFrame.LayoutType.Soft,
+            SupportsSpacing = false,
 
-function M:RaidContainer()
-    return nil
-end
+            -- not applicable
+            FramesOffset = function() return nil end,
+            SupportsGrouping = function() return nil end,
+            IsHorizontalLayout = function() return nil end,
+            GroupFramesOffset = function(_) return nil end
+        }
+    end
 
-function M:PartyFrames()
-    return fsFrame:ChildUnitFrames(M:PartyContainer(), GetUnit)
-end
-
-function M:RaidFrames()
-    return {}
-end
-
-function M:RaidGroupMembers(_)
-    return {}
-end
-
-function M:RaidGroups()
-    return {}
-end
-
-function M:EnemyArenaFrames()
-    return fsFrame:ChildUnitFrames(M:EnemyArenaContainer(), GetUnit)
-end
-
-function M:IsRaidGrouped()
-    return false
+    return containers
 end

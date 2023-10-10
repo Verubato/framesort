@@ -11,11 +11,7 @@ local callbacks = {}
 fsProviders.sArena = M
 table.insert(fsProviders.All, M)
 
-local function GetUnit(frame)
-    return frame.unit
-end
-
-local function Update()
+local function RequestSort()
     for _, callback in pairs(callbacks) do
         callback(M)
     end
@@ -23,7 +19,7 @@ end
 
 local function UpdateNextFrame()
     -- wait for sArena to update their frames before we perform a sort
-    fsScheduler:RunNextFrame(Update)
+    fsScheduler:RunNextFrame(RequestSort)
 end
 
 function M:Name()
@@ -53,47 +49,34 @@ function M:Init()
     end
 end
 
-function M:RegisterCallback(callback)
+function M:RegisterRequestSortCallback(callback)
     callbacks[#callbacks + 1] = callback
 end
 
-function M:GetUnit(frame)
-    return GetUnit(frame)
-end
+function M:RegisterContainersChangedCallback(_) end
 
-function M:PartyContainer()
-    return nil
-end
-
-function M:EnemyArenaContainer()
+function M:Containers()
     ---@diagnostic disable-next-line: undefined-global
-    return sArena
-end
+    if not sArena then
+        return {}
+    end
 
-function M:RaidContainer()
-    return nil
-end
+    ---@type FrameContainer
+    local arena = {
+        ---@diagnostic disable-next-line: undefined-global
+        Frame = sArena,
+        Type = fsFrame.ContainerType.EnemyArena,
+        LayoutType = fsFrame.LayoutType.Soft,
+        SupportsSpacing = false,
 
-function M:PartyFrames()
-    return {}
-end
+        -- not applicable
+        FramesOffset = function() return nil end,
+        SupportsGrouping = function() return nil end,
+        IsHorizontalLayout = function() return nil end,
+        GroupFramesOffset = function(_) return nil end
+    }
 
-function M:RaidFrames()
-    return {}
-end
-
-function M:RaidGroupMembers(_)
-    return {}
-end
-
-function M:RaidGroups()
-    return {}
-end
-
-function M:EnemyArenaFrames()
-    return fsFrame:ChildUnitFrames(M:EnemyArenaContainer(), GetUnit)
-end
-
-function M:IsRaidGrouped()
-    return false
+    return {
+        arena
+    }
 end

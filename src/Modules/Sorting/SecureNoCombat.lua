@@ -1,18 +1,18 @@
 ---@type string, Addon
 local _, addon = ...
-local wow = addon.WoW.Api
 local fsProviders = addon.Providers
 local fsCompare = addon.Collections.Comparer
 local fsFrame = addon.WoW.Frame
 local fsEnumerable = addon.Collections.Enumerable
 local fsMath = addon.Numerics.Math
+local fsLog = addon.Logging.Log
 local M = {}
 addon.Modules.Sorting.Secure.NoCombat = M
 
-local function FrameSortFunction(unitSortFunction, provider)
+local function FrameSortFunction(unitSortFunction)
     return function(left, right)
-        local leftUnit = provider:GetUnit(left)
-        local rightUnit = provider:GetUnit(right)
+        local leftUnit = fsFrame:GetFrameUnit(left)
+        local rightUnit = fsFrame:GetFrameUnit(right)
 
         return unitSortFunction(leftUnit, rightUnit)
     end
@@ -37,8 +37,8 @@ local function Move(frames, points)
                 point ~= to.Point or
                 relativeTo ~= to.RelativeTo or
                 relativePoint ~= to.RelativePoint or
-                fsMath:Round(xOffset, decimalSanity) ~= fsMath:Round(to.XOffset, decimalSanity) or
-                fsMath:Round(yOffset, decimalSanity) ~= fsMath:Round(to.YOffset, decimalSanity)
+                fsMath:Round(xOffset or 0, decimalSanity) ~= fsMath:Round(to.XOffset or 0, decimalSanity) or
+                fsMath:Round(yOffset or 0, decimalSanity) ~= fsMath:Round(to.YOffset or 0, decimalSanity)
 
             if different then
                 framesToMove[#framesToMove + 1] = frame
@@ -59,16 +59,13 @@ end
 ---Rearranges frames by only modifying the X/Y offsets and not changing any point anchors.
 ---@param frames table[]
 ---@param spacing Spacing?
----@param sort boolean?
 ---@return boolean sorted
-local function SoftArrange(frames, spacing, sort)
+local function SoftArrange(frames, spacing)
     if #frames == 0 then
         return false
     end
 
-    if sort == nil then sort = true end
-
-    local ordered = sort and fsEnumerable
+    local ordered = fsEnumerable
         :From(frames)
         :OrderBy(function(x, y)
             return fsCompare:CompareTopLeftFuzzy(x, y)
@@ -159,7 +156,7 @@ end
 ---@param frames table[]
 ---@param container table
 ---@param isHorizontalLayout boolean
----@param spacing Spacing
+---@param spacing Spacing?
 ---@param offset Offset?
 ---@return boolean sorted
 local function HardArrange(frames, container, isHorizontalLayout, spacing, offset)
@@ -180,9 +177,10 @@ local function HardArrange(frames, container, isHorizontalLayout, spacing, offse
         Y = 0
     }
 
-    if container.title and type(container.title) == "table" and type(container.title.GetHeight) == "function" then
-        offset.Y = offset.Y - container.title:GetHeight()
-    end
+    spacing = spacing or {
+        Vertical = 0,
+        Horizontal = 0
+    }
 
     ---@type table<table, Point>
     local pointsByFrame = {}
@@ -249,19 +247,18 @@ local function HardArrange(frames, container, isHorizontalLayout, spacing, offse
 end
 
 ---Determines the offset to use for the ungrouped portion of the raid frames.
----@param provider FrameProvider
+---@param container FrameContainer
 ---@return Offset
-local function UngroupedOffset(provider, spacing)
+local function UngroupedOffset(container, spacing)
     local offset = {
         X = 0,
         Y = 0
     }
-    local container = provider:RaidContainer()
-    local groups = provider:RaidGroups()
-    local horizontal = provider:IsRaidHorizontalLayout()
+    local groups = fsFrame:ExtractGroups(container.Frame)
+    local horizontal = container.IsHorizontalLayout
     local frames = fsEnumerable
         :From(groups)
-        :Map(function(group) return provider:RaidGroupMembers(group) end)
+        :Map(function(group) return fsFrame:ExtractUnitFrames(group) end)
         :Flatten()
         :ToTable()
 
@@ -273,121 +270,126 @@ local function UngroupedOffset(provider, spacing)
             :OrderBy(function(x, y) return fsCompare:CompareBottomLeftFuzzy(x, y) end)
             :First()
 
-        offset.Y = -(container:GetTop() - bottomLeftFrame:GetBottom() + spacing.Vertical)
-        offset.X = -(container:GetLeft() - bottomLeftFrame:GetLeft())
+        offset.Y = -(container.Frame:GetTop() - bottomLeftFrame:GetBottom() + spacing.Vertical)
+        offset.X = -(container.Frame:GetLeft() - bottomLeftFrame:GetLeft())
     else
         local topRightFrame = fsEnumerable
             :From(frames)
             :OrderBy(function(x, y) return fsCompare:CompareTopRightFuzzy(x, y) end)
             :First()
 
-        offset.X = -(container:GetLeft() - topRightFrame:GetRight() - spacing.Horizontal)
-        offset.Y = -(container:GetTop() - topRightFrame:GetTop())
+        offset.X = -(container.Frame:GetLeft() - topRightFrame:GetRight() - spacing.Horizontal)
+        offset.Y = -(container.Frame:GetTop() - topRightFrame:GetTop())
     end
 
     return offset
 end
 
----@param provider FrameProvider
+---@param container FrameContainer
 ---@return boolean
-local function SortRaid(provider)
-    local getUnit = function(frame)
-        return provider:GetUnit(frame)
-    end
-
+local function SortBlizzardRaid(container)
     local sorted = false
     local offset = {
         X = 0,
         Y = 0
     }
-    local container = provider:RaidContainer()
-    if not container then return false end
 
-    local horizontal = provider:IsRaidHorizontalLayout()
+    local horizontal = container.IsHorizontalLayout and container:IsHorizontalLayout() or false
     local spacing = addon.DB.Options.Appearance.Raid.Spacing
+    local groups = fsFrame:ExtractGroups(container.Frame)
 
-    if provider:IsRaidGrouped() then
-        local groups = provider:RaidGroups()
+    for _, group in ipairs(groups) do
+        local frames = fsFrame:ExtractUnitFrames(group)
+        local units = fsEnumerable
+            :From(frames)
+            :Map(function(frame)
+                return fsFrame:GetFrameUnit(frame)
+            end)
+            :ToTable()
+        local sortFunction = FrameSortFunction(fsCompare:SortFunction(units))
 
-        for _, group in ipairs(groups) do
-            local frames = provider:RaidGroupMembers(group)
-            local units = fsEnumerable:From(frames):Map(getUnit):ToTable()
-            local sortFunction = FrameSortFunction(fsCompare:SortFunction(units), provider)
+        table.sort(frames, sortFunction)
 
-            table.sort(frames, sortFunction)
-
-            local sortedGroup = false
-
-            if provider == fsProviders.Blizzard then
-                sortedGroup = HardArrange(frames, group, horizontal, spacing)
-            else
-                sortedGroup = SoftArrange(frames)
-            end
-
-            sorted = sorted or sortedGroup
-        end
-
-        if provider == fsProviders.Blizzard then
-            local spacedGroups = SoftArrange(groups, spacing, false)
-            sorted = sorted or spacedGroups
-
-            local ungroupedOffset = UngroupedOffset(provider, spacing)
-            offset.X = offset.X + ungroupedOffset.X
-            offset.Y = offset.Y + ungroupedOffset.Y
-        end
+        local sortedGroup = HardArrange(frames, group, horizontal, spacing, container.GroupFramesOffset and container:GroupFramesOffset())
+        sorted = sorted or sortedGroup
     end
 
-    local ungrouped = provider:RaidFrames()
-    local ungroupedUnits = fsEnumerable:From(ungrouped):Map(getUnit):ToTable()
-    local ungroupedSortFunction = FrameSortFunction(fsCompare:SortFunction(ungroupedUnits), provider)
+    local spacedGroups = SoftArrange(groups, spacing)
+    sorted = sorted or spacedGroups
+
+    local ungroupedOffset = UngroupedOffset(container, spacing)
+    offset.X = offset.X + ungroupedOffset.X
+    offset.Y = offset.Y + ungroupedOffset.Y
+
+    local ungrouped = fsFrame:ExtractUnitFrames(container.Frame)
+    local ungroupedUnits = fsEnumerable
+        :From(ungrouped)
+        :Map(function(frame)
+            return fsFrame:GetFrameUnit(frame)
+        end)
+        :ToTable()
+
+    local ungroupedSortFunction = FrameSortFunction(fsCompare:SortFunction(ungroupedUnits))
 
     table.sort(ungrouped, ungroupedSortFunction)
 
-    local sortedUngrouped = false
-
-    if provider == fsProviders.Blizzard then
-        sortedUngrouped = HardArrange(ungrouped, container, horizontal, spacing, offset)
-    else
-        sortedUngrouped = SoftArrange(ungrouped, spacing)
-    end
-
+    local sortedUngrouped = HardArrange(ungrouped, container.Frame, horizontal, spacing, offset)
     sorted = sorted or sortedUngrouped
 
     return sorted
 end
 
 ---@param provider FrameProvider
+---@param container FrameContainer
 ---@return boolean
-local function SortParty(provider)
-    local getUnit = function(frame)
-        return provider:GetUnit(frame)
-    end
-    local frames = provider:PartyFrames()
-    local units = fsEnumerable:From(frames):Map(getUnit):ToTable()
-    local sortFunction = FrameSortFunction(fsCompare:SortFunction(units), provider)
-    local spacing = addon.DB.Options.Appearance.Party.Spacing
+local function SortContainer(provider, container)
+    local frames = fsFrame:ExtractUnitFrames(container.Frame)
+    local sortFunction = nil
 
-    table.sort(frames, sortFunction)
-
-    if provider == fsProviders.Blizzard then
-        return HardArrange(frames, provider:PartyContainer(), provider:IsPartyHorizontalLayout(), spacing)
+    if container.Type == fsFrame.ContainerType.Party or
+        container.Type == fsFrame.ContainerType.Raid then
+        local units = fsEnumerable:From(frames):Map(function(frame) return fsFrame:GetFrameUnit(frame) end):ToTable()
+        local unitSortFunction = fsCompare:SortFunction(units)
+        sortFunction = FrameSortFunction(unitSortFunction)
+    elseif container.Type == fsFrame.ContainerType.EnemyArena then
+        local unitSortFunction = fsCompare:EnemySortFunction()
+        sortFunction = FrameSortFunction(unitSortFunction)
     else
-        return SoftArrange(frames)
+        fsLog:Error("Unknown container type: " .. (container.Type or "nil"))
+        return false
     end
-end
 
----@param provider FrameProvider
----@return boolean
-local function SortEnemyArena(provider)
-    local sortFunction = FrameSortFunction(fsCompare:EnemySortFunction(), provider)
-    local frames = provider:EnemyArenaFrames()
     table.sort(frames, sortFunction)
 
-    local spacing = provider == fsProviders.Blizzard
-        and addon.DB.Options.Appearance.EnemyArena.Spacing
-        or nil
+    local spacing = nil
 
-    return SoftArrange(frames, spacing)
+    if container.SupportsSpacing then
+        if container.Type == fsFrame.ContainerType.Party then
+            spacing = addon.DB.Options.Appearance.Party.Spacing
+        elseif container.Type == fsFrame.ContainerType.Raid then
+            spacing = addon.DB.Options.Appearance.Raid.Spacing
+        elseif container.Type == fsFrame.ContainerType.EnemyArena then
+            spacing = addon.DB.Options.Appearance.EnemyArena.Spacing
+        end
+    end
+
+    -- special handling for blizzard
+    -- TODO: see if we can somehow make this generic
+    if provider == fsProviders.Blizzard and container.Type == fsFrame.ContainerType.Raid then
+        return SortBlizzardRaid(container)
+    elseif container.LayoutType == fsFrame.LayoutType.Soft then
+        return SoftArrange(frames, spacing)
+    elseif container.LayoutType == fsFrame.LayoutType.Hard then
+        return HardArrange(
+            frames,
+            container.Frame,
+            container.IsHorizontalLayout and container:IsHorizontalLayout() or false,
+            spacing,
+            container.FramesOffset and container:FramesOffset())
+    else
+        fsLog:Error("Unknown layout type: " .. (container.Type or "nil"))
+        return false
+    end
 end
 
 ---@param provider FrameProvider?
@@ -395,21 +397,23 @@ end
 function M:TrySort(provider)
     local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
     local enemyEnabled, _, _ = fsCompare:EnemySortMode()
-    local sorted = false
 
+    if not friendlyEnabled and not enemyEnabled then
+        return false
+    end
+
+    local sorted = false
     local providers = provider and { provider } or fsProviders:Enabled()
 
     for _, p in ipairs(providers) do
-        if friendlyEnabled then
-            local sortedParty = SortParty(p)
-            local sortedRaid = SortRaid(p)
+        local containers = p:Containers()
 
-            sorted = sorted or sortedParty or sortedRaid
-        end
-
-        if enemyEnabled and wow.IsRetail() then
-            local arenaSorted = SortEnemyArena(p)
-            sorted = sorted or arenaSorted
+        for _, container in ipairs(containers) do
+            if (container.Type == fsFrame.ContainerType.Party or container.Type == fsFrame.ContainerType.Raid) and friendlyEnabled then
+                sorted = SortContainer(p, container) or sorted
+            elseif container.Type == fsFrame.ContainerType.EnemyArena and enemyEnabled then
+                sorted = SortContainer(p, container) or sorted
+            end
         end
     end
 

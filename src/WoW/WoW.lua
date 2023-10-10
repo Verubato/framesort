@@ -118,6 +118,12 @@ local wow = {
         -- Special event that's fired when the user closes edit mode.
         -- Can only be used directly on EventRegistry and not via RegisterScript()
         EditModeExit = "EditMode.Exit",
+
+        -- Fires when changing console variables with an optional argument to C_CVar.SetCVar().
+        CVAR_UPDATE = "CVAR_UPDATE",
+
+        -- Fired when switching to a different layout from edit mode.
+        EDIT_MODE_LAYOUTS_UPDATED = "EDIT_MODE_LAYOUTS_UPDATED",
     },
 }
 
