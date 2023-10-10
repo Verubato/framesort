@@ -177,65 +177,6 @@ secureMethods["FrameChain"] = [[
     return true
 ]]
 
--- returns the width x height of the frames in a grid layout.
-secureMethods["GridSize"] = [[
-    local framesVariable = ...
-    local frames = _G[framesVariable]
-
-    if #frames == 0 then return 0, 0 end
-    if #frames == 1 then return 1, 1 end
-
-    local width = 1
-    local height = 1
-
-    local byCol = newtable()
-    local byRow = newtable()
-
-    ByCol = byCol
-    self:RunAttribute("CopyTable", framesVariable, "ByCol")
-    self:RunAttribute("SortFramesByLeftTop", "ByCol")
-    ByCol = nil
-
-    ByRow = byRow
-    self:RunAttribute("CopyTable", framesVariable, "ByRow")
-    self:RunAttribute("SortFramesByTopLeft", "ByRow")
-    ByRow = nil
-
-    local columnHeight = 1
-    for i = 2, #byCol do
-        local frame = byCol[i]
-        local previous = byCol[i - 1]
-        local left, _, _, _ = frame:GetRect()
-        local previousLeft, _, _, _ = previous:GetRect()
-        local sameColumn = self:RunAttribute("Round", left) == self:RunAttribute("Round", previousLeft)
-
-        if sameColumn then
-            columnHeight = columnHeight + 1
-            height = max(height, columnHeight)
-        else
-            columnHeight = 0
-        end
-    end
-
-    local rowWidth = 1
-    for i = 2, #byRow do
-        local frame = byRow[i]
-        local previous = byRow[i - 1]
-        local _, bottom, _, height = frame:GetRect()
-        local _, previousBottom, _, previousHeight = previous:GetRect()
-        local sameRow = self:RunAttribute("Round", bottom + height) == self:RunAttribute("Round", previousBottom + previousHeight)
-
-        if sameRow then
-            rowWidth = rowWidth + 1
-            width = max(width, rowWidth)
-        else
-            rowWidth = 0
-        end
-    end
-
-    return width, height
-]]
-
 -- performs an in place sort on an array of frames by their visual order
 secureMethods["SortFramesByTopLeft"] = [[
     local framesVariable = ...
@@ -609,7 +550,6 @@ secureMethods["HardArrange"] = [[
     local spacing = spacingVariable and _G[spacingVariable]
     local verticalSpacing = spacing and spacing.Vertical or 0
     local horizontalSpacing = spacing and spacing.Horizontal or 0
-    local width, height = self:RunAttribute("GridSize", framesVariable)
     local isHorizontalLayout = container.IsHorizontalLayout
     local _, _, blockWidth, blockHeight = frames[1]:GetRect()
     local offset = container.Offset or newtable()
@@ -637,13 +577,13 @@ secureMethods["HardArrange"] = [[
 
         if isHorizontalLayout then
             col = (col + 1)
-            xOffset = xOffset + blockWidth + spacing.Horizontal
+            xOffset = xOffset + blockWidth + horizontalSpacing
             -- keep track of the tallest frame within the row
             -- as the next row will be the tallest row frame + spacing
             rowHeight = max(rowHeight, height)
 
             -- if we've reached the end then wrap around
-            if col > width then
+            if container.FramesPerLine and col > container.FramesPerLine then
                 xOffset = offset.X
                 yOffset = yOffset - rowHeight - verticalSpacing
 
@@ -670,7 +610,7 @@ secureMethods["HardArrange"] = [[
             end
 
             -- if we've reached the end then wrap around
-            if row > height then
+            if container.FramesPerLine and row > container.FramesPerLine then
                 row = 1
                 col = col + 1
                 yOffset = offset.Y
@@ -905,6 +845,7 @@ secureMethods["LoadProvider"] = [[
         container.SupportsSpacing = self:GetAttribute(prefix .. "SupportsSpacing")
         container.SupportsGrouping = self:GetAttribute(prefix .. "SupportsGrouping")
         container.IsHorizontalLayout = self:GetAttribute(prefix .. "IsHorizontalLayout")
+        container.FramesPerLine = self:GetAttribute(prefix .. "FramesPerLine")
 
         local offsetX = self:GetAttribute(prefix .. "OffsetX")
         local offsetY = self:GetAttribute(prefix .. "OffsetY")
@@ -1073,6 +1014,7 @@ local function LoadProvider(provider, force)
         manager:SetAttribute(containerPrefix .. "Type", container.Type)
         manager:SetAttribute(containerPrefix .. "LayoutType", container.LayoutType)
         manager:SetAttribute(containerPrefix .. "IsHorizontalLayout", container.IsHorizontalLayout and container:IsHorizontalLayout())
+        manager:SetAttribute(containerPrefix .. "FramesPerLine", container.FramesPerLine and container:FramesPerLine())
         manager:SetAttribute(containerPrefix .. "SupportsSpacing", container.SupportsSpacing)
         manager:SetAttribute(containerPrefix .. "SupportsGrouping", container.SupportsGrouping and container:SupportsGrouping())
         manager:SetAttribute(containerPrefix .. "OffsetX", offset and offset.X)
@@ -1226,9 +1168,9 @@ function M:Init()
     fsConfig:RegisterConfigurationChangedCallback(OnConfigChanged)
 
     ---@diagnostic disable-next-line: undefined-global
-    if CompactUnitFrame_SetUpFrame then
-        wow.hooksecurefunc("CompactUnitFrame_SetUpFrame", OnBlizzardUnitFrameCreated)
-    end
+    -- if CompactUnitFrame_SetUpFrame then
+    --     wow.hooksecurefunc("CompactUnitFrame_SetUpFrame", OnBlizzardUnitFrameCreated)
+    -- end
 end
 
 function M:RefreshUnits()
