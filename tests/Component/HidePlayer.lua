@@ -4,7 +4,9 @@ local frame = require("Mock\\Frame")
 local wow = addon.WoW.Api
 local provider = addon.Providers.Test
 local realBlizzardProvider = addon.Providers.Blizzard
+local fsFrame = addon.WoW.Frame
 local M = {}
+local player = nil
 
 function M:setup()
     addon.Providers.Blizzard = provider
@@ -14,8 +16,12 @@ function M:setup()
     addon.Scheduling.Scheduler:Init()
     addon.Modules.HidePlayer:Init()
 
-    local partyContainer = frame:New()
-    local player = frame:New("Frame", nil, partyContainer, nil)
+    local party = fsFrame:GetContainer(provider, fsFrame.ContainerType.Party)
+    local partyContainer = assert(party).Frame
+
+    assert(partyContainer ~= nil)
+
+    player = frame:New("Frame", nil, partyContainer, nil)
     player.State.Position.Top = 300
     player.unit = "player"
 
@@ -26,22 +32,16 @@ function M:setup()
     local p2 = frame:New("Frame", nil, partyContainer, nil)
     p2.State.Position.Top = 100
     p2.unit = "party2"
-
-    provider.State.PartyFrames = {
-        player,
-        p1,
-        p2,
-    }
 end
 
 function M:teardown()
     addon:Reset()
     addon.Providers.Blizzard = realBlizzardProvider
-    provider.State.PartyFrames = {}
 end
 
 function M:test_player_hides_on_provider_callback()
-    local player = provider.State.PartyFrames[1]
+    assert(player)
+
     addon.DB.Options.World.Enabled = true
     addon.DB.Options.World.PlayerSortMode = "Hidden"
 
@@ -56,7 +56,8 @@ function M:test_player_hides_on_provider_callback()
 end
 
 function M:test_player_shows_on_provider_callback()
-    local player = provider.State.PartyFrames[1]
+    assert(player)
+
     player.State.Visible = false
 
     addon.DB.Options.World.Enabled = true
@@ -73,7 +74,7 @@ function M:test_player_shows_on_provider_callback()
 end
 
 function M:test_player_hides_after_combat()
-    local player = provider.State.PartyFrames[1]
+    assert(player)
 
     addon.DB.Options.World.Enabled = true
     addon.DB.Options.World.PlayerSortMode = "Hidden"
@@ -95,7 +96,8 @@ function M:test_player_hides_after_combat()
 end
 
 function M:test_player_shows_after_combat()
-    local player = provider.State.PartyFrames[1]
+    assert(player)
+
     player.State.Visible = false
 
     addon.DB.Options.World.Enabled = true

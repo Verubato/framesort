@@ -1,19 +1,11 @@
-local frameMock = require("Mock\\Frame")
+local wow = require("Mock\\WoW")
 
 ---@type FrameProvider
-return {
+local provider = {
     State = {
-        PartyFrames = {},
-        RaidFrames = {},
-        EnemyArenaFrames = {},
         Callbacks = {},
+        Containers = {}
     },
-    Reset = function(self)
-        self.State.Callbacks = {}
-        self.State.PartyFrames = {}
-        self.State.RaidFrames = {}
-        self.State.EnemyArenaFrames = {}
-    end,
     Name = function()
         return "Test"
     end,
@@ -21,69 +13,74 @@ return {
     Enabled = function()
         return true
     end,
-    GetUnit = function(_, frame)
-        return frame.unit
+    Containers = function(self)
+        return self.State.Containers
     end,
-    PartyContainer = function(_)
-        return frameMock:New("Frame", "PartyContainer")
-    end,
-    RaidContainer = function(_)
-        return frameMock:New("Frame", "RaidContainer")
-    end,
-    EnemyArenaContainer = function(_)
-        return frameMock:New("Frame", "EnemyArenaContainer")
-    end,
-    RaidFrames = function(self)
-        return self.State.RaidFrames
-    end,
-    RaidGroups = function()
-        return {}
-    end,
-    PartyFrames = function(self)
-        return self.State.PartyFrames
-    end,
-    IsRaidGrouped = function()
-        return false
-    end,
-    IsPartyHorizontalLayout = function()
-        return false
-    end,
-    IsRaidHorizontalLayout = function()
-        return false
-    end,
-    IsEnemyArenaHorizontalLayout = function()
-        return false
-    end,
-    EnemyArenaFrames = function(self)
-        return self.State.EnemyArenaFrames
-    end,
-    PlayerRaidFrames = function(self)
-        local frames = {}
-
-        for _, frame in ipairs(self.State.PartyFrames) do
-            if frame.unit == "player" then
-                frames[#frames + 1] = frame
-            end
-        end
-
-        for _, frame in ipairs(self.State.RaidFrames) do
-            if frame.unit == "player" then
-                frames[#frames + 1] = frame
-            end
-        end
-
-        return frames
-    end,
-    IsUsingRaidStyleFrames = function() return true end,
-    RaidGroupMembers = function()
-        return {}
-    end,
-    RegisterCallback = function(self, callback)
+    RegisterRequestSortCallback = function(self, callback)
         self.State.Callbacks[#self.State.Callbacks + 1] = callback
     end,
+    RegisterContainersChangedCallback = function(_, _) end,
     FireCallbacks = function(self)
         for _, callback in ipairs(self.State.Callbacks) do
             callback(self)
         end
     end,
 }
+
+---@diagnostic disable-next-line: inject-field
+function provider:Reset()
+    self.State.Callbacks = {}
+
+    ---@type FrameContainer
+    local party = {
+        Frame = assert(wow.CompactPartyFrame),
+        -- TODO: reference named values from addon.WoW.Frame
+        -- party
+        Type = 1,
+        -- hard
+        LayoutType = 2,
+        SupportsSpacing = true,
+        IsHorizontalLayout = function() return nil end,
+        SupportsGrouping = function() return nil end,
+        FramesOffset = function() return nil end,
+        GroupFramesOffset = function() return nil end,
+    }
+
+    local raid = {
+        Frame = assert(wow.CompactRaidFrameContainer),
+        -- TODO: reference named values from addon.WoW.Frame
+        -- raid
+        Type = 2,
+        -- hard
+        LayoutType = 2,
+        SupportsSpacing = true,
+        IsHorizontalLayout = function() return nil end,
+        SupportsGrouping = function() return nil end,
+        FramesOffset = function() return nil end,
+        GroupFramesOffset = function() return nil end,
+    }
+
+    local arena = {
+        Frame = assert(wow.CompactArenaFrame),
+        -- TODO: reference named values from addon.WoW.Frame
+        -- arena
+        Type = 3,
+        -- hard
+        LayoutType = 2,
+        SupportsSpacing = true,
+        IsHorizontalLayout = function() return nil end,
+        SupportsGrouping = function() return nil end,
+        FramesOffset = function() return nil end,
+        GroupFramesOffset = function() return nil end,
+    }
+
+    self.State.Containers = {
+        party,
+        raid,
+        arena
+    }
+end
+
+provider:Reset()
+
+return provider

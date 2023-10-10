@@ -1,37 +1,39 @@
+---@type AddonMock
 local addon = require("Addon")
 local frame = require("Mock\\Frame")
 local fsProviders = addon.Providers
 local provider = fsProviders.Test
-local realBlizzardProvider = fsProviders.Blizzard
 local fsSort = addon.Modules.Sorting
+local fsFrame = addon.WoW.Frame
 
 local M = {}
-local player = frame:New("Frame", "Player")
-player.unit = "player"
-
-local p1 = frame:New("Frame", "Party1")
-p1.unit = "party1"
-
-local p2 = frame:New("Frame", "Party2")
-p2.unit = "party2"
+local player = nil
+local p1 = nil
+local p2 = nil
 
 function M:setup()
     addon:InitDB()
 
-    provider.State.PartyFrames = {
-        player,
-        p1,
-        p2,
-    }
-
-    fsProviders.Blizzard = provider
     ---@diagnostic disable-next-line: inject-field
     addon.DB.Options.SortingMethod = "Secure"
+
+    local party = fsFrame:GetContainer(provider, fsFrame.ContainerType.Party)
+    local partyContainer = assert(party).Frame
+
+    assert(partyContainer)
+
+    player = frame:New("Frame", nil, partyContainer)
+    player.unit = "player"
+
+    p1 = frame:New("Frame", nil, partyContainer)
+    p1.unit = "party1"
+
+    p2 = frame:New("Frame", nil, partyContainer)
+    p2.unit = "party2"
 end
 
 function M:teardown()
     addon:Reset()
-    fsProviders.Blizzard = realBlizzardProvider
 end
 
 function M:test_sort_party_frames_top()
@@ -42,16 +44,23 @@ function M:test_sort_party_frames_top()
 
     local width = 100
     local height = 100
+    local party = fsFrame:GetContainer(provider, fsFrame.ContainerType.Party)
+    local partyContainer = assert(party).Frame
+
+    assert(partyContainer)
+    assert(player)
+    assert(p1)
+    assert(p2)
 
     -- 3 frames with no spacing between them
     -- player = top
     -- p1 = middle
     -- p2 = bottom
-    player:SetPoint("TOPLEFT", provider:PartyContainer(), "BOTTOMLEFT", 0, 0)
+    player:SetPoint("TOPLEFT", partyContainer, "BOTTOMLEFT", 0, 0)
     player:SetPosition(0, 0, width, -height)
     p1:SetPoint("TOPLEFT", player, "BOTTOMLEFT", 0, 0)
     p1:SetPosition(-height, 0, width, -height * 2)
-    p2:SetPoint("TOPLEFT", provider:PartyContainer(), "TOPLEFT", 0, 0)
+    p2:SetPoint("TOPLEFT", partyContainer, "TOPLEFT", 0, 0)
     p2:SetPosition(-height * 2, 0, width, -height * 3)
 
     assert(fsSort:TrySort())
@@ -70,7 +79,7 @@ function M:test_sort_party_frames_top()
     assertEquals(toPos(player.State.Point),
         {
             Point = "TOPLEFT",
-            RelativeTo = provider:PartyContainer():GetName(),
+            RelativeTo = partyContainer:GetName(),
             RelativePoint = "TOPLEFT",
             XOffset = 0,
             YOffset = 0,
@@ -80,7 +89,7 @@ function M:test_sort_party_frames_top()
     assertEquals(toPos(p1.State.Point),
         {
             Point = "TOPLEFT",
-            RelativeTo = provider:PartyContainer():GetName(),
+            RelativeTo = partyContainer:GetName(),
             RelativePoint = "TOPLEFT",
             XOffset = 0,
             YOffset = 90,
@@ -90,7 +99,7 @@ function M:test_sort_party_frames_top()
     assertEquals(toPos(p2.State.Point),
         {
             Point = "TOPLEFT",
-            RelativeTo = provider:PartyContainer():GetName(),
+            RelativeTo = partyContainer:GetName(),
             RelativePoint = "TOPLEFT",
             XOffset = 0,
             YOffset = 180,

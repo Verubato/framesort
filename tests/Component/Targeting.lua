@@ -2,6 +2,7 @@ local addon = require("Addon")
 local frame = require("Mock\\Frame")
 local wow = addon.WoW.Api
 local provider = addon.Providers.Test
+local fsFrame = addon.WoW.Frame
 local M = {}
 
 function M:setup()
@@ -10,7 +11,11 @@ function M:setup()
     addon.Scheduling.Scheduler:Init()
     addon.Modules.Targeting:Init()
 
-    local partyContainer = frame:New()
+    local party = fsFrame:GetContainer(provider, fsFrame.ContainerType.Party)
+    local partyContainer = assert(party).Frame
+
+    assert(partyContainer)
+
     local player = frame:New("Frame", nil, partyContainer, nil)
     player.State.Position.Top = 300
     player.unit = "player"
@@ -23,13 +28,10 @@ function M:setup()
     p2.State.Position.Top = 200
     p2.unit = "party2"
 
-    provider.State.PartyFrames = {
-        player,
-        p1,
-        p2,
-    }
+    local arena = fsFrame:GetContainer(provider, fsFrame.ContainerType.EnemyArena)
+    local arenaContainer = assert(arena).Frame
+    assert(arenaContainer)
 
-    local arenaContainer = frame:New()
     local arena1 = frame:New("Frame", nil, arenaContainer, nil)
     arena1.State.Position.Top = 300
     arena1.unit = "arena1"
@@ -41,12 +43,6 @@ function M:setup()
     local arena3 = frame:New("Frame", nil, arenaContainer, nil)
     arena3.State.Position.Top = 200
     arena3.unit = "arena3"
-
-    provider.State.EnemyArenaFrames = {
-        arena1,
-        arena2,
-        arena3,
-    }
 end
 
 function M:teardown()

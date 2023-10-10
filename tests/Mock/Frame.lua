@@ -34,10 +34,12 @@ function M:New(type, name, parent, template)
                 Left = 0,
                 Right = 0,
                 Bottom = 0,
-            }
+            },
+            Children = {}
         },
         Type = type,
-        Name = name,
+        -- don't want name to be nil otherwise the void metatable will kick in and return a black hole
+        Name = name or false,
         Parent = parent,
         Template = template,
     }
@@ -50,11 +52,19 @@ function M:New(type, name, parent, template)
         __index = M,
     })
 
+    if parent then
+        parent.State.Children[#parent.State.Children + 1] = frame
+    end
+
     return frame
 end
 
+function M:IsForbidden()
+    return false
+end
+
 function M:GetName()
-    return self.Name
+    return self.Name and self.Name or nil
 end
 
 function M:SetAttribute(name, value)
@@ -136,6 +146,10 @@ end
 
 function M:IsVisible()
     return self.State.Visible
+end
+
+function M:GetChildren()
+    return unpack(self.State.Children)
 end
 
 function M:FireEvent(event, ...)

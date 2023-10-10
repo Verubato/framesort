@@ -7,16 +7,18 @@ local fsSort = addon.Modules.Sorting
 local fsEnumerable = addon.Collections.Enumerable
 local fsScheduler = addon.Scheduling.Scheduler
 local fsCompare = addon.Collections.Comparer
+local fsFrame = addon.WoW.Frame
 local fsLog = addon.Logging.Log
 local prefix = "FSTarget"
 local targetFramesButtons = {}
 local targetEnemyButtons = {}
 local targetBottomFrameButton = nil
+
 ---@class TargetingModule: IInitialise
 local M = {}
 addon.Modules.Targeting = M
 
-local function GetFrames(provider)
+local function GetFriendlyFrames(provider)
     local whereVisible = function(frames)
         return fsEnumerable
             :From(frames)
@@ -26,19 +28,10 @@ local function GetFrames(provider)
             :ToTable()
     end
 
-    local frames = whereVisible(provider:PartyFrames())
+    local frames = whereVisible(fsFrame:PartyFrames(provider))
 
     if #frames == 0 then
-        if not provider:IsRaidGrouped() then
-            frames = whereVisible(provider:RaidFrames())
-        else
-            frames = whereVisible(fsEnumerable
-                :From(provider:RaidGroups())
-                :Map(function(group)
-                    return provider:RaidGroupMembers(group)
-                end)
-                :Flatten())
-        end
+        frames = whereVisible(fsFrame:RaidFrames(provider))
     end
 
     return frames
@@ -100,13 +93,13 @@ function M:FriendlyTargets()
 
     -- prefer Blizzard frames
     if fsProviders.Blizzard:Enabled() then
-        frames = GetFrames(fsProviders.Blizzard)
+        frames = GetFriendlyFrames(fsProviders.Blizzard)
         frameProvider = fsProviders.Blizzard
     end
 
     if not frames or #frames == 0 then
         for _, provider in pairs(fsProviders:Enabled()) do
-            frames = GetFrames(provider)
+            frames = GetFriendlyFrames(provider)
             frameProvider = provider
 
             if #frames > 0 then
@@ -122,7 +115,7 @@ function M:FriendlyTargets()
                 return fsCompare:CompareTopLeftFuzzy(x, y)
             end)
             :Map(function(x)
-                return frameProvider:GetUnit(x)
+                return fsFrame:GetFrameUnit(x)
             end)
             :ToTable()
     end
@@ -142,16 +135,14 @@ function M:EnemyTargets()
         :ToTable()
 
     local frames = {}
-    local frameProvider = nil
 
     for _, provider in pairs(preferred) do
         frames = fsEnumerable
-            :From(provider:EnemyArenaFrames())
+            :From(fsFrame:EnemyArenaFrames(provider))
             :Where(function(x)
                 return x:IsVisible()
             end)
             :ToTable()
-        frameProvider = provider
 
         if #frames > 0 then
             break
@@ -160,13 +151,11 @@ function M:EnemyTargets()
 
     if #frames == 0 and fsProviders.Blizzard:Enabled() then
         frames = fsEnumerable
-            :From(fsProviders.Blizzard:EnemyArenaFrames())
+            :From(fsFrame:EnemyArenaFrames(fsProviders.Blizzard))
             :Where(function(x)
                 return x:IsVisible()
             end)
             :ToTable()
-
-        frameProvider = fsProviders.Blizzard
     end
 
     if #frames > 0 then
@@ -176,7 +165,7 @@ function M:EnemyTargets()
                 return fsCompare:CompareTopLeftFuzzy(x, y)
             end)
             :Map(function(x)
-                return frameProvider:GetUnit(x)
+                return fsFrame:GetFrameUnit(x)
             end)
             :ToTable()
     end
@@ -226,7 +215,7 @@ function M:Init()
     targetBottomFrameButton:SetAttribute("unit", "none")
 
     for _, provider in ipairs(fsProviders:Enabled()) do
-        provider:RegisterCallback(Run)
+        provider:RegisterRequestSortCallback(Run)
     end
 
     fsSort:RegisterPostSortCallback(Run)

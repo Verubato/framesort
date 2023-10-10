@@ -20,11 +20,11 @@ local wow = {
     MEMBERS_PER_RAID_GROUP = 5,
 
     -- frames
-    UIParent = void,
-    CompactPartyFrame = void,
-    PartyFrame = void,
-    CompactRaidFrameContainer = void,
-    CompactArenaFrame = void,
+    UIParent = frameMock:New("Frame", "UIParent"),
+    CompactPartyFrame = frameMock:New("Frame", "CompactPartyFrame"),
+    PartyFrame = frameMock:New("Frame", "PartyFrame"),
+    CompactRaidFrameContainer = frameMock:New("Frame", "CompactRaidFrameContainer"),
+    CompactArenaFrame = frameMock:New("Frame", "CompactArenaFrame"),
     CompactRaidFrameContainer_SetFlowSortFunction = function() end,
     CompactRaidFrameManager_GetSetting = function()
         return nil
@@ -200,6 +200,11 @@ function wow:Reset()
     self.State.AttributeDrivers = {}
     self.State.Macros = {}
     self.State.MockInCombat = false
+    self.UIParent = frameMock:New("Frame", "UIParent")
+    self.CompactPartyFrame = frameMock:New("Frame", "CompactPartyFrame")
+    self.PartyFrame = frameMock:New("Frame", "PartyFrame")
+    self.CompactRaidFrameContainer = frameMock:New("Frame", "CompactRaidFrameContainer")
+    self.CompactArenaFrame = frameMock:New("Frame", "CompactArenaFrame")
 
     timer:Reset()
 end

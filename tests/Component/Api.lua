@@ -1,38 +1,36 @@
 local addon = require("Addon")
 local frame = require("Mock\\Frame")
+local fsFrame = addon.WoW.Frame
 local provider = addon.Providers.Test
 local realBlizzardProvider = addon.Providers.Blizzard
 local M = {}
+local partyUnitsCount = 3
+local raidUnitsCount = 6
 
 function M:setup()
     addon.Providers.Blizzard = provider
     addon:InitDB()
     addon.Api:Init()
 
-    local partyContainer = frame:New()
-    local player = frame:New("Frame", nil, partyContainer, nil)
-    player.State.Position.Top = 300
-    player.unit = "player"
+    local party = fsFrame:GetContainer(provider, fsFrame.ContainerType.Party)
+    local partyContainer = assert(party).Frame
 
-    local p1 = frame:New("Frame", nil, partyContainer, nil)
-    p1.State.Position.Top = 100
-    p1.unit = "party1"
+    assert(partyContainer)
 
-    local p2 = frame:New("Frame", nil, partyContainer, nil)
-    p2.State.Position.Top = 200
-    p2.unit = "party2"
+    for i = 1, partyUnitsCount do
+        local unit = frame:New("Frame", nil, partyContainer, nil)
+        unit.unit = "party" .. i
+    end
 
-    provider.State.PartyFrames = {
-        player,
-        p1,
-        p2,
-    }
+    local raid = fsFrame:GetContainer(provider, fsFrame.ContainerType.Raid)
+    local raidContainer = assert(raid).Frame
 
-    provider.State.RaidFrames = {
-        player,
-        p1,
-        p2,
-    }
+    assert(raidContainer)
+
+    for i = 1, raidUnitsCount do
+        local unit = frame:New("Frame", nil, raidContainer, nil)
+        unit.unit = "raid" .. i
+    end
 
     -- disable sorting on config changes
     addon.DB.Options.World.Enabled = false
@@ -50,13 +48,13 @@ end
 function M:test_get_party_frames()
     local frames = FrameSortApi.v1.Sorting:GetPartyFrames()
 
-    assertEquals(#frames, 3)
+    assertEquals(#frames, partyUnitsCount)
 end
 
 function M:test_get_raid_frames()
     local frames = FrameSortApi.v1.Sorting:GetRaidFrames()
 
-    assertEquals(#frames, 3)
+    assertEquals(#frames, raidUnitsCount)
 end
 
 function M:test_get_sort_mode()
