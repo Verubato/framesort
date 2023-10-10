@@ -799,12 +799,10 @@ secureMethods["TrySort"] = [[
         Container = item.Container
         Provider = item.Provider
 
-        local containerSorted = self:RunAttribute("TrySortContainer", "Container", "Provider")
-        sorted = sorted or containerSorted
-
-        if Container.SupportsGrouping then
-            local sortedGroups = self:RunAttribute("TrySortContainerGroups", "Container", "Provider")
-            sorted = sorted or sortedGroups
+        if Container.IsGrouped then
+            sorted = self:RunAttribute("TrySortContainerGroups", "Container", "Provider") or sorted
+        else
+            sorted = self:RunAttribute("TrySortContainer", "Container", "Provider") or sorted
         end
 
         Provider = nil
@@ -843,7 +841,7 @@ secureMethods["LoadProvider"] = [[
         container.Type = self:GetAttribute(prefix .. "Type")
         container.LayoutType = self:GetAttribute(prefix .. "LayoutType")
         container.SupportsSpacing = self:GetAttribute(prefix .. "SupportsSpacing")
-        container.SupportsGrouping = self:GetAttribute(prefix .. "SupportsGrouping")
+        container.IsGrouped = self:GetAttribute(prefix .. "IsGrouped")
         container.IsHorizontalLayout = self:GetAttribute(prefix .. "IsHorizontalLayout")
         container.FramesPerLine = self:GetAttribute(prefix .. "FramesPerLine")
 
@@ -1016,7 +1014,7 @@ local function LoadProvider(provider, force)
         manager:SetAttribute(containerPrefix .. "IsHorizontalLayout", container.IsHorizontalLayout and container:IsHorizontalLayout())
         manager:SetAttribute(containerPrefix .. "FramesPerLine", container.FramesPerLine and container:FramesPerLine())
         manager:SetAttribute(containerPrefix .. "SupportsSpacing", container.SupportsSpacing)
-        manager:SetAttribute(containerPrefix .. "SupportsGrouping", container.SupportsGrouping and container:SupportsGrouping())
+        manager:SetAttribute(containerPrefix .. "IsGrouped", container.IsGrouped and container:IsGrouped())
         manager:SetAttribute(containerPrefix .. "OffsetX", offset and offset.X)
         manager:SetAttribute(containerPrefix .. "OffsetY", offset and offset.Y)
         manager:SetAttribute(containerPrefix .. "GroupOffsetX", groupOffset and groupOffset.X)

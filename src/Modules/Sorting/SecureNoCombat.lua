@@ -296,37 +296,40 @@ local function SortBlizzardRaid(container)
 
     local horizontal = container.IsHorizontalLayout and container:IsHorizontalLayout() or false
     local spacing = addon.DB.Options.Appearance.Raid.Spacing
-    local groups = fsFrame:ExtractGroups(container.Frame)
 
-    for _, group in ipairs(groups) do
-        local frames = fsFrame:ExtractUnitFrames(group)
-        local units = fsEnumerable
-            :From(frames)
-            :Map(function(frame)
-                return fsFrame:GetFrameUnit(frame)
-            end)
-            :ToTable()
-        local sortFunction = FrameSortFunction(fsCompare:SortFunction(units))
+    if container:IsGrouped() then
+        local groups = fsFrame:ExtractGroups(container.Frame)
 
-        table.sort(frames, sortFunction)
+        for _, group in ipairs(groups) do
+            local frames = fsFrame:ExtractUnitFrames(group)
+            local units = fsEnumerable
+                :From(frames)
+                :Map(function(frame)
+                    return fsFrame:GetFrameUnit(frame)
+                end)
+                :ToTable()
+            local sortFunction = FrameSortFunction(fsCompare:SortFunction(units))
 
-        local sortedGroup = HardArrange(
-            frames,
-            group,
-            horizontal,
-            container.FramesPerLine and container:FramesPerLine(),
-            spacing,
-            container.GroupFramesOffset and container:GroupFramesOffset())
+            table.sort(frames, sortFunction)
 
-        sorted = sorted or sortedGroup
+            sorted = HardArrange(
+                frames,
+                group,
+                horizontal,
+                container.FramesPerLine and container:FramesPerLine(),
+                spacing,
+                container.GroupFramesOffset and container:GroupFramesOffset()) or sorted
+        end
+
+        sorted = SoftArrange(groups, spacing) or sorted
+
+        -- TODO: probably don't worry about sorting the ungrouped stuff as it can only cause problems
+        -- instead just apply spacing
+        -- local ungroupedOffset = UngroupedOffset(container, spacing)
+        -- offset.X = offset.X + ungroupedOffset.X
+        -- offset.Y = offset.Y + ungroupedOffset.Y
+        return sorted
     end
-
-    local spacedGroups = SoftArrange(groups, spacing)
-    sorted = sorted or spacedGroups
-
-    local ungroupedOffset = UngroupedOffset(container, spacing)
-    offset.X = offset.X + ungroupedOffset.X
-    offset.Y = offset.Y + ungroupedOffset.Y
 
     local ungrouped = fsFrame:ExtractUnitFrames(container.Frame)
     local ungroupedUnits = fsEnumerable
@@ -340,15 +343,13 @@ local function SortBlizzardRaid(container)
 
     table.sort(ungrouped, ungroupedSortFunction)
 
-    local sortedUngrouped = HardArrange(
+    sorted = HardArrange(
         ungrouped,
         container.Frame,
         horizontal,
         container.FramesPerLine and container:FramesPerLine(),
         spacing,
-        offset)
-
-    sorted = sorted or sortedUngrouped
+        offset) or sorted
 
     return sorted
 end

@@ -41,7 +41,7 @@ function provider:Reset()
         LayoutType = 2,
         SupportsSpacing = true,
         IsHorizontalLayout = function() return nil end,
-        SupportsGrouping = function() return nil end,
+        IsGrouped = function() return nil end,
         FramesOffset = function() return nil end,
         GroupFramesOffset = function() return nil end,
         FramesPerLine = function(_) return nil end
@@ -56,7 +56,7 @@ function provider:Reset()
         LayoutType = 2,
         SupportsSpacing = true,
         IsHorizontalLayout = function() return nil end,
-        SupportsGrouping = function() return nil end,
+        IsGrouped = function() return nil end,
         FramesOffset = function() return nil end,
         GroupFramesOffset = function() return nil end,
         FramesPerLine = function(_) return nil end
@@ -71,7 +71,7 @@ function provider:Reset()
         LayoutType = 2,
         SupportsSpacing = true,
         IsHorizontalLayout = function() return nil end,
-        SupportsGrouping = function() return nil end,
+        IsGrouped = function() return nil end,
         FramesOffset = function() return nil end,
         GroupFramesOffset = function() return nil end,
         FramesPerLine = function(_) return nil end
