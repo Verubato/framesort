@@ -91,7 +91,7 @@ local function CanSeeFrames()
                 return true
             end
 
-            if container.SupportsGrouping and container:SupportsGrouping() then
+            if container.IsGrouped and container:IsGrouped() then
                 local groups = fsFrame:ExtractGroups(container.Frame)
                 local anyVisibleInGroup = fsEnumerable
                     :From(groups)

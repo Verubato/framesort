@@ -123,7 +123,7 @@ function M:Containers()
         Type = fsFrame.ContainerType.Party,
         LayoutType = fsFrame.LayoutType.Hard,
         SupportsSpacing = true,
-        SupportsGrouping = function() return false end,
+        IsGrouped = function() return false end,
         IsHorizontalLayout = function()
             if wow.IsRetail() then
                 return wow.EditModeManagerFrame:GetSettingValueBool(
@@ -149,7 +149,7 @@ function M:Containers()
         Type = fsFrame.ContainerType.Raid,
         LayoutType = fsFrame.LayoutType.Hard,
         SupportsSpacing = true,
-        SupportsGrouping = function()
+        IsGrouped = function()
             if wow.IsRetail() then
                 local raidGroupDisplayType = wow.EditModeManagerFrame:GetSettingValue(
                     wow.Enum.EditModeSystem.UnitFrame,
@@ -200,7 +200,7 @@ function M:Containers()
 
         -- not applicable
         IsHorizontalLayout = function() return nil end,
-        SupportsGrouping = function() return nil end,
+        IsGrouped = function() return nil end,
         GroupFramesOffset = function(_) return nil end,
         FramesPerLine = function(_) return nil end
     }

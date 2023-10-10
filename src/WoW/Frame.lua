@@ -31,7 +31,7 @@ local function GetFrames(provider, type)
 
     local frames = M:ExtractUnitFrames(target.Frame)
 
-    if not target.SupportsGrouping or not target:SupportsGrouping() then
+    if not target.IsGrouped or not target:IsGrouped() then
         return frames
     end
 
