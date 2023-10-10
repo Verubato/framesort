@@ -14,6 +14,7 @@ local M = {}
 addon.Modules.Sorting.Secure.InCombat = M
 
 local manager = nil
+local headers = {}
 local secureMethods = {}
 
 -- rounds a number to the specified decimal places
@@ -1075,6 +1076,90 @@ local function OnConfigChanged()
     end, "SecureSortConfigChanged")
 end
 
+local function ConfigureHeader(header)
+    InjectSecureHelpers(header)
+
+    function header:UnitButtonCreated(index)
+        local children = { header:GetChildren() }
+        local frame = children[index]
+
+        if not frame then
+            fsLog:Error("Failed to find unit button " .. index)
+            return
+        end
+
+        fsScheduler:RunWhenCombatEnds(function()
+            frame:SetAttribute("_onattributechanged", [[
+                if name ~= "unit" then return end
+
+                local combat = SecureCmdOptionParse("[combat] true; false") == "true"
+
+                if not combat then return end
+
+                local manager = self:GetAttribute("Manager")
+                local queued = manager:GetAttribute("SortQueued")
+
+                -- queue up a sort if one isn't already
+                if not queued then
+                    manager:SetAttribute("SortQueued", true)
+                    manager:SetAttribute("state-framesort-toggle", random())
+                end
+            ]])
+
+            -- don't need the refresh script anymore so remove it to reduce enoise
+            frame:SetAttribute("refreshUnitChange", nil)
+        end)
+    end
+
+    -- show as much as possible
+    header:SetAttribute("showRaid", true)
+    header:SetAttribute("showParty", true)
+    header:SetAttribute("showPlayer", true)
+    header:SetAttribute("showSolo", true)
+
+    -- unit buttons template type
+    header:SetAttribute("template", "SecureHandlerAttributeTemplate")
+
+    -- fired when a new unit button is created
+    header:SetAttribute("initialConfigFunction", [=[
+        -- self = the newly created unit button
+        self:SetWidth(0)
+        self:SetHeight(0)
+        self:SetAttribute("Manager", Manager)
+
+        RefreshUnitChange = [[
+            local combat = SecureCmdOptionParse("[combat] true; false") == "true"
+
+            if not combat then return end
+
+            local manager = self:GetAttribute("Manager")
+            local queued = manager:GetAttribute("SortQueued")
+
+            -- queue up a sort if one isn't already
+            if not queued then
+                manager:SetAttribute("SortQueued", true)
+                manager:SetAttribute("state-framesort-toggle", random())
+            end
+        ]]
+
+        self:SetAttribute("refreshUnitChange", RefreshUnitChange)
+
+        UnitButtonsCount = (UnitButtonsCount or 0) + 1
+        Header:CallMethod("UnitButtonCreated", UnitButtonsCount)
+    ]=])
+
+    header:SetFrameRef("Manager", manager)
+
+    header:Execute([[
+        Header = self
+        Manager = self:GetFrameRef("Manager")
+    ]])
+
+    -- must be shown for it to work
+    header:SetPoint("TOPLEFT", wow.UIParent, "TOPLEFT")
+    header:Show()
+end
+
 function M:Init()
     manager = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureHandlerStateTemplate")
 
@@ -1091,7 +1176,7 @@ function M:Init()
     manager:Execute([[ self:RunAttribute("Init") ]])
 
     -- TODO: remove the need for this dodgy workaround once we capture all frame refresh events
-    wow.RegisterAttributeDriver(manager, "state-framesort-mod", "[mod] true; false")
+    --wow.RegisterAttributeDriver(manager, "state-framesort-mod", "[mod] true; false")
 
     for i = 0, wow.MAX_RAID_MEMBERS do
         wow.RegisterAttributeDriver(manager, "state-framesort-raid" .. i, string.format("[@raid%d, exists] true; false", i))
@@ -1115,7 +1200,16 @@ function M:Init()
             if not strmatch(name, "framesort") then return end
 
             self:RunAttribute("TrySort")
+            self:SetAttribute("SortQueued", false)
         ]])
+
+    local groupHeader = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureGroupHeaderTemplate")
+    local petHeader = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureGroupPetHeaderTemplate")
+
+    headers = { groupHeader, petHeader }
+    for _, header in ipairs(headers) do
+        ConfigureHeader(header)
+    end
 
     for _, provider in ipairs(fsProviders.All) do
         LoadProvider(provider)
