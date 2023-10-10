@@ -44,6 +44,7 @@ function provider:Reset()
         SupportsGrouping = function() return nil end,
         FramesOffset = function() return nil end,
         GroupFramesOffset = function() return nil end,
+        FramesPerLine = function(_) return nil end
     }
 
     local raid = {
@@ -58,6 +59,7 @@ function provider:Reset()
         SupportsGrouping = function() return nil end,
         FramesOffset = function() return nil end,
         GroupFramesOffset = function() return nil end,
+        FramesPerLine = function(_) return nil end
     }
 
     local arena = {
@@ -72,6 +74,7 @@ function provider:Reset()
         SupportsGrouping = function() return nil end,
         FramesOffset = function() return nil end,
         GroupFramesOffset = function() return nil end,
+        FramesPerLine = function(_) return nil end
     }
 
     self.State.Containers = {

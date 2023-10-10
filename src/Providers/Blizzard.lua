@@ -137,9 +137,10 @@ function M:Containers()
         FramesOffset = function()
             return GetOffset(wow.CompactPartyFrame)
         end,
-        GroupFramesOffset = function(_)
-            return nil
-        end
+
+        -- not applicable
+        GroupFramesOffset = function(_) return nil end,
+        FramesPerLine = function(_) return nil end
     }
 
     ---@type FrameContainer
@@ -181,6 +182,9 @@ function M:Containers()
             end
 
             return GetOffset(groups[1])
+        end,
+        FramesPerLine = function()
+            return wow.CompactRaidFrameContainer and wow.CompactRaidFrameContainer.flowMaxPerLine
         end
     }
 
@@ -190,14 +194,15 @@ function M:Containers()
         Type = fsFrame.ContainerType.EnemyArena,
         LayoutType = fsFrame.LayoutType.Hard,
         SupportsSpacing = true,
-        IsHorizontalLayout = function() return nil end,
-        SupportsGrouping = function() return nil end,
         FramesOffset = function()
             return GetOffset(wow.CompactArenaFrame)
         end,
-        GroupFramesOffset = function(_)
-            return nil
-        end
+
+        -- not applicable
+        IsHorizontalLayout = function() return nil end,
+        SupportsGrouping = function() return nil end,
+        GroupFramesOffset = function(_) return nil end,
+        FramesPerLine = function(_) return nil end
     }
 
     return fsEnumerable:From({

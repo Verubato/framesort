@@ -75,7 +75,8 @@ function M:Containers()
             FramesOffset = function() return nil end,
             SupportsGrouping = function() return nil end,
             IsHorizontalLayout = function() return nil end,
-            GroupFramesOffset = function(_) return nil end
+            GroupFramesOffset = function(_) return nil end,
+            FramesPerLine = function(_) return nil end
         }
     end
 
@@ -92,7 +93,8 @@ function M:Containers()
             FramesOffset = function() return nil end,
             SupportsGrouping = function() return nil end,
             IsHorizontalLayout = function() return nil end,
-            GroupFramesOffset = function(_) return nil end
+            GroupFramesOffset = function(_) return nil end,
+            FramesPerLine = function(_) return nil end
         }
     end
 

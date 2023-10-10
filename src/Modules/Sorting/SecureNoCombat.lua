@@ -156,15 +156,15 @@ end
 ---@param frames table[]
 ---@param container table
 ---@param isHorizontalLayout boolean
+---@param framesPerLine number?
 ---@param spacing Spacing?
 ---@param offset Offset?
 ---@return boolean sorted
-local function HardArrange(frames, container, isHorizontalLayout, spacing, offset)
+local function HardArrange(frames, container, isHorizontalLayout, framesPerLine, spacing, offset)
     if #frames == 0 then
         return false
     end
 
-    local width, height = fsFrame:GridSize(frames)
     -- the block size is the largest height and width combination
     -- this is only useful when we have frames of different sizes
     -- which is the case of pet frames, where 2 pet frames can fit into 1 player frame
@@ -207,7 +207,7 @@ local function HardArrange(frames, container, isHorizontalLayout, spacing, offse
             rowHeight = math.max(rowHeight, frame:GetHeight())
 
             -- if we've reached the end then wrap around
-            if col > width then
+            if framesPerLine and col > framesPerLine then
                 xOffset = offset.X
                 yOffset = yOffset - rowHeight - spacing.Vertical
 
@@ -234,7 +234,7 @@ local function HardArrange(frames, container, isHorizontalLayout, spacing, offse
             end
 
             -- if we've reached the end then wrap around
-            if row > height then
+            if framesPerLine and row > framesPerLine then
                 row = 1
                 col = col + 1
                 yOffset = offset.Y
@@ -310,7 +310,14 @@ local function SortBlizzardRaid(container)
 
         table.sort(frames, sortFunction)
 
-        local sortedGroup = HardArrange(frames, group, horizontal, spacing, container.GroupFramesOffset and container:GroupFramesOffset())
+        local sortedGroup = HardArrange(
+            frames,
+            group,
+            horizontal,
+            container.FramesPerLine and container:FramesPerLine(),
+            spacing,
+            container.GroupFramesOffset and container:GroupFramesOffset())
+
         sorted = sorted or sortedGroup
     end
 
@@ -333,7 +340,14 @@ local function SortBlizzardRaid(container)
 
     table.sort(ungrouped, ungroupedSortFunction)
 
-    local sortedUngrouped = HardArrange(ungrouped, container.Frame, horizontal, spacing, offset)
+    local sortedUngrouped = HardArrange(
+        ungrouped,
+        container.Frame,
+        horizontal,
+        container.FramesPerLine and container:FramesPerLine(),
+        spacing,
+        offset)
+
     sorted = sorted or sortedUngrouped
 
     return sorted
@@ -384,6 +398,7 @@ local function SortContainer(provider, container)
             frames,
             container.Frame,
             container.IsHorizontalLayout and container:IsHorizontalLayout() or false,
+            container.FramesPerLine and container:FramesPerLine(),
             spacing,
             container.FramesOffset and container:FramesOffset())
     else
