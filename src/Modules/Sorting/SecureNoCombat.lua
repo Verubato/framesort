@@ -258,7 +258,7 @@ local function UngroupedOffset(container, spacing)
     local horizontal = container.IsHorizontalLayout
     local frames = fsEnumerable
         :From(groups)
-        :Map(function(group) return fsFrame:ExtractUnitFrames(group) end)
+        :Map(function(group) return fsFrame:ExtractUnitFrames(group, container.VisibleOnly) end)
         :Flatten()
         :ToTable()
 
@@ -301,7 +301,7 @@ local function SortBlizzardRaid(container)
         local groups = fsFrame:ExtractGroups(container.Frame)
 
         for _, group in ipairs(groups) do
-            local frames = fsFrame:ExtractUnitFrames(group)
+            local frames = fsFrame:ExtractUnitFrames(group, container.VisibleOnly)
             local units = fsEnumerable
                 :From(frames)
                 :Map(function(frame)
@@ -331,7 +331,7 @@ local function SortBlizzardRaid(container)
         return sorted
     end
 
-    local ungrouped = fsFrame:ExtractUnitFrames(container.Frame)
+    local ungrouped = fsFrame:ExtractUnitFrames(container.Frame, container.VisibleOnly)
     local ungroupedUnits = fsEnumerable
         :From(ungrouped)
         :Map(function(frame)
@@ -358,7 +358,7 @@ end
 ---@param container FrameContainer
 ---@return boolean
 local function SortContainer(provider, container)
-    local frames = fsFrame:ExtractUnitFrames(container.Frame)
+    local frames = fsFrame:ExtractUnitFrames(container.Frame, container.VisibleOnly)
     local sortFunction = nil
 
     if container.Type == fsFrame.ContainerType.Party or

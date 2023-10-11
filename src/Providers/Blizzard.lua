@@ -122,6 +122,7 @@ function M:Containers()
         Frame = wow.CompactPartyFrame,
         Type = fsFrame.ContainerType.Party,
         LayoutType = fsFrame.LayoutType.Hard,
+        VisibleOnly = true,
         SupportsSpacing = true,
         IsGrouped = function() return false end,
         IsHorizontalLayout = function()
@@ -148,6 +149,7 @@ function M:Containers()
         Frame = wow.CompactRaidFrameContainer,
         Type = fsFrame.ContainerType.Raid,
         LayoutType = fsFrame.LayoutType.Hard,
+        VisibleOnly = true,
         SupportsSpacing = true,
         IsGrouped = function()
             if wow.IsRetail() then
@@ -192,7 +194,8 @@ function M:Containers()
     local arena = {
         Frame = wow.CompactArenaFrame,
         Type = fsFrame.ContainerType.EnemyArena,
-        LayoutType = fsFrame.LayoutType.Hard,
+        LayoutType = fsFrame.LayoutType.Soft,
+        VisibleOnly = true,
         SupportsSpacing = true,
         FramesOffset = function()
             return GetOffset(wow.CompactArenaFrame)
