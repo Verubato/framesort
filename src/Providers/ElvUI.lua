@@ -3,7 +3,6 @@
 local _, addon = ...
 local wow = addon.WoW.Api
 local fsFrame = addon.WoW.Frame
-local fsLog = addon.Logging.Log
 local fsProviders = addon.Providers
 local M = {}
 local callbacks = {}
@@ -37,15 +36,6 @@ local function RequestSort()
     for _, callback in pairs(callbacks) do
         callback(M)
     end
-end
-
-local function OnSecureGroupHeaderUpdate(header)
-    ---@diagnostic disable-next-line: undefined-global
-    if header ~= ElvUF_PartyGroup1 then
-        return
-    end
-
-    RequestSort()
 end
 
 function M:Name()
@@ -82,32 +72,17 @@ function M:Init()
         -- so we can't rely on event handling to determine when updates are required
         -- instead we hook OnShow/OnHide for each of the secure unit button frames
         fsPlugin:SecureHook(UF, "LoadUnits", function()
-            ---@diagnostic disable-next-line: undefined-global
             if not ElvUF_PartyGroup1 then
                 fsLog:Error("ElvUF_PartyGroup1 container is nil")
                 return
             end
 
-            local expectedChildren = 6
-            ---@diagnostic disable-next-line: undefined-global
-            local children = ElvUF_PartyGroup1 and { ElvUF_PartyGroup1:GetChildren() } or {}
-
-            if #children == 0 then
-                fsLog:Error("ElvUF_PartyGroup1 unexpectedly has 0 children where it should have " .. expectedChildren)
-                return
-            end
-
-            if #children ~= expectedChildren then
-                fsLog:Error(string.format("ElvUF_PartyGroup1 unexpectedly has %d children where it should have %d", #children, expectedChildren))
-                -- don't return, might as well try with however many child frames there are
-            end
+            local children = { ElvUF_PartyGroup1:GetChildren() }
 
             for _, child in ipairs(children) do
                 child:HookScript("OnShow", RequestSort)
                 child:HookScript("OnHide", RequestSort)
             end
-
-            fsPlugin:SecureHook("SecureGroupHeader_Update", OnSecureGroupHeaderUpdate)
         end)
     end
 
@@ -148,11 +123,12 @@ function M:Containers()
         Frame = ElvUF_PartyGroup1,
         Type = fsFrame.ContainerType.Party,
         LayoutType = fsFrame.LayoutType.Soft,
+        VisibleOnly = true,
 
         -- not applicable
+        IsHorizontalLayout = function() return nil end,
         FramesOffset = function() return nil end,
         IsGrouped = function() return nil end,
-        IsHorizontalLayout = function() return nil end,
         GroupFramesOffset = function(_) return nil end,
         FramesPerLine = function(_) return nil end
     }
