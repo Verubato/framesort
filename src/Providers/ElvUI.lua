@@ -148,7 +148,6 @@ function M:Containers()
         Frame = ElvUF_PartyGroup1,
         Type = fsFrame.ContainerType.Party,
         LayoutType = fsFrame.LayoutType.Soft,
-        SupportsSpacing = false,
 
         -- not applicable
         FramesOffset = function() return nil end,

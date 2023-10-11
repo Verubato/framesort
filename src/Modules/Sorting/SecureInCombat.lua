@@ -722,8 +722,7 @@ secureMethods["TrySortContainer"] = [[
     -- import into the global table for filtering
     container.Frame:GetChildList(Children)
 
-    -- blizzard frames can have non-existant units assigned, so filter them out
-    if not self:RunAttribute("ExtractUnitFrames", "Children", "Frames", provider.IsBlizzard) then
+    if not self:RunAttribute("ExtractUnitFrames", "Children", "Frames", container.VisibleOnly) then
         return false
     end
 
@@ -825,7 +824,6 @@ secureMethods["LoadProvider"] = [[
     if not provider then
         provider = newtable()
         provider.Name = name
-        provider.IsBlizzard = name == "Blizzard"
         Providers[name] = provider
     end
 
@@ -842,6 +840,7 @@ secureMethods["LoadProvider"] = [[
         container.Type = self:GetAttribute(prefix .. "Type")
         container.LayoutType = self:GetAttribute(prefix .. "LayoutType")
         container.SupportsSpacing = self:GetAttribute(prefix .. "SupportsSpacing")
+        container.VisibleOnly = self:GetAttribute(prefix .. "SupportsSpacing")
         container.IsGrouped = self:GetAttribute(prefix .. "IsGrouped")
         container.IsHorizontalLayout = self:GetAttribute(prefix .. "IsHorizontalLayout")
         container.FramesPerLine = self:GetAttribute(prefix .. "FramesPerLine")
@@ -1014,6 +1013,7 @@ local function LoadProvider(provider, force)
         manager:SetAttribute(containerPrefix .. "LayoutType", container.LayoutType)
         manager:SetAttribute(containerPrefix .. "IsHorizontalLayout", container.IsHorizontalLayout and container:IsHorizontalLayout())
         manager:SetAttribute(containerPrefix .. "FramesPerLine", container.FramesPerLine and container:FramesPerLine())
+        manager:SetAttribute(containerPrefix .. "VisibleOnly", container.VisibleOnly or false)
         manager:SetAttribute(containerPrefix .. "SupportsSpacing", container.SupportsSpacing)
         manager:SetAttribute(containerPrefix .. "IsGrouped", container.IsGrouped and container:IsGrouped())
         manager:SetAttribute(containerPrefix .. "OffsetX", offset and offset.X)

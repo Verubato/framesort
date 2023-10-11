@@ -2,8 +2,6 @@
 ---@type string, Addon
 local _, addon = ...
 local fsEnumerable = addon.Collections.Enumerable
-local fsCompare = addon.Collections.Comparer
-local fsMath = addon.Numerics.Math
 ---@class FrameUtil
 local M = {
     ---@class ContainerType
@@ -25,17 +23,18 @@ addon.WoW.Frame = M
 
 ---@param provider FrameProvider
 ---@param type number
-local function GetFrames(provider, type)
+---@param visibleOnly boolean?
+local function GetFrames(provider, type, visibleOnly)
     local target = M:GetContainer(provider, type)
     if not target then return {} end
 
-    local frames = M:ExtractUnitFrames(target.Frame)
+    local frames = M:ExtractUnitFrames(target.Frame, visibleOnly)
 
     if not target.IsGrouped or not target:IsGrouped() then
         return frames
     end
 
-    local groups = M:ExtractGroups(target.Frame)
+    local groups = M:ExtractGroups(target.Frame, visibleOnly)
     local ungrouped = fsEnumerable
         :From(groups)
         :Map(function(group)
@@ -154,11 +153,14 @@ end
 
 ---Returns a collection of unit frames from the specified container.
 ---@param container table
+---@param visibleOnly boolean?
 ---@return table
-function M:ExtractUnitFrames(container)
+function M:ExtractUnitFrames(container, visibleOnly)
     if not container or container:IsForbidden() or not container:IsVisible() then
         return {}
     end
+
+    visibleOnly = visibleOnly or false
 
     return fsEnumerable
         :From({ container:GetChildren() })
@@ -166,6 +168,7 @@ function M:ExtractUnitFrames(container)
             if type(frame) ~= "table" then return false end
             if frame:IsForbidden() then return false end
             if frame:GetTop() == nil or frame:GetLeft() == nil then return false end
+            if visibleOnly and not frame:IsVisible() then return false end
 
             local unit = M:GetFrameUnit(frame)
             return unit ~= nil
@@ -175,11 +178,14 @@ end
 
 ---Returns a collection of groups from the specified container.
 ---@param container table
+---@param visibleOnly boolean?
 ---@return table
-function M:ExtractGroups(container)
+function M:ExtractGroups(container, visibleOnly)
     if not container or container:IsForbidden() or not container:IsVisible() then
         return {}
     end
+
+    visibleOnly = visibleOnly or false
 
     return fsEnumerable
         :From({ container:GetChildren() })
@@ -187,6 +193,7 @@ function M:ExtractGroups(container)
             if type(frame) ~= "table" then return false end
             if frame:IsForbidden() then return false end
             if frame:GetTop() == nil or frame:GetLeft() == nil then return false end
+            if visibleOnly and not frame:IsVisible() then return false end
 
             local name = frame:GetName()
 
@@ -214,21 +221,24 @@ function M:GetContainer(provider, type)
 end
 ---Returns the party frames of the specified provider.
 ---@param provider FrameProvider
+---@param visibleOnly boolean?
 ---@return table[]
-function M:PartyFrames(provider)
-    return GetFrames(provider, M.ContainerType.Party)
+function M:PartyFrames(provider, visibleOnly)
+    return GetFrames(provider, M.ContainerType.Party, visibleOnly)
 end
 
 ---Returns the raid frames of the specified provider.
 ---@param provider FrameProvider
+---@param visibleOnly boolean?
 ---@return table[]
-function M:RaidFrames(provider)
-    return GetFrames(provider, M.ContainerType.Raid)
+function M:RaidFrames(provider, visibleOnly)
+    return GetFrames(provider, M.ContainerType.Raid, visibleOnly)
 end
 
 ---Returns the enemy arena frames of the specified provider.
 ---@param provider FrameProvider
+---@param visibleOnly boolean?
 ---@return table[]
-function M:EnemyArenaFrames(provider)
-    return GetFrames(provider, M.ContainerType.EnemyArena)
+function M:EnemyArenaFrames(provider, visibleOnly)
+    return GetFrames(provider, M.ContainerType.EnemyArena, visibleOnly)
 end
