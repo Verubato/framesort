@@ -219,6 +219,7 @@ function M:GetContainer(provider, type)
 
     return nil
 end
+
 ---Returns the party frames of the specified provider.
 ---@param provider FrameProvider
 ---@param visibleOnly boolean?
