@@ -4,6 +4,7 @@ local _, addon = ...
 local wow = addon.WoW.Api
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
+local events = addon.WoW.Api.Events
 local M = {}
 local callbacks = {}
 local fsPlugin = nil
@@ -38,6 +39,10 @@ local function RequestSort()
     end
 end
 
+local function OnEvent()
+    RequestSort()
+end
+
 function M:Name()
     return "ElvUI"
 end
@@ -57,7 +62,6 @@ function M:Init()
 
     local E, _, _, P, _ = unpack(ElvUI)
     local EP = LibStub("LibElvUIPlugin-1.0")
-    local UF = E:GetModule("UnitFrames")
 
     fsPlugin = E:NewModule(pluginName, "AceHook-3.0")
 
@@ -68,22 +72,12 @@ function M:Init()
     function fsPlugin:Initialize()
         EP:RegisterPlugin(pluginName, fsPlugin.InsertOptions)
 
-        -- party frames are secure unit buttons that change visibility based on a secure state driver
-        -- so we can't rely on event handling to determine when updates are required
-        -- instead we hook OnShow/OnHide for each of the secure unit button frames
-        fsPlugin:SecureHook(UF, "LoadUnits", function()
-            if not ElvUF_PartyGroup1 then
-                fsLog:Error("ElvUF_PartyGroup1 container is nil")
-                return
-            end
-
-            local children = { ElvUF_PartyGroup1:GetChildren() }
-
-            for _, child in ipairs(children) do
-                child:HookScript("OnShow", RequestSort)
-                child:HookScript("OnHide", RequestSort)
-            end
-        end)
+        local eventFrame = wow.CreateFrame("Frame")
+        eventFrame:HookScript("OnEvent", OnEvent)
+        eventFrame:RegisterEvent(events.PLAYER_ENTERING_WORLD)
+        eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
+        eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
+        eventFrame:RegisterEvent(events.UNIT_PET)
     end
 
     function fsPlugin:InsertOptions()
@@ -123,7 +117,6 @@ function M:Containers()
         Frame = ElvUF_PartyGroup1,
         Type = fsFrame.ContainerType.Party,
         LayoutType = fsFrame.LayoutType.Soft,
-        VisibleOnly = true,
 
         -- not applicable
         IsHorizontalLayout = function() return nil end,
