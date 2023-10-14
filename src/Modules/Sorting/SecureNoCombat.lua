@@ -6,6 +6,7 @@ local fsFrame = addon.WoW.Frame
 local fsEnumerable = addon.Collections.Enumerable
 local fsMath = addon.Numerics.Math
 local fsLog = addon.Logging.Log
+local wow = addon.WoW.Api
 local M = {}
 addon.Modules.Sorting.Secure.NoCombat = M
 
@@ -287,77 +288,7 @@ end
 
 ---@param container FrameContainer
 ---@return boolean
-local function SortBlizzardRaid(container)
-    local sorted = false
-    local offset = {
-        X = 0,
-        Y = 0
-    }
-
-    local horizontal = container.IsHorizontalLayout and container:IsHorizontalLayout() or false
-    local spacing = addon.DB.Options.Appearance.Raid.Spacing
-
-    if container:IsGrouped() then
-        local groups = fsFrame:ExtractGroups(container.Frame)
-
-        for _, group in ipairs(groups) do
-            local frames = fsFrame:ExtractUnitFrames(group, container.VisibleOnly)
-            local units = fsEnumerable
-                :From(frames)
-                :Map(function(frame)
-                    return fsFrame:GetFrameUnit(frame)
-                end)
-                :ToTable()
-            local sortFunction = FrameSortFunction(fsCompare:SortFunction(units))
-
-            table.sort(frames, sortFunction)
-
-            sorted = HardArrange(
-                frames,
-                group,
-                horizontal,
-                container.FramesPerLine and container:FramesPerLine(),
-                spacing,
-                container.GroupFramesOffset and container:GroupFramesOffset()) or sorted
-        end
-
-        sorted = SoftArrange(groups, spacing) or sorted
-
-        -- TODO: probably don't worry about sorting the ungrouped stuff as it can only cause problems
-        -- instead just apply spacing
-        -- local ungroupedOffset = UngroupedOffset(container, spacing)
-        -- offset.X = offset.X + ungroupedOffset.X
-        -- offset.Y = offset.Y + ungroupedOffset.Y
-        return sorted
-    end
-
-    local ungrouped = fsFrame:ExtractUnitFrames(container.Frame, container.VisibleOnly)
-    local ungroupedUnits = fsEnumerable
-        :From(ungrouped)
-        :Map(function(frame)
-            return fsFrame:GetFrameUnit(frame)
-        end)
-        :ToTable()
-
-    local ungroupedSortFunction = FrameSortFunction(fsCompare:SortFunction(ungroupedUnits))
-
-    table.sort(ungrouped, ungroupedSortFunction)
-
-    sorted = HardArrange(
-        ungrouped,
-        container.Frame,
-        horizontal,
-        container.FramesPerLine and container:FramesPerLine(),
-        spacing,
-        offset) or sorted
-
-    return sorted
-end
-
----@param provider FrameProvider
----@param container FrameContainer
----@return boolean
-local function SortContainer(provider, container)
+local function TrySortContainer(container)
     local frames = fsFrame:ExtractUnitFrames(container.Frame, container.VisibleOnly)
     local sortFunction = nil
 
@@ -388,11 +319,7 @@ local function SortContainer(provider, container)
         end
     end
 
-    -- special handling for blizzard
-    -- TODO: see if we can somehow make this generic
-    if provider == fsProviders.Blizzard and container.Type == fsFrame.ContainerType.Raid then
-        return SortBlizzardRaid(container)
-    elseif container.LayoutType == fsFrame.LayoutType.Soft then
+    if container.LayoutType == fsFrame.LayoutType.Soft then
         return SoftArrange(frames, spacing)
     elseif container.LayoutType == fsFrame.LayoutType.Hard then
         return HardArrange(
@@ -406,6 +333,71 @@ local function SortContainer(provider, container)
         fsLog:Error("Unknown layout type: " .. (container.Type or "nil"))
         return false
     end
+end
+
+---@param container FrameContainer
+---@return boolean
+local function TrySortContainerGroups(container)
+    local sorted = false
+    local groups = fsFrame:ExtractGroups(container.Frame, container.VisibleOnly)
+
+    if #groups == 0 then
+        return false
+    end
+
+    for _, group in ipairs(groups) do
+        ---@type FrameContainer
+        local groupContainer = {
+            Frame = group,
+            Type = container.Type,
+            IsHorizontalLayout = function() return container.IsHorizontalLayout and container:IsHorizontalLayout() end,
+            VisibleOnly = container.VisibleOnly,
+            LayoutType = container.LayoutType,
+            SupportsSpacing = container.SupportsSpacing,
+            FramesPerLine = container.FramesPerLine,
+            -- we want to use the group frames offset here
+            FramesOffset = function() return container.GroupFramesOffset and container:GroupFramesOffset() end,
+            GroupFramesOffset = function() return nil end,
+            IsGrouped = function() return false end,
+        }
+
+        sorted = TrySortContainer(groupContainer) or sorted
+    end
+
+    local spacing = nil
+    if container.SupportsSpacing then
+        if container.Type == fsFrame.ContainerType.Party then
+            spacing = addon.DB.Options.Appearance.Party.Spacing
+        elseif container.Type == fsFrame.ContainerType.Raid then
+            spacing = addon.DB.Options.Appearance.Raid.Spacing
+        elseif container.Type == fsFrame.ContainerType.EnemyArena then
+            spacing = addon.DB.Options.Appearance.EnemyArena.Spacing
+        end
+    end
+
+    if container.SupportsSpacing and spacing then
+        sorted = SoftArrange(groups, spacing) or sorted
+    end
+
+    -- ungrouped frames include pets, vehicles, and main tank/assist frames
+    local ungroupedOffset = UngroupedOffset(container, spacing)
+    local ungroupedContainer = {
+        Frame = container.Frame,
+        Type = container.Type,
+        IsHorizontalLayout = function() return container.IsHorizontalLayout and container:IsHorizontalLayout() end,
+        VisibleOnly = container.VisibleOnly,
+        LayoutType = container.LayoutType,
+        SupportsSpacing = container.SupportsSpacing,
+        FramesPerLine = container.FramesPerLine,
+        -- we want to use the group frames offset here
+        FramesOffset = function() return ungroupedOffset end,
+        GroupFramesOffset = function() return nil end,
+        IsGrouped = function() return false end,
+    }
+
+    sorted = TrySortContainer(ungroupedContainer) or sorted
+
+    return sorted
 end
 
 ---@param provider FrameProvider?
@@ -425,10 +417,13 @@ function M:TrySort(provider)
         local containers = p:Containers()
 
         for _, container in ipairs(containers) do
-            if (container.Type == fsFrame.ContainerType.Party or container.Type == fsFrame.ContainerType.Raid) and friendlyEnabled then
-                sorted = SortContainer(p, container) or sorted
-            elseif container.Type == fsFrame.ContainerType.EnemyArena and enemyEnabled then
-                sorted = SortContainer(p, container) or sorted
+            if ((container.Type == fsFrame.ContainerType.Party or container.Type == fsFrame.ContainerType.Raid) and friendlyEnabled) or
+                (container.Type == fsFrame.ContainerType.EnemyArena and enemyEnabled) then
+                if container.IsGrouped and container:IsGrouped() then
+                    sorted = TrySortContainerGroups(container) or sorted
+                else
+                    sorted = TrySortContainer(container) or sorted
+                end
             end
         end
     end

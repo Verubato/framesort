@@ -90,11 +90,10 @@ secureMethods["ExtractGroups"] = [[
         local name = child:GetName()
         local left, bottom, width, height = child:GetRect()
 
-        if child:IsVisible() and
-            name and
-            strmatch(name, "CompactRaidGroup") and
-            (left and bottom and width and height) then
-            groups[#groups + 1] = child
+        if child:IsVisible() and name and (left and bottom and width and height) then
+            if strmatch(name, "CompactRaidGroup") or strmatch(name, "CompactPartyFrame") then
+                groups[#groups + 1] = child
+            end
         end
     end
 
@@ -203,7 +202,7 @@ secureMethods["SortFramesByTopLeft"] = [[
 ]]
 
 -- performs an in place sort on an array of frames by their visual order
-secureMethods["SortFramesByLeftTop"] = [[
+secureMethods["SortFramesByTopRight"] = [[
     local framesVariable = ...
     local frames = _G[framesVariable]
 
@@ -214,10 +213,32 @@ secureMethods["SortFramesByLeftTop"] = [[
 
             local topFuzzy = self:RunAttribute("Round", bottom + height)
             local nextTopFuzzy = self:RunAttribute("Round", nextBottom + nextHeight)
+            local rightFuzzy = self:RunAttribute("Round", left + width)
+            local nextRightFuzzy = self:RunAttribute("Round", nextLeft + nextWidth)
+
+            if topFuzzy < nextTopFuzzy or rightFuzzy < nextRightFuzzy then
+                frames[j], frames[j + 1] = frames[j + 1], frames[j]
+            end
+        end
+    end
+]]
+
+-- performs an in place sort on an array of frames by their visual order
+secureMethods["SortFramesByBottomLeft"] = [[
+    local framesVariable = ...
+    local frames = _G[framesVariable]
+
+    for i = 1, #frames do
+        for j = 1, #frames - i do
+            local left, bottom, width, height = frames[j]:GetRect()
+            local nextLeft, nextBottom, nextWidth, nextHeight = frames[j + 1]:GetRect()
+
+            local bottomFuzzy = self:RunAttribute("Round", bottom)
+            local nextBottomFuzzy = self:RunAttribute("Round", nextBottom)
             local leftFuzzy = self:RunAttribute("Round", left)
             local nextLeftFuzzy = self:RunAttribute("Round", nextLeft)
 
-            if leftFuzzy > nextLeftFuzzy or topFuzzy < nextTopFuzzy then
+            if bottomFuzzy > nextBottomFuzzy or leftFuzzy > nextLeftFuzzy then
                 frames[j], frames[j + 1] = frames[j + 1], frames[j]
             end
         end
@@ -382,7 +403,7 @@ secureMethods["ApplySpacing"] = [[
     for i = 2, #OrderedLeftTop do
         local point = OrderedLeftTop[i]
         local previous = OrderedLeftTop[i - 1]
-        local sameRow = self:RunAttribute("Round", point.Bottom) == self:RunAttribute("Round", previous.Bottom)
+        local sameRow = self:RunAttribute("Round", point.Bottom + point.Height) == self:RunAttribute("Round", previous.Bottom + previous.Height)
 
         if sameRow then
             local existingSpace = point.Left - (previous.Left + previous.Width)
@@ -647,6 +668,63 @@ secureMethods["HardArrange"] = [[
     return #framesToMove > 0
 ]]
 
+-- determines the offset to use for the ungrouped portion of the raid frames.
+secureMethods["UngroupedOffset"] = [[
+    local containerVariable, spacingVariable = ...
+    local container = _G[containerVariable]
+    local spacing = _G[spacingVariable]
+
+    if not self:RunAttribute("ExtractGroups", containerVariable, "OffsetGroups") then
+        return 0, 0
+    end
+
+    local frames = newtable()
+    local horizontal = container.IsHorizontalLayout
+
+    -- TODO: don't get frames from all groups, get frames from the bottom/right most group
+    for i, group in ipairs(OffsetGroups) do
+        OffsetGroupChildren = newtable()
+        group:GetChildList(OffsetGroupChildren)
+
+        if self:RunAttribute("ExtractUnitFrames", "OffsetGroupChildren", "OffsetGroupFrames", container.VisibleOnly) then
+            for _, frame in ipairs(OffsetGroupFrames) do
+                frames[#frames + 1] = frame
+            end
+        end
+
+        OffsetGroupChildren = nil
+        OffsetGroupFrames = nil
+    end
+
+    if #frames == 0 then return 0, 0 end
+
+    UngroupedFrames = frames
+
+    local x, y = 0, 0
+    local left, bottom, width, height = container.Frame:GetRect()
+
+    if horizontal then
+        self:RunAttribute("SortFramesByBottomLeft", "UngroupedFrames")
+        local bottomLeftFrame = UngroupedFrames[1]
+        local bottomFrameLeft, bottomFrameBottom, _, _ = bottomLeftFrame:GetRect()
+
+        x = -(left - bottomFrameLeft)
+        y = -((bottom + height) - bottomFrameBottom + spacing.Vertical)
+    else
+        self:RunAttribute("SortFramesByTopRight", "UngroupedFrames")
+        local topRightFrame = UngroupedFrames[1]
+        local topFrameLeft, topFrameBottom, topFrameWidth, topFrameHeight = topRightFrame:GetRect()
+
+        x = -(left - (topFrameLeft + topFrameWidth) - spacing.Horizontal)
+        y = -((bottom + height) - (topFrameBottom + topFrameHeight))
+    end
+
+    UngroupedFrames = nil
+    OffsetGroups = nil
+
+    return x, y
+]]
+
 secureMethods["TrySortContainerGroups"] = [[
     local containerVariable, providerVariable = ...
     local container = _G[containerVariable]
@@ -673,8 +751,7 @@ secureMethods["TrySortContainerGroups"] = [[
             GroupContainer.Offset.Y = container.GroupOffset.Y
         end
 
-        local groupSorted = self:RunAttribute("TrySortContainer", "GroupContainer", providerVariable)
-        sorted = sorted or groupSorted
+        sorted = self:RunAttribute("TrySortContainer", "GroupContainer", providerVariable) or sorted
 
         GroupContainer = nil
     end
@@ -692,6 +769,21 @@ secureMethods["TrySortContainerGroups"] = [[
         end
     end
 
+    local offsetX, offsetY = self:RunAttribute("UngroupedOffset", containerVariable, "GroupSpacing")
+
+    -- now re-write over the top
+    UngroupedContainer = newtable()
+    -- just copy over all the attributes to make code simpler
+    self:RunAttribute("CopyTable", containerVariable, "UngroupedContainer")
+
+    UngroupedContainer.Offset = newtable()
+    UngroupedContainer.Offset.X = offsetX or 0
+    UngroupedContainer.Offset.Y = offsetY or 0
+
+    sorted = self:RunAttribute("TrySortContainer", "UngroupedContainer", providerVariable) or sorted
+
+    UngroupedContainer = nil
+    GroupSpacing = nil
     Groups = nil
     return sorted
 ]]
@@ -972,18 +1064,6 @@ local function LoadProvider(provider, force)
 
     local containers = provider:Containers()
 
-    if provider == fsProviders.Blizzard then
-        local raid = fsFrame:GetContainer(provider, fsFrame.ContainerType.Raid)
-        if raid then
-            local groups = fsFrame:ExtractGroups(raid.Frame)
-
-            -- c'mon blizzard, seriously?
-            for _, group in ipairs(groups) do
-                group:SetProtected()
-            end
-        end
-    end
-
     -- skip loading the container if we've already loaded it
     -- 99% of the time we've already loaded it
     local shouldLoad = force or fsEnumerable
@@ -1074,6 +1154,14 @@ local function OnConfigChanged()
         LoadSpacing()
         LoadEnabled()
     end, "SecureSortConfigChanged")
+end
+
+local function OnRaidGroupLoaded(group)
+    if not group or group:IsProtected() then return end
+
+    fsScheduler:RunWhenCombatEnds(function()
+        group:SetProtected()
+    end)
 end
 
 local function ConfigureHeader(header)
@@ -1222,6 +1310,8 @@ function M:Init()
     LoadSpacing()
 
     fsConfig:RegisterConfigurationChangedCallback(OnConfigChanged)
+
+    wow.hooksecurefunc("CompactRaidGroup_OnLoad", OnRaidGroupLoaded)
 end
 
 function M:RefreshUnits()
