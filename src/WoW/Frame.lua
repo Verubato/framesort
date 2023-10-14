@@ -199,6 +199,9 @@ function M:ExtractGroups(container, visibleOnly)
 
             if not name then return false end
 
+            -- wotlk with 1 group uses the party frame
+            if string.match(name, "CompactPartyFrame") then return true end
+
             -- only supports blizzard groups atm
             return string.match(name, "CompactRaidGroup")
         end)
