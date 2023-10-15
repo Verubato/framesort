@@ -52,7 +52,7 @@
 ---@field Macro MacroUtil
 ---@field Unit UnitUtil
 
----@class SortingModules : ISort, ISpace, IInitialise
+---@class SortingModules : ISort, IInitialise
 ---@field Traditional TraditionalSortingModule
 ---@field Secure SecureSortingModule
 ---@field RegisterPostSortCallback fun(self: table, callback: function)
