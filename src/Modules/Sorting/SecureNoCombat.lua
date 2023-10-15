@@ -255,7 +255,7 @@ local function UngroupedOffset(container, spacing)
         Y = 0
     }
     local groups = fsFrame:ExtractGroups(container.Frame)
-    local horizontal = container.IsHorizontalLayout
+    local horizontal = container.IsHorizontalLayout and container:IsHorizontalLayout()
     local frames = fsEnumerable
         :From(groups)
         :Map(function(group) return fsFrame:ExtractUnitFrames(group, container.VisibleOnly) end)
