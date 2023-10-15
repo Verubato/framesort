@@ -6,7 +6,6 @@ local fsFrame = addon.WoW.Frame
 local fsEnumerable = addon.Collections.Enumerable
 local fsMath = addon.Numerics.Math
 local fsLog = addon.Logging.Log
-local wow = addon.WoW.Api
 local M = {}
 addon.Modules.Sorting.Secure.NoCombat = M
 

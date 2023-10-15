@@ -8,7 +8,6 @@ local fsEnumerable = addon.Collections.Enumerable
 local fsUnit = addon.WoW.Unit
 local fsScheduler = addon.Scheduling.Scheduler
 local fsConfig = addon.Configuration
-local fsFrame = addon.WoW.Frame
 local fsLog = addon.Logging.Log
 local M = {}
 addon.Modules.Sorting.Secure.InCombat = M
@@ -99,20 +98,6 @@ secureMethods["ExtractGroups"] = [[
 
     _G[destinationTableName] = groups
     return #groups > 0
-]]
-
--- returns the index of the item within the array, or -1 if it doesn't exist
-secureMethods["ArrayIndex"] = [[
-    local arrayVariable, item = ...
-    local array = _G[arrayVariable]
-
-    for i, value in ipairs(array) do
-        if value == item then
-            return i
-        end
-    end
-
-    return -1
 ]]
 
 -- copies elements from one table to another
