@@ -1248,8 +1248,7 @@ function M:Init()
 
     manager:Execute([[ self:RunAttribute("Init") ]])
 
-    -- TODO: remove the need for this dodgy workaround once we capture all frame refresh events
-    --wow.RegisterAttributeDriver(manager, "state-framesort-mod", "[mod] true; false")
+    wow.RegisterAttributeDriver(manager, "state-framesort-playerpet", "[@pet, exists] true; false")
 
     for i = 0, wow.MAX_RAID_MEMBERS do
         wow.RegisterAttributeDriver(manager, "state-framesort-raid" .. i, string.format("[@raid%d, exists] true; false", i))
