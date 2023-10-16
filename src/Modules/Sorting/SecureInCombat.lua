@@ -1177,26 +1177,16 @@ local function ConfigureHeader(header)
         end
 
         fsScheduler:RunWhenCombatEnds(function()
+            -- the refreshUnitChange script doesn't capture when the unit is changed to nil
+            -- which can happen when a pet is dismissed or dies
+            -- so we're only interested in listening for effectively pet deaths via this handler
             frame:SetAttribute("_onattributechanged", [[
-                if name ~= "unit" then return end
-
-                local combat = SecureCmdOptionParse("[combat] true; false") == "true"
-
-                if not combat then return end
+                if name ~= "unit" or value ~= nil then return end
+                if SecureCmdOptionParse("[combat] true; false") ~= "true" then return end
 
                 local manager = self:GetAttribute("Manager")
-                local queued = manager:GetAttribute("SortQueued")
-
-                -- queue up a sort if one isn't already
-                -- TODO: try only running sort for the last child
-                if not queued then
-                    manager:SetAttribute("SortQueued", true)
-                    manager:SetAttribute("state-framesort-toggle", random())
-                end
+                manager:SetAttribute("state-framesort-toggle", random())
             ]])
-
-            -- don't need the refresh script anymore so remove it to reduce noise
-            frame:SetAttribute("refreshUnitChange", nil)
         end)
     end
 
@@ -1211,30 +1201,32 @@ local function ConfigureHeader(header)
 
     -- fired when a new unit button is created
     header:SetAttribute("initialConfigFunction", [=[
+        UnitButtonsCount = (UnitButtonsCount or 0) + 1
+
         -- self = the newly created unit button
         self:SetWidth(0)
         self:SetHeight(0)
+        self:SetID(UnitButtonsCount)
         self:SetAttribute("Manager", Manager)
 
-        RefreshUnitChange = [[
-            local combat = SecureCmdOptionParse("[combat] true; false") == "true"
+        Manager:SetAttribute("UnitButtonsCount", UnitButtonsCount)
 
-            if not combat then return end
+        RefreshUnitChange = [[
+            if SecureCmdOptionParse("[combat] true; false") ~= "true" then return end
 
             local manager = self:GetAttribute("Manager")
-            local queued = manager:GetAttribute("SortQueued")
+            local id = self:GetID()
+            local totalButtons = manager:GetAttribute("UnitButtonsCount")
 
-            -- queue up a sort if one isn't already
-            -- TODO: try only running sort for the last child
-            if not queued then
-                manager:SetAttribute("SortQueued", true)
-                manager:SetAttribute("state-framesort-toggle", random())
-            end
+            -- Blizzard iterate over all the unit buttons and change their unit token
+            -- so to avoid spam, only perform a sort once the last unit button has been updated
+            if id ~= totalButtons then return end
+
+            manager:SetAttribute("state-framesort-toggle", random())
         ]]
 
         self:SetAttribute("refreshUnitChange", RefreshUnitChange)
 
-        UnitButtonsCount = (UnitButtonsCount or 0) + 1
         Header:CallMethod("UnitButtonCreated", UnitButtonsCount)
     ]=])
 
@@ -1290,7 +1282,6 @@ function M:Init()
             if not strmatch(name, "framesort") then return end
 
             self:RunAttribute("TrySort")
-            self:SetAttribute("SortQueued", false)
         ]])
 
     local groupHeader = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureGroupHeaderTemplate")
