@@ -51,6 +51,7 @@ function M:TrySort(provider)
         return false
     end
 
+    local start = wow.GetTimePreciseSec()
     local sorted = false
 
     if addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Traditional then
@@ -60,9 +61,11 @@ function M:TrySort(provider)
     end
 
     if sorted then
-        fsLog:Debug("Sorted frames.")
         M:InvokeCallbacks()
     end
+
+    local stop = wow.GetTimePreciseSec();
+    fsLog:Debug(string.format("Performed sort in %fms, result: %s.", (stop - start) * 1000, sorted and "sorted" or "not sorted"))
 
     return sorted
 end
