@@ -16,6 +16,14 @@ local manager = nil
 local headers = {}
 local secureMethods = {}
 
+-- prints a log message
+secureMethods["Log"] = [[
+    if not self:GetAttribute("LoggingEnabled") then return end
+
+    local level, message = ...
+    print(format("FrameSort - %s: %s", level, message))
+]]
+
 -- rounds a number to the specified decimal places
 secureMethods["Round"] = [[
     local number, decimalPlaces = ...
@@ -542,7 +550,7 @@ secureMethods["SoftArrange"] = [[
                 Frame = nil
             end
         else
-            -- TODO: this would be a bug, log it
+            self:RunAttribute("Log", "Warning", "Unable to determine frame's desired index")
         end
     end
 
@@ -789,7 +797,7 @@ secureMethods["TrySortContainer"] = [[
     elseif container.Type == ContainerType.EnemyArena then
         units = EnemyUnits
     else
-        -- TODO: log bug
+        self:RunAttribute("Log", "Error", "Invalid container type: " .. (container.Type or 'nil'))
         return false
     end
 
@@ -891,6 +899,8 @@ secureMethods["TrySort"] = [[
         self:CallMethod("InvokeCallbacks")
     end
 
+    self:RunAttribute("Log", "Debug", format("Performed in-combat sort, result: %s.", sorted and "sorted" or "not sorted"))
+
     return sorted
 ]]
 
@@ -988,6 +998,8 @@ secureMethods["Init"] = [[
 local function LoadUnits()
     assert(manager ~= nil)
 
+    local start = wow.GetTimePreciseSec()
+
     -- TODO: we could transfer unit info to the restricted environment
     -- then perform the unit sort inside which would give us more control
     local friendlyUnits = fsUnit:FriendlyUnits()
@@ -1011,7 +1023,9 @@ local function LoadUnits()
     -- flag that the units need to be reloaded
     manager:SetAttribute("LoadedUnits", false)
 
-    fsLog:Debug("Sent units to the secure environment.")
+    local stop = wow.GetTimePreciseSec()
+
+    fsLog:Debug(string.format("Sent units to the secure environment in %fms.", (stop - start) * 100))
 end
 
 local function LoadEnabled()
@@ -1022,6 +1036,7 @@ local function LoadEnabled()
 
     manager:SetAttribute("FriendlySortEnabled", friendlyEnabled)
     manager:SetAttribute("EnemySortEnabled", enemyEnabled)
+    manager:SetAttribute("LoggingEnabled", addon.DB.Options.Logging.Enabled)
 
     for _, provider in ipairs(fsProviders.All) do
         manager:SetAttribute("Provider" .. provider:Name() .. "Enabled", provider:Enabled())
@@ -1173,6 +1188,7 @@ local function ConfigureHeader(header)
                 local queued = manager:GetAttribute("SortQueued")
 
                 -- queue up a sort if one isn't already
+                -- TODO: try only running sort for the last child
                 if not queued then
                     manager:SetAttribute("SortQueued", true)
                     manager:SetAttribute("state-framesort-toggle", random())
@@ -1209,6 +1225,7 @@ local function ConfigureHeader(header)
             local queued = manager:GetAttribute("SortQueued")
 
             -- queue up a sort if one isn't already
+            -- TODO: try only running sort for the last child
             if not queued then
                 manager:SetAttribute("SortQueued", true)
                 manager:SetAttribute("state-framesort-toggle", random())

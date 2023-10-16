@@ -1,7 +1,7 @@
 local void = require("Mock\\Void")
 local frameMock = require("Mock\\Frame")
 local timer = require("Mock\\Timer")
----@class WowMock: WoW
+---@class WowApiMock: WowApi
 local wow = {
     -- mock fields
     State = {
@@ -168,6 +168,11 @@ local wow = {
     -- addon related
     GetAddOnEnableState = function()
         return 0
+    end,
+
+    -- time related
+    GetTimePreciseSec = function()
+        return os.time()
     end,
 
     -- non-blizzard
