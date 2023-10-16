@@ -1133,6 +1133,27 @@ local function InjectSecureHelpers(secureFrame)
     end
 end
 
+local function OnCombatStarting()
+    -- we want our sorting code to run after blizzard and other frame addons refresh their frames
+    -- i.e., we want to handle GROUP_ROSTER_UPDATE/UNT_PET after frame addons have performed their update handling
+    -- this is easily achieved in the insecure environment by using hooks, however in the restricted environment we have no such luxury
+    -- fortunately it seems blizzard invoke event handlers roughly in the order that they were registered
+    -- so if we register our events later, our code will run later
+    -- of course it's not good to rely on this and we should generally treat event ordering as undefined
+    -- perhaps in a future patch this implementation detail could change and our code will break
+    -- however until a better solution can be found, this is our only hope
+
+    for _, header in ipairs(headers) do
+        header:UnregisterEvent(wow.Events.GROUP_ROSTER_UPDATE)
+        header:UnregisterEvent(wow.Events.UNIT_PET)
+        header:UnregisterEvent(wow.Events.UNIT_NAME_UPDATE)
+
+        header:RegisterEvent(wow.Events.GROUP_ROSTER_UPDATE)
+        header:RegisterEvent(wow.Events.UNIT_PET)
+        header:RegisterEvent(wow.Events.UNIT_NAME_UPDATE)
+    end
+end
+
 local function OnProviderContainersChanged(provider)
     fsScheduler:RunWhenCombatEnds(function()
         LoadProvider(provider, true)
@@ -1257,24 +1278,6 @@ function M:Init()
 
     manager:Execute([[ self:RunAttribute("Init") ]])
 
-    wow.RegisterAttributeDriver(manager, "state-framesort-playerpet", "[@pet, exists] true; false")
-
-    for i = 1, wow.MAX_RAID_MEMBERS do
-        wow.RegisterAttributeDriver(manager, "state-framesort-raid" .. i, string.format("[@raid%d, exists] true; false", i))
-        wow.RegisterAttributeDriver(manager, "state-framesort-raidpet" .. i, string.format("[@raidpet%d, exists] true; false", i))
-    end
-
-    -- party4 is the highest as parties use the 'player' token as well
-    for i = 1, wow.MEMBERS_PER_RAID_GROUP - 1 do
-        wow.RegisterAttributeDriver(manager, "state-framesort-party" .. i, string.format("[@party%d, exists] true; false", i))
-        wow.RegisterAttributeDriver(manager, "state-framesort-partypet" .. i, string.format("[@partypet%d, exists] true; false", i))
-    end
-
-    for i = 1, wow.MEMBERS_PER_RAID_GROUP do
-        wow.RegisterAttributeDriver(manager, "state-framesort-arena" .. i, string.format("[@arena%d, exists] true; false", i))
-        wow.RegisterAttributeDriver(manager, "state-framesort-arenapet" .. i, string.format("[@arenapet%d, exists] true; false", i))
-    end
-
     manager:WrapScript(
         manager,
         "OnAttributeChanged",
@@ -1305,6 +1308,10 @@ function M:Init()
     fsConfig:RegisterConfigurationChangedCallback(OnConfigChanged)
 
     wow.hooksecurefunc("CompactRaidGroup_OnLoad", OnRaidGroupLoaded)
+
+    local combatStartingFrame = wow.CreateFrame("Frame", nil, wow.UIParent)
+    combatStartingFrame:HookScript("OnEvent", OnCombatStarting)
+    combatStartingFrame:RegisterEvent(wow.Events.PLAYER_REGEN_DISABLED)
 end
 
 function M:RefreshUnits()
