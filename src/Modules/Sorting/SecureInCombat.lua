@@ -1200,7 +1200,7 @@ local function ConfigureHeader(header)
         fsScheduler:RunWhenCombatEnds(function()
             -- the refreshUnitChange script doesn't capture when the unit is changed to nil
             -- which can happen when a pet is dismissed or dies
-            -- so we're only interested in listening for effectively pet deaths via this handler
+            -- so we're only interested in unit changing to nil here
             frame:SetAttribute("_onattributechanged", [[
                 if name ~= "unit" or value ~= nil then return end
                 if SecureCmdOptionParse("[combat] true; false") ~= "true" then return end
@@ -1227,22 +1227,27 @@ local function ConfigureHeader(header)
         -- self = the newly created unit button
         self:SetWidth(0)
         self:SetHeight(0)
-        self:SetID(UnitButtonsCount)
         self:SetAttribute("Manager", Manager)
-
-        Manager:SetAttribute("UnitButtonsCount", UnitButtonsCount)
 
         RefreshUnitChange = [[
             if SecureCmdOptionParse("[combat] true; false") ~= "true" then return end
 
             local manager = self:GetAttribute("Manager")
-            local id = self:GetID()
-            local totalButtons = manager:GetAttribute("UnitButtonsCount")
 
             -- Blizzard iterate over all the unit buttons and change their unit token
-            -- so to avoid spam, only perform a sort once the last unit button has been updated
-            -- TODO: re-enable if it's working
-            --if id ~= totalButtons then return end
+            -- so to avoid spamming multiple sort attempts, only perform a sort once the last unit button has been updated
+            -- we can determine this by knowing that our button ordering is the default group ordering
+            -- so the last unit (unitN) will be where the next unit (unitN+1) doesn't exist
+            local unit = self:GetAttribute("unit")
+            local unitNumber = strmatch(unit, "%d+")
+
+            -- might be "player" or "pet"
+            if not unitNumber then return end
+
+            local nextUnit = gsub(unit, unitNumber, tonumber(unitNumber) + 1)
+
+            -- if the next unit exists, we'll get called again in Blizzard's next loop iteration
+            if UnitExists(nextUnit) then return end
 
             manager:SetAttribute("state-framesort-toggle", random())
         ]]
