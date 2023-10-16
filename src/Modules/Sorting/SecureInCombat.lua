@@ -1195,7 +1195,7 @@ local function ConfigureHeader(header)
                 end
             ]])
 
-            -- don't need the refresh script anymore so remove it to reduce enoise
+            -- don't need the refresh script anymore so remove it to reduce noise
             frame:SetAttribute("refreshUnitChange", nil)
         end)
     end
@@ -1267,17 +1267,18 @@ function M:Init()
 
     wow.RegisterAttributeDriver(manager, "state-framesort-playerpet", "[@pet, exists] true; false")
 
-    for i = 0, wow.MAX_RAID_MEMBERS do
+    for i = 1, wow.MAX_RAID_MEMBERS do
         wow.RegisterAttributeDriver(manager, "state-framesort-raid" .. i, string.format("[@raid%d, exists] true; false", i))
         wow.RegisterAttributeDriver(manager, "state-framesort-raidpet" .. i, string.format("[@raidpet%d, exists] true; false", i))
     end
 
-    for i = 0, wow.MEMBERS_PER_RAID_GROUP - 1 do
+    -- party4 is the highest as parties use the 'player' token as well
+    for i = 1, wow.MEMBERS_PER_RAID_GROUP - 1 do
         wow.RegisterAttributeDriver(manager, "state-framesort-party" .. i, string.format("[@party%d, exists] true; false", i))
         wow.RegisterAttributeDriver(manager, "state-framesort-partypet" .. i, string.format("[@partypet%d, exists] true; false", i))
     end
 
-    for i = 0, wow.MEMBERS_PER_RAID_GROUP - 1 do
+    for i = 1, wow.MEMBERS_PER_RAID_GROUP do
         wow.RegisterAttributeDriver(manager, "state-framesort-arena" .. i, string.format("[@arena%d, exists] true; false", i))
         wow.RegisterAttributeDriver(manager, "state-framesort-arenapet" .. i, string.format("[@arenapet%d, exists] true; false", i))
     end
