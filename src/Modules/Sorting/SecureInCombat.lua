@@ -1241,7 +1241,8 @@ local function ConfigureHeader(header)
 
             -- Blizzard iterate over all the unit buttons and change their unit token
             -- so to avoid spam, only perform a sort once the last unit button has been updated
-            if id ~= totalButtons then return end
+            -- TODO: re-enable if it's working
+            --if id ~= totalButtons then return end
 
             manager:SetAttribute("state-framesort-toggle", random())
         ]]
