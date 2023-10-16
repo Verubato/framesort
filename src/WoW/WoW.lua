@@ -1,6 +1,7 @@
 ---@diagnostic disable: undefined-global
 ---@type string, Addon
 local _, addon = ...
+---@type WowApi
 local wow = {
     -- constants
     WOW_PROJECT_ID = WOW_PROJECT_ID,
@@ -69,6 +70,9 @@ local wow = {
 
     -- addon related
     GetAddOnEnableState = GetAddOnEnableState,
+
+    -- time related
+    GetTimePreciseSec = GetTimePreciseSec,
 
     -- non-blizzard related
     IsRetail = function()

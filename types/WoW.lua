@@ -59,6 +59,8 @@
 ---@field SecureHandlerExecute fun(frame, body)
 -- addon related
 ---@field GetAddOnEnableState fun(character: string?, addon: string): number
+-- time related
+---@field GetTimePreciseSec fun(): number
 -- non-blizzard
 ---@field IsRetail fun(): boolean
 ---@field IsClassic fun(): boolean
