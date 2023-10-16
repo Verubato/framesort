@@ -5,6 +5,7 @@ local wow = addon.WoW.Api
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local events = addon.WoW.Api.Events
+local fsLog = addon.Logging.Log
 local M = {}
 local callbacks = {}
 local fsPlugin = nil
@@ -62,6 +63,7 @@ function M:Init()
 
     local E, _, _, P, _ = unpack(ElvUI)
     local EP = LibStub("LibElvUIPlugin-1.0")
+    local UF = E:GetModule("UnitFrames")
 
     fsPlugin = E:NewModule(pluginName, "AceHook-3.0")
 
@@ -78,6 +80,16 @@ function M:Init()
         eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
         eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
         eventFrame:RegisterEvent(events.UNIT_PET)
+
+        fsPlugin:SecureHook(UF, "LoadUnits", function()
+            if not ElvUF_PartyGroup1 then
+                fsLog:Error("ElvUF_PartyGroup1 container is nil")
+                return
+            end
+
+            -- prevent this event from unsorting frames
+            ElvUF_PartyGroup1:UnregisterEvent(events.UNIT_NAME_UPDATE)
+        end)
     end
 
     function fsPlugin:InsertOptions()
