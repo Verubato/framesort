@@ -7,6 +7,8 @@ local fsProviders = addon.Providers
 local events = addon.WoW.Api.Events
 local M = {}
 local callbacks = {}
+local containersChangedCallbacks = {}
+local eventFrame = nil
 
 fsProviders.GladiusEx = M
 table.insert(fsProviders.All, M)
@@ -17,9 +19,41 @@ local function RequestSort()
     end
 end
 
+local function RequestUpdateContainers()
+    for _, callback in pairs(containersChangedCallbacks) do
+        callback(M)
+    end
+end
+
 local function UpdateNextFrame()
     -- wait for GladiusEx to update their frames before we perform a sort
+    -- technically waiting until next frame may not be required as we reigstered our callbacks after GEX
+    -- which means blizzard should invoke our callbacks after gladius
+    -- but it's probably best not to rely on this, so just run our sorting next frame
     fsScheduler:RunNextFrame(RequestSort)
+end
+
+local function DelayedInit()
+    assert(eventFrame ~= nil)
+
+    eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
+    eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
+    eventFrame:RegisterEvent(events.UNIT_PET)
+
+    if wow.IsRetail() then
+        eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
+        eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
+    end
+
+    RequestUpdateContainers()
+end
+
+local function OnEvent(_, event)
+    if event == events.PLAYER_ENTERING_WORLD then
+        DelayedInit()
+    end
+
+    UpdateNextFrame()
 end
 
 function M:Name()
@@ -39,33 +73,26 @@ function M:Init()
         callbacks = {}
     end
 
-    local eventFrame = wow.CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", UpdateNextFrame)
+    -- wait for GladiusEx to initialise before we do
+    eventFrame = wow.CreateFrame("Frame")
+    eventFrame:HookScript("OnEvent", OnEvent)
     eventFrame:RegisterEvent(events.PLAYER_ENTERING_WORLD)
-    eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
-    eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
-    eventFrame:RegisterEvent(events.UNIT_PET)
-
-    if wow.IsRetail() then
-        eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
-        eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
-    end
 end
 
 function M:RegisterRequestSortCallback(callback)
     callbacks[#callbacks + 1] = callback
 end
 
-function M:RegisterContainersChangedCallback(_) end
+function M:RegisterContainersChangedCallback(callback)
+    containersChangedCallbacks[#containersChangedCallbacks + 1] = callback
+end
 
 function M:Containers()
     ---@type FrameContainer[]
     local containers = {}
 
-    ---@diagnostic disable-next-line: undefined-global
     if GladiusExPartyFrame then
         containers[#containers + 1] = {
-            ---@diagnostic disable-next-line: undefined-global
             Frame = GladiusExPartyFrame,
             Type = fsFrame.ContainerType.Party,
             LayoutType = fsFrame.LayoutType.Soft,
@@ -80,10 +107,8 @@ function M:Containers()
         }
     end
 
-    ---@diagnostic disable-next-line: undefined-global
     if GladiusExArenaFrame then
         containers[#containers + 1] = {
-            ---@diagnostic disable-next-line: undefined-global
             Frame = GladiusExArenaFrame,
             Type = fsFrame.ContainerType.EnemyArena,
             LayoutType = fsFrame.LayoutType.Soft,

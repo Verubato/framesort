@@ -3,6 +3,12 @@
         "version": "Lua 5.1"
     },
     "diagnostics.globals": [
-        "assertEquals"
+        "assertEquals",
+        "GladiusExPartyFrame",
+        "GladiusExArenaFrame",
+        "sArena",
+        "ElvUI",
+        "LibStub",
+        "ElvUF_PartyGroup1"
     ]
 }

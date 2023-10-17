@@ -7,6 +7,8 @@ local fsProviders = addon.Providers
 local events = addon.WoW.Api.Events
 local M = {}
 local callbacks = {}
+local containersChangedCallbacks = {}
+local eventFrame = nil
 
 fsProviders.sArena = M
 table.insert(fsProviders.All, M)
@@ -17,9 +19,34 @@ local function RequestSort()
     end
 end
 
+local function RequestUpdateContainers()
+    for _, callback in pairs(containersChangedCallbacks) do
+        callback(M)
+    end
+end
+
 local function UpdateNextFrame()
     -- wait for sArena to update their frames before we perform a sort
     fsScheduler:RunNextFrame(RequestSort)
+end
+
+local function DelayedInit()
+    assert(eventFrame ~= nil)
+
+    if wow.IsRetail() then
+        eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
+        eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
+    end
+
+    RequestUpdateContainers()
+end
+
+local function OnEvent(_, event)
+    if event == events.PLAYER_ENTERING_WORLD then
+        DelayedInit()
+    end
+
+    UpdateNextFrame()
 end
 
 function M:Name()
@@ -39,31 +66,27 @@ function M:Init()
         callbacks = {}
     end
 
-    local eventFrame = wow.CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", UpdateNextFrame)
+    -- wait for sArena to initialise before we do
+    eventFrame = wow.CreateFrame("Frame")
+    eventFrame:HookScript("OnEvent", OnEvent)
     eventFrame:RegisterEvent(events.PLAYER_ENTERING_WORLD)
-
-    if wow.IsRetail() then
-        eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
-        eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
-    end
 end
 
 function M:RegisterRequestSortCallback(callback)
     callbacks[#callbacks + 1] = callback
 end
 
-function M:RegisterContainersChangedCallback(_) end
+function M:RegisterContainersChangedCallback(callback)
+    containersChangedCallbacks[#containersChangedCallbacks + 1] = callback
+end
 
 function M:Containers()
-    ---@diagnostic disable-next-line: undefined-global
     if not sArena then
         return {}
     end
 
     ---@type FrameContainer
     local arena = {
-        ---@diagnostic disable-next-line: undefined-global
         Frame = sArena,
         Type = fsFrame.ContainerType.EnemyArena,
         LayoutType = fsFrame.LayoutType.Soft,
