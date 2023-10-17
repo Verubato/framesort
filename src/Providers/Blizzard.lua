@@ -57,6 +57,11 @@ local function GetOffset(container)
     return nil
 end
 
+local function OnRaidGroupLoaded(_)
+    -- refresh group frame offsets once a group has been loaded
+    RequestUpdateContainers()
+end
+
 function M:Name()
     return "Blizzard"
 end
@@ -106,6 +111,8 @@ function M:Init()
     local cvarUpdate = wow.CreateFrame("Frame")
     cvarUpdate:HookScript("OnEvent", OnCvarUpdate)
     cvarUpdate:RegisterEvent(events.CVAR_UPDATE)
+
+    wow.hooksecurefunc("CompactRaidGroup_OnLoad", OnRaidGroupLoaded)
 end
 
 function M:RegisterRequestSortCallback(callback)
