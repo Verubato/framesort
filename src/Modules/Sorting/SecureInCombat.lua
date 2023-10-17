@@ -1000,8 +1000,6 @@ secureMethods["Init"] = [[
 local function LoadUnits()
     assert(manager ~= nil)
 
-    local start = wow.GetTimePreciseSec()
-
     -- TODO: we could transfer unit info to the restricted environment
     -- then perform the unit sort inside which would give us more control
     local friendlyUnits = fsUnit:FriendlyUnits()
@@ -1024,10 +1022,6 @@ local function LoadUnits()
     manager:SetAttribute("EnemyUnitsCount", #enemyUnits)
     -- flag that the units need to be reloaded
     manager:SetAttribute("LoadedUnits", false)
-
-    local stop = wow.GetTimePreciseSec()
-
-    fsLog:Debug(string.format("Sent units to the secure environment in %fms.", (stop - start) * 100))
 end
 
 local function LoadEnabled()
@@ -1043,8 +1037,6 @@ local function LoadEnabled()
     for _, provider in ipairs(fsProviders.All) do
         manager:SetAttribute("Provider" .. provider:Name() .. "Enabled", provider:Enabled())
     end
-
-    fsLog:Debug("Sent enabled values to the secure environment.")
 end
 
 local function LoadSpacing()
@@ -1056,8 +1048,6 @@ local function LoadSpacing()
         manager:SetAttribute(type .. "SpacingHorizontal", value.Spacing.Horizontal)
         manager:SetAttribute(type .. "SpacingVertical", value.Spacing.Vertical)
     end
-
-    fsLog:Debug("Sent spacing values to the secure environment.")
 end
 
 ---@param provider FrameProvider
