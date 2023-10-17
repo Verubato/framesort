@@ -1,4 +1,3 @@
----@diagnostic disable: undefined-global
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
@@ -8,6 +7,7 @@ local events = addon.WoW.Api.Events
 local fsLog = addon.Logging.Log
 local M = {}
 local callbacks = {}
+local containersChangedCallbacks = {}
 local fsPlugin = nil
 local pluginName = "FrameSort"
 
@@ -36,6 +36,12 @@ local function RequestSort()
     end
 
     for _, callback in pairs(callbacks) do
+        callback(M)
+    end
+end
+
+local function RequestUpdateContainers()
+    for _, callback in pairs(containersChangedCallbacks) do
         callback(M)
     end
 end
@@ -89,6 +95,7 @@ function M:Init()
 
             -- prevent this event from unsorting frames
             ElvUF_PartyGroup1:UnregisterEvent(events.UNIT_NAME_UPDATE)
+            RequestUpdateContainers()
         end)
     end
 
@@ -121,7 +128,9 @@ function M:RegisterRequestSortCallback(callback)
     callbacks[#callbacks + 1] = callback
 end
 
-function M:RegisterContainersChangedCallback(_) end
+function M:RegisterContainersChangedCallback(callback)
+    containersChangedCallbacks[#containersChangedCallbacks + 1] = callback
+end
 
 function M:Containers()
     ---@type FrameContainer
