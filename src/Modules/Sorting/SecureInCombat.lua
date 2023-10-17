@@ -1199,8 +1199,9 @@ local function ConfigureHeader(header)
 
         fsScheduler:RunWhenCombatEnds(function()
             -- the refreshUnitChange script doesn't capture when the unit is changed to nil
-            -- which can happen when a pet is dismissed or dies
+            -- which can happen when someone leaves the group, or a pet ceases to exist
             -- so we're only interested in unit changing to nil here
+            -- TODO: implement similar performance improvement like the refreshUnitChange has
             frame:SetAttribute("_onattributechanged", [[
                 if name ~= "unit" or value ~= nil then return end
                 if SecureCmdOptionParse("[combat] true; false") ~= "true" then return end
