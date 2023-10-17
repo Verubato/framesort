@@ -13,6 +13,8 @@ local M = {}
 addon.Modules.Sorting.Secure.InCombat = M
 
 local manager = nil
+local memberHeader = nil
+local petHeader = nil
 local headers = {}
 local secureMethods = {}
 
@@ -1143,15 +1145,22 @@ local function OnCombatStarting()
     -- perhaps in a future patch this implementation detail could change and our code will break
     -- however until a better solution can be found, this is our only hope
 
-    for _, header in ipairs(headers) do
-        header:UnregisterEvent(wow.Events.GROUP_ROSTER_UPDATE)
-        header:UnregisterEvent(wow.Events.UNIT_PET)
-        header:UnregisterEvent(wow.Events.UNIT_NAME_UPDATE)
+    assert(memberHeader ~= nil)
+    assert(petHeader ~= nil)
 
-        header:RegisterEvent(wow.Events.GROUP_ROSTER_UPDATE)
-        header:RegisterEvent(wow.Events.UNIT_PET)
-        header:RegisterEvent(wow.Events.UNIT_NAME_UPDATE)
-    end
+    memberHeader:UnregisterEvent(wow.Events.GROUP_ROSTER_UPDATE)
+    memberHeader:UnregisterEvent(wow.Events.UNIT_NAME_UPDATE)
+
+    memberHeader:RegisterEvent(wow.Events.GROUP_ROSTER_UPDATE)
+    memberHeader:RegisterEvent(wow.Events.UNIT_NAME_UPDATE)
+
+    petHeader:UnregisterEvent(wow.Events.GROUP_ROSTER_UPDATE)
+    petHeader:UnregisterEvent(wow.Events.UNIT_PET)
+    petHeader:UnregisterEvent(wow.Events.UNIT_NAME_UPDATE)
+
+    petHeader:RegisterEvent(wow.Events.GROUP_ROSTER_UPDATE)
+    petHeader:RegisterEvent(wow.Events.UNIT_PET)
+    petHeader:RegisterEvent(wow.Events.UNIT_NAME_UPDATE)
 end
 
 local function OnProviderContainersChanged(provider)
@@ -1294,10 +1303,11 @@ function M:Init()
             self:RunAttribute("TrySort")
         ]])
 
-    local groupHeader = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureGroupHeaderTemplate")
-    local petHeader = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureGroupPetHeaderTemplate")
+    memberHeader = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureGroupHeaderTemplate")
+    petHeader = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureGroupPetHeaderTemplate")
 
-    headers = { groupHeader, petHeader }
+    headers = { memberHeader, petHeader }
+
     for _, header in ipairs(headers) do
         ConfigureHeader(header)
     end
