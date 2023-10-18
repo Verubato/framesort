@@ -29,6 +29,9 @@ function M:setup()
     local helper = require("Helper")
     helper:LoadDependencies(addon, deps)
 
+    fsCompare = addon.Collections.Comparer
+    fsConfig = addon.Configuration
+
     local playerToken = "raid2"
     local members = helper:GenerateUnits(8)
     addon.WoW.Api.UnitExists = function(unit)
@@ -40,14 +43,25 @@ function M:setup()
     addon.WoW.Api.UnitIsUnit = function(left, right)
         return left == right or (left == playerToken and right == "player")
     end
+    addon.WoW.Api.IsInInstance = function() return false end
 
-    fsCompare = addon.Collections.Comparer
-    fsConfig = addon.Configuration
+    addon.DB = {
+        Options = {
+            World = {
+                Enabled = true,
+            }
+        }
+    }
 end
 
 function M:test_sort_player_top()
+    assert(addon)
+
+    addon.DB.Options.World.PlayerSortMode = fsConfig.PlayerSortMode.Top
+    addon.DB.Options.World.GroupSortMode = fsConfig.GroupSortMode.Group
+
     local subject = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8" }
-    local sortFunction = function(x, y) return fsCompare:Compare(x, y, fsConfig.PlayerSortMode.Top, fsConfig.GroupSortMode.Group, false, nil) end
+    local sortFunction = fsCompare:SortFunction(subject)
 
     table.sort(subject, sortFunction)
 
@@ -55,8 +69,13 @@ function M:test_sort_player_top()
 end
 
 function M:test_sort_player_bottom()
+    assert(addon)
+
+    addon.DB.Options.World.PlayerSortMode = fsConfig.PlayerSortMode.Bottom
+    addon.DB.Options.World.GroupSortMode = fsConfig.GroupSortMode.Group
+
     local subject = { "raid8", "raid3", "raid4", "raid1", "raid2", "raid7", "raid5", "raid6" }
-    local sortFunction = function(x, y) return fsCompare:Compare(x, y, fsConfig.PlayerSortMode.Bottom, fsConfig.GroupSortMode.Group, false, nil) end
+    local sortFunction = fsCompare:SortFunction(subject)
 
     table.sort(subject, sortFunction)
 
@@ -64,13 +83,17 @@ function M:test_sort_player_bottom()
 end
 
 function M:test_sort_player_middle()
-    local presorted = { "raid1", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8" }
-    local subject = { "raid2", "raid3", "raid4", "raid8", "raid7", "raid1", "raid5", "raid6" }
-    local sortFunction = function(x, y) return fsCompare:Compare(x, y, fsConfig.PlayerSortMode.Middle, fsConfig.GroupSortMode.Group, false, presorted) end
+    assert(addon)
+
+    addon.DB.Options.World.PlayerSortMode = fsConfig.PlayerSortMode.Middle
+    addon.DB.Options.World.GroupSortMode = fsConfig.GroupSortMode.Group
+
+    local subject = { "raid2", "raid3", "raid4", "raid7", "raid1", "raid5", "raid6" }
+    local sortFunction = fsCompare:SortFunction(subject)
 
     table.sort(subject, sortFunction)
 
-    assertEquals(subject, { "raid1", "raid3", "raid4", "raid2", "raid5", "raid6", "raid7", "raid8" })
+    assertEquals(subject, { "raid1", "raid3", "raid4", "raid2", "raid5", "raid6", "raid7" })
 end
 
 return M
