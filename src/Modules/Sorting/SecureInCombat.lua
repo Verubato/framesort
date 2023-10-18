@@ -854,6 +854,8 @@ secureMethods["TrySort"] = [[
 
     if not friendlyEnabled and not enemyEnabled then return false end
 
+    self:CallMethod("SortStarting")
+
     local loadedUnits = self:GetAttribute("LoadedUnits")
     if not loadedUnits then
         self:RunAttribute("LoadUnits")
@@ -898,10 +900,10 @@ secureMethods["TrySort"] = [[
 
     if sorted then
         -- notify unsecure code to invoke callbacks
-        self:CallMethod("InvokeCallbacks")
+        self:CallMethod("NotifySorted")
     end
 
-    self:RunAttribute("Log", "Debug", format("Performed in-combat sort, result: %s.", sorted and "sorted" or "not sorted"))
+    self:CallMethod("SortEnding", sorted)
 
     return sorted
 ]]
@@ -1279,8 +1281,19 @@ function M:Init()
 
     InjectSecureHelpers(manager)
 
-    function manager:InvokeCallbacks()
-        fsSorting:InvokeCallbacks()
+    function manager:NotifySorted()
+        fsSorting:NotifySorted()
+    end
+
+    function manager:SortStarting()
+        manager.TimeStart = wow.GetTimePreciseSec()
+    end
+
+    function manager:SortEnding(sorted)
+        manager.TimeStop = wow.GetTimePreciseSec()
+
+        local ms = (manager.TimeStop - manager.TimeStart) * 1000
+        fsLog:Debug(string.format("Performed in-combat sort in %fms, result: %s.", ms, sorted and "sorted" or "not sorted"))
     end
 
     for name, snippet in pairs(secureMethods) do
