@@ -14,7 +14,7 @@ local function OnProviderRequiresSort(provider)
 end
 
 ---Calls the post sorting callbacks.
-function M:InvokeCallbacks()
+function M:NotifySorted()
     for _, callback in ipairs(callbacks) do
         pcall(callback)
     end
@@ -61,7 +61,7 @@ function M:TrySort(provider)
     end
 
     if sorted then
-        M:InvokeCallbacks()
+        M:NotifySorted()
     end
 
     local stop = wow.GetTimePreciseSec();

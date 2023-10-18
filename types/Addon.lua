@@ -56,7 +56,7 @@
 ---@field Traditional TraditionalSortingModule
 ---@field Secure SecureSortingModule
 ---@field RegisterPostSortCallback fun(self: table, callback: function)
----@field InvokeCallbacks fun(self: table)
+---@field NotifySorted fun(self: table)
 
 ---@class TraditionalSortingModule : ISort
 
