@@ -15,10 +15,5 @@ function M:TrySort(provider)
         return false
     end
 
-    if M.NoCombat:TrySort(provider) then
-        M.InCombat:RefreshUnits()
-        return true
-    end
-
-    return false
+    return M.NoCombat:TrySort(provider)
 end

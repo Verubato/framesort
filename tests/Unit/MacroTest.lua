@@ -1,3 +1,4 @@
+---@diagnostic disable: inject-field
 local deps = {
     "Collections\\Enumerable.lua",
     "WoW\\Macro.lua",
