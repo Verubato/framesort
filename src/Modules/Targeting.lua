@@ -8,9 +8,9 @@ local fsScheduler = addon.Scheduling.Scheduler
 local fsCompare = addon.Collections.Comparer
 local fsFrame = addon.WoW.Frame
 local fsLog = addon.Logging.Log
-local prefix = "FSTarget"
 local targetFramesButtons = {}
 local targetEnemyButtons = {}
+local focusEnemyButtons = {}
 local targetBottomFrameButton = nil
 
 ---@class TargetingModule: IInitialise
@@ -64,6 +64,16 @@ local function UpdateTargets()
     local enemyunits = M:EnemyTargets()
 
     for i, btn in ipairs(targetEnemyButtons) do
+        local new = enemyunits[i] or "none"
+        local current = btn:GetAttribute("unit")
+
+        if current ~= new then
+            btn:SetAttribute("unit", new)
+            updatedAny = true
+        end
+    end
+
+    for i, btn in ipairs(focusEnemyButtons) do
         local new = enemyunits[i] or "none"
         local current = btn:GetAttribute("unit")
 
@@ -185,7 +195,7 @@ function M:Init()
     end
 
     for i = 1, targetFriendlyCount do
-        local button = wow.CreateFrame("Button", prefix .. i, wow.UIParent, "SecureActionButtonTemplate")
+        local button = wow.CreateFrame("Button", "FSTarget" .. i, wow.UIParent, "SecureActionButtonTemplate")
         -- If the ActionButtonUseKeyDown cvar is set to 0, then button down triggers don't work
         -- seems to be a Blizzard bug since Dragonflight:
         -- https://us.forums.blizzard.com/en/wow/t/dragonflight-click-bindings-broken/1361972/8
@@ -198,16 +208,22 @@ function M:Init()
     end
 
     for i = 1, targetEnemyCount do
-        local button = wow.CreateFrame("Button", prefix .. "Enemy" .. i, wow.UIParent, "SecureActionButtonTemplate")
-        button:RegisterForClicks("AnyDown", "AnyUp")
-        button:SetAttribute("type", "target")
-        button:SetAttribute("unit", "none")
+        local target = wow.CreateFrame("Button", "FSTargetEnemy" .. i, wow.UIParent, "SecureActionButtonTemplate")
+        target:RegisterForClicks("AnyDown", "AnyUp")
+        target:SetAttribute("type", "target")
+        target:SetAttribute("unit", "none")
 
-        targetEnemyButtons[#targetEnemyButtons + 1] = button
+        local focus = wow.CreateFrame("Button", "FSFocusEnemy" .. i, wow.UIParent, "SecureActionButtonTemplate")
+        focus:RegisterForClicks("AnyDown", "AnyUp")
+        focus:SetAttribute("type", "focus")
+        focus:SetAttribute("unit", "none")
+
+        targetEnemyButtons[#targetEnemyButtons + 1] = target
+        focusEnemyButtons[#focusEnemyButtons + 1] = focus
     end
 
     -- target bottom
-    targetBottomFrameButton = wow.CreateFrame("Button", prefix .. "Bottom", wow.UIParent, "SecureActionButtonTemplate")
+    targetBottomFrameButton = wow.CreateFrame("Button", "FSTargetBottom", wow.UIParent, "SecureActionButtonTemplate")
     targetBottomFrameButton:RegisterForClicks("AnyDown", "AnyUp")
     targetBottomFrameButton:SetAttribute("type", "target")
     targetBottomFrameButton:SetAttribute("unit", "none")
