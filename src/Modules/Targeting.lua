@@ -224,4 +224,6 @@ function M:Init()
     end
 
     fsSort:RegisterPostSortCallback(Run)
+
+    Run()
 end

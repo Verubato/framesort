@@ -74,14 +74,13 @@ function M:test_targets_update_on_provider_callback()
     assertEquals(#friendlyButtons, 5)
     assertEquals(#enemyButtons, 3)
 
+    -- ensure there is nothing already set
     for _, f in ipairs(friendlyButtons) do
-        local unit = f:GetAttribute("unit")
-        assertEquals(unit, "none")
+        f:SetAttribute("unit", "none")
     end
 
     for _, f in ipairs(enemyButtons) do
-        local unit = f:GetAttribute("unit")
-        assertEquals(unit, "none")
+        f:SetAttribute("unit", "none")
     end
 
     provider:FireCallbacks()
@@ -123,13 +122,11 @@ function M:test_targets_update_after_combat()
     assertEquals(#enemyButtons, 3)
 
     for _, f in ipairs(friendlyButtons) do
-        local unit = f:GetAttribute("unit")
-        assertEquals(unit, "none")
+        f:SetAttribute("unit", "none")
     end
 
     for _, f in ipairs(enemyButtons) do
-        local unit = f:GetAttribute("unit")
-        assertEquals(unit, "none")
+        f:SetAttribute("unit", "none")
     end
 
     wow.State.MockInCombat = true

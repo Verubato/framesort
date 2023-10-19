@@ -75,4 +75,6 @@ end
 function M:Init()
     local blizzard = fsProviders.Blizzard
     blizzard:RegisterRequestSortCallback(Run)
+
+    Run()
 end
