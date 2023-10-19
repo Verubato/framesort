@@ -4,6 +4,7 @@ local wow = addon.WoW.Api
 local fsFrame = addon.WoW.Frame
 local fsEnumerable = addon.Collections.Enumerable
 local fsProviders = addon.Providers
+local fsScheduler = addon.Scheduling.Scheduler
 local events = addon.WoW.Api.Events
 ---@class BlizzardFrameProvider: FrameProvider
 local M = {}
@@ -105,7 +106,13 @@ function M:Init()
         wow.EventRegistry:RegisterCallback(events.EditModeExit, RequestUpdateContainers)
         eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
         eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
-        eventFrame:RegisterEvent(events.EDIT_MODE_LAYOUTS_UPDATED)
+
+        fsScheduler:RunWhenEnteringWorld(function()
+            -- this event always fires when loading
+            -- and we don't care about the first one
+            -- so to avoid running modules multiple times on first load, delay the event registration
+            eventFrame:RegisterEvent(events.EDIT_MODE_LAYOUTS_UPDATED)
+        end)
     end
 
     local cvarUpdate = wow.CreateFrame("Frame")
