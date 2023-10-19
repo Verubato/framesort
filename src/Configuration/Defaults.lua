@@ -4,10 +4,14 @@ local fsConfig = addon.Configuration
 
 ---@class Options
 fsConfig.Defaults = {
-    Version = 15,
+    Version = 16,
     Logging = {
         Enabled = false,
     },
+    Sorting = {
+        RoleOrdering = 1,
+    },
+    -- TODO: move other sorting config into Sorting table
     Arena = {
         Enabled = true,
         PlayerSortMode = fsConfig.PlayerSortMode.Top,

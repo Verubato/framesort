@@ -4,7 +4,6 @@ local wow = addon.WoW.Api
 local fsHealth = addon.Health.HealthCheck
 local fsConfig = addon.Configuration
 local fsModules = addon.Modules
-local fsHide = addon.Modules.HidePlayer
 local verticalSpacing = fsConfig.VerticalSpacing
 local horizontalSpacing = fsConfig.HorizontalSpacing
 local labelWidth = 50
@@ -37,6 +36,8 @@ local function BuiltTitle(panel)
     local i = 1
     local anchor = title
     local sortingRules = {}
+    local roleValueText = nil
+
     for k, v in pairs(lines) do
         local keyText = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
         keyText:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing * 0.75)
@@ -49,6 +50,10 @@ local function BuiltTitle(panel)
         valueText:SetPoint("LEFT", keyText, "RIGHT")
         valueText:SetText(v)
         i = i + 1
+
+        if k == "Role" then
+            roleValueText = valueText
+        end
 
         sortingRules[#sortingRules + 1] = {
             Key = keyText,
@@ -67,6 +72,16 @@ local function BuiltTitle(panel)
         for _, rule in ipairs(sortingRules) do
             rule.Key:SetShown(healthy)
             rule.Value:SetShown(healthy)
+        end
+
+        assert(roleValueText ~= nil)
+
+        if addon.DB.Options.Sorting.RoleOrdering == 2 then
+            roleValueText:SetText("healer > tank > dps")
+        elseif addon.DB.Options.Sorting.RoleOrdering == 3 then
+            roleValueText:SetText("healer > dps > tank")
+        else
+            roleValueText:SetText("tank > healer > dps")
         end
 
         if healthy then
