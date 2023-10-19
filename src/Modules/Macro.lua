@@ -16,15 +16,16 @@ local M = {}
 addon.Modules.Macro = M
 
 ---@return boolean updated, boolean isFrameSortMacro, number newId
-local function UpdateMacro(id)
+local function UpdateMacro(id, friendlyUnits, enemyUnits)
     local _, _, body = wow.GetMacroInfo(id)
 
     if not body or not fsMacro:IsFrameSortMacro(body) then
         return false, false, id
     end
 
-    local friendlyUnits = fsTarget:FriendlyTargets()
-    local enemyUnits = fsTarget:EnemyTargets()
+    friendlyUnits = friendlyUnits or fsTarget:FriendlyTargets()
+    enemyUnits = enemyUnits or fsTarget:EnemyTargets()
+
     local newBody = fsMacro:GetNewBody(body, friendlyUnits, enemyUnits)
 
     if not newBody then
@@ -44,14 +45,18 @@ local function UpdateMacro(id)
 end
 
 local function ScanMacros()
+    local start = wow.GetTimePreciseSec()
+    local friendlyUnits = fsTarget:FriendlyTargets()
+    local enemyUnits = fsTarget:EnemyTargets()
     local updatedCount = 0
+
     for id = 1, maxMacros do
         -- if we've already inspected this macro and it's not a framesort macro
         -- then skip attempting to re-process it
         local shouldInspect = isFsMacroCache[id] == nil or isFsMacroCache[id]
 
         if shouldInspect then
-            local updated, isFsMacro, newId = UpdateMacro(id)
+            local updated, isFsMacro, newId = UpdateMacro(id, friendlyUnits, enemyUnits)
             isFsMacroCache[newId] = isFsMacro
 
             if updated then
@@ -63,6 +68,9 @@ local function ScanMacros()
     if updatedCount > 0 then
         fsLog:Debug(string.format("Updated %d macros", updatedCount))
     end
+
+    local stop = wow.GetTimePreciseSec()
+    fsLog:Debug(string.format("Update macros took %fms.", (stop - start) * 1000))
 end
 
 local function OnEditMacro(id, _, _, _)
@@ -97,10 +105,12 @@ function M:Init()
         isFsMacroCache = {}
     end
 
+    -- TODO: remove this double up
     for _, provider in ipairs(fsProviders:Enabled()) do
         provider:RegisterRequestSortCallback(Run)
     end
 
     fsSort:RegisterPostSortCallback(Run)
+
     wow.hooksecurefunc("EditMacro", OnEditMacro)
 end

@@ -66,7 +66,6 @@
 
 ---@class NoCombatSecureSorter : ISort, IInitialise
 ---@class InCombatSecureSorter : IInitialise
----@field RefreshUnits fun(self: table)
 
 ---@class ISort
 ---@field TrySort fun(self: table, provider: FrameProvider?): boolean

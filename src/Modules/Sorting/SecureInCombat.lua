@@ -1015,17 +1015,18 @@ local function LoadUnits()
     table.sort(enemyUnits, enemyCompare)
 
     for i, unit in ipairs(friendlyUnits) do
-        manager:SetAttribute("FriendlyUnit" .. i, unit)
+        manager:SetAttributeNoHandler("FriendlyUnit" .. i, unit)
     end
 
     for i, unit in ipairs(enemyUnits) do
-        manager:SetAttribute("EnemyUnit" .. i, unit)
+        manager:SetAttributeNoHandler("EnemyUnit" .. i, unit)
     end
 
-    manager:SetAttribute("FriendlyUnitsCount", #friendlyUnits)
-    manager:SetAttribute("EnemyUnitsCount", #enemyUnits)
+    manager:SetAttributeNoHandler("FriendlyUnitsCount", #friendlyUnits)
+    manager:SetAttributeNoHandler("EnemyUnitsCount", #enemyUnits)
+
     -- flag that the units need to be reloaded
-    manager:SetAttribute("LoadedUnits", false)
+    manager:SetAttributeNoHandler("LoadedUnits", false)
 
     local stop = wow.GetTimePreciseSec()
     fsLog:Debug(string.format("Sent units to the secure environment in %fms.", (stop - start) * 1000))
@@ -1037,12 +1038,12 @@ local function LoadEnabled()
     local friendlyEnabled = fsCompare:FriendlySortMode()
     local enemyEnabled = fsCompare:EnemySortMode()
 
-    manager:SetAttribute("FriendlySortEnabled", friendlyEnabled)
-    manager:SetAttribute("EnemySortEnabled", enemyEnabled)
-    manager:SetAttribute("LoggingEnabled", addon.DB.Options.Logging.Enabled)
+    manager:SetAttributeNoHandler("FriendlySortEnabled", friendlyEnabled)
+    manager:SetAttributeNoHandler("EnemySortEnabled", enemyEnabled)
+    manager:SetAttributeNoHandler("LoggingEnabled", addon.DB.Options.Logging.Enabled)
 
     for _, provider in ipairs(fsProviders.All) do
-        manager:SetAttribute("Provider" .. provider:Name() .. "Enabled", provider:Enabled())
+        manager:SetAttributeNoHandler("Provider" .. provider:Name() .. "Enabled", provider:Enabled())
     end
 end
 
@@ -1052,8 +1053,8 @@ local function LoadSpacing()
     local appearance = addon.DB.Options.Appearance
 
     for type, value in pairs(appearance) do
-        manager:SetAttribute(type .. "SpacingHorizontal", value.Spacing.Horizontal)
-        manager:SetAttribute(type .. "SpacingVertical", value.Spacing.Vertical)
+        manager:SetAttributeNoHandler(type .. "SpacingHorizontal", value.Spacing.Horizontal)
+        manager:SetAttributeNoHandler(type .. "SpacingVertical", value.Spacing.Vertical)
     end
 end
 
@@ -1075,7 +1076,7 @@ local function LoadProvider(provider, force)
         return
     end
 
-    manager:SetAttribute("ProviderName", provider:Name())
+    manager:SetAttributeNoHandler("ProviderName", provider:Name())
 
     for i, container in ipairs(containers) do
         -- to fix a current blizzard bug where GetPoint() returns nil values on secure frames when their parent's are unsecure
@@ -1088,28 +1089,26 @@ local function LoadProvider(provider, force)
         local containerPrefix = provider:Name() .. "Container" .. i
 
         manager:SetFrameRef(containerPrefix .. "Frame", container.Frame)
-        manager:SetAttribute(containerPrefix .. "Type", container.Type)
-        manager:SetAttribute(containerPrefix .. "LayoutType", container.LayoutType)
-        manager:SetAttribute(containerPrefix .. "IsHorizontalLayout", container.IsHorizontalLayout and container:IsHorizontalLayout())
-        manager:SetAttribute(containerPrefix .. "FramesPerLine", container.FramesPerLine and container:FramesPerLine())
-        manager:SetAttribute(containerPrefix .. "VisibleOnly", container.VisibleOnly or false)
-        manager:SetAttribute(containerPrefix .. "SupportsSpacing", container.SupportsSpacing)
-        manager:SetAttribute(containerPrefix .. "IsGrouped", container.IsGrouped and container:IsGrouped())
-        manager:SetAttribute(containerPrefix .. "OffsetX", offset and offset.X)
-        manager:SetAttribute(containerPrefix .. "OffsetY", offset and offset.Y)
-        manager:SetAttribute(containerPrefix .. "GroupOffsetX", groupOffset and groupOffset.X)
-        manager:SetAttribute(containerPrefix .. "GroupOffsetY", groupOffset and groupOffset.Y)
+        manager:SetAttributeNoHandler(containerPrefix .. "Type", container.Type)
+        manager:SetAttributeNoHandler(containerPrefix .. "LayoutType", container.LayoutType)
+        manager:SetAttributeNoHandler(containerPrefix .. "IsHorizontalLayout", container.IsHorizontalLayout and container:IsHorizontalLayout())
+        manager:SetAttributeNoHandler(containerPrefix .. "FramesPerLine", container.FramesPerLine and container:FramesPerLine())
+        manager:SetAttributeNoHandler(containerPrefix .. "VisibleOnly", container.VisibleOnly or false)
+        manager:SetAttributeNoHandler(containerPrefix .. "SupportsSpacing", container.SupportsSpacing)
+        manager:SetAttributeNoHandler(containerPrefix .. "IsGrouped", container.IsGrouped and container:IsGrouped())
+        manager:SetAttributeNoHandler(containerPrefix .. "OffsetX", offset and offset.X)
+        manager:SetAttributeNoHandler(containerPrefix .. "OffsetY", offset and offset.Y)
+        manager:SetAttributeNoHandler(containerPrefix .. "GroupOffsetX", groupOffset and groupOffset.X)
+        manager:SetAttributeNoHandler(containerPrefix .. "GroupOffsetY", groupOffset and groupOffset.Y)
     end
 
-    manager:SetAttribute(provider:Name() .. "ContainersCount", #containers)
+    manager:SetAttributeNoHandler(provider:Name() .. "ContainersCount", #containers)
     manager:Execute([[ self:RunAttribute("LoadProvider") ]])
 
     for _, item in ipairs(containers) do
         -- flag as imported
-        item.Frame:SetAttribute("FrameSortLoaded", true)
+        item.Frame:SetAttributeNoHandler("FrameSortLoaded", true)
     end
-
-    fsLog:Debug(string.format("Sent provider %s to the secure environment.", provider:Name()))
 end
 
 local function InjectSecureHelpers(secureFrame)
@@ -1132,7 +1131,7 @@ local function InjectSecureHelpers(secureFrame)
     end
 end
 
-local function OnCombatStarting()
+local function ResubscribeEvents()
     -- we want our sorting code to run after blizzard and other frame addons refresh their frames
     -- i.e., we want to handle GROUP_ROSTER_UPDATE/UNT_PET after frame addons have performed their update handling
     -- this is easily achieved in the insecure environment by using hooks, however in the restricted environment we have no such luxury
@@ -1158,6 +1157,11 @@ local function OnCombatStarting()
     petHeader:RegisterEvent(wow.Events.GROUP_ROSTER_UPDATE)
     petHeader:RegisterEvent(wow.Events.UNIT_PET)
     petHeader:RegisterEvent(wow.Events.UNIT_NAME_UPDATE)
+end
+
+local function OnCombatStarting()
+    ResubscribeEvents()
+    LoadUnits()
 end
 
 local function OnProviderContainersChanged(provider)
@@ -1297,7 +1301,7 @@ function M:Init()
     end
 
     for name, snippet in pairs(secureMethods) do
-        manager:SetAttribute(name, snippet)
+        manager:SetAttributeNoHandler(name, snippet)
     end
 
     manager:Execute([[ self:RunAttribute("Init") ]])
@@ -1339,6 +1343,3 @@ function M:Init()
     combatStartingFrame:RegisterEvent(wow.Events.PLAYER_REGEN_DISABLED)
 end
 
-function M:RefreshUnits()
-    LoadUnits()
-end

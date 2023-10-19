@@ -60,12 +60,12 @@ function M:TrySort(provider)
         sorted = M.Secure:TrySort(provider)
     end
 
+    local stop = wow.GetTimePreciseSec();
+    fsLog:Debug(string.format("Performed sort in %fms, result: %s.", (stop - start) * 1000, sorted and "sorted" or "not sorted"))
+
     if sorted then
         M:NotifySorted()
     end
-
-    local stop = wow.GetTimePreciseSec();
-    fsLog:Debug(string.format("Performed sort in %fms, result: %s.", (stop - start) * 1000, sorted and "sorted" or "not sorted"))
 
     return sorted
 end

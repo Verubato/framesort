@@ -38,6 +38,7 @@ local function GetFriendlyFrames(provider)
 end
 
 local function UpdateTargets()
+    local start = wow.GetTimePreciseSec()
     local friendlyUnits = M:FriendlyTargets()
     local updatedAny = false
 
@@ -76,6 +77,9 @@ local function UpdateTargets()
     if updatedAny then
         fsLog:Debug(string.format("Updated targets: %d friendly, %d enemy.", #friendlyUnits, #enemyunits))
     end
+
+    local stop = wow.GetTimePreciseSec()
+    fsLog:Debug(string.format("Update targets took %fms.", (stop - start) * 1000))
 end
 
 local function Run()
@@ -214,6 +218,7 @@ function M:Init()
     targetBottomFrameButton:SetAttribute("type", "target")
     targetBottomFrameButton:SetAttribute("unit", "none")
 
+    -- TODO: remove this double up
     for _, provider in ipairs(fsProviders:Enabled()) do
         provider:RegisterRequestSortCallback(Run)
     end
