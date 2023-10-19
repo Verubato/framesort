@@ -3,6 +3,7 @@ local _, addon = ...
 local wow = addon.WoW.Api
 local fsLog = addon.Logging.Log
 local fsProviders = addon.Providers
+local fsScheduler = addon.Scheduling.Scheduler
 local M = addon.Modules
 
 local function Run(provider)
@@ -33,11 +34,5 @@ function M:Init()
         provider:RegisterRequestSortCallback(OnProviderRequiresSort)
     end
 
-    local onLoadFrame = wow.CreateFrame("Frame", nil, wow.UIParent)
-    onLoadFrame:HookScript("OnEvent", function()
-        Run()
-    end)
-
-    -- perform the first run
-    onLoadFrame:RegisterEvent(wow.Events.PLAYER_ENTERING_WORLD)
+    fsScheduler:RunWhenEnteringWorld(Run)
 end

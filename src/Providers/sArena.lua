@@ -30,23 +30,21 @@ local function UpdateNextFrame()
     fsScheduler:RunNextFrame(RequestSort)
 end
 
+local function OnEvent()
+    UpdateNextFrame()
+end
+
 local function DelayedInit()
     assert(eventFrame ~= nil)
 
     if wow.IsRetail() then
+        eventFrame = wow.CreateFrame("Frame")
+        eventFrame:HookScript("OnEvent", OnEvent)
         eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
         eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
     end
 
     RequestUpdateContainers()
-end
-
-local function OnEvent(_, event)
-    if event == events.PLAYER_ENTERING_WORLD then
-        DelayedInit()
-    end
-
-    UpdateNextFrame()
 end
 
 function M:Name()
@@ -66,10 +64,7 @@ function M:Init()
         callbacks = {}
     end
 
-    -- wait for sArena to initialise before we do
-    eventFrame = wow.CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", OnEvent)
-    eventFrame:RegisterEvent(events.PLAYER_ENTERING_WORLD)
+    fsScheduler:RunWhenEnteringWorld(DelayedInit)
 end
 
 function M:RegisterRequestSortCallback(callback)

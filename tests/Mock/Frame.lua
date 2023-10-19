@@ -167,7 +167,7 @@ function M:FireEvent(event, ...)
 
     for _, hook in ipairs(self.State.ScriptHooks) do
         if hook.Event == "OnEvent" then
-            hook.Callback(...)
+            hook.Callback(self, event, ...)
         end
     end
 end

@@ -6,6 +6,8 @@ local events = addon.WoW.Api.Events
 local M = {}
 addon.Scheduling.Scheduler = M
 
+local eventFrame = nil
+local enteringWorldCallbacks = {}
 local combatEndCallbacks = {}
 local combatEndKeyedCallbacks = {}
 
@@ -20,6 +22,22 @@ local function OnCombatEnded()
 
     combatEndCallbacks = wow.wipe(combatEndCallbacks)
     combatEndKeyedCallbacks = wow.wipe(combatEndKeyedCallbacks)
+end
+
+local function OnEnteringWorld()
+    for _, callback in pairs(enteringWorldCallbacks) do
+        callback()
+    end
+end
+
+local function OnEvent(_, event)
+    assert(event ~= nil)
+
+    if event == events.PLAYER_ENTERING_WORLD then
+        OnEnteringWorld()
+    elseif event == events.PLAYER_REGEN_ENABLED then
+        OnCombatEnded()
+    end
 end
 
 ---Invokes the callback on the next frame.
@@ -44,6 +62,10 @@ function M:RunWhenCombatEnds(callback, key)
     end
 end
 
+function M:RunWhenEnteringWorld(callback)
+    enteringWorldCallbacks[#enteringWorldCallbacks + 1] = callback
+end
+
 function M:Init()
     if #combatEndCallbacks > 0 then
         combatEndCallbacks = {}
@@ -53,7 +75,8 @@ function M:Init()
         combatEndKeyedCallbacks = {}
     end
 
-    local eventFrame = wow.CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", OnCombatEnded)
+    eventFrame = wow.CreateFrame("Frame")
+    eventFrame:HookScript("OnEvent", OnEvent)
     eventFrame:RegisterEvent(events.PLAYER_REGEN_ENABLED)
+    eventFrame:RegisterEvent(events.PLAYER_ENTERING_WORLD)
 end
