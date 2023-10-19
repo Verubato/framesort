@@ -4,7 +4,6 @@ local wow = addon.WoW.Api
 local fsSorting = addon.Modules.Sorting
 local fsCompare = addon.Collections.Comparer
 local fsProviders = addon.Providers
-local fsEnumerable = addon.Collections.Enumerable
 local fsUnit = addon.WoW.Unit
 local fsScheduler = addon.Scheduling.Scheduler
 local fsConfig = addon.Configuration
@@ -1180,10 +1179,17 @@ local function ConfigureHeader(header)
             -- the refreshUnitChange script doesn't capture when the unit is changed to nil
             -- which can happen when someone leaves the group, or a pet ceases to exist
             -- so we're only interested in unit changing to nil here
-            -- TODO: implement similar performance improvement like the refreshUnitChange has
             frame:SetAttribute("_onattributechanged", [[
                 if name ~= "unit" or value ~= nil then return end
                 if SecureCmdOptionParse("[combat] true; false") ~= "true" then return end
+
+                local id = self:GetID()
+                local header = self:GetAttribute("Header")
+                local next = header:GetAttribute("child" .. (id + 1))
+
+                -- Blizzard iterate over all the unit buttons and nil their unit token
+                -- so to avoid spamming multiple sort attempts, only perform a sort once the last unit button has been updated
+                if next then return end
 
                 local manager = self:GetAttribute("Manager")
                 manager:SetAttribute("state-framesort-toggle", random())
@@ -1207,7 +1213,9 @@ local function ConfigureHeader(header)
         -- self = the newly created unit button
         self:SetWidth(0)
         self:SetHeight(0)
+        self:SetID(UnitButtonsCount)
         self:SetAttribute("Manager", Manager)
+        self:SetAttribute("Header", Header)
 
         RefreshUnitChange = [[
             if SecureCmdOptionParse("[combat] true; false") ~= "true" then return end
