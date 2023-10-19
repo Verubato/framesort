@@ -37,12 +37,11 @@
 ---@field Math Math
 
 ---@meta
----@class Modules
+---@class Modules : IInitialise, IRun
 ---@field Sorting SortingModule
 ---@field HidePlayer HidePlayerModule
 ---@field Targeting TargetingModule
 ---@field Macro MacroModule
----@field Init fun(self: table)
 
 ---@class Scheduling
 ---@field Scheduler Scheduler
@@ -74,4 +73,7 @@
 ---@field TrySort fun(self: table, provider: FrameProvider?): boolean
 
 ---@class IRun
----@field Run fun(self: table, provider: FrameProvider?): boolean
+---@field Run fun(self: table, provider: FrameProvider?)
+
+---@class IInitialise
+---@field Init fun(self: table)

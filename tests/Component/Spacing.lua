@@ -63,7 +63,7 @@ function M:test_sort_party_frames_top()
     p2:SetPoint("TOPLEFT", partyContainer, "TOPLEFT", 0, 0)
     p2:SetPosition(-height * 2, 0, width, -height * 3)
 
-    assert(fsSort:Run())
+    fsSort:Run()
 
     local function toPos(pos)
         return {

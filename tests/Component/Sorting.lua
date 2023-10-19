@@ -58,7 +58,7 @@ function M:test_sort_party_frames_top()
     p1:SetPoint("TOPLEFT", player, "BOTTOMLEFT", 0, 0)
     p1:SetPosition(-height * 2, 0, width, -height * 3)
 
-    assert(fsSort:Run())
+    fsSort:Run()
 
     local function toPos(pos)
         return {

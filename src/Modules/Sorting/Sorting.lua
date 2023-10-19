@@ -28,13 +28,11 @@ function M:Run(provider)
     local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
     local enemyEnabled, _, _ = fsCompare:EnemySortMode()
 
-    if not friendlyEnabled and not enemyEnabled then
-        return false
-    end
+    if not friendlyEnabled and not enemyEnabled then return end
 
     if wow.IsRetail() and wow.EditModeManagerFrame.editModeActive then
         fsLog:Debug("Not sorting while edit mode active.")
-        return false
+        return
     end
 
     if wow.InCombatLockdown() then
@@ -43,7 +41,7 @@ function M:Run(provider)
             M:Run(provider)
         end, "TrySort" .. (provider and provider:Name() or ""))
 
-        return false
+        return
     end
 
     local start = wow.GetTimePreciseSec()
@@ -61,8 +59,6 @@ function M:Run(provider)
     if sorted then
         M:NotifySorted()
     end
-
-    return sorted
 end
 
 ---Initialises the module.
