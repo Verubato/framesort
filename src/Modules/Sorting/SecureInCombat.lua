@@ -1002,8 +1002,6 @@ secureMethods["Init"] = [[
 local function LoadUnits()
     assert(manager ~= nil)
 
-    local start = wow.GetTimePreciseSec()
-
     -- TODO: we could transfer unit info to the restricted environment
     -- then perform the unit sort inside which would give us more control
     local friendlyUnits = fsUnit:FriendlyUnits()
@@ -1027,9 +1025,6 @@ local function LoadUnits()
 
     -- flag that the units need to be reloaded
     manager:SetAttributeNoHandler("LoadedUnits", false)
-
-    local stop = wow.GetTimePreciseSec()
-    fsLog:Debug(string.format("Sent units to the secure environment in %fms.", (stop - start) * 1000))
 end
 
 local function LoadEnabled()
