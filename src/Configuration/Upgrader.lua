@@ -320,6 +320,16 @@ function M:UpgradeToVersion15(options)
     options.Version = 15
 end
 
+function M:UpgradeToVersion16(options)
+    assert(options.Version == 15)
+
+    options.Sorting = {
+        RoleOrdering = 1
+    }
+
+    options.Version = 16
+end
+
 ---Upgrades saved options to the current version.
 function M:UpgradeOptions(options)
     while (options.Version or 1) < fsConfig.Defaults.Version do

@@ -6,7 +6,14 @@ local fsMath = addon.Numerics.Math
 local fsEnumerable = addon.Collections.Enumerable
 local fsConfig = addon.Configuration
 local fuzzyDecimalPlaces = 0
-local roleValues = { MAINTANK = 1, MAINASSIST = 2, TANK = 3, HEALER = 4, DAMAGER = 5, NONE = 6 }
+local roleOrdering = {
+    -- tank > healer > dps
+    [1] = { MAINTANK = 1, MAINASSIST = 2, TANK = 3, HEALER = 4, DAMAGER = 5, NONE = 6 },
+    -- healer > tank > dps
+    [2] = { HEALER = 1, MAINTANK = 2, MAINASSIST = 3, TANK = 4, DAMAGER = 5, NONE = 6 },
+    -- healer > dps > tank
+    [3] = { HEALER = 1, DAMAGER = 2, MAINTANK = 3, MAINASSIST = 4, TANK = 5, NONE = 6 },
+}
 ---@class Comparer
 local M = {}
 addon.Collections.Comparer = M
@@ -80,6 +87,7 @@ local function CompareRole(leftToken, rightToken)
     end
 
     if leftRole and rightRole then
+        local roleValues = roleOrdering[addon.DB.Options.Sorting.RoleOrdering] or roleOrdering[1]
         local leftValue, rightValue = roleValues[leftRole], roleValues[rightRole]
         if leftValue ~= rightValue then
             return leftValue < rightValue
