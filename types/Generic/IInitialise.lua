@@ -1,3 +1,0 @@
----@meta
----@class IInitialise
----@field Init fun(self: table)

@@ -3,7 +3,7 @@ local _, addon = ...
 local wow = addon.WoW.Api
 local fsHealth = addon.Health.HealthCheck
 local fsConfig = addon.Configuration
-local fsSort = addon.Modules.Sorting
+local fsModules = addon.Modules
 local fsHide = addon.Modules.HidePlayer
 local verticalSpacing = fsConfig.VerticalSpacing
 local horizontalSpacing = fsConfig.HorizontalSpacing
@@ -161,8 +161,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
 
             options.PlayerSortMode = sender:GetChecked() and playerModes[sender] or ""
             fsConfig:NotifyChanged()
-            fsHide:Run()
-            fsSort:Run()
+            fsModules:Run()
         end
 
         for chkbox, _ in pairs(playerModes) do
@@ -227,7 +226,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
 
         options.GroupSortMode = sender:GetChecked() and modes[sender] or ""
         fsConfig:NotifyChanged()
-        fsSort:Run()
+        fsModules:Run()
     end
 
     for chkbox, _ in pairs(modes) do
@@ -237,7 +236,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
     reverse:HookScript("OnClick", function()
         options.Reverse = reverse:GetChecked()
         fsConfig:NotifyChanged()
-        fsSort:Run()
+        fsModules:Run()
     end)
 
     parentPanel:HookScript("OnShow", function()
@@ -298,7 +297,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         fsConfig:NotifyChanged()
 
         if checked then
-            fsSort:Run()
+            fsModules:Run()
         end
     end)
 
