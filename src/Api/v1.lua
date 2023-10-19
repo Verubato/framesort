@@ -105,7 +105,7 @@ function M.Options:SetPlayerSortMode(area, mode)
     table.PlayerSortMode = mode
 
     fsConfig:NotifyChanged()
-    fsSort:TrySort()
+    fsSort:Run()
 end
 
 ---Sets the group sort mode.
@@ -119,7 +119,7 @@ function M.Options:SetGroupSortMode(area, mode)
     table.GroupSortMode = mode
 
     fsConfig:NotifyChanged()
-    fsSort:TrySort()
+    fsSort:Run()
 end
 
 ---Gets the group sort mode.
@@ -152,7 +152,7 @@ function M.Options:SetEnabled(area, enabled)
     fsConfig:NotifyChanged()
 
     if enabled then
-        fsSort:TrySort()
+        fsSort:Run()
     end
 end
 
@@ -175,7 +175,7 @@ function M.Options:SetReverse(area, reverse)
     table.Reverse = reverse
 
     fsConfig:NotifyChanged()
-    fsSort:TrySort()
+    fsSort:Run()
 end
 
 ---Enables/disables logging.

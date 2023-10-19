@@ -34,23 +34,15 @@ function M:teardown()
     addon:Reset()
 end
 
-function M:test_macro_updates_on_provider_callback()
+function M:test_macro_updates_on_run()
     local macro = [[
     #FrameSort Frame1
     /cast [@placeholder] Spell
     ]]
 
-    -- using EditMacro will cause the macro module to update it's internal cache
-    -- and it will have flagged this macro as a framesort macro and have updated it
-    wow.EditMacro(1, "Test", nil, macro)
-
-    -- now reset it back to what it was
     wow:LoadMacro(1, "Test", "Test", macro)
 
-    assertEquals(wow.State.Macros[1].Body, macro)
-
-    -- fire a provider event
-    provider:FireCallbacks()
+    addon.Modules.Macro:Run()
 
     -- ensure the macro changed
     assertEquals(
@@ -71,7 +63,6 @@ function M:test_macro_updates_after_user_edits()
     wow:LoadMacro(1, "Test", "Test", macro)
     wow:InvokeSecureHooks("EditMacro", 1)
 
-    -- should have changed now that combat dropped
     assertEquals(
         wow.State.Macros[1].Body,
         [[
@@ -87,15 +78,10 @@ function M:test_macro_updates_for_provider_after_combat()
     /cast [@placeholder] Spell
     ]]
 
-    -- using EditMacro will cause the macro module to update it's internal cache
-    -- and it will have flagged this macro as a framesort macro and have updated it
-    wow.EditMacro(1, "Test", nil, macro)
+    wow:LoadMacro(1, "Test", nil, macro)
 
     wow.State.MockInCombat = true
-
-    -- now revert the macro back to the original
-    wow:LoadMacro(1, "Test", nil, macro)
-    provider:FireCallbacks()
+    addon.Modules.Macro:Run()
 
     -- should not have changed as we're in combat
     assertEquals(macro, wow.State.Macros[1].Body)
@@ -120,6 +106,7 @@ function M:test_macro_updates_for_hook_after_combat()
     ]]
 
     wow.State.MockInCombat = true
+
     wow.EditMacro(1, "Test", "Test", macro)
 
     -- should not have changed as we're in combat
@@ -147,12 +134,12 @@ function M:test_macro_updates_are_efficient()
     /cast [@placeholder] Spell
     ]]
 
-    wow.EditMacro(1, "Test", nil, fsMacro)
-    wow.EditMacro(2, "Test2", nil, notfsMacro)
+    wow:LoadMacro(1, "Test", nil, fsMacro)
+    wow:LoadMacro(2, "Test2", nil, notfsMacro)
 
     local timesToInspect = 5
-    for _ = 1, timesToInspect do
-        provider:FireCallbacks()
+    for _ = 0, timesToInspect do
+        addon.Modules.Macro:Run()
     end
 
     assertEquals(wow.State.Macros[1].TimesRetrieved, timesToInspect)

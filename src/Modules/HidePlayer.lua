@@ -68,13 +68,11 @@ local function Run()
 end
 
 ---Shows or hides the player (depending on settings).
-function M:ShowHidePlayer()
-    Run()
+function M:Run()
+    fsScheduler:RunWhenCombatEnds(Run, "UpdateTargets")
 end
 
 function M:Init()
     local blizzard = fsProviders.Blizzard
     blizzard:RegisterRequestSortCallback(Run)
-
-    Run()
 end

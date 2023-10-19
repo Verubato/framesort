@@ -5,13 +5,8 @@ local fsScheduler = addon.Scheduling.Scheduler
 local fsCompare = addon.Collections.Comparer
 local fsLog = addon.Logging.Log
 local fsConfig = addon.Configuration
-local fsProviders = addon.Providers
 local callbacks = {}
 local M = addon.Modules.Sorting
-
-local function OnProviderRequiresSort(provider)
-    M:TrySort(provider)
-end
 
 ---Calls the post sorting callbacks.
 function M:NotifySorted()
@@ -29,7 +24,7 @@ end
 ---Attempts to sort all frames.
 ---@return boolean sorted true if sorted, otherwise false.
 ---@param provider FrameProvider? optionally specify the provider to sort, otherwise sorts all providers.
-function M:TrySort(provider)
+function M:Run(provider)
     local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
     local enemyEnabled, _, _ = fsCompare:EnemySortMode()
 
@@ -45,7 +40,7 @@ function M:TrySort(provider)
     if wow.InCombatLockdown() then
         -- can't make changes during combat
         fsScheduler:RunWhenCombatEnds(function()
-            M:TrySort(provider)
+            M:Run(provider)
         end, "TrySort" .. (provider and provider:Name() or ""))
 
         return false
@@ -78,9 +73,5 @@ function M:Init()
 
     if #callbacks > 0 then
         callbacks = {}
-    end
-
-    for _, provider in ipairs(fsProviders.All) do
-        provider:RegisterRequestSortCallback(OnProviderRequiresSort)
     end
 end

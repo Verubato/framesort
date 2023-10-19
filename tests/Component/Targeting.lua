@@ -83,7 +83,7 @@ function M:test_targets_update_on_provider_callback()
         f:SetAttribute("unit", "none")
     end
 
-    provider:FireCallbacks()
+    addon.Modules.Targeting:Run()
 
     assertEquals(friendlyButtons[1]:GetAttribute("unit"), "player")
     assertEquals(friendlyButtons[2]:GetAttribute("unit"), "party2")
@@ -130,7 +130,8 @@ function M:test_targets_update_after_combat()
     end
 
     wow.State.MockInCombat = true
-    provider:FireCallbacks()
+
+    addon.Modules.Targeting:Run()
 
     -- assert nothing changed as we're in combat
     for _, f in ipairs(friendlyButtons) do
