@@ -113,4 +113,6 @@ function M:Init()
     fsSort:RegisterPostSortCallback(Run)
 
     wow.hooksecurefunc("EditMacro", OnEditMacro)
+
+    Run()
 end

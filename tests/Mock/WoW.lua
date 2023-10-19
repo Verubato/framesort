@@ -246,8 +246,6 @@ wow.hooksecurefunc = function(table, name, callback)
 end
 
 wow.RegisterAttributeDriver = function(frame, attribute, conditional)
-    assertEquals(wow.InCombatLockdown(), false)
-
     wow.State.AttributeDrivers[#wow.State.AttributeDrivers + 1] = {
         Frame = frame,
         Attribute = attribute,
@@ -268,8 +266,6 @@ wow.GetMacroInfo = function(id)
 end
 
 wow.EditMacro = function(id, name, icon, body)
-    assertEquals(wow.InCombatLockdown(), false)
-
     local macro = wow.State.Macros[id]
     if not macro then
         macro = {}
@@ -280,6 +276,9 @@ wow.EditMacro = function(id, name, icon, body)
     macro.Name = name
     macro.Icon = icon
     macro.Body = body
+    macro.TimesRetrieved = 0
+
+    wow:InvokeSecureHooks("EditMacro", id)
 
     return id
 end
