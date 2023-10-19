@@ -35,8 +35,6 @@ local function OnEvent()
 end
 
 local function DelayedInit()
-    assert(eventFrame ~= nil)
-
     if wow.IsRetail() then
         eventFrame = wow.CreateFrame("Frame")
         eventFrame:HookScript("OnEvent", OnEvent)

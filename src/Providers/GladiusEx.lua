@@ -33,9 +33,13 @@ local function UpdateNextFrame()
     fsScheduler:RunNextFrame(RequestSort)
 end
 
-local function DelayedInit()
-    assert(eventFrame ~= nil)
+local function OnEvent()
+    UpdateNextFrame()
+end
 
+local function DelayedInit()
+    eventFrame = wow.CreateFrame("Frame")
+    eventFrame:HookScript("OnEvent", OnEvent)
     eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
     eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
     eventFrame:RegisterEvent(events.UNIT_PET)
@@ -46,10 +50,6 @@ local function DelayedInit()
     end
 
     RequestUpdateContainers()
-end
-
-local function OnEvent()
-    UpdateNextFrame()
 end
 
 function M:Name()
@@ -68,9 +68,6 @@ function M:Init()
     if #callbacks > 0 then
         callbacks = {}
     end
-
-    eventFrame = wow.CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", OnEvent)
 
     -- wait for GladiusEx to initialise before we do
     fsScheduler:RunWhenEnteringWorld(DelayedInit)
