@@ -3,7 +3,6 @@ local _, addon = ...
 local wow = addon.WoW.Api
 local fsProviders = addon.Providers
 local fsUnit = addon.WoW.Unit
-local fsSort = addon.Modules.Sorting
 local fsEnumerable = addon.Collections.Enumerable
 local fsScheduler = addon.Scheduling.Scheduler
 local fsCompare = addon.Collections.Comparer
@@ -80,15 +79,6 @@ local function UpdateTargets()
 
     local stop = wow.GetTimePreciseSec()
     fsLog:Debug(string.format("Update targets took %fms.", (stop - start) * 1000))
-end
-
-local function Run()
-    if wow.InCombatLockdown() then
-        fsScheduler:RunWhenCombatEnds(UpdateTargets, "UpdateTargets")
-        return
-    end
-
-    UpdateTargets()
 end
 
 function M:FriendlyTargets()
@@ -179,6 +169,10 @@ function M:EnemyTargets()
     return fsUnit:EnemyUnits(false)
 end
 
+function M:Run()
+    fsScheduler:RunWhenCombatEnds(UpdateTargets, "UpdateTargets")
+end
+
 function M:Init()
     local targetFriendlyCount = 5
     local targetEnemyCount = 3
@@ -217,13 +211,4 @@ function M:Init()
     targetBottomFrameButton:RegisterForClicks("AnyDown", "AnyUp")
     targetBottomFrameButton:SetAttribute("type", "target")
     targetBottomFrameButton:SetAttribute("unit", "none")
-
-    -- TODO: remove this double up
-    for _, provider in ipairs(fsProviders:Enabled()) do
-        provider:RegisterRequestSortCallback(Run)
-    end
-
-    fsSort:RegisterPostSortCallback(Run)
-
-    Run()
 end

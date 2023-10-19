@@ -78,7 +78,7 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
             if value then
                 spacing.Horizontal = value
                 fsConfig:NotifyChanged()
-                fsSorting:TrySort()
+                fsSorting:Run()
             end
         end)
 
@@ -91,7 +91,7 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
             if value then
                 spacing.Horizontal = value
                 fsConfig:NotifyChanged()
-                fsSorting:TrySort()
+                fsSorting:Run()
             end
         end)
 
@@ -120,7 +120,7 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
             if value then
                 spacing.Vertical = value
                 fsConfig:NotifyChanged()
-                fsSorting:TrySort()
+                fsSorting:Run()
             end
         end)
 
@@ -134,7 +134,7 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
             if value then
                 spacing.Vertical = value
                 fsConfig:NotifyChanged()
-                fsSorting:TrySort()
+                fsSorting:Run()
             end
         end)
 

@@ -44,6 +44,7 @@
     <Script file="Modules\HidePlayer.lua"/>
     <Script file="Modules\Targeting.lua"/>
     <Script file="Modules\Macro.lua"/>
+    <Script file="Modules\Runner.lua"/>
 
     <!-- Api requires modules -->
     <Script file="Api\Api.lua"/>

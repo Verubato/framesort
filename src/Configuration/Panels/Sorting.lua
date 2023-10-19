@@ -161,8 +161,8 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
 
             options.PlayerSortMode = sender:GetChecked() and playerModes[sender] or ""
             fsConfig:NotifyChanged()
-            fsHide:ShowHidePlayer()
-            fsSort:TrySort()
+            fsHide:Run()
+            fsSort:Run()
         end
 
         for chkbox, _ in pairs(playerModes) do
@@ -227,7 +227,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
 
         options.GroupSortMode = sender:GetChecked() and modes[sender] or ""
         fsConfig:NotifyChanged()
-        fsSort:TrySort()
+        fsSort:Run()
     end
 
     for chkbox, _ in pairs(modes) do
@@ -237,7 +237,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
     reverse:HookScript("OnClick", function()
         options.Reverse = reverse:GetChecked()
         fsConfig:NotifyChanged()
-        fsSort:TrySort()
+        fsSort:Run()
     end)
 
     parentPanel:HookScript("OnShow", function()
@@ -245,17 +245,17 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         enabled:SetChecked(options.Enabled)
 
         if hasPlayer then
-            top:SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Top)
-            middle:SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Middle)
-            bottom:SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Bottom)
-            hidden:SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Hidden)
+            assert(top):SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Top)
+            assert(middle):SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Middle)
+            assert(bottom):SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Bottom)
+            assert(hidden):SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Hidden)
         end
 
         group:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Group)
         role:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Role)
 
         if hasAlpha then
-            alpha:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Alphabetical)
+            assert(alpha):SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Alphabetical)
         end
 
         reverse:SetChecked(options.Reverse)
@@ -298,7 +298,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         fsConfig:NotifyChanged()
 
         if checked then
-            fsSort:TrySort()
+            fsSort:Run()
         end
     end)
 

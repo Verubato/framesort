@@ -38,10 +38,11 @@
 
 ---@meta
 ---@class Modules
----@field Sorting SortingModules
+---@field Sorting SortingModule
 ---@field HidePlayer HidePlayerModule
 ---@field Targeting TargetingModule
----@field Macro IInitialise
+---@field Macro MacroModule
+---@field Init fun(self: table)
 
 ---@class Scheduling
 ---@field Scheduler Scheduler
@@ -52,7 +53,7 @@
 ---@field Macro MacroUtil
 ---@field Unit UnitUtil
 
----@class SortingModules : ISort, IInitialise
+---@class SortingModule : IRun, IInitialise
 ---@field Traditional TraditionalSortingModule
 ---@field Secure SecureSortingModule
 ---@field RegisterPostSortCallback fun(self: table, callback: function)
@@ -67,5 +68,10 @@
 ---@class NoCombatSecureSorter : ISort, IInitialise
 ---@class InCombatSecureSorter : IInitialise
 
+---@class MacroModule : IRun, IInitialise
+
 ---@class ISort
 ---@field TrySort fun(self: table, provider: FrameProvider?): boolean
+
+---@class IRun
+---@field Run fun(self: table, provider: FrameProvider?): boolean

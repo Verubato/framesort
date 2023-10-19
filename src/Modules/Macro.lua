@@ -5,8 +5,6 @@ local fsScheduler = addon.Scheduling.Scheduler
 local fsMacro = addon.WoW.Macro
 local fsLog = addon.Logging.Log
 local fsTarget = addon.Modules.Targeting
-local fsSort = addon.Modules.Sorting
-local fsProviders = addon.Providers
 local maxMacros = 138
 local isSelfEditingMacro = false
 ---@type table<number, boolean>
@@ -91,13 +89,8 @@ local function OnEditMacro(id, _, _, _)
     isFsMacroCache[newId] = isFsMacro
 end
 
-local function Run()
-    if wow.InCombatLockdown() then
-        fsScheduler:RunWhenCombatEnds(ScanMacros, "Macro")
-        return
-    end
-
-    ScanMacros()
+function M:Run()
+    fsScheduler:RunWhenCombatEnds(ScanMacros, "UpdateMacros")
 end
 
 function M:Init()
@@ -105,14 +98,5 @@ function M:Init()
         isFsMacroCache = {}
     end
 
-    -- TODO: remove this double up
-    for _, provider in ipairs(fsProviders:Enabled()) do
-        provider:RegisterRequestSortCallback(Run)
-    end
-
-    fsSort:RegisterPostSortCallback(Run)
-
     wow.hooksecurefunc("EditMacro", OnEditMacro)
-
-    Run()
 end
