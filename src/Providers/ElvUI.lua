@@ -133,6 +133,10 @@ function M:RegisterContainersChangedCallback(callback)
 end
 
 function M:Containers()
+    if not ElvUF_PartyGroup1 then
+        return {}
+    end
+
     ---@type FrameContainer
     local party = {
         Frame = ElvUF_PartyGroup1,

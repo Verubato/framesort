@@ -962,21 +962,17 @@ secureMethods["LoadUnits"] = [[
     FriendlyUnits = newtable()
     EnemyUnits = newtable()
 
-    local friendlyUnitsCount = self:GetAttribute("FriendlyUnitsCount")
-    local enemyUnitsCount = self:GetAttribute("EnemyUnitsCount")
+    local friendlyUnitsCount = self:GetAttribute("FriendlyUnitsCount") or 0
+    local enemyUnitsCount = self:GetAttribute("EnemyUnitsCount") or 0
 
-    if friendlyUnitsCount then
-        for i = 1, friendlyUnitsCount do
-            local unit = self:GetAttribute("FriendlyUnit" .. i)
-            FriendlyUnits[#FriendlyUnits + 1] = unit
-        end
+    for i = 1, friendlyUnitsCount do
+        local unit = self:GetAttribute("FriendlyUnit" .. i)
+        FriendlyUnits[#FriendlyUnits + 1] = unit
     end
 
-    if enemyUnitsCount then
-        for i = 1, enemyUnitsCount do
-            local unit = self:GetAttribute("EnemyUnit" .. i)
-            EnemyUnits[#EnemyUnits + 1] = unit
-        end
+    for i = 1, enemyUnitsCount do
+        local unit = self:GetAttribute("EnemyUnit" .. i)
+        EnemyUnits[#EnemyUnits + 1] = unit
     end
 ]]
 
@@ -1054,22 +1050,10 @@ local function LoadSpacing()
 end
 
 ---@param provider FrameProvider
-local function LoadProvider(provider, force)
+local function LoadProvider(provider)
     assert(manager ~= nil)
 
     local containers = provider:Containers()
-
-    -- skip loading the container if we've already loaded it
-    -- 99% of the time we've already loaded it
-    local shouldLoad = force or fsEnumerable
-        :From(containers)
-        :Any(function(x)
-            return x.Frame and not x.Frame:GetAttribute("FrameSortLoaded")
-        end)
-
-    if not shouldLoad then
-        return
-    end
 
     manager:SetAttributeNoHandler("ProviderName", provider:Name())
 
@@ -1161,18 +1145,8 @@ end
 
 local function OnProviderContainersChanged(provider)
     fsScheduler:RunWhenCombatEnds(function()
-        LoadProvider(provider, true)
+        LoadProvider(provider)
     end)
-end
-
-local function OnProviderRequestSort(provider)
-    -- don't respond to provider events during combat
-    if wow.InCombatLockdown() then return end
-
-    -- we may have loaded the provider before it had a chance to initialise itself
-    -- so re-import the provider if it's changed
-    -- there's likely a better event to place this instead of here as it's too noisy
-    LoadProvider(provider)
 end
 
 local function OnConfigChanged()
@@ -1320,13 +1294,17 @@ function M:Init()
     end
 
     for _, provider in ipairs(fsProviders.All) do
-        LoadProvider(provider)
-        provider:RegisterRequestSortCallback(OnProviderRequestSort)
         provider:RegisterContainersChangedCallback(OnProviderContainersChanged)
     end
 
+    -- wait until the providers have created their frames
+    fsScheduler:RunWhenEnteringWorld(function()
+        for _, provider in ipairs(fsProviders:Enabled()) do
+            LoadProvider(provider)
+        end
+    end)
+
     LoadEnabled()
-    LoadUnits()
     LoadSpacing()
 
     fsConfig:RegisterConfigurationChangedCallback(OnConfigChanged)
@@ -1337,4 +1315,3 @@ function M:Init()
     combatStartingFrame:HookScript("OnEvent", OnCombatStarting)
     combatStartingFrame:RegisterEvent(wow.Events.PLAYER_REGEN_DISABLED)
 end
-
