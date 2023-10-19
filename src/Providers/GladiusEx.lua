@@ -48,11 +48,7 @@ local function DelayedInit()
     RequestUpdateContainers()
 end
 
-local function OnEvent(_, event)
-    if event == events.PLAYER_ENTERING_WORLD then
-        DelayedInit()
-    end
-
+local function OnEvent()
     UpdateNextFrame()
 end
 
@@ -73,10 +69,11 @@ function M:Init()
         callbacks = {}
     end
 
-    -- wait for GladiusEx to initialise before we do
     eventFrame = wow.CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", OnEvent)
-    eventFrame:RegisterEvent(events.PLAYER_ENTERING_WORLD)
+
+    -- wait for GladiusEx to initialise before we do
+    fsScheduler:RunWhenEnteringWorld(DelayedInit)
 end
 
 function M:RegisterRequestSortCallback(callback)

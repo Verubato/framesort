@@ -7,6 +7,7 @@ local fsProviders = addon.Providers
 local events = addon.WoW.Api.Events
 ---@class BlizzardFrameProvider: FrameProvider
 local M = {}
+local eventFrame = nil
 local sortCallbacks = {}
 local containersChangedCallbacks = {}
 local cvarsToWatch = {
@@ -92,9 +93,8 @@ function M:Init()
         containersChangedCallbacks = {}
     end
 
-    local eventFrame = wow.CreateFrame("Frame")
+    eventFrame = wow.CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", OnEvent)
-    eventFrame:RegisterEvent(events.PLAYER_ENTERING_WORLD)
     eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
     eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
     eventFrame:RegisterEvent(events.UNIT_PET)

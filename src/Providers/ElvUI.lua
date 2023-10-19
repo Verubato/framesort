@@ -10,6 +10,7 @@ local callbacks = {}
 local containersChangedCallbacks = {}
 local fsPlugin = nil
 local pluginName = "FrameSort"
+local eventFrame = nil
 
 fsProviders.ElvUI = M
 table.insert(fsProviders.All, M)
@@ -80,9 +81,8 @@ function M:Init()
     function fsPlugin:Initialize()
         EP:RegisterPlugin(pluginName, fsPlugin.InsertOptions)
 
-        local eventFrame = wow.CreateFrame("Frame")
+        eventFrame = wow.CreateFrame("Frame")
         eventFrame:HookScript("OnEvent", OnEvent)
-        eventFrame:RegisterEvent(events.PLAYER_ENTERING_WORLD)
         eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
         eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
         eventFrame:RegisterEvent(events.UNIT_PET)
