@@ -8,6 +8,9 @@ _G["BINDING_NAME_CLICK FSTargetBottom:LeftButton"] = "Target bottom frame"
 _G["BINDING_NAME_CLICK FSTargetEnemy1:LeftButton"] = "Target enemy frame 1"
 _G["BINDING_NAME_CLICK FSTargetEnemy2:LeftButton"] = "Target enemy frame 2"
 _G["BINDING_NAME_CLICK FSTargetEnemy3:LeftButton"] = "Target enemy frame 3"
+_G["BINDING_NAME_CLICK FSFocusEnemy1:LeftButton"] = "Focus enemy frame 1"
+_G["BINDING_NAME_CLICK FSFocusEnemy2:LeftButton"] = "Focus enemy frame 2"
+_G["BINDING_NAME_CLICK FSFocusEnemy3:LeftButton"] = "Focus enemy frame 3"
 
 ---@type string, Addon
 local _, addon = ...

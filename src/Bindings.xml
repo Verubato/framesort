@@ -8,4 +8,7 @@
   <Binding name="CLICK FSTargetEnemy1:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
   <Binding name="CLICK FSTargetEnemy2:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
   <Binding name="CLICK FSTargetEnemy3:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
+  <Binding name="CLICK FSFocusEnemy1:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
+  <Binding name="CLICK FSFocusEnemy2:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
+  <Binding name="CLICK FSFocusEnemy3:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
 </Bindings>
