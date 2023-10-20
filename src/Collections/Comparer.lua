@@ -276,17 +276,18 @@ end
 ---@return boolean? reverse whether the sorting is reversed.
 function M:FriendlySortMode()
     local inInstance, instanceType = wow.IsInInstance()
+    local config = addon.DB.Options.Sorting
 
     if inInstance and instanceType == "arena" then
-        return addon.DB.Options.Arena.Enabled, addon.DB.Options.Arena.PlayerSortMode, addon.DB.Options.Arena.GroupSortMode, addon.DB.Options.Arena.Reverse
+        return config.Arena.Enabled, config.Arena.PlayerSortMode, config.Arena.GroupSortMode, config.Arena.Reverse
     elseif inInstance and instanceType == "party" then
-        return addon.DB.Options.Dungeon.Enabled, addon.DB.Options.Dungeon.PlayerSortMode, addon.DB.Options.Dungeon.GroupSortMode, addon.DB.Options.Dungeon.Reverse
+        return config.Dungeon.Enabled, config.Dungeon.PlayerSortMode, config.Dungeon.GroupSortMode, config.Dungeon.Reverse
     elseif inInstance and (instanceType == "raid" or instanceType == "pvp") then
-        return addon.DB.Options.Raid.Enabled, addon.DB.Options.Raid.PlayerSortMode, addon.DB.Options.Raid.GroupSortMode, addon.DB.Options.Raid.Reverse
+        return config.Raid.Enabled, config.Raid.PlayerSortMode, config.Raid.GroupSortMode, config.Raid.Reverse
     end
 
     -- default to world rules for all other instance types
-    return addon.DB.Options.World.Enabled, addon.DB.Options.World.PlayerSortMode, addon.DB.Options.World.GroupSortMode, addon.DB.Options.World.Reverse
+    return config.World.Enabled, config.World.PlayerSortMode, config.World.GroupSortMode, config.World.Reverse
 end
 
 ---Returns the sort mode from the configured options for the current instance.
@@ -294,7 +295,9 @@ end
 ---@return string? groupMode the group sort mode.
 ---@return boolean? reverse whether the sorting is reversed.
 function M:EnemySortMode()
-    return addon.DB.Options.EnemyArena.Enabled, addon.DB.Options.EnemyArena.GroupSortMode, addon.DB.Options.EnemyArena.Reverse
+    local config = addon.DB.Options.Sorting.EnemyArena
+
+    return config.Enabled, config.GroupSortMode, config.Reverse
 end
 
 ---Returns true if the left frame is "earlier" than the right frame.

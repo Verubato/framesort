@@ -33,11 +33,12 @@ function M:setup()
     end
 
     -- disable sorting on config changes
-    addon.DB.Options.World.Enabled = false
-    addon.DB.Options.Raid.Enabled = false
-    addon.DB.Options.Arena.Enabled = false
-    addon.DB.Options.EnemyArena.Enabled = false
-    addon.DB.Options.Dungeon.Enabled = false
+    local config = addon.DB.Options.Sorting
+    config.World.Enabled = false
+    config.Raid.Enabled = false
+    config.Arena.Enabled = false
+    config.EnemyArena.Enabled = false
+    config.Dungeon.Enabled = false
 end
 
 function M:teardown()
@@ -58,25 +59,26 @@ function M:test_get_raid_frames()
 end
 
 function M:test_get_sort_mode()
-    addon.DB.Options.Arena.PlayerSortMode = "ArenaTestPlayer"
-    addon.DB.Options.Dungeon.PlayerSortMode = "DungeonTestPlayer"
-    addon.DB.Options.Raid.PlayerSortMode = "PlayerTestPlayer"
-    addon.DB.Options.World.PlayerSortMode = "WorldTestPlayer"
+    local config = addon.DB.Options.Sorting
+    config.Arena.PlayerSortMode = "ArenaTestPlayer"
+    config.Dungeon.PlayerSortMode = "DungeonTestPlayer"
+    config.Raid.PlayerSortMode = "PlayerTestPlayer"
+    config.World.PlayerSortMode = "WorldTestPlayer"
 
-    addon.DB.Options.Arena.GroupSortMode = "ArenaTestGroup"
-    addon.DB.Options.Dungeon.GroupSortMode = "DungeonTestGroup"
-    addon.DB.Options.Raid.GroupSortMode = "RaidTestGroup"
-    addon.DB.Options.World.GroupSortMode = "WorldTestGroup"
+    config.Arena.GroupSortMode = "ArenaTestGroup"
+    config.Dungeon.GroupSortMode = "DungeonTestGroup"
+    config.Raid.GroupSortMode = "RaidTestGroup"
+    config.World.GroupSortMode = "WorldTestGroup"
 
-    assertEquals(FrameSortApi.v1.Options:GetPlayerSortMode("Arena"), addon.DB.Options.Arena.PlayerSortMode)
-    assertEquals(FrameSortApi.v1.Options:GetPlayerSortMode("Dungeon"), addon.DB.Options.Dungeon.PlayerSortMode)
-    assertEquals(FrameSortApi.v1.Options:GetPlayerSortMode("Raid"), addon.DB.Options.Raid.PlayerSortMode)
-    assertEquals(FrameSortApi.v1.Options:GetPlayerSortMode("World"), addon.DB.Options.World.PlayerSortMode)
+    assertEquals(FrameSortApi.v1.Options:GetPlayerSortMode("Arena"), config.Arena.PlayerSortMode)
+    assertEquals(FrameSortApi.v1.Options:GetPlayerSortMode("Dungeon"), config.Dungeon.PlayerSortMode)
+    assertEquals(FrameSortApi.v1.Options:GetPlayerSortMode("Raid"), config.Raid.PlayerSortMode)
+    assertEquals(FrameSortApi.v1.Options:GetPlayerSortMode("World"), config.World.PlayerSortMode)
 
-    assertEquals(FrameSortApi.v1.Options:GetGroupSortMode("Arena"), addon.DB.Options.Arena.GroupSortMode)
-    assertEquals(FrameSortApi.v1.Options:GetGroupSortMode("Dungeon"), addon.DB.Options.Dungeon.GroupSortMode)
-    assertEquals(FrameSortApi.v1.Options:GetGroupSortMode("Raid"), addon.DB.Options.Raid.GroupSortMode)
-    assertEquals(FrameSortApi.v1.Options:GetGroupSortMode("World"), addon.DB.Options.World.GroupSortMode)
+    assertEquals(FrameSortApi.v1.Options:GetGroupSortMode("Arena"), config.Arena.GroupSortMode)
+    assertEquals(FrameSortApi.v1.Options:GetGroupSortMode("Dungeon"), config.Dungeon.GroupSortMode)
+    assertEquals(FrameSortApi.v1.Options:GetGroupSortMode("Raid"), config.Raid.GroupSortMode)
+    assertEquals(FrameSortApi.v1.Options:GetGroupSortMode("World"), config.World.GroupSortMode)
 end
 
 function M:test_set_sort_mode()
@@ -90,15 +92,16 @@ function M:test_set_sort_mode()
     FrameSortApi.v1.Options:SetGroupSortMode("Raid", "Role")
     FrameSortApi.v1.Options:SetGroupSortMode("World", "Role")
 
-    assertEquals(addon.DB.Options.Arena.PlayerSortMode, "Bottom")
-    assertEquals(addon.DB.Options.Dungeon.PlayerSortMode, "Bottom")
-    assertEquals(addon.DB.Options.Raid.PlayerSortMode, "Bottom")
-    assertEquals(addon.DB.Options.World.PlayerSortMode, "Bottom")
+    local config = addon.DB.Options.Sorting
+    assertEquals(config.Arena.PlayerSortMode, "Bottom")
+    assertEquals(config.Dungeon.PlayerSortMode, "Bottom")
+    assertEquals(config.Raid.PlayerSortMode, "Bottom")
+    assertEquals(config.World.PlayerSortMode, "Bottom")
 
-    assertEquals(addon.DB.Options.Arena.GroupSortMode, "Role")
-    assertEquals(addon.DB.Options.Dungeon.GroupSortMode, "Role")
-    assertEquals(addon.DB.Options.Raid.GroupSortMode, "Role")
-    assertEquals(addon.DB.Options.World.GroupSortMode, "Role")
+    assertEquals(config.Arena.GroupSortMode, "Role")
+    assertEquals(config.Dungeon.GroupSortMode, "Role")
+    assertEquals(config.Raid.GroupSortMode, "Role")
+    assertEquals(config.World.GroupSortMode, "Role")
 end
 
 return M

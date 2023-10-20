@@ -310,12 +310,13 @@ local function TrySortContainer(container)
     local spacing = nil
 
     if container.SupportsSpacing then
+        local config = addon.DB.Options.Spacing
         if container.Type == fsFrame.ContainerType.Party then
-            spacing = addon.DB.Options.Appearance.Party.Spacing
+            spacing = config.Party
         elseif container.Type == fsFrame.ContainerType.Raid then
-            spacing = addon.DB.Options.Appearance.Raid.Spacing
+            spacing = config.Raid
         elseif container.Type == fsFrame.ContainerType.EnemyArena then
-            spacing = addon.DB.Options.Appearance.EnemyArena.Spacing
+            spacing = config.EnemyArena
         end
     end
 
@@ -366,12 +367,13 @@ local function TrySortContainerGroups(container)
 
     local spacing = nil
     if container.SupportsSpacing then
+        local config = addon.DB.Options.Spacing
         if container.Type == fsFrame.ContainerType.Party then
-            spacing = addon.DB.Options.Appearance.Party.Spacing
+            spacing = config.Party
         elseif container.Type == fsFrame.ContainerType.Raid then
-            spacing = addon.DB.Options.Appearance.Raid.Spacing
+            spacing = config.Raid
         elseif container.Type == fsFrame.ContainerType.EnemyArena then
-            spacing = addon.DB.Options.Appearance.EnemyArena.Spacing
+            spacing = config.EnemyArena
         end
     end
 

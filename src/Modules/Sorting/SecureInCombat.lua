@@ -1040,11 +1040,9 @@ end
 local function LoadSpacing()
     assert(manager ~= nil)
 
-    local appearance = addon.DB.Options.Appearance
-
-    for type, value in pairs(appearance) do
-        manager:SetAttributeNoHandler(type .. "SpacingHorizontal", value.Spacing.Horizontal)
-        manager:SetAttributeNoHandler(type .. "SpacingVertical", value.Spacing.Vertical)
+    for type, value in pairs(addon.DB.Options.Spacing) do
+        manager:SetAttributeNoHandler(type .. "SpacingHorizontal", value.Horizontal)
+        manager:SetAttributeNoHandler(type .. "SpacingVertical", value.Vertical)
     end
 end
 

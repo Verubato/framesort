@@ -330,6 +330,34 @@ function M:UpgradeToVersion16(options)
     options.Version = 16
 end
 
+function M:UpgradeToVersion17(options)
+    assert(options.Version == 16)
+
+    options.Sorting.Method = options.SortingMethod
+    options.Sorting.Arena = options.Arena
+    options.Sorting.EnemyArena = options.EnemyArena
+    options.Sorting.Dungeon = options.Dungeon
+    options.Sorting.Raid = options.Raid
+    options.Sorting.World = options.World
+
+    options.SortingMethod = nil
+    options.Arena = nil
+    options.EnemyArena = nil
+    options.Dungeon = nil
+    options.Raid = nil
+    options.World = nil
+
+    options.Spacing = {
+        Party = options.Appearance.Party.Spacing,
+        Raid = options.Appearance.Raid.Spacing,
+        EnemyArena = options.Appearance.EnemyArena.Spacing,
+    }
+
+    options.Appearance = nil
+
+    options.Version = 17
+end
+
 ---Upgrades saved options to the current version.
 function M:UpgradeOptions(options)
     while (options.Version or 1) < fsConfig.Defaults.Version do
