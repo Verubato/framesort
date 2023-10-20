@@ -1235,16 +1235,20 @@ local function ConfigureHeader(header)
                     return
                 end
             else
+                local isRaid = SecureCmdOptionParse("[group:raid] true; false;") == "true"
+                local prefix = isRaid and "raid" or "party"
+                local isPet = strmatch(unit, "pet")
+
+                if isPet then
+                    prefix = prefix .. "pet"
+                end
+
                 local unitNumberStr = unit and strmatch(unit, "%d+")
+                local start = unitNumberStr and (tonumber(unitNumberStr) + 1) or 1
+                local stop = isRaid and 40 or 5
 
-                -- might be "player" or "pet"
-                if not unitNumberStr then return end
-
-                local unitNumber = tonumber(unitNumberStr)
-
-                -- 40 = max units
-                for i = unitNumber + 1, 40 do
-                    local nextUnit = gsub(unit, unitNumberStr, i)
+                for i = start, stop do
+                    local nextUnit = prefix .. i
 
                     -- if the next unit exists, we'll get called again in Blizzard's next loop iteration
                     if UnitExists(nextUnit) then
