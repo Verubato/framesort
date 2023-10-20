@@ -11,9 +11,15 @@ local M = {}
 local eventFrame = nil
 local sortCallbacks = {}
 local containersChangedCallbacks = {}
-local cvarsToWatch = {
+local cvarsToUpdateContainer = {
     "HorizontalGroups",
     "KeepGroupsTogether",
+}
+local cvarsPatternsToRunSort = {
+    "raidOptionDisplay.*",
+    "pvpOptionDisplay.*",
+    "raidFrames.*",
+    "pvpFrames.*"
 }
 
 fsProviders.Blizzard = M
@@ -39,10 +45,17 @@ local function OnEvent(_, event)
     end
 end
 
-local function OnCvarUpdate(name, _)
-    for _, cvar in ipairs(cvarsToWatch) do
+local function OnCvarUpdate(_, _, name)
+    for _, cvar in ipairs(cvarsToUpdateContainer) do
         if name == cvar then
             RequestUpdateContainers()
+            return
+        end
+    end
+
+    for _, pattern in ipairs(cvarsPatternsToRunSort) do
+        if string.match(name, pattern) then
+            RequestSort()
             return
         end
     end
