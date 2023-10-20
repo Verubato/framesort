@@ -8,7 +8,7 @@ local verticalSpacing = fsConfig.VerticalSpacing
 local horizontalSpacing = fsConfig.HorizontalSpacing
 local labelWidth = 50
 local M = {}
-fsConfig.Sorting = M
+fsConfig.Panels.Sorting = M
 
 ---Adds the title UI components.
 ---@param panel table the parent UI panel.
@@ -76,9 +76,9 @@ local function BuiltTitle(panel)
 
         assert(roleValueText ~= nil)
 
-        if addon.DB.Options.Sorting.RoleOrdering == 2 then
+        if addon.DB.Options.Sorting.RoleOrdering == fsConfig.RoleOrdering.HealerTankDps then
             roleValueText:SetText("healer > tank > dps")
-        elseif addon.DB.Options.Sorting.RoleOrdering == 3 then
+        elseif addon.DB.Options.Sorting.RoleOrdering == fsConfig.RoleOrdering.HealerDpsTank then
             roleValueText:SetText("healer > dps > tank")
         else
             roleValueText:SetText("tank > healer > dps")

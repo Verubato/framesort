@@ -2,7 +2,8 @@
 local _, addon = ...
 local fsConfig = addon.Configuration
 local wow = addon.WoW.Api
-local M = fsConfig.SortingMethod
+local M = {}
+fsConfig.Panels.SortingMethod = M
 
 ---Adds a dot point list for each string item in lines
 ---@param panel table the parent panel

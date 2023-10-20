@@ -6,7 +6,7 @@ local wow = addon.WoW.Api
 local minSpacing = 0
 local maxSpacing = 100
 local M = {}
-fsConfig.Spacing = M
+fsConfig.Panels.Spacing = M
 
 local function ConfigureSlider(slider, value)
     slider:SetOrientation("HORIZONTAL")
