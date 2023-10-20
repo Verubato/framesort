@@ -56,9 +56,8 @@ function fsConfig:Init()
     AddCategory(panel)
 
     local panels = fsConfig.Panels
-    panels.Announcement:Build(main)
+    panels.Sorting:Build(main)
 
-    local sortingRules = panels.Sorting:Build(panel)
     local sortingMethod = panels.SortingMethod:Build(panel)
     local roleOrdering = panels.RoleOrdering:Build(panel)
     local keybinding = panels.Keybinding:Build(panel)
@@ -67,7 +66,6 @@ function fsConfig:Init()
     local integration = panels.Integration:Build(panel)
     local health = panels.Health:Build(panel)
 
-    AddSubCategory(sortingRules)
     AddSubCategory(sortingMethod)
     AddSubCategory(roleOrdering)
     AddSubCategory(keybinding)

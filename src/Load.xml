@@ -55,7 +55,6 @@
     <Script file="Configuration\Options.lua"/>
     <Script file="Configuration\Defaults.lua"/>
     <Script file="Configuration\Upgrader.lua"/>
-    <Script file="Configuration\Panels\Announcement.lua"/>
     <Script file="Configuration\Panels\RoleOrdering.lua"/>
     <Script file="Configuration\Panels\Sorting.lua"/>
     <Script file="Configuration\Panels\Spacing.lua"/>
