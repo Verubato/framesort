@@ -1194,6 +1194,8 @@ local function ConfigureHeader(header)
                 local manager = self:GetAttribute("Manager")
                 manager:SetAttribute("state-framesort-toggle", random())
             ]])
+
+            frame:SetAttribute("HaveSetAttributeHandler", true)
         end)
     end
 
@@ -1223,19 +1225,35 @@ local function ConfigureHeader(header)
             local manager = self:GetAttribute("Manager")
 
             -- Blizzard iterate over all the unit buttons and change their unit token
-            -- so to avoid spamming multiple sort attempts, only perform a sort once the last unit button has been updated
+            -- so we want to avoid spamming multiple sort attempts and only perform a sort once the last unit button has been updated
             -- we can determine this by knowing that our button ordering is the default group ordering
-            -- so the last unit (unitN) will be where the next unit (unitN+1) doesn't exist
+            -- so the last unit will be where no more units exist after it
             local unit = self:GetAttribute("unit")
-            local unitNumber = strmatch(unit, "%d+")
 
-            -- might be "player" or "pet"
-            if not unitNumber then return end
+            if unit == nil then
+                -- attribute change handler will handle nil changes
+                -- not even sure if this is possible as unit should always have a value here?
+                if self:GetAttribute("HaveSetAttributeHandler") then
+                    return
+                end
+            else
+                local unitNumberStr = unit and strmatch(unit, "%d+")
 
-            local nextUnit = gsub(unit, unitNumber, tonumber(unitNumber) + 1)
+                -- might be "player" or "pet"
+                if not unitNumberStr then return end
 
-            -- if the next unit exists, we'll get called again in Blizzard's next loop iteration
-            if UnitExists(nextUnit) then return end
+                local unitNumber = tonumber(unitNumberStr)
+
+                -- 40 = max units
+                for i = unitNumber + 1, 40 do
+                    local nextUnit = gsub(unit, unitNumberStr, i)
+
+                    -- if the next unit exists, we'll get called again in Blizzard's next loop iteration
+                    if UnitExists(nextUnit) then
+                        return
+                    end
+                end
+            end
 
             manager:SetAttribute("state-framesort-toggle", random())
         ]]
