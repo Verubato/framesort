@@ -37,12 +37,11 @@ function M:Build(parent)
     local secure = wow.CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
     -- not sure why, but checkbox left seems to be off by about 4 units by default
     secure:SetPoint("TOPLEFT", panel, verticalSpacing - 4, -verticalSpacing + 4)
-    secure.Text:SetText("Secure *In Development*")
+    secure.Text:SetText("Secure")
     secure.Text:SetFontObject("GameFontNormalLarge")
     secure:SetChecked(addon.DB.Options.SortingMethod == M.Secure)
 
     local secureLines = {
-        "Please help me test this and let me know how it goes.",
         "Adjusts the position of each individual frame and doesn't bug/lock/taint the UI.",
     }
 
@@ -62,8 +61,10 @@ function M:Build(parent)
     })
 
     anchor = BuildDottedList(panel, anchor, "Cons: ", {
-        "Still in development since 10.1.7 broke the old method.",
-        "May break with WoW patches."
+        "House of cards situation to workaround Blizzard spaghetti.",
+        "Ironically is not secure in the foundational sense (name is referring to 'secure' code).",
+        "May break with WoW patches.",
+        "If it breaks in 10.2 the developer may go insane.",
     })
 
     local traditional = wow.CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
