@@ -5,6 +5,6 @@
 ## Version: 5.9.2a-13
 ## SavedVariables: FrameSortDB
 ## IconTexture: Interface\AddOns\FrameSort\Media\icon.blp
-## OptionalDeps: ElvUI, GladiusEx, sArena Updated
+## OptionalDeps: ElvUI, GladiusEx
 
 Load.xml
