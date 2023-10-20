@@ -7,6 +7,7 @@
     <Script file="Collections\Enumerable.lua"/>
     <Script file="Configuration\SortingMethod.lua"/>
     <Script file="Configuration\SortMode.lua"/>
+    <Script file="Configuration\RoleOrdering.lua"/>
     <Script file="Numerics\Math.lua"/>
 
     <!-- Load core wow files that other files need -->

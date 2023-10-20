@@ -8,11 +8,11 @@ local fsConfig = addon.Configuration
 local fuzzyDecimalPlaces = 0
 local roleOrdering = {
     -- tank > healer > dps
-    [1] = { MAINTANK = 1, MAINASSIST = 2, TANK = 3, HEALER = 4, DAMAGER = 5, NONE = 6 },
+    [fsConfig.RoleOrdering.TankHealerDps] = { MAINTANK = 1, MAINASSIST = 2, TANK = 3, HEALER = 4, DAMAGER = 5, NONE = 6 },
     -- healer > tank > dps
-    [2] = { HEALER = 1, MAINTANK = 2, MAINASSIST = 3, TANK = 4, DAMAGER = 5, NONE = 6 },
+    [fsConfig.RoleOrdering.HealerTankDps] = { HEALER = 1, MAINTANK = 2, MAINASSIST = 3, TANK = 4, DAMAGER = 5, NONE = 6 },
     -- healer > dps > tank
-    [3] = { HEALER = 1, DAMAGER = 2, MAINTANK = 3, MAINASSIST = 4, TANK = 5, NONE = 6 },
+    [fsConfig.RoleOrdering.HealerDpsTank] = { HEALER = 1, DAMAGER = 2, MAINTANK = 3, MAINASSIST = 4, TANK = 5, NONE = 6 },
 }
 ---@class Comparer
 local M = {}

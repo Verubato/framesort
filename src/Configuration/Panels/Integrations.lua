@@ -3,7 +3,7 @@ local _, addon = ...
 local wow = addon.WoW.Api
 local fsConfig = addon.Configuration
 local M = {}
-fsConfig.Integration = M
+fsConfig.Panels.Integration = M
 
 function M:Build(parent)
     local panel = wow.CreateFrame("Frame", "FrameSortSortingIntegrations", parent)

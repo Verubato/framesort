@@ -5,7 +5,9 @@ local provider = require("Mock\\FrameProvider")
 local addon = {
     Api = {},
     Collections = {},
-    Configuration = {},
+    Configuration = {
+        Panels = {}
+    },
     Health = {},
     Logging = {},
     Modules = {

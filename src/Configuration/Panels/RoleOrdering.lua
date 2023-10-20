@@ -3,7 +3,7 @@ local _, addon = ...
 local fsConfig = addon.Configuration
 local wow = addon.WoW.Api
 local M = {}
-fsConfig.RoleOrdering = M
+fsConfig.Panels.RoleOrdering = M
 
 function M:Build(parent)
     local verticalSpacing = fsConfig.VerticalSpacing
@@ -23,22 +23,22 @@ function M:Build(parent)
     tankHealerDps:SetPoint("TOPLEFT", description, "BOTTOMLEFT", -4, -verticalSpacing)
     tankHealerDps.Text:SetText("Tank > Healer > DPS")
     tankHealerDps.Text:SetFontObject("GameFontNormalLarge")
-    tankHealerDps:SetChecked(addon.DB.Options.Sorting.RoleOrdering == 1)
-    tankHealerDps.RoleOrdering = 1
+    tankHealerDps.RoleOrdering = fsConfig.RoleOrdering.TankHealerDps
+    tankHealerDps:SetChecked(addon.DB.Options.Sorting.RoleOrdering == tankHealerDps.RoleOrdering)
 
     local healerTankDps = wow.CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
     healerTankDps:SetPoint("TOPLEFT", tankHealerDps, "BOTTOMLEFT", 0, -verticalSpacing)
     healerTankDps.Text:SetText("Healer > Tank > DPS")
     healerTankDps.Text:SetFontObject("GameFontNormalLarge")
-    healerTankDps:SetChecked(addon.DB.Options.Sorting.RoleOrdering == 2)
-    healerTankDps.RoleOrdering = 2
+    healerTankDps.RoleOrdering = fsConfig.RoleOrdering.HealerTankDps
+    healerTankDps:SetChecked(addon.DB.Options.Sorting.RoleOrdering == healerTankDps.RoleOrdering)
 
     local healerDpsTank = wow.CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
     healerDpsTank:SetPoint("TOPLEFT", healerTankDps, "BOTTOMLEFT", 0, -verticalSpacing)
     healerDpsTank.Text:SetText("Healer > DPS > Tank")
     healerDpsTank.Text:SetFontObject("GameFontNormalLarge")
-    healerDpsTank:SetChecked(addon.DB.Options.Sorting.RoleOrdering == 3)
-    healerDpsTank.RoleOrdering = 3
+    healerDpsTank.RoleOrdering = fsConfig.RoleOrdering.HealerDpsTank
+    healerDpsTank:SetChecked(addon.DB.Options.Sorting.RoleOrdering == healerDpsTank.RoleOrdering)
 
     local all = {
         tankHealerDps,

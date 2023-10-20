@@ -5,7 +5,7 @@ local fsHealth = addon.Health.HealthCheck
 local fsConfig = addon.Configuration
 local lines = {}
 local M = {}
-fsConfig.Health = M
+fsConfig.Panels.Health = M
 
 function M:Build(parent)
     local verticalSpacing = fsConfig.VerticalSpacing

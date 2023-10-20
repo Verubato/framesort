@@ -17,7 +17,7 @@ local _, addon = ...
 local fsConfig = addon.Configuration
 local wow = addon.WoW.Api
 local M = {}
-fsConfig.Keybinding = M
+fsConfig.Panels.Keybinding = M
 
 function M:Build(parent)
     local verticalSpacing = fsConfig.VerticalSpacing

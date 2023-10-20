@@ -15,7 +15,13 @@ local M = {}
 function M:setup()
     addon = {
         Collections = {},
-        Configuration = {},
+        Configuration = {
+            RoleOrdering = {
+                TankHealerDps = 1,
+                HealerTankDps = 2,
+                HealerDpsTank = 3
+            }
+        },
         Numerics = {},
         WoW = {
             Api = {

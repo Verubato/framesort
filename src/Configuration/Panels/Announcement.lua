@@ -3,7 +3,7 @@ local _, addon = ...
 local wow = addon.WoW.Api
 local fsConfig = addon.Configuration
 local M = {}
-fsConfig.Announcement = M
+fsConfig.Panels.Announcement = M
 
 function M:Build(panel)
     local verticalSpacing = fsConfig.VerticalSpacing

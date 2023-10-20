@@ -1,4 +1,0 @@
----@meta
----@class SortingMethodOptions: OptionsPanel
----@field Secure string
----@field Traditional string

@@ -5,7 +5,7 @@ local fsMacro = addon.WoW.Macro
 local fsConfig = addon.Configuration
 local maxMacros = 138
 local M = {}
-fsConfig.Macro = M
+fsConfig.Panels.Macro = M
 
 local function CountMacros()
     local count = 0
