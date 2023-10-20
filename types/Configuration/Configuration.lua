@@ -14,7 +14,6 @@
 ---@field NotifyChanged fun(self: table)
 
 ---@class Panels
----@field Announcement OptionsPanel
 ---@field Sorting OptionsPanel
 ---@field Spacing OptionsPanel
 ---@field Health OptionsPanel

@@ -321,11 +321,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
     return dynamicAnchor
 end
 
-function M:Build(parent)
-    local panel = wow.CreateFrame("Frame", "FrameSortSortingRules", parent)
-    panel.name = "Rules"
-    panel.parent = parent.name
-
+function M:Build(panel)
     local anchor = BuiltTitle(panel)
 
     local config = addon.DB.Options.Sorting
