@@ -180,7 +180,9 @@ function M:EnemyTargets()
 end
 
 function M:Run()
-    fsScheduler:RunWhenCombatEnds(UpdateTargets, "UpdateTargets")
+    assert(not wow.InCombatLockdown())
+
+    UpdateTargets()
 end
 
 function M:Init()

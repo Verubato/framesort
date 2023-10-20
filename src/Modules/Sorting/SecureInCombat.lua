@@ -1145,7 +1145,7 @@ end
 local function OnProviderContainersChanged(provider)
     fsScheduler:RunWhenCombatEnds(function()
         LoadProvider(provider)
-    end)
+    end, "LoadProvider" .. provider:Name())
 end
 
 local function OnConfigChanged()

@@ -14,7 +14,7 @@ function M:setup()
     addon:InitDB()
     addon.Providers:Init()
     addon.Scheduling.Scheduler:Init()
-    addon.Modules.HidePlayer:Init()
+    addon.Modules:Init()
 
     local party = fsFrame:GetContainer(provider, fsFrame.ContainerType.Party)
     local partyContainer = assert(party).Frame

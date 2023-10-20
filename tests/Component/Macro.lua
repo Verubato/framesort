@@ -10,7 +10,7 @@ function M:setup()
     addon:InitDB()
     addon.Providers:Init()
     addon.Scheduling.Scheduler:Init()
-    addon.Modules.Macro:Init()
+    addon.Modules:Init()
 
     local party = fsFrame:GetContainer(provider, fsFrame.ContainerType.Party)
     local partyContainer = assert(party).Frame
@@ -81,7 +81,7 @@ function M:test_macro_updates_for_provider_after_combat()
     wow:LoadMacro(1, "Test", nil, macro)
 
     wow.State.MockInCombat = true
-    addon.Modules.Macro:Run()
+    addon.Modules:Run()
 
     -- should not have changed as we're in combat
     assertEquals(macro, wow.State.Macros[1].Body)

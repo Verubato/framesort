@@ -1,7 +1,6 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
-local fsScheduler = addon.Scheduling.Scheduler
 local fsCompare = addon.Collections.Comparer
 local fsLog = addon.Logging.Log
 local fsConfig = addon.Configuration
@@ -25,6 +24,8 @@ end
 ---@return boolean sorted true if sorted, otherwise false.
 ---@param provider FrameProvider? optionally specify the provider to sort, otherwise sorts all providers.
 function M:Run(provider)
+    assert(not wow.InCombatLockdown())
+
     local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
     local enemyEnabled, _, _ = fsCompare:EnemySortMode()
 
@@ -32,15 +33,6 @@ function M:Run(provider)
 
     if wow.IsRetail() and wow.EditModeManagerFrame.editModeActive then
         fsLog:Debug("Not sorting while edit mode active.")
-        return
-    end
-
-    if wow.InCombatLockdown() then
-        -- can't make changes during combat
-        fsScheduler:RunWhenCombatEnds(function()
-            M:Run(provider)
-        end, "TrySort" .. (provider and provider:Name() or ""))
-
         return
     end
 

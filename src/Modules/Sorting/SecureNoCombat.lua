@@ -6,6 +6,7 @@ local fsFrame = addon.WoW.Frame
 local fsEnumerable = addon.Collections.Enumerable
 local fsMath = addon.Numerics.Math
 local fsLog = addon.Logging.Log
+local wow = addon.WoW.Api
 local M = {}
 addon.Modules.Sorting.Secure.NoCombat = M
 
@@ -402,6 +403,8 @@ end
 ---@param provider FrameProvider?
 ---@return boolean
 function M:TrySort(provider)
+    assert(not wow.InCombatLockdown())
+
     local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
     local enemyEnabled, _, _ = fsCompare:EnemySortMode()
 
