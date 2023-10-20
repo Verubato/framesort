@@ -9,7 +9,7 @@ function M:setup()
     addon:InitDB()
     addon.Providers:Init()
     addon.Scheduling.Scheduler:Init()
-    addon.Modules.Targeting:Init()
+    addon.Modules:Init()
 
     local party = fsFrame:GetContainer(provider, fsFrame.ContainerType.Party)
     local partyContainer = assert(party).Frame
@@ -131,7 +131,7 @@ function M:test_targets_update_after_combat()
 
     wow.State.MockInCombat = true
 
-    addon.Modules.Targeting:Run()
+    addon.Modules:Run()
 
     -- assert nothing changed as we're in combat
     for _, f in ipairs(friendlyButtons) do

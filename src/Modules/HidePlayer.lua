@@ -1,7 +1,6 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
-local fsScheduler = addon.Scheduling.Scheduler
 local fsCompare = addon.Collections.Comparer
 local fsConfig = addon.Configuration
 local fsProviders = addon.Providers
@@ -38,7 +37,9 @@ local function PlayerRaidFrames()
         :ToTable()
 end
 
-local function Run()
+function M:Run()
+    assert(not wow.InCombatLockdown())
+
     local blizzard = fsProviders.Blizzard
 
     if not blizzard:Enabled() then
@@ -47,11 +48,6 @@ local function Run()
 
     local enabled, mode, _, _ = fsCompare:FriendlySortMode()
     if not enabled then
-        return
-    end
-
-    if wow.InCombatLockdown() then
-        fsScheduler:RunWhenCombatEnds(Run, "HidePlayer")
         return
     end
 
@@ -67,12 +63,4 @@ local function Run()
     end
 end
 
----Shows or hides the player (depending on settings).
-function M:Run()
-    fsScheduler:RunWhenCombatEnds(Run, "UpdateTargets")
-end
-
-function M:Init()
-    local blizzard = fsProviders.Blizzard
-    blizzard:RegisterRequestSortCallback(Run)
-end
+function M:Init() end

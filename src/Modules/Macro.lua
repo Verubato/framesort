@@ -90,7 +90,9 @@ local function OnEditMacro(id, _, _, _)
 end
 
 function M:Run()
-    fsScheduler:RunWhenCombatEnds(ScanMacros, "UpdateMacros")
+    assert(not wow.InCombatLockdown())
+
+    ScanMacros()
 end
 
 function M:Init()

@@ -9,14 +9,16 @@ local function OnProviderRequiresSort(provider)
 end
 
 function M:Run(provider)
-    -- run hide player first as it may impact sorting
-    addon.Modules.HidePlayer:Run()
+    fsScheduler:RunWhenCombatEnds(function()
+        -- run hide player first as it may impact sorting
+        addon.Modules.HidePlayer:Run()
 
-    -- run sorting next as it impacts targeting and macros
-    addon.Modules.Sorting:Run(provider)
+        -- run sorting next as it impacts targeting and macros
+        addon.Modules.Sorting:Run(provider)
 
-    addon.Modules.Targeting:Run()
-    addon.Modules.Macro:Run()
+        addon.Modules.Targeting:Run()
+        addon.Modules.Macro:Run()
+    end, "Runner")
 end
 
 ---Initialises all modules.
