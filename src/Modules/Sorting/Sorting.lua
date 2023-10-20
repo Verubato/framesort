@@ -39,9 +39,9 @@ function M:Run(provider)
     local start = wow.GetTimePreciseSec()
     local sorted = false
 
-    if addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Traditional then
+    if addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Traditional then
         sorted = M.Traditional:TrySort()
-    elseif addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Secure then
+    elseif addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Secure then
         sorted = M.Secure:TrySort(provider)
     end
 
@@ -55,7 +55,7 @@ end
 
 ---Initialises the module.
 function M:Init()
-    if addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Secure then
+    if addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Secure then
         M.Secure:Init()
     end
 

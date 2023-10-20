@@ -52,8 +52,10 @@ function M:setup()
 
     addon.DB = {
         Options = {
-            World = {
-                Enabled = true,
+            Sorting = {
+                World = {
+                    Enabled = true,
+                }
             }
         }
     }
@@ -62,8 +64,9 @@ end
 function M:test_sort_player_top()
     assert(addon)
 
-    addon.DB.Options.World.PlayerSortMode = fsConfig.PlayerSortMode.Top
-    addon.DB.Options.World.GroupSortMode = fsConfig.GroupSortMode.Group
+    local config = addon.DB.Options.Sorting.World
+    config.PlayerSortMode = fsConfig.PlayerSortMode.Top
+    config.GroupSortMode = fsConfig.GroupSortMode.Group
 
     local subject = { "party2", "party1", "player", "party3", "party4" }
     local sortFunction = fsCompare:SortFunction()
@@ -76,8 +79,9 @@ end
 function M:test_sort_player_bottom()
     assert(addon)
 
-    addon.DB.Options.World.PlayerSortMode = fsConfig.PlayerSortMode.Bottom
-    addon.DB.Options.World.GroupSortMode = fsConfig.GroupSortMode.Group
+    local config = addon.DB.Options.Sorting.World
+    config.PlayerSortMode = fsConfig.PlayerSortMode.Bottom
+    config.GroupSortMode = fsConfig.GroupSortMode.Group
 
     local subject = { "party2", "party1", "player", "party3", "party4" }
     local sortFunction = fsCompare:SortFunction()
@@ -90,8 +94,9 @@ end
 function M:test_sort_player_middle_size_2()
     assert(addon)
 
-    addon.DB.Options.World.PlayerSortMode = fsConfig.PlayerSortMode.Middle
-    addon.DB.Options.World.GroupSortMode = fsConfig.GroupSortMode.Group
+    local config = addon.DB.Options.Sorting.World
+    config.PlayerSortMode = fsConfig.PlayerSortMode.Middle
+    config.GroupSortMode = fsConfig.GroupSortMode.Group
 
     local subject = { "player", "party1" }
     local sortFunction = fsCompare:SortFunction(subject)
@@ -104,8 +109,9 @@ end
 function M:test_sort_player_middle_size_3()
     assert(addon)
 
-    addon.DB.Options.World.PlayerSortMode = fsConfig.PlayerSortMode.Middle
-    addon.DB.Options.World.GroupSortMode = fsConfig.GroupSortMode.Group
+    local config = addon.DB.Options.Sorting.World
+    config.PlayerSortMode = fsConfig.PlayerSortMode.Middle
+    config.GroupSortMode = fsConfig.GroupSortMode.Group
 
     local subject = { "player", "party1", "party2" }
     local sortFunction = fsCompare:SortFunction(subject)
@@ -118,8 +124,9 @@ end
 function M:test_sort_player_middle_size_4()
     assert(addon)
 
-    addon.DB.Options.World.PlayerSortMode = fsConfig.PlayerSortMode.Middle
-    addon.DB.Options.World.GroupSortMode = fsConfig.GroupSortMode.Group
+    local config = addon.DB.Options.Sorting.World
+    config.PlayerSortMode = fsConfig.PlayerSortMode.Middle
+    config.GroupSortMode = fsConfig.GroupSortMode.Group
 
     local subject = { "player", "party1", "party2", "party3" }
     local sortFunction = fsCompare:SortFunction(subject)
@@ -132,8 +139,9 @@ end
 function M:test_sort_player_middle_size_5()
     assert(addon)
 
-    addon.DB.Options.World.PlayerSortMode = fsConfig.PlayerSortMode.Middle
-    addon.DB.Options.World.GroupSortMode = fsConfig.GroupSortMode.Group
+    local config = addon.DB.Options.Sorting.World
+    config.PlayerSortMode = fsConfig.PlayerSortMode.Middle
+    config.GroupSortMode = fsConfig.GroupSortMode.Group
 
     local subject = { "player", "party1", "party2", "party3", "party4" }
     local sortFunction = fsCompare:SortFunction(subject)
@@ -146,8 +154,9 @@ end
 function M:test_sort_with_nonexistant_units()
     assert(addon)
 
-    addon.DB.Options.World.PlayerSortMode = fsConfig.PlayerSortMode.Top
-    addon.DB.Options.World.GroupSortMode = fsConfig.GroupSortMode.Group
+    local config = addon.DB.Options.Sorting.World
+    config.PlayerSortMode = fsConfig.PlayerSortMode.Top
+    config.GroupSortMode = fsConfig.GroupSortMode.Group
 
     local subject = { "party2", "party1", "hello5", "player", "party3", "party4" }
     local sortFunction = fsCompare:SortFunction(subject)

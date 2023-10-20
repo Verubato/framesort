@@ -90,7 +90,7 @@ end
 function M.Options:GetPlayerSortMode(area)
     ValidateArea(area)
 
-    local table = addon.DB.Options[area]
+    local table = addon.DB.Options.Sorting[area]
     return table.PlayerSortMode
 end
 
@@ -101,7 +101,7 @@ function M.Options:SetPlayerSortMode(area, mode)
     ValidateArea(area)
     ValidatePlayerSortMode(mode)
 
-    local table = addon.DB.Options[area]
+    local table = addon.DB.Options.Sorting[area]
     table.PlayerSortMode = mode
 
     fsConfig:NotifyChanged()
@@ -115,7 +115,7 @@ function M.Options:SetGroupSortMode(area, mode)
     ValidateArea(area)
     ValidateGroupSortMode(mode)
 
-    local table = addon.DB.Options[area]
+    local table = addon.DB.Options.Sorting[area]
     table.GroupSortMode = mode
 
     fsConfig:NotifyChanged()
@@ -127,7 +127,7 @@ end
 function M.Options:GetGroupSortMode(area)
     ValidateArea(area)
 
-    local table = addon.DB.Options[area]
+    local table = addon.DB.Options.Sorting[area]
     return table.GroupSortMode
 end
 
@@ -136,7 +136,7 @@ end
 function M.Options:GetEnabled(area)
     ValidateArea(area)
 
-    local table = addon.DB.Options[area]
+    local table = addon.DB.Options.Sorting[area]
     return table.Enabled
 end
 
@@ -146,7 +146,7 @@ end
 function M.Options:SetEnabled(area, enabled)
     ValidateArea(area)
 
-    local table = addon.DB.Options[area]
+    local table = addon.DB.Options.Sorting[area]
     table.Enabled = enabled
 
     fsConfig:NotifyChanged()
@@ -161,7 +161,7 @@ end
 function M.Options:GetReverse(area)
     ValidateArea(area)
 
-    local table = addon.DB.Options[area]
+    local table = addon.DB.Options.Sorting[area]
     return table.Reverse
 end
 
@@ -171,7 +171,7 @@ end
 function M.Options:SetReverse(area, reverse)
     ValidateArea(area)
 
-    local table = addon.DB.Options[area]
+    local table = addon.DB.Options.Sorting[area]
     table.Reverse = reverse
 
     fsConfig:NotifyChanged()

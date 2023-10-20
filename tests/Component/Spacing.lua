@@ -37,10 +37,12 @@ function M:teardown()
 end
 
 function M:test_sort_party_frames_top()
-    addon.DB.Options.Appearance.Party.Spacing.Vertical = 10
-    addon.DB.Options.World.Enabled = true
-    addon.DB.Options.World.PlayerSortMode = "Top"
-    addon.DB.Options.World.GroupSortMode = "Group"
+    addon.DB.Options.Spacing.Party.Vertical = 10
+
+    local config = addon.DB.Options.Sorting.World
+    config.Enabled = true
+    config.PlayerSortMode = "Top"
+    config.GroupSortMode = "Group"
 
     local width = 100
     local height = 100

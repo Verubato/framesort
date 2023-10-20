@@ -111,7 +111,7 @@ end
 
 local function OnlyUsingBlizzard()
     -- TODO: make this more generic, probs need a supporting method added to providers
-    if addon.DB.Options.EnemyArena.Enabled and (fsProviders.GladiusEx:Enabled() or fsProviders.sArena:Enabled()) then
+    if addon.DB.Options.Sorting.EnemyArena.Enabled and (fsProviders.GladiusEx:Enabled() or fsProviders.sArena:Enabled()) then
         return false
     end
 
@@ -119,18 +119,19 @@ local function OnlyUsingBlizzard()
 end
 
 local function UsingSpacing()
+    local options = addon.DB.Options
     local spacings = {}
 
-    if addon.DB.Options.World.Enabled then
-        spacings[#spacings + 1] = addon.DB.Options.Appearance.Party.Spacing
+    if options.Sorting.World.Enabled then
+        spacings[#spacings + 1] = options.Spacing.Party
     end
 
-    if addon.DB.Options.Raid.Enabled then
-        spacings[#spacings + 1] = addon.DB.Options.Appearance.Raid.Spacing
+    if options.Sorting.Raid.Enabled then
+        spacings[#spacings + 1] = options.Spacing.Raid
     end
 
-    if addon.DB.Options.EnemyArena.Enabled then
-        spacings[#spacings + 1] = addon.DB.Options.Appearance.EnemyArena.Spacing
+    if options.Sorting.EnemyArena.Enabled then
+        spacings[#spacings + 1] = options.Spacing.EnemyArena
     end
 
     return fsEnumerable
@@ -197,28 +198,28 @@ function M:IsHealthy()
     }
 
     results[#results + 1] = {
-        Applicable = addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Traditional,
+        Applicable = addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Traditional,
         Passed = IsUsingRaidStyleFrames(),
         Description = "Using Raid-Style Party Frames",
         Help = "Please enable 'Use Raid-Style Party Frames' in the Blizzard settings",
     }
 
     results[#results + 1] = {
-        Applicable = addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Traditional,
+        Applicable = addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Traditional,
         Passed = not IsRaidGrouped(),
         Description = "Keep Groups Together setting disabled",
         Help = wow.IsRetail() and "Change the raid display mode to one of the 'Combined Groups' options via Edit Mode" or "Disable the 'Keep Groups Together' raid profile setting",
     }
 
     results[#results + 1] = {
-        Applicable = addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Traditional,
+        Applicable = addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Traditional,
         Passed = OnlyUsingBlizzard(),
         Description = "Only using Blizzard frames with Traditional mode",
         Help = string.format("Traditional mode can't sort your other frame addons: '%s'", enabledNonBlizzardString),
     }
 
     results[#results + 1] = {
-        Applicable = addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Traditional,
+        Applicable = addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Traditional,
         Passed = not UsingSpacing(),
         Description = "Using Secure sorting mode when spacing is being used.",
         Help = "Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method.",
@@ -226,7 +227,7 @@ function M:IsHealthy()
 
     local conflictingSorter = SortingFunctionsTampered()
     results[#results + 1] = {
-        Applicable = addon.DB.Options.SortingMethod == fsConfig.SortingMethod.Traditional,
+        Applicable = addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Traditional,
         Passed = conflictingSorter == nil,
         Description = "Blizzard sorting functions not tampered with",
         Help = string.format('"%s" may cause conflicts, consider disabling it', conflictingSorter or "(unknown)"),

@@ -53,8 +53,10 @@ function M:setup()
 
     addon.DB = {
         Options = {
-            World = {
-                Enabled = true,
+            Sorting = {
+                World = {
+                    Enabled = true,
+                }
             }
         }
     }
@@ -63,8 +65,9 @@ end
 function M:test_sort_player_top()
     assert(addon)
 
-    addon.DB.Options.World.PlayerSortMode = fsConfig.PlayerSortMode.Top
-    addon.DB.Options.World.GroupSortMode = fsConfig.GroupSortMode.Group
+    local config = addon.DB.Options.Sorting.World
+    config.PlayerSortMode = fsConfig.PlayerSortMode.Top
+    config.GroupSortMode = fsConfig.GroupSortMode.Group
 
     local subject = { "raid1", "raid2", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8" }
     local sortFunction = fsCompare:SortFunction(subject)
@@ -77,8 +80,9 @@ end
 function M:test_sort_player_bottom()
     assert(addon)
 
-    addon.DB.Options.World.PlayerSortMode = fsConfig.PlayerSortMode.Bottom
-    addon.DB.Options.World.GroupSortMode = fsConfig.GroupSortMode.Group
+    local config = addon.DB.Options.Sorting.World
+    config.PlayerSortMode = fsConfig.PlayerSortMode.Bottom
+    config.GroupSortMode = fsConfig.GroupSortMode.Group
 
     local subject = { "raid8", "raid3", "raid4", "raid1", "raid2", "raid7", "raid5", "raid6" }
     local sortFunction = fsCompare:SortFunction(subject)
@@ -91,8 +95,9 @@ end
 function M:test_sort_player_middle()
     assert(addon)
 
-    addon.DB.Options.World.PlayerSortMode = fsConfig.PlayerSortMode.Middle
-    addon.DB.Options.World.GroupSortMode = fsConfig.GroupSortMode.Group
+    local config = addon.DB.Options.Sorting.World
+    config.PlayerSortMode = fsConfig.PlayerSortMode.Middle
+    config.GroupSortMode = fsConfig.GroupSortMode.Group
 
     local subject = { "raid2", "raid3", "raid4", "raid7", "raid1", "raid5", "raid6" }
     local sortFunction = fsCompare:SortFunction(subject)

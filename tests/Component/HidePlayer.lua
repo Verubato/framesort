@@ -42,8 +42,9 @@ end
 function M:test_player_hides_on_provider_callback()
     assert(player)
 
-    addon.DB.Options.World.Enabled = true
-    addon.DB.Options.World.PlayerSortMode = "Hidden"
+    local config = addon.DB.Options.Sorting.World
+    config.Enabled = true
+    config.PlayerSortMode = "Hidden"
 
     provider:FireCallbacks()
 
@@ -60,8 +61,9 @@ function M:test_player_shows_on_provider_callback()
 
     player.State.Visible = false
 
-    addon.DB.Options.World.Enabled = true
-    addon.DB.Options.World.PlayerSortMode = "Top"
+    local config = addon.DB.Options.Sorting.World
+    config.Enabled = true
+    config.PlayerSortMode = "Top"
 
     provider:FireCallbacks()
 
@@ -76,8 +78,9 @@ end
 function M:test_player_hides_after_combat()
     assert(player)
 
-    addon.DB.Options.World.Enabled = true
-    addon.DB.Options.World.PlayerSortMode = "Hidden"
+    local config = addon.DB.Options.Sorting.World
+    config.Enabled = true
+    config.PlayerSortMode = "Hidden"
     wow.State.MockInCombat = true
 
     provider:FireCallbacks()
@@ -100,8 +103,9 @@ function M:test_player_shows_after_combat()
 
     player.State.Visible = false
 
-    addon.DB.Options.World.Enabled = true
-    addon.DB.Options.World.PlayerSortMode = "Top"
+    local config = addon.DB.Options.Sorting.World
+    config.Enabled = true
+    config.PlayerSortMode = "Top"
     wow.State.MockInCombat = true
 
     assertEquals(#provider.State.Callbacks, 1)

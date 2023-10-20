@@ -2,6 +2,7 @@
 local _, addon = ...
 local fsSorting = addon.Modules.Sorting
 local fsConfig = addon.Configuration
+local fsScheduler = addon.Scheduling.Scheduler
 local wow = addon.WoW.Api
 local minSpacing = 0
 local maxSpacing = 100
@@ -31,6 +32,12 @@ local function ConfigureEditBox(box, value)
     box:SetJustifyH("CENTER")
     box:SetNumeric(true)
     box:SetCursorPosition(0)
+end
+
+local function ApplySpacing()
+    fsScheduler:RunWhenCombatEnds(function()
+        fsSorting:Run()
+    end, "ApplySpacingConfig")
 end
 
 local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, addY, additionalTopSpacing)
@@ -78,7 +85,7 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
             if value then
                 spacing.Horizontal = value
                 fsConfig:NotifyChanged()
-                fsSorting:Run()
+                ApplySpacing()
             end
         end)
 
@@ -91,7 +98,7 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
             if value then
                 spacing.Horizontal = value
                 fsConfig:NotifyChanged()
-                fsSorting:Run()
+                ApplySpacing()
             end
         end)
 
@@ -120,7 +127,7 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
             if value then
                 spacing.Vertical = value
                 fsConfig:NotifyChanged()
-                fsSorting:Run()
+                ApplySpacing()
             end
         end)
 
@@ -134,7 +141,7 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
             if value then
                 spacing.Vertical = value
                 fsConfig:NotifyChanged()
-                fsSorting:Run()
+                ApplySpacing()
             end
         end)
 
@@ -163,16 +170,17 @@ function M:Build(parent)
     descriptionLine2:SetText("This only applies to Blizzard frames.")
 
     local anchor = descriptionLine2
+    local config = addon.DB.Options.Spacing
     if wow.IsRetail() then
         -- for retail
-        anchor = BuildSpacingOptions(panel, anchor, "Party", addon.DB.Options.Appearance.Party.Spacing, true, true, 0)
+        anchor = BuildSpacingOptions(panel, anchor, "Party", config.Party, true, true, 0)
     end
 
     local title = wow.IsRetail() and "Raid" or "Group"
-    anchor = BuildSpacingOptions(panel, anchor, title, addon.DB.Options.Appearance.Raid.Spacing, true, true, verticalSpacing)
+    anchor = BuildSpacingOptions(panel, anchor, title, config.Raid, true, true, verticalSpacing)
 
     if wow.IsRetail() and wow.CompactArenaFrame then
-        anchor = BuildSpacingOptions(panel, anchor, "Enemy Arena", addon.DB.Options.Appearance.EnemyArena.Spacing, false, true, verticalSpacing)
+        anchor = BuildSpacingOptions(panel, anchor, "Enemy Arena", config.EnemyArena, false, true, verticalSpacing)
     end
 
     return panel

@@ -328,17 +328,19 @@ function M:Build(parent)
 
     local anchor = BuiltTitle(panel)
 
+    local config = addon.DB.Options.Sorting
+
     if not wow.IsClassic() then
-        anchor = BuildSortModeCheckboxes(panel, anchor, "Arena", addon.DB.Options.Arena)
+        anchor = BuildSortModeCheckboxes(panel, anchor, "Arena", config.Arena)
     end
 
     if wow.IsRetail() then
-        anchor = BuildSortModeCheckboxes(panel, anchor, "Enemy Arena (GladiusEx, sArena, Blizzard)", addon.DB.Options.EnemyArena, false, false)
+        anchor = BuildSortModeCheckboxes(panel, anchor, "Enemy Arena (GladiusEx, sArena, Blizzard)", config.EnemyArena, false, false)
     end
 
-    anchor = BuildSortModeCheckboxes(panel, anchor, "Dungeon (mythics, 5-mans)", addon.DB.Options.Dungeon)
-    anchor = BuildSortModeCheckboxes(panel, anchor, "Raid (battlegrounds, raids)", addon.DB.Options.Raid)
-    anchor = BuildSortModeCheckboxes(panel, anchor, "World (non-instance groups)", addon.DB.Options.World)
+    anchor = BuildSortModeCheckboxes(panel, anchor, "Dungeon (mythics, 5-mans)", config.Dungeon)
+    anchor = BuildSortModeCheckboxes(panel, anchor, "Raid (battlegrounds, raids)", config.Raid)
+    anchor = BuildSortModeCheckboxes(panel, anchor, "World (non-instance groups)", config.World)
 
     return panel
 end
