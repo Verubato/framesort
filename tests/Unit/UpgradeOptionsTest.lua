@@ -1497,6 +1497,120 @@ function M:test_upgrade_options_version17()
     assertEquals(options, expected)
 end
 
+function M:test_upgrade_options_version18()
+    local options = {
+        Logging = {
+            Enabled = false,
+        },
+        SortingMethod = "Secure",
+        Sorting = {
+            RoleOrdering = 1,
+            Method = "Secure",
+            Arena = {
+                Enabled = true,
+                PlayerSortMode = "Top",
+                GroupSortMode = "Group",
+                Reverse = false,
+            },
+            EnemyArena = {
+                Enabled = false,
+                GroupSortMode = "Group",
+                Reverse = false,
+            },
+            Dungeon = {
+                Enabled = true,
+                PlayerSortMode = "Top",
+                GroupSortMode = "Group",
+                Reverse = false,
+            },
+            World = {
+                Enabled = true,
+                PlayerSortMode = "Top",
+                GroupSortMode = "Group",
+                Reverse = false,
+            },
+            Raid = {
+                Enabled = false,
+                PlayerSortMode = "Top",
+                GroupSortMode = "Role",
+                Reverse = false,
+            },
+        },
+        Spacing = {
+            Party = {
+                Horizontal = 0,
+                Vertical = 0,
+            },
+            Raid = {
+                Horizontal = 0,
+                Vertical = 0,
+            },
+            EnemyArena = {
+                Horizontal = 0,
+                Vertical = 0,
+            },
+        },
+        Version = 17,
+    }
+
+    local expected = {
+        Logging = {
+            Enabled = false,
+        },
+        Sorting = {
+            RoleOrdering = 1,
+            Method = "Secure",
+            Arena = {
+                Enabled = true,
+                PlayerSortMode = "Top",
+                GroupSortMode = "Group",
+                Reverse = false,
+            },
+            EnemyArena = {
+                Enabled = false,
+                GroupSortMode = "Group",
+                Reverse = false,
+            },
+            Dungeon = {
+                Enabled = true,
+                PlayerSortMode = "Top",
+                GroupSortMode = "Group",
+                Reverse = false,
+            },
+            World = {
+                Enabled = true,
+                PlayerSortMode = "Top",
+                GroupSortMode = "Group",
+                Reverse = false,
+            },
+            Raid = {
+                Enabled = false,
+                PlayerSortMode = "Top",
+                GroupSortMode = "Role",
+                Reverse = false,
+            },
+        },
+        Spacing = {
+            Party = {
+                Horizontal = 0,
+                Vertical = 0,
+            },
+            Raid = {
+                Horizontal = 0,
+                Vertical = 0,
+            },
+            EnemyArena = {
+                Horizontal = 0,
+                Vertical = 0,
+            },
+        },
+        Version = 18,
+    }
+
+    upgrader:UpgradeToVersion18(options)
+    assertEquals(options, expected)
+end
+
 function M:test_upgrade_options_version1_to_latest()
     local options = {
         PlayerSortMode = "Top",
@@ -1557,7 +1671,7 @@ function M:test_upgrade_options_version1_to_latest()
                 Vertical = 0,
             },
         },
-        Version = 17,
+        Version = 18,
     }
 
     upgrader:UpgradeOptions(options)

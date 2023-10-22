@@ -39,7 +39,7 @@ function M:Build(parent)
     secure:SetPoint("TOPLEFT", panel, verticalSpacing - 4, -verticalSpacing + 4)
     secure.Text:SetText("Secure")
     secure.Text:SetFontObject("GameFontNormalLarge")
-    secure:SetChecked(addon.DB.Options.SortingMethod == M.Secure)
+    secure:SetChecked(addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Secure)
 
     local secureLines = {
         "Adjusts the position of each individual frame and doesn't bug/lock/taint the UI.",
@@ -71,7 +71,7 @@ function M:Build(parent)
     traditional:SetPoint("TOPLEFT", anchor, -4, -verticalSpacing * 2)
     traditional.Text:SetText("Traditional")
     traditional.Text:SetFontObject("GameFontNormalLarge")
-    traditional:SetChecked(addon.DB.Options.SortingMethod == M.Traditional)
+    traditional:SetChecked(addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Traditional)
 
     local traditionalLines = {
         "This is the standard sorting mode that addons and macros have used for 10+ years.",
@@ -111,14 +111,13 @@ function M:Build(parent)
     reloadButton:SetShown(false)
 
     local function setSortingMethod(method)
-        if method == M.Secure then
+        if method == fsConfig.SortingMethod.Secure then
             traditional:SetChecked(false)
-        elseif method == M.Traditional then
+        elseif method == fsConfig.SortingMethod.Traditional then
             secure:SetChecked(false)
         end
 
-        ---@diagnostic disable-next-line: inject-field
-        addon.DB.Options.SortingMethod = method
+        addon.DB.Options.Sorting.Method = method
         reloadButton:SetShown(true)
     end
 
@@ -128,7 +127,7 @@ function M:Build(parent)
             return
         end
 
-        setSortingMethod(M.Secure)
+        setSortingMethod(fsConfig.SortingMethod.Secure)
     end)
 
     traditional:HookScript("OnClick", function()
@@ -137,7 +136,7 @@ function M:Build(parent)
             return
         end
 
-        setSortingMethod(M.Traditional)
+        setSortingMethod(fsConfig.SortingMethod.Traditional)
     end)
 
     return panel
