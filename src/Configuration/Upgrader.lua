@@ -358,6 +358,16 @@ function M:UpgradeToVersion17(options)
     options.Version = 17
 end
 
+function M:UpgradeToVersion18(options)
+    assert(options.Version == 17)
+
+    -- missed some areas that were still referencing this instead of Sorting.Method
+    -- so clear it again
+    options.SortingMethod = nil
+
+    options.Version = 18
+end
+
 ---Upgrades saved options to the current version.
 function M:UpgradeOptions(options)
     while (options.Version or 1) < fsConfig.Defaults.Version do
