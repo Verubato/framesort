@@ -12,10 +12,12 @@ local M = {
     },
     ---@class FrameLayoutType
     LayoutType = {
-        ---Arrange frames by adjusting their x/y coordinates without changing the anchor.
+        --- Arrange frames by adjusting their x/y coordinates without changing the anchor.
         Soft = 1,
-        --Arrange frames by setting their anchors.
-        Hard = 2
+        --- Arrange frames by setting their anchors.
+        Hard = 2,
+        -- Uses the NameList attribute of a SecureGroupHeader to order members.
+        NameList = 3
     }
 }
 

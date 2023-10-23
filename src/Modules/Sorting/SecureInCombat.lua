@@ -791,6 +791,12 @@ secureMethods["TrySortContainer"] = [[
     local provider = _G[providerVariable]
     local units = nil
 
+    if container.LayoutType == LayoutType.NameList then
+        -- there's no way to get a unit's name in the restricted environment
+        -- so we can't do anything
+        return false
+    end
+
     if container.Type == ContainerType.Party then
         units = FriendlyUnits
     elseif container.Type == ContainerType.Raid then
@@ -832,7 +838,7 @@ secureMethods["TrySortContainer"] = [[
 
     if container.LayoutType == LayoutType.Hard then
         sorted = self:RunAttribute("HardArrange", "FramesInUnitOrder", containerVariable, Spacing and "Spacing")
-    else
+    elseif container.LayoutType == LayoutType.Soft then
         sorted = self:RunAttribute("SoftArrange", "FramesInUnitOrder", Spacing and "Spacing")
     end
 
@@ -992,6 +998,7 @@ secureMethods["Init"] = [[
     LayoutType = newtable()
     LayoutType.Soft = 1
     LayoutType.Hard = 2
+    LayoutType.NameList = 3
 ]]
 
 local function LoadUnits()

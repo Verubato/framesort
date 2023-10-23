@@ -3,14 +3,13 @@ local _, addon = ...
 local wow = addon.WoW.Api
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
-local events = addon.WoW.Api.Events
 local fsLog = addon.Logging.Log
 local M = {}
 local callbacks = {}
 local containersChangedCallbacks = {}
 local fsPlugin = nil
 local pluginName = "FrameSort"
-local eventFrame = nil
+local updating = nil
 
 fsProviders.ElvUI = M
 table.insert(fsProviders.All, M)
@@ -47,8 +46,14 @@ local function RequestUpdateContainers()
     end
 end
 
-local function OnEvent()
+local function OnHeaderUpdate(header)
+    if header ~= ElvUF_PartyGroup1 then return end
+    -- prevent stack overflow as SetAttribute() calls will invoke another header update
+    if updating then return end
+
+    updating = true
     RequestSort()
+    updating = false
 end
 
 function M:Name()
@@ -81,11 +86,7 @@ function M:Init()
     function fsPlugin:Initialize()
         EP:RegisterPlugin(pluginName, fsPlugin.InsertOptions)
 
-        eventFrame = wow.CreateFrame("Frame")
-        eventFrame:HookScript("OnEvent", OnEvent)
-        eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
-        eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
-        eventFrame:RegisterEvent(events.UNIT_PET)
+        fsPlugin:SecureHook("SecureGroupHeader_Update", OnHeaderUpdate)
 
         fsPlugin:SecureHook(UF, "LoadUnits", function()
             if not ElvUF_PartyGroup1 then
@@ -93,8 +94,6 @@ function M:Init()
                 return
             end
 
-            -- prevent this event from unsorting frames
-            ElvUF_PartyGroup1:UnregisterEvent(events.UNIT_NAME_UPDATE)
             RequestUpdateContainers()
         end)
     end
@@ -141,7 +140,7 @@ function M:Containers()
     local party = {
         Frame = ElvUF_PartyGroup1,
         Type = fsFrame.ContainerType.Party,
-        LayoutType = fsFrame.LayoutType.Soft,
+        LayoutType = fsFrame.LayoutType.NameList,
 
         -- not applicable
         IsHorizontalLayout = function() return nil end,
