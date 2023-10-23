@@ -3,6 +3,7 @@ local _, addon = ...
 local fsProviders = addon.Providers
 local fsCompare = addon.Collections.Comparer
 local fsFrame = addon.WoW.Frame
+local fsUnit = addon.WoW.Unit
 local fsEnumerable = addon.Collections.Enumerable
 local fsMath = addon.Numerics.Math
 local fsLog = addon.Logging.Log
@@ -247,6 +248,41 @@ local function HardArrange(frames, container, isHorizontalLayout, framesPerLine,
     return Move(frames, pointsByFrame)
 end
 
+---@param container FrameContainer
+---@return boolean
+local function SetNameList(container)
+    local isFriendly = container.Type == fsFrame.ContainerType.Party or container.Type == fsFrame.ContainerType.Raid
+    local units = isFriendly and fsUnit:FriendlyUnits(true) or fsUnit:EnemyUnits(true)
+    local sortFunction = fsCompare:SortFunction(units)
+
+    table.sort(units, sortFunction)
+
+    -- groupFilter must be set to nil for nameList to be used
+    container.Frame:SetAttribute("groupFilter", nil)
+    container.Frame:SetAttribute("sortMethod", "NAMELIST")
+
+    local names = ""
+
+    for i, unit in ipairs(units) do
+        local unitName = wow.GetUnitName(unit, true)
+
+        if i > 1 then
+            names = names .. "," .. unitName
+        else
+            names = unitName
+        end
+    end
+
+    local existingNameList = container.Frame:GetAttribute("nameList")
+
+    if existingNameList == names then
+        return false
+    end
+
+    container.Frame:SetAttribute("nameList", names)
+    return true
+end
+
 ---Determines the offset to use for the ungrouped portion of the raid frames.
 ---@param container FrameContainer
 ---@return Offset
@@ -289,6 +325,10 @@ end
 ---@param container FrameContainer
 ---@return boolean
 local function TrySortContainer(container)
+    if container.LayoutType == fsFrame.LayoutType.NameList then
+        return SetNameList(container)
+    end
+
     local frames = fsFrame:ExtractUnitFrames(container.Frame, container.VisibleOnly)
     local sortFunction = nil
 
