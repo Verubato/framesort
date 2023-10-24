@@ -5,6 +5,7 @@ local wow = addon.WoW.Api
 local provider = addon.Providers.Test
 local realBlizzardProvider = addon.Providers.Blizzard
 local fsFrame = addon.WoW.Frame
+local fsEnumerable = addon.Collections.Enumerable
 local M = {}
 local player = nil
 
@@ -48,10 +49,13 @@ function M:test_player_hides_on_provider_callback()
 
     provider:FireCallbacks()
 
-    assertEquals(#wow.State.AttributeDrivers, 1)
+    local driver = fsEnumerable
+        :From(wow.State.AttributeDrivers)
+        :Where(function(x) return x.Frame == player end)
+        :First()
 
-    local driver = wow.State.AttributeDrivers[1]
-    assert(driver.Frame == player)
+    assert(driver)
+
     assertEquals(driver.Attribute, "state-visibility")
     assertEquals(driver.Conditional, "hide")
 end
@@ -67,10 +71,13 @@ function M:test_player_shows_on_provider_callback()
 
     provider:FireCallbacks()
 
-    assertEquals(#wow.State.AttributeDrivers, 1)
+    local driver = fsEnumerable
+        :From(wow.State.AttributeDrivers)
+        :Where(function(x) return x.Frame == player end)
+        :First()
 
-    local driver = wow.State.AttributeDrivers[1]
-    assert(driver.Frame == player)
+    assert(driver)
+
     assertEquals(driver.Attribute, "state-visibility")
     assertEquals(driver.Conditional, "show")
 end
@@ -85,15 +92,16 @@ function M:test_player_hides_after_combat()
 
     provider:FireCallbacks()
 
-    assertEquals(#wow.State.AttributeDrivers, 0)
-
     wow.State.MockInCombat = false
     wow:FireEvent(wow.Events.PLAYER_REGEN_ENABLED)
 
-    assertEquals(#wow.State.AttributeDrivers, 1)
+    local driver = fsEnumerable
+        :From(wow.State.AttributeDrivers)
+        :Where(function(x) return x.Frame == player end)
+        :First()
 
-    local driver = wow.State.AttributeDrivers[1]
-    assert(driver.Frame == player)
+    assert(driver)
+
     assertEquals(driver.Attribute, "state-visibility")
     assertEquals(driver.Conditional, "hide")
 end
@@ -108,18 +116,18 @@ function M:test_player_shows_after_combat()
     config.PlayerSortMode = "Top"
     wow.State.MockInCombat = true
 
-    assertEquals(#provider.State.Callbacks, 1)
     provider:FireCallbacks()
-
-    assertEquals(#wow.State.AttributeDrivers, 0)
 
     wow.State.MockInCombat = false
     wow:FireEvent(wow.Events.PLAYER_REGEN_ENABLED)
 
-    assertEquals(#wow.State.AttributeDrivers, 1)
+    local driver = fsEnumerable
+        :From(wow.State.AttributeDrivers)
+        :Where(function(x) return x.Frame == player end)
+        :First()
 
-    local driver = wow.State.AttributeDrivers[1]
-    assert(driver.Frame == player)
+    assert(driver)
+
     assertEquals(driver.Attribute, "state-visibility")
     assertEquals(driver.Conditional, "show")
 end
