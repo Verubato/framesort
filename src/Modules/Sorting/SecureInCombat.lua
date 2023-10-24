@@ -1114,36 +1114,7 @@ local function InjectSecureHelpers(secureFrame)
     end
 end
 
-local function ResubscribeEvents()
-    -- we want our sorting code to run after blizzard and other frame addons refresh their frames
-    -- i.e., we want to handle GROUP_ROSTER_UPDATE/UNT_PET after frame addons have performed their update handling
-    -- this is easily achieved in the insecure environment by using hooks, however in the restricted environment we have no such luxury
-    -- fortunately it seems blizzard invoke event handlers roughly in the order that they were registered
-    -- so if we register our events later, our code will run later
-    -- of course it's not good to rely on this and we should generally treat event ordering as undefined
-    -- perhaps in a future patch this implementation detail could change and our code will break
-    -- however until a better solution can be found, this is our only hope
-
-    assert(memberHeader ~= nil)
-    assert(petHeader ~= nil)
-
-    memberHeader:UnregisterEvent(wow.Events.GROUP_ROSTER_UPDATE)
-    memberHeader:UnregisterEvent(wow.Events.UNIT_NAME_UPDATE)
-
-    memberHeader:RegisterEvent(wow.Events.GROUP_ROSTER_UPDATE)
-    memberHeader:RegisterEvent(wow.Events.UNIT_NAME_UPDATE)
-
-    petHeader:UnregisterEvent(wow.Events.GROUP_ROSTER_UPDATE)
-    petHeader:UnregisterEvent(wow.Events.UNIT_PET)
-    petHeader:UnregisterEvent(wow.Events.UNIT_NAME_UPDATE)
-
-    petHeader:RegisterEvent(wow.Events.GROUP_ROSTER_UPDATE)
-    petHeader:RegisterEvent(wow.Events.UNIT_PET)
-    petHeader:RegisterEvent(wow.Events.UNIT_NAME_UPDATE)
-end
-
 local function OnCombatStarting()
-    ResubscribeEvents()
     LoadUnits()
 end
 
@@ -1183,21 +1154,10 @@ local function ConfigureHeader(header)
         fsScheduler:RunWhenCombatEnds(function()
             -- the refreshUnitChange script doesn't capture when the unit is changed to nil
             -- which can happen when someone leaves the group, or a pet ceases to exist
-            -- so we're only interested in unit changing to nil here
+            -- so we're really only interested in unit changing to nil here
             frame:SetAttribute("_onattributechanged", [[
-                if name ~= "unit" or value ~= nil then return end
-                if SecureCmdOptionParse("[combat] true; false") ~= "true" then return end
-
-                local id = self:GetID()
-                local header = self:GetAttribute("Header")
-                local next = header:GetAttribute("child" .. (id + 1))
-
-                -- Blizzard iterate over all the unit buttons and nil their unit token
-                -- so to avoid spamming multiple sort attempts, only perform a sort once the last unit button has been updated
-                if next then return end
-
                 local manager = self:GetAttribute("Manager")
-                manager:SetAttribute("state-framesort-toggle", random())
+                manager:SetAttribute("state-framesort-run", "ignore")
             ]])
 
             frame:SetAttribute("HaveSetAttributeHandler", true)
@@ -1225,46 +1185,11 @@ local function ConfigureHeader(header)
         self:SetAttribute("Header", Header)
 
         RefreshUnitChange = [[
-            if SecureCmdOptionParse("[combat] true; false") ~= "true" then return end
-
+            -- Blizzard iterate over all the unit buttons and change their unit token so this snippet is called a lot
+            -- we want to avoid spamming multiple sort attempts and only perform after all the buttons have been updated
+            -- we can do this by changing our attribute to some temporary value which blizzard will change back when it re-evaluates state attributes
             local manager = self:GetAttribute("Manager")
-
-            -- Blizzard iterate over all the unit buttons and change their unit token
-            -- so we want to avoid spamming multiple sort attempts and only perform a sort once the last unit button has been updated
-            -- we can determine this by knowing that our button ordering is the default group ordering
-            -- so the last unit will be where no more units exist after it
-            local unit = self:GetAttribute("unit")
-
-            if unit == nil then
-                -- attribute change handler will handle nil changes
-                -- not even sure if this is possible as unit should always have a value here?
-                if self:GetAttribute("HaveSetAttributeHandler") then
-                    return
-                end
-            else
-                local isRaid = SecureCmdOptionParse("[group:raid] true; false;") == "true"
-                local prefix = isRaid and "raid" or "party"
-                local isPet = strmatch(unit, "pet")
-
-                if isPet then
-                    prefix = prefix .. "pet"
-                end
-
-                local unitNumberStr = unit and strmatch(unit, "%d+")
-                local start = unitNumberStr and (tonumber(unitNumberStr) + 1) or 1
-                local stop = isRaid and 40 or 5
-
-                for i = start, stop do
-                    local nextUnit = prefix .. i
-
-                    -- if the next unit exists, we'll get called again in Blizzard's next loop iteration
-                    if UnitExists(nextUnit) then
-                        return
-                    end
-                end
-            end
-
-            manager:SetAttribute("state-framesort-toggle", random())
+            manager:SetAttribute("state-framesort-run", "ignore")
         ]]
 
         self:SetAttribute("refreshUnitChange", RefreshUnitChange)
@@ -1310,14 +1235,18 @@ function M:Init()
 
     manager:Execute([[ self:RunAttribute("Init") ]])
 
-    manager:WrapScript(
-        manager,
-        "OnAttributeChanged",
-        [[
-            if not strmatch(name, "framesort") then return end
+    manager:SetAttribute("_onstate-framesort-run", [[
+        if newstate == "ignore" then return end
 
-            self:RunAttribute("TrySort")
-        ]])
+        self:RunAttribute("TrySort")
+    ]])
+
+    -- https://www.wowinterface.com/forums/showthread.php?t=58697
+    -- this attribute driver is used for delaying the sorting function
+    -- the actual conditional value doesn't really matter
+    -- we'll change the value of this to "ignore" from group header events
+    -- and then blizzard will later detect the value has changed from "pet" or "nopet" and invoke our attribute changed handler
+    wow.RegisterAttributeDriver(manager, "state-framesort-run", "[pet] pet; nopet;")
 
     memberHeader = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureGroupHeaderTemplate")
     petHeader = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureGroupPetHeaderTemplate")
