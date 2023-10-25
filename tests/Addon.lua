@@ -13,7 +13,8 @@ local addon = {
     Modules = {
         Sorting = {
             Secure = {}
-        }
+        },
+        Macro = {}
     },
     Numerics = {},
     Providers = {

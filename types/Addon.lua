@@ -49,8 +49,10 @@
 ---@class WoW
 ---@field Api WowApi
 ---@field Frame FrameUtil
----@field Macro MacroUtil
 ---@field Unit UnitUtil
+
+---@class MacroModule : IRun, IInitialise
+---@field Parser MacroParser
 
 ---@class SortingModule : IRun, IInitialise
 ---@field Traditional TraditionalSortingModule

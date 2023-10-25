@@ -13,7 +13,7 @@
     <!-- Load core wow files that other files need -->
     <Script file="WoW\WoW.lua"/>
     <Script file="WoW\Unit.lua"/>
-    <Script file="WoW\Macro.lua"/>
+    <Script file="Modules\Macro\Parser.lua"/>
 
     <!-- Scheduler requires core wow files -->
     <Script file="Scheduling\Scheduler.lua"/>
@@ -44,7 +44,7 @@
     <!-- Load modules -->
     <Script file="Modules\HidePlayer.lua"/>
     <Script file="Modules\Targeting.lua"/>
-    <Script file="Modules\Macro.lua"/>
+    <Script file="Modules\Macro\Macro.lua"/>
     <Script file="Modules\Runner.lua"/>
 
     <!-- Api requires modules -->

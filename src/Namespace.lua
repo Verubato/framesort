@@ -10,7 +10,8 @@ addon.Logging = {}
 addon.Modules = {
     Sorting = {
         Secure = {}
-    }
+    },
+    Macro = {}
 }
 addon.Numerics = {}
 addon.Providers = { All = {} }
