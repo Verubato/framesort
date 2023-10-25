@@ -253,6 +253,16 @@ wow.RegisterAttributeDriver = function(frame, attribute, conditional)
     }
 end
 
+wow.UnregisterAttributeDriver = function(frame, attribute)
+    -- TODO: store a lookup by attribute name for better performance
+    for i, value in ipairs(wow.State.AttributeDrivers) do
+        if value.Frame == frame and value.Attribute == attribute then
+            table.remove(wow.State.AttributeDrivers, i)
+            return
+        end
+    end
+end
+
 -- macro
 wow.GetMacroInfo = function(id)
     local macro = wow.State.Macros[id]

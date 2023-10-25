@@ -10,11 +10,11 @@ end
 
 function M:Run(provider)
     fsScheduler:RunWhenCombatEnds(function()
-        -- run hide player first as it may impact sorting
-        addon.Modules.HidePlayer:Run()
-
-        -- run sorting next as it impacts targeting and macros
+        -- run sorting first as it affects everything
         addon.Modules.Sorting:Run(provider)
+
+        -- run hide player after as it may impact targeting
+        addon.Modules.HidePlayer:Run()
 
         addon.Modules.Targeting:Run()
         addon.Modules.Macro:Run()

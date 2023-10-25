@@ -55,6 +55,7 @@
 ---@field issecurevariable fun(tableOrName: table|string, name: string?): isSecure: boolean, taint: string?
 ---@field hooksecurefunc fun(...)
 ---@field RegisterAttributeDriver fun(frame: table, attribute: string, conditional: string)
+---@field UnregisterAttributeDriver fun(frame: table, attribute: string)
 ---@field SecureHandlerWrapScript fun(frame, script, header, preBody, postBody)
 ---@field SecureHandlerSetFrameRef fun(frame, label, refFrame)
 ---@field SecureHandlerExecute fun(frame, body)
