@@ -14,15 +14,12 @@ local M = {}
 addon.Modules.Macro = M
 
 ---@return boolean updated, boolean isFrameSortMacro, number newId
-local function UpdateMacro(id, friendlyUnits, enemyUnits)
+local function Rewrite(id, friendlyUnits, enemyUnits)
     local _, _, body = wow.GetMacroInfo(id)
 
     if not body or not fsMacro:IsFrameSortMacro(body) then
         return false, false, id
     end
-
-    friendlyUnits = friendlyUnits or fsTarget:FriendlyTargets()
-    enemyUnits = enemyUnits or fsTarget:EnemyTargets()
 
     local newBody = fsMacro:GetNewBody(body, friendlyUnits, enemyUnits)
 
@@ -36,10 +33,31 @@ local function UpdateMacro(id, friendlyUnits, enemyUnits)
 
     isSelfEditingMacro = true
     local newId = wow.EditMacro(id, nil, nil, newBody)
-    fsLog:Debug("Updated macro: " .. newId)
     isSelfEditingMacro = false
 
     return true, true, newId
+end
+
+local function UpdateMacro(id, friendlyUnits, enemyUnits, bypassCache)
+    -- if we've already inspected this macro and it's not a framesort macro
+    -- then skip attempting to re-process it
+    local shouldInspect = bypassCache or isFsMacroCache[id] == nil or isFsMacroCache[id]
+
+    if not shouldInspect then
+        return false
+    end
+
+    friendlyUnits = friendlyUnits or fsTarget:FriendlyTargets()
+    enemyUnits = enemyUnits or fsTarget:EnemyTargets()
+
+    local updated, isFsMacro, newId = Rewrite(id, friendlyUnits, enemyUnits)
+    isFsMacroCache[newId] = isFsMacro
+
+    if updated then
+        fsLog:Debug("Updated macro: " .. newId)
+    end
+
+    return updated
 end
 
 local function ScanMacros()
@@ -49,17 +67,10 @@ local function ScanMacros()
     local updatedCount = 0
 
     for id = 1, maxMacros do
-        -- if we've already inspected this macro and it's not a framesort macro
-        -- then skip attempting to re-process it
-        local shouldInspect = isFsMacroCache[id] == nil or isFsMacroCache[id]
+        local updated = UpdateMacro(id, friendlyUnits, enemyUnits, false)
 
-        if shouldInspect then
-            local updated, isFsMacro, newId = UpdateMacro(id, friendlyUnits, enemyUnits)
-            isFsMacroCache[newId] = isFsMacro
-
-            if updated then
-                updatedCount = updatedCount + 1
-            end
+        if updated then
+            updatedCount = updatedCount + 1
         end
     end
 
@@ -77,16 +88,9 @@ local function OnEditMacro(id, _, _, _)
         return
     end
 
-    if wow.InCombatLockdown() then
-        fsScheduler:RunWhenCombatEnds(function()
-            local _, isFsMacro, newId = UpdateMacro(id)
-            isFsMacroCache[newId] = isFsMacro
-        end, "EditMacro" .. id)
-        return
-    end
-
-    local _, isFsMacro, newId = UpdateMacro(id)
-    isFsMacroCache[newId] = isFsMacro
+    fsScheduler:RunWhenCombatEnds(function()
+        UpdateMacro(id, nil, nil, true)
+    end, "EditMacro" .. id)
 end
 
 function M:Run()
