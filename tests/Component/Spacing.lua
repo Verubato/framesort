@@ -1,5 +1,5 @@
 ---@type AddonMock
-local addon = require("Addon")
+local addon = require("Mock\\Addon")
 local frame = require("Mock\\Frame")
 local fsProviders = addon.Providers
 local provider = fsProviders.Test

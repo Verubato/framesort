@@ -1,4 +1,4 @@
-local addon = require("Addon")
+local addon = require("Mock\\Addon")
 local M = {}
 
 function M:setup()
