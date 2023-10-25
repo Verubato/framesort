@@ -2,9 +2,9 @@
 local _, addon = ...
 local wow = addon.WoW.Api
 local fsEnumerable = addon.Collections.Enumerable
----@class MacroUtil
+---@class MacroParser
 local M = {}
-addon.WoW.Macro = M
+addon.Modules.Macro.Parser = M
 
 local shortSyntax = "@"
 local longSyntax = "target="

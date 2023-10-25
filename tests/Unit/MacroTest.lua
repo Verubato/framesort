@@ -1,11 +1,14 @@
 ---@diagnostic disable: inject-field
 local deps = {
     "Collections\\Enumerable.lua",
-    "WoW\\Macro.lua",
+    "Modules\\Macro\\Parser.lua",
 }
 
 local addon = {
     Collections = {},
+    Modules = {
+        Macro = {}
+    },
     WoW = {
         Api = require("Mock\\WoW"),
     },
@@ -14,7 +17,7 @@ local addon = {
 local helper = require("Helper")
 helper:LoadDependencies(addon, deps)
 
-local fsMacro = addon.WoW.Macro
+local fsMacro = addon.Modules.Macro.Parser
 local M = {}
 
 function M:setup()

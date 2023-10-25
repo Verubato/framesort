@@ -2,7 +2,7 @@
 local _, addon = ...
 local wow = addon.WoW.Api
 local fsScheduler = addon.Scheduling.Scheduler
-local fsMacro = addon.WoW.Macro
+local fsMacroParser = addon.Modules.Macro.Parser
 local fsLog = addon.Logging.Log
 local fsTarget = addon.Modules.Targeting
 local maxMacros = 138
@@ -10,18 +10,17 @@ local isSelfEditingMacro = false
 ---@type table<number, boolean>
 local isFsMacroCache = {}
 ---@class MacroModule: IInitialise
-local M = {}
-addon.Modules.Macro = M
+local M = addon.Modules.Macro
 
 ---@return boolean updated, boolean isFrameSortMacro, number newId
 local function Rewrite(id, friendlyUnits, enemyUnits)
     local _, _, body = wow.GetMacroInfo(id)
 
-    if not body or not fsMacro:IsFrameSortMacro(body) then
+    if not body or not fsMacroParser:IsFrameSortMacro(body) then
         return false, false, id
     end
 
-    local newBody = fsMacro:GetNewBody(body, friendlyUnits, enemyUnits)
+    local newBody = fsMacroParser:GetNewBody(body, friendlyUnits, enemyUnits)
 
     if not newBody then
         return false, true, id
@@ -53,10 +52,6 @@ local function UpdateMacro(id, friendlyUnits, enemyUnits, bypassCache)
     local updated, isFsMacro, newId = Rewrite(id, friendlyUnits, enemyUnits)
     isFsMacroCache[newId] = isFsMacro
 
-    if updated then
-        fsLog:Debug("Updated macro: " .. newId)
-    end
-
     return updated
 end
 
@@ -74,9 +69,7 @@ local function ScanMacros()
         end
     end
 
-    if updatedCount > 0 then
-        fsLog:Debug(string.format("Updated %d macros", updatedCount))
-    end
+    fsLog:Debug(string.format("Updated %d macros", updatedCount))
 
     local stop = wow.GetTimePreciseSec()
     fsLog:Debug(string.format("Update macros took %fms.", (stop - start) * 1000))
@@ -89,7 +82,11 @@ local function OnEditMacro(id, _, _, _)
     end
 
     fsScheduler:RunWhenCombatEnds(function()
-        UpdateMacro(id, nil, nil, true)
+        local updated = UpdateMacro(id, nil, nil, true)
+
+        if updated then
+            fsLog:Debug("Updated macro: " .. id)
+        end
     end, "EditMacro" .. id)
 end
 
