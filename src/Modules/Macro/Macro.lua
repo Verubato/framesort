@@ -52,6 +52,13 @@ local function UpdateMacro(id, friendlyUnits, enemyUnits, bypassCache)
     local updated, isFsMacro, newId = Rewrite(id, friendlyUnits, enemyUnits)
     isFsMacroCache[newId] = isFsMacro
 
+    if id ~= newId then
+        -- invalidate the old id if it changed
+        -- I believe the id only changes when the name or icon is updated which we don't touch
+        -- better to be safe though
+        isFsMacroCache[id] = nil
+    end
+
     return updated
 end
 
