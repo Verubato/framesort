@@ -123,9 +123,17 @@ function M:FriendlyTargets()
             :ToTable()
     end
 
-    -- fallback to party/raid123
-    -- TODO: sort the units array
-    return fsUnit:FriendlyUnits()
+    -- no frames found, fallback to units
+    local units = fsUnit:FriendlyUnits()
+    local sortEnabled = fsCompare:FriendlySortMode()
+
+    if not sortEnabled then
+        return units
+    end
+
+    table.sort(units, fsCompare:SortFunction(units))
+
+    return units
 end
 
 function M:EnemyTargets()
@@ -173,9 +181,17 @@ function M:EnemyTargets()
             :ToTable()
     end
 
-    -- fallback to arena123
-    -- TODO: sort the units array
-    return fsUnit:EnemyUnits(false)
+    -- no frames found, fallback to units
+    local units = fsUnit:EnemyUnits()
+    local sortEnabled = fsCompare:EnemySortMode()
+
+    if not sortEnabled then
+        return units
+    end
+
+    table.sort(units, fsCompare:SortFunction(units))
+
+    return units
 end
 
 function M:Run()
