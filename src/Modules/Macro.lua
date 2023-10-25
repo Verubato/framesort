@@ -79,7 +79,7 @@ local function OnEditMacro(id, _, _, _)
 
     if wow.InCombatLockdown() then
         fsScheduler:RunWhenCombatEnds(function()
-            local isFsMacro, newId = UpdateMacro(id)
+            local _, isFsMacro, newId = UpdateMacro(id)
             isFsMacroCache[newId] = isFsMacro
         end, "EditMacro" .. id)
         return
