@@ -1,7 +1,7 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
-local fsMacro = addon.WoW.Macro
+local fsMacro = addon.Modules.Macro.Parser
 local fsConfig = addon.Configuration
 local maxMacros = 138
 local M = {}
