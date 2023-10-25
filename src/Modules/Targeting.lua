@@ -4,7 +4,6 @@ local wow = addon.WoW.Api
 local fsProviders = addon.Providers
 local fsUnit = addon.WoW.Unit
 local fsEnumerable = addon.Collections.Enumerable
-local fsScheduler = addon.Scheduling.Scheduler
 local fsCompare = addon.Collections.Comparer
 local fsFrame = addon.WoW.Frame
 local fsLog = addon.Logging.Log
