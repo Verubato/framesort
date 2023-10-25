@@ -60,13 +60,14 @@ secureMethods["GetUnit"] = [[
 
 -- filters a set of frames to only unit frames
 secureMethods["ExtractUnitFrames"] = [[
+    local run = control or self
     local framesVariable, destinationVariable, visibleOnly = ...
     local children = _G[framesVariable]
     local unitFrames = newtable()
 
     for _, child in ipairs(children) do
         Frame = child
-        local unit = self:RunAttribute("GetUnit", "Frame")
+        local unit = run:RunAttribute("GetUnit", "Frame")
         Frame = nil
 
         -- in some rare cases frames can have no position, so exclude them
@@ -173,6 +174,7 @@ secureMethods["FrameChain"] = [[
 
 -- performs an in place sort on an array of frames by their visual order
 secureMethods["SortFramesByTopLeft"] = [[
+    local run = control or self
     local framesVariable = ...
     local frames = _G[framesVariable]
 
@@ -183,10 +185,10 @@ secureMethods["SortFramesByTopLeft"] = [[
             local left, bottom, width, height = frames[j]:GetRect()
             local nextLeft, nextBottom, nextWidth, nextHeight = frames[j + 1]:GetRect()
 
-            local topFuzzy = self:RunAttribute("Round", bottom + height)
-            local nextTopFuzzy = self:RunAttribute("Round", nextBottom + nextHeight)
-            local leftFuzzy = self:RunAttribute("Round", left)
-            local nextLeftFuzzy = self:RunAttribute("Round", nextLeft)
+            local topFuzzy = run:RunAttribute("Round", bottom + height)
+            local nextTopFuzzy = run:RunAttribute("Round", nextBottom + nextHeight)
+            local leftFuzzy = run:RunAttribute("Round", left)
+            local nextLeftFuzzy = run:RunAttribute("Round", nextLeft)
 
             if topFuzzy < nextTopFuzzy or leftFuzzy > nextLeftFuzzy then
                 frames[j], frames[j + 1] = frames[j + 1], frames[j]
@@ -197,6 +199,7 @@ secureMethods["SortFramesByTopLeft"] = [[
 
 -- performs an in place sort on an array of frames by their visual order
 secureMethods["SortFramesByTopRight"] = [[
+    local run = control or self
     local framesVariable = ...
     local frames = _G[framesVariable]
 
@@ -205,10 +208,10 @@ secureMethods["SortFramesByTopRight"] = [[
             local left, bottom, width, height = frames[j]:GetRect()
             local nextLeft, nextBottom, nextWidth, nextHeight = frames[j + 1]:GetRect()
 
-            local topFuzzy = self:RunAttribute("Round", bottom + height)
-            local nextTopFuzzy = self:RunAttribute("Round", nextBottom + nextHeight)
-            local rightFuzzy = self:RunAttribute("Round", left + width)
-            local nextRightFuzzy = self:RunAttribute("Round", nextLeft + nextWidth)
+            local topFuzzy = run:RunAttribute("Round", bottom + height)
+            local nextTopFuzzy = run:RunAttribute("Round", nextBottom + nextHeight)
+            local rightFuzzy = run:RunAttribute("Round", left + width)
+            local nextRightFuzzy = run:RunAttribute("Round", nextLeft + nextWidth)
 
             if topFuzzy < nextTopFuzzy or rightFuzzy < nextRightFuzzy then
                 frames[j], frames[j + 1] = frames[j + 1], frames[j]
@@ -219,6 +222,7 @@ secureMethods["SortFramesByTopRight"] = [[
 
 -- performs an in place sort on an array of frames by their visual order
 secureMethods["SortFramesByBottomLeft"] = [[
+    local run = control or self
     local framesVariable = ...
     local frames = _G[framesVariable]
 
@@ -227,10 +231,10 @@ secureMethods["SortFramesByBottomLeft"] = [[
             local left, bottom, width, height = frames[j]:GetRect()
             local nextLeft, nextBottom, nextWidth, nextHeight = frames[j + 1]:GetRect()
 
-            local bottomFuzzy = self:RunAttribute("Round", bottom)
-            local nextBottomFuzzy = self:RunAttribute("Round", nextBottom)
-            local leftFuzzy = self:RunAttribute("Round", left)
-            local nextLeftFuzzy = self:RunAttribute("Round", nextLeft)
+            local bottomFuzzy = run:RunAttribute("Round", bottom)
+            local nextBottomFuzzy = run:RunAttribute("Round", nextBottom)
+            local leftFuzzy = run:RunAttribute("Round", left)
+            local nextLeftFuzzy = run:RunAttribute("Round", nextLeft)
 
             if bottomFuzzy > nextBottomFuzzy or leftFuzzy > nextLeftFuzzy then
                 frames[j], frames[j + 1] = frames[j + 1], frames[j]
@@ -241,6 +245,7 @@ secureMethods["SortFramesByBottomLeft"] = [[
 
 -- performs an in place sort on an array of points by their top left coordinate
 secureMethods["SortPointsByTopLeft"] = [[
+    local run = control or self
     local pointsVariable = ...
     local points = _G[pointsVariable]
 
@@ -249,10 +254,10 @@ secureMethods["SortPointsByTopLeft"] = [[
             local point = points[j]
             local next = points[j + 1]
 
-            local topFuzzy = self:RunAttribute("Round", point.Bottom + point.Height)
-            local nextTopFuzzy = self:RunAttribute("Round", next.Bottom + next.Height)
-            local leftFuzzy = self:RunAttribute("Round", point.Left)
-            local nextLeftFuzzy = self:RunAttribute("Round", next.Left)
+            local topFuzzy = run:RunAttribute("Round", point.Bottom + point.Height)
+            local nextTopFuzzy = run:RunAttribute("Round", next.Bottom + next.Height)
+            local leftFuzzy = run:RunAttribute("Round", point.Left)
+            local nextLeftFuzzy = run:RunAttribute("Round", next.Left)
 
             if topFuzzy < nextTopFuzzy or leftFuzzy > nextLeftFuzzy then
                 points[j], points[j + 1] = points[j + 1], points[j]
@@ -263,6 +268,7 @@ secureMethods["SortPointsByTopLeft"] = [[
 
 -- performs an in place sort on an array of points by their top left coordinate
 secureMethods["SortPointsByLeftTop"] = [[
+    local run = control or self
     local pointsVariable = ...
     local points = _G[pointsVariable]
 
@@ -271,10 +277,10 @@ secureMethods["SortPointsByLeftTop"] = [[
             local point = points[j]
             local next = points[j + 1]
 
-            local topFuzzy = self:RunAttribute("Round", point.Bottom + point.Height)
-            local nextTopFuzzy = self:RunAttribute("Round", next.Bottom + next.Height)
-            local leftFuzzy = self:RunAttribute("Round", point.Left)
-            local nextLeftFuzzy = self:RunAttribute("Round", next.Left)
+            local topFuzzy = run:RunAttribute("Round", point.Bottom + point.Height)
+            local nextTopFuzzy = run:RunAttribute("Round", next.Bottom + next.Height)
+            local leftFuzzy = run:RunAttribute("Round", point.Left)
+            local nextLeftFuzzy = run:RunAttribute("Round", next.Left)
 
             if leftFuzzy > nextLeftFuzzy or topFuzzy < nextTopFuzzy then
                 points[j], points[j + 1] = points[j + 1], points[j]
@@ -285,6 +291,7 @@ secureMethods["SortPointsByLeftTop"] = [[
 
 -- performs an out of place sort on an array frames by the order of the units array
 secureMethods["SortFramesByUnits"] = [[
+    local run = control or self
     local framesVariable, unitsVariable, destinationVariable = ...
     local frames = _G[framesVariable]
     local units = _G[unitsVariable]
@@ -296,7 +303,7 @@ secureMethods["SortFramesByUnits"] = [[
         local frame = frames[i]
 
         Frame = frame
-        local unit = self:RunAttribute("GetUnit", "Frame")
+        local unit = run:RunAttribute("GetUnit", "Frame")
         Frame = nil
 
         if unit then
@@ -377,6 +384,7 @@ secureMethods["SpacingForContainer"] = [[
 ]]
 
 secureMethods["ApplySpacing"] = [[
+    local run = control or self
     local pointsVariable, spacingVariable = ...
     local points = _G[pointsVariable]
     local spacing = _G[spacingVariable]
@@ -386,18 +394,18 @@ secureMethods["ApplySpacing"] = [[
     OrderedTopLeft = newtable()
     OrderedLeftTop = newtable()
 
-    self:RunAttribute("CopyTable", pointsVariable, "OrderedTopLeft")
-    self:RunAttribute("CopyTable", pointsVariable, "OrderedLeftTop")
+    run:RunAttribute("CopyTable", pointsVariable, "OrderedTopLeft")
+    run:RunAttribute("CopyTable", pointsVariable, "OrderedLeftTop")
 
-    self:RunAttribute("SortPointsByTopLeft", "OrderedTopLeft")
-    self:RunAttribute("SortPointsByLeftTop", "OrderedLeftTop")
+    run:RunAttribute("SortPointsByTopLeft", "OrderedTopLeft")
+    run:RunAttribute("SortPointsByLeftTop", "OrderedLeftTop")
 
     local changed = false
 
     for i = 2, #OrderedLeftTop do
         local point = OrderedLeftTop[i]
         local previous = OrderedLeftTop[i - 1]
-        local sameRow = self:RunAttribute("Round", point.Bottom + point.Height) == self:RunAttribute("Round", previous.Bottom + previous.Height)
+        local sameRow = run:RunAttribute("Round", point.Bottom + point.Height) == run:RunAttribute("Round", previous.Bottom + previous.Height)
 
         if sameRow then
             local existingSpace = point.Left - (previous.Left + previous.Width)
@@ -410,7 +418,7 @@ secureMethods["ApplySpacing"] = [[
     for i = 2, #OrderedTopLeft do
         local point = OrderedTopLeft[i]
         local previous = OrderedTopLeft[i - 1]
-        local sameColumn = self:RunAttribute("Round", point.Left) == self:RunAttribute("Round", previous.Left)
+        local sameColumn = run:RunAttribute("Round", point.Left) == run:RunAttribute("Round", previous.Left)
 
         if sameColumn then
             local existingSpace = previous.Bottom - (point.Bottom + point.Height)
@@ -425,6 +433,7 @@ secureMethods["ApplySpacing"] = [[
 
 -- rearranges a set of frames accoding to the pre-sorted unit positions
 secureMethods["SpaceGroups"] = [[
+    local run = control or self
     local groupsVariable, spacingVariable = ...
     local groups = _G[groupsVariable]
     local spacing = _G[spacingVariable]
@@ -447,7 +456,7 @@ secureMethods["SpaceGroups"] = [[
 
     GroupPoints = points
 
-    if not self:RunAttribute("ApplySpacing", "GroupPoints", spacingVariable) then
+    if not run:RunAttribute("ApplySpacing", "GroupPoints", spacingVariable) then
         GroupPoints = nil
         return false
     end
@@ -461,12 +470,12 @@ secureMethods["SpaceGroups"] = [[
         local left, bottom, _, _ = group:GetRect()
         local xDelta = point.Left - left
         local yDelta = point.Bottom - bottom
-        local xDeltaRounded = self:RunAttribute("Round", xDelta, DecimalSanity)
-        local yDeltaRounded = self:RunAttribute("Round", yDelta, DecimalSanity)
+        local xDeltaRounded = run:RunAttribute("Round", xDelta, DecimalSanity)
+        local yDeltaRounded = run:RunAttribute("Round", yDelta, DecimalSanity)
 
         if xDeltaRounded ~= 0 or yDeltaRounded ~= 0 then
             Group = group
-            local moved = self:RunAttribute("AdjustPointsOffset", "Group", xDelta, yDelta)
+            local moved = run:RunAttribute("AdjustPointsOffset", "Group", xDelta, yDelta)
             movedAny = movedAny or moved
             Group = nil
         end
@@ -477,13 +486,14 @@ secureMethods["SpaceGroups"] = [[
 
 -- rearranges a set of frames by only modifying the x and y offsets
 secureMethods["SoftArrange"] = [[
+    local run = control or self
     local framesVariable, spacingVariable = ...
     local frames = _G[framesVariable]
 
     OrderedByTopLeft = newtable()
 
-    self:RunAttribute("CopyTable", framesVariable, "OrderedByTopLeft")
-    self:RunAttribute("SortFramesByTopLeft", "OrderedByTopLeft")
+    run:RunAttribute("CopyTable", framesVariable, "OrderedByTopLeft")
+    run:RunAttribute("SortFramesByTopLeft", "OrderedByTopLeft")
 
     local points = newtable()
     for _, frame in ipairs(OrderedByTopLeft) do
@@ -500,12 +510,12 @@ secureMethods["SoftArrange"] = [[
 
     if spacingVariable then
         Points = points
-        self:RunAttribute("ApplySpacing", "Points", spacingVariable)
+        run:RunAttribute("ApplySpacing", "Points", spacingVariable)
         Points = nil
     end
 
     Root = nil
-    local isChain = self:RunAttribute("FrameChain", framesVariable, "Root")
+    local isChain = run:RunAttribute("FrameChain", framesVariable, "Root")
     local root = Root
     Root = nil
 
@@ -541,17 +551,17 @@ secureMethods["SoftArrange"] = [[
             local destination = points[desiredIndex]
             local xDelta = destination.Left - left
             local yDelta = destination.Bottom - bottom
-            local xDeltaRounded = self:RunAttribute("Round", xDelta, DecimalSanity)
-            local yDeltaRounded = self:RunAttribute("Round", yDelta, DecimalSanity)
+            local xDeltaRounded = run:RunAttribute("Round", xDelta, DecimalSanity)
+            local yDeltaRounded = run:RunAttribute("Round", yDelta, DecimalSanity)
 
             if xDeltaRounded ~= 0 or yDeltaRounded ~= 0 then
                 Frame = source
-                local moved = self:RunAttribute("AdjustPointsOffset", "Frame", xDelta, yDelta)
+                local moved = run:RunAttribute("AdjustPointsOffset", "Frame", xDelta, yDelta)
                 movedAny = movedAny or moved
                 Frame = nil
             end
         else
-            self:RunAttribute("Log", "Warning", "Unable to determine frame's desired index")
+            run:RunAttribute("Log", "Warning", "Unable to determine frame's desired index")
         end
     end
 
@@ -560,6 +570,7 @@ secureMethods["SoftArrange"] = [[
 
 -- rearranges a set of frames by modifying their anchors and offsets
 secureMethods["HardArrange"] = [[
+    local run = control or self
     local framesVariable, containerVariable, spacingVariable = ...
     local frames = _G[framesVariable]
     local container = _G[containerVariable]
@@ -644,8 +655,8 @@ secureMethods["HardArrange"] = [[
             point ~= to.Point or
             relativeTo ~= to.RelativeTo or
             relativePoint ~= to.RelativePoint or
-            self:RunAttribute("Round", xOffset, DecimalSanity) ~= self:RunAttribute("Round", to.XOffset, DecimalSanity) or
-            self:RunAttribute("Round", yOffset, DecimalSanity) ~= self:RunAttribute("Round", to.YOffset, DecimalSanity)
+            run:RunAttribute("Round", xOffset, DecimalSanity) ~= run:RunAttribute("Round", to.XOffset, DecimalSanity) or
+            run:RunAttribute("Round", yOffset, DecimalSanity) ~= run:RunAttribute("Round", to.YOffset, DecimalSanity)
 
         if different then
             framesToMove[#framesToMove + 1] = frame
@@ -664,11 +675,12 @@ secureMethods["HardArrange"] = [[
 
 -- determines the offset to use for the ungrouped portion of the raid frames.
 secureMethods["UngroupedOffset"] = [[
+    local run = control or self
     local containerVariable, spacingVariable = ...
     local container = _G[containerVariable]
     local spacing = _G[spacingVariable]
 
-    if not self:RunAttribute("ExtractGroups", containerVariable, "OffsetGroups") then
+    if not run:RunAttribute("ExtractGroups", containerVariable, "OffsetGroups") then
         return 0, 0
     end
 
@@ -680,7 +692,7 @@ secureMethods["UngroupedOffset"] = [[
         OffsetGroupChildren = newtable()
         group:GetChildList(OffsetGroupChildren)
 
-        if self:RunAttribute("ExtractUnitFrames", "OffsetGroupChildren", "OffsetGroupFrames", container.VisibleOnly) then
+        if run:RunAttribute("ExtractUnitFrames", "OffsetGroupChildren", "OffsetGroupFrames", container.VisibleOnly) then
             for _, frame in ipairs(OffsetGroupFrames) do
                 frames[#frames + 1] = frame
             end
@@ -698,14 +710,14 @@ secureMethods["UngroupedOffset"] = [[
     local left, bottom, width, height = container.Frame:GetRect()
 
     if horizontal then
-        self:RunAttribute("SortFramesByBottomLeft", "UngroupedFrames")
+        run:RunAttribute("SortFramesByBottomLeft", "UngroupedFrames")
         local bottomLeftFrame = UngroupedFrames[1]
         local bottomFrameLeft, bottomFrameBottom, _, _ = bottomLeftFrame:GetRect()
 
         x = -(left - bottomFrameLeft)
         y = -((bottom + height) - bottomFrameBottom + spacing.Vertical)
     else
-        self:RunAttribute("SortFramesByTopRight", "UngroupedFrames")
+        run:RunAttribute("SortFramesByTopRight", "UngroupedFrames")
         local topRightFrame = UngroupedFrames[1]
         local topFrameLeft, topFrameBottom, topFrameWidth, topFrameHeight = topRightFrame:GetRect()
 
@@ -720,6 +732,7 @@ secureMethods["UngroupedOffset"] = [[
 ]]
 
 secureMethods["TrySortContainerGroups"] = [[
+    local run = control or self
     local containerVariable, providerVariable = ...
     local container = _G[containerVariable]
     local provider = _G[providerVariable]
@@ -727,14 +740,14 @@ secureMethods["TrySortContainerGroups"] = [[
     local sorted = false
     Groups = nil
 
-    if not self:RunAttribute("ExtractGroups", containerVariable, "Groups") then
+    if not run:RunAttribute("ExtractGroups", containerVariable, "Groups") then
         return false
     end
 
     for _, group in ipairs(Groups) do
         GroupContainer = newtable()
         -- just copy over all the attributes to make code simpler
-        self:RunAttribute("CopyTable", containerVariable, "GroupContainer")
+        run:RunAttribute("CopyTable", containerVariable, "GroupContainer")
 
         -- now re-write over the top
         GroupContainer.Frame = group
@@ -745,36 +758,36 @@ secureMethods["TrySortContainerGroups"] = [[
             GroupContainer.Offset.Y = container.GroupOffset.Y
         end
 
-        sorted = self:RunAttribute("TrySortContainer", "GroupContainer", providerVariable) or sorted
+        sorted = run:RunAttribute("TrySortContainer", "GroupContainer", providerVariable) or sorted
 
         GroupContainer = nil
     end
 
     if container.SupportsSpacing then
-        local horizontalSpacing, verticalSpacing = self:RunAttribute("SpacingForContainer", container.Type)
+        local horizontalSpacing, verticalSpacing = run:RunAttribute("SpacingForContainer", container.Type)
 
         if (horizontalSpacing and horizontalSpacing ~= 0) or (verticalSpacing and verticalSpacing ~= 0) then
             GroupSpacing = newtable()
             GroupSpacing.Horizontal = horizontalSpacing
             GroupSpacing.Vertical = verticalSpacing
 
-            local spacedGroup = self:RunAttribute("SpaceGroups", "Groups", "GroupSpacing")
+            local spacedGroup = run:RunAttribute("SpaceGroups", "Groups", "GroupSpacing")
             sorted = sorted or spacedGroup
         end
     end
 
-    local offsetX, offsetY = self:RunAttribute("UngroupedOffset", containerVariable, "GroupSpacing")
+    local offsetX, offsetY = run:RunAttribute("UngroupedOffset", containerVariable, "GroupSpacing")
 
     -- now re-write over the top
     UngroupedContainer = newtable()
     -- just copy over all the attributes to make code simpler
-    self:RunAttribute("CopyTable", containerVariable, "UngroupedContainer")
+    run:RunAttribute("CopyTable", containerVariable, "UngroupedContainer")
 
     UngroupedContainer.Offset = newtable()
     UngroupedContainer.Offset.X = offsetX or 0
     UngroupedContainer.Offset.Y = offsetY or 0
 
-    sorted = self:RunAttribute("TrySortContainer", "UngroupedContainer", providerVariable) or sorted
+    sorted = run:RunAttribute("TrySortContainer", "UngroupedContainer", providerVariable) or sorted
 
     UngroupedContainer = nil
     GroupSpacing = nil
@@ -784,6 +797,7 @@ secureMethods["TrySortContainerGroups"] = [[
 
 -- attempts to sort the frames within the container
 secureMethods["TrySortContainer"] = [[
+    local run = control or self
     local friendlyEnabled = self:GetAttribute("FriendlySortEnabled")
     local enemyEnabled = self:GetAttribute("EnemySortEnabled")
     local containerVariable, providerVariable = ...
@@ -804,7 +818,7 @@ secureMethods["TrySortContainer"] = [[
     elseif container.Type == ContainerType.EnemyArena then
         units = EnemyUnits
     else
-        self:RunAttribute("Log", "Error", "Invalid container type: " .. (container.Type or 'nil'))
+        run:RunAttribute("Log", "Error", "Invalid container type: " .. (container.Type or 'nil'))
         return false
     end
 
@@ -814,7 +828,7 @@ secureMethods["TrySortContainer"] = [[
     -- import into the global table for filtering
     container.Frame:GetChildList(Children)
 
-    if not self:RunAttribute("ExtractUnitFrames", "Children", "Frames", container.VisibleOnly) then
+    if not run:RunAttribute("ExtractUnitFrames", "Children", "Frames", container.VisibleOnly) then
         return false
     end
 
@@ -822,12 +836,12 @@ secureMethods["TrySortContainer"] = [[
 
     -- sort the frames to the desired locations
     FramesInUnitOrder = nil
-    self:RunAttribute("SortFramesByUnits", "Frames", "Units", "FramesInUnitOrder")
+    run:RunAttribute("SortFramesByUnits", "Frames", "Units", "FramesInUnitOrder")
 
     local sorted = false
 
     if container.SupportsSpacing then
-        local horizontalSpacing, verticalSpacing = self:RunAttribute("SpacingForContainer", container.Type)
+        local horizontalSpacing, verticalSpacing = run:RunAttribute("SpacingForContainer", container.Type)
 
         if (horizontalSpacing and horizontalSpacing ~= 0) or (verticalSpacing and verticalSpacing ~= 0) then
             Spacing = newtable()
@@ -837,9 +851,9 @@ secureMethods["TrySortContainer"] = [[
     end
 
     if container.LayoutType == LayoutType.Hard then
-        sorted = self:RunAttribute("HardArrange", "FramesInUnitOrder", containerVariable, Spacing and "Spacing")
+        sorted = run:RunAttribute("HardArrange", "FramesInUnitOrder", containerVariable, Spacing and "Spacing")
     elseif container.LayoutType == LayoutType.Soft then
-        sorted = self:RunAttribute("SoftArrange", "FramesInUnitOrder", Spacing and "Spacing")
+        sorted = run:RunAttribute("SoftArrange", "FramesInUnitOrder", Spacing and "Spacing")
     end
 
     FramesInUnitOrder = nil
@@ -852,7 +866,9 @@ secureMethods["TrySortContainer"] = [[
 
 -- top level perform sort routine
 secureMethods["TrySort"] = [[
-    if not self:RunAttribute("InCombat") then return false end
+    local run = control or self
+
+    if not run:RunAttribute("InCombat") then return false end
 
     local friendlyEnabled = self:GetAttribute("FriendlySortEnabled")
     local enemyEnabled = self:GetAttribute("EnemySortEnabled")
@@ -863,7 +879,7 @@ secureMethods["TrySort"] = [[
 
     local loadedUnits = self:GetAttribute("LoadedUnits")
     if not loadedUnits then
-        self:RunAttribute("LoadUnits")
+        run:RunAttribute("LoadUnits")
         self:SetAttribute("LoadedUnits", true)
     end
 
@@ -894,9 +910,9 @@ secureMethods["TrySort"] = [[
         Provider = item.Provider
 
         if Container.IsGrouped then
-            sorted = self:RunAttribute("TrySortContainerGroups", "Container", "Provider") or sorted
+            sorted = run:RunAttribute("TrySortContainerGroups", "Container", "Provider") or sorted
         else
-            sorted = self:RunAttribute("TrySortContainer", "Container", "Provider") or sorted
+            sorted = run:RunAttribute("TrySortContainer", "Container", "Provider") or sorted
         end
 
         Provider = nil
@@ -1086,7 +1102,10 @@ local function LoadProvider(provider)
     end
 
     manager:SetAttributeNoHandler(provider:Name() .. "ContainersCount", #containers)
-    manager:Execute([[ self:RunAttribute("LoadProvider") ]])
+    manager:Execute([[ 
+        local run = control or self
+        run:RunAttribute("LoadProvider") 
+    ]])
 
     for _, item in ipairs(containers) do
         -- flag as imported
@@ -1194,7 +1213,8 @@ local function ConfigureHeader(header)
 
         self:SetAttribute("refreshUnitChange", RefreshUnitChange)
 
-        Header:CallMethod("UnitButtonCreated", UnitButtonsCount)
+        local run = control or Header
+        run:CallMethod("UnitButtonCreated", UnitButtonsCount)
     ]=])
 
     header:SetFrameRef("Manager", manager)
@@ -1233,12 +1253,19 @@ function M:Init()
         manager:SetAttributeNoHandler(name, snippet)
     end
 
-    manager:Execute([[ self:RunAttribute("Init") ]])
+    manager:Execute([[ 
+        -- wotlk 3.3.5 doesn't have RunAttribute and such on self
+        -- those methods exist on the "control" global
+        local run = control or self
+
+        run:RunAttribute("Init") 
+    ]])
 
     manager:SetAttribute("_onstate-framesort-run", [[
         if newstate == "ignore" then return end
 
-        self:RunAttribute("TrySort")
+        local run = control or self
+        run:RunAttribute("TrySort")
     ]])
 
     -- https://www.wowinterface.com/forums/showthread.php?t=58697
