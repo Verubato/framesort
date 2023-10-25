@@ -64,8 +64,7 @@ function M:Build(parent)
 
         [[#FrameSort EnemyHealer, EnemyHealer
 /cast [@doesntmatter] Shadowstep;
-/cast [@placeholder] Kick;
-]],
+/cast [@placeholder] Kick;]],
     }
 
     local padding = 10
