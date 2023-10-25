@@ -1,5 +1,5 @@
 ---@type AddonMock
-local addon = require("Addon")
+local addon = require("Mock\\Addon")
 local frame = require("Mock\\Frame")
 local fsFrame = addon.WoW.Frame
 local wow = addon.WoW.Api

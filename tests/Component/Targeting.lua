@@ -1,4 +1,4 @@
-local addon = require("Addon")
+local addon = require("Mock\\Addon")
 local frame = require("Mock\\Frame")
 local wow = addon.WoW.Api
 local provider = addon.Providers.Test
