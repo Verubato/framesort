@@ -158,7 +158,7 @@ end
 ---@param visibleOnly boolean?
 ---@return table
 function M:ExtractUnitFrames(container, visibleOnly)
-    if not container or container:IsForbidden() or not container:IsVisible() then
+    if not container or M:IsForbidden(container) or not container:IsVisible() then
         return {}
     end
 
@@ -168,7 +168,7 @@ function M:ExtractUnitFrames(container, visibleOnly)
         :From({ container:GetChildren() })
         :Where(function(frame)
             if type(frame) ~= "table" then return false end
-            if frame:IsForbidden() then return false end
+            if M:IsForbidden(frame) then return false end
             if frame:GetTop() == nil or frame:GetLeft() == nil then return false end
             if visibleOnly and not frame:IsVisible() then return false end
 
@@ -183,7 +183,7 @@ end
 ---@param visibleOnly boolean?
 ---@return table
 function M:ExtractGroups(container, visibleOnly)
-    if not container or container:IsForbidden() or not container:IsVisible() then
+    if not container or M:IsForbidden(container) or not container:IsVisible() then
         return {}
     end
 
@@ -193,7 +193,7 @@ function M:ExtractGroups(container, visibleOnly)
         :From({ container:GetChildren() })
         :Where(function(frame)
             if type(frame) ~= "table" then return false end
-            if frame:IsForbidden() then return false end
+            if M:IsForbidden(frame) then return false end
             if frame:GetTop() == nil or frame:GetLeft() == nil then return false end
             if visibleOnly and not frame:IsVisible() then return false end
 
@@ -247,4 +247,11 @@ end
 ---@return table[]
 function M:EnemyArenaFrames(provider, visibleOnly)
     return GetFrames(provider, M.ContainerType.EnemyArena, visibleOnly)
+end
+
+function M:IsForbidden(frame)
+    -- wotlk 3.3.5 doesn't have this function
+    if not frame.IsForbidden then return false end
+
+    return frame:IsForbidden()
 end
