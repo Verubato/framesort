@@ -65,6 +65,7 @@ local wow = {
     issecurevariable = issecurevariable,
     hooksecurefunc = hooksecurefunc,
     RegisterAttributeDriver = RegisterAttributeDriver,
+    UnregisterAttributeDriver = UnregisterAttributeDriver,
     SecureHandlerWrapScript = SecureHandlerWrapScript,
     SecureHandlerSetFrameRef = SecureHandlerSetFrameRef,
     SecureHandlerExecute = SecureHandlerExecute,

@@ -4,37 +4,37 @@ local wow = addon.WoW.Api
 local fsCompare = addon.Collections.Comparer
 local fsConfig = addon.Configuration
 local fsProviders = addon.Providers
-local fsUnit = addon.WoW.Unit
 local fsFrame = addon.WoW.Frame
 local fsEnumerable = addon.Collections.Enumerable
-local fsLog = addon.Logging.Log
 ---@class HidePlayerModule: IInitialise
 local M = {}
 addon.Modules.HidePlayer = M
 
-local function UpdatePlayer(player, mode)
-    if player:IsVisible() and mode == fsConfig.PlayerSortMode.Hidden then
-        wow.RegisterAttributeDriver(player, "state-visibility", "hide")
-    elseif not player:IsVisible() and mode ~= fsConfig.PlayerSortMode.Hidden then
-        wow.RegisterAttributeDriver(player, "state-visibility", "show")
-    end
-end
-
-local function PlayerRaidFrames()
+local function ShowHide(show)
     local blizzard = fsProviders.Blizzard
-    local party = fsFrame:PartyFrames(blizzard)
-    local raid = fsFrame:RaidFrames(blizzard)
+    local party = fsFrame:PartyFrames(blizzard, false)
+    local raid = fsFrame:RaidFrames(blizzard, false)
 
-    return fsEnumerable
+    local all = fsEnumerable
         :From(party)
         :Concat(raid)
-        :Where(function(frame)
-            local unit = frame.unit
-            -- a player can have more than one frame if they occupy a vehicle
-            -- as both the player and vehicle pet frame are shown
-            return unit and (unit == "player" or wow.UnitIsUnit(unit, "player")) and not fsUnit:IsPet(unit)
-        end)
         :ToTable()
+
+    -- we need to update all frames as units are not fixed to a frame
+    -- so the player unit may have moved from frame1 to frame3 for example
+    for _, frame in ipairs(all) do
+        local unit = fsFrame:GetFrameUnit(frame)
+
+        assert(unit ~= nil)
+
+        local isPlayer = wow.UnitIsUnit(unit, "player")
+
+        if isPlayer then
+            wow.RegisterAttributeDriver(frame, "state-visibility", show and "show" or "hide")
+        else
+            wow.UnregisterAttributeDriver(frame, "state-visibility")
+        end
+    end
 end
 
 function M:Run()
@@ -51,16 +51,9 @@ function M:Run()
         return
     end
 
-    local frames = PlayerRaidFrames()
+    local show = mode ~= fsConfig.PlayerSortMode.Hidden
 
-    if #frames == 0 and wow.IsInGroup() then
-        fsLog:Warning("Couldn't find player raid frame.")
-        return
-    end
-
-    for _, player in ipairs(frames) do
-        UpdatePlayer(player, mode)
-    end
+    ShowHide(show)
 end
 
 function M:Init() end
