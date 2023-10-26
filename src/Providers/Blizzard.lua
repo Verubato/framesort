@@ -38,11 +38,17 @@ local function RequestUpdateContainers()
 end
 
 local function OnEvent(_, event)
-    RequestSort()
-
     if event == events.EDIT_MODE_LAYOUTS_UPDATED then
         RequestUpdateContainers()
     end
+
+    RequestSort()
+end
+
+local function OnEditModeExited()
+    -- user may have changed frame settings, so request that containers be refreshed
+    RequestUpdateContainers()
+    RequestSort()
 end
 
 local function OnCvarUpdate(_, _, name)
@@ -114,9 +120,7 @@ function M:Init()
     eventFrame:RegisterEvent(events.UNIT_PET)
 
     if wow.IsRetail() then
-        wow.EventRegistry:RegisterCallback(events.EditModeExit, RequestSort)
-        -- user may have changed frame settings, so request that containers be refreshed
-        wow.EventRegistry:RegisterCallback(events.EditModeExit, RequestUpdateContainers)
+        wow.EventRegistry:RegisterCallback(events.EditModeExit, OnEditModeExited)
         eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
         eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
 
