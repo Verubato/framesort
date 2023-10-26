@@ -875,7 +875,7 @@ secureMethods["TrySort"] = [[
 
     if not friendlyEnabled and not enemyEnabled then return false end
 
-    self:CallMethod("SortStarting")
+    run:CallMethod("SortStarting")
 
     local loadedUnits = self:GetAttribute("LoadedUnits")
     if not loadedUnits then
@@ -919,12 +919,7 @@ secureMethods["TrySort"] = [[
         Container = nil
     end
 
-    if sorted then
-        -- notify unsecure code to invoke callbacks
-        self:CallMethod("NotifySorted")
-    end
-
-    self:CallMethod("SortEnding", sorted)
+    run:CallMethod("SortEnding", sorted)
 
     return sorted
 ]]
@@ -1213,8 +1208,15 @@ local function ConfigureHeader(header)
 
         self:SetAttribute("refreshUnitChange", RefreshUnitChange)
 
-        local run = control or Header
-        run:CallMethod("UnitButtonCreated", UnitButtonsCount)
+        if Header.CallMethod then
+            Header:CallMethod("UnitButtonCreated", UnitButtonsCount)
+        else
+            -- backwards compatibility for wotlk private
+            local run = control or self
+            run:RunFor(Header, [[
+                control:CallMethod("UnitButtonCreated")
+            ]])
+        end
     ]=])
 
     header:SetFrameRef("Manager", manager)
@@ -1234,10 +1236,6 @@ function M:Init()
 
     InjectSecureHelpers(manager)
 
-    function manager:NotifySorted()
-        fsSorting:NotifySorted()
-    end
-
     function manager:SortStarting()
         manager.TimeStart = wow.GetTimePreciseSec()
     end
@@ -1246,7 +1244,11 @@ function M:Init()
         manager.TimeStop = wow.GetTimePreciseSec()
 
         local ms = (manager.TimeStop - manager.TimeStart) * 1000
-        fsLog:Debug(string.format("Performed in-combat sort in %fms, result: %s.", ms, sorted and "sorted" or "not sorted"))
+        fsLog:Debug(string.format("In-combat sort took %fms, result: %s.", ms, sorted and "sorted" or "not sorted"))
+
+        if sorted then
+            fsSorting:NotifySorted()
+        end
     end
 
     for name, snippet in pairs(secureMethods) do
@@ -1254,7 +1256,7 @@ function M:Init()
     end
 
     manager:Execute([[ 
-        -- wotlk 3.3.5 doesn't have RunAttribute and such on self
+        -- wotlk 3.3.5 doesn't have the control methods on self
         -- those methods exist on the "control" global
         local run = control or self
 
