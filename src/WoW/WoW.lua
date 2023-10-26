@@ -135,7 +135,10 @@ local wow = {
         EDIT_MODE_LAYOUTS_UPDATED = "EDIT_MODE_LAYOUTS_UPDATED",
 
         -- Fired when a unit's name updates (both ally and enemy units)
-        UNIT_NAME_UPDATE = "UNIT_NAME_UPDATE"
+        UNIT_NAME_UPDATE = "UNIT_NAME_UPDATE",
+
+        -- fired when some sort of timer starts, e.g. time until arena/bg gates open
+        START_TIMER = "START_TIMER",
     },
 }
 
