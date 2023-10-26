@@ -76,10 +76,8 @@ local function ScanMacros()
         end
     end
 
-    fsLog:Debug(string.format("Updated %d macros", updatedCount))
-
     local stop = wow.GetTimePreciseSec()
-    fsLog:Debug(string.format("Update macros took %fms.", (stop - start) * 1000))
+    fsLog:Debug(string.format("Update macros took %fms, %d were changed.", (stop - start) * 1000, updatedCount))
 end
 
 local function OnEditMacro(id, _, _, _)

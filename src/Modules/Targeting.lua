@@ -38,7 +38,7 @@ end
 local function UpdateTargets()
     local start = wow.GetTimePreciseSec()
     local friendlyUnits = M:FriendlyTargets()
-    local updatedAny = false
+    local updatedCount = 0
 
     -- if units has less than 5 items it's still fine as units[i] will just be nil
     for i, btn in ipairs(targetFramesButtons) do
@@ -47,7 +47,7 @@ local function UpdateTargets()
 
         if current ~= new then
             btn:SetAttribute("unit", new)
-            updatedAny = true
+            updatedCount = updatedCount + 1
         end
     end
 
@@ -57,7 +57,7 @@ local function UpdateTargets()
 
     if bottomCurrentUnit ~= bottomNewUnit then
         targetBottomFrameButton:SetAttribute("unit", bottomNewUnit)
-        updatedAny = true
+        updatedCount = updatedCount + 1
     end
 
     local enemyunits = M:EnemyTargets()
@@ -68,7 +68,7 @@ local function UpdateTargets()
 
         if current ~= new then
             btn:SetAttribute("unit", new)
-            updatedAny = true
+            updatedCount = updatedCount + 1
         end
     end
 
@@ -78,16 +78,12 @@ local function UpdateTargets()
 
         if current ~= new then
             btn:SetAttribute("unit", new)
-            updatedAny = true
+            updatedCount = updatedCount + 1
         end
     end
 
-    if updatedAny then
-        fsLog:Debug(string.format("Updated targets: %d friendly, %d enemy.", #friendlyUnits, #enemyunits))
-    end
-
     local stop = wow.GetTimePreciseSec()
-    fsLog:Debug(string.format("Update targets took %fms.", (stop - start) * 1000))
+    fsLog:Debug(string.format("Update targets took %fms, %d were updated.", (stop - start) * 1000, updatedCount))
 end
 
 function M:FriendlyTargets()

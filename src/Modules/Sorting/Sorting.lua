@@ -46,7 +46,7 @@ function M:Run(provider)
     end
 
     local stop = wow.GetTimePreciseSec();
-    fsLog:Debug(string.format("Performed sort in %fms, result: %s.", (stop - start) * 1000, sorted and "sorted" or "not sorted"))
+    fsLog:Debug(string.format("Sort took %fms, result: %s.", (stop - start) * 1000, sorted and "sorted" or "not sorted"))
 
     if sorted then
         M:NotifySorted()
