@@ -1128,8 +1128,38 @@ local function InjectSecureHelpers(secureFrame)
     end
 end
 
+-- TODO: I don't think this should make a difference anymore, but re-adding it for testing.
+local function ResubscribeEvents()
+    -- we want our sorting code to run after blizzard and other frame addons refresh their frames
+    -- i.e., we want to handle GROUP_ROSTER_UPDATE/UNT_PET after frame addons have performed their update handling
+    -- this is easily achieved in the insecure environment by using hooks, however in the restricted environment we have no such luxury
+    -- fortunately it seems blizzard invoke event handlers roughly in the order that they were registered
+    -- so if we register our events later, our code will run later
+    -- of course it's not good to rely on this and we should generally treat event ordering as undefined
+    -- perhaps in a future patch this implementation detail could change and our code will break
+    -- however until a better solution can be found, this is our only hope
+
+    assert(memberHeader ~= nil)
+    assert(petHeader ~= nil)
+
+    memberHeader:UnregisterEvent(wow.Events.GROUP_ROSTER_UPDATE)
+    memberHeader:UnregisterEvent(wow.Events.UNIT_NAME_UPDATE)
+
+    memberHeader:RegisterEvent(wow.Events.GROUP_ROSTER_UPDATE)
+    memberHeader:RegisterEvent(wow.Events.UNIT_NAME_UPDATE)
+
+    petHeader:UnregisterEvent(wow.Events.GROUP_ROSTER_UPDATE)
+    petHeader:UnregisterEvent(wow.Events.UNIT_PET)
+    petHeader:UnregisterEvent(wow.Events.UNIT_NAME_UPDATE)
+
+    petHeader:RegisterEvent(wow.Events.GROUP_ROSTER_UPDATE)
+    petHeader:RegisterEvent(wow.Events.UNIT_PET)
+    petHeader:RegisterEvent(wow.Events.UNIT_NAME_UPDATE)
+end
+
 local function OnCombatStarting()
     LoadUnits()
+    ResubscribeEvents()
 end
 
 local function OnProviderContainersChanged(provider)
