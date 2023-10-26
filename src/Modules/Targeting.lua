@@ -83,7 +83,7 @@ local function UpdateTargets()
     end
 
     local stop = wow.GetTimePreciseSec()
-    fsLog:Debug(string.format("Update targets took %fms, %d were updated.", (stop - start) * 1000, updatedCount))
+    fsLog:Debug(string.format("Update targets took %fms, %d updated.", (stop - start) * 1000, updatedCount))
 end
 
 function M:FriendlyTargets()
