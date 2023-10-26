@@ -46,6 +46,13 @@ function M:RunNextFrame(callback)
     wow.C_Timer.After(0, callback)
 end
 
+--- invokes the callback after the specified number of seconds.
+---@param callback fun()
+---@param seconds number
+function M:RunAfter(seconds, callback)
+    wow.C_Timer.After(seconds, callback)
+end
+
 ---Invokes the callback once combat ends.
 ---@param key string? an optional key which will ensure only the latest callback provided with the same key will be executed.
 ---@param callback fun()
