@@ -161,8 +161,9 @@ end
 ---@param framesPerLine number?
 ---@param spacing Spacing?
 ---@param offset Offset?
+---@param blockHeight number?
 ---@return boolean sorted
-local function HardArrange(frames, container, isHorizontalLayout, framesPerLine, spacing, offset)
+local function HardArrange(frames, container, isHorizontalLayout, framesPerLine, spacing, offset, blockHeight)
     if #frames == 0 then
         return false
     end
@@ -172,7 +173,8 @@ local function HardArrange(frames, container, isHorizontalLayout, framesPerLine,
     -- which is the case of pet frames, where 2 pet frames can fit into 1 player frame
     -- we could find max height/width, but this should almost certaintly be equal to the first frame in the array
     -- so save the cpu cycles and just use the first frame
-    local blockHeight, blockWidth = frames[1]:GetHeight(), frames[1]:GetWidth()
+    blockHeight = blockHeight or frames[1]:GetHeight()
+    local blockWidth = frames[1]:GetWidth()
 
     offset = offset or {
         X = 0,
@@ -445,7 +447,16 @@ local function TrySortContainerGroups(container)
 
     -- ungrouped frames include pets, vehicles, and main tank/assist frames
     local ungroupedFrames = fsFrame:ExtractUnitFrames(container.Frame, container.VisibleOnly)
+
+    if #ungroupedFrames == 0 then
+        return sorted
+    end
+
     local ungroupedOffset = UngroupedOffset(container, spacing)
+    -- pet frames are half the height of a member frame
+    -- it'd be technically better to get the height of a member frame
+    -- but want a way to do that efficiently, e.g. get the frames back from TrySortContainer or something
+    local blockHeight = ungroupedFrames[1]:GetHeight() * 2
 
     sorted = HardArrange(
         ungroupedFrames,
@@ -453,7 +464,8 @@ local function TrySortContainerGroups(container)
         isHorizontalLayout,
         container.FramesPerLine and container:FramesPerLine(),
         spacing,
-        ungroupedOffset)
+        ungroupedOffset,
+        blockHeight)
 
     return true
 end

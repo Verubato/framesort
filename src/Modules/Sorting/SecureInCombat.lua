@@ -573,15 +573,17 @@ secureMethods["SoftArrange"] = [[
 -- rearranges a set of frames by modifying their anchors and offsets
 secureMethods["HardArrange"] = [[
     local run = control or self
-    local framesVariable, containerVariable, spacingVariable = ...
+    local framesVariable, containerVariable, spacingVariable, blockHeight = ...
     local frames = _G[framesVariable]
     local container = _G[containerVariable]
     local spacing = spacingVariable and _G[spacingVariable]
     local verticalSpacing = spacing and spacing.Vertical or 0
     local horizontalSpacing = spacing and spacing.Horizontal or 0
     local isHorizontalLayout = container.IsHorizontalLayout
-    local _, _, blockWidth, blockHeight = frames[1]:GetRect()
+    local _, _, firstFrameWidth, firstFrameHeight = frames[1]:GetRect()
     local offset = container.Offset or newtable()
+    local blockWidth = firstFrameWidth
+    blockHeight = blockHeight or firstFrameHeight
 
     offset.X = offset.X or 0
     offset.Y = offset.Y or 0
@@ -823,7 +825,10 @@ secureMethods["TrySortContainerGroups"] = [[
     UngroupedContainer.Offset.X = offsetX
     UngroupedContainer.Offset.Y = offsetY
 
-    sorted = run:RunAttribute("HardArrange", "UngroupedFrames", "UngroupedContainer", "GroupSpacing")
+    -- use the block height of a member frame as pet frames are smaller
+    local blockHeight = UngroupedFrames[1]:GetHeight() * 2
+
+    sorted = run:RunAttribute("HardArrange", "UngroupedFrames", "UngroupedContainer", "GroupSpacing", blockHeight)
 
     UngroupedContainer = nil
     UngroupedChildren = nil
@@ -928,7 +933,7 @@ secureMethods["TrySort"] = [[
         local providerEnabled = self:GetAttribute("Provider" .. provider.Name .. "Enabled")
         if providerEnabled then
             for _, container in ipairs(provider.Containers) do
-                if container.Frame and container.Frame:IsVisible() then
+                if container.Frame:IsVisible() then
                     if ((container.Type == ContainerType.Party or container.Type == ContainerType.Raid) and friendlyEnabled) or
                         (container.Type == ContainerType.EnemyArena and enemyEnabled) then
                         local add = newtable()
