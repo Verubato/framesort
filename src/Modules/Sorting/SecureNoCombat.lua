@@ -291,15 +291,29 @@ local function UngroupedOffset(container, spacing)
         X = 0,
         Y = 0
     }
+
     local groups = fsFrame:ExtractGroups(container.Frame)
     local horizontal = container.IsHorizontalLayout and container:IsHorizontalLayout()
-    local frames = fsEnumerable
-        :From(groups)
-        :Map(function(group) return fsFrame:ExtractUnitFrames(group, container.VisibleOnly) end)
-        :Flatten()
-        :ToTable()
 
-    if #frames == 0 then return offset end
+    spacing = spacing or {
+        Horizontal = 0,
+        Vertical = 0
+    }
+
+    local lastGroup = fsEnumerable
+        :From(groups)
+        :Reverse()
+        :First(function(x) return x:IsVisible() end)
+
+    if not lastGroup then
+        return offset
+    end
+
+    local frames = fsFrame:ExtractUnitFrames(lastGroup, container.VisibleOnly)
+
+    if #frames == 0 then
+        return offset
+    end
 
     if horizontal then
         local bottomLeftFrame = fsEnumerable
@@ -386,12 +400,14 @@ local function TrySortContainerGroups(container)
         return false
     end
 
+    local isHorizontalLayout = container.IsHorizontalLayout and container:IsHorizontalLayout() or false
+
     for _, group in ipairs(groups) do
         ---@type FrameContainer
         local groupContainer = {
             Frame = group,
             Type = container.Type,
-            IsHorizontalLayout = function() return container.IsHorizontalLayout and container:IsHorizontalLayout() end,
+            IsHorizontalLayout = function() return isHorizontalLayout end,
             VisibleOnly = container.VisibleOnly,
             LayoutType = container.LayoutType,
             SupportsSpacing = container.SupportsSpacing,
@@ -405,41 +421,41 @@ local function TrySortContainerGroups(container)
         sorted = TrySortContainer(groupContainer) or sorted
     end
 
-    local spacing = nil
-    if container.SupportsSpacing then
-        local config = addon.DB.Options.Spacing
-        if container.Type == fsFrame.ContainerType.Party then
-            spacing = config.Party
-        elseif container.Type == fsFrame.ContainerType.Raid then
-            spacing = config.Raid
-        elseif container.Type == fsFrame.ContainerType.EnemyArena then
-            spacing = config.EnemyArena
-        end
+    if not container.SupportsSpacing then
+        -- to avoid issues with main tank and assist frames don't move ungrouped frames if we don't need to
+        return sorted
     end
 
-    if container.SupportsSpacing and spacing then
-        sorted = SoftArrange(groups, spacing) or sorted
+    local spacing = nil
+    local config = addon.DB.Options.Spacing
+
+    if container.Type == fsFrame.ContainerType.Party then
+        spacing = config.Party
+    elseif container.Type == fsFrame.ContainerType.Raid then
+        spacing = config.Raid
+    elseif container.Type == fsFrame.ContainerType.EnemyArena then
+        spacing = config.EnemyArena
     end
+
+    if not spacing or (spacing.Horizontal == 0 and spacing.Vertical == 0) then
+        return sorted
+    end
+
+    sorted = SoftArrange(groups, spacing) or sorted
 
     -- ungrouped frames include pets, vehicles, and main tank/assist frames
+    local ungroupedFrames = fsFrame:ExtractUnitFrames(container.Frame, container.VisibleOnly)
     local ungroupedOffset = UngroupedOffset(container, spacing)
-    local ungroupedContainer = {
-        Frame = container.Frame,
-        Type = container.Type,
-        IsHorizontalLayout = function() return container.IsHorizontalLayout and container:IsHorizontalLayout() end,
-        VisibleOnly = container.VisibleOnly,
-        LayoutType = container.LayoutType,
-        SupportsSpacing = container.SupportsSpacing,
-        FramesPerLine = container.FramesPerLine,
-        -- we want to use the group frames offset here
-        FramesOffset = function() return ungroupedOffset end,
-        GroupFramesOffset = function() return nil end,
-        IsGrouped = function() return false end,
-    }
 
-    sorted = TrySortContainer(ungroupedContainer) or sorted
+    sorted = HardArrange(
+        ungroupedFrames,
+        container.Frame,
+        isHorizontalLayout,
+        container.FramesPerLine and container:FramesPerLine(),
+        spacing,
+        ungroupedOffset)
 
-    return sorted
+    return true
 end
 
 ---@param provider FrameProvider?

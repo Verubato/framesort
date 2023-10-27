@@ -363,6 +363,7 @@ secureMethods["AdjustPointsOffset"] = [[
     return true
 ]]
 
+-- returns the spacing configuration for the specified container type
 secureMethods["SpacingForContainer"] = [[
     local containerType = ...
     local spacingType = nil
@@ -383,6 +384,7 @@ secureMethods["SpacingForContainer"] = [[
     return horizontalSpacing, verticalSpacing
 ]]
 
+-- applies spacing on a set of points
 secureMethods["ApplySpacing"] = [[
     local run = control or self
     local pointsVariable, spacingVariable = ...
@@ -431,7 +433,7 @@ secureMethods["ApplySpacing"] = [[
     return changed
 ]]
 
--- rearranges a set of frames accoding to the pre-sorted unit positions
+-- applies spacing between raid groups
 secureMethods["SpaceGroups"] = [[
     local run = control or self
     local groupsVariable, spacingVariable = ...
@@ -684,48 +686,63 @@ secureMethods["UngroupedOffset"] = [[
         return 0, 0
     end
 
-    local frames = newtable()
-    local horizontal = container.IsHorizontalLayout
+    local lastGroup = nil
 
-    -- TODO: don't get frames from all groups, get frames from the bottom/right most group
-    for i, group in ipairs(OffsetGroups) do
-        OffsetGroupChildren = newtable()
-        group:GetChildList(OffsetGroupChildren)
+    for i = #OffsetGroups, 1, -1 do 
+        local group = OffsetGroups[i]
 
-        if run:RunAttribute("ExtractUnitFrames", "OffsetGroupChildren", "OffsetGroupFrames", container.VisibleOnly) then
-            for _, frame in ipairs(OffsetGroupFrames) do
-                frames[#frames + 1] = frame
-            end
+        if group:IsVisible() then
+            lastGroup = group
+            break
         end
-
-        OffsetGroupChildren = nil
-        OffsetGroupFrames = nil
     end
 
-    if #frames == 0 then return 0, 0 end
+    if not lastGroup then
+        OffsetGroups = nil
+        return 0, 0
+    end
 
-    UngroupedFrames = frames
+    OffsetGroupChildren = newtable()
+
+    lastGroup:GetChildList(OffsetGroupChildren)
+
+    if not run:RunAttribute("ExtractUnitFrames", "OffsetGroupChildren", "OffsetGroupFrames", container.VisibleOnly) then
+        OffsetGroupFrames = nil
+        OffsetGroupChildren = nil
+        return 0, 0
+    end
+
+    local horizontal = container.IsHorizontalLayout
+
+    if not spacing then
+        spacing = newtable()
+        spacing.Horizontal = 0
+        spacing.Vertical = 0
+    end
 
     local x, y = 0, 0
     local left, bottom, width, height = container.Frame:GetRect()
 
     if horizontal then
-        run:RunAttribute("SortFramesByBottomLeft", "UngroupedFrames")
-        local bottomLeftFrame = UngroupedFrames[1]
+        run:RunAttribute("SortFramesByBottomLeft", "OffsetGroupFrames")
+
+        local bottomLeftFrame = OffsetGroupFrames[1]
         local bottomFrameLeft, bottomFrameBottom, _, _ = bottomLeftFrame:GetRect()
 
         x = -(left - bottomFrameLeft)
         y = -((bottom + height) - bottomFrameBottom + spacing.Vertical)
     else
-        run:RunAttribute("SortFramesByTopRight", "UngroupedFrames")
-        local topRightFrame = UngroupedFrames[1]
+        run:RunAttribute("SortFramesByTopRight", "OffsetGroupFrames")
+
+        local topRightFrame = OffsetGroupFrames[1]
         local topFrameLeft, topFrameBottom, topFrameWidth, topFrameHeight = topRightFrame:GetRect()
 
         x = -(left - (topFrameLeft + topFrameWidth) - spacing.Horizontal)
         y = -((bottom + height) - (topFrameBottom + topFrameHeight))
     end
 
-    UngroupedFrames = nil
+    OffsetGroupChildren = nil
+    OffsetGroupFrames = nil
     OffsetGroups = nil
 
     return x, y
@@ -763,35 +780,57 @@ secureMethods["TrySortContainerGroups"] = [[
         GroupContainer = nil
     end
 
-    if container.SupportsSpacing then
-        local horizontalSpacing, verticalSpacing = run:RunAttribute("SpacingForContainer", container.Type)
-
-        if (horizontalSpacing and horizontalSpacing ~= 0) or (verticalSpacing and verticalSpacing ~= 0) then
-            GroupSpacing = newtable()
-            GroupSpacing.Horizontal = horizontalSpacing
-            GroupSpacing.Vertical = verticalSpacing
-
-            local spacedGroup = run:RunAttribute("SpaceGroups", "Groups", "GroupSpacing")
-            sorted = sorted or spacedGroup
-        end
+    if not container.SupportsSpacing then
+        Groups = nil
+        return sorted
     end
 
+    local horizontalSpacing, verticalSpacing = run:RunAttribute("SpacingForContainer", container.Type)
+
+    if not horizontalSpacing and not verticalSpacing or (horizontalSpacing == 0 and verticalSpacing == 0) then
+        Groups = nil
+        return sorted
+    end
+
+    GroupSpacing = newtable()
+    GroupSpacing.Horizontal = horizontalSpacing or 0
+    GroupSpacing.Vertical = verticalSpacing or 0
+
+    sorted = run:RunAttribute("SpaceGroups", "Groups", "GroupSpacing") or sorted
+
+    -- TODO: I think something from here onwards is very slow, investigate
     local offsetX, offsetY = run:RunAttribute("UngroupedOffset", containerVariable, "GroupSpacing")
 
-    -- now re-write over the top
+    UngroupedChildren = newtable()
+    UngroupedFrames = newtable()
+
+    -- import into the global table for filtering
+    container.Frame:GetChildList(UngroupedChildren)
+
+    if not run:RunAttribute("ExtractUnitFrames", "UngroupedChildren", "UngroupedFrames", container.VisibleOnly) then
+        UngroupedChildren = nil
+        UngroupedFrames = nil
+        return false
+    end
+
     UngroupedContainer = newtable()
+
     -- just copy over all the attributes to make code simpler
     run:RunAttribute("CopyTable", containerVariable, "UngroupedContainer")
 
+    -- now re-write over the top
     UngroupedContainer.Offset = newtable()
-    UngroupedContainer.Offset.X = offsetX or 0
-    UngroupedContainer.Offset.Y = offsetY or 0
+    UngroupedContainer.Offset.X = offsetX
+    UngroupedContainer.Offset.Y = offsetY
 
-    sorted = run:RunAttribute("TrySortContainer", "UngroupedContainer", providerVariable) or sorted
+    sorted = run:RunAttribute("HardArrange", "UngroupedFrames", "UngroupedContainer", "GroupSpacing")
 
     UngroupedContainer = nil
+    UngroupedChildren = nil
+    UngroupedFrames = nil
     GroupSpacing = nil
     Groups = nil
+
     return sorted
 ]]
 
@@ -1097,9 +1136,9 @@ local function LoadProvider(provider)
     end
 
     manager:SetAttributeNoHandler(provider:Name() .. "ContainersCount", #containers)
-    manager:Execute([[ 
+    manager:Execute([[
         local run = control or self
-        run:RunAttribute("LoadProvider") 
+        run:RunAttribute("LoadProvider")
     ]])
 
     for _, item in ipairs(containers) do
@@ -1285,12 +1324,12 @@ function M:Init()
         manager:SetAttributeNoHandler(name, snippet)
     end
 
-    manager:Execute([[ 
+    manager:Execute([[
         -- wotlk 3.3.5 doesn't have the control methods on self
         -- those methods exist on the "control" global
         local run = control or self
 
-        run:RunAttribute("Init") 
+        run:RunAttribute("Init")
     ]])
 
     manager:SetAttribute("_onstate-framesort-run", [[
