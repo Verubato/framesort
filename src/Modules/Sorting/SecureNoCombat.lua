@@ -486,16 +486,30 @@ function M:TrySort(provider)
     local providers = provider and { provider } or fsProviders:Enabled()
 
     for _, p in ipairs(providers) do
-        local containers = p:Containers()
+        local containers = fsEnumerable
+            :From(p:Containers())
+            :Where(function(container)
+                if not container.Frame:IsVisible() then
+                    return false
+                end
+
+                if (container.Type == fsFrame.ContainerType.Party or container.Type == fsFrame.ContainerType.Raid) and not friendlyEnabled then
+                    return false
+                end
+
+                if container.Type == fsFrame.ContainerType.EnemyArena and not enemyEnabled then
+                    return false
+                end
+
+                return true
+            end)
+            :ToTable()
 
         for _, container in ipairs(containers) do
-            if ((container.Type == fsFrame.ContainerType.Party or container.Type == fsFrame.ContainerType.Raid) and friendlyEnabled) or
-                (container.Type == fsFrame.ContainerType.EnemyArena and enemyEnabled) then
-                if container.IsGrouped and container:IsGrouped() then
-                    sorted = TrySortContainerGroups(container) or sorted
-                else
-                    sorted = TrySortContainer(container) or sorted
-                end
+            if container.IsGrouped and container:IsGrouped() then
+                sorted = TrySortContainerGroups(container) or sorted
+            else
+                sorted = TrySortContainer(container) or sorted
             end
         end
     end
