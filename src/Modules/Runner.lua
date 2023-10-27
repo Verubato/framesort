@@ -31,6 +31,7 @@ local function OnTimer(_, _, timerType, timeSeconds)
     -- TODO: there seems to be a bug in solo shuffle where enemy macros/targeting isn't updated
     -- unsure the specifics yet, but I have a feeling it's after round 1 that it occurs
     -- as a workaround, run 1 second after the gates open
+    -- bug still happens even with ARENA_OPPONENT_UPDATE event registered
     fsScheduler:RunAfter(timeSeconds + 1, Run)
 end
 
@@ -73,9 +74,11 @@ function M:Init()
         eventFrame = wow.CreateFrame("Frame")
         eventFrame:HookScript("OnEvent", OnEvent)
         eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
-        -- TODO: I don't think this event is needed, as GROUP_ROSTER_UPDATE always runs when people change roles anyway
-        --eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
         eventFrame:RegisterEvent(events.UNIT_PET)
+
+        -- sometimes there is a delay from when a person joins group until their role is assigned
+        -- so trigger a sort once we know their role
+        eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
 
         if wow.IsRetail() then
             wow.EventRegistry:RegisterCallback(events.EditModeExit, OnEditModeExited)
