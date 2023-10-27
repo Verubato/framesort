@@ -8,7 +8,8 @@ local fsScheduler = addon.Scheduling.Scheduler
 local events = addon.WoW.Api.Events
 ---@class BlizzardFrameProvider: FrameProvider
 local M = {}
-local eventFrame = nil
+local layoutEventFrame = nil
+local cvarEventFrame = nil
 local sortCallbacks = {}
 local containersChangedCallbacks = {}
 local cvarsToUpdateContainer = {
@@ -26,29 +27,30 @@ fsProviders.Blizzard = M
 table.insert(fsProviders.All, M)
 
 local function RequestSort()
-    for _, callback in pairs(sortCallbacks) do
+    for _, callback in ipairs(sortCallbacks) do
         callback(M)
     end
 end
 
 local function RequestUpdateContainers()
-    for _, callback in pairs(containersChangedCallbacks) do
+    for _, callback in ipairs(containersChangedCallbacks) do
         callback(M)
     end
 end
 
-local function OnEvent(_, event)
-    if event == events.EDIT_MODE_LAYOUTS_UPDATED then
-        RequestUpdateContainers()
-    end
-
-    RequestSort()
+local function OnLayoutsApplied()
+    -- user or system changed their layout
+    RequestUpdateContainers()
 end
 
 local function OnEditModeExited()
-    -- user may have changed frame settings, so request that containers be refreshed
+    -- user may have changed frame settings
     RequestUpdateContainers()
-    RequestSort()
+end
+
+local function OnRaidGroupLoaded()
+    -- refresh group frame offsets once a group has been loaded
+    RequestUpdateContainers()
 end
 
 local function OnCvarUpdate(_, _, name)
@@ -76,11 +78,6 @@ local function GetOffset(container)
     end
 
     return nil
-end
-
-local function OnRaidGroupLoaded(_)
-    -- refresh group frame offsets once a group has been loaded
-    RequestUpdateContainers()
 end
 
 function M:Name()
@@ -113,28 +110,22 @@ function M:Init()
         containersChangedCallbacks = {}
     end
 
-    eventFrame = wow.CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", OnEvent)
-    eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
-    eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
-    eventFrame:RegisterEvent(events.UNIT_PET)
-
     if wow.IsRetail() then
         wow.EventRegistry:RegisterCallback(events.EditModeExit, OnEditModeExited)
-        eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
-        eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
 
         fsScheduler:RunWhenEnteringWorld(function()
             -- this event always fires when loading
             -- and we don't care about the first one
             -- so to avoid running modules multiple times on first load, delay the event registration
-            eventFrame:RegisterEvent(events.EDIT_MODE_LAYOUTS_UPDATED)
+            layoutEventFrame = wow.CreateFrame("Frame")
+            layoutEventFrame:HookScript("OnEvent", OnLayoutsApplied)
+            layoutEventFrame:RegisterEvent(events.EDIT_MODE_LAYOUTS_UPDATED)
         end)
     end
 
-    local cvarUpdate = wow.CreateFrame("Frame")
-    cvarUpdate:HookScript("OnEvent", OnCvarUpdate)
-    cvarUpdate:RegisterEvent(events.CVAR_UPDATE)
+    cvarEventFrame = wow.CreateFrame("Frame")
+    cvarEventFrame:HookScript("OnEvent", OnCvarUpdate)
+    cvarEventFrame:RegisterEvent(events.CVAR_UPDATE)
 
     wow.hooksecurefunc("CompactRaidGroup_OnLoad", OnRaidGroupLoaded)
 end

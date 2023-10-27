@@ -5,7 +5,6 @@ local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsLog = addon.Logging.Log
 local M = {}
-local eventFrame = nil
 local events = addon.WoW.Api.Events
 local callbacks = {}
 local containersChangedCallbacks = {}
@@ -37,23 +36,15 @@ local function RequestSort()
         return
     end
 
-    for _, callback in pairs(callbacks) do
+    for _, callback in ipairs(callbacks) do
         callback(M)
     end
 end
 
 local function RequestUpdateContainers()
-    for _, callback in pairs(containersChangedCallbacks) do
+    for _, callback in ipairs(containersChangedCallbacks) do
         callback(M)
     end
-end
-
-local function OnEvent()
-    if updating then return end
-
-    updating = true
-    RequestSort()
-    updating = false
 end
 
 local function OnHeaderUpdate(header)
@@ -106,12 +97,6 @@ function M:Init()
 
             RequestUpdateContainers()
         end)
-
-        eventFrame = wow.CreateFrame("Frame")
-        eventFrame:HookScript("OnEvent", OnEvent)
-        eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
-        eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
-        eventFrame:RegisterEvent(events.UNIT_PET)
     end
 
     function fsPlugin:InsertOptions()

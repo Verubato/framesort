@@ -2,48 +2,13 @@
 local _, addon = ...
 local wow = addon.WoW.Api
 local fsFrame = addon.WoW.Frame
-local fsScheduler = addon.Scheduling.Scheduler
 local fsProviders = addon.Providers
-local events = addon.WoW.Api.Events
 local M = {}
 local callbacks = {}
 local containersChangedCallbacks = {}
-local eventFrame = nil
 
 fsProviders.sArena = M
 table.insert(fsProviders.All, M)
-
-local function RequestSort()
-    for _, callback in pairs(callbacks) do
-        callback(M)
-    end
-end
-
-local function RequestUpdateContainers()
-    for _, callback in pairs(containersChangedCallbacks) do
-        callback(M)
-    end
-end
-
-local function UpdateNextFrame()
-    -- wait for sArena to update their frames before we perform a sort
-    fsScheduler:RunNextFrame(RequestSort)
-end
-
-local function OnEvent()
-    UpdateNextFrame()
-end
-
-local function DelayedInit()
-    if wow.IsRetail() then
-        eventFrame = wow.CreateFrame("Frame")
-        eventFrame:HookScript("OnEvent", OnEvent)
-        eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
-        eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
-    end
-
-    RequestUpdateContainers()
-end
 
 function M:Name()
     return "sArena"
@@ -61,17 +26,11 @@ function M:Init()
     if #callbacks > 0 then
         callbacks = {}
     end
-
-    fsScheduler:RunWhenEnteringWorld(DelayedInit)
 end
 
-function M:RegisterRequestSortCallback(callback)
-    callbacks[#callbacks + 1] = callback
-end
+function M:RegisterRequestSortCallback(_) end
 
-function M:RegisterContainersChangedCallback(callback)
-    containersChangedCallbacks[#containersChangedCallbacks + 1] = callback
-end
+function M:RegisterContainersChangedCallback(_) end
 
 function M:Containers()
     if not sArena then
