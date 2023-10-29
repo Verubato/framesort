@@ -88,12 +88,10 @@ end
 
 function M:FriendlyTargets()
     local frames = nil
-    local frameProvider = nil
 
     -- prefer Blizzard frames
     if fsProviders.Blizzard:Enabled() then
         frames = GetFriendlyFrames(fsProviders.Blizzard)
-        frameProvider = fsProviders.Blizzard
     end
 
     local nonBlizzard = fsEnumerable
@@ -106,7 +104,6 @@ function M:FriendlyTargets()
     if not frames or #frames == 0 then
         for _, provider in ipairs(nonBlizzard) do
             frames = GetFriendlyFrames(provider)
-            frameProvider = provider
 
             if #frames > 0 then
                 break
@@ -114,8 +111,10 @@ function M:FriendlyTargets()
         end
     end
 
-    if frames and #frames > 0 and frameProvider then
-        return fsEnumerable
+    local units = nil
+
+    if frames and #frames > 0 then
+        units = fsEnumerable
             :From(frames)
             :OrderBy(function(x, y)
                 return fsCompare:CompareTopLeftFuzzy(x, y)
@@ -126,8 +125,13 @@ function M:FriendlyTargets()
             :ToTable()
     end
 
+    if units and #units > 0 then
+        return units
+    end
+
     -- no frames found, fallback to units
-    local units = fsUnit:FriendlyUnits()
+    units = fsUnit:FriendlyUnits()
+
     local sortEnabled = fsCompare:FriendlySortMode()
 
     if not sortEnabled then
@@ -172,8 +176,10 @@ function M:EnemyTargets()
             :ToTable()
     end
 
+    local units = nil
+
     if #frames > 0 then
-        return fsEnumerable
+        units = fsEnumerable
             :From(frames)
             :OrderBy(function(x, y)
                 return fsCompare:CompareTopLeftFuzzy(x, y)
@@ -184,15 +190,21 @@ function M:EnemyTargets()
             :ToTable()
     end
 
-    -- no frames found, fallback to units
-    local units = fsUnit:EnemyUnits()
+    if units and #units > 0 then
+        return units
+    end
+
+    -- get enemy units even if they don't exist
+    -- as we might be in the starting room of the arena where UnitExists() will return false until gates open
+    units = fsUnit:EnemyUnits(false)
+
     local sortEnabled = fsCompare:EnemySortMode()
 
     if not sortEnabled then
         return units
     end
 
-    table.sort(units, fsCompare:SortFunction(units))
+    table.sort(units, fsCompare:EnemySortFunction())
 
     return units
 end
