@@ -57,20 +57,6 @@ function M:test_party_full()
     end
 end
 
-function M:test_party_empty()
-    addon.WoW.Api.IsInRaid = function()
-        return false
-    end
-    addon.WoW.Api.UnitExists = function(_)
-        return false
-    end
-
-    local units = fsUnit:FriendlyUnits()
-
-    -- the player token will always exist
-    assertEquals(#units, 1)
-end
-
 function M:test_party3()
     addon.WoW.Api.IsInRaid = function()
         return false

@@ -254,7 +254,7 @@ end
 ---@return boolean
 local function SetNameList(container)
     local isFriendly = container.Type == fsFrame.ContainerType.Party or container.Type == fsFrame.ContainerType.Raid
-    local units = isFriendly and fsUnit:FriendlyUnits(true) or fsUnit:EnemyUnits(true)
+    local units = isFriendly and fsUnit:FriendlyUnits() or fsUnit:EnemyUnits()
     local sortFunction = fsCompare:SortFunction(units)
 
     table.sort(units, sortFunction)

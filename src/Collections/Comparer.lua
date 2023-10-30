@@ -202,6 +202,18 @@ end
 ---@param reverse boolean?
 ---@return boolean
 local function EnemyCompare(leftToken, rightToken, groupSortMode, reverse)
+    if fsUnit:IsPet(leftToken) or fsUnit:IsPet(rightToken) then
+        -- place player before pets
+        if not fsUnit:IsPet(leftToken) then return true end
+        if not fsUnit:IsPet(rightToken) then return false end
+
+        -- both are pets, compare their parent
+        local leftTokenParent = string.gsub(leftToken, "pet", "")
+        local rightTokenParent = string.gsub(rightToken, "pet", "")
+
+        return EnemyCompare(leftTokenParent, rightTokenParent, groupSortMode, reverse)
+    end
+
     if reverse then
         local tmp = leftToken
         leftToken = rightToken
