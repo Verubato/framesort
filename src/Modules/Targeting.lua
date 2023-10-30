@@ -144,60 +144,13 @@ function M:FriendlyTargets()
 end
 
 function M:EnemyTargets()
-    -- prefer GladiusEx/sArena
-    local preferred = fsEnumerable
-        :From(fsProviders:Enabled())
-        :Where(function(provider)
-            return provider ~= fsProviders.Blizzard
-        end)
-        :ToTable()
+    -- GladiusEx, sArena, and Blizzar all show enemies in group order
+    -- arena1, arena2, arena3
+    -- so we can just grab the units directly instead of extracting units from frames
+    -- this has the benefit of not having to worry about frame visibility and event ordering shenanigans
+    local units = fsUnit:EnemyUnits()
 
-    local frames = {}
-
-    for _, provider in ipairs(preferred) do
-        frames = fsEnumerable
-            :From(fsFrame:EnemyArenaFrames(provider))
-            :Where(function(x)
-                return x:IsVisible()
-            end)
-            :ToTable()
-
-        if #frames > 0 then
-            break
-        end
-    end
-
-    if #frames == 0 and fsProviders.Blizzard:Enabled() then
-        frames = fsEnumerable
-            :From(fsFrame:EnemyArenaFrames(fsProviders.Blizzard))
-            :Where(function(x)
-                return x:IsVisible()
-            end)
-            :ToTable()
-    end
-
-    local units = nil
-
-    if #frames > 0 then
-        units = fsEnumerable
-            :From(frames)
-            :OrderBy(function(x, y)
-                return fsCompare:CompareTopLeftFuzzy(x, y)
-            end)
-            :Map(function(x)
-                return fsFrame:GetFrameUnit(x)
-            end)
-            :ToTable()
-    end
-
-    if units and #units > 0 then
-        return units
-    end
-
-    -- get enemy units even if they don't exist
-    -- as we might be in the starting room of the arena where UnitExists() will return false until gates open
-    units = fsUnit:EnemyUnits(false)
-
+    -- EnemyUnits() returns in group order
     local sortEnabled = fsCompare:EnemySortMode()
 
     if not sortEnabled then

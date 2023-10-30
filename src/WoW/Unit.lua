@@ -36,46 +36,57 @@ for i = 1, wow.MEMBERS_PER_RAID_GROUP do
     allEnemyUnitsIds[#allEnemyUnitsIds + 1] = "arenapet" .. i
 end
 
----Gets a table of group member unit tokens.
+local function ArenaUnitExists(token)
+    -- after the gates open UnitExists will start working
+    if wow.UnitExists(token) then
+        return true
+    end
+
+    -- get the number from the token, e.g. "2" from "arena2"
+    local idStr = string.match(token, "%d+")
+    if not idStr then
+        return false
+    end
+
+    -- if only 2 members load in a 3v3, then not all information is available
+    -- e.g. in a 2v2, 2v3, or 3v2 inside a 3v3 environment GetNumArenaOpponentSpecs() doesn't return the right value
+    -- so give it a best guess
+    local enemyCount = wow.GetNumArenaOpponentSpecs()
+    local allyCount = wow.GetNumGroupMembers()
+    local instanceSize = math.max(enemyCount, allyCount)
+
+    local id = tonumber(idStr)
+    return id <= instanceSize
+end
+
+---Returns a table of group member unit tokens where the unit exists.
 ---@return string[]
-function M:FriendlyUnits(existsOnly)
-    if existsOnly == nil then
-        existsOnly = true
+function M:FriendlyUnits()
+    if not wow.IsInGroup() then
+        return {}
     end
 
     local isRaid = wow.IsInRaid()
     local units = isRaid and allRaidUnitsIds or allPartyUnitsIds
 
-    if not existsOnly then
-        -- return a copy of the table 
-        -- to avoid any issues with the caller changing the table
-        return wow.CopyTable(units)
-    end
-
-    if not wow.IsInGroup() then
-        return { "player" }
-    end
-
     return fsEnumerable
         :From(units)
-        :Where(function(unit) return wow.UnitIsUnit(unit, "player") or wow.UnitExists(unit) end)
+        :Where(function(unit) return wow.UnitExists(unit) end)
         :ToTable()
 end
 
----Gets a table of enemy unit tokens.
+---Returns a table of enemy unit tokens where the unit exists.
 ---@return string[]
-function M:EnemyUnits(existsOnly)
-    if existsOnly == nil then
-        existsOnly = true
-    end
+function M:EnemyUnits()
+    local inInstance, instanceType = wow.IsInInstance()
 
-    if not existsOnly then
-        return wow.CopyTable(allEnemyUnitsIds);
+    if not inInstance or instanceType ~= "arena" then
+        return {}
     end
 
     return fsEnumerable
         :From(allEnemyUnitsIds)
-        :Where(function(unit) return wow.UnitExists(unit) end)
+        :Where(function(unit) return ArenaUnitExists(unit) end)
         :ToTable()
 end
 

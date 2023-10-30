@@ -37,10 +37,12 @@
 ---@field UnitInRaid fun(unit: string): index: number?
 ---@field UnitIsPlayer fun(unit: string): boolean
 ---@field GetRaidRosterInfo fun(id: number): ...
----@field GetNumArenaOpponentSpecs fun(): number
 ---@field GetArenaOpponentSpec fun(id: number): specID: number, gender: number
 ---@field GetSpecializationInfoByID fun(specIndex: number): id: number, name: string, description: string, icon: number, role: string, classFile: string, className: string
 ---@field UnitGroupRolesAssigned fun(unit: string): role: string
+-- group size functions
+---@field GetNumGroupMembers fun(): number
+---@field GetNumArenaOpponentSpecs fun(): number
 -- state functions
 ---@field IsInInstance fun(): boolean
 ---@field IsInGroup fun(): boolean

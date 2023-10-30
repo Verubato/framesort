@@ -1,3 +1,4 @@
+---@diagnostic disable: inject-field
 local addon = require("Mock\\Addon")
 local frame = require("Mock\\Frame")
 local wow = addon.WoW.Api
@@ -32,21 +33,34 @@ function M:setup()
     local arenaContainer = assert(arena).Frame
     assert(arenaContainer)
 
+    -- enemy arena units aren't retrieved from the frame position
+    -- so their position doesn't matter
     local arena1 = frame:New("Frame", nil, arenaContainer, nil)
-    arena1.State.Position.Top = 300
+    arena1.State.Position.Top = 100
     arena1.unit = "arena1"
 
     local arena2 = frame:New("Frame", nil, arenaContainer, nil)
-    arena2.State.Position.Top = 100
+    arena2.State.Position.Top = 200
     arena2.unit = "arena2"
 
     local arena3 = frame:New("Frame", nil, arenaContainer, nil)
-    arena3.State.Position.Top = 200
+    arena3.State.Position.Top = 300
     arena3.unit = "arena3"
+
+    wow.GetNumGroupMembers = function() return 3 end
+    wow.GetNumArenaOpponentSpecs = function() return 3 end
+    wow.IsInGroup = function() return true end
+    wow.IsInInstance = function() return true, "arena" end
+
+    local config = addon.DB.Options.Sorting.EnemyArena
+    config.Enabled = true
+    config.Reverse = true
+    config.GroupSortMode = "Group"
 end
 
 function M:teardown()
     addon:Reset()
+    wow.GetNumArenaOpponentSpecs = function() return 0 end
 end
 
 function M:test_targets_update_on_provider_callback()
@@ -91,9 +105,9 @@ function M:test_targets_update_on_provider_callback()
     assertEquals(friendlyButtons[4]:GetAttribute("unit"), "none")
     assertEquals(friendlyButtons[5]:GetAttribute("unit"), "none")
 
-    assertEquals(enemyButtons[1]:GetAttribute("unit"), "arena1")
-    assertEquals(enemyButtons[2]:GetAttribute("unit"), "arena3")
-    assertEquals(enemyButtons[3]:GetAttribute("unit"), "arena2")
+    assertEquals(enemyButtons[1]:GetAttribute("unit"), "arena3")
+    assertEquals(enemyButtons[2]:GetAttribute("unit"), "arena2")
+    assertEquals(enemyButtons[3]:GetAttribute("unit"), "arena1")
 end
 
 function M:test_targets_update_after_combat()
@@ -153,9 +167,9 @@ function M:test_targets_update_after_combat()
     assertEquals(friendlyButtons[4]:GetAttribute("unit"), "none")
     assertEquals(friendlyButtons[5]:GetAttribute("unit"), "none")
 
-    assertEquals(enemyButtons[1]:GetAttribute("unit"), "arena1")
-    assertEquals(enemyButtons[2]:GetAttribute("unit"), "arena3")
-    assertEquals(enemyButtons[3]:GetAttribute("unit"), "arena2")
+    assertEquals(enemyButtons[1]:GetAttribute("unit"), "arena3")
+    assertEquals(enemyButtons[2]:GetAttribute("unit"), "arena2")
+    assertEquals(enemyButtons[3]:GetAttribute("unit"), "arena1")
 end
 
 return M

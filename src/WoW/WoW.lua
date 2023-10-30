@@ -44,7 +44,6 @@ local wow = {
     UnitInRaid = UnitInRaid,
     UnitIsPlayer = UnitIsPlayer,
     GetRaidRosterInfo = GetRaidRosterInfo,
-    GetNumArenaOpponentSpecs = GetNumArenaOpponentSpecs,
     GetArenaOpponentSpec = GetArenaOpponentSpec,
     GetSpecializationInfoByID = GetSpecializationInfoByID,
     UnitGroupRolesAssigned = UnitGroupRolesAssigned,
@@ -54,6 +53,10 @@ local wow = {
     IsInGroup = IsInGroup,
     IsInRaid = IsInRaid,
     InCombatLockdown = InCombatLockdown,
+
+    -- group size functions
+    GetNumGroupMembers = GetNumGroupMembers,
+    GetNumArenaOpponentSpecs = GetNumArenaOpponentSpecs,
 
     -- utility
     ReloadUI = ReloadUI,
@@ -248,3 +251,6 @@ if wow.IsWotlkPrivate() then
         wow.UnregisterStateDriver(frame, attributeWithoutState)
     end
 end
+
+-- only retail has GetNumArenaOpponentSpecs
+wow.GetNumArenaOpponentSpecs = wow.GetNumArenaOpponentSpecs or GetNumArenaOpponents
