@@ -142,6 +142,9 @@ local wow = {
 
         -- fired when some sort of timer starts, e.g. time until arena/bg gates open
         START_TIMER = "START_TIMER",
+
+        -- fired when a macro is created/deleted/updated
+        UPDATE_MACROS = "UPDATE_MACROS",
     },
 }
 
