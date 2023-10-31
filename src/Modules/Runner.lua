@@ -65,6 +65,8 @@ function M:Init()
         provider:RegisterRequestSortCallback(OnProviderRequiresSort)
     end
 
+    wow.EventRegistry:RegisterCallback(events.EditModeExit, OnEditModeExited)
+
     -- delay the event subscriptions to hopefully help with being notified after other addons
     fsScheduler:RunWhenEnteringWorld(function()
         timerFrame = wow.CreateFrame("Frame")
@@ -81,8 +83,6 @@ function M:Init()
         eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
 
         if wow.IsRetail() then
-            wow.EventRegistry:RegisterCallback(events.EditModeExit, OnEditModeExited)
-
             eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
 
             -- TODO: is this event required? it's very noisy
