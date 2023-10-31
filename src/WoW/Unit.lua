@@ -93,5 +93,5 @@ end
 ---Returns true if the unit token is a pet.
 ---@param unit string
 function M:IsPet(unit)
-    return string.match(unit, ".*pet.*") ~= nil
+    return string.find(unit, "pet", nil, true) ~= nil
 end

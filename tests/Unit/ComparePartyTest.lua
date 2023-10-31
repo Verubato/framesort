@@ -49,6 +49,7 @@ function M:setup()
         return left == right
     end
     addon.WoW.Api.IsInInstance = function() return false end
+    addon.WoW.Api.IsInRaid = function() return false end
 
     addon.DB = {
         Options = {

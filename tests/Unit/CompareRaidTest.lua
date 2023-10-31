@@ -50,6 +50,7 @@ function M:setup()
         return left == right or (left == playerToken and right == "player")
     end
     addon.WoW.Api.IsInInstance = function() return false end
+    addon.WoW.Api.IsInRaid = function() return true end
 
     addon.DB = {
         Options = {
