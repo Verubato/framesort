@@ -31,7 +31,31 @@ local function CompareAlphabetical(leftToken, rightToken)
     return leftToken < rightToken
 end
 
-local function CompareGroup(leftToken, rightToken)
+local function CompareGroup(leftToken, rightToken, isArena)
+    if not wow.IsInRaid() then
+        -- string comparison is ok to use as party doesn't go above 1 digit
+        return leftToken < rightToken
+    end
+
+    if isArena then
+        local id1 = tonumber(string.sub(leftToken, 6))
+        local id2 = tonumber(string.sub(rightToken, 6))
+
+        if id1 and id2 then
+            return id1 < id2
+        end
+    else
+        -- the same way blizzard do it in CRFSort_Group
+        local id1 = tonumber(string.sub(leftToken, 5))
+        local id2 = tonumber(string.sub(rightToken, 5))
+
+        if id1 and id2 then
+            return id1 < id2
+        end
+    end
+
+    -- the below probably isn't needed anymore
+    -- fallback to a slower but more reliable comparison
     local leftStr = string.match(leftToken, "%d+")
     local rightStr = string.match(rightToken, "%d+")
 
@@ -45,8 +69,7 @@ local function CompareGroup(leftToken, rightToken)
     return leftNumber < rightNumber
 end
 
-local function CompareRole(leftToken, rightToken)
-    local isArena = string.match(leftToken, "arena")
+local function CompareRole(leftToken, rightToken, isArena)
     local leftRole, rightRole = nil, nil
 
     if isArena then
@@ -221,13 +244,13 @@ local function EnemyCompare(leftToken, rightToken, groupSortMode, reverse)
     end
 
     if groupSortMode == fsConfig.GroupSortMode.Group then
-        return CompareGroup(leftToken, rightToken)
+        return CompareGroup(leftToken, rightToken, true)
     end
 
     local inInstance, instanceType = wow.IsInInstance()
 
     if groupSortMode == fsConfig.GroupSortMode.Role and inInstance and instanceType == "arena" and wow.IsRetail() then
-        return CompareRole(leftToken, rightToken)
+        return CompareRole(leftToken, rightToken, true)
     end
 
     return leftToken < rightToken
