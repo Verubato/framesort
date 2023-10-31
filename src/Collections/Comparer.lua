@@ -24,6 +24,7 @@ end
 
 local function CompareAlphabetical(leftToken, rightToken)
     local name1, name2 = wow.UnitName(leftToken), wow.UnitName(rightToken)
+
     if name1 and name2 then
         return name1 < name2
     end
@@ -56,39 +57,29 @@ local function CompareGroup(leftToken, rightToken, isArena)
 
     -- the below probably isn't needed anymore
     -- fallback to a slower but more reliable comparison
-    local leftStr = string.match(leftToken, "%d+")
-    local rightStr = string.match(rightToken, "%d+")
+    local left = tonumber(string.match(leftToken, "%d+"))
+    local right = tonumber(string.match(rightToken, "%d+"))
 
-    if not leftStr or not rightStr then
-        return leftToken < rightToken
+    if left and right then
+        return left < right
     end
 
-    local leftNumber = tonumber(leftStr)
-    local rightNumber = tonumber(rightStr)
-
-    return leftNumber < rightNumber
+    return leftToken < rightToken
 end
 
 local function CompareRole(leftToken, rightToken, isArena)
     local leftRole, rightRole = nil, nil
 
     if isArena then
-        local leftStr = string.match(leftToken, "%d+")
-        local rightStr = string.match(rightToken, "%d+")
+        local leftId = tonumber(string.match(leftToken, "%d+"))
+        local rightId = tonumber(string.match(rightToken, "%d+"))
 
-        if not leftStr or not rightStr then
+        if not leftId or not rightId then
             return leftToken < rightToken
         end
 
-        local leftNumber = tonumber(leftStr)
-        local rightNumber = tonumber(rightStr)
-
-        if not leftNumber or not rightNumber then
-            return leftToken < rightToken
-        end
-
-        local leftSpecId = wow.GetArenaOpponentSpec(leftNumber)
-        local rightSpecId = wow.GetArenaOpponentSpec(rightNumber)
+        local leftSpecId = wow.GetArenaOpponentSpec(leftId)
+        local rightSpecId = wow.GetArenaOpponentSpec(rightId)
 
         if leftSpecId and rightSpecId then
             leftRole = select(5, wow.GetSpecializationInfoByID(leftSpecId))
@@ -97,24 +88,23 @@ local function CompareRole(leftToken, rightToken, isArena)
     else
         local leftId, rightId = wow.UnitInRaid(leftToken), wow.UnitInRaid(rightToken)
 
-        if leftId then
-            leftRole = select(12, wow.GetRaidRosterInfo(leftId))
+        if not leftId or not rightId then
+            return leftToken < rightToken
         end
 
-        if rightId then
-            rightRole = select(12, wow.GetRaidRosterInfo(rightId))
-        end
-
-        leftRole = leftRole or wow.UnitGroupRolesAssigned(leftToken)
-        rightRole = rightRole or wow.UnitGroupRolesAssigned(rightToken)
+        leftRole = select(12, wow.GetRaidRosterInfo(leftId)) or wow.UnitGroupRolesAssigned(leftToken)
+        rightRole = select(12, wow.GetRaidRosterInfo(rightId)) or wow.UnitGroupRolesAssigned(rightToken)
     end
 
-    if leftRole and rightRole then
-        local roleValues = roleOrdering[addon.DB.Options.Sorting.RoleOrdering] or roleOrdering[1]
-        local leftValue, rightValue = roleValues[leftRole], roleValues[rightRole]
-        if leftValue ~= rightValue then
-            return leftValue < rightValue
-        end
+    if not leftRole or not rightRole then
+        return leftToken < rightToken
+    end
+
+    local roleValues = roleOrdering[addon.DB.Options.Sorting.RoleOrdering] or roleOrdering[1]
+    local leftValue, rightValue = roleValues[leftRole], roleValues[rightRole]
+
+    if leftValue ~= rightValue then
+        return leftValue < rightValue
     end
 
     return leftToken < rightToken
@@ -157,12 +147,8 @@ end
 local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse, preSortedUnits)
     -- if not in a group, we might be in test mode
     if wow.IsInGroup() then
-        if not wow.UnitExists(leftToken) then
-            return false
-        end
-        if not wow.UnitExists(rightToken) then
-            return true
-        end
+        if not wow.UnitExists(leftToken) then return false end
+        if not wow.UnitExists(rightToken) then return true end
     end
 
     if fsUnit:IsPet(leftToken) or fsUnit:IsPet(rightToken) then
@@ -202,9 +188,7 @@ local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, rev
     end
 
     if reverse then
-        local tmp = leftToken
-        leftToken = rightToken
-        rightToken = tmp
+        leftToken, rightToken = rightToken, leftToken
     end
 
     if groupSortMode == fsConfig.GroupSortMode.Group then
@@ -238,9 +222,7 @@ local function EnemyCompare(leftToken, rightToken, groupSortMode, reverse)
     end
 
     if reverse then
-        local tmp = leftToken
-        leftToken = rightToken
-        rightToken = tmp
+        leftToken, rightToken = rightToken, leftToken
     end
 
     if groupSortMode == fsConfig.GroupSortMode.Group then
@@ -342,12 +324,8 @@ end
 ---@param rightFrame table a wow frame
 ---@return boolean
 function M:CompareTopLeftFuzzy(leftFrame, rightFrame)
-    if not leftFrame then
-        return false
-    end
-    if not rightFrame then
-        return true
-    end
+    if not leftFrame then return false end
+    if not rightFrame then return true end
 
     local leftY = fsMath:Round(leftFrame:GetTop(), fuzzyDecimalPlaces)
     local rightY = fsMath:Round(rightFrame:GetTop(), fuzzyDecimalPlaces)
@@ -369,12 +347,8 @@ end
 ---@param rightFrame table a wow frame
 ---@return boolean
 function M:CompareLeftTopFuzzy(leftFrame, rightFrame)
-    if not leftFrame then
-        return false
-    end
-    if not rightFrame then
-        return true
-    end
+    if not leftFrame then return false end
+    if not rightFrame then return true end
 
     local leftX = fsMath:Round(leftFrame:GetLeft(), fuzzyDecimalPlaces)
     local rightX = fsMath:Round(rightFrame:GetLeft(), fuzzyDecimalPlaces)
@@ -396,12 +370,8 @@ end
 ---@param rightFrame table a wow frame
 ---@return boolean
 function M:CompareTopRightFuzzy(leftFrame, rightFrame)
-    if not leftFrame then
-        return false
-    end
-    if not rightFrame then
-        return true
-    end
+    if not leftFrame then return false end
+    if not rightFrame then return true end
 
     local leftY = fsMath:Round(leftFrame:GetTop(), fuzzyDecimalPlaces)
     local rightY = fsMath:Round(rightFrame:GetTop(), fuzzyDecimalPlaces)
@@ -423,12 +393,8 @@ end
 ---@param rightFrame table a wow frame
 ---@return boolean
 function M:CompareBottomLeftFuzzy(leftFrame, rightFrame)
-    if not leftFrame then
-        return false
-    end
-    if not rightFrame then
-        return true
-    end
+    if not leftFrame then return false end
+    if not rightFrame then return true end
 
     local leftY = fsMath:Round(leftFrame:GetBottom(), fuzzyDecimalPlaces)
     local rightY = fsMath:Round(rightFrame:GetBottom(), fuzzyDecimalPlaces)
