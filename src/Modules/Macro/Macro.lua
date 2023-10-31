@@ -11,6 +11,7 @@ local isSelfEditingMacro = false
 local isFsMacroCache = {}
 ---@class MacroModule: IInitialise
 local M = addon.Modules.Macro
+local eventFrame = nil
 
 ---@return boolean updated, boolean isFrameSortMacro, number newId
 local function Rewrite(id, friendlyUnits, enemyUnits)
@@ -53,10 +54,10 @@ local function UpdateMacro(id, friendlyUnits, enemyUnits, bypassCache)
     isFsMacroCache[newId] = isFsMacro
 
     if id ~= newId then
-        -- invalidate the old id if it changed
+        -- invalidate the cache if the id changed
         -- I believe the id only changes when the name or icon is updated which we don't touch
-        -- better to be safe though
-        isFsMacroCache[id] = nil
+        -- but maybe that changes in the future, who knows
+        isFsMacroCache = {}
     end
 
     return updated
@@ -95,6 +96,17 @@ local function OnEditMacro(id, _, _, _)
     end, "EditMacro" .. id)
 end
 
+local function OnUpdateMacros()
+    -- if the event was triggered by us, then ignore it
+    if isSelfEditingMacro then return end
+
+    -- someone else has edited a macro
+    -- invalidate our cache as ids may have all completely changed
+    -- macro "ids" aren't really an id, just the index they are visually displayed in the macro window
+    -- therefore simply creating or deleting 1 macro can change a lot of ids
+    isFsMacroCache = {}
+end
+
 function M:Run()
     assert(not wow.InCombatLockdown())
 
@@ -107,4 +119,8 @@ function M:Init()
     end
 
     wow.hooksecurefunc("EditMacro", OnEditMacro)
+
+    eventFrame = wow.CreateFrame("Frame")
+    eventFrame:HookScript("OnEvent", OnUpdateMacros)
+    eventFrame:RegisterEvent(wow.Events.UPDATE_MACROS)
 end

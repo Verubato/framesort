@@ -94,14 +94,14 @@ function M:FriendlyTargets()
         frames = GetFriendlyFrames(fsProviders.Blizzard)
     end
 
-    local nonBlizzard = fsEnumerable
-        :From(fsProviders:Enabled())
-        :Where(function(provider)
-            return provider ~= fsProviders.Blizzard
-        end)
-        :ToTable()
-
     if not frames or #frames == 0 then
+        local nonBlizzard = fsEnumerable
+            :From(fsProviders:Enabled())
+            :Where(function(provider)
+                return provider ~= fsProviders.Blizzard
+            end)
+            :ToTable()
+
         for _, provider in ipairs(nonBlizzard) do
             frames = GetFriendlyFrames(provider)
 
