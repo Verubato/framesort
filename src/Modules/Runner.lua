@@ -9,35 +9,43 @@ local M = addon.Modules
 local timerFrame = nil
 local eventFrame = nil
 local pvpTimerType = 1
-
-local function Run(provider)
-    M:Run(provider)
-end
+local run = false
 
 local function OnProviderRequiresSort(provider)
     fsLog:Debug(string.format("Provider %s requested sort.", provider:Name()))
-    Run(provider)
+    M:Run(provider)
 end
 
 local function OnEditModeExited()
     if fsProviders.Blizzard:Enabled() then
-        Run(fsProviders.Blizzard)
+        M:Run(fsProviders.Blizzard)
     end
 end
 
 local function OnTimer(_, _, timerType, timeSeconds)
     if timerType ~= pvpTimerType then return end
 
-    -- TODO: there seems to be a bug in solo shuffle where enemy macros/targeting isn't updated
-    -- unsure the specifics yet, but I have a feeling it's after round 1 that it occurs
-    -- as a workaround, run 1 second after the gates open
-    -- bug still happens even with ARENA_OPPONENT_UPDATE event registered
-    fsScheduler:RunAfter(timeSeconds + 1, Run)
+    -- TODO: I don't think this is required anymore
+    -- it was added to workaround a bug where enemy macros weren't being updated
+    -- but that bug was macro cache related and not a timing issue, so this workaround didn't do anything AFAIK
+    -- would need to do more testing before feeling comfortable to remove this
+    fsScheduler:RunAfter(timeSeconds + 1, function() M:Run() end)
+end
+
+local function OnUpdate()
+    if not run then return end
+
+    run = false
+    M:Run()
 end
 
 local function OnEvent(_, event)
     fsLog:Debug("Event: " .. event)
-    Run()
+
+    -- flag that a run needs to occur
+    -- the reason we do this instead of just running straight away is because multiple events may have fired during a single frame
+    -- and for efficiency/performance sake we only want to run once
+    run = true
 end
 
 function M:Run(provider)
@@ -45,7 +53,7 @@ function M:Run(provider)
         -- run sorting first as it affects everything
         addon.Modules.Sorting:Run(provider)
 
-        -- run hide player after as it may impact targeting
+        -- run hide player next as it may impact targeting and macros
         addon.Modules.HidePlayer:Run()
 
         addon.Modules.Targeting:Run()
@@ -68,9 +76,11 @@ function M:Init()
     wow.EventRegistry:RegisterCallback(events.EditModeExit, OnEditModeExited)
 
     -- delay the event subscriptions to hopefully help with being notified after other addons
+    -- probably not needed anymore now that we sort in OnUpdate
     fsScheduler:RunWhenEnteringWorld(function()
         timerFrame = wow.CreateFrame("Frame")
         timerFrame:HookScript("OnEvent", OnTimer)
+        timerFrame:HookScript("OnUpdate", OnUpdate)
         timerFrame:RegisterEvent(wow.Events.START_TIMER)
 
         eventFrame = wow.CreateFrame("Frame")
