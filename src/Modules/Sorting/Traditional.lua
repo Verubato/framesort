@@ -12,21 +12,31 @@ function M:TrySort()
     local sorted = false
     local sortFunction = fsCompare:SortFunction()
 
-    if wow.IsRetail() then
-        if wow.CompactRaidFrameContainer and not fsFrame:IsForbidden(wow.CompactRaidFrameContainer) and wow.CompactRaidFrameContainer:IsVisible() then
-            wow.CompactRaidFrameContainer:SetFlowSortFunction(sortFunction)
-            sorted = true
-        end
+    if wow.CompactRaidFrameContainer
+        and not fsFrame:IsForbidden(wow.CompactRaidFrameContainer)
+        and wow.CompactRaidFrameContainer:IsVisible()
+        and wow.CompactRaidFrameContainer.SetFlowSortFunction
+    then
+        wow.CompactRaidFrameContainer:SetFlowSortFunction(sortFunction)
+        sorted = true
+    end
 
-        if wow.CompactPartyFrame and not fsFrame:IsForbidden(wow.CompactPartyFrame) and wow.CompactPartyFrame:IsVisible() then
-            wow.CompactPartyFrame:SetFlowSortFunction(sortFunction)
-            sorted = sorted or true
-        end
-    else
-        if wow.CompactRaidFrameContainer and not fsFrame:IsForbidden(wow.CompactRaidFrameContainer) and wow.CompactRaidFrameContainer:IsVisible() then
-            wow.CompactRaidFrameContainer_SetFlowSortFunction(wow.CompactRaidFrameContainer, sortFunction)
-            sorted = true
-        end
+    if wow.CompactPartyFrame
+        and not fsFrame:IsForbidden(wow.CompactPartyFrame)
+        and wow.CompactPartyFrame:IsVisible()
+        and wow.CompactPartyFrame.SetFlowSortFunction
+    then
+        wow.CompactPartyFrame:SetFlowSortFunction(sortFunction)
+        sorted = sorted or true
+    end
+
+    if wow.CompactRaidFrameContainer
+        and not fsFrame:IsForbidden(wow.CompactRaidFrameContainer)
+        and wow.CompactRaidFrameContainer:IsVisible()
+        and wow.CompactRaidFrameContainer_SetFlowSortFunction
+    then
+        wow.CompactRaidFrameContainer_SetFlowSortFunction(wow.CompactRaidFrameContainer, sortFunction)
+        sorted = true
     end
 
     return sorted

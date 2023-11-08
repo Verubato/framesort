@@ -73,7 +73,9 @@ function M:Init()
         provider:RegisterRequestSortCallback(OnProviderRequiresSort)
     end
 
-    wow.EventRegistry:RegisterCallback(events.EditModeExit, OnEditModeExited)
+    if wow.EventRegistry then
+        wow.EventRegistry:RegisterCallback(events.EditModeExit, OnEditModeExited)
+    end
 
     -- delay the event subscriptions to hopefully help with being notified after other addons
     -- probably not needed anymore now that we sort in OnUpdate

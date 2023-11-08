@@ -690,7 +690,7 @@ secureMethods["UngroupedOffset"] = [[
 
     local lastGroup = nil
 
-    for i = #OffsetGroups, 1, -1 do 
+    for i = #OffsetGroups, 1, -1 do
         local group = OffsetGroups[i]
 
         if group:IsVisible() then
@@ -1120,7 +1120,10 @@ local function LoadProvider(provider)
         -- to fix a current blizzard bug where GetPoint() returns nil values on secure frames when their parent's are unsecure
         -- https://github.com/Stanzilla/WoWUIBugs/issues/470
         -- https://github.com/Stanzilla/WoWUIBugs/issues/480
-        container.Frame:SetProtected()
+        if container.Frame.SetProtected then
+            -- classic doesn't have SetProtected()
+            container.Frame:SetProtected()
+        end
 
         local offset = container.FramesOffset and container:FramesOffset()
         local groupOffset = container.GroupFramesOffset and container:GroupFramesOffset()
@@ -1220,7 +1223,7 @@ local function OnConfigChanged()
 end
 
 local function OnRaidGroupLoaded(group)
-    if not group or group:IsProtected() then return end
+    if not group or group:IsProtected() or not group.SetProtected then return end
 
     fsScheduler:RunWhenCombatEnds(function()
         group:SetProtected()
@@ -1376,7 +1379,9 @@ function M:Init()
 
     fsConfig:RegisterConfigurationChangedCallback(OnConfigChanged)
 
-    wow.hooksecurefunc("CompactRaidGroup_OnLoad", OnRaidGroupLoaded)
+    if CompactRaidGroup_OnLoad then
+        wow.hooksecurefunc("CompactRaidGroup_OnLoad", OnRaidGroupLoaded)
+    end
 
     local combatStartingFrame = wow.CreateFrame("Frame", nil, wow.UIParent)
     combatStartingFrame:HookScript("OnEvent", OnCombatStarting)
