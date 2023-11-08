@@ -48,8 +48,7 @@ end
 ---Returns a new Enumerable instance.
 ---@return Enumerable
 function M:New()
-    local table = {}
-    return M:From(table)
+    return M:From({})
 end
 
 ---Maps a sequence from one type into another.
@@ -81,9 +80,10 @@ function M:Flatten()
             if not index or index > #next then
                 next = self.Next()
                 index = 1
-                if next == nil then
-                    return nil
-                end
+            end
+
+            if next == nil then
+                return nil
             end
 
             item = next[index]
@@ -102,6 +102,7 @@ end
 function M:Where(predicate)
     local iterator = function()
         local next = self.Next()
+
         while next and not predicate(next) do
             next = self.Next()
         end
@@ -128,6 +129,7 @@ function M:Nth(n, predicate)
 
         if predicate(item) then
             found = found + 1
+
             if n == found then
                 return item
             end
@@ -166,6 +168,7 @@ end
 ---@return boolean
 function M:All(predicate)
     local next = self.Next()
+
     if next == nil then
         return false
     end
@@ -174,6 +177,7 @@ function M:All(predicate)
         if not predicate(next) then
             return false
         end
+
         next = self.Next()
     end
 
@@ -187,6 +191,7 @@ function M:IndexOf(item)
     local _, index = self:First(function(x)
         return x == item
     end)
+
     return index
 end
 
@@ -195,6 +200,7 @@ end
 ---@return any? item
 function M:Min(valueSelector)
     local items = self:ToTable()
+
     if #items == 0 then
         return nil
     end
@@ -220,6 +226,7 @@ end
 ---@return any? item
 function M:Max(valueSelector)
     local items = self:ToTable()
+
     if #items == 0 then
         return nil
     end
@@ -299,6 +306,7 @@ function M:Take(count)
 
         local next = self.Next()
         taken = taken + 1
+
         return next
     end
 
@@ -341,6 +349,7 @@ function M:Concat(other)
     local iterator = function()
         if not finishedFirst then
             local item = self.Next()
+
             if item then
                 return item
             end
