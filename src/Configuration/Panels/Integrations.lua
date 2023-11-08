@@ -16,19 +16,12 @@ function M:Build(parent)
     title:SetText("Integrations")
 
     local lines = {
-        "FrameSort has mostly been developed for Blizzard frames but also supports some other frame addons.",
-        "",
-        "This functionality is very new and is still being developed.",
-        "Feel free to let me know (Curseforge/GitHub) if you encounter any issues or have any feature requests.",
-        "",
-        "Here is the current status:",
+        "In addition to Blizzard frames, FrameSort also supports the following addons:",
         "",
         "ElvUI",
         " - Party: yes",
         " - Raid: no",
         " - Arena: no",
-        " - Pets: no",
-        " - Hide player: no",
         "",
         "sArena",
         " - Arena: yes",
@@ -36,10 +29,6 @@ function M:Build(parent)
         "GladiusEx",
         " - Party: yes",
         " - Arena: yes",
-        " - Hide player: no",
-        "",
-        "Shadowed Unit Frames:",
-        " - not yet implemented",
     }
 
     local anchor = title
