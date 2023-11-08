@@ -163,38 +163,26 @@ end
 ---@return boolean healthy,HealthCheckResult[] results
 function M:IsHealthy()
     local results = {}
-
-    assert(#fsProviders.All > 0)
-
-    local addonsString = fsProviders.All[1]:Name()
-
-    for i = 2, #fsProviders.All do
-        local provider = fsProviders.All[i]
-        addonsString = addonsString .. ", " .. provider:Name()
-    end
-
-    local enabledNonBlizzard = fsEnumerable
+    local allProviderNames = fsEnumerable
+        :From(fsProviders.All)
+        :Map(function(provider) return provider:Name() end)
+        :ToTable()
+    local enabledNonBlizzardNames = fsEnumerable
         :From(fsProviders:Enabled())
         :Where(function(p)
             return p ~= fsProviders.Blizzard
         end)
+        :Map(function(provider) return provider:Name() end)
         :ToTable()
 
-    local enabledNonBlizzardString = ""
-    if #enabledNonBlizzard > 0 then
-        enabledNonBlizzardString = enabledNonBlizzard[1]:Name()
-
-        for i = 2, #enabledNonBlizzard do
-            local provider = enabledNonBlizzard[i]
-            enabledNonBlizzardString = enabledNonBlizzardString .. ", " .. provider:Name()
-        end
-    end
+    local allProvidersString = wow.strjoin(", ", allProviderNames)
+    local enabledNonBlizzardString = wow.strjoin(", ", enabledNonBlizzardNames)
 
     results[#results + 1] = {
         Applicable = true,
         Passed = CanSeeFrames(),
         Description = "Can detect frames",
-        Help = "FrameSort currently supports frames from these addons: " .. addonsString,
+        Help = "FrameSort currently supports frames from these addons: " .. allProvidersString,
     }
 
     results[#results + 1] = {
@@ -241,7 +229,9 @@ function M:IsHealthy()
         Help = string.format('"%s" may cause conflicts, consider disabling it', conflictingAddon or "(unknown)"),
     }
 
-    return fsEnumerable:From(results):All(function(x)
-        return not x.Applicable or x.Passed
-    end), results
+    return fsEnumerable
+        :From(results)
+        :All(function(x)
+            return not x.Applicable or x.Passed
+        end), results
 end

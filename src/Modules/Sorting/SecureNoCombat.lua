@@ -263,18 +263,12 @@ local function SetNameList(container)
     container.Frame:SetAttribute("groupFilter", nil)
     container.Frame:SetAttribute("sortMethod", "NAMELIST")
 
-    local names = ""
+    local unitNames = fsEnumerable
+        :From(units)
+        :Map(function(unit) return wow.GetUnitName(unit, true) end)
+        :ToTable()
 
-    for i, unit in ipairs(units) do
-        local unitName = wow.GetUnitName(unit, true)
-
-        if i > 1 then
-            names = names .. "," .. unitName
-        else
-            names = unitName
-        end
-    end
-
+    local names = wow.strjoin(",", unitNames)
     local existingNameList = container.Frame:GetAttribute("nameList")
 
     if existingNameList == names then

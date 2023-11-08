@@ -59,28 +59,48 @@ local wow = {
     GetNumArenaOpponentSpecs = GetNumArenaOpponentSpecs,
 
     -- utility
-    ReloadUI = ReloadUI,
-    C_Timer = C_Timer,
     wipe = wipe,
     CopyTable = CopyTable,
+    strjoin = function(delimiter, ...)
+        if strjoin then
+            return strjoin(delimiter, unpack(...))
+        end
+
+        local joined = ""
+
+        for i, str in ipairs(...) do
+            if i > 1 then
+                joined = joined .. delimiter .. str
+            else
+                joined = str
+            end
+        end
+
+        return joined
+    end,
 
     -- secure functions
     issecurevariable = issecurevariable,
     hooksecurefunc = hooksecurefunc,
     RegisterAttributeDriver = RegisterAttributeDriver,
     UnregisterAttributeDriver = UnregisterAttributeDriver,
-    -- used for older clients that don't have the new attribute driver functions
-    RegisterStateDriver = RegisterStateDriver,
-    UnregisterStateDriver = UnregisterStateDriver,
-    SecureHandlerWrapScript = SecureHandlerWrapScript,
-    SecureHandlerSetFrameRef = SecureHandlerSetFrameRef,
-    SecureHandlerExecute = SecureHandlerExecute,
+
+    -- other
+    ReloadUI = ReloadUI,
+    C_Timer = C_Timer,
 
     -- addon related
     GetAddOnEnableState = GetAddOnEnableState,
 
     -- time related
     GetTimePreciseSec = GetTimePreciseSec,
+
+    -- used for older clients that don't have the new attribute driver functions
+    RegisterStateDriver = RegisterStateDriver,
+    UnregisterStateDriver = UnregisterStateDriver,
+    SecureHandlerWrapScript = SecureHandlerWrapScript,
+    SecureHandlerSetFrameRef = SecureHandlerSetFrameRef,
+    SecureHandlerExecute = SecureHandlerExecute,
 
     -- non-blizzard related
     IsRetail = function()
