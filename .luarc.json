@@ -10,6 +10,7 @@
         "ElvUI",
         "LibStub",
         "ElvUF_PartyGroup1",
-        "CompactRaidGroup_OnLoad"
+        "CompactRaidGroup_OnLoad",
+        "CUF_CVar"
     ]
 }
