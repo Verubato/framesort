@@ -5,7 +5,6 @@ local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsLog = addon.Logging.Log
 local M = {}
-local events = addon.WoW.Api.Events
 local callbacks = {}
 local containersChangedCallbacks = {}
 local fsPlugin = nil

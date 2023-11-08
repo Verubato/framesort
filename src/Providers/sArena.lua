@@ -5,7 +5,6 @@ local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local M = {}
 local callbacks = {}
-local containersChangedCallbacks = {}
 
 fsProviders.sArena = M
 table.insert(fsProviders.All, M)
