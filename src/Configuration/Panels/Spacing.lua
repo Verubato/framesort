@@ -47,6 +47,7 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
     title:SetText(name)
 
     local anchor = title
+    local systemChange = false
     local setValue = function(auto, slider, box)
         local value = tonumber(auto)
 
@@ -57,9 +58,12 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
 
         local text = tostring(value)
         box:SetFontObject("GameFontWhite")
-        box:SetText(text)
 
+        systemChange = true
+        box:SetText(text)
         slider:SetValue(value)
+        systemChange = false
+
         return value
     end
 
@@ -77,7 +81,9 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
         ConfigureEditBox(box, spacing.Horizontal)
 
         slider:SetScript("OnValueChanged", function(_, sliderValue, userInput)
-            if not userInput then
+            if systemChange or (userInput ~= nil and not userInput) then
+                -- wotlk private doesn't have the userInput flag for sliders, but it does for text boxes
+                -- so check our own flag
                 return
             end
 
@@ -119,9 +125,11 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
         ConfigureEditBox(box, spacing.Vertical)
 
         slider:SetScript("OnValueChanged", function(_, sliderValue, userInput)
-            if not userInput then
+            if systemChange or (userInput ~= nil and not userInput) then
                 return
             end
+
+            box:SetText(tostring(sliderValue))
 
             local value = setValue(sliderValue, slider, box)
             if value then
