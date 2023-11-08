@@ -1057,7 +1057,7 @@ secureMethods["Init"] = [[
 ]]
 
 local function LoadUnits()
-    assert(manager ~= nil)
+    assert(manager)
 
     -- TODO: we could transfer unit info to the restricted environment
     -- then perform the unit sort inside which would give us more control
@@ -1085,7 +1085,7 @@ local function LoadUnits()
 end
 
 local function LoadEnabled()
-    assert(manager ~= nil)
+    assert(manager)
 
     local friendlyEnabled = fsCompare:FriendlySortMode()
     local enemyEnabled = fsCompare:EnemySortMode()
@@ -1100,7 +1100,7 @@ local function LoadEnabled()
 end
 
 local function LoadSpacing()
-    assert(manager ~= nil)
+    assert(manager)
 
     for type, value in pairs(addon.DB.Options.Spacing) do
         manager:SetAttributeNoHandler(type .. "SpacingHorizontal", value.Horizontal)
@@ -1110,7 +1110,7 @@ end
 
 ---@param provider FrameProvider
 local function LoadProvider(provider)
-    assert(manager ~= nil)
+    assert(manager)
 
     local containers = provider:Containers()
 

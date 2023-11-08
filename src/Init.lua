@@ -4,12 +4,8 @@ local wow = addon.WoW.Api
 local loader = nil
 
 function addon:InitDB()
-    if not FrameSortDB then
-        FrameSortDB = {}
-    end
-    if not FrameSortDB.Options then
-        FrameSortDB.Options = wow.CopyTable(addon.Configuration.Defaults)
-    end
+    FrameSortDB = FrameSortDB or {}
+    FrameSortDB.Options = FrameSortDB.Options or wow.CopyTable(addon.Configuration.Defaults)
 
     addon.DB = FrameSortDB
     addon.Configuration.Upgrader:UpgradeOptions(addon.DB.Options)
@@ -30,13 +26,11 @@ end
 ---Listens for our to be loaded and then initialises it.
 ---@param name string the name of the addon being loaded.
 local function OnLoadAddon(_, _, name)
-    if name ~= addonName then
-        return
-    end
+    if name ~= addonName then return end
+
+    assert(loader)
 
     addon:Init()
-
-    assert(loader ~= nil)
     loader:UnregisterEvent("ADDON_LOADED")
 end
 
