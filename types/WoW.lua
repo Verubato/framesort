@@ -49,10 +49,9 @@
 ---@field IsInRaid fun(): boolean
 ---@field InCombatLockdown fun(): boolean
 -- utility
----@field ReloadUI fun()
----@field C_Timer table
 ---@field wipe fun(table: table): table
 ---@field CopyTable fun(table: table): table
+---@field strjoin fun(delimiter: string, ...): string
 -- secure functions
 ---@field issecurevariable fun(tableOrName: table|string, name: string?): isSecure: boolean, taint: string?
 ---@field hooksecurefunc fun(...)
@@ -65,6 +64,9 @@
 ---@field GetAddOnEnableState fun(character: string?, addon: string): number
 -- time related
 ---@field GetTimePreciseSec fun(): number
+-- other
+---@field ReloadUI fun()
+---@field C_Timer table
 -- non-blizzard
 ---@field IsRetail fun(): boolean
 ---@field IsClassic fun(): boolean
