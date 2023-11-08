@@ -21,6 +21,12 @@ local function AddonFriendlyName(name)
     end
 end
 
+local function IsSafeAddon(name)
+    return name == addonName
+        -- wotlk uses a backport addon for raid frames
+        or name == "CompactRaidFrame"
+end
+
 local function SortingFunctionsTampered()
     local functions = {
         "CRFSort_Group",
@@ -30,7 +36,7 @@ local function SortingFunctionsTampered()
 
     for _, f in ipairs(functions) do
         local issecure, taintedAddon = wow.issecurevariable(f)
-        if not issecure then
+        if not issecure and not IsSafeAddon(taintedAddon) then
             return AddonFriendlyName(taintedAddon)
         end
     end
@@ -45,24 +51,24 @@ local function ConflictingAddons()
 
     if wow.CompactRaidFrameContainer then
         local issecure, taintedAddon = wow.issecurevariable("CompactRaidFrameContainer")
-        if not issecure and taintedAddon ~= addonName then
+        if not issecure and not IsSafeAddon(taintedAddon) then
             return AddonFriendlyName(taintedAddon)
         end
 
         issecure, taintedAddon = wow.issecurevariable(wow.CompactRaidFrameContainer, "flowSortFunc")
-        if not issecure and taintedAddon ~= addonName then
+        if not issecure and not IsSafeAddon(taintedAddon) then
             return AddonFriendlyName(taintedAddon)
         end
     end
 
     if wow.CompactPartyFrame then
         local issecure, taintedAddon = wow.issecurevariable("CompactPartyFrame")
-        if not issecure and taintedAddon ~= addonName then
+        if not issecure and not IsSafeAddon(taintedAddon) then
             return AddonFriendlyName(taintedAddon)
         end
 
         issecure, taintedAddon = wow.issecurevariable(wow.CompactPartyFrame, "flowSortFunc")
-        if not issecure and taintedAddon ~= addonName then
+        if not issecure and not IsSafeAddon(taintedAddon) then
             return AddonFriendlyName(taintedAddon)
         end
     end
@@ -142,9 +148,14 @@ end
 local function IsUsingRaidStyleFrames()
     if wow.IsRetail() then
         return wow.EditModeManagerFrame:UseRaidStylePartyFrames()
-    else
-        return wow.GetCVarBool("useCompactPartyFrames")
     end
+
+    -- for wotlk private
+    if CUF_CVar and CUF_CVar.GetCVarBool then
+        return CUF_CVar:GetCVarBool("useCompactPartyFrames")
+    end
+
+    return wow.GetCVarBool("useCompactPartyFrames")
 end
 
 local function IsRaidGrouped()
