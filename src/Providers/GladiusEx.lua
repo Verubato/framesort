@@ -2,11 +2,9 @@
 local _, addon = ...
 local wow = addon.WoW.Api
 local fsFrame = addon.WoW.Frame
-local fsScheduler = addon.Scheduling.Scheduler
 local fsProviders = addon.Providers
 local M = {}
 local callbacks = {}
-local containersChangedCallbacks = {}
 
 fsProviders.GladiusEx = M
 table.insert(fsProviders.All, M)
