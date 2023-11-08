@@ -16,20 +16,20 @@ local targetBottomFrameButton = nil
 local M = {}
 addon.Modules.Targeting = M
 
-local function GetFriendlyFrames(provider)
-    local whereVisible = function(frames)
-        return fsEnumerable
-            :From(frames)
-            :Where(function(x)
-                return x:IsVisible()
-            end)
-            :ToTable()
-    end
+local function WhereVisible(frames)
+    return fsEnumerable
+        :From(frames)
+        :Where(function(x)
+            return x:IsVisible()
+        end)
+        :ToTable()
+end
 
-    local frames = whereVisible(fsFrame:PartyFrames(provider))
+local function GetFriendlyFrames(provider)
+    local frames = WhereVisible(fsFrame:PartyFrames(provider))
 
     if #frames == 0 then
-        frames = whereVisible(fsFrame:RaidFrames(provider))
+        frames = WhereVisible(fsFrame:RaidFrames(provider))
     end
 
     return frames
@@ -175,6 +175,7 @@ function M:Init()
     if #targetFramesButtons > 0 then
         targetFramesButtons = {}
     end
+
     if #targetEnemyButtons > 0 then
         targetEnemyButtons = {}
     end

@@ -23,11 +23,7 @@ local function Rewrite(id, friendlyUnits, enemyUnits)
 
     local newBody = fsMacroParser:GetNewBody(body, friendlyUnits, enemyUnits)
 
-    if not newBody then
-        return false, true, id
-    end
-
-    if body == newBody then
+    if not newBody or body == newBody then
         return false, true, id
     end
 

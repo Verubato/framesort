@@ -83,6 +83,7 @@ local function GetSelectors(body)
 
     -- basically string split on non-alpha characters
     local passedHeader = false
+
     for match in string.gmatch(header, "([%w]+)") do
         if passedHeader then
             selectors[#selectors + 1] = match
