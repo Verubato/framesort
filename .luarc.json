@@ -9,6 +9,7 @@
         "sArena",
         "ElvUI",
         "LibStub",
-        "ElvUF_PartyGroup1"
+        "ElvUF_PartyGroup1",
+        "CompactRaidGroup_OnLoad"
     ]
 }

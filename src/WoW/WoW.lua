@@ -170,45 +170,21 @@ local wow = {
 
 addon.WoW.Api = wow
 
--- shims for older versions
-if wow.IsClassic() then
-    wow.CreateFrame = function(frameType, name, parent, template, id)
-        local frame = CreateFrame(frameType, name, parent, template, id)
-        if not frame.Text and frame.text then
-            frame.Text = frame.text
-        end
+-- shims for older clients
+local nextFrameId = 1
 
-        return frame
+local function FrameShims(frame)
+    -- classic
+    if not frame.Text and frame.text then
+        frame.Text = frame.text
     end
-end
 
-if wow.IsWotlkPrivate() then
-    local nextFrameId = 1
-
-    local function WotlkShim(frame)
-        -- SetShown() doesn't exist
-        frame.SetShown = function(self, show)
-            if show then
-                self:Show()
-            else
-                self:Hide()
-            end
-        end
-
-        -- SetObeyStepOnDrag() doesn't exist
-        frame.SetObeyStepOnDrag = function() end
-
-        local originalCreateFontString = frame.CreateFontString
-        frame.CreateFontString = function(...)
-            local fontString = originalCreateFontString(...)
-            WotlkShim(fontString)
-            return fontString
-        end
-
+    -- wotlk private
+    if not frame.Text then
         frame.Text = {
-            SetFontObject = function(_, name)
+            SetFontObject = function(_, fontName)
                 local textFrame = _G[frame:GetName() .. "Text"]
-                return textFrame:SetFontObject(name)
+                return textFrame:SetFontObject(fontName)
             end,
             SetText = function(_, text)
                 local textFrame = _G[frame:GetName() .. "Text"]
@@ -216,64 +192,78 @@ if wow.IsWotlkPrivate() then
             end,
         }
 
-        -- SetAttributeNoHandler() doesn't exist
-        frame.SetAttributeNoHandler = function(self, ...)
-            self:SetAttribute(...)
+        local originalCreateFontString = frame.CreateFontString
+        frame.CreateFontString = function(...)
+            local fontString = originalCreateFontString(...)
+            FrameShims(fontString)
+            return fontString
         end
     end
 
-    wow.CreateFrame = function(frameType, name, parent, template, id)
-        -- CreateFrame() requires name to not be nil
-        if not name then
-            name = "FSDummyName" .. nextFrameId
-            nextFrameId = nextFrameId + 1
-        end
-
-        if template == "BackdropTemplate" then
-            local frame = CreateFrame(frameType, name, parent, nil, id)
-            WotlkShim(frame)
-            return frame
-        end
-
-        local frame = CreateFrame(frameType, name, parent, template, id)
-        WotlkShim(frame)
-
-        return frame
-    end
-
-    -- GetAddOnEnableState() doesn't exist
-    wow.GetAddOnEnableState = function(_, name)
-        local _, _, _, loadable, reason, _, _ = GetAddOnInfo(name)
-        if loadable and not reason then
-            return 1
+    -- wotlk private
+    frame.SetShown = frame.SetShown or function(self, show)
+        if show then
+            self:Show()
         else
-            return 0
+            self:Hide()
         end
     end
 
-    -- IsInGroup() doesn't exist
-    wow.IsInGroup = function()
-        return GetNumPartyMembers() > 0 or GetNumRaidMembers() > 0
+    -- wotlk private
+    frame.SetAttributeNoHandler = frame.SetAttributeNoHandler or function(self, ...)
+        self:SetAttribute(...)
     end
 
-    -- CompactRaidFrameManager_GetSetting() doesn't exist
-    wow.CompactRaidFrameManager_GetSetting = function(_) return false end
+    -- wotlk private
+    frame.SetObeyStepOnDrag = frame.SetObeyStepOnDrag or function() end
+end
 
-    -- GetTimePreciseSec doesn't exist
-    wow.GetTimePreciseSec = function() return debugprofilestop() / 1000 end
-
-    -- RegisterAttributeDriver doesn't exist
-    wow.RegisterAttributeDriver = function(frame, attribute, conditional)
-        local attributeWithoutState = string.gsub(attribute, "state%-", "")
-        wow.RegisterStateDriver(frame, attributeWithoutState, conditional)
+wow.CreateFrame = function(frameType, name, parent, template, id)
+    if not name and wow.IsWotlkPrivate() then
+        -- wotlk private requires name to not be nil
+        name = "FSDummyName" .. nextFrameId
+        nextFrameId = nextFrameId + 1
     end
 
-    -- UnregisterAttributeDriver doesn't exist
-    wow.UnregisterAttributeDriver = function(frame, attribute)
-        local attributeWithoutState = string.gsub(attribute, "state%-", "")
-        wow.UnregisterStateDriver(frame, attributeWithoutState)
+    -- wotlk private doesn't have this
+    if template == "BackdropTemplate" and not BackdropTemplateMixin then
+        template = nil
+    end
+
+    local frame = CreateFrame(frameType, name, parent, template, id)
+    FrameShims(frame)
+    return frame
+end
+
+wow.RegisterAttributeDriver = wow.RegisterAttributeDriver or function(frame, attribute, conditional)
+    local attributeWithoutState = string.gsub(attribute, "state%-", "")
+    wow.RegisterStateDriver(frame, attributeWithoutState, conditional)
+end
+
+wow.UnregisterAttributeDriver = wow.UnregisterAttributeDriver or function(frame, attribute)
+    local attributeWithoutState = string.gsub(attribute, "state%-", "")
+    wow.UnregisterStateDriver(frame, attributeWithoutState)
+end
+
+wow.GetTimePreciseSec = wow.GetTimePreciseSec or function()
+    return debugprofilestop() / 1000
+end
+
+wow.CompactRaidFrameManager_GetSetting = wow.CompactRaidFrameManager_GetSetting or function(_)
+    return false
+end
+
+wow.IsInGroup = wow.IsInGroup or function()
+    return GetNumPartyMembers() > 0 or GetNumRaidMembers() > 0
+end
+
+wow.GetAddOnEnableState = wow.GetAddOnEnableState or function(_, name)
+    local _, _, _, loadable, reason, _, _ = GetAddOnInfo(name)
+    if loadable and not reason then
+        return 1
+    else
+        return 0
     end
 end
 
--- only retail has GetNumArenaOpponentSpecs
 wow.GetNumArenaOpponentSpecs = wow.GetNumArenaOpponentSpecs or GetNumArenaOpponents
