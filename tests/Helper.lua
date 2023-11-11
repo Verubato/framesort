@@ -55,14 +55,4 @@ function M:UnitExists(unit, members)
     return false
 end
 
-function M:CopyTable(table)
-    local new = {}
-
-    for key, value in pairs(table) do
-        new[key] = value
-    end
-
-    return new
-end
-
 return M

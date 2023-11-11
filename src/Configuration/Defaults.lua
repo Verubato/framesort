@@ -4,7 +4,7 @@ local fsConfig = addon.Configuration
 
 ---@class Options
 fsConfig.Defaults = {
-    Version = 18,
+    Version = 19,
     Logging = {
         Enabled = false,
     },
@@ -12,10 +12,18 @@ fsConfig.Defaults = {
         RoleOrdering = 1,
         Method = fsConfig.SortingMethod.Secure,
         Arena = {
-            Enabled = true,
-            PlayerSortMode = fsConfig.PlayerSortMode.Top,
-            GroupSortMode = fsConfig.GroupSortMode.Group,
-            Reverse = false,
+            Twos = {
+                Enabled = true,
+                PlayerSortMode = fsConfig.PlayerSortMode.Top,
+                GroupSortMode = fsConfig.GroupSortMode.Group,
+                Reverse = false,
+            },
+            Default = {
+                Enabled = true,
+                PlayerSortMode = fsConfig.PlayerSortMode.Top,
+                GroupSortMode = fsConfig.GroupSortMode.Group,
+                Reverse = false,
+            }
         },
         EnemyArena = {
             Enabled = false,

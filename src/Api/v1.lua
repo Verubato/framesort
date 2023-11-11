@@ -5,6 +5,19 @@ local fsCompare = addon.Collections.Comparer
 local fsSort = addon.Modules.Sorting
 local fsConfig = addon.Configuration
 local fsFrame = addon.WoW.Frame
+---@type PlayerSortMode[]
+local playerSortModes = {
+    "Top",
+    "Middle",
+    "Bottom",
+    "Hidden"
+}
+---@type GroupSortMode[]
+local groupSortModes = {
+    "Role",
+    "Group",
+    "Alphabetical"
+}
 
 ---@class ApiV1
 local M = {
@@ -29,23 +42,54 @@ end
 
 ---@param mode PlayerSortMode
 local function ValidatePlayerSortMode(mode)
-    if mode ~= fsConfig.PlayerSortMode.Top and mode ~= fsConfig.PlayerSortMode.Middle and mode ~= fsConfig.PlayerSortMode.Bottom and mode ~= fsConfig.PlayerSortMode.Hidden then
+    if not fsEnumerable
+        :From(playerSortModes)
+        :Any(function(x) return x == mode end)
+    then
         error("Invalid player sort mode: " .. (mode or "nil"))
     end
 end
 
 ---@param mode GroupSortMode
 local function ValidateGroupSortMode(mode)
-    if mode ~= fsConfig.GroupSortMode.Group and mode ~= fsConfig.GroupSortMode.Role and mode ~= fsConfig.GroupSortMode.Alphabetical then
+    if not fsEnumerable
+        :From(groupSortModes)
+        :Any(function(x) return x == mode end)
+    then
         error("Invalid group sort mode: " .. (mode or "nil"))
     end
 end
 
 ---@param area Area
-local function ValidateArea(area)
-    if area ~= "Arena" and area ~= "Dungeon" and area ~= "Raid" and area ~= "World" then
+---@return table[]
+local function AreaOptions(area)
+    local sorting = addon.DB.Options.Sorting
+
+    -- backwards compatibility for when there was only 1 arena mode
+    if area == "Arena" then
+        -- in v2 of the API, we'd ask the caller to specify which arena area
+        -- then we can avoid returning multiple options which just introduces ambiguity
+        return {
+            sorting.Arena.Twos,
+            sorting.Arena.Default
+        }
+    elseif area == "Arena - 2v2" then
+        return {
+            sorting.Arena.Twos
+        }
+    elseif area == "Arena - Default" then
+        return {
+            sorting.Arena.Default
+        }
+    end
+
+    local table = addon.DB.Options.Sorting[area]
+
+    if not table then
         error("Invalid area: " .. (area or "nil"))
     end
+
+    return { table }
 end
 
 ---Register a callback to invoke after sorting has been performed.
@@ -88,21 +132,22 @@ end
 ---Gets the player sort mode.
 ---@param area Area
 function M.Options:GetPlayerSortMode(area)
-    ValidateArea(area)
-
-    local table = addon.DB.Options.Sorting[area]
-    return table.PlayerSortMode
+    local options = AreaOptions(area)
+    -- in v2 of the API we can remove this ambiguity
+    return options[1].PlayerSortMode
 end
 
 ---Sets the player sort mode.
 ---@param area Area
 ---@param mode PlayerSortMode
 function M.Options:SetPlayerSortMode(area, mode)
-    ValidateArea(area)
     ValidatePlayerSortMode(mode)
 
-    local table = addon.DB.Options.Sorting[area]
-    table.PlayerSortMode = mode
+    local areaOptions = AreaOptions(area)
+
+    for _, table in ipairs(areaOptions) do
+        table.PlayerSortMode = mode
+    end
 
     fsConfig:NotifyChanged()
     fsSort:Run()
@@ -112,11 +157,13 @@ end
 ---@param area Area
 ---@param mode GroupSortMode
 function M.Options:SetGroupSortMode(area, mode)
-    ValidateArea(area)
     ValidateGroupSortMode(mode)
 
-    local table = addon.DB.Options.Sorting[area]
-    table.GroupSortMode = mode
+    local areaOptions = AreaOptions(area)
+
+    for _, table in ipairs(areaOptions) do
+        table.GroupSortMode = mode
+    end
 
     fsConfig:NotifyChanged()
     fsSort:Run()
@@ -125,29 +172,26 @@ end
 ---Gets the group sort mode.
 ---@param area Area
 function M.Options:GetGroupSortMode(area)
-    ValidateArea(area)
-
-    local table = addon.DB.Options.Sorting[area]
-    return table.GroupSortMode
+    local areaOptions = AreaOptions(area)
+    return areaOptions[1].GroupSortMode
 end
 
 ---Gets the Enabled flag.
 ---@param area Area
 function M.Options:GetEnabled(area)
-    ValidateArea(area)
-
-    local table = addon.DB.Options.Sorting[area]
-    return table.Enabled
+    local areaOptions = AreaOptions(area)
+    return areaOptions[1].Enabled
 end
 
 ---Enables/disables sorting.
 ---@param area Area
 ---@param enabled boolean
 function M.Options:SetEnabled(area, enabled)
-    ValidateArea(area)
+    local areaOptions = AreaOptions(area)
 
-    local table = addon.DB.Options.Sorting[area]
-    table.Enabled = enabled
+    for _, table in ipairs(areaOptions) do
+        table.Enabled = enabled
+    end
 
     fsConfig:NotifyChanged()
 
@@ -159,20 +203,19 @@ end
 ---Enables/disables reverse sorting.
 ---@param area Area
 function M.Options:GetReverse(area)
-    ValidateArea(area)
-
-    local table = addon.DB.Options.Sorting[area]
-    return table.Reverse
+    local areaOptions = AreaOptions(area)
+    return areaOptions[1].Reverse
 end
 
 ---Enables/disables reverse sorting.
 ---@param area Area
 ---@param reverse boolean
 function M.Options:SetReverse(area, reverse)
-    ValidateArea(area)
+    local areaOptions = AreaOptions(area)
 
-    local table = addon.DB.Options.Sorting[area]
-    table.Reverse = reverse
+    for _, table in ipairs(areaOptions) do
+        table.Reverse = reverse
+    end
 
     fsConfig:NotifyChanged()
     fsSort:Run()
