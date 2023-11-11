@@ -267,3 +267,14 @@ wow.GetAddOnEnableState = wow.GetAddOnEnableState or function(_, name)
 end
 
 wow.GetNumArenaOpponentSpecs = wow.GetNumArenaOpponentSpecs or GetNumArenaOpponents
+
+-- for unit tests
+wow.CopyTable = wow.CopyTable or function(t)
+    local new = {}
+
+    for k, v in pairs(t) do
+        new[k] = v
+    end
+
+    return new
+end

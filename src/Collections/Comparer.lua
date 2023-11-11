@@ -296,7 +296,10 @@ function M:FriendlySortMode()
     local config = addon.DB.Options.Sorting
 
     if inInstance and instanceType == "arena" then
-        return config.Arena.Enabled, config.Arena.PlayerSortMode, config.Arena.GroupSortMode, config.Arena.Reverse
+        local instanceSize = wow.GetNumGroupMembers()
+        local arena = instanceSize == 2 and config.Arena.Twos or config.Arena.Default
+
+        return arena.Enabled, arena.PlayerSortMode, arena.GroupSortMode, arena.Reverse
     elseif inInstance and instanceType == "party" then
         return config.Dungeon.Enabled, config.Dungeon.PlayerSortMode, config.Dungeon.GroupSortMode, config.Dungeon.Reverse
     elseif inInstance and (instanceType == "raid" or instanceType == "pvp") then

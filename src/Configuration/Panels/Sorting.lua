@@ -327,7 +327,10 @@ function M:Build(panel)
     local config = addon.DB.Options.Sorting
 
     if not wow.IsClassic() then
-        anchor = BuildSortModeCheckboxes(panel, anchor, "Arena", config.Arena)
+        anchor = BuildSortModeCheckboxes(panel, anchor, "Arena - 2v2", config.Arena.Twos)
+
+        local otherArenaSizes = wow.IsRetail() and "3v3" or "3v3 & 5v5"
+        anchor = BuildSortModeCheckboxes(panel, anchor, "Arena - " .. otherArenaSizes, config.Arena.Default)
     end
 
     if wow.IsRetail() then

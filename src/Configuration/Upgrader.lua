@@ -1,5 +1,6 @@
 ---@type string, Addon
 local _, addon = ...
+local wow = addon.WoW.Api
 local fsLog = addon.Logging.Log
 local fsConfig = addon.Configuration
 ---@class OptionsUpgrader
@@ -366,6 +367,22 @@ function M:UpgradeToVersion18(options)
     options.SortingMethod = nil
 
     options.Version = 18
+end
+
+function M:UpgradeToVersion19(options)
+    assert(options.Version == 18)
+
+    local arena = wow.CopyTable(options.Sorting.Arena)
+
+    options.Sorting.Arena.Twos = wow.CopyTable(arena)
+    options.Sorting.Arena.Default = wow.CopyTable(arena)
+
+    options.Sorting.Arena.Enabled = nil
+    options.Sorting.Arena.PlayerSortMode = nil
+    options.Sorting.Arena.GroupSortMode = nil
+    options.Sorting.Arena.Reverse = nil
+
+    options.Version = 19
 end
 
 ---Upgrades saved options to the current version.
