@@ -1,6 +1,5 @@
 ---@type string, Addon
 local _, addon = ...
-local wow = addon.WoW.Api
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local M = {}
@@ -14,7 +13,10 @@ function M:Name()
 end
 
 function M:Enabled()
-    return wow.IsRetail() and wow.GetAddOnEnableState(nil, "sArena Updated") ~= 0
+    -- there are a few of variants of sArena
+    -- e.g. "sArena Updated" and "sArena_Updated2_by_sammers"
+    -- so instead of checking for enabled state just check if the container exists
+    return sArena ~= nil and type(sArena) == "table"
 end
 
 function M:Init()

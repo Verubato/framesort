@@ -14,7 +14,7 @@ function M:Name()
 end
 
 function M:Enabled()
-    return wow.IsRetail() and wow.GetAddOnEnableState(nil, "GladiusEx") ~= 0
+    return wow.GetAddOnEnableState(nil, "GladiusEx") ~= 0
 end
 
 function M:Init()
