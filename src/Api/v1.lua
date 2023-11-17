@@ -119,6 +119,14 @@ function M.Sorting:GetRaidFrames()
     return VisualOrder(frames)
 end
 
+---Returns a collection of Blizzard enemy arena frames ordered by their visual representation.
+function M.Sorting:GetArenaFrames()
+    local blizzard = addon.Providers.Blizzard
+    local frames = fsFrame:ArenaFrames(blizzard)
+
+    return VisualOrder(frames)
+end
+
 ---Returns party frames if there are any, otherwise raid frames.
 function M.Sorting:GetFrames()
     local party = M.Sorting:GetPartyFrames()

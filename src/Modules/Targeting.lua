@@ -37,7 +37,7 @@ end
 
 local function UpdateTargets()
     local start = wow.GetTimePreciseSec()
-    local friendlyUnits = M:FriendlyTargets()
+    local friendlyUnits = M:FriendlyUnits()
     local updatedCount = 0
 
     -- if units has less than 5 items it's still fine as units[i] will just be nil
@@ -60,7 +60,7 @@ local function UpdateTargets()
         updatedCount = updatedCount + 1
     end
 
-    local enemyunits = M:EnemyTargets()
+    local enemyunits = M:EnemyUnits()
 
     for i, btn in ipairs(targetEnemyButtons) do
         local new = enemyunits[i] or "none"
@@ -86,7 +86,7 @@ local function UpdateTargets()
     fsLog:Debug(string.format("Update targets took %fms, %d updated.", (stop - start) * 1000, updatedCount))
 end
 
-function M:FriendlyTargets()
+function M:FriendlyFrames()
     local frames = nil
 
     -- prefer Blizzard frames
@@ -111,27 +111,32 @@ function M:FriendlyTargets()
         end
     end
 
-    local units = nil
+    if not frames or #frames == 0 then
+        return {}
+    end
+
+    return fsEnumerable
+        :From(frames)
+        :OrderBy(function(x, y)
+            return fsCompare:CompareTopLeftFuzzy(x, y)
+        end)
+        :ToTable()
+end
+
+function M:FriendlyUnits()
+    local frames = M:FriendlyFrames()
 
     if frames and #frames > 0 then
-        units = fsEnumerable
+       return fsEnumerable
             :From(frames)
-            :OrderBy(function(x, y)
-                return fsCompare:CompareTopLeftFuzzy(x, y)
-            end)
             :Map(function(x)
                 return fsFrame:GetFrameUnit(x)
             end)
             :ToTable()
     end
 
-    if units and #units > 0 then
-        return units
-    end
-
     -- no frames found, fallback to units
-    units = fsUnit:FriendlyUnits()
-
+    local units = fsUnit:FriendlyUnits()
     local sortEnabled = fsCompare:FriendlySortMode()
 
     if not sortEnabled then
@@ -143,7 +148,24 @@ function M:FriendlyTargets()
     return units
 end
 
-function M:EnemyTargets()
+function M:EnemyFrames()
+    -- GladiusEx, sArena, and Blizzar all show enemies in group order
+    -- arena1, arena2, arena3
+    -- so we can just grab the units directly instead of extracting units from frames
+    -- this has the benefit of not having to worry about frame visibility and event ordering shenanigans
+    local units = fsUnit:EnemyUnits()
+    local sortEnabled = fsCompare:EnemySortMode()
+
+    if not sortEnabled then
+        return units
+    end
+
+    table.sort(units, fsCompare:EnemySortFunction())
+
+    return units
+end
+
+function M:EnemyUnits()
     -- GladiusEx, sArena, and Blizzar all show enemies in group order
     -- arena1, arena2, arena3
     -- so we can just grab the units directly instead of extracting units from frames
