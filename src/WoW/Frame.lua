@@ -245,7 +245,7 @@ end
 ---@param provider FrameProvider
 ---@param visibleOnly boolean?
 ---@return table[]
-function M:EnemyArenaFrames(provider, visibleOnly)
+function M:ArenaFrames(provider, visibleOnly)
     return GetFrames(provider, M.ContainerType.EnemyArena, visibleOnly)
 end
 
