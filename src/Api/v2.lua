@@ -3,6 +3,7 @@ local _, addon = ...
 local fsEnumerable = addon.Collections.Enumerable
 local fsCompare = addon.Collections.Comparer
 local fsSort = addon.Modules.Sorting
+local fsTarget = addon.Modules.Targeting
 local fsConfig = addon.Configuration
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
@@ -20,14 +21,14 @@ local groupSortModes = {
     "Alphabetical"
 }
 
----@class ApiV1
+---@class ApiV2
 local M = {
     Sorting = {},
     Options = {},
     Debugging = {},
     Logging = {},
 }
-addon.Api.v1 = M
+addon.Api.v2 = M
 
 local function VisualOrder(framesOrFunction)
     return fsEnumerable
@@ -62,31 +63,33 @@ local function ValidateGroupSortMode(mode)
 end
 
 ---@param area Area
----@return table[]
 local function AreaOptions(area)
     local sorting = addon.DB.Options.Sorting
 
-    -- backwards compatibility for when there was only 1 arena mode
-    if area == "Arena" then
-        -- in v2 of the API, we'd ask the caller to specify which arena area
-        -- then we can avoid returning multiple options which just introduces ambiguity
-        return {
-            sorting.Arena.Twos,
-            sorting.Arena.Default
-        }
-    elseif area == "Arena - 2v2" then
-        return { sorting.Arena.Twos }
+    if area == "Arena - 2v2" then
+        return sorting.Arena.Twos
     elseif area == "Arena - Default" then
-        return { sorting.Arena.Default }
-    end
-
-    local table = addon.DB.Options.Sorting[area]
-
-    if table then
-        return { table }
+        return sorting.Arena.Default
+    elseif area == "Dungeon" then
+        return sorting.Dungeon
+    elseif area == "Raid" then
+        return sorting.Raid
+    elseif area == "World" then
+        return sorting.World
     end
 
     error("Invalid area: " .. (area or "nil"))
+end
+
+---@param type number
+local function GetFrames(type)
+    local frames = {}
+
+    for _, provider in ipairs(fsProviders:Enabled()) do
+        frames[provider:Name()] = VisualOrder(fsFrame:GetFrames(provider, type))
+    end
+
+    return frames
 end
 
 ---Register a callback to invoke after sorting has been performed.
@@ -100,47 +103,49 @@ function M.Sorting:RegisterPostSortCallback(callback)
     fsSort:RegisterPostSortCallback(callback)
 end
 
----Returns a collection of Blizzard party frames ordered by their visual representation.
+---Returns a collection of party frames ordered by their visual representation.
 function M.Sorting:GetPartyFrames()
-    local blizzard = fsProviders.Blizzard
-    local frames = fsFrame:PartyFrames(blizzard)
-
-    return VisualOrder(frames)
+    return GetFrames(fsFrame.ContainerType.Party)
 end
 
----Returns a collection of Blizzard raid frames ordered by their visual representation.
+---Returns a collection of raid frames ordered by their visual representation.
 function M.Sorting:GetRaidFrames()
-    local blizzard = fsProviders.Blizzard
-    local frames = fsFrame:RaidFrames(blizzard)
-
-    return VisualOrder(frames)
+    return GetFrames(fsFrame.ContainerType.Raid)
 end
 
----Returns a collection of Blizzard enemy arena frames ordered by their visual representation.
+---Returns a collection of enemy arena frames ordered by their visual representation.
 function M.Sorting:GetArenaFrames()
-    local blizzard = fsProviders.Blizzard
-    local frames = fsFrame:ArenaFrames(blizzard)
-
-    return VisualOrder(frames)
+    return GetFrames(fsFrame.ContainerType.EnemyArena)
 end
 
 ---Returns party frames if there are any, otherwise raid frames.
 function M.Sorting:GetFrames()
-    local party = M.Sorting:GetPartyFrames()
+    local party = GetFrames(fsFrame.ContainerType.Party)
 
-    if #party > 0 then
-        return party
+    for _, frames in ipairs(party) do
+        if #frames > 0 then
+            return party
+        end
     end
 
-    return M.Sorting:GetRaidFrames()
+    return GetFrames(fsFrame.ContainerType.Raid)
+end
+
+---Returns a sorted array of friendly unit tokens.
+function M.Sorting:GetFriendlyUnits()
+    return fsTarget:FriendlyUnits()
+end
+
+---Returns a sorted array of enemy unit tokens.
+function M.Sorting:GetEnemyUnits()
+    return fsTarget:EnemyUnits()
 end
 
 ---Gets the player sort mode.
 ---@param area Area
 function M.Options:GetPlayerSortMode(area)
     local options = AreaOptions(area)
-    -- in v2 of the API we can remove this ambiguity
-    return options[1].PlayerSortMode
+    return options.PlayerSortMode
 end
 
 ---Sets the player sort mode.
@@ -150,10 +155,7 @@ function M.Options:SetPlayerSortMode(area, mode)
     ValidatePlayerSortMode(mode)
 
     local options = AreaOptions(area)
-
-    for _, table in ipairs(options) do
-        table.PlayerSortMode = mode
-    end
+    options.PlayerSortMode = mode
 
     fsConfig:NotifyChanged()
     fsSort:Run()
@@ -166,10 +168,7 @@ function M.Options:SetGroupSortMode(area, mode)
     ValidateGroupSortMode(mode)
 
     local options = AreaOptions(area)
-
-    for _, table in ipairs(options) do
-        table.GroupSortMode = mode
-    end
+    options.GroupSortMode = mode
 
     fsConfig:NotifyChanged()
     fsSort:Run()
@@ -179,14 +178,14 @@ end
 ---@param area Area
 function M.Options:GetGroupSortMode(area)
     local options = AreaOptions(area)
-    return options[1].GroupSortMode
+    return options.GroupSortMode
 end
 
 ---Gets the Enabled flag.
 ---@param area Area
 function M.Options:GetEnabled(area)
     local options = AreaOptions(area)
-    return options[1].Enabled
+    return options.Enabled
 end
 
 ---Enables/disables sorting.
@@ -194,10 +193,7 @@ end
 ---@param enabled boolean
 function M.Options:SetEnabled(area, enabled)
     local options = AreaOptions(area)
-
-    for _, table in ipairs(options) do
-        table.Enabled = enabled
-    end
+    options.Enabled = enabled
 
     fsConfig:NotifyChanged()
 
@@ -210,7 +206,7 @@ end
 ---@param area Area
 function M.Options:GetReverse(area)
     local options = AreaOptions(area)
-    return options[1].Reverse
+    return options.Reverse
 end
 
 ---Enables/disables reverse sorting.
@@ -218,10 +214,7 @@ end
 ---@param reverse boolean
 function M.Options:SetReverse(area, reverse)
     local options = AreaOptions(area)
-
-    for _, table in ipairs(options) do
-        table.Reverse = reverse
-    end
+    options.Reverse = reverse
 
     fsConfig:NotifyChanged()
     fsSort:Run()

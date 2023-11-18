@@ -18,6 +18,7 @@
 ---@meta
 ---@class Api: IInitialise
 ---@field v1 ApiV1
+---@field v2 ApiV2
 
 ---@class Collections
 ---@field Enumerable Enumerable

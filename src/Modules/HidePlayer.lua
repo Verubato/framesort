@@ -12,8 +12,8 @@ addon.Modules.HidePlayer = M
 
 local function ShowHide(show)
     local blizzard = fsProviders.Blizzard
-    local party = fsFrame:PartyFrames(blizzard, false)
-    local raid = fsFrame:RaidFrames(blizzard, false)
+    local party = fsFrame:GetFrames(blizzard, fsFrame.ContainerType.Party, false)
+    local raid = fsFrame:GetFrames(blizzard, fsFrame.ContainerType.Raid, false)
 
     local all = fsEnumerable
         :From(party)
