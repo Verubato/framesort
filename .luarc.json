@@ -12,5 +12,8 @@
         "ElvUF_PartyGroup1",
         "CompactRaidGroup_OnLoad",
         "CUF_CVar"
+    ],
+    "diagnostics.disable": [
+        "inject-field"
     ]
 }

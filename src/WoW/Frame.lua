@@ -25,10 +25,12 @@ addon.WoW.Frame = M
 
 ---@param provider FrameProvider
 ---@param type number
----@param visibleOnly boolean?
-local function GetFrames(provider, type, visibleOnly)
+---@param visibleOnly boolean? override the default container visibility filter
+function M:GetFrames(provider, type, visibleOnly)
     local target = M:GetContainer(provider, type)
     if not target then return {} end
+
+    visibleOnly = visibleOnly or target.VisibleOnly
 
     local frames = M:ExtractUnitFrames(target.Frame, visibleOnly)
 
@@ -227,26 +229,23 @@ end
 
 ---Returns the party frames of the specified provider.
 ---@param provider FrameProvider
----@param visibleOnly boolean?
 ---@return table[]
-function M:PartyFrames(provider, visibleOnly)
-    return GetFrames(provider, M.ContainerType.Party, visibleOnly)
+function M:PartyFrames(provider)
+    return M:GetFrames(provider, M.ContainerType.Party)
 end
 
 ---Returns the raid frames of the specified provider.
 ---@param provider FrameProvider
----@param visibleOnly boolean?
 ---@return table[]
-function M:RaidFrames(provider, visibleOnly)
-    return GetFrames(provider, M.ContainerType.Raid, visibleOnly)
+function M:RaidFrames(provider)
+    return M:GetFrames(provider, M.ContainerType.Raid)
 end
 
 ---Returns the enemy arena frames of the specified provider.
 ---@param provider FrameProvider
----@param visibleOnly boolean?
 ---@return table[]
-function M:ArenaFrames(provider, visibleOnly)
-    return GetFrames(provider, M.ContainerType.EnemyArena, visibleOnly)
+function M:ArenaFrames(provider)
+    return M:GetFrames(provider, M.ContainerType.EnemyArena)
 end
 
 function M:IsForbidden(frame)
