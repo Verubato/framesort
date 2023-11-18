@@ -157,8 +157,9 @@ local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, rev
         if not fsUnit:IsPet(rightToken) then return false end
 
         -- both are pets, compare their parent
-        local leftTokenParent = string.gsub(leftToken, "pet", "")
-        local rightTokenParent = string.gsub(rightToken, "pet", "")
+        -- remove "pet" from the token to get the parent
+        local leftTokenParent = leftToken == "pet" and "player" or string.gsub(leftToken, "pet", "")
+        local rightTokenParent = rightToken == "pet" and "player" or string.gsub(rightToken, "pet", "")
 
         return Compare(leftTokenParent, rightTokenParent, playerSortMode, groupSortMode, reverse, preSortedUnits)
     end
