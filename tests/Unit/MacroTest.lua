@@ -642,7 +642,41 @@ function M:test_arena_3v3()
         /cast [@arena2, exists][@arena1, exists][@arena3] Spell
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, {}, units), expected)
+end
+
+function M:test_arena_3v3_order()
+    local units = { "arena3", "arena2", "arena1" }
+
+    addon.WoW.Api.GetArenaOpponentSpec = function(i)
+        return i
+    end
+    addon.WoW.Api.GetNumArenaOpponentSpecs = function()
+        return 3
+    end
+    addon.WoW.Api.GetSpecializationInfoByID = function(i)
+        local role = ""
+        if i == 3 then
+            role = "HEALER"
+        else
+            role = "DAMAGER"
+        end
+
+        return nil, nil, nil, nil, role, nil, nil
+    end
+
+    local macroText = [[
+        #showtooltip
+        #framesort EnemyDPS2 EnemyDPS1
+        /cast [mod:ctrl,@a][mod:shift,@b] Spell
+    ]]
+    local expected = [[
+        #showtooltip
+        #framesort EnemyDPS2 EnemyDPS1
+        /cast [mod:ctrl,@arena1][mod:shift,@arena2] Spell
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, {}, units), expected)
 end
 
 function M:test_arena_5v5()
@@ -679,7 +713,7 @@ function M:test_arena_5v5()
         /cast [@arena2, exists][@arena1, exists] Spell
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, {}, units), expected)
 end
 
 function M:test_multiline()
