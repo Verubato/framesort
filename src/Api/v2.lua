@@ -122,7 +122,7 @@ end
 function M.Sorting:GetFrames()
     local party = GetFrames(fsFrame.ContainerType.Party)
 
-    for _, frames in ipairs(party) do
+    for _, frames in pairs(party) do
         if #frames > 0 then
             return party
         end

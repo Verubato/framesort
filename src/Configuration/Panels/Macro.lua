@@ -22,11 +22,23 @@ local function CountMacros()
 end
 
 function M:Build(parent)
-    local verticalSpacing = fsConfig.VerticalSpacing
-    local panel = wow.CreateFrame("Frame", "FrameSortMacros", parent)
-    panel.name = "Macros"
-    panel.parent = parent.name
+    local scroller = wow.CreateFrame("ScrollFrame", "FrameSortMacros", parent, "UIPanelScrollFrameTemplate")
+    scroller.name = "Macros"
+    scroller.parent = parent.name
 
+    local panel = wow.CreateFrame("Frame")
+
+    if wow.IsRetail() then
+        panel:SetWidth(wow.SettingsPanel.Container:GetWidth())
+        panel:SetHeight(wow.SettingsPanel.Container:GetHeight())
+    else
+        panel:SetWidth(wow.InterfaceOptionsFramePanelContainer:GetWidth())
+        panel:SetHeight(wow.InterfaceOptionsFramePanelContainer:GetHeight())
+    end
+
+    scroller:SetScrollChild(panel)
+
+    local verticalSpacing = fsConfig.VerticalSpacing
     local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
     title:SetText("Macros")
@@ -109,14 +121,20 @@ function M:Build(parent)
     local notes = {
         "Supported variables:",
         " - Frame1, Frame2, Frame3, etc.",
-        " - EnemyFrame1, EnemyFrame2, EnemyFrame3, etc. - Retail only (doesn't work in Wotlk and Classic).",
-        " - BottomFrame",
+        " - PetFrame1, PetFrame2, PetFrame3, etc.",
+        " - BottomFrame.",
         " - Tank, Healer, DPS.",
         " - OtherDps - The first DPS that's not you.",
-        " - EnemyTank, EnemyHealer, EnemyDPS - Retail only (doesn't work in Wotlk and Classic).",
-        " - Add a number to choose the Nth target, e.g., DPS2 selects the 2nd DPS.",
-        " - Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work.",
     }
+
+    if wow.IsRetail() then
+        notes[#notes + 1] = " - EnemyFrame1, EnemyFrame2, EnemyFrame3, etc."
+        notes[#notes + 1] = " - EnemyPetFrame1, EnemyPetFrame2, EnemyPetFrame3, etc."
+        notes[#notes + 1] = " - EnemyTank, EnemyHealer, EnemyDPS."
+    end
+
+    notes[#notes + 1] = " - Add a number to choose the Nth target, e.g., DPS2 selects the 2nd DPS."
+    notes[#notes + 1] = " - Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work."
 
     for i, line in ipairs(notes) do
         local description = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
@@ -125,5 +143,5 @@ function M:Build(parent)
         anchor = description
     end
 
-    return panel
+    return scroller
 end

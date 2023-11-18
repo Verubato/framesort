@@ -8,7 +8,9 @@ local fsCompare = addon.Collections.Comparer
 local fsFrame = addon.WoW.Frame
 local fsLog = addon.Logging.Log
 local targetFramesButtons = {}
+local targetPetFramesButtons = {}
 local targetEnemyButtons = {}
+local targetEnemyPetButtons = {}
 local focusEnemyButtons = {}
 local targetBottomFrameButton = nil
 
@@ -36,9 +38,9 @@ local function GetFriendlyFrames(provider)
 end
 
 local function UpdateTargets()
+    local updatedCount = 0
     local start = wow.GetTimePreciseSec()
     local friendlyUnits = M:FriendlyUnits()
-    local updatedCount = 0
 
     -- if units has less than 5 items it's still fine as units[i] will just be nil
     for i, btn in ipairs(targetFramesButtons) do
@@ -51,7 +53,28 @@ local function UpdateTargets()
         end
     end
 
-    assert(targetBottomFrameButton ~= nil)
+    for i, btn in ipairs(targetPetFramesButtons) do
+        local new = fsUnit:PetFor(friendlyUnits[i] or "none")
+        local current = btn:GetAttribute("unit")
+
+        if current ~= new then
+            btn:SetAttribute("unit", new)
+            updatedCount = updatedCount + 1
+        end
+    end
+
+    for i, btn in ipairs(targetFramesButtons) do
+        local new = friendlyUnits[i] or "none"
+        local current = btn:GetAttribute("unit")
+
+        if current ~= new then
+            btn:SetAttribute("unit", new)
+            updatedCount = updatedCount + 1
+        end
+    end
+
+    assert(targetBottomFrameButton)
+
     local bottomCurrentUnit = targetBottomFrameButton:GetAttribute("unit")
     local bottomNewUnit = friendlyUnits[#friendlyUnits] or "none"
 
@@ -60,10 +83,20 @@ local function UpdateTargets()
         updatedCount = updatedCount + 1
     end
 
-    local enemyunits = M:EnemyUnits()
+    local enemyUnits = M:EnemyUnits()
 
     for i, btn in ipairs(targetEnemyButtons) do
-        local new = enemyunits[i] or "none"
+        local new = enemyUnits[i] or "none"
+        local current = btn:GetAttribute("unit")
+
+        if current ~= new then
+            btn:SetAttribute("unit", new)
+            updatedCount = updatedCount + 1
+        end
+    end
+
+    for i, btn in ipairs(targetEnemyPetButtons) do
+        local new = fsUnit:PetFor(enemyUnits[i] or "none")
         local current = btn:GetAttribute("unit")
 
         if current ~= new then
@@ -73,7 +106,7 @@ local function UpdateTargets()
     end
 
     for i, btn in ipairs(focusEnemyButtons) do
-        local new = enemyunits[i] or "none"
+        local new = enemyUnits[i] or "none"
         local current = btn:GetAttribute("unit")
 
         if current ~= new then
@@ -127,7 +160,7 @@ function M:FriendlyUnits()
     local frames = M:FriendlyFrames()
 
     if frames and #frames > 0 then
-       return fsEnumerable
+        return fsEnumerable
             :From(frames)
             :Map(function(x)
                 return fsFrame:GetFrameUnit(x)
@@ -149,10 +182,6 @@ function M:FriendlyUnits()
 end
 
 function M:EnemyFrames()
-    -- GladiusEx, sArena, and Blizzar all show enemies in group order
-    -- arena1, arena2, arena3
-    -- so we can just grab the units directly instead of extracting units from frames
-    -- this has the benefit of not having to worry about frame visibility and event ordering shenanigans
     local units = fsUnit:EnemyUnits()
     local sortEnabled = fsCompare:EnemySortMode()
 
@@ -171,8 +200,6 @@ function M:EnemyUnits()
     -- so we can just grab the units directly instead of extracting units from frames
     -- this has the benefit of not having to worry about frame visibility and event ordering shenanigans
     local units = fsUnit:EnemyUnits()
-
-    -- EnemyUnits() returns in group order
     local sortEnabled = fsCompare:EnemySortMode()
 
     if not sortEnabled then
@@ -212,7 +239,14 @@ function M:Init()
         button:SetAttribute("type", "target")
         button:SetAttribute("unit", "none")
 
-        targetFramesButtons[#targetFramesButtons + 1] = button
+        -- pet
+        local pet = wow.CreateFrame("Button", "FSTargetPet" .. i, wow.UIParent, "SecureActionButtonTemplate")
+        pet:RegisterForClicks("AnyDown", "AnyUp")
+        pet:SetAttribute("type", "target")
+        pet:SetAttribute("unit", "none")
+
+        targetFramesButtons[i] = button
+        targetPetFramesButtons[i] = pet
     end
 
     for i = 1, targetEnemyCount do
@@ -226,8 +260,14 @@ function M:Init()
         focus:SetAttribute("type", "focus")
         focus:SetAttribute("unit", "none")
 
-        targetEnemyButtons[#targetEnemyButtons + 1] = target
-        focusEnemyButtons[#focusEnemyButtons + 1] = focus
+        local pet = wow.CreateFrame("Button", "FSTargetEnemyPet" .. i, wow.UIParent, "SecureActionButtonTemplate")
+        pet:RegisterForClicks("AnyDown", "AnyUp")
+        pet:SetAttribute("type", "target")
+        pet:SetAttribute("unit", "none")
+
+        targetEnemyButtons[i] = target
+        targetEnemyPetButtons[i] = pet
+        focusEnemyButtons[i] = focus
     end
 
     -- target bottom

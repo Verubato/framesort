@@ -95,3 +95,19 @@ end
 function M:IsPet(unit)
     return string.find(unit, "pet", nil, true) ~= nil
 end
+
+---Returns the pet unit for the specified player unit.
+---@param unit string
+---@return string
+function M:PetFor(unit)
+    if not unit or unit == "none" then
+        return "none"
+    end
+
+    if unit == "player" or wow.UnitIsUnit(unit, "player") then
+        return "pet"
+    end
+
+    local pet, _ = string.gsub(unit, "%a+", "%1pet")
+    return pet
+end

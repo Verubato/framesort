@@ -65,7 +65,9 @@ end
 
 function M:test_targets_update_on_provider_callback()
     local friendlyButtons = {}
+    local friendlyPetButtons = {}
     local enemyButtons = {}
+    local enemyPetButtons = {}
 
     for _, f in ipairs(wow.State.Frames) do
         if f.Name and type(f.Name) == "string" then
@@ -73,6 +75,10 @@ function M:test_targets_update_on_provider_callback()
                 friendlyButtons[#friendlyButtons + 1] = f
             elseif string.match(f.Name, "FSTargetEnemy%d") then
                 enemyButtons[#enemyButtons + 1] = f
+            elseif string.match(f.Name, "FSTargetPet%d") then
+                friendlyPetButtons[#friendlyPetButtons + 1] = f
+            elseif string.match(f.Name, "FSTargetEnemyPet%d") then
+                enemyPetButtons[#enemyPetButtons + 1] = f
             end
         end
     end
@@ -108,6 +114,17 @@ function M:test_targets_update_on_provider_callback()
     assertEquals(enemyButtons[1]:GetAttribute("unit"), "arena3")
     assertEquals(enemyButtons[2]:GetAttribute("unit"), "arena2")
     assertEquals(enemyButtons[3]:GetAttribute("unit"), "arena1")
+
+    -- pets
+    assertEquals(friendlyPetButtons[1]:GetAttribute("unit"), "pet")
+    assertEquals(friendlyPetButtons[2]:GetAttribute("unit"), "partypet2")
+    assertEquals(friendlyPetButtons[3]:GetAttribute("unit"), "partypet1")
+    assertEquals(friendlyPetButtons[4]:GetAttribute("unit"), "none")
+    assertEquals(friendlyPetButtons[5]:GetAttribute("unit"), "none")
+
+    assertEquals(enemyPetButtons[1]:GetAttribute("unit"), "arenapet3")
+    assertEquals(enemyPetButtons[2]:GetAttribute("unit"), "arenapet2")
+    assertEquals(enemyPetButtons[3]:GetAttribute("unit"), "arenapet1")
 end
 
 function M:test_targets_update_after_combat()

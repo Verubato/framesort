@@ -2,6 +2,7 @@
 local _, addon = ...
 local wow = addon.WoW.Api
 local fsEnumerable = addon.Collections.Enumerable
+local fsUnit = addon.WoW.Unit
 ---@class MacroParser
 local M = {}
 addon.Modules.Macro.Parser = M
@@ -106,9 +107,21 @@ local function UnitForSelector(selector, friendlyUnits, enemyUnits)
         return number and friendlyUnits[#friendlyUnits] or "none"
     end
 
+    -- enemy pet frame
+    if string.match(selectorLower, "enemypetframe") then
+        local player = number and enemyUnits[number] or "none"
+        return fsUnit:PetFor(player)
+    end
+
     -- enemy frame
     if string.match(selectorLower, "enemyframe") then
         return number and enemyUnits[number] or "none"
+    end
+
+    -- pet frame
+    if string.match(selectorLower, "petframe") then
+        local player = number and friendlyUnits[number] or "none"
+        return fsUnit:PetFor(player)
     end
 
     -- frame
