@@ -139,28 +139,20 @@ local function UnitForSelector(selector, friendlyUnits, enemyUnits)
             return "none"
         end
 
-        local count = wow.GetNumArenaOpponentSpecs()
-        if not count or count <= 0 then
-            return "none"
-        end
+        assert(enemyUnits)
 
-        local ids = {}
-        for i = 1, count do
-            ids[#ids + 1] = i
-        end
+        return fsEnumerable:From(enemyUnits):Nth(number or 1, function(x)
+            local id = tonumber(string.match(x, "%d+"))
 
-        local arenaId = fsEnumerable:From(ids):Nth(number or 1, function(x)
-            local specId = wow.GetArenaOpponentSpec(x)
+            if not id then
+                return false
+            end
+
+            local specId = wow.GetArenaOpponentSpec(id)
             local _, _, _, _, role, _, _ = wow.GetSpecializationInfoByID(specId)
 
             return (tank and role == WowRole.Tank) or (healer and role == WowRole.Healer) or (dps and role == WowRole.DPS)
-        end)
-
-        if arenaId then
-            return "arena" .. arenaId
-        end
-
-        return "none"
+        end) or "none"
     end
 
     -- other dps
