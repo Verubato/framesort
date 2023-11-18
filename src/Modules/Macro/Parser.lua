@@ -149,6 +149,11 @@ local function UnitForSelector(selector, friendlyUnits, enemyUnits)
             end
 
             local specId = wow.GetArenaOpponentSpec(id)
+
+            if not specId then
+                return false
+            end
+
             local _, _, _, _, role, _, _ = wow.GetSpecializationInfoByID(specId)
 
             return (tank and role == WowRole.Tank) or (healer and role == WowRole.Healer) or (dps and role == WowRole.DPS)
