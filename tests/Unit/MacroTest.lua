@@ -1,6 +1,7 @@
 ---@diagnostic disable: inject-field
 local deps = {
     "Collections\\Enumerable.lua",
+    "WoW\\Unit.lua",
     "Modules\\Macro\\Parser.lua",
 }
 
@@ -165,6 +166,22 @@ function M:test_frame_123456()
     assertEquals(fsMacro:GetNewBody(macroText, units), expected)
 end
 
+function M:test_pet_frame_123456()
+    local units = { "party2", "party1", "player", "raid17", "raid4", "asdf1" }
+    local macroText = [[
+        #showtooltip
+        #FrameSort PetFrame1 PetFrame2 PetFrame3 PetFrame4 PetFrame5 PetFrame6
+        /cast [mod:ctrl,@a][mod:shift,@b][nomod,@c][something,@d][test,@e][@f] Spell
+    ]]
+    local expected = [[
+        #showtooltip
+        #FrameSort PetFrame1 PetFrame2 PetFrame3 PetFrame4 PetFrame5 PetFrame6
+        /cast [mod:ctrl,@partypet2][mod:shift,@partypet1][nomod,@pet][something,@raidpet17][test,@raidpet4][@asdfpet1] Spell
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+end
+
 function M:test_enemy_frame_123456()
     local units = { "arena2", "arena3", "arena1" }
     local macroText = [[
@@ -176,6 +193,22 @@ function M:test_enemy_frame_123456()
         #showtooltip
         #FrameSort EnemyFrame1 EnemyFrame2 EnemyFrame3
         /cast [mod:ctrl,@arena2][mod:shift,@arena3][nomod,@arena1] Spell
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, {}, units), expected)
+end
+
+function M:test_enemy_pet_frame_123456()
+    local units = { "arena2", "arena3", "arena1" }
+    local macroText = [[
+        #showtooltip
+        #FrameSort EnemyPetFrame1 EnemyPetFrame2 EnemyPetFrame3
+        /cast [mod:ctrl,@a][mod:shift,@b][nomod,@c] Spell
+    ]]
+    local expected = [[
+        #showtooltip
+        #FrameSort EnemyPetFrame1 EnemyPetFrame2 EnemyPetFrame3
+        /cast [mod:ctrl,@arenapet2][mod:shift,@arenapet3][nomod,@arenapet1] Spell
     ]]
 
     assertEquals(fsMacro:GetNewBody(macroText, {}, units), expected)
