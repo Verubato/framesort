@@ -108,7 +108,7 @@ local function UnitForSelector(selector, friendlyUnits, enemyUnits)
     end
 
     -- enemy pet frame
-    if string.match(selectorLower, "enemypetframe") then
+    if string.match(selectorLower, "enemyframe%d+pet") then
         local player = number and enemyUnits[number] or "none"
         return fsUnit:PetFor(player)
     end
@@ -119,7 +119,7 @@ local function UnitForSelector(selector, friendlyUnits, enemyUnits)
     end
 
     -- pet frame
-    if string.match(selectorLower, "petframe") then
+    if string.match(selectorLower, "frame%d+pet") then
         local player = number and friendlyUnits[number] or "none"
         return fsUnit:PetFor(player)
     end
