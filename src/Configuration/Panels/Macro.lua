@@ -121,7 +121,7 @@ function M:Build(parent)
     local notes = {
         "Supported variables:",
         " - Frame1, Frame2, Frame3, etc.",
-        " - PetFrame1, PetFrame2, PetFrame3, etc.",
+        " - Frame1Pet, Frame2Pet, Frame3Pet, etc.",
         " - BottomFrame.",
         " - Tank, Healer, DPS.",
         " - OtherDps - The first DPS that's not you.",
@@ -129,7 +129,7 @@ function M:Build(parent)
 
     if wow.IsRetail() then
         notes[#notes + 1] = " - EnemyFrame1, EnemyFrame2, EnemyFrame3, etc."
-        notes[#notes + 1] = " - EnemyPetFrame1, EnemyPetFrame2, EnemyPetFrame3, etc."
+        notes[#notes + 1] = " - EnemyFrame1Pet, EnemyFrame2Pet, EnemyFrame3Pet, etc."
         notes[#notes + 1] = " - EnemyTank, EnemyHealer, EnemyDPS."
     end
 

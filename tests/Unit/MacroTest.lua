@@ -166,16 +166,16 @@ function M:test_frame_123456()
     assertEquals(fsMacro:GetNewBody(macroText, units), expected)
 end
 
-function M:test_pet_frame_123456()
+function M:test_frame_123456_pet()
     local units = { "party2", "party1", "player", "raid17", "raid4", "asdf1" }
     local macroText = [[
         #showtooltip
-        #FrameSort PetFrame1 PetFrame2 PetFrame3 PetFrame4 PetFrame5 PetFrame6
+        #FrameSort Frame1Pet Frame2Pet Frame3Pet Frame4Pet Frame5Pet Frame6Pet
         /cast [mod:ctrl,@a][mod:shift,@b][nomod,@c][something,@d][test,@e][@f] Spell
     ]]
     local expected = [[
         #showtooltip
-        #FrameSort PetFrame1 PetFrame2 PetFrame3 PetFrame4 PetFrame5 PetFrame6
+        #FrameSort Frame1Pet Frame2Pet Frame3Pet Frame4Pet Frame5Pet Frame6Pet
         /cast [mod:ctrl,@partypet2][mod:shift,@partypet1][nomod,@pet][something,@raidpet17][test,@raidpet4][@asdfpet1] Spell
     ]]
 
@@ -198,16 +198,16 @@ function M:test_enemy_frame_123456()
     assertEquals(fsMacro:GetNewBody(macroText, {}, units), expected)
 end
 
-function M:test_enemy_pet_frame_123456()
+function M:test_enemy_frame_123456_pet()
     local units = { "arena2", "arena3", "arena1" }
     local macroText = [[
         #showtooltip
-        #FrameSort EnemyPetFrame1 EnemyPetFrame2 EnemyPetFrame3
+        #FrameSort EnemyFrame1Pet EnemyFrame2Pet EnemyFrame3Pet
         /cast [mod:ctrl,@a][mod:shift,@b][nomod,@c] Spell
     ]]
     local expected = [[
         #showtooltip
-        #FrameSort EnemyPetFrame1 EnemyPetFrame2 EnemyPetFrame3
+        #FrameSort EnemyFrame1Pet EnemyFrame2Pet EnemyFrame3Pet
         /cast [mod:ctrl,@arenapet2][mod:shift,@arenapet3][nomod,@arenapet1] Spell
     ]]
 
