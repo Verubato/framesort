@@ -19,7 +19,7 @@
 ---@field Health OptionsPanel
 ---@field Keybinding OptionsPanel
 ---@field Macro OptionsPanel
----@field Integration OptionsPanel
+---@field Addons OptionsPanel
 ---@field RoleOrdering OptionsPanel
 ---@field SortingMethod OptionsPanel
 ---@field Api OptionsPanel
