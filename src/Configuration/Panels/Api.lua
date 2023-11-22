@@ -62,7 +62,7 @@ function M:Build(parent)
             Text = [[/run FrameSortApi.v2.Options:SetPlayerSortMode("Arena - 2v2", "Top")]]
         },
         {
-            Description = "View a full listing of all API methods in GitHub.",
+            Description = "View a full listing of all API methods on GitHub.",
             Text = [[https://github.com/Verubato/framesort/tree/main/src/Api]]
         },
     }
