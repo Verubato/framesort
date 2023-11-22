@@ -161,7 +161,7 @@ end
 
 function M:Build(parent)
     local verticalSpacing = fsConfig.VerticalSpacing
-    local panel = wow.CreateFrame("Frame", "FrameSortSpacing", parent)
+    local panel = wow.CreateFrame("Frame", nil, parent)
     panel.name = "Spacing"
     panel.parent = parent.name
 

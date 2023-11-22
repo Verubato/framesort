@@ -29,7 +29,7 @@ fsConfig.Panels.Keybinding = M
 
 function M:Build(parent)
     local verticalSpacing = fsConfig.VerticalSpacing
-    local panel = wow.CreateFrame("Frame", "FrameSortKeybindings", parent)
+    local panel = wow.CreateFrame("Frame", nil, parent)
     panel.name = "Keybindings"
     panel.parent = parent.name
 
