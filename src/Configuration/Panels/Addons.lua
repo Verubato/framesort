@@ -3,17 +3,17 @@ local _, addon = ...
 local wow = addon.WoW.Api
 local fsConfig = addon.Configuration
 local M = {}
-fsConfig.Panels.Integration = M
+fsConfig.Panels.Addons = M
 
 function M:Build(parent)
     local panel = wow.CreateFrame("Frame", "FrameSortSortingIntegrations", parent)
-    panel.name = "Integrations"
+    panel.name = "Addons Support"
     panel.parent = parent.name
 
     local verticalSpacing = fsConfig.VerticalSpacing
     local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
-    title:SetText("Integrations")
+    title:SetText("Addons")
 
     local lines = {
         "In addition to Blizzard frames, FrameSort also supports the following addons:",
