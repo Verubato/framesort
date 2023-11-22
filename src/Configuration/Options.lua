@@ -65,6 +65,7 @@ function fsConfig:Init()
     local spacing = panels.Spacing:Build(panel)
     local integration = panels.Integration:Build(panel)
     local health = panels.Health:Build(panel)
+    local api = panels.Api:Build(panel)
 
     AddSubCategory(sortingMethod)
     AddSubCategory(roleOrdering)
@@ -73,6 +74,7 @@ function fsConfig:Init()
     AddSubCategory(spacing)
     AddSubCategory(integration)
     AddSubCategory(health)
+    AddSubCategory(api)
 
     SLASH_FRAMESORT1 = "/fs"
     SLASH_FRAMESORT2 = "/framesort"

@@ -22,3 +22,4 @@
 ---@field Integration OptionsPanel
 ---@field RoleOrdering OptionsPanel
 ---@field SortingMethod OptionsPanel
+---@field Api OptionsPanel

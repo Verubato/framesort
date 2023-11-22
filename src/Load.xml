@@ -64,6 +64,7 @@
     <Script file="Configuration\Panels\SortingMethod.lua"/>
     <Script file="Configuration\Panels\Integrations.lua"/>
     <Script file="Configuration\Panels\HealthCheck.lua"/>
+    <Script file="Configuration\Panels\Api.lua"/>
 
     <!-- Now initialise the addon -->
     <Script file="Init.lua"/>
