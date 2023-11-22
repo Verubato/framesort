@@ -23,3 +23,4 @@
 ---@field RoleOrdering OptionsPanel
 ---@field SortingMethod OptionsPanel
 ---@field Api OptionsPanel
+---@field Help OptionsPanel
