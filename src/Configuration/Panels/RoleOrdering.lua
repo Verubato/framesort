@@ -7,7 +7,7 @@ fsConfig.Panels.RoleOrdering = M
 
 function M:Build(parent)
     local verticalSpacing = fsConfig.VerticalSpacing
-    local panel = wow.CreateFrame("Frame", "FrameSortRoleOrdering", parent)
+    local panel = wow.CreateFrame("Frame", nil, parent)
     panel.name = "Role Ordering"
     panel.parent = parent.name
 

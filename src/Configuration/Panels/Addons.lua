@@ -6,7 +6,7 @@ local M = {}
 fsConfig.Panels.Addons = M
 
 function M:Build(parent)
-    local panel = wow.CreateFrame("Frame", "FrameSortSortingIntegrations", parent)
+    local panel = wow.CreateFrame("Frame", nil, parent)
     panel.name = "Addons Support"
     panel.parent = parent.name
 

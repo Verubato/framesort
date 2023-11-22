@@ -9,7 +9,7 @@ fsConfig.Panels.Health = M
 
 function M:Build(parent)
     local verticalSpacing = fsConfig.VerticalSpacing
-    local panel = wow.CreateFrame("Frame", "FrameSortHealthCheck", parent)
+    local panel = wow.CreateFrame("Frame", nil, parent)
     panel.name = "Health Check"
     panel.parent = parent.name
 
