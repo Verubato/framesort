@@ -66,6 +66,7 @@ function fsConfig:Init()
     local addons = panels.Addons:Build(panel)
     local health = panels.Health:Build(panel)
     local api = panels.Api:Build(panel)
+    local help = panels.Help:Build(panel)
 
     AddSubCategory(sortingMethod)
     AddSubCategory(roleOrdering)
@@ -75,6 +76,7 @@ function fsConfig:Init()
     AddSubCategory(addons)
     AddSubCategory(health)
     AddSubCategory(api)
+    AddSubCategory(help)
 
     SLASH_FRAMESORT1 = "/fs"
     SLASH_FRAMESORT2 = "/framesort"

@@ -65,6 +65,7 @@
     <Script file="Configuration\Panels\Addons.lua"/>
     <Script file="Configuration\Panels\HealthCheck.lua"/>
     <Script file="Configuration\Panels\Api.lua"/>
+    <Script file="Configuration\Panels\Help.lua"/>
 
     <!-- Now initialise the addon -->
     <Script file="Init.lua"/>
