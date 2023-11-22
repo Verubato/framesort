@@ -22,7 +22,7 @@ local function CountMacros()
 end
 
 function M:Build(parent)
-    local scroller = wow.CreateFrame("ScrollFrame", "FrameSortMacros", parent, "UIPanelScrollFrameTemplate")
+    local scroller = wow.CreateFrame("ScrollFrame", nil, parent, "UIPanelScrollFrameTemplate")
     scroller.name = "Macros"
     scroller.parent = parent.name
 
