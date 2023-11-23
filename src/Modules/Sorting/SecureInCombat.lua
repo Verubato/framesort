@@ -1151,7 +1151,9 @@ local function LoadProvider(provider)
 
     for _, item in ipairs(containers) do
         -- flag as imported
-        item.Frame:SetAttributeNoHandler("FrameSortLoaded", true)
+        -- SetAttributeNoHandler may not exist on frames we didn't create
+        -- doesn't exist in wow 3.3.5
+        item.Frame:SetAttribute("FrameSortLoaded", true)
     end
 end
 
