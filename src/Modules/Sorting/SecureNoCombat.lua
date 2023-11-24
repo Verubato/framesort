@@ -13,6 +13,11 @@ addon.Modules.Sorting.Secure.NoCombat = M
 
 local function FrameSortFunction(unitSortFunction)
     return function(left, right)
+        -- not sure why sometimes we get null arguments here, but it does happen on very rare occasions
+        -- https://github.com/Verubato/framesort/issues/33
+        if not left then return false end
+        if not right then return true end
+
         local leftUnit = fsFrame:GetFrameUnit(left)
         local rightUnit = fsFrame:GetFrameUnit(right)
 
