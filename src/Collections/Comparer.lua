@@ -8,11 +8,11 @@ local fsConfig = addon.Configuration
 local fuzzyDecimalPlaces = 0
 local roleOrdering = {
     -- tank > healer > dps
-    [fsConfig.RoleOrdering.TankHealerDps] = { MAINTANK = 1, MAINASSIST = 2, TANK = 3, HEALER = 4, DAMAGER = 5, NONE = 6 },
+    [fsConfig.RoleOrdering.TankHealerDps] = { TANK = 1, HEALER = 2, DAMAGER = 3, NONE = 4 },
     -- healer > tank > dps
-    [fsConfig.RoleOrdering.HealerTankDps] = { HEALER = 1, MAINTANK = 2, MAINASSIST = 3, TANK = 4, DAMAGER = 5, NONE = 6 },
+    [fsConfig.RoleOrdering.HealerTankDps] = { HEALER = 1, TANK = 2, DAMAGER = 3, NONE = 4 },
     -- healer > dps > tank
-    [fsConfig.RoleOrdering.HealerDpsTank] = { HEALER = 1, DAMAGER = 2, MAINTANK = 3, MAINASSIST = 4, TANK = 5, NONE = 6 },
+    [fsConfig.RoleOrdering.HealerDpsTank] = { HEALER = 1, DAMAGER = 2, TANK = 3, NONE = 4 },
 }
 ---@class Comparer
 local M = {}
@@ -92,8 +92,8 @@ local function CompareRole(leftToken, rightToken, isArena)
             return leftToken < rightToken
         end
 
-        leftRole = select(12, wow.GetRaidRosterInfo(leftId)) or wow.UnitGroupRolesAssigned(leftToken)
-        rightRole = select(12, wow.GetRaidRosterInfo(rightId)) or wow.UnitGroupRolesAssigned(rightToken)
+        leftRole = wow.UnitGroupRolesAssigned(leftToken)
+        rightRole = wow.UnitGroupRolesAssigned(rightToken)
     end
 
     if not leftRole or not rightRole then
