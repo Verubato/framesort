@@ -849,4 +849,22 @@ function M:test_skip_selector()
     assertEquals(fsMacro:GetNewBody(macroText, units), expected)
 end
 
+function M:test_short_header()
+    local units = { "party1", "party2", "player" }
+
+    local macroText = [[
+        #showtooltip
+        #fs ! frame1
+        /cast [@mouseover,exists][@x] Spell
+    ]]
+    local expected = [[
+        #showtooltip
+        #fs ! frame1
+        /cast [@mouseover,exists][@party1] Spell
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+end
+
+
 return M

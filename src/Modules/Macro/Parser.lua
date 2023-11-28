@@ -7,7 +7,10 @@ local fsUnit = addon.WoW.Unit
 local M = {}
 addon.Modules.Macro.Parser = M
 local skipSelector = "!"
-
+-- string split on ",", " " and "|"
+local splitOn = "([^,|%s]+)"
+local shortHeaderPattern = "#[Ff][Ss]"
+local longHeaderPattern = "#[Ff][Rr][Aa][Mm][Ee][Ss][Oo][Rr][Tt]"
 local shortSyntax = "@"
 local longSyntax = "target="
 local alphanumericWord = "([%w]+)"
@@ -76,9 +79,9 @@ local function ReplaceSelector(body, unit, occurrence)
 end
 
 local function GetSelectors(body)
-    -- string split on ",", " " and "|"
-    local splitOn = "([^,|%s]+)"
-    local header = string.match(body, "[Ff][Rr][Aa][Mm][Ee][Ss][Oo][Rr][Tt].-\n")
+    local longHeader = string.match(body, longHeaderPattern .. ".-\n")
+    local shortHeader = string.match(body, shortHeaderPattern .. ".-\n")
+    local header = longHeader or shortHeader
     local selectors = {}
 
     if not header then
@@ -189,7 +192,7 @@ local function UnitForSelector(selector, friendlyUnits, enemyUnits)
 end
 
 function M:IsFrameSortMacro(body)
-    return body and string.match(body, "[Ff][Rr][Aa][Mm][Ee][Ss][Oo][Rr][Tt]") ~= nil or false
+    return body and (string.match(body, shortHeaderPattern) ~= nil or string.match(body, longHeaderPattern) ~= nil) or false
 end
 
 ---Returns a copy of the macro body with the new unit inserted.
