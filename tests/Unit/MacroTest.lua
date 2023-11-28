@@ -100,12 +100,12 @@ function M:test_separators()
 
     macroText = [[
         #showtooltip
-        #FrameSort: Frame1 Frame2 Frame3 Frame4 Frame5
+        #FrameSort Frame1 Frame2 Frame3 Frame4 Frame5
         /cast [@a][@b][@c][@d][@e] Spell
     ]]
     expected = [[
         #showtooltip
-        #FrameSort: Frame1 Frame2 Frame3 Frame4 Frame5
+        #FrameSort Frame1 Frame2 Frame3 Frame4 Frame5
         /cast [@party2][@party4][@party1][@party2][@player] Spell
     ]]
 
@@ -113,12 +113,12 @@ function M:test_separators()
 
     macroText = [[
         #showtooltip
-        #FrameSort - Frame1|Frame2|Frame3|Frame4|Frame5
+        #FrameSort Frame1|Frame2|Frame3,Frame4 Frame5
         /cast [@a][@b][@c][@d][@e] Spell
     ]]
     expected = [[
         #showtooltip
-        #FrameSort - Frame1|Frame2|Frame3|Frame4|Frame5
+        #FrameSort Frame1|Frame2|Frame3,Frame4 Frame5
         /cast [@party2][@party4][@party1][@party2][@player] Spell
     ]]
 
@@ -814,6 +814,36 @@ function M:test_syntax_combination()
         #showtooltip
         #framesort Frame1, Frame2, Frame3, player
         /cast [target=player, @party1, @party2, target=@player] Spell;
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+end
+
+function M:test_skip_selector()
+    local units = { "party1", "party2", "player" }
+
+    local macroText = [[
+        #showtooltip
+        #framesort ! ! Frame1 !
+        /cast [@mouseover,exists][mod:shift,@focus][mod:ctrl,@none][@target][] Spell;
+    ]]
+    local expected = [[
+        #showtooltip
+        #framesort ! ! Frame1 !
+        /cast [@mouseover,exists][mod:shift,@focus][mod:ctrl,@party1][@target][] Spell;
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+
+    macroText = [[
+        #showtooltip
+        #framesort ! ! Frame1
+        /cast [@mouseover,exists][mod:shift,@focus][mod:ctrl,@none][@target][] Spell;
+    ]]
+    expected = [[
+        #showtooltip
+        #framesort ! ! Frame1
+        /cast [@mouseover,exists][mod:shift,@focus][mod:ctrl,@party1][@target][] Spell;
     ]]
 
     assertEquals(fsMacro:GetNewBody(macroText, units), expected)
