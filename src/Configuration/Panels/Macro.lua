@@ -120,17 +120,17 @@ function M:Build(parent)
 
     local notes = {
         "Supported variables:",
-        " - Frame1, Frame2, Frame3, etc.",
-        " - Frame1Pet, Frame2Pet, Frame3Pet, etc.",
-        " - BottomFrame.",
-        " - Tank, Healer, DPS.",
+        " - Frame1, Frame2, Frame3, etc",
+        " - Frame1Pet, Frame2Pet, Frame3Pet, etc",
+        " - BottomFrame",
+        " - Tank, Healer, DPS",
         " - OtherDps - The first DPS that's not you.",
     }
 
     if wow.IsRetail() then
-        notes[#notes + 1] = " - EnemyFrame1, EnemyFrame2, EnemyFrame3, etc."
-        notes[#notes + 1] = " - EnemyFrame1Pet, EnemyFrame2Pet, EnemyFrame3Pet, etc."
-        notes[#notes + 1] = " - EnemyTank, EnemyHealer, EnemyDPS."
+        notes[#notes + 1] = " - EnemyFrame1, EnemyFrame2, EnemyFrame3, etc"
+        notes[#notes + 1] = " - EnemyFrame1Pet, EnemyFrame2Pet, EnemyFrame3Pet, etc"
+        notes[#notes + 1] = " - EnemyTank, EnemyHealer, EnemyDPS"
     end
 
     notes[#notes + 1] = " - Add a number to choose the Nth target, e.g., DPS2 selects the 2nd DPS."
@@ -142,6 +142,68 @@ function M:Build(parent)
         description:SetText(line)
         anchor = description
     end
+
+    local abbreviations = {
+        "Need to save on macro characters? Use abbreviations to shorten them:",
+        " - #FS = #FrameSort",
+        " - F1, F2, F3 = Frame1, Frame2, Frame3",
+        " - F1P, F2P, F3P = Frame1Pet, Frame2Pet, Frame3Pet",
+        " - BottomFrame = BF",
+        " - Tank, Healer, DPS = T, H, D",
+        " - OtherDPS = OD",
+        " - EnemyHealer = EH",
+    }
+
+    if wow.IsRetail() then
+        abbreviations[#abbreviations + 1] = " - EF1, EF2, EF3 = EnemyFrame1, EnemyFrame2, EnemyFrame3."
+        abbreviations[#abbreviations + 1] = " - EF1P, EF2P, EF3P = EnemyFrame1Pet, EnemyFrame2Pet, EnemyFrame3Pet, etc."
+        abbreviations[#abbreviations + 1] = " - ET, EH, DP = EnemyTank, EnemyHealer, EnemyDPS."
+    end
+
+    for i, line in ipairs(abbreviations) do
+        local description = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+        description:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, i == 1 and -verticalSpacing or -verticalSpacing / 2)
+        description:SetText(line)
+        anchor = description
+    end
+
+    local skipDescription = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+    skipDescription:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
+    skipDescription:SetText("Use \"!\" to tell FrameSort to ignore an \"@unit\" selector:")
+
+    local skipExample = [[
+#FS ! ! EnemyHealer
+/cast [mod:shift,@focus][@mouseover,harm][@enemyhealer][] Spell;]]
+
+    local skipBox = wow.CreateFrame("EditBox", nil, panel)
+    skipBox:SetPoint("TOPLEFT", skipDescription, "BOTTOMLEFT", 0, -verticalSpacing)
+    skipBox:SetSize(500, 1)
+    skipBox:SetFontObject("GameFontWhite")
+    skipBox:SetAutoFocus(false)
+    skipBox:SetMultiLine(true)
+    skipBox:SetText(skipExample)
+    skipBox:SetCursorPosition(0)
+
+    -- undo any user changes
+    skipBox:SetScript("OnTextChanged", function(_, userInput)
+        if not userInput then
+            return
+        end
+
+        skipBox:SetText(skipExample)
+    end)
+
+    skipBox:SetScript("OnEscapePressed", function()
+        skipBox:ClearFocus()
+    end)
+    skipBox:SetTextInsets(padding, padding, padding, padding)
+
+    local bg = wow.CreateFrame("Frame", nil, panel, "BackdropTemplate")
+    bg:SetBackdrop({
+        edgeFile = "Interface\\Glues\\Common\\TextPanel-Border",
+        edgeSize = 16,
+    })
+    bg:SetAllPoints(skipBox)
 
     return scroller
 end
