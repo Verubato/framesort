@@ -30,7 +30,9 @@ function M:GetFrames(provider, type, visibleOnly)
     local target = M:GetContainer(provider, type)
     if not target then return {} end
 
-    visibleOnly = visibleOnly or target.VisibleOnly
+    if visibleOnly == nil then
+        visibleOnly = target.VisibleOnly
+    end
 
     local frames = M:ExtractUnitFrames(target.Frame, visibleOnly)
 
