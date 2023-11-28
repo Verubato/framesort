@@ -103,43 +103,51 @@ local function GetSelectors(body)
 end
 
 local function UnitForSelector(selector, friendlyUnits, enemyUnits)
-    local selectorLower = string.lower(selector)
-    local numberStr = string.match(selector, "%d+")
-    local number = numberStr and tonumber(numberStr) or nil
+    -- extract the frame number
+    local number = tonumber(string.match(selector, "%d+")) or 1
+    -- drop the number and make it case insensitive
+    local type = string.gsub(string.lower(selector), "%d+", "")
 
     -- bottom frame
-    if string.match(selectorLower, "bottomframe") then
-        return number and friendlyUnits[#friendlyUnits] or "none"
+    if type == "bottomframe" or type == "bf" then
+        return friendlyUnits[#friendlyUnits] or "none"
     end
 
     -- enemy pet frame
-    if string.match(selectorLower, "enemyframe%d+pet") then
-        local player = number and enemyUnits[number] or "none"
+    if type == "enemyframepet" or type == "efp" then
+        local player = enemyUnits[number] or "none"
         return fsUnit:PetFor(player)
     end
 
     -- enemy frame
-    if string.match(selectorLower, "enemyframe") then
-        return number and enemyUnits[number] or "none"
+    if type == "enemyframe" or type == "ef" then
+        return enemyUnits[number] or "none"
     end
 
     -- pet frame
-    if string.match(selectorLower, "frame%d+pet") then
-        local player = number and friendlyUnits[number] or "none"
+    if type == "framepet" or type == "fp" then
+        local player = friendlyUnits[number] or "none"
         return fsUnit:PetFor(player)
     end
 
     -- frame
-    if string.match(selectorLower, "frame") then
-        return number and friendlyUnits[number] or "none"
+    if type == "frame" or type == "f" then
+        return friendlyUnits[number] or "none"
     end
 
-    local tank = string.match(selectorLower, "tank")
-    local healer = string.match(selectorLower, "healer")
-    local dps = string.match(selectorLower, "dps")
+    -- other dps
+    if type == "otherdps" or type == "od" then
+        return fsEnumerable:From(friendlyUnits):Nth(number or 1, function(x)
+            return wow.UnitGroupRolesAssigned(x) == WowRole.DPS and not wow.UnitIsUnit(x, "player")
+        end) or "none"
+    end
+
+    local enemyTank = type == "enemytank" or type == "et"
+    local enemyHealer = type == "enemyhealer" or type == "eh"
+    local enemyDps = type == "enemydps" or type == "ed"
 
     -- enemy arena
-    if string.match(selectorLower, "enemy") then
+    if enemyTank or enemyHealer or enemyDps then
         if not wow.IsRetail() then
             return "none"
         end
@@ -160,31 +168,19 @@ local function UnitForSelector(selector, friendlyUnits, enemyUnits)
             end
 
             local _, _, _, _, role, _, _ = wow.GetSpecializationInfoByID(specId)
-
-            return (tank and role == WowRole.Tank) or (healer and role == WowRole.Healer) or (dps and role == WowRole.DPS)
+            return (enemyTank and role == WowRole.Tank) or (enemyHealer and role == WowRole.Healer) or (enemyDps and role == WowRole.DPS)
         end) or "none"
-    end
-
-    -- other dps
-    if string.match(selectorLower, "otherdps") then
-        return fsEnumerable:From(friendlyUnits):Nth(number or 1, function(x)
-            return wow.UnitGroupRolesAssigned(x) == WowRole.DPS and not wow.UnitIsUnit(x, "player")
-        end) or "none"
-    end
-
-    local role = nil
-    if tank then
-        role = WowRole.Tank
-    elseif healer then
-        role = WowRole.Healer
-    elseif dps then
-        role = WowRole.DPS
     end
 
     -- role
-    if role then
+    local tank = type == "tank" or type == "t"
+    local healer = type == "healer" or type == "h"
+    local dps = type == "dps" or type == "d"
+
+    if tank or healer or dps then
         return fsEnumerable:From(friendlyUnits):Nth(number or 1, function(x)
-            return wow.UnitGroupRolesAssigned(x) == role
+            local role = wow.UnitGroupRolesAssigned(x)
+            return (tank and role == WowRole.Tank) or (healer and role == WowRole.Healer) or (dps and role == WowRole.DPS)
         end) or "none"
     end
 

@@ -48,6 +48,28 @@ function M:test_is_framesort_macro()
         ]]),
         true
     )
+
+    assertEquals(
+        fsMacro:IsFrameSortMacro([[
+        #FS
+        ]]),
+        true
+    )
+
+    assertEquals(
+        fsMacro:IsFrameSortMacro([[
+        #fs
+        ]]),
+        true
+    )
+
+    assertEquals(
+        fsMacro:IsFrameSortMacro([[
+        #Fs
+        ]]),
+        true
+    )
+
     assertEquals(
         fsMacro:IsFrameSortMacro([[
         #showtooltip
@@ -166,6 +188,22 @@ function M:test_frame_123456()
     assertEquals(fsMacro:GetNewBody(macroText, units), expected)
 end
 
+function M:test_frame_123456_abbreviated()
+    local units = { "party2", "party1", "player", "raid17", "raid4", "asdf1" }
+    local macroText = [[
+        #showtooltip
+        #FS F1 F2 F3 F4 F5 F6
+        /cast [mod:ctrl,@a][mod:shift,@b][nomod,@c][something,@d][test,@e][@f] Spell
+    ]]
+    local expected = [[
+        #showtooltip
+        #FS F1 F2 F3 F4 F5 F6
+        /cast [mod:ctrl,@party2][mod:shift,@party1][nomod,@player][something,@raid17][test,@raid4][@asdf1] Spell
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+end
+
 function M:test_frame_123456_pet()
     local units = { "party2", "party1", "player", "raid17", "raid4", "asdf1" }
     local macroText = [[
@@ -176,6 +214,22 @@ function M:test_frame_123456_pet()
     local expected = [[
         #showtooltip
         #FrameSort Frame1Pet Frame2Pet Frame3Pet Frame4Pet Frame5Pet Frame6Pet
+        /cast [mod:ctrl,@partypet2][mod:shift,@partypet1][nomod,@pet][something,@raidpet17][test,@raidpet4][@asdfpet1] Spell
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+end
+
+function M:test_frame_123456_pet_abbreviated()
+    local units = { "party2", "party1", "player", "raid17", "raid4", "asdf1" }
+    local macroText = [[
+        #showtooltip
+        #FS F1P F2P F3P F4P f5p F6P
+        /cast [mod:ctrl,@a][mod:shift,@b][nomod,@c][something,@d][test,@e][@f] Spell
+    ]]
+    local expected = [[
+        #showtooltip
+        #FS F1P F2P F3P F4P f5p F6P
         /cast [mod:ctrl,@partypet2][mod:shift,@partypet1][nomod,@pet][something,@raidpet17][test,@raidpet4][@asdfpet1] Spell
     ]]
 
@@ -198,6 +252,22 @@ function M:test_enemy_frame_123456()
     assertEquals(fsMacro:GetNewBody(macroText, {}, units), expected)
 end
 
+function M:test_enemy_frame_123456_abbreviated()
+    local units = { "arena2", "arena3", "arena1" }
+    local macroText = [[
+        #showtooltip
+        #FS EF1 EF2 ef3
+        /cast [mod:ctrl,@a][mod:shift,@b][nomod,@c] Spell
+    ]]
+    local expected = [[
+        #showtooltip
+        #FS EF1 EF2 ef3
+        /cast [mod:ctrl,@arena2][mod:shift,@arena3][nomod,@arena1] Spell
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, {}, units), expected)
+end
+
 function M:test_enemy_frame_123456_pet()
     local units = { "arena2", "arena3", "arena1" }
     local macroText = [[
@@ -208,6 +278,22 @@ function M:test_enemy_frame_123456_pet()
     local expected = [[
         #showtooltip
         #FrameSort EnemyFrame1Pet EnemyFrame2Pet EnemyFrame3Pet
+        /cast [mod:ctrl,@arenapet2][mod:shift,@arenapet3][nomod,@arenapet1] Spell
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, {}, units), expected)
+end
+
+function M:test_enemy_frame_123456_pet_abbreviated()
+    local units = { "arena2", "arena3", "arena1" }
+    local macroText = [[
+        #showtooltip
+        #FS EF1P EF2P ef3p
+        /cast [mod:ctrl,@a][mod:shift,@b][nomod,@c] Spell
+    ]]
+    local expected = [[
+        #showtooltip
+        #FS EF1P EF2P ef3p
         /cast [mod:ctrl,@arenapet2][mod:shift,@arenapet3][nomod,@arenapet1] Spell
     ]]
 
@@ -252,6 +338,27 @@ function M:test_tank()
     assertEquals(fsMacro:GetNewBody(macroText, units), expected)
 end
 
+function M:test_tank_abbreviated()
+    local units = { "player", "party1", "party2", "party3", "party4" }
+
+    addon.WoW.Api.UnitGroupRolesAssigned = function(x)
+        return x == "party3" and "TANK" or "DAMAGER"
+    end
+
+    local macroText = [[
+        #showtooltip
+        #fs t
+        /cast [@none] Spell;
+    ]]
+    local expected = [[
+        #showtooltip
+        #fs t
+        /cast [@party3] Spell;
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+end
+
 function M:test_healer()
     local units = { "player", "party1", "party2", "party3", "party4" }
 
@@ -271,42 +378,24 @@ function M:test_healer()
     ]]
 
     assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+end
 
-    macroText = [[
+function M:test_healer_abbreviated()
+    local units = { "player", "party1", "party2", "party3", "party4" }
+
+    addon.WoW.Api.UnitGroupRolesAssigned = function(x)
+        return x == "party1" and "HEALER" or "DAMAGER"
+    end
+
+    local macroText = [[
         #showtooltip
-        #framesort HEALER
+        #FS H
         /cast [@none] Spell;
     ]]
-    expected = [[
+    local expected = [[
         #showtooltip
-        #framesort HEALER
+        #FS H
         /cast [@party1] Spell;
-    ]]
-
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
-
-    macroText = [[
-        #showtooltip
-        #framesort healer, frame1
-        /cast [@none,exists][@none,exists] Spell;
-    ]]
-    expected = [[
-        #showtooltip
-        #framesort healer, frame1
-        /cast [@party1,exists][@player,exists] Spell;
-    ]]
-
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
-
-    macroText = [[
-        #showtooltip
-        #framesort healer
-        /cast [@none,exists][] Spell;
-    ]]
-    expected = [[
-        #showtooltip
-        #framesort healer
-        /cast [@party1,exists][] Spell;
     ]]
 
     assertEquals(fsMacro:GetNewBody(macroText, units), expected)
@@ -335,29 +424,28 @@ function M:test_dps()
     ]]
 
     assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+end
 
-    macroText = [[
+function M:test_dps_abbreviated()
+    local units = { "player", "party4", "party3", "party2", "party1" }
+
+    addon.WoW.Api.UnitGroupRolesAssigned = function(x)
+        if x == "party4" then
+            return "DAMAGER"
+        end
+
+        return "NONE"
+    end
+
+    local macroText = [[
         #showtooltip
-        #framesort Dps
+        #FS D
         /cast [@none] Spell;
     ]]
-    expected = [[
+    local expected = [[
         #showtooltip
-        #framesort Dps
+        #FS D
         /cast [@party4] Spell;
-    ]]
-
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
-
-    macroText = [[
-        #showtooltip
-        #framesort dps, frame1
-        /cast [@none,exists][@none,exists] Spell;
-    ]]
-    expected = [[
-        #showtooltip
-        #framesort dps, frame1
-        /cast [@party4,exists][@player,exists] Spell;
     ]]
 
     assertEquals(fsMacro:GetNewBody(macroText, units), expected)
@@ -382,6 +470,31 @@ function M:test_other_dps()
     local expected = [[
         #showtooltip
         #framesort OtherDPS
+        /cast [@party2] Spell;
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+end
+
+function M:test_other_dps_abbreviated()
+    local units = { "player", "party1", "party2" }
+
+    addon.WoW.Api.UnitGroupRolesAssigned = function(x)
+        if x == "party1" then
+            return "HEALER"
+        end
+
+        return "DAMAGER"
+    end
+
+    local macroText = [[
+        #showtooltip
+        #FS OD
+        /cast [@none] Spell;
+    ]]
+    local expected = [[
+        #showtooltip
+        #FS OD
         /cast [@party2] Spell;
     ]]
 
@@ -498,6 +611,66 @@ function M:test_tank_n()
     assertEquals(fsMacro:GetNewBody(macroText, units), expected)
 end
 
+function M:test_tank_n_abbreviated()
+    local units = { "player", "party1", "party2", "party3", "party4" }
+
+    addon.WoW.Api.UnitGroupRolesAssigned = function(_)
+        return "TANK"
+    end
+
+    local macroText = [[
+        #showtooltip
+        #FS T
+        /cast [@none] Spell;
+    ]]
+    local expected = [[
+        #showtooltip
+        #FS T
+        /cast [@player] Spell;
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+
+    macroText = [[
+        #showtooltip
+        #fs t1
+        /cast [@none] Spell;
+    ]]
+    expected = [[
+        #showtooltip
+        #fs t1
+        /cast [@player] Spell;
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+
+    macroText = [[
+        #showtooltip
+        #fs t2
+        /cast [@none] Spell;
+    ]]
+    expected = [[
+        #showtooltip
+        #fs t2
+        /cast [@party1] Spell;
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+
+    macroText = [[
+        #showtooltip
+        #FS T5
+        /cast [@none] Spell;
+    ]]
+    expected = [[
+        #showtooltip
+        #FS T5
+        /cast [@party4] Spell;
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+end
+
 function M:test_healer_n()
     local units = { "player", "party1", "party2", "party3", "party4" }
 
@@ -519,29 +692,22 @@ function M:test_healer_n()
     assertEquals(fsMacro:GetNewBody(macroText, units), expected)
 end
 
-function M:test_role_multi_n()
+function M:test_healer_n_abbreviated()
     local units = { "player", "party1", "party2", "party3", "party4" }
 
-    addon.WoW.Api.UnitGroupRolesAssigned = function(x)
-        if x == "party1" then
-            return "TANK"
-        end
-        if x == "party3" then
-            return "HEALER"
-        end
-
-        return "DAMAGER"
+    addon.WoW.Api.UnitGroupRolesAssigned = function(_)
+        return "HEALER"
     end
 
     local macroText = [[
         #showtooltip
-        #framesort DPS2
-        /cast [@a] Spell;
+        #fs h1, h3, h2
+        /cast [@a,exists][@b,exists][@c,exists] Spell;
     ]]
     local expected = [[
         #showtooltip
-        #framesort DPS2
-        /cast [@party2] Spell;
+        #fs h1, h3, h2
+        /cast [@player,exists][@party2,exists][@party1,exists] Spell;
     ]]
 
     assertEquals(fsMacro:GetNewBody(macroText, units), expected)
@@ -575,6 +741,68 @@ function M:test_role_dps()
     expected = [[
         #showtooltip
         #framesort DPS3
+        /cast [@party2] Spell;
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+end
+
+function M:test_role_dps_abbreviated()
+    local units = { "player", "party1", "party2", "party3", "party4" }
+
+    addon.WoW.Api.UnitGroupRolesAssigned = function(_)
+        return "DAMAGER"
+    end
+
+    local macroText = [[
+        #showtooltip
+        #FS D
+        /cast [@none] Spell;
+    ]]
+    local expected = [[
+        #showtooltip
+        #FS D
+        /cast [@player] Spell;
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+
+    macroText = [[
+        #showtooltip
+        #fs d3
+        /cast [@none] Spell;
+    ]]
+    expected = [[
+        #showtooltip
+        #fs d3
+        /cast [@party2] Spell;
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+end
+
+function M:test_role_multi_n()
+    local units = { "player", "party1", "party2", "party3", "party4" }
+
+    addon.WoW.Api.UnitGroupRolesAssigned = function(x)
+        if x == "party1" then
+            return "TANK"
+        end
+        if x == "party3" then
+            return "HEALER"
+        end
+
+        return "DAMAGER"
+    end
+
+    local macroText = [[
+        #showtooltip
+        #framesort DPS2
+        /cast [@a] Spell;
+    ]]
+    local expected = [[
+        #showtooltip
+        #framesort DPS2
         /cast [@party2] Spell;
     ]]
 
@@ -644,6 +872,41 @@ function M:test_arena_3v3()
 
     assertEquals(fsMacro:GetNewBody(macroText, {}, units), expected)
 end
+
+function M:test_arena_3v3_abbreviated()
+    local units = { "arena1", "arena2", "arena3" }
+
+    addon.WoW.Api.GetArenaOpponentSpec = function(i)
+        return i
+    end
+    addon.WoW.Api.GetNumArenaOpponentSpecs = function()
+        return 3
+    end
+    addon.WoW.Api.GetSpecializationInfoByID = function(i)
+        local role = ""
+        if i == 2 then
+            role = "HEALER"
+        else
+            role = "DAMAGER"
+        end
+
+        return nil, nil, nil, nil, role, nil, nil
+    end
+
+    local macroText = [[
+        #showtooltip
+        #fs eh ed1 ed2
+        /cast [@a, exists][@b, exists][@c] Spell
+    ]]
+    local expected = [[
+        #showtooltip
+        #fs eh ed1 ed2
+        /cast [@arena2, exists][@arena1, exists][@arena3] Spell
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, {}, units), expected)
+end
+
 
 function M:test_arena_3v3_order()
     local units = { "arena3", "arena2", "arena1" }
@@ -790,14 +1053,14 @@ function M:test_syntax_combination()
 
     local macroText = [[
         #showtooltip
-        #framesort Frame1, Frame2, Frame3
+        #framesort Frame1, f2, Frame3
         /cast [target=a,exists] Spell;
         /cast [@b,exists] Spell;
         /cast [target=something,exists] Spell;
     ]]
     local expected = [[
         #showtooltip
-        #framesort Frame1, Frame2, Frame3
+        #framesort Frame1, f2, Frame3
         /cast [target=player,exists] Spell;
         /cast [@party1,exists] Spell;
         /cast [target=party2,exists] Spell;
@@ -807,12 +1070,12 @@ function M:test_syntax_combination()
 
     macroText = [[
         #showtooltip
-        #framesort Frame1, Frame2, Frame3, player
+        #framesort   f1, Frame2, Frame3, player
         /cast [target=a, @b, @c, target=@d] Spell;
     ]]
     expected = [[
         #showtooltip
-        #framesort Frame1, Frame2, Frame3, player
+        #framesort   f1, Frame2, Frame3, player
         /cast [target=player, @party1, @party2, target=@player] Spell;
     ]]
 
@@ -865,6 +1128,5 @@ function M:test_short_header()
 
     assertEquals(fsMacro:GetNewBody(macroText, units), expected)
 end
-
 
 return M
