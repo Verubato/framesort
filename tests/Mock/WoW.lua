@@ -246,7 +246,7 @@ wow.hooksecurefunc = function(table, name, callback)
 end
 
 wow.RegisterAttributeDriver = function(frame, attribute, conditional)
-    wow.State.AttributeDrivers[#wow.State.AttributeDrivers + 1] = {
+    frame.State.AttributeDrivers[attribute] = {
         Frame = frame,
         Attribute = attribute,
         Conditional = conditional,
@@ -254,13 +254,7 @@ wow.RegisterAttributeDriver = function(frame, attribute, conditional)
 end
 
 wow.UnregisterAttributeDriver = function(frame, attribute)
-    -- TODO: store a lookup by attribute name for better performance
-    for i, value in ipairs(wow.State.AttributeDrivers) do
-        if value.Frame == frame and value.Attribute == attribute then
-            table.remove(wow.State.AttributeDrivers, i)
-            return
-        end
-    end
+    frame.State.AttributeDrivers[attribute] = nil
 end
 
 -- macro

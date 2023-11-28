@@ -9,6 +9,7 @@ local fsEnumerable = addon.Collections.Enumerable
 ---@class HidePlayerModule: IInitialise
 local M = {}
 addon.Modules.HidePlayer = M
+local previousSetting = true
 
 local function ShowHide(show)
     local blizzard = fsProviders.Blizzard
@@ -53,7 +54,16 @@ function M:Run()
 
     local show = mode ~= fsConfig.PlayerSortMode.Hidden
 
+    -- no point in attempting it again, so save some cpu cycles
+    if previousSetting == show then
+        return
+    end
+
     ShowHide(show)
+    previousSetting = show
 end
 
-function M:Init() end
+function M:Init()
+    -- reset state
+    previousSetting = true
+end

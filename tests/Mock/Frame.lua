@@ -20,6 +20,7 @@ function M:New(type, name, parent, template)
             ScriptHooks = {},
             EventRegistrations = {},
             Attributes = {},
+            AttributeDrivers = {},
             Text = "",
             Visible = true,
             Point = {

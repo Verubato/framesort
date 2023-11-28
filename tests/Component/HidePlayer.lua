@@ -5,7 +5,6 @@ local wow = addon.WoW.Api
 local provider = addon.Providers.Test
 local realBlizzardProvider = addon.Providers.Blizzard
 local fsFrame = addon.WoW.Frame
-local fsEnumerable = addon.Collections.Enumerable
 local M = {}
 local player = nil
 
@@ -40,53 +39,48 @@ function M:teardown()
     addon.Providers.Blizzard = realBlizzardProvider
 end
 
-function M:test_player_hides_on_provider_callback()
+function M:test_player_shows_and_hides_on_provider_callback()
     assert(player)
 
     local config = addon.DB.Options.Sorting.World
     config.Enabled = true
+
+    -- hide the player first
     config.PlayerSortMode = "Hidden"
-
     provider:FireCallbacks()
 
-    local driver = fsEnumerable
-        :From(wow.State.AttributeDrivers)
-        :Where(function(x) return x.Frame == player end)
-        :First()
+    local hideDriver = player.State.AttributeDrivers["state-visibility"]
+    assert(hideDriver)
 
-    assert(driver)
+    assertEquals(hideDriver.Attribute, "state-visibility")
+    assertEquals(hideDriver.Conditional, "hide")
 
-    assertEquals(driver.Attribute, "state-visibility")
-    assertEquals(driver.Conditional, "hide")
-end
-
-function M:test_player_shows_on_provider_callback()
-    assert(player)
-
-    player.State.Visible = false
-
-    local config = addon.DB.Options.Sorting.World
-    config.Enabled = true
     config.PlayerSortMode = "Top"
-
     provider:FireCallbacks()
 
-    local driver = fsEnumerable
-        :From(wow.State.AttributeDrivers)
-        :Where(function(x) return x.Frame == player end)
-        :First()
+    local showDriver = player.State.AttributeDrivers["state-visibility"]
+    assert(showDriver)
 
-    assert(driver)
-
-    assertEquals(driver.Attribute, "state-visibility")
-    assertEquals(driver.Conditional, "show")
+    assertEquals(showDriver.Attribute, "state-visibility")
+    assertEquals(showDriver.Conditional, "show")
 end
 
-function M:test_player_hides_after_combat()
+function M:test_player_shows_and_hides_after_combat()
     assert(player)
 
     local config = addon.DB.Options.Sorting.World
     config.Enabled = true
+
+    -- hide the player first
+    config.PlayerSortMode = "Hidden"
+    provider:FireCallbacks()
+
+    local hideDriver = player.State.AttributeDrivers["state-visibility"]
+    assert(hideDriver)
+
+    assertEquals(hideDriver.Attribute, "state-visibility")
+    assertEquals(hideDriver.Conditional, "hide")
+
     config.PlayerSortMode = "Hidden"
     wow.State.MockInCombat = true
 
@@ -95,41 +89,11 @@ function M:test_player_hides_after_combat()
     wow.State.MockInCombat = false
     wow:FireEvent(wow.Events.PLAYER_REGEN_ENABLED)
 
-    local driver = fsEnumerable
-        :From(wow.State.AttributeDrivers)
-        :Where(function(x) return x.Frame == player end)
-        :First()
+    local showDriver = player.State.AttributeDrivers["state-visibility"]
+    assert(showDriver)
 
-    assert(driver)
-
-    assertEquals(driver.Attribute, "state-visibility")
-    assertEquals(driver.Conditional, "hide")
-end
-
-function M:test_player_shows_after_combat()
-    assert(player)
-
-    player.State.Visible = false
-
-    local config = addon.DB.Options.Sorting.World
-    config.Enabled = true
-    config.PlayerSortMode = "Top"
-    wow.State.MockInCombat = true
-
-    provider:FireCallbacks()
-
-    wow.State.MockInCombat = false
-    wow:FireEvent(wow.Events.PLAYER_REGEN_ENABLED)
-
-    local driver = fsEnumerable
-        :From(wow.State.AttributeDrivers)
-        :Where(function(x) return x.Frame == player end)
-        :First()
-
-    assert(driver)
-
-    assertEquals(driver.Attribute, "state-visibility")
-    assertEquals(driver.Conditional, "show")
+    assertEquals(showDriver.Attribute, "state-visibility")
+    assertEquals(showDriver.Conditional, "hide")
 end
 
 return M
