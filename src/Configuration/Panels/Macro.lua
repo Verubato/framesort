@@ -169,11 +169,11 @@ function M:Build(parent)
 
     local skipDescription = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
     skipDescription:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
-    skipDescription:SetText("Use \"!\" to tell FrameSort to ignore an \"@unit\" selector:")
+    skipDescription:SetText("Use \"X\" to tell FrameSort to ignore an @unit selector:")
 
     local skipExample = [[
-#FS ! ! EnemyHealer
-/cast [mod:shift,@focus][@mouseover,harm][@enemyhealer][] Spell;]]
+#FS X X EnemyHealer
+/cast [mod:shift,@focus][@mouseover,harm][@enemyhealer,exists][] Spell;]]
 
     local skipBox = wow.CreateFrame("EditBox", nil, panel)
     skipBox:SetPoint("TOPLEFT", skipDescription, "BOTTOMLEFT", 0, -verticalSpacing)

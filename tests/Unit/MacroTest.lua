@@ -1087,12 +1087,12 @@ function M:test_skip_selector()
 
     local macroText = [[
         #showtooltip
-        #framesort ! ! Frame1 !
+        #framesort X X Frame1 X
         /cast [@mouseover,exists][mod:shift,@focus][mod:ctrl,@none][@target][] Spell;
     ]]
     local expected = [[
         #showtooltip
-        #framesort ! ! Frame1 !
+        #framesort X X Frame1 X
         /cast [@mouseover,exists][mod:shift,@focus][mod:ctrl,@party1][@target][] Spell;
     ]]
 
@@ -1100,12 +1100,12 @@ function M:test_skip_selector()
 
     macroText = [[
         #showtooltip
-        #framesort ! ! Frame1
+        #framesort X X Frame1
         /cast [@mouseover,exists][mod:shift,@focus][mod:ctrl,@none][@target][] Spell;
     ]]
     expected = [[
         #showtooltip
-        #framesort ! ! Frame1
+        #framesort X X Frame1
         /cast [@mouseover,exists][mod:shift,@focus][mod:ctrl,@party1][@target][] Spell;
     ]]
 
@@ -1117,12 +1117,12 @@ function M:test_short_header()
 
     local macroText = [[
         #showtooltip
-        #fs ! frame1
+        #fs x frame1
         /cast [@mouseover,exists][@x] Spell
     ]]
     local expected = [[
         #showtooltip
-        #fs ! frame1
+        #fs x frame1
         /cast [@mouseover,exists][@party1] Spell
     ]]
 
