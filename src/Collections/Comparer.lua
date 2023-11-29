@@ -86,12 +86,6 @@ local function CompareRole(leftToken, rightToken, isArena)
             rightRole = select(5, wow.GetSpecializationInfoByID(rightSpecId))
         end
     else
-        local leftId, rightId = wow.UnitInRaid(leftToken), wow.UnitInRaid(rightToken)
-
-        if not leftId or not rightId then
-            return leftToken < rightToken
-        end
-
         leftRole = wow.UnitGroupRolesAssigned(leftToken)
         rightRole = wow.UnitGroupRolesAssigned(rightToken)
     end
