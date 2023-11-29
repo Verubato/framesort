@@ -6,9 +6,9 @@ local fsUnit = addon.WoW.Unit
 ---@class MacroParser
 local M = {}
 addon.Modules.Macro.Parser = M
-local skipSelector = "!"
--- string split on ",", " " and "|"
-local splitOn = "([^,|%s]+)"
+local skipSelector = "x"
+-- string split on non-alpha numberic
+local splitOn = "([%w]+)"
 local shortHeaderPattern = "#[Ff][Ss]"
 local longHeaderPattern = "#[Ff][Rr][Aa][Mm][Ee][Ss][Oo][Rr][Tt]"
 local shortSyntax = "@"
@@ -201,7 +201,7 @@ function M:GetNewBody(body, friendlyUnits, enemyUnits)
     local selectors = GetSelectors(body)
 
     for i, selector in ipairs(selectors) do
-        if selector ~= skipSelector then
+        if string.lower(selector) ~= skipSelector then
             local unit = UnitForSelector(selector, friendlyUnits, enemyUnits)
             local tmp = ReplaceSelector(newBody, unit, i)
 
