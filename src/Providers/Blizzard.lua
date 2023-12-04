@@ -208,7 +208,8 @@ function M:Containers()
             return GetOffset(groups[1])
         end,
         FramesPerLine = function()
-            return wow.CompactRaidFrameContainer and wow.CompactRaidFrameContainer.flowMaxPerLine
+            -- classic doesn't specify this value, so default to 5 frames per line
+            return (wow.CompactRaidFrameContainer and wow.CompactRaidFrameContainer.flowMaxPerLine) or 5
         end
     }
 
