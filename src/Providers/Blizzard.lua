@@ -2,7 +2,6 @@
 local _, addon = ...
 local wow = addon.WoW.Api
 local fsFrame = addon.WoW.Frame
-local fsEnumerable = addon.Collections.Enumerable
 local fsProviders = addon.Providers
 local fsScheduler = addon.Scheduling.Scheduler
 local events = addon.WoW.Api.Events
@@ -50,6 +49,10 @@ end
 
 local function OnRaidGroupLoaded()
     -- refresh group frame offsets once a group has been loaded
+    RequestUpdateContainers()
+end
+
+local function OnRaidContainerSizeChanged()
     RequestUpdateContainers()
 end
 
@@ -127,7 +130,14 @@ function M:Init()
     cvarEventFrame:HookScript("OnEvent", OnCvarUpdate)
     cvarEventFrame:RegisterEvent(events.CVAR_UPDATE)
 
-    wow.hooksecurefunc("CompactRaidGroup_OnLoad", OnRaidGroupLoaded)
+    if CompactRaidGroup_OnLoad then
+        wow.hooksecurefunc("CompactRaidGroup_OnLoad", OnRaidGroupLoaded)
+    end
+
+    if CompactRaidFrameContainer_OnSizeChanged then
+        -- classic uses the container size to determine frames per line
+        wow.hooksecurefunc("CompactRaidFrameContainer_OnSizeChanged", OnRaidContainerSizeChanged)
+    end
 end
 
 function M:RegisterRequestSortCallback(callback)
@@ -139,103 +149,132 @@ function M:RegisterContainersChangedCallback(callback)
 end
 
 function M:Containers()
-    ---@type FrameContainer
-    local party = {
-        Frame = wow.CompactPartyFrame,
-        Type = fsFrame.ContainerType.Party,
-        LayoutType = fsFrame.LayoutType.Hard,
-        VisibleOnly = true,
-        SupportsSpacing = true,
-        IsGrouped = function() return false end,
-        IsHorizontalLayout = function()
-            if wow.IsRetail() then
-                return wow.EditModeManagerFrame:GetSettingValueBool(
-                    wow.Enum.EditModeSystem.UnitFrame,
-                    wow.Enum.EditModeUnitFrameSystemIndices.Party,
-                    wow.Enum.EditModeUnitFrameSetting.UseHorizontalGroups)
+    ---@type FrameContainer[]
+    local containers = {}
+
+    if wow.CompactPartyFrame then
+        containers[#containers + 1] = {
+            Frame = wow.CompactPartyFrame,
+            Type = fsFrame.ContainerType.Party,
+            LayoutType = fsFrame.LayoutType.Hard,
+            VisibleOnly = true,
+            SupportsSpacing = true,
+            IsGrouped = function() return false end,
+            IsHorizontalLayout = function()
+                if wow.IsRetail() then
+                    return wow.EditModeManagerFrame:GetSettingValueBool(
+                        wow.Enum.EditModeSystem.UnitFrame,
+                        wow.Enum.EditModeUnitFrameSystemIndices.Party,
+                        wow.Enum.EditModeUnitFrameSetting.UseHorizontalGroups)
+                end
+
+                return wow.CompactRaidFrameManager_GetSetting("HorizontalGroups")
+            end,
+            FramesOffset = function()
+                return GetOffset(wow.CompactPartyFrame)
+            end,
+
+            -- not applicable
+            GroupFramesOffset = function(_) return nil end,
+            FramesPerLine = function(_) return nil end
+        }
+    end
+
+    if wow.CompactRaidFrameContainer then
+        local raid = {
+            Frame = wow.CompactRaidFrameContainer,
+            Type = fsFrame.ContainerType.Raid,
+            LayoutType = fsFrame.LayoutType.Hard,
+            VisibleOnly = true,
+            SupportsSpacing = true,
+            IsGrouped = function()
+                if wow.IsRetail() then
+                    local raidGroupDisplayType = wow.EditModeManagerFrame:GetSettingValue(
+                        wow.Enum.EditModeSystem.UnitFrame,
+                        wow.Enum.EditModeUnitFrameSystemIndices.Raid,
+                        wow.Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
+                    return raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsVertical or raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsHorizontal
+                end
+
+                return wow.CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
+            end,
+            IsHorizontalLayout = function()
+                if wow.IsRetail() then
+                    local displayType = wow.EditModeManagerFrame:GetSettingValue(
+                        wow.Enum.EditModeSystem.UnitFrame,
+                        wow.Enum.EditModeUnitFrameSystemIndices.Raid,
+                        wow.Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
+                    return displayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsHorizontal or displayType == wow.Enum.RaidGroupDisplayType.CombineGroupsHorizontal
+                end
+
+                return wow.CompactRaidFrameManager_GetSetting("HorizontalGroups")
+            end,
+            FramesOffset = function()
+                return GetOffset(wow.CompactRaidFrameContainer)
+            end,
+            GroupFramesOffset = function()
+                local groups = fsFrame:ExtractGroups(wow.CompactRaidFrameContainer)
+
+                if #groups == 0 then
+                    return nil
+                end
+
+                return GetOffset(groups[1])
+            end,
+        }
+
+        raid.FramesPerLine = function()
+            if wow.CompactRaidFrameContainer.flowMaxPerLine then
+                return wow.CompactRaidFrameContainer.flowMaxPerLine
             end
 
-            return wow.CompactRaidFrameManager_GetSetting("HorizontalGroups")
-        end,
-        FramesOffset = function()
-            return GetOffset(wow.CompactPartyFrame)
-        end,
+            local horizontal = raid:IsHorizontalLayout()
+            local lineSize = horizontal and wow.CompactRaidFrameContainer:GetWidth() or wow.CompactRaidFrameContainer:GetHeight()
+            local frameSize = nil
 
-        -- not applicable
-        GroupFramesOffset = function(_) return nil end,
-        FramesPerLine = function(_) return nil end
-    }
+            local o = DefaultCompactUnitFrameSetupOptions
+            local f1 = CompactRaidFrame1
 
-    ---@type FrameContainer
-    local raid = {
-        Frame = wow.CompactRaidFrameContainer,
-        Type = fsFrame.ContainerType.Raid,
-        LayoutType = fsFrame.LayoutType.Hard,
-        VisibleOnly = true,
-        SupportsSpacing = true,
-        IsGrouped = function()
-            if wow.IsRetail() then
-                local raidGroupDisplayType = wow.EditModeManagerFrame:GetSettingValue(
-                    wow.Enum.EditModeSystem.UnitFrame,
-                    wow.Enum.EditModeUnitFrameSystemIndices.Raid,
-                    wow.Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
-                return raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsVertical or raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsHorizontal
+            if o then
+                -- classic and sod
+                frameSize = horizontal and o.width or o.height
+            elseif f1 then
+                frameSize = tonumber(horizontal and f1:GetWidth() or f1:GetHeight())
             end
 
-            return wow.CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
-        end,
-        IsHorizontalLayout = function()
-            if wow.IsRetail() then
-                local displayType = wow.EditModeManagerFrame:GetSettingValue(
-                    wow.Enum.EditModeSystem.UnitFrame,
-                    wow.Enum.EditModeUnitFrameSystemIndices.Raid,
-                    wow.Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
-                return displayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsHorizontal or displayType == wow.Enum.RaidGroupDisplayType.CombineGroupsHorizontal
+            if lineSize and frameSize then
+                -- round down
+                local framesPerLine = math.floor(lineSize / frameSize)
+                -- be at least 1
+                framesPerLine = math.max(framesPerLine, 1)
+                return framesPerLine
             end
 
-            return wow.CompactRaidFrameManager_GetSetting("HorizontalGroups")
-        end,
-        FramesOffset = function()
-            return GetOffset(wow.CompactRaidFrameContainer)
-        end,
-        GroupFramesOffset = function()
-            local groups = fsFrame:ExtractGroups(wow.CompactRaidFrameContainer)
-
-            if #groups == 0 then
-                return nil
-            end
-
-            return GetOffset(groups[1])
-        end,
-        FramesPerLine = function()
-            -- classic doesn't specify this value, so default to 5 frames per line
-            return (wow.CompactRaidFrameContainer and wow.CompactRaidFrameContainer.flowMaxPerLine) or 5
+            -- default to 5 if we for some reason we can't calculate it
+            return 5
         end
-    }
 
-    ---@type FrameContainer
-    local arena = {
-        Frame = wow.CompactArenaFrame,
-        Type = fsFrame.ContainerType.EnemyArena,
-        LayoutType = fsFrame.LayoutType.Soft,
-        VisibleOnly = true,
-        SupportsSpacing = true,
-        FramesOffset = function()
-            return GetOffset(wow.CompactArenaFrame)
-        end,
+        containers[#containers + 1] = raid
+    end
 
-        -- not applicable
-        IsHorizontalLayout = function() return nil end,
-        IsGrouped = function() return nil end,
-        GroupFramesOffset = function(_) return nil end,
-        FramesPerLine = function(_) return nil end
-    }
+    if wow.CompactArenaFrame then
+        containers[#containers + 1] = {
+            Frame = wow.CompactArenaFrame,
+            Type = fsFrame.ContainerType.EnemyArena,
+            LayoutType = fsFrame.LayoutType.Soft,
+            VisibleOnly = true,
+            SupportsSpacing = true,
+            FramesOffset = function()
+                return GetOffset(wow.CompactArenaFrame)
+            end,
 
-    return fsEnumerable:From({
-            party,
-            raid,
-            arena
-        })
-        :Where(function(x) return x.Frame ~= nil end)
-        :ToTable()
+            -- not applicable
+            IsHorizontalLayout = function() return nil end,
+            IsGrouped = function() return nil end,
+            GroupFramesOffset = function(_) return nil end,
+            FramesPerLine = function(_) return nil end
+        }
+    end
+
+    return containers
 end

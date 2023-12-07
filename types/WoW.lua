@@ -22,10 +22,12 @@
 ---@field InterfaceOptions_AddCategory fun(panel: table)
 ---@field InterfaceOptionsFrame_OpenToCategory fun(panel: table)
 ---@field InterfaceOptionsFramePanelContainer table
----@field GetCVarBool fun(name: string): boolean?
 ---@field Enum table
 ---@field EventRegistry table
 ---@field Settings table
+-- cvars
+---@field GetCVarBool fun(name: string): boolean?
+---@field GetCVar fun(name: string): any?
 -- macro
 ---@field GetMacroInfo fun(id: string|number): name: string, icon: number, body: string
 ---@field EditMacro fun(macroInfo: number|string, name: string?, icon: number|string?, body: string?): macroId: number

@@ -11,7 +11,10 @@
         "LibStub",
         "ElvUF_PartyGroup1",
         "CompactRaidGroup_OnLoad",
-        "CUF_CVar"
+        "CUF_CVar",
+        "DefaultCompactUnitFrameSetupOptions",
+        "CompactRaidFrame1",
+        "CompactRaidFrameContainer_OnSizeChanged"
     ],
     "diagnostics.disable": [
         "inject-field"
