@@ -260,6 +260,13 @@ end
 local function SetNameList(container)
     local isFriendly = container.Type == fsFrame.ContainerType.Party or container.Type == fsFrame.ContainerType.Raid
     local units = isFriendly and fsUnit:FriendlyUnits() or fsUnit:EnemyUnits()
+
+    if isFriendly and #units == 0 then
+        -- ensure player always exists for friendly units
+        -- as they might be showing party frames even when not in a party in order to shown their own frame
+        units = { "player" }
+    end
+
     local sortFunction = fsCompare:SortFunction(units)
 
     table.sort(units, sortFunction)
