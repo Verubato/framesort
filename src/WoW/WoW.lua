@@ -27,10 +27,13 @@ local wow = {
     InterfaceOptions_AddCategory = InterfaceOptions_AddCategory,
     InterfaceOptionsFrame_OpenToCategory = InterfaceOptionsFrame_OpenToCategory,
     InterfaceOptionsFramePanelContainer = InterfaceOptionsFramePanelContainer,
-    GetCVarBool = GetCVarBool,
     Enum = Enum,
     EventRegistry = EventRegistry,
     Settings = Settings,
+
+    -- cvars
+    GetCVarBool = GetCVarBool,
+    GetCVar = GetCVar,
 
     -- macro
     GetMacroInfo = GetMacroInfo,
