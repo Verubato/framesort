@@ -271,6 +271,12 @@ local function SetNameList(container)
 
     table.sort(units, sortFunction)
 
+    local previousSortMethod = container.Frame:GetAttribute("sortMethod")
+    local previousGroupFilter = container.Frame:GetAttribute("groupFilter")
+
+    container.Frame:SetAttribute("previousSortMethod", previousSortMethod)
+    container.Frame:SetAttribute("previousGroupFilter", previousGroupFilter)
+
     -- groupFilter must be set to nil for nameList to be used
     container.Frame:SetAttribute("groupFilter", nil)
     container.Frame:SetAttribute("sortMethod", "NAMELIST")
@@ -476,20 +482,55 @@ local function TrySortContainerGroups(container)
     return true
 end
 
+local function ClearSorting(providers, friendlyEnabled, enemyEnabled)
+    ---@type FrameContainer
+    local nameListContainers = fsEnumerable
+        :From(providers)
+        :Map(function(provider) return provider:Containers() end)
+        :Flatten()
+        :Where(function(container)
+            if (container.Type == fsFrame.ContainerType.Party or container.Type == fsFrame.ContainerType.Raid) and friendlyEnabled then
+                return false
+            end
+
+            if container.Type == fsFrame.ContainerType.EnemyArena and enemyEnabled then
+                return false
+            end
+
+            -- after exiting an arena, elvui retains the nameList property
+            -- so we want to clear it if they've disabled sorting in the world
+            return container.LayoutType == fsFrame.LayoutType.NameList
+        end)
+        :ToTable()
+
+    for _, container in ipairs(nameListContainers) do
+        container.Frame:SetAttribute("nameList", nil)
+
+        local previousSortMethod = container.Frame:GetAttribute("previousSortMethod") or "INDEX"
+        local previousGroupFilter = container.Frame:GetAttribute("previousGroupFilter")
+
+        container.Frame:SetAttribute("sortMethod", previousSortMethod)
+        container.Frame:SetAttribute("groupFilter", previousGroupFilter)
+    end
+end
+
 ---@param provider FrameProvider?
 ---@return boolean
 function M:TrySort(provider)
     assert(not wow.InCombatLockdown())
 
+    local sorted = false
     local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
     local enemyEnabled, _, _ = fsCompare:EnemySortMode()
+    local providers = provider and { provider } or fsProviders:Enabled()
+
+    if not friendlyEnabled or not enemyEnabled then
+        ClearSorting(providers, friendlyEnabled, enemyEnabled)
+    end
 
     if not friendlyEnabled and not enemyEnabled then
         return false
     end
-
-    local sorted = false
-    local providers = provider and { provider } or fsProviders:Enabled()
 
     for _, p in ipairs(providers) do
         local containers = fsEnumerable
