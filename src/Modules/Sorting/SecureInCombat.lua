@@ -1207,6 +1207,7 @@ local function ResubscribeEvents()
 end
 
 local function OnCombatStarting()
+    LoadEnabled()
     LoadUnits()
     ResubscribeEvents()
 end
@@ -1220,7 +1221,6 @@ end
 local function OnConfigChanged()
     fsScheduler:RunWhenCombatEnds(function()
         LoadSpacing()
-        LoadEnabled()
     end, "SecureSortConfigChanged")
 end
 
