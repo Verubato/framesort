@@ -5,6 +5,7 @@ local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsScheduler = addon.Scheduling.Scheduler
 local events = addon.WoW.Api.Events
+local fsMath = addon.Numerics.Math
 ---@class BlizzardFrameProvider: FrameProvider
 local M = {}
 local layoutEventFrame = nil
@@ -243,10 +244,12 @@ function M:Containers()
             end
 
             if lineSize and frameSize then
-                -- round down
-                local framesPerLine = math.floor(lineSize / frameSize)
+                -- round to nearest
+                local framesPerLine = fsMath:Round(lineSize / frameSize)
                 -- be at least 1
                 framesPerLine = math.max(framesPerLine, 1)
+
+                print(framesPerLine)
                 return framesPerLine
             end
 
