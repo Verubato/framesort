@@ -248,8 +248,6 @@ function M:Containers()
                 local framesPerLine = fsMath:Round(lineSize / frameSize)
                 -- be at least 1
                 framesPerLine = math.max(framesPerLine, 1)
-
-                print(framesPerLine)
                 return framesPerLine
             end
 
