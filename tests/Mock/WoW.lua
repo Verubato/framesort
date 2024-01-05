@@ -130,11 +130,10 @@ local wow = {
     UnitGroupRolesAssigned = function()
         return "NONE"
     end,
-    UnitIsGroupLeader = function(unit, partyCategory)
+    UnitIsGroupLeader = function()
         return false
     end,
-    PromoteToLeader = function(unitOrPlayerName)
-    end,
+    PromoteToLeader = function() end,
 
     -- state functions
     IsInInstance = function()
@@ -172,9 +171,9 @@ local wow = {
         return false
     end,
 
-    SecureHandlerWrapScript = function(frame, script, header, preBody, postBody) end,
-    SecureHandlerSetFrameRef = function(frame, label, refFrame) end,
-    SecureHandlerExecute = function(frame, body) end,
+    SecureHandlerWrapScript = function() end,
+    SecureHandlerSetFrameRef = function() end,
+    SecureHandlerExecute = function() end,
 
     -- addon related
     GetAddOnEnableState = function()
