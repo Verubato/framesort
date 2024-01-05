@@ -1,5 +1,7 @@
 ---@meta
 ---@class WowApi
+-- fields
+---@field C_PvP C_PvP
 -- constants
 ---@field WOW_PROJECT_ID string
 ---@field WOW_PROJECT_CLASSIC string
@@ -42,6 +44,8 @@
 ---@field GetArenaOpponentSpec fun(id: number): specID: number, gender: number
 ---@field GetSpecializationInfoByID fun(specIndex: number): id: number, name: string, description: string, icon: number, role: string, classFile: string, className: string
 ---@field UnitGroupRolesAssigned fun(unit: string): role: string
+---@field UnitIsGroupLeader fun(unit: string, partyCategory: number?): boolean
+---@field PromoteToLeader fun(unitOrPlayerName: string)
 -- group size functions
 ---@field GetNumGroupMembers fun(): number
 ---@field GetNumArenaOpponentSpecs fun(): number
@@ -74,3 +78,7 @@
 ---@field IsClassic fun(): boolean
 ---@field IsWotlk fun(): boolean
 ---@field Events WowEvents
+
+---@class C_PvP
+---@field IsSoloShuffle fun(): boolean
+---@field GetActiveMatchState fun(): number
