@@ -60,6 +60,7 @@ function fsConfig:Init()
 
     local sortingMethod = panels.SortingMethod:Build(panel)
     local roleOrdering = panels.RoleOrdering:Build(panel)
+    local autoLeader = wow.IsRetail() and panels.AutoLeader:Build(panel)
     local keybinding = panels.Keybinding:Build(panel)
     local macro = panels.Macro:Build(panel)
     local spacing = panels.Spacing:Build(panel)
@@ -70,6 +71,11 @@ function fsConfig:Init()
 
     AddSubCategory(sortingMethod)
     AddSubCategory(roleOrdering)
+
+    if wow.IsRetail() then
+        AddSubCategory(autoLeader)
+    end
+
     AddSubCategory(keybinding)
     AddSubCategory(macro)
     AddSubCategory(spacing)

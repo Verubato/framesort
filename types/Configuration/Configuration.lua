@@ -21,6 +21,7 @@
 ---@field Macro OptionsPanel
 ---@field Addons OptionsPanel
 ---@field RoleOrdering OptionsPanel
+---@field AutoLeader OptionsPanel
 ---@field SortingMethod OptionsPanel
 ---@field Api OptionsPanel
 ---@field Help OptionsPanel

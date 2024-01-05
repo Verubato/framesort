@@ -385,6 +385,16 @@ function M:UpgradeToVersion19(options)
     options.Version = 19
 end
 
+function M:UpgradeToVersion20(options)
+    assert(options.Version == 19)
+
+    options.AutoLeader = {
+        Enabled = true
+    }
+
+    options.Version = 20
+end
+
 ---Upgrades saved options to the current version.
 function M:UpgradeOptions(options)
     while (options.Version or 1) < fsConfig.Defaults.Version do

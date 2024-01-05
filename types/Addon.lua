@@ -43,6 +43,7 @@
 ---@field HidePlayer HidePlayerModule
 ---@field Targeting TargetingModule
 ---@field Macro MacroModule
+---@field AutoLeader AutoLeaderModule
 
 ---@class Scheduling
 ---@field Scheduler Scheduler

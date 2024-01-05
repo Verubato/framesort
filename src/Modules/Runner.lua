@@ -50,7 +50,10 @@ end
 
 function M:Run(provider)
     fsScheduler:RunWhenCombatEnds(function()
-        -- run sorting first as it affects everything
+        -- run auto promotion first
+        addon.Modules.AutoLeader:Run()
+
+        -- run sorting first as it affects the rest
         addon.Modules.Sorting:Run(provider)
 
         -- run hide player next as it may impact targeting and macros
@@ -63,6 +66,7 @@ end
 
 ---Initialises all modules.
 function M:Init()
+    addon.Modules.AutoLeader:Init()
     addon.Modules.HidePlayer:Init()
     addon.Modules.Sorting:Init()
     addon.Modules.Targeting:Init()

@@ -3,6 +3,12 @@ local frameMock = require("Mock\\Frame")
 local timer = require("Mock\\Timer")
 ---@class WowApiMock: WowApi
 local wow = {
+    -- fields
+    C_PvP = {
+        IsSoloShuffle = function() return false end,
+        GetActiveMatchState = function() return nil end
+    },
+
     -- mock fields
     State = {
         Frames = {},
@@ -123,6 +129,11 @@ local wow = {
     end,
     UnitGroupRolesAssigned = function()
         return "NONE"
+    end,
+    UnitIsGroupLeader = function(unit, partyCategory)
+        return false
+    end,
+    PromoteToLeader = function(unitOrPlayerName)
     end,
 
     -- state functions

@@ -3,6 +3,9 @@
 local _, addon = ...
 ---@type WowApi
 local wow = {
+    -- fields
+    C_PvP = C_PvP,
+
     -- constants
     WOW_PROJECT_ID = WOW_PROJECT_ID,
     WOW_PROJECT_CLASSIC = WOW_PROJECT_CLASSIC,
@@ -50,6 +53,8 @@ local wow = {
     GetArenaOpponentSpec = GetArenaOpponentSpec,
     GetSpecializationInfoByID = GetSpecializationInfoByID,
     UnitGroupRolesAssigned = UnitGroupRolesAssigned,
+    UnitIsGroupLeader = UnitIsGroupLeader,
+    PromoteToLeader = PromoteToLeader,
 
     -- state functions
     IsInInstance = IsInInstance,
