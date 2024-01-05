@@ -24,9 +24,14 @@ local function Run()
 
     if not healer then return end
 
-    healerHadLeader = wow.UnitIsGroupLeader(healer)
+    if wow.UnitIsGroupLeader(healer) then
+        healerHadLeader = true
+        return
+    end
 
+    -- if we aren't leader, exit
     if not wow.UnitIsGroupLeader("player") then return end
+    -- if we are the healer, exit
     if wow.UnitIsUnit("player", healer) then return end
 
     wow.PromoteToLeader(healer)
