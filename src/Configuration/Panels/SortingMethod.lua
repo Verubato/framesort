@@ -57,14 +57,11 @@ function M:Build(parent)
         "Can sort frames from other addons.",
         "Can apply frame spacing.",
         "No taint (technical term for addons interfering with Blizzard's UI code).",
-        "Works with 10.1.7.",
     })
 
     anchor = BuildDottedList(panel, anchor, "Cons: ", {
-        "House of cards situation to workaround Blizzard spaghetti.",
-        "Ironically is not secure in the foundational sense (name is referring to 'secure' code).",
-        "May break with WoW patches.",
-        "If it breaks in 10.2 the developer may go insane.",
+        "Fragile house of cards situation to workaround Blizzard spaghetti.",
+        "May break with WoW patches and cause the developer to go insane.",
     })
 
     local traditional = wow.CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
