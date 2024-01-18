@@ -103,10 +103,26 @@ local function GetSelectors(body)
 end
 
 local function UnitForSelector(selector, friendlyUnits, enemyUnits)
+    local lowercase = string.lower(selector)
+
+    -- tanktarget, healertarget, etc
+    if string.match(lowercase, ".+target") or string.match(lowercase, ".+tg") then
+        local withoutTarget = string.gsub(lowercase, "target", "")
+        withoutTarget = string.gsub(withoutTarget, "tg", "")
+
+        local unit = UnitForSelector(withoutTarget, friendlyUnits, enemyUnits)
+
+        if unit and unit ~= "none" then
+            unit = unit .. "target"
+        end
+
+        return unit
+    end
+
     -- extract the frame number
     local number = tonumber(string.match(selector, "%d+")) or 1
     -- drop the number and make it case insensitive
-    local type = string.gsub(string.lower(selector), "%d+", "")
+    local type = string.gsub(lowercase, "%d+", "")
 
     -- bottom frame
     if type == "bottomframe" or type == "bf" then
