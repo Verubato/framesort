@@ -120,16 +120,17 @@ function M:Build(parent)
 
     local notes = {
         "Supported variables:",
-        " - Frame1, Frame2, Frame3, etc",
-        " - Frame1Pet, Frame2Pet, Frame3Pet, etc",
+        " - Frame1, Frame2, Frame3, etc.",
+        " - Frame1Pet, Frame2Pet, Frame3Pet, etc.",
         " - BottomFrame",
         " - Tank, Healer, DPS",
+        " - TankTarget, HealerTarget, Frame1Target, etc.",
         " - OtherDps - The first DPS that's not you.",
     }
 
     if wow.IsRetail() then
-        notes[#notes + 1] = " - EnemyFrame1, EnemyFrame2, EnemyFrame3, etc"
-        notes[#notes + 1] = " - EnemyFrame1Pet, EnemyFrame2Pet, EnemyFrame3Pet, etc"
+        notes[#notes + 1] = " - EnemyFrame1, EnemyFrame2, EnemyFrame3, etc."
+        notes[#notes + 1] = " - EnemyFrame1Pet, EnemyFrame2Pet, EnemyFrame3Pet, etc."
         notes[#notes + 1] = " - EnemyTank, EnemyHealer, EnemyDPS"
     end
 
@@ -148,10 +149,11 @@ function M:Build(parent)
         " - #FS = #FrameSort",
         " - F1, F2, F3 = Frame1, Frame2, Frame3",
         " - F1P, F2P, F3P = Frame1Pet, Frame2Pet, Frame3Pet",
-        " - BottomFrame = BF",
-        " - Tank, Healer, DPS = T, H, D",
-        " - OtherDPS = OD",
-        " - EnemyHealer = EH",
+        " - BF = BottomFrame",
+        " - T, H, D = Tank, Healer, DPS",
+        " - OD = OtherDPS",
+        " - EH = EnemyHealer",
+        " - SomethingTG = SomethingTarget"
     }
 
     if wow.IsRetail() then
