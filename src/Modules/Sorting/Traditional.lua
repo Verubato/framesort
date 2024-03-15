@@ -9,6 +9,10 @@ addon.Modules.Sorting.Traditional = M
 ---Attempts to sort Blizzard party frames.
 ---@return boolean sorted true if sorted, otherwise false.
 function M:TrySort()
+    local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
+
+    if not friendlyEnabled then return false end
+
     local sorted = false
     local sortFunction = fsCompare:SortFunction()
 

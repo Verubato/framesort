@@ -26,11 +26,6 @@ end
 function M:Run(provider)
     assert(not wow.InCombatLockdown())
 
-    local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
-    local enemyEnabled, _, _ = fsCompare:EnemySortMode()
-
-    if not friendlyEnabled and not enemyEnabled then return end
-
     if wow.IsRetail() and wow.EditModeManagerFrame.editModeActive then
         fsLog:Debug("Not sorting while edit mode active.")
         return

@@ -512,6 +512,8 @@ local function ClearSorting(providers, friendlyEnabled, enemyEnabled)
         container.Frame:SetAttribute("sortMethod", previousSortMethod)
         container.Frame:SetAttribute("groupFilter", previousGroupFilter)
     end
+
+    return #nameListContainers > 0
 end
 
 ---@param provider FrameProvider?
@@ -525,11 +527,11 @@ function M:TrySort(provider)
     local providers = provider and { provider } or fsProviders:Enabled()
 
     if not friendlyEnabled or not enemyEnabled then
-        ClearSorting(providers, friendlyEnabled, enemyEnabled)
+        sorted = ClearSorting(providers, friendlyEnabled, enemyEnabled)
     end
 
     if not friendlyEnabled and not enemyEnabled then
-        return false
+        return sorted
     end
 
     for _, p in ipairs(providers) do
