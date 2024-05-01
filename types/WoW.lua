@@ -65,6 +65,7 @@
 ---@field SecureHandlerExecute fun(frame, body)
 -- addon related
 ---@field GetAddOnEnableState fun(character: string?, addon: string): number
+---@field GetAddOnMetadata fun(nameOrIndex: string, field: string): string
 -- time related
 ---@field GetTimePreciseSec fun(): number
 -- other

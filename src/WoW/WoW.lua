@@ -96,6 +96,7 @@ local wow = {
 
     -- addon related
     GetAddOnEnableState = GetAddOnEnableState,
+    GetAddOnMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata,
 
     -- time related
     GetTimePreciseSec = GetTimePreciseSec,
