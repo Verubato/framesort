@@ -3,9 +3,6 @@
 -- fields
 ---@field C_PvP C_PvP
 -- constants
----@field WOW_PROJECT_ID string
----@field WOW_PROJECT_CLASSIC string
----@field WOW_PROJECT_MAINLINE string
 ---@field MAX_RAID_MEMBERS number
 ---@field MEMBERS_PER_RAID_GROUP number
 -- frames
