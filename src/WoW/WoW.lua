@@ -7,9 +7,6 @@ local wow = {
     C_PvP = C_PvP,
 
     -- constants
-    WOW_PROJECT_ID = WOW_PROJECT_ID,
-    WOW_PROJECT_CLASSIC = WOW_PROJECT_CLASSIC,
-    WOW_PROJECT_MAINLINE = WOW_PROJECT_MAINLINE,
     MAX_RAID_MEMBERS = MAX_RAID_MEMBERS or 40,
     MEMBERS_PER_RAID_GROUP = MEMBERS_PER_RAID_GROUP or 5,
 
@@ -116,6 +113,9 @@ local wow = {
     end,
     IsWotlk = function()
         return WOW_PROJECT_ID ~= nil and WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
+    end,
+    IsCata = function()
+        return WOW_PROJECT_ID ~= nil and WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC
     end,
     IsClassic = function()
         return WOW_PROJECT_ID ~= nil and WOW_PROJECT_ID == WOW_PROJECT_CLASSIC

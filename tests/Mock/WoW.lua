@@ -19,9 +19,6 @@ local wow = {
     },
 
     -- constants
-    WOW_PROJECT_ID = "RETAIL",
-    WOW_PROJECT_CLASSIC = "CLASSIC",
-    WOW_PROJECT_MAINLINE = "RETAIL",
     MAX_RAID_MEMBERS = 40,
     MEMBERS_PER_RAID_GROUP = 5,
 
