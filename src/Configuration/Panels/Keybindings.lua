@@ -19,6 +19,8 @@ _G["BINDING_NAME_CLICK FSTargetEnemyPet3:LeftButton"] = "Target enemy frame 3's 
 _G["BINDING_NAME_CLICK FSFocusEnemy1:LeftButton"] = "Focus enemy frame 1"
 _G["BINDING_NAME_CLICK FSFocusEnemy2:LeftButton"] = "Focus enemy frame 2"
 _G["BINDING_NAME_CLICK FSFocusEnemy3:LeftButton"] = "Focus enemy frame 3"
+_G["BINDING_NAME_CLICK FSTargetNextFrame:LeftButton"] = "Cycle to the next frame"
+_G["BINDING_NAME_CLICK FSTargetPreviousFrame:LeftButton"] = "Cycle to the previous frame"
 
 ---@type string, Addon
 local _, addon = ...
