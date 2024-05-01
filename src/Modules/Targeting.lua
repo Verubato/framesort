@@ -13,6 +13,8 @@ local targetEnemyButtons = {}
 local targetEnemyPetButtons = {}
 local focusEnemyButtons = {}
 local targetBottomFrameButton = nil
+local cycleNextFrameButton = nil
+local cyclePreviousFrameButton = nil
 
 ---@class TargetingModule: IInitialise
 local M = {}
@@ -35,6 +37,20 @@ local function GetFriendlyFrames(provider)
     end
 
     return frames
+end
+
+local function UpdateCycleTargets(friendlyUnits)
+    assert(cycleNextFrameButton)
+    assert(cyclePreviousFrameButton)
+
+    cycleNextFrameButton:SetAttribute("FSUnitsCount", #friendlyUnits)
+    cyclePreviousFrameButton:SetAttribute("FSUnitsCount", #friendlyUnits)
+
+    for index, unit in ipairs(friendlyUnits) do
+        -- need to prefix as Unit1/2/3 is reserved
+        cycleNextFrameButton:SetAttribute("FSUnit" .. index, unit)
+        cyclePreviousFrameButton:SetAttribute("FSUnit" .. index, unit)
+    end
 end
 
 local function UpdateTargets()
@@ -115,8 +131,72 @@ local function UpdateTargets()
         end
     end
 
+    UpdateCycleTargets(friendlyUnits)
+
     local stop = wow.GetTimePreciseSec()
     fsLog:Debug(string.format("Update targets took %fms, %d updated.", (stop - start) * 1000, updatedCount))
+end
+
+local function InitCycleButtons()
+    cycleNextFrameButton = wow.CreateFrame("Button", "FSTargetNextFrame", wow.UIParent, "SecureActionButtonTemplate")
+    cycleNextFrameButton:SetAttribute("type", "target")
+
+    cyclePreviousFrameButton = wow.CreateFrame("Button", "FSTargetPreviousFrame", wow.UIParent, "SecureActionButtonTemplate")
+    cyclePreviousFrameButton:SetAttribute("type", "target")
+
+    local downOrUp = wow.GetCVarBool("ActionButtonUseKeyDown") and "AnyDown" or "AnyUp"
+    cycleNextFrameButton:RegisterForClicks(downOrUp)
+    cyclePreviousFrameButton:RegisterForClicks(downOrUp)
+
+    wow.SecureHandlerSetFrameRef(cycleNextFrameButton, "PreviousHandler", cyclePreviousFrameButton)
+    wow.SecureHandlerSetFrameRef(cyclePreviousFrameButton, "NextHandler", cycleNextFrameButton)
+
+    wow.SecureHandlerWrapScript(
+        cycleNextFrameButton,
+        "OnClick",
+        cycleNextFrameButton,
+        [[
+            local maxUnits = self:GetAttribute("FSUnitsCount")
+            local index = (self:GetAttribute("FSIndex") or 0) + 1
+
+            -- if we've reached the end, then start from the beginning
+            if index > maxUnits then
+                index = 1
+            end
+
+            local before = self:GetAttribute("unit") or "none"
+            local unit = self:GetAttribute("FSUnit" .. index) or "none"
+
+            self:SetAttribute("FSIndex", index)
+            self:SetAttribute("unit", unit)
+
+            local previousHandler = self:GetFrameRef("PreviousHandler")
+            previousHandler:SetAttribute("FSIndex", index)
+        ]]
+    )
+
+    wow.SecureHandlerWrapScript(
+        cyclePreviousFrameButton,
+        "OnClick",
+        cyclePreviousFrameButton,
+        [[
+            local maxUnits = self:GetAttribute("FSUnitsCount")
+            local index = (self:GetAttribute("FSIndex") or 0) - 1
+
+            if index <= 0 then
+                index = maxUnits
+            end
+
+            local before = self:GetAttribute("unit") or "none"
+            local unit = self:GetAttribute("FSUnit" .. index) or "none"
+
+            self:SetAttribute("FSIndex", index)
+            self:SetAttribute("unit", unit)
+
+            local nextHandler = self:GetFrameRef("NextHandler")
+            nextHandler:SetAttribute("FSIndex", index)
+        ]]
+    )
 end
 
 function M:FriendlyFrames()
@@ -275,4 +355,6 @@ function M:Init()
     targetBottomFrameButton:RegisterForClicks("AnyDown", "AnyUp")
     targetBottomFrameButton:SetAttribute("type", "target")
     targetBottomFrameButton:SetAttribute("unit", "none")
+
+    InitCycleButtons()
 end
