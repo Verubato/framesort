@@ -14,9 +14,10 @@ fsConfig.Panels.Sorting = M
 ---@param panel table the parent UI panel.
 ---@return table The bottom left most control to use for anchoring subsequent UI components.
 local function BuiltTitle(panel)
+    local version = wow.GetAddOnMetadata("FrameSort", "Version")
     local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
-    title:SetText("FrameSort")
+    title:SetText("FrameSort - " .. version)
 
     local unhealthy = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
     unhealthy:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -verticalSpacing)

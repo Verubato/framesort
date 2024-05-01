@@ -176,6 +176,9 @@ local wow = {
     GetAddOnEnableState = function()
         return 0
     end,
+    GetAddOnMetadata = function()
+        return "test"
+    end,
 
     -- time related
     GetTimePreciseSec = function()
