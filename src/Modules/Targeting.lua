@@ -7,14 +7,14 @@ local fsEnumerable = addon.Collections.Enumerable
 local fsCompare = addon.Collections.Comparer
 local fsFrame = addon.WoW.Frame
 local fsLog = addon.Logging.Log
-local targetFramesButtons = {}
-local targetPetFramesButtons = {}
-local targetEnemyButtons = {}
-local targetEnemyPetButtons = {}
-local focusEnemyButtons = {}
-local targetBottomFrameButton = nil
-local cycleNextFrameButton = nil
-local cyclePreviousFrameButton = nil
+local targetFrames = {}
+local targetPetFrames = {}
+local targetEnemyFrames = {}
+local targetEnemyPetFrames = {}
+local focusEnemyFrames = {}
+local targetBottomFrame = nil
+local cycleNextFrame = nil
+local cyclePreviousFrame = nil
 
 ---@class TargetingModule: IInitialise
 local M = {}
@@ -40,16 +40,16 @@ local function GetFriendlyFrames(provider)
 end
 
 local function UpdateCycleTargets(friendlyUnits)
-    assert(cycleNextFrameButton)
-    assert(cyclePreviousFrameButton)
+    assert(cycleNextFrame)
+    assert(cyclePreviousFrame)
 
-    cycleNextFrameButton:SetAttribute("FSUnitsCount", #friendlyUnits)
-    cyclePreviousFrameButton:SetAttribute("FSUnitsCount", #friendlyUnits)
+    cycleNextFrame:SetAttribute("FSUnitsCount", #friendlyUnits)
+    cyclePreviousFrame:SetAttribute("FSUnitsCount", #friendlyUnits)
 
     for index, unit in ipairs(friendlyUnits) do
         -- need to prefix as Unit1/2/3 is reserved
-        cycleNextFrameButton:SetAttribute("FSUnit" .. index, unit)
-        cyclePreviousFrameButton:SetAttribute("FSUnit" .. index, unit)
+        cycleNextFrame:SetAttribute("FSUnit" .. index, unit)
+        cyclePreviousFrame:SetAttribute("FSUnit" .. index, unit)
     end
 end
 
@@ -59,7 +59,7 @@ local function UpdateTargets()
     local friendlyUnits = M:FriendlyUnits()
 
     -- if units has less than 5 items it's still fine as units[i] will just be nil
-    for i, btn in ipairs(targetFramesButtons) do
+    for i, btn in ipairs(targetFrames) do
         local new = friendlyUnits[i] or "none"
         local current = btn:GetAttribute("unit")
 
@@ -69,7 +69,7 @@ local function UpdateTargets()
         end
     end
 
-    for i, btn in ipairs(targetPetFramesButtons) do
+    for i, btn in ipairs(targetPetFrames) do
         local new = fsUnit:PetFor(friendlyUnits[i] or "none")
         local current = btn:GetAttribute("unit")
 
@@ -79,7 +79,7 @@ local function UpdateTargets()
         end
     end
 
-    for i, btn in ipairs(targetFramesButtons) do
+    for i, btn in ipairs(targetFrames) do
         local new = friendlyUnits[i] or "none"
         local current = btn:GetAttribute("unit")
 
@@ -89,19 +89,19 @@ local function UpdateTargets()
         end
     end
 
-    assert(targetBottomFrameButton)
+    assert(targetBottomFrame)
 
-    local bottomCurrentUnit = targetBottomFrameButton:GetAttribute("unit")
+    local bottomCurrentUnit = targetBottomFrame:GetAttribute("unit")
     local bottomNewUnit = friendlyUnits[#friendlyUnits] or "none"
 
     if bottomCurrentUnit ~= bottomNewUnit then
-        targetBottomFrameButton:SetAttribute("unit", bottomNewUnit)
+        targetBottomFrame:SetAttribute("unit", bottomNewUnit)
         updatedCount = updatedCount + 1
     end
 
     local enemyUnits = M:EnemyUnits()
 
-    for i, btn in ipairs(targetEnemyButtons) do
+    for i, btn in ipairs(targetEnemyFrames) do
         local new = enemyUnits[i] or "none"
         local current = btn:GetAttribute("unit")
 
@@ -111,7 +111,7 @@ local function UpdateTargets()
         end
     end
 
-    for i, btn in ipairs(targetEnemyPetButtons) do
+    for i, btn in ipairs(targetEnemyPetFrames) do
         local new = fsUnit:PetFor(enemyUnits[i] or "none")
         local current = btn:GetAttribute("unit")
 
@@ -121,7 +121,7 @@ local function UpdateTargets()
         end
     end
 
-    for i, btn in ipairs(focusEnemyButtons) do
+    for i, btn in ipairs(focusEnemyFrames) do
         local new = enemyUnits[i] or "none"
         local current = btn:GetAttribute("unit")
 
@@ -138,23 +138,23 @@ local function UpdateTargets()
 end
 
 local function InitCycleButtons()
-    cycleNextFrameButton = wow.CreateFrame("Button", "FSCycleNextFrame", wow.UIParent, "SecureActionButtonTemplate")
-    cycleNextFrameButton:SetAttribute("type", "target")
+    cycleNextFrame = wow.CreateFrame("Button", "FSCycleNextFrame", wow.UIParent, "SecureActionButtonTemplate")
+    cycleNextFrame:SetAttribute("type", "target")
 
-    cyclePreviousFrameButton = wow.CreateFrame("Button", "FSCyclePreviousFrame", wow.UIParent, "SecureActionButtonTemplate")
-    cyclePreviousFrameButton:SetAttribute("type", "target")
+    cyclePreviousFrame = wow.CreateFrame("Button", "FSCyclePreviousFrame", wow.UIParent, "SecureActionButtonTemplate")
+    cyclePreviousFrame:SetAttribute("type", "target")
 
     local downOrUp = wow.GetCVarBool("ActionButtonUseKeyDown") and "AnyDown" or "AnyUp"
-    cycleNextFrameButton:RegisterForClicks(downOrUp)
-    cyclePreviousFrameButton:RegisterForClicks(downOrUp)
+    cycleNextFrame:RegisterForClicks(downOrUp)
+    cyclePreviousFrame:RegisterForClicks(downOrUp)
 
-    wow.SecureHandlerSetFrameRef(cycleNextFrameButton, "PreviousHandler", cyclePreviousFrameButton)
-    wow.SecureHandlerSetFrameRef(cyclePreviousFrameButton, "NextHandler", cycleNextFrameButton)
+    wow.SecureHandlerSetFrameRef(cycleNextFrame, "PreviousHandler", cyclePreviousFrame)
+    wow.SecureHandlerSetFrameRef(cyclePreviousFrame, "NextHandler", cycleNextFrame)
 
     wow.SecureHandlerWrapScript(
-        cycleNextFrameButton,
+        cycleNextFrame,
         "OnClick",
-        cycleNextFrameButton,
+        cycleNextFrame,
         [[
             local maxUnits = self:GetAttribute("FSUnitsCount")
             local index = (self:GetAttribute("FSIndex") or 0) + 1
@@ -176,9 +176,9 @@ local function InitCycleButtons()
     )
 
     wow.SecureHandlerWrapScript(
-        cyclePreviousFrameButton,
+        cyclePreviousFrame,
         "OnClick",
-        cyclePreviousFrameButton,
+        cyclePreviousFrame,
         [[
             local maxUnits = self:GetAttribute("FSUnitsCount")
             local index = (self:GetAttribute("FSIndex") or 0) - 1
@@ -301,12 +301,12 @@ function M:Init()
     local targetFriendlyCount = 5
     local targetEnemyCount = 3
 
-    if #targetFramesButtons > 0 then
-        targetFramesButtons = {}
+    if #targetFrames > 0 then
+        targetFrames = {}
     end
 
-    if #targetEnemyButtons > 0 then
-        targetEnemyButtons = {}
+    if #targetEnemyFrames > 0 then
+        targetEnemyFrames = {}
     end
 
     for i = 1, targetFriendlyCount do
@@ -325,8 +325,8 @@ function M:Init()
         pet:SetAttribute("type", "target")
         pet:SetAttribute("unit", "none")
 
-        targetFramesButtons[i] = button
-        targetPetFramesButtons[i] = pet
+        targetFrames[i] = button
+        targetPetFrames[i] = pet
     end
 
     for i = 1, targetEnemyCount do
@@ -345,16 +345,16 @@ function M:Init()
         pet:SetAttribute("type", "target")
         pet:SetAttribute("unit", "none")
 
-        targetEnemyButtons[i] = target
-        targetEnemyPetButtons[i] = pet
-        focusEnemyButtons[i] = focus
+        targetEnemyFrames[i] = target
+        targetEnemyPetFrames[i] = pet
+        focusEnemyFrames[i] = focus
     end
 
     -- target bottom
-    targetBottomFrameButton = wow.CreateFrame("Button", "FSTargetBottom", wow.UIParent, "SecureActionButtonTemplate")
-    targetBottomFrameButton:RegisterForClicks("AnyDown", "AnyUp")
-    targetBottomFrameButton:SetAttribute("type", "target")
-    targetBottomFrameButton:SetAttribute("unit", "none")
+    targetBottomFrame = wow.CreateFrame("Button", "FSTargetBottom", wow.UIParent, "SecureActionButtonTemplate")
+    targetBottomFrame:RegisterForClicks("AnyDown", "AnyUp")
+    targetBottomFrame:SetAttribute("type", "target")
+    targetBottomFrame:SetAttribute("unit", "none")
 
     InitCycleButtons()
 end
