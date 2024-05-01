@@ -1,0 +1,10 @@
+## Interface: 40400
+## Title: FrameSort
+## Notes: Places the player frame at the top/middle/bottom (configurable) of party/raid frames.
+## Author: Verz
+## Version: 6.4.2
+## SavedVariables: FrameSortDB
+## IconTexture: Interface\AddOns\FrameSort\Media\icon.blp
+## OptionalDeps: ElvUI, GladiusEx
+
+Load.xml
