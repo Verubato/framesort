@@ -138,10 +138,10 @@ local function UpdateTargets()
 end
 
 local function InitCycleButtons()
-    cycleNextFrameButton = wow.CreateFrame("Button", "FSTargetNextFrame", wow.UIParent, "SecureActionButtonTemplate")
+    cycleNextFrameButton = wow.CreateFrame("Button", "FSCycleNextFrame", wow.UIParent, "SecureActionButtonTemplate")
     cycleNextFrameButton:SetAttribute("type", "target")
 
-    cyclePreviousFrameButton = wow.CreateFrame("Button", "FSTargetPreviousFrame", wow.UIParent, "SecureActionButtonTemplate")
+    cyclePreviousFrameButton = wow.CreateFrame("Button", "FSCyclePreviousFrame", wow.UIParent, "SecureActionButtonTemplate")
     cyclePreviousFrameButton:SetAttribute("type", "target")
 
     local downOrUp = wow.GetCVarBool("ActionButtonUseKeyDown") and "AnyDown" or "AnyUp"
