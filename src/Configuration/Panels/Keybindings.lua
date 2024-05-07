@@ -21,6 +21,15 @@ _G["BINDING_NAME_CLICK FSFocusEnemy2:LeftButton"] = "Focus enemy frame 2"
 _G["BINDING_NAME_CLICK FSFocusEnemy3:LeftButton"] = "Focus enemy frame 3"
 _G["BINDING_NAME_CLICK FSCycleNextFrame:LeftButton"] = "Cycle to the next frame"
 _G["BINDING_NAME_CLICK FSCyclePreviousFrame:LeftButton"] = "Cycle to the previous frame"
+-- TODO: investigate and fix the unit tests
+-- I have absolutely no idea why adding the below 2 lines causes unit tests to fail
+-- it's completely bizarre, it's just global metadata that has 0 functional impact
+-- yet somehow it breaks several unit tests
+-- comment out the 2 lines below and unit tests will pass
+-- if you change the "NextFrame" to something like to "HelloFrame" then it also passes
+-- makes 0 sense
+_G["BINDING_NAME_CLICK FSTargetNextFrame:LeftButton"] = "Target the next frame"
+_G["BINDING_NAME_CLICK FSTargetPreviousFrame:LeftButton"] = "Target the previous frame"
 
 ---@type string, Addon
 local _, addon = ...
