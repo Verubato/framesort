@@ -358,8 +358,10 @@ secureMethods["AdjustPointsOffset"] = [[
 
     local newOffsetX = (offsetX or 0) + xDelta
     local newOffsetY = (offsetY or 0) + yDelta
+    local isProtected, explicitly = (relativeTo and relativeTo:IsProtected()) or false, false
+    local newRelativeTo = (isProtected and explicitly) and relativeTo or "$parent"
 
-    frame:SetPoint(point, relativeTo, relativePoint, newOffsetX, newOffsetY)
+    frame:SetPoint(point, newRelativeTo, relativePoint, newOffsetX, newOffsetY)
     return true
 ]]
 
@@ -671,7 +673,12 @@ secureMethods["HardArrange"] = [[
     -- now move them
     for _, frame in ipairs(framesToMove) do
         local to = pointsByFrame[frame]
-        frame:SetPoint(to.Point, to.RelativeTo, to.RelativePoint, to.XOffset, to.YOffset)
+        -- since 10.2.7 this broke where to.RelativeTo must be a protected frame
+        -- thankfully we can use a magic string to default it to the parent even if it's not protected
+        local isProtected, explicitly = (to.RelativeTo and to.RelativeTo:IsProtected()) or false, false
+        local relativeTo = (isProtected and explicitly) and to.RelativeTo or "$parent"
+
+        frame:SetPoint(to.Point, relativeTo, to.RelativePoint, to.XOffset, to.YOffset)
     end
 
     return #framesToMove > 0
@@ -931,9 +938,12 @@ secureMethods["TrySort"] = [[
 
     for _, provider in pairs(Providers) do
         local providerEnabled = self:GetAttribute("Provider" .. provider.Name .. "Enabled")
+
         if providerEnabled then
             for _, container in ipairs(provider.Containers) do
-                if container.Frame:IsVisible() then
+                if not container.Frame:IsProtected() then
+                    run:RunAttribute("Log", "Error", "Container for " .. provider.Name .. " must be protected.")
+                elseif container.Frame:IsVisible() then
                     if ((container.Type == ContainerType.Party or container.Type == ContainerType.Raid) and friendlyEnabled) or
                         (container.Type == ContainerType.EnemyArena and enemyEnabled) then
                         local add = newtable()
@@ -1117,14 +1127,6 @@ local function LoadProvider(provider)
     manager:SetAttributeNoHandler("ProviderName", provider:Name())
 
     for i, container in ipairs(containers) do
-        -- to fix a current blizzard bug where GetPoint() returns nil values on secure frames when their parent's are unsecure
-        -- https://github.com/Stanzilla/WoWUIBugs/issues/470
-        -- https://github.com/Stanzilla/WoWUIBugs/issues/480
-        if container.Frame.SetProtected then
-            -- classic doesn't have SetProtected()
-            container.Frame:SetProtected()
-        end
-
         local offset = container.FramesOffset and container:FramesOffset()
         local groupOffset = container.GroupFramesOffset and container:GroupFramesOffset()
         local containerPrefix = provider:Name() .. "Container" .. i
@@ -1222,14 +1224,6 @@ local function OnConfigChanged()
     fsScheduler:RunWhenCombatEnds(function()
         LoadSpacing()
     end, "SecureSortConfigChanged")
-end
-
-local function OnRaidGroupLoaded(group)
-    if not group or group:IsProtected() or not group.SetProtected then return end
-
-    fsScheduler:RunWhenCombatEnds(function()
-        group:SetProtected()
-    end)
 end
 
 local function ConfigureHeader(header)
@@ -1380,10 +1374,6 @@ function M:Init()
     LoadSpacing()
 
     fsConfig:RegisterConfigurationChangedCallback(OnConfigChanged)
-
-    if CompactRaidGroup_OnLoad then
-        wow.hooksecurefunc("CompactRaidGroup_OnLoad", OnRaidGroupLoaded)
-    end
 
     local combatStartingFrame = wow.CreateFrame("Frame", nil, wow.UIParent)
     combatStartingFrame:HookScript("OnEvent", OnCombatStarting)
