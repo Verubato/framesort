@@ -29,6 +29,7 @@
     <Script file="Providers\Blizzard.lua"/>
     <Script file="Providers\sArena.lua"/>
     <Script file="Providers\GladiusEx.lua"/>
+    <Script file="Providers\Gladius.lua"/>
     <Script file="Providers\ElvUI.lua"/>
 
     <!-- Health check requires frame providers -->

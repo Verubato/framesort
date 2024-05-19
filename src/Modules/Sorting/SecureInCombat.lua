@@ -44,18 +44,21 @@ secureMethods["InCombat"] = [[
 secureMethods["GetUnit"] = [[
     local framesVariable = ...
     local frame = _G[framesVariable]
+    local name = frame:GetName() or ""
+    local parent = frame:GetParent()
 
-    local unit = frame:GetAttribute("unit")
+    if parent and parent:GetName() = "UIParent" then
+        local unit, replaced = gsub(name, "GladiusButtonFrame", "")
+        return replaced > 0 and unit or nil
+    end
 
-    if unit then return unit end
+    local unit, replaced = gsub(name, "GladiusExButtonFrame", "")
 
-    local name = frame:GetName()
-    if name and strmatch(name, "GladiusExButtonFrame") then
-        unit = gsub(name, "GladiusExButtonFrame", "")
+    if replaced > 0 then
         return unit
     end
 
-    return nil
+    return frame:GetAttribute("unit")
 ]]
 
 -- filters a set of frames to only unit frames

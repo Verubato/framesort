@@ -1,6 +1,7 @@
 -- TODO: move this to a better namespace
 ---@type string, Addon
 local _, addon = ...
+local wow = addon.WoW.Api
 local fsEnumerable = addon.Collections.Enumerable
 ---@class FrameUtil
 local M = {
@@ -8,7 +9,7 @@ local M = {
     ContainerType = {
         Party = 1,
         Raid = 2,
-        EnemyArena = 3
+        EnemyArena = 3,
     },
     ---@class FrameLayoutType
     LayoutType = {
@@ -17,8 +18,8 @@ local M = {
         --- Arrange frames by setting their anchors.
         Hard = 2,
         -- Uses the NameList attribute of a SecureGroupHeader to order members.
-        NameList = 3
-    }
+        NameList = 3,
+    },
 }
 
 addon.WoW.Frame = M
@@ -150,6 +151,22 @@ end
 ---@param frame table
 ---@return string|nil
 function M:GetFrameUnit(frame)
+    local name = frame:GetName() or ""
+    local parent = frame:GetParent()
+
+    if parent == wow.UIParent then
+        -- don't want to inspect other frames of UIParent
+        -- so if it's not gladius, then we'll return nil
+        local unit, replaced = string.gsub(name, "GladiusButtonFrame", "")
+        return replaced > 0 and unit or nil
+    end
+
+    local unit, replaced = string.gsub(name, "GladiusButtonFrame", "")
+
+    if replaced > 0 then
+        return unit
+    end
+
     if frame.unit then
         return frame.unit
     end
