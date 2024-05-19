@@ -335,7 +335,7 @@ function M:Build(panel)
     end
 
     if wow.IsRetail() then
-        anchor = BuildSortModeCheckboxes(panel, anchor, "Enemy Arena (GladiusEx, sArena, Blizzard)", config.EnemyArena, false, false)
+        anchor = BuildSortModeCheckboxes(panel, anchor, "Enemy Arena (Gladius, GladiusEx, sArena, Blizzard)", config.EnemyArena, false, false)
     end
 
     anchor = BuildSortModeCheckboxes(panel, anchor, "Dungeon (mythics, 5-mans)", config.Dungeon)
