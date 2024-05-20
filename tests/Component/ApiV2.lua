@@ -7,6 +7,7 @@ local M = {}
 local partyUnitsCount = 3
 local raidUnitsCount = 6
 local arenaUnitsCount = 3
+local restoreFunctions = {}
 
 function M:setup()
     addon:InitDB()
@@ -44,8 +45,13 @@ function M:setup()
         unit.unit = "arena" .. i
     end
 
+    restoreFunctions.GetNumGroupMembers = wow.GetNumGroupMembers
+    restoreFunctions.GetNumArenaOpponentSpecs = wow.GetNumArenaOpponentSpecs
+    restoreFunctions.IsInInstance = wow.IsInInstance
+
     wow.GetNumGroupMembers = function() return partyUnitsCount end
     wow.IsInInstance = function() return true, "arena" end
+    wow.GetNumArenaOpponentSpecs = function() return arenaUnitsCount end
 
     -- disable sorting on config changes
     local config = addon.DB.Options.Sorting
@@ -58,10 +64,11 @@ function M:setup()
 end
 
 function M:teardown()
-    addon:Reset()
+    wow.GetNumGroupMembers = restoreFunctions.GetNumGroupMembers
+    wow.GetNumArenaOpponentSpecs = restoreFunctions.GetNumArenaOpponentSpecs
+    wow.IsInInstance = restoreFunctions.IsInInstance
 
-    wow.GetNumGroupMembers = function() return 0 end
-    wow.IsInInstance = function() return false, nil end
+    addon:Reset()
 end
 
 function M:test_get_party_frames()

@@ -1,10 +1,6 @@
 local addon = require("Mock\\Addon")
 local M = {}
 
-function M:setup()
-    addon:Reset()
-end
-
 function M:teardown()
     addon:Reset()
 end

@@ -5,6 +5,7 @@ local wow = addon.WoW.Api
 local provider = addon.Providers.Test
 local fsFrame = addon.WoW.Frame
 local M = {}
+local restoreFunctions = {}
 
 function M:setup()
     addon:InitDB()
@@ -47,6 +48,11 @@ function M:setup()
     arena3.State.Position.Top = 300
     arena3.unit = "arena3"
 
+    restoreFunctions.GetNumGroupMembers = wow.GetNumGroupMembers
+    restoreFunctions.GetNumArenaOpponentSpecs = wow.GetNumArenaOpponentSpecs
+    restoreFunctions.IsInGroup = wow.IsInGroup
+    restoreFunctions.IsInInstance = wow.IsInGroup
+
     wow.GetNumGroupMembers = function() return 3 end
     wow.GetNumArenaOpponentSpecs = function() return 3 end
     wow.IsInGroup = function() return true end
@@ -60,7 +66,11 @@ end
 
 function M:teardown()
     addon:Reset()
-    wow.GetNumArenaOpponentSpecs = function() return 0 end
+
+    wow.GetNumGroupMembers = restoreFunctions.GetNumGroupMembers
+    wow.GetNumArenaOpponentSpecs = restoreFunctions.GetNumArenaOpponentSpecs
+    wow.IsInGroup = restoreFunctions.IsInGroup
+    wow.IsInInstance = restoreFunctions.IsInGroup
 end
 
 function M:test_targets_update_on_provider_callback()

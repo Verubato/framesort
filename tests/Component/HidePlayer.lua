@@ -35,8 +35,8 @@ function M:setup()
 end
 
 function M:teardown()
-    addon:Reset()
     addon.Providers.Blizzard = realBlizzardProvider
+    addon:Reset()
 end
 
 function M:test_player_shows_and_hides_on_provider_callback()

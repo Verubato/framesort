@@ -58,12 +58,14 @@ function M:test_sort_party_frames_top()
     -- player = top
     -- p1 = middle
     -- p2 = bottom
-    player:SetPoint("TOPLEFT", partyContainer, "BOTTOMLEFT", 0, 0)
-    player:SetPosition(0, 0, width, -height)
-    p1:SetPoint("TOPLEFT", player, "BOTTOMLEFT", 0, 0)
-    p1:SetPosition(-height, 0, width, -height * 2)
-    p2:SetPoint("TOPLEFT", partyContainer, "TOPLEFT", 0, 0)
-    p2:SetPosition(-height * 2, 0, width, -height * 3)
+    player:SetPoint("TOPLEFT", partyContainer, "TOPLEFT", 0, 0)
+    player:SetPosition(height * 3, 0, width, height * 2)
+
+    p1:SetPoint("TOPLEFT", p2, "BOTTOMLEFT", 0, 0)
+    p1:SetPosition(height * 2, 0, width, height)
+
+    p2:SetPoint("TOPLEFT", player, "BOTTOMLEFT", 0, 0)
+    p2:SetPosition(height, 0, width, 0)
 
     fsSort:Run()
 
@@ -94,7 +96,7 @@ function M:test_sort_party_frames_top()
             RelativeTo = partyContainer:GetName(),
             RelativePoint = "TOPLEFT",
             XOffset = 0,
-            YOffset = 90,
+            YOffset = -110,
         })
 
     -- next frame down should have moved 20 units
@@ -104,7 +106,7 @@ function M:test_sort_party_frames_top()
             RelativeTo = partyContainer:GetName(),
             RelativePoint = "TOPLEFT",
             XOffset = 0,
-            YOffset = 180,
+            YOffset = -220,
         })
 end
 

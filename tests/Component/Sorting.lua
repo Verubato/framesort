@@ -49,17 +49,43 @@ function M:test_sort_party_frames_top()
     assert(p1)
     assert(p2)
 
-    -- player = top
-    -- p1 = middle
-    -- p2 = bottom
+    -- 3 frames with no spacing between them
+    -- p2 = top
+    -- player = middle
+    -- p1 = bottom
     p2:SetPoint("TOPLEFT", partyContainer, "TOPLEFT", 0, 0)
-    p2:SetPosition(0, 0, width, -height)
+    p2:SetPosition(height * 3, 0, width, height * 2)
+
     player:SetPoint("TOPLEFT", p2, "BOTTOMLEFT", 0, 0)
-    player:SetPosition(-height, 0, width, -height * 2)
+    player:SetPosition(height * 2, 0, width, height)
+
     p1:SetPoint("TOPLEFT", player, "BOTTOMLEFT", 0, 0)
-    p1:SetPosition(-height * 2, 0, width, -height * 3)
+    p1:SetPosition(height, 0, width, 0)
+
+    assertEquals(player:GetLeft(), 0)
+    assertEquals(p1:GetLeft(), 0)
+    assertEquals(p2:GetLeft(), 0)
+
+    assertEquals(p2:GetTop(), 300)
+    assertEquals(player:GetTop(), 200)
+    assertEquals(p1:GetTop(), 100)
+
+    assertEquals(p2:GetBottom(), 200)
+    assertEquals(player:GetBottom(), 100)
+    assertEquals(p1:GetBottom(), 0)
+
+    assertEquals(p2:GetHeight(), 100)
+    assertEquals(player:GetHeight(), 100)
+    assertEquals(p1:GetHeight(), 100)
+
+    local sorted = false
+    addon.Modules.Sorting:RegisterPostSortCallback(function()
+        sorted = true
+    end)
 
     fsSort:Run()
+
+    assert(sorted)
 
     local function toPos(pos)
         return {
@@ -71,32 +97,29 @@ function M:test_sort_party_frames_top()
         }
     end
 
-    assertEquals(toPos(player.State.Point),
-        {
-            Point = "TOPLEFT",
-            RelativeTo = partyContainer:GetName(),
-            RelativePoint = "TOPLEFT",
-            XOffset = 0,
-            YOffset = 0,
-        })
+    assertEquals(toPos(player.State.Point), {
+        Point = "TOPLEFT",
+        RelativeTo = partyContainer:GetName(),
+        RelativePoint = "TOPLEFT",
+        XOffset = 0,
+        YOffset = 0,
+    })
 
-    assertEquals(toPos(p1.State.Point),
-        {
-            Point = "TOPLEFT",
-            RelativeTo = partyContainer:GetName(),
-            RelativePoint = "TOPLEFT",
-            XOffset = 0,
-            YOffset = 100,
-        })
+    assertEquals(toPos(p1.State.Point), {
+        Point = "TOPLEFT",
+        RelativeTo = partyContainer:GetName(),
+        RelativePoint = "TOPLEFT",
+        XOffset = 0,
+        YOffset = -100,
+    })
 
-    assertEquals(toPos(p2.State.Point),
-        {
-            Point = "TOPLEFT",
-            RelativeTo = partyContainer:GetName(),
-            RelativePoint = "TOPLEFT",
-            XOffset = 0,
-            YOffset = 200,
-        })
+    assertEquals(toPos(p2.State.Point), {
+        Point = "TOPLEFT",
+        RelativeTo = partyContainer:GetName(),
+        RelativePoint = "TOPLEFT",
+        XOffset = 0,
+        YOffset = -200,
+    })
 end
 
 return M
