@@ -1,6 +1,21 @@
 local void = require("Mock\\Void")
 local frameMock = require("Mock\\Frame")
 local timer = require("Mock\\Timer")
+
+local function CopyTable(table)
+    local new = {}
+
+    for key, value in pairs(table) do
+        if type(value) == "table" then
+            new[key] = CopyTable(value)
+        else
+            new[key] = value
+        end
+    end
+
+    return new
+end
+
 ---@class WowApiMock: WowApi
 local wow = {
     -- fields
@@ -153,15 +168,7 @@ local wow = {
 
         return table
     end,
-    CopyTable = function(table)
-        local new = {}
-
-        for key, value in pairs(table) do
-            new[key] = value
-        end
-
-        return new
-    end,
+    CopyTable = CopyTable,
 
     -- secure functions
     issecurevariable = function()

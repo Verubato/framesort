@@ -1,7 +1,6 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
-local fsCompare = addon.Collections.Comparer
 local fsLog = addon.Logging.Log
 local fsConfig = addon.Configuration
 local callbacks = {}
