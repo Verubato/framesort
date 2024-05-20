@@ -47,7 +47,7 @@ secureMethods["GetUnit"] = [[
     local name = frame:GetName() or ""
     local parent = frame:GetParent()
 
-    if parent and parent:GetName() = "UIParent" then
+    if parent and parent:GetName() == "UIParent" then
         local unit, replaced = gsub(name, "GladiusButtonFrame", "")
         return replaced > 0 and unit or nil
     end
