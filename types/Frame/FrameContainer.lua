@@ -10,3 +10,4 @@
 ---@field IsHorizontalLayout fun(self: table): boolean? whether frames are placed horizontally, only applicable to when the layout type is "Hard".
 ---@field IsGrouped fun(self: table): boolean? whether the container may or may not have groups within.
 ---@field FramesPerLine fun(self: table): number?: For the hard layout type, specify the number of frames per horizontal/vertical line.
+---@field AnchorPoint string?: Only TOPLEFT or TOPRIGHT are supported.

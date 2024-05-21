@@ -262,12 +262,13 @@ function M:Containers()
         containers[#containers + 1] = {
             Frame = wow.CompactArenaFrame,
             Type = fsFrame.ContainerType.EnemyArena,
-            LayoutType = fsFrame.LayoutType.Soft,
+            LayoutType = fsFrame.LayoutType.Hard,
             VisibleOnly = true,
             SupportsSpacing = true,
             FramesOffset = function()
                 return GetOffset(wow.CompactArenaFrame)
             end,
+            AnchorPoint = "TOPRIGHT",
 
             -- not applicable
             IsHorizontalLayout = function() return nil end,
