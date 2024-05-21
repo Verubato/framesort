@@ -6,7 +6,7 @@ A simple WoW addon that sorts party/raid/arena frames and places you at the top/
 
 * Place the player frame at the top, middle, or bottom.
 * Sort the remaining frames by group/role/alphabetical.
-* Works with Blizzard, GladiusEx, sArena, and ElvUI frames.
+* Works with Blizzard, Gladius, GladiusEx, sArena, and ElvUI frames.
 * Automatically promote healers to leader in solo shuffle.
 * Keybindings to target frames based on their visual position rather than their party number.
 * Macro variables for @Healer, @EnemyHealer, @Frame, and more.
