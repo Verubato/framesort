@@ -602,9 +602,9 @@ secureMethods["HardArrange"] = [[
 
     for _, frame in ipairs(frames) do
         local framePoint = newtable()
-        framePoint.Point = "TOPLEFT"
+        framePoint.Point = container.AnchorPoint or "TOPLEFT"
         framePoint.RelativeTo = container.Frame
-        framePoint.RelativePoint = "TOPLEFT"
+        framePoint.RelativePoint = container.AnchorPoint or "TOPLEFT"
         framePoint.XOffset = xOffset
         framePoint.YOffset = yOffset
         pointsByFrame[frame] = framePoint
@@ -1005,6 +1005,7 @@ secureMethods["LoadProvider"] = [[
         container.LayoutType = self:GetAttribute(prefix .. "LayoutType")
         container.SupportsSpacing = self:GetAttribute(prefix .. "SupportsSpacing")
         container.VisibleOnly = self:GetAttribute(prefix .. "SupportsSpacing")
+        container.AnchorPoint = self:GetAttribute(prefix .. "AnchorPoint")
         container.IsGrouped = self:GetAttribute(prefix .. "IsGrouped")
         container.IsHorizontalLayout = self:GetAttribute(prefix .. "IsHorizontalLayout")
         container.FramesPerLine = self:GetAttribute(prefix .. "FramesPerLine")
@@ -1140,6 +1141,7 @@ local function LoadProvider(provider)
         manager:SetAttributeNoHandler(containerPrefix .. "IsHorizontalLayout", container.IsHorizontalLayout and container:IsHorizontalLayout())
         manager:SetAttributeNoHandler(containerPrefix .. "FramesPerLine", container.FramesPerLine and container:FramesPerLine())
         manager:SetAttributeNoHandler(containerPrefix .. "VisibleOnly", container.VisibleOnly or false)
+        manager:SetAttributeNoHandler(containerPrefix .. "AnchorPoint", container.AnchorPoint)
         manager:SetAttributeNoHandler(containerPrefix .. "SupportsSpacing", container.SupportsSpacing)
         manager:SetAttributeNoHandler(containerPrefix .. "IsGrouped", container.IsGrouped and container:IsGrouped())
         manager:SetAttributeNoHandler(containerPrefix .. "OffsetX", offset and offset.X)

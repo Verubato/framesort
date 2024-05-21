@@ -160,18 +160,23 @@ local function SoftArrange(frames, spacing)
 end
 
 ---Rearranges frames by modifying their entire anchor point.
+---@param container FrameContainer
 ---@param frames table[]
----@param container table
----@param isHorizontalLayout boolean
----@param framesPerLine number?
 ---@param spacing Spacing?
 ---@param offset Offset?
 ---@param blockHeight number?
 ---@return boolean sorted
-local function HardArrange(frames, container, isHorizontalLayout, framesPerLine, spacing, offset, blockHeight)
+local function HardArrange(container, frames, spacing, offset, blockHeight)
     if #frames == 0 then
         return false
     end
+
+    local relativeTo = container.Frame
+    local isHorizontalLayout = container.IsHorizontalLayout and container:IsHorizontalLayout() or false
+    local framesPerLine = container.FramesPerLine and container:FramesPerLine()
+    local anchorPoint = container.AnchorPoint or "TOPLEFT"
+
+    offset = offset or (container.FramesOffset and container:FramesOffset())
 
     -- the block size is the largest height and width combination
     -- this is only useful when we have frames of different sizes
@@ -201,9 +206,9 @@ local function HardArrange(frames, container, isHorizontalLayout, framesPerLine,
 
     for _, frame in ipairs(frames) do
         pointsByFrame[frame] = {
-            Point = "TOPLEFT",
-            RelativeTo = container,
-            RelativePoint = "TOPLEFT",
+            Point = anchorPoint,
+            RelativeTo = relativeTo,
+            RelativePoint = anchorPoint,
             XOffset = xOffset,
             YOffset = yOffset
         }
@@ -392,12 +397,9 @@ local function TrySortContainer(container)
         return SoftArrange(frames, spacing)
     elseif container.LayoutType == fsFrame.LayoutType.Hard then
         return HardArrange(
+            container,
             frames,
-            container.Frame,
-            container.IsHorizontalLayout and container:IsHorizontalLayout() or false,
-            container.FramesPerLine and container:FramesPerLine(),
-            spacing,
-            container.FramesOffset and container:FramesOffset())
+            spacing)
     else
         fsLog:Error("Unknown layout type: " .. (container.Type or "nil"))
         return false
@@ -471,10 +473,8 @@ local function TrySortContainerGroups(container)
     local blockHeight = ungroupedFrames[1]:GetHeight() * 2
 
     sorted = HardArrange(
+        container,
         ungroupedFrames,
-        container.Frame,
-        isHorizontalLayout,
-        container.FramesPerLine and container:FramesPerLine(),
         spacing,
         ungroupedOffset,
         blockHeight)
