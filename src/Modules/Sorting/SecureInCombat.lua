@@ -947,15 +947,14 @@ secureMethods["TrySort"] = [[
             for _, container in ipairs(provider.Containers) do
                 if not container.Frame:IsProtected() then
                     run:RunAttribute("Log", "Error", "Container for " .. provider.Name .. " must be protected.")
-                elseif container.Frame:IsVisible() then
-                    if ((container.Type == ContainerType.Party or container.Type == ContainerType.Raid) and friendlyEnabled) or
-                        (container.Type == ContainerType.EnemyArena and enemyEnabled) then
+                elseif container.Frame:IsVisible() and
+                    ((container.Type == ContainerType.Party or container.Type == ContainerType.Raid) and friendlyEnabled) or
+                    (container.Type == ContainerType.EnemyArena and enemyEnabled) then
                         local add = newtable()
                         add.Provider = provider
                         add.Container = container
 
                         toSort[#toSort + 1] = add
-                    end
                 end
             end
         end
