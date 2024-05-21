@@ -160,6 +160,7 @@ function M:Containers()
             LayoutType = fsFrame.LayoutType.Hard,
             VisibleOnly = true,
             SupportsSpacing = true,
+            InCombatSortingRequired = true,
             IsGrouped = function() return false end,
             IsHorizontalLayout = function()
                 if wow.IsRetail() then
@@ -188,6 +189,7 @@ function M:Containers()
             LayoutType = fsFrame.LayoutType.Hard,
             VisibleOnly = true,
             SupportsSpacing = true,
+            InCombatSortingRequired = true,
             IsGrouped = function()
                 if wow.IsRetail() then
                     local raidGroupDisplayType = wow.EditModeManagerFrame:GetSettingValue(
@@ -265,6 +267,7 @@ function M:Containers()
             LayoutType = fsFrame.LayoutType.Hard,
             VisibleOnly = true,
             SupportsSpacing = true,
+            InCombatSortingRequired = true,
             FramesOffset = function()
                 return GetOffset(wow.CompactArenaFrame)
             end,
