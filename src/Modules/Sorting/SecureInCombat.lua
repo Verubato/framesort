@@ -7,6 +7,7 @@ local fsProviders = addon.Providers
 local fsUnit = addon.WoW.Unit
 local fsScheduler = addon.Scheduling.Scheduler
 local fsConfig = addon.Configuration
+local fsEnumerable = addon.Collections.Enumerable
 local fsLog = addon.Logging.Log
 local M = {}
 addon.Modules.Sorting.Secure.InCombat = M
@@ -1126,7 +1127,13 @@ end
 local function LoadProvider(provider)
     assert(manager)
 
-    local containers = provider:Containers()
+    local containers = fsEnumerable:From(provider:Containers())
+        :Where(function(c) return c.InCombatSortingRequired end)
+        :ToTable()
+
+    if #containers == 0 then
+        return
+    end
 
     manager:SetAttributeNoHandler("ProviderName", provider:Name())
 
