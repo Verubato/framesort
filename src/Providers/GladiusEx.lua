@@ -43,11 +43,21 @@ function M:Containers()
             SupportsSpacing = false,
 
             -- not applicable
-            FramesOffset = function() return nil end,
-            IsGrouped = function() return nil end,
-            IsHorizontalLayout = function() return nil end,
-            GroupFramesOffset = function(_) return nil end,
-            FramesPerLine = function(_) return nil end
+            FramesOffset = function()
+                return nil
+            end,
+            IsGrouped = function()
+                return nil
+            end,
+            IsHorizontalLayout = function()
+                return nil
+            end,
+            GroupFramesOffset = function(_)
+                return nil
+            end,
+            FramesPerLine = function(_)
+                return nil
+            end,
         }
     end
 
@@ -59,11 +69,21 @@ function M:Containers()
             SupportsSpacing = false,
 
             -- not applicable
-            FramesOffset = function() return nil end,
-            IsGrouped = function() return nil end,
-            IsHorizontalLayout = function() return nil end,
-            GroupFramesOffset = function(_) return nil end,
-            FramesPerLine = function(_) return nil end
+            FramesOffset = function()
+                return nil
+            end,
+            IsGrouped = function()
+                return nil
+            end,
+            IsHorizontalLayout = function()
+                return nil
+            end,
+            GroupFramesOffset = function(_)
+                return nil
+            end,
+            FramesPerLine = function(_)
+                return nil
+            end,
         }
     end
 

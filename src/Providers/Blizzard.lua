@@ -20,7 +20,7 @@ local cvarsPatternsToRunSort = {
     "raidOptionDisplay.*",
     "pvpOptionDisplay.*",
     "raidFrames.*",
-    "pvpFrames.*"
+    "pvpFrames.*",
 }
 
 fsProviders.Blizzard = M
@@ -77,7 +77,7 @@ local function GetOffset(container)
     if container and container.title and type(container.title) == "table" and type(container.title.GetHeight) == "function" then
         return {
             X = 0,
-            Y = -container.title:GetHeight()
+            Y = -container.title:GetHeight(),
         }
     end
 
@@ -161,13 +161,16 @@ function M:Containers()
             VisibleOnly = true,
             SupportsSpacing = true,
             InCombatSortingRequired = true,
-            IsGrouped = function() return false end,
+            IsGrouped = function()
+                return false
+            end,
             IsHorizontalLayout = function()
                 if wow.IsRetail() then
                     return wow.EditModeManagerFrame:GetSettingValueBool(
                         wow.Enum.EditModeSystem.UnitFrame,
                         wow.Enum.EditModeUnitFrameSystemIndices.Party,
-                        wow.Enum.EditModeUnitFrameSetting.UseHorizontalGroups)
+                        wow.Enum.EditModeUnitFrameSetting.UseHorizontalGroups
+                    )
                 end
 
                 return wow.CompactRaidFrameManager_GetSetting("HorizontalGroups")
@@ -177,8 +180,12 @@ function M:Containers()
             end,
 
             -- not applicable
-            GroupFramesOffset = function(_) return nil end,
-            FramesPerLine = function(_) return nil end
+            GroupFramesOffset = function(_)
+                return nil
+            end,
+            FramesPerLine = function(_)
+                return nil
+            end,
         }
     end
 
@@ -195,7 +202,8 @@ function M:Containers()
                     local raidGroupDisplayType = wow.EditModeManagerFrame:GetSettingValue(
                         wow.Enum.EditModeSystem.UnitFrame,
                         wow.Enum.EditModeUnitFrameSystemIndices.Raid,
-                        wow.Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
+                        wow.Enum.EditModeUnitFrameSetting.RaidGroupDisplayType
+                    )
                     return raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsVertical or raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsHorizontal
                 end
 
@@ -206,7 +214,8 @@ function M:Containers()
                     local displayType = wow.EditModeManagerFrame:GetSettingValue(
                         wow.Enum.EditModeSystem.UnitFrame,
                         wow.Enum.EditModeUnitFrameSystemIndices.Raid,
-                        wow.Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
+                        wow.Enum.EditModeUnitFrameSetting.RaidGroupDisplayType
+                    )
                     return displayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsHorizontal or displayType == wow.Enum.RaidGroupDisplayType.CombineGroupsHorizontal
                 end
 
@@ -274,10 +283,18 @@ function M:Containers()
             AnchorPoint = "TOPRIGHT",
 
             -- not applicable
-            IsHorizontalLayout = function() return nil end,
-            IsGrouped = function() return nil end,
-            GroupFramesOffset = function(_) return nil end,
-            FramesPerLine = function(_) return nil end
+            IsHorizontalLayout = function()
+                return nil
+            end,
+            IsGrouped = function()
+                return nil
+            end,
+            GroupFramesOffset = function(_)
+                return nil
+            end,
+            FramesPerLine = function(_)
+                return nil
+            end,
         }
     end
 

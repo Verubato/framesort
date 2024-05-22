@@ -244,15 +244,17 @@ wow.CreateFrame = function(frameType, name, parent, template, id)
     return frame
 end
 
-wow.RegisterAttributeDriver = wow.RegisterAttributeDriver or function(frame, attribute, conditional)
-    local attributeWithoutState = string.gsub(attribute, "state%-", "")
-    wow.RegisterStateDriver(frame, attributeWithoutState, conditional)
-end
+wow.RegisterAttributeDriver = wow.RegisterAttributeDriver
+    or function(frame, attribute, conditional)
+        local attributeWithoutState = string.gsub(attribute, "state%-", "")
+        wow.RegisterStateDriver(frame, attributeWithoutState, conditional)
+    end
 
-wow.UnregisterAttributeDriver = wow.UnregisterAttributeDriver or function(frame, attribute)
-    local attributeWithoutState = string.gsub(attribute, "state%-", "")
-    wow.UnregisterStateDriver(frame, attributeWithoutState)
-end
+wow.UnregisterAttributeDriver = wow.UnregisterAttributeDriver
+    or function(frame, attribute)
+        local attributeWithoutState = string.gsub(attribute, "state%-", "")
+        wow.UnregisterStateDriver(frame, attributeWithoutState)
+    end
 
 wow.GetTimePreciseSec = wow.GetTimePreciseSec or function()
     return debugprofilestop() / 1000
@@ -266,14 +268,15 @@ wow.IsInGroup = wow.IsInGroup or function()
     return GetNumPartyMembers() > 0 or GetNumRaidMembers() > 0
 end
 
-wow.GetAddOnEnableState = wow.GetAddOnEnableState or function(_, name)
-    local _, _, _, loadable, reason, _, _ = GetAddOnInfo(name)
-    if loadable and not reason then
-        return 1
-    else
-        return 0
+wow.GetAddOnEnableState = wow.GetAddOnEnableState
+    or function(_, name)
+        local _, _, _, loadable, reason, _, _ = GetAddOnInfo(name)
+        if loadable and not reason then
+            return 1
+        else
+            return 0
+        end
     end
-end
 
 wow.GetNumArenaOpponentSpecs = wow.GetNumArenaOpponentSpecs or GetNumArenaOpponents
 

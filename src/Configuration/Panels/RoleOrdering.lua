@@ -43,7 +43,7 @@ function M:Build(parent)
     local all = {
         tankHealerDps,
         healerTankDps,
-        healerDpsTank
+        healerDpsTank,
     }
 
     local function OnClick(box)
@@ -69,4 +69,3 @@ function M:Build(parent)
 
     return panel
 end
-

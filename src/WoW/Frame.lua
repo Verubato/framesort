@@ -29,7 +29,9 @@ addon.WoW.Frame = M
 ---@param visibleOnly boolean? override the default container visibility filter
 function M:GetFrames(provider, type, visibleOnly)
     local target = M:GetContainer(provider, type)
-    if not target then return {} end
+    if not target then
+        return {}
+    end
 
     if visibleOnly == nil then
         visibleOnly = target.VisibleOnly
@@ -49,10 +51,7 @@ function M:GetFrames(provider, type, visibleOnly)
         end)
         :Flatten()
 
-    return fsEnumerable
-        :From(frames)
-        :Concat(ungrouped)
-        :ToTable()
+    return fsEnumerable:From(frames):Concat(ungrouped):ToTable()
 end
 
 ---Returns the frames in order of their relative positioning to each other.
@@ -188,10 +187,18 @@ function M:ExtractUnitFrames(container, visibleOnly)
     return fsEnumerable
         :From({ container:GetChildren() })
         :Where(function(frame)
-            if type(frame) ~= "table" then return false end
-            if M:IsForbidden(frame) then return false end
-            if frame:GetTop() == nil or frame:GetLeft() == nil then return false end
-            if visibleOnly and not frame:IsVisible() then return false end
+            if type(frame) ~= "table" then
+                return false
+            end
+            if M:IsForbidden(frame) then
+                return false
+            end
+            if frame:GetTop() == nil or frame:GetLeft() == nil then
+                return false
+            end
+            if visibleOnly and not frame:IsVisible() then
+                return false
+            end
 
             local unit = M:GetFrameUnit(frame)
             return unit ~= nil
@@ -213,17 +220,29 @@ function M:ExtractGroups(container, visibleOnly)
     return fsEnumerable
         :From({ container:GetChildren() })
         :Where(function(frame)
-            if type(frame) ~= "table" then return false end
-            if M:IsForbidden(frame) then return false end
-            if frame:GetTop() == nil or frame:GetLeft() == nil then return false end
-            if visibleOnly and not frame:IsVisible() then return false end
+            if type(frame) ~= "table" then
+                return false
+            end
+            if M:IsForbidden(frame) then
+                return false
+            end
+            if frame:GetTop() == nil or frame:GetLeft() == nil then
+                return false
+            end
+            if visibleOnly and not frame:IsVisible() then
+                return false
+            end
 
             local name = frame:GetName()
 
-            if not name then return false end
+            if not name then
+                return false
+            end
 
             -- wotlk with 1 group uses the party frame
-            if string.match(name, "CompactPartyFrame") then return true end
+            if string.match(name, "CompactPartyFrame") then
+                return true
+            end
 
             -- only supports blizzard groups atm
             return string.match(name, "CompactRaidGroup")
@@ -269,7 +288,9 @@ end
 
 function M:IsForbidden(frame)
     -- wotlk 3.3.5 doesn't have this function
-    if not frame.IsForbidden then return false end
+    if not frame.IsForbidden then
+        return false
+    end
 
     return frame:IsForbidden()
 end

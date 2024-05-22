@@ -3,15 +3,15 @@ local _, addon = ...
 addon.Api = {}
 addon.Collections = {}
 addon.Configuration = {
-    Panels = {}
+    Panels = {},
 }
 addon.Health = {}
 addon.Logging = {}
 addon.Modules = {
     Sorting = {
-        Secure = {}
+        Secure = {},
     },
-    Macro = {}
+    Macro = {},
 }
 addon.Numerics = {}
 addon.Providers = { All = {} }

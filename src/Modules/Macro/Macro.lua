@@ -94,7 +94,9 @@ end
 
 local function OnUpdateMacros()
     -- if the event was triggered by us, then ignore it
-    if isSelfEditingMacro then return end
+    if isSelfEditingMacro then
+        return
+    end
 
     -- someone else has edited a macro
     -- invalidate our cache as ids may have all completely changed

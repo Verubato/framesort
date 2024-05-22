@@ -7,7 +7,7 @@ local M = {}
 addon.WoW.Unit = M
 
 local allPartyUnitsIds = {
-    "player"
+    "player",
 }
 local allRaidUnitsIds = {}
 local allEnemyUnitsIds = {}
@@ -71,7 +71,9 @@ function M:FriendlyUnits()
 
     return fsEnumerable
         :From(units)
-        :Where(function(unit) return wow.UnitExists(unit) end)
+        :Where(function(unit)
+            return wow.UnitExists(unit)
+        end)
         :ToTable()
 end
 
@@ -86,7 +88,9 @@ function M:EnemyUnits()
 
     return fsEnumerable
         :From(allEnemyUnitsIds)
-        :Where(function(unit) return ArenaUnitExists(unit) end)
+        :Where(function(unit)
+            return ArenaUnitExists(unit)
+        end)
         :ToTable()
 end
 

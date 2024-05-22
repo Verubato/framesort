@@ -15,11 +15,7 @@ local function ShowHide(show)
     local blizzard = fsProviders.Blizzard
     local party = fsFrame:GetFrames(blizzard, fsFrame.ContainerType.Party, false)
     local raid = fsFrame:GetFrames(blizzard, fsFrame.ContainerType.Raid, false)
-
-    local all = fsEnumerable
-        :From(party)
-        :Concat(raid)
-        :ToTable()
+    local all = fsEnumerable:From(party):Concat(raid):ToTable()
 
     -- we need to update all frames as units are not fixed to a frame
     -- so the player unit may have moved from frame1 to frame3 for example

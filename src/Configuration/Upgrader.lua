@@ -273,7 +273,7 @@ function M:UpgradeToVersion13(options)
     local methods = {
         Secure = 1,
         Taintless = 2,
-        Traditional = 3
+        Traditional = 3,
     }
 
     ---@diagnostic disable-next-line: undefined-field
@@ -292,7 +292,7 @@ function M:UpgradeToVersion14(options)
     local methods = {
         Secure = 1,
         Taintless = 2,
-        Traditional = 3
+        Traditional = 3,
     }
 
     -- move people to using Secure instead of Taintless
@@ -309,7 +309,7 @@ function M:UpgradeToVersion15(options)
     local methods = {
         Secure = 1,
         Taintless = 2,
-        Traditional = 3
+        Traditional = 3,
     }
 
     if options.SortingMethod == methods.Traditional then
@@ -325,7 +325,7 @@ function M:UpgradeToVersion16(options)
     assert(options.Version == 15)
 
     options.Sorting = {
-        RoleOrdering = 1
+        RoleOrdering = 1,
     }
 
     options.Version = 16
@@ -389,7 +389,7 @@ function M:UpgradeToVersion20(options)
     assert(options.Version == 19)
 
     options.AutoLeader = {
-        Enabled = true
+        Enabled = true,
     }
 
     options.Version = 20

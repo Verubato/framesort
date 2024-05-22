@@ -3,4 +3,4 @@ max_line_length = 200
 quote_style = double
 end_of_line = crlf
 indent_style = space
-
+collapse_simple_statement = "Always"

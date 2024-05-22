@@ -153,7 +153,7 @@ function M:Build(parent)
         " - T, H, D = Tank, Healer, DPS",
         " - OD = OtherDPS",
         " - EH = EnemyHealer",
-        " - SomethingTG = SomethingTarget"
+        " - SomethingTG = SomethingTarget",
     }
 
     if wow.IsRetail() then
@@ -171,7 +171,7 @@ function M:Build(parent)
 
     local skipDescription = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
     skipDescription:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
-    skipDescription:SetText("Use \"X\" to tell FrameSort to ignore an @unit selector:")
+    skipDescription:SetText('Use "X" to tell FrameSort to ignore an @unit selector:')
 
     local skipExample = [[
 #FS X X EnemyHealer
