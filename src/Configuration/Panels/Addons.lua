@@ -7,7 +7,7 @@ fsConfig.Panels.Addons = M
 
 function M:Build(parent)
     local panel = wow.CreateFrame("Frame", nil, parent)
-    panel.name = "Addons Support"
+    panel.name = "Addons"
     panel.parent = parent.name
 
     local verticalSpacing = fsConfig.VerticalSpacing
@@ -26,7 +26,8 @@ function M:Build(parent)
         "sArena",
         " - Arena: yes",
         "",
-        "Gladius",
+        "Gladius *NEW*",
+        " - Only partially working, still in development.",
         " - Arena: yes",
         " - Bicmex version: yes",
         "",
