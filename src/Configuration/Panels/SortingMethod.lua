@@ -73,7 +73,7 @@ function M:Build(parent)
     local traditionalLines = {
         "This is the standard sorting mode that addons and macros have used for 10+ years.",
         "It replaces the internal Blizzard sorting method with our own.",
-        "This is the same as the \"SetFlowSortFunction\" script but with FrameSort configuration."
+        'This is the same as the "SetFlowSortFunction" script but with FrameSort configuration.',
     }
 
     anchor = traditional

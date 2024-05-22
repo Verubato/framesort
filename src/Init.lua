@@ -26,7 +26,9 @@ end
 ---Listens for our to be loaded and then initialises it.
 ---@param name string the name of the addon being loaded.
 local function OnLoadAddon(_, _, name)
-    if name ~= addonName then return end
+    if name ~= addonName then
+        return
+    end
 
     assert(loader)
 

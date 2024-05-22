@@ -15,7 +15,9 @@ fsProviders.ElvUI = M
 table.insert(fsProviders.All, M)
 
 local function IntegrationEnabled()
-    if not ElvUI then return false end
+    if not ElvUI then
+        return false
+    end
 
     local E = ElvUI[1]
 
@@ -47,9 +49,13 @@ local function RequestUpdateContainers()
 end
 
 local function OnHeaderUpdate(header)
-    if header ~= ElvUF_PartyGroup1 then return end
+    if header ~= ElvUF_PartyGroup1 then
+        return
+    end
     -- prevent stack overflow as SetAttribute() calls will invoke another header update
-    if updating then return end
+    if updating then
+        return
+    end
 
     updating = true
     RequestSort()
@@ -143,14 +149,24 @@ function M:Containers()
         LayoutType = fsFrame.LayoutType.NameList,
 
         -- not applicable
-        IsHorizontalLayout = function() return nil end,
-        FramesOffset = function() return nil end,
-        IsGrouped = function() return nil end,
-        GroupFramesOffset = function(_) return nil end,
-        FramesPerLine = function(_) return nil end
+        IsHorizontalLayout = function()
+            return nil
+        end,
+        FramesOffset = function()
+            return nil
+        end,
+        IsGrouped = function()
+            return nil
+        end,
+        GroupFramesOffset = function(_)
+            return nil
+        end,
+        FramesPerLine = function(_)
+            return nil
+        end,
     }
 
     return {
-        party
+        party,
     }
 end

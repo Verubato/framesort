@@ -15,8 +15,12 @@ local function FrameSortFunction(unitSortFunction)
     return function(left, right)
         -- not sure why sometimes we get null arguments here, but it does happen on very rare occasions
         -- https://github.com/Verubato/framesort/issues/33
-        if not left then return false end
-        if not right then return true end
+        if not left then
+            return false
+        end
+        if not right then
+            return true
+        end
 
         local leftUnit = fsFrame:GetFrameUnit(left)
         local rightUnit = fsFrame:GetFrameUnit(right)
@@ -40,12 +44,11 @@ local function Move(frames, points)
         local to = points[frame]
         if to then
             local point, relativeTo, relativePoint, xOffset, yOffset = frame:GetPoint()
-            local different =
-                point ~= to.Point or
-                relativeTo ~= to.RelativeTo or
-                relativePoint ~= to.RelativePoint or
-                fsMath:Round(xOffset or 0, decimalSanity) ~= fsMath:Round(to.XOffset or 0, decimalSanity) or
-                fsMath:Round(yOffset or 0, decimalSanity) ~= fsMath:Round(to.YOffset or 0, decimalSanity)
+            local different = point ~= to.Point
+                or relativeTo ~= to.RelativeTo
+                or relativePoint ~= to.RelativePoint
+                or fsMath:Round(xOffset or 0, decimalSanity) ~= fsMath:Round(to.XOffset or 0, decimalSanity)
+                or fsMath:Round(yOffset or 0, decimalSanity) ~= fsMath:Round(to.YOffset or 0, decimalSanity)
 
             if different then
                 framesToMove[#framesToMove + 1] = frame
@@ -89,9 +92,11 @@ local function SoftArrange(frames, spacing)
             }
         end)
         :ToTable()
-    local pointsByFrame = fsEnumerable
-        :From(points)
-        :ToLookup(function(x) return x.Frame end, function(x) return x end)
+    local pointsByFrame = fsEnumerable:From(points):ToLookup(function(x)
+        return x.Frame
+    end, function(x)
+        return x
+    end)
 
     if spacing then
         local orderedTopLeft = fsEnumerable
@@ -188,12 +193,12 @@ local function HardArrange(container, frames, spacing, offset, blockHeight)
 
     offset = offset or {
         X = 0,
-        Y = 0
+        Y = 0,
     }
 
     spacing = spacing or {
         Vertical = 0,
-        Horizontal = 0
+        Horizontal = 0,
     }
 
     ---@type table<table, Point>
@@ -210,7 +215,7 @@ local function HardArrange(container, frames, spacing, offset, blockHeight)
             RelativeTo = relativeTo,
             RelativePoint = anchorPoint,
             XOffset = xOffset,
-            YOffset = yOffset
+            YOffset = yOffset,
         }
 
         if isHorizontalLayout then
@@ -288,7 +293,9 @@ local function SetNameList(container)
 
     local unitNames = fsEnumerable
         :From(units)
-        :Map(function(unit) return wow.GetUnitName(unit, true) end)
+        :Map(function(unit)
+            return wow.GetUnitName(unit, true)
+        end)
         :ToTable()
 
     local names = wow.strjoin(",", unitNames)
@@ -308,7 +315,7 @@ end
 local function UngroupedOffset(container, spacing)
     local offset = {
         X = 0,
-        Y = 0
+        Y = 0,
     }
 
     local groups = fsFrame:ExtractGroups(container.Frame)
@@ -316,13 +323,12 @@ local function UngroupedOffset(container, spacing)
 
     spacing = spacing or {
         Horizontal = 0,
-        Vertical = 0
+        Vertical = 0,
     }
 
-    local lastGroup = fsEnumerable
-        :From(groups)
-        :Reverse()
-        :First(function(x) return x:IsVisible() end)
+    local lastGroup = fsEnumerable:From(groups):Reverse():First(function(x)
+        return x:IsVisible()
+    end)
 
     if not lastGroup then
         return offset
@@ -337,7 +343,9 @@ local function UngroupedOffset(container, spacing)
     if horizontal then
         local bottomLeftFrame = fsEnumerable
             :From(frames)
-            :OrderBy(function(x, y) return fsCompare:CompareBottomLeftFuzzy(x, y) end)
+            :OrderBy(function(x, y)
+                return fsCompare:CompareBottomLeftFuzzy(x, y)
+            end)
             :First()
 
         offset.Y = -(container.Frame:GetTop() - bottomLeftFrame:GetBottom() + spacing.Vertical)
@@ -345,7 +353,9 @@ local function UngroupedOffset(container, spacing)
     else
         local topRightFrame = fsEnumerable
             :From(frames)
-            :OrderBy(function(x, y) return fsCompare:CompareTopRightFuzzy(x, y) end)
+            :OrderBy(function(x, y)
+                return fsCompare:CompareTopRightFuzzy(x, y)
+            end)
             :First()
 
         offset.X = -(container.Frame:GetLeft() - topRightFrame:GetRight() - spacing.Horizontal)
@@ -365,9 +375,13 @@ local function TrySortContainer(container)
     local frames = fsFrame:ExtractUnitFrames(container.Frame, container.VisibleOnly)
     local sortFunction = nil
 
-    if container.Type == fsFrame.ContainerType.Party or
-        container.Type == fsFrame.ContainerType.Raid then
-        local units = fsEnumerable:From(frames):Map(function(frame) return fsFrame:GetFrameUnit(frame) end):ToTable()
+    if container.Type == fsFrame.ContainerType.Party or container.Type == fsFrame.ContainerType.Raid then
+        local units = fsEnumerable
+            :From(frames)
+            :Map(function(frame)
+                return fsFrame:GetFrameUnit(frame)
+            end)
+            :ToTable()
         local unitSortFunction = fsCompare:SortFunction(units)
         sortFunction = FrameSortFunction(unitSortFunction)
     elseif container.Type == fsFrame.ContainerType.EnemyArena then
@@ -396,10 +410,7 @@ local function TrySortContainer(container)
     if container.LayoutType == fsFrame.LayoutType.Soft then
         return SoftArrange(frames, spacing)
     elseif container.LayoutType == fsFrame.LayoutType.Hard then
-        return HardArrange(
-            container,
-            frames,
-            spacing)
+        return HardArrange(container, frames, spacing)
     else
         fsLog:Error("Unknown layout type: " .. (container.Type or "nil"))
         return false
@@ -423,15 +434,23 @@ local function TrySortContainerGroups(container)
         local groupContainer = {
             Frame = group,
             Type = container.Type,
-            IsHorizontalLayout = function() return isHorizontalLayout end,
+            IsHorizontalLayout = function()
+                return isHorizontalLayout
+            end,
             VisibleOnly = container.VisibleOnly,
             LayoutType = container.LayoutType,
             SupportsSpacing = container.SupportsSpacing,
             FramesPerLine = container.FramesPerLine,
             -- we want to use the group frames offset here
-            FramesOffset = function() return container.GroupFramesOffset and container:GroupFramesOffset() end,
-            GroupFramesOffset = function() return nil end,
-            IsGrouped = function() return false end,
+            FramesOffset = function()
+                return container.GroupFramesOffset and container:GroupFramesOffset()
+            end,
+            GroupFramesOffset = function()
+                return nil
+            end,
+            IsGrouped = function()
+                return false
+            end,
         }
 
         sorted = TrySortContainer(groupContainer) or sorted
@@ -472,12 +491,7 @@ local function TrySortContainerGroups(container)
     -- but want a way to do that efficiently, e.g. get the frames back from TrySortContainer or something
     local blockHeight = ungroupedFrames[1]:GetHeight() * 2
 
-    sorted = HardArrange(
-        container,
-        ungroupedFrames,
-        spacing,
-        ungroupedOffset,
-        blockHeight)
+    sorted = HardArrange(container, ungroupedFrames, spacing, ungroupedOffset, blockHeight)
 
     return true
 end
@@ -486,7 +500,9 @@ local function ClearSorting(providers, friendlyEnabled, enemyEnabled)
     ---@type FrameContainer
     local nameListContainers = fsEnumerable
         :From(providers)
-        :Map(function(provider) return provider:Containers() end)
+        :Map(function(provider)
+            return provider:Containers()
+        end)
         :Flatten()
         :Where(function(container)
             if (container.Type == fsFrame.ContainerType.Party or container.Type == fsFrame.ContainerType.Raid) and friendlyEnabled then

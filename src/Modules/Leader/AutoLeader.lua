@@ -13,16 +13,19 @@ addon.Modules.AutoLeader = M
 local healerHadLeader = false
 
 local function Run()
-    if healerHadLeader then return end
+    if healerHadLeader then
+        return
+    end
 
     local units = fsUnit:FriendlyUnits()
-    local healer = fsEnumerable:From(units)
-        :First(function(unit)
-            local role = wow.UnitGroupRolesAssigned(unit)
-            return role == "HEALER"
-        end)
+    local healer = fsEnumerable:From(units):First(function(unit)
+        local role = wow.UnitGroupRolesAssigned(unit)
+        return role == "HEALER"
+    end)
 
-    if not healer then return end
+    if not healer then
+        return
+    end
 
     if wow.UnitIsGroupLeader(healer) then
         healerHadLeader = true
@@ -30,9 +33,13 @@ local function Run()
     end
 
     -- if we aren't leader, exit
-    if not wow.UnitIsGroupLeader("player") then return end
+    if not wow.UnitIsGroupLeader("player") then
+        return
+    end
     -- if we are the healer, exit
-    if wow.UnitIsUnit("player", healer) then return end
+    if wow.UnitIsUnit("player", healer) then
+        return
+    end
 
     wow.PromoteToLeader(healer)
 end
@@ -47,7 +54,9 @@ local function OnStateChanged()
 end
 
 function M:Init()
-    if not wow.IsRetail() then return end
+    if not wow.IsRetail() then
+        return
+    end
 
     local frame = wow.CreateFrame("Frame")
     frame:HookScript("OnEvent", OnStateChanged)
@@ -55,15 +64,23 @@ function M:Init()
 end
 
 function M:Run()
-    if not wow.IsRetail() then return end
-    if not addon.DB.Options.AutoLeader.Enabled then return end
-    if not wow.C_PvP.IsSoloShuffle() then return end
+    if not wow.IsRetail() then
+        return
+    end
+    if not addon.DB.Options.AutoLeader.Enabled then
+        return
+    end
+    if not wow.C_PvP.IsSoloShuffle() then
+        return
+    end
 
     -- only run in the waiting room
     -- unfortunately this event fires too early for us to run our promote leader code
     -- as the group hasn't yet formed when this even fires
     -- https://warcraft.wiki.gg/wiki/API_C_PvP.GetActiveMatchState
-    if wow.C_PvP.GetActiveMatchState() ~= wow.Enum.PvPMatchState.StartUp then return end
+    if wow.C_PvP.GetActiveMatchState() ~= wow.Enum.PvPMatchState.StartUp then
+        return
+    end
 
     Run()
 end

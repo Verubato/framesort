@@ -1,0 +1,1 @@
+%LocalAppData%\nvim-data\mason\bin\stylua.cmd --glob '**/*.lua' -- src

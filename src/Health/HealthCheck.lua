@@ -23,7 +23,7 @@ end
 
 local function IsSafeAddon(name)
     return name == addonName
-        -- wotlk uses a backport addon for raid frames
+        -- wotlk uses a backport addon for raid frames
         or name == "CompactRaidFrame"
 end
 
@@ -91,7 +91,9 @@ local function CanSeeFrames()
 
         for _, container in ipairs(containers) do
             local frames = fsFrame:ExtractUnitFrames(container.Frame)
-            local anyVisible = fsEnumerable:From(frames):Any(function(frame) return frame:IsVisible() end)
+            local anyVisible = fsEnumerable:From(frames):Any(function(frame)
+                return frame:IsVisible()
+            end)
 
             if anyVisible then
                 return true
@@ -101,9 +103,13 @@ local function CanSeeFrames()
                 local groups = fsFrame:ExtractGroups(container.Frame)
                 local anyVisibleInGroup = fsEnumerable
                     :From(groups)
-                    :Map(function(group) return fsFrame:ExtractUnitFrames(group) end)
+                    :Map(function(group)
+                        return fsFrame:ExtractUnitFrames(group)
+                    end)
                     :Flatten()
-                    :Any(function(frame) return frame:IsVisible() end)
+                    :Any(function(frame)
+                        return frame:IsVisible()
+                    end)
 
                 if anyVisibleInGroup then
                     return true
@@ -140,9 +146,9 @@ local function UsingSpacing()
         spacings[#spacings + 1] = options.Spacing.EnemyArena
     end
 
-    return fsEnumerable
-        :From(spacings)
-        :Any(function(spacing) return spacing.Vertical ~= 0 or spacing.Horizontal ~= 0 end)
+    return fsEnumerable:From(spacings):Any(function(spacing)
+        return spacing.Vertical ~= 0 or spacing.Horizontal ~= 0
+    end)
 end
 
 local function IsUsingRaidStyleFrames()
@@ -160,10 +166,8 @@ end
 
 local function IsRaidGrouped()
     if wow.IsRetail() then
-        local raidGroupDisplayType = wow.EditModeManagerFrame:GetSettingValue(
-            wow.Enum.EditModeSystem.UnitFrame,
-            wow.Enum.EditModeUnitFrameSystemIndices.Raid,
-            wow.Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
+        local raidGroupDisplayType =
+            wow.EditModeManagerFrame:GetSettingValue(wow.Enum.EditModeSystem.UnitFrame, wow.Enum.EditModeUnitFrameSystemIndices.Raid, wow.Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
         return raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsVertical or raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsHorizontal
     end
 
@@ -176,14 +180,18 @@ function M:IsHealthy()
     local results = {}
     local allProviderNames = fsEnumerable
         :From(fsProviders.All)
-        :Map(function(provider) return provider:Name() end)
+        :Map(function(provider)
+            return provider:Name()
+        end)
         :ToTable()
     local enabledNonBlizzardNames = fsEnumerable
         :From(fsProviders:Enabled())
         :Where(function(p)
             return p ~= fsProviders.Blizzard
         end)
-        :Map(function(provider) return provider:Name() end)
+        :Map(function(provider)
+            return provider:Name()
+        end)
         :ToTable()
 
     local allProvidersString = wow.strjoin(", ", allProviderNames)
@@ -240,9 +248,7 @@ function M:IsHealthy()
         Help = string.format('"%s" may cause conflicts, consider disabling it', conflictingAddon or "(unknown)"),
     }
 
-    return fsEnumerable
-        :From(results)
-        :All(function(x)
-            return not x.Applicable or x.Passed
-        end), results
+    return fsEnumerable:From(results):All(function(x)
+        return not x.Applicable or x.Passed
+    end), results
 end

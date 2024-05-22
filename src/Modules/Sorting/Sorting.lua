@@ -39,7 +39,7 @@ function M:Run(provider)
         sorted = M.Secure:TrySort(provider)
     end
 
-    local stop = wow.GetTimePreciseSec();
+    local stop = wow.GetTimePreciseSec()
     fsLog:Debug(string.format("Sort took %fms, result: %s.", (stop - start) * 1000, sorted and "sorted" or "not sorted"))
 
     if sorted then

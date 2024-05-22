@@ -23,17 +23,23 @@ local function OnEditModeExited()
 end
 
 local function OnTimer(_, _, timerType, timeSeconds)
-    if timerType ~= pvpTimerType then return end
+    if timerType ~= pvpTimerType then
+        return
+    end
 
     -- TODO: I don't think this is required anymore
     -- it was added to workaround a bug where enemy macros weren't being updated
     -- but that bug was macro cache related and not a timing issue, so this workaround didn't do anything AFAIK
     -- would need to do more testing before feeling comfortable to remove this
-    fsScheduler:RunAfter(timeSeconds + 1, function() M:Run() end)
+    fsScheduler:RunAfter(timeSeconds + 1, function()
+        M:Run()
+    end)
 end
 
 local function OnUpdate()
-    if not run then return end
+    if not run then
+        return
+    end
 
     run = false
     M:Run()

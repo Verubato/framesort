@@ -23,7 +23,7 @@ fsConfig.Defaults = {
                 PlayerSortMode = fsConfig.PlayerSortMode.Top,
                 GroupSortMode = fsConfig.GroupSortMode.Group,
                 Reverse = false,
-            }
+            },
         },
         EnemyArena = {
             Enabled = false,
@@ -50,7 +50,7 @@ fsConfig.Defaults = {
         },
     },
     AutoLeader = {
-        Enabled = true
+        Enabled = true,
     },
     Spacing = {
         Party = {

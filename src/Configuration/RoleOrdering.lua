@@ -6,7 +6,7 @@ local fsConfig = addon.Configuration
 local M = {
     TankHealerDps = 1,
     HealerTankDps = 2,
-    HealerDpsTank = 3
+    HealerDpsTank = 3,
 }
 
 fsConfig.RoleOrdering = M

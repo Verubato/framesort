@@ -18,7 +18,7 @@ function M:Build(parent)
     local anchor = title
     local intro = {
         "Need help with something?",
-        "Talk directly with the developer on Discord."
+        "Talk directly with the developer on Discord.",
     }
 
     for _, line in ipairs(intro) do

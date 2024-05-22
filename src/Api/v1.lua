@@ -11,13 +11,13 @@ local playerSortModes = {
     "Top",
     "Middle",
     "Bottom",
-    "Hidden"
+    "Hidden",
 }
 ---@type GroupSortMode[]
 local groupSortModes = {
     "Role",
     "Group",
-    "Alphabetical"
+    "Alphabetical",
 }
 
 ---@class ApiV1
@@ -43,20 +43,18 @@ end
 
 ---@param mode PlayerSortMode
 local function ValidatePlayerSortMode(mode)
-    if not fsEnumerable
-        :From(playerSortModes)
-        :Any(function(x) return x == mode end)
-    then
+    if not fsEnumerable:From(playerSortModes):Any(function(x)
+        return x == mode
+    end) then
         error("Invalid player sort mode: " .. (mode or "nil"))
     end
 end
 
 ---@param mode GroupSortMode
 local function ValidateGroupSortMode(mode)
-    if not fsEnumerable
-        :From(groupSortModes)
-        :Any(function(x) return x == mode end)
-    then
+    if not fsEnumerable:From(groupSortModes):Any(function(x)
+        return x == mode
+    end) then
         error("Invalid group sort mode: " .. (mode or "nil"))
     end
 end
@@ -72,7 +70,7 @@ local function AreaOptions(area)
         -- then we can avoid returning multiple options which just introduces ambiguity
         return {
             sorting.Arena.Twos,
-            sorting.Arena.Default
+            sorting.Arena.Default,
         }
     elseif area == "Arena - 2v2" then
         return { sorting.Arena.Twos }

@@ -1126,8 +1126,11 @@ end
 local function LoadProvider(provider)
     assert(manager)
 
-    local containers = fsEnumerable:From(provider:Containers())
-        :Where(function(c) return c.InCombatSortingRequired end)
+    local containers = fsEnumerable
+        :From(provider:Containers())
+        :Where(function(c)
+            return c.InCombatSortingRequired
+        end)
         :ToTable()
 
     if #containers == 0 then
@@ -1253,10 +1256,13 @@ local function ConfigureHeader(header)
             -- the refreshUnitChange script doesn't capture when the unit is changed to nil
             -- which can happen when someone leaves the group, or a pet ceases to exist
             -- so we're really only interested in unit changing to nil here
-            frame:SetAttribute("_onattributechanged", [[
+            frame:SetAttribute(
+                "_onattributechanged",
+                [[
                 local manager = self:GetAttribute("Manager")
                 manager:SetAttribute("state-framesort-run", "ignore")
-            ]])
+                ]]
+            )
 
             frame:SetAttribute("HaveSetAttributeHandler", true)
         end)
@@ -1272,7 +1278,9 @@ local function ConfigureHeader(header)
     header:SetAttribute("template", "SecureHandlerAttributeTemplate")
 
     -- fired when a new unit button is created
-    header:SetAttribute("initialConfigFunction", [=[
+    header:SetAttribute(
+        "initialConfigFunction",
+        [=[
         UnitButtonsCount = (UnitButtonsCount or 0) + 1
 
         -- self = the newly created unit button
@@ -1301,7 +1309,8 @@ local function ConfigureHeader(header)
                 control:CallMethod("UnitButtonCreated")
             ]])
         end
-    ]=])
+    ]=]
+    )
 
     header:SetFrameRef("Manager", manager)
 
@@ -1347,12 +1356,15 @@ function M:Init()
         run:RunAttribute("Init")
     ]])
 
-    manager:SetAttribute("_onstate-framesort-run", [[
+    manager:SetAttribute(
+        "_onstate-framesort-run",
+        [[
         if newstate == "ignore" then return end
 
         local run = control or self
         run:RunAttribute("TrySort")
-    ]])
+        ]]
+    )
 
     -- https://www.wowinterface.com/forums/showthread.php?t=58697
     -- this attribute driver is used for delaying the sorting function

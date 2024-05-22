@@ -112,13 +112,13 @@ end
 local function CompareMiddle(token, sortedUnits)
     local notPets = fsEnumerable
         :From(sortedUnits)
-        :Where(function(unit) return not fsUnit:IsPet(unit) and wow.UnitExists(unit) end)
+        :Where(function(unit)
+            return not fsUnit:IsPet(unit) and wow.UnitExists(unit)
+        end)
         :ToTable()
 
     -- index of the token we are comparing with
-    local index = fsEnumerable
-        :From(notPets)
-        :IndexOf(token)
+    local index = fsEnumerable:From(notPets):IndexOf(token)
 
     -- most likely a non-existant unit
     if not index then
@@ -141,14 +141,22 @@ end
 local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse, preSortedUnits)
     -- if not in a group, we might be in test mode
     if wow.IsInGroup() then
-        if not wow.UnitExists(leftToken) then return false end
-        if not wow.UnitExists(rightToken) then return true end
+        if not wow.UnitExists(leftToken) then
+            return false
+        end
+        if not wow.UnitExists(rightToken) then
+            return true
+        end
     end
 
     if fsUnit:IsPet(leftToken) or fsUnit:IsPet(rightToken) then
         -- place player before pets
-        if not fsUnit:IsPet(leftToken) then return true end
-        if not fsUnit:IsPet(rightToken) then return false end
+        if not fsUnit:IsPet(leftToken) then
+            return true
+        end
+        if not fsUnit:IsPet(rightToken) then
+            return false
+        end
 
         -- both are pets, compare their parent
         -- remove "pet" from the token to get the parent
@@ -206,8 +214,12 @@ end
 local function EnemyCompare(leftToken, rightToken, groupSortMode, reverse)
     if fsUnit:IsPet(leftToken) or fsUnit:IsPet(rightToken) then
         -- place player before pets
-        if not fsUnit:IsPet(leftToken) then return true end
-        if not fsUnit:IsPet(rightToken) then return false end
+        if not fsUnit:IsPet(leftToken) then
+            return true
+        end
+        if not fsUnit:IsPet(rightToken) then
+            return false
+        end
 
         -- both are pets, compare their parent
         local leftTokenParent = string.gsub(leftToken, "pet", "")
@@ -256,7 +268,9 @@ function M:SortFunction(units)
     -- making use of Enumerable:OrderBy() so we don't re-order the original array
     units = fsEnumerable
         :From(units)
-        :Where(function(x) return not wow.UnitIsUnit(x, "player") end)
+        :Where(function(x)
+            return not wow.UnitIsUnit(x, "player")
+        end)
         :OrderBy(function(x, y)
             return Compare(x, y, fsConfig.PlayerSortMode.Top, groupSortMode, reverse)
         end)
@@ -322,8 +336,12 @@ end
 ---@param rightFrame table a wow frame
 ---@return boolean
 function M:CompareTopLeftFuzzy(leftFrame, rightFrame)
-    if not leftFrame then return false end
-    if not rightFrame then return true end
+    if not leftFrame then
+        return false
+    end
+    if not rightFrame then
+        return true
+    end
 
     local leftY = fsMath:Round(leftFrame:GetTop(), fuzzyDecimalPlaces)
     local rightY = fsMath:Round(rightFrame:GetTop(), fuzzyDecimalPlaces)
@@ -345,8 +363,12 @@ end
 ---@param rightFrame table a wow frame
 ---@return boolean
 function M:CompareLeftTopFuzzy(leftFrame, rightFrame)
-    if not leftFrame then return false end
-    if not rightFrame then return true end
+    if not leftFrame then
+        return false
+    end
+    if not rightFrame then
+        return true
+    end
 
     local leftX = fsMath:Round(leftFrame:GetLeft(), fuzzyDecimalPlaces)
     local rightX = fsMath:Round(rightFrame:GetLeft(), fuzzyDecimalPlaces)
@@ -368,8 +390,12 @@ end
 ---@param rightFrame table a wow frame
 ---@return boolean
 function M:CompareTopRightFuzzy(leftFrame, rightFrame)
-    if not leftFrame then return false end
-    if not rightFrame then return true end
+    if not leftFrame then
+        return false
+    end
+    if not rightFrame then
+        return true
+    end
 
     local leftY = fsMath:Round(leftFrame:GetTop(), fuzzyDecimalPlaces)
     local rightY = fsMath:Round(rightFrame:GetTop(), fuzzyDecimalPlaces)
@@ -391,8 +417,12 @@ end
 ---@param rightFrame table a wow frame
 ---@return boolean
 function M:CompareBottomLeftFuzzy(leftFrame, rightFrame)
-    if not leftFrame then return false end
-    if not rightFrame then return true end
+    if not leftFrame then
+        return false
+    end
+    if not rightFrame then
+        return true
+    end
 
     local leftY = fsMath:Round(leftFrame:GetBottom(), fuzzyDecimalPlaces)
     local rightY = fsMath:Round(rightFrame:GetBottom(), fuzzyDecimalPlaces)
