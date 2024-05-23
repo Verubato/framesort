@@ -40,6 +40,7 @@ function M:Containers()
         Type = fsFrame.ContainerType.EnemyArena,
         LayoutType = fsFrame.LayoutType.Soft,
         SupportsSpacing = false,
+        VisibleOnly = true,
 
         -- not applicable
         FramesOffset = function()
