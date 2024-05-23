@@ -27,7 +27,7 @@ function M:Build(parent)
         " - Arena: yes",
         "",
         "Gladius *NEW*",
-        " - Only partially working, still in development.",
+        " - May not work 100%, needs testing.",
         " - Arena: yes",
         " - Bicmex version: yes",
         "",
