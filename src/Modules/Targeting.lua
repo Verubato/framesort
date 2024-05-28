@@ -87,16 +87,6 @@ local function UpdateTargets()
         end
     end
 
-    for i, btn in ipairs(targetFrames) do
-        local new = friendlyUnits[i] or "none"
-        local current = btn:GetAttribute("unit")
-
-        if current ~= new then
-            btn:SetAttribute("unit", new)
-            updatedCount = updatedCount + 1
-        end
-    end
-
     assert(targetBottomFrame)
 
     local bottomCurrentUnit = targetBottomFrame:GetAttribute("unit")
@@ -374,7 +364,7 @@ function M:Init()
 
         -- pet
         local pet = wow.CreateFrame("Button", "FSTargetPet" .. i, wow.UIParent, "SecureActionButtonTemplate")
-        button:RegisterForClicks(downOrUp)
+        pet:RegisterForClicks(downOrUp)
         pet:SetAttribute("type", "target")
         pet:SetAttribute("unit", "none")
 
@@ -389,12 +379,12 @@ function M:Init()
         target:SetAttribute("unit", "none")
 
         local focus = wow.CreateFrame("Button", "FSFocusEnemy" .. i, wow.UIParent, "SecureActionButtonTemplate")
-        target:RegisterForClicks(downOrUp)
+        focus:RegisterForClicks(downOrUp)
         focus:SetAttribute("type", "focus")
         focus:SetAttribute("unit", "none")
 
         local pet = wow.CreateFrame("Button", "FSTargetEnemyPet" .. i, wow.UIParent, "SecureActionButtonTemplate")
-        target:RegisterForClicks(downOrUp)
+        pet:RegisterForClicks(downOrUp)
         pet:SetAttribute("type", "target")
         pet:SetAttribute("unit", "none")
 
