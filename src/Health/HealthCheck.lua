@@ -174,6 +174,10 @@ local function IsRaidGrouped()
     return wow.CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
 end
 
+local function IsMainTankAssistEnabled()
+    return wow.GetCVarBool("raidOptionDisplayMainTankAndAssist")
+end
+
 ---Returns true if the environment/settings is in a good state, otherwise false.
 ---@return boolean healthy,HealthCheckResult[] results
 function M:IsHealthy()
@@ -246,6 +250,14 @@ function M:IsHealthy()
         Passed = conflictingAddon == nil,
         Description = "No conflicting addons",
         Help = string.format('"%s" may cause conflicts, consider disabling it', conflictingAddon or "(unknown)"),
+    }
+
+    local mainTankAndAssist = IsMainTankAssistEnabled()
+    results[#results + 1] = {
+        Applicable = wow.IsInRaid(),
+        Passed = not mainTankAndAssist,
+        Description = "Main tank and assist setting disabled",
+        Help = "Please disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames",
     }
 
     return fsEnumerable:From(results):All(function(x)
