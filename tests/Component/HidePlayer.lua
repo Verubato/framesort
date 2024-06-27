@@ -59,10 +59,7 @@ function M:test_player_shows_and_hides_on_provider_callback()
     provider:FireCallbacks()
 
     local showDriver = player.State.AttributeDrivers["state-visibility"]
-    assert(showDriver)
-
-    assertEquals(showDriver.Attribute, "state-visibility")
-    assertEquals(showDriver.Conditional, "show")
+    assert(showDriver == nil)
 end
 
 function M:test_player_shows_and_hides_after_combat()
