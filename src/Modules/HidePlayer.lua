@@ -24,11 +24,19 @@ local function ShowHide(show)
         assert(unit ~= nil)
 
         local isPlayer = wow.UnitIsUnit(unit, "player")
+        local hasAttribute = frame:GetAttribute("framesort-state-visibility") ~= nil
 
-        if isPlayer then
-            wow.RegisterAttributeDriver(frame, "state-visibility", show and "show" or "hide")
-        else
+        if show and hasAttribute then
+            -- the frame may have moved to a different unit or the user wants the player raid frame to be shown again
             wow.UnregisterAttributeDriver(frame, "state-visibility")
+            frame:SetAttribute("framesort-state-visibility", nil)
+            frame:Show()
+        end
+
+        if isPlayer and not show then
+            -- user has opted to hide the player unit frame
+            wow.RegisterAttributeDriver(frame, "state-visibility", "hide")
+            frame:SetAttribute("framesort-state-visibility", "hide")
         end
     end
 end
