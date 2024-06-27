@@ -15,12 +15,15 @@ local containersChangedCallbacks = {}
 local cvarsToUpdateContainer = {
     "HorizontalGroups",
     "KeepGroupsTogether",
+    -- classic when changing between raid profiles
+    "activeCUFProfile"
 }
 local cvarsPatternsToRunSort = {
     "raidOptionDisplay.*",
     "pvpOptionDisplay.*",
     "raidFrames.*",
     "pvpFrames.*",
+    "activeCUFProfile"
 }
 
 fsProviders.Blizzard = M
@@ -61,14 +64,13 @@ local function OnCvarUpdate(_, _, name)
     for _, cvar in ipairs(cvarsToUpdateContainer) do
         if name == cvar then
             RequestUpdateContainers()
-            return
         end
     end
 
     for _, pattern in ipairs(cvarsPatternsToRunSort) do
         if string.match(name, pattern) then
-            RequestSort()
-            return
+            -- run next frame to allow cvars to take effect
+            fsScheduler:RunNextFrame(RequestSort)
         end
     end
 end
