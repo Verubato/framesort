@@ -18,7 +18,10 @@ local wow = {
     CompactRaidFrameContainer = CompactRaidFrameContainer,
     CompactArenaFrame = CompactArenaFrame,
     CompactRaidFrameContainer_SetFlowSortFunction = CompactRaidFrameContainer_SetFlowSortFunction,
-    CompactRaidFrameManager_GetSetting = CompactRaidFrameManager_GetSetting,
+    CompactRaidFrameManager_GetSetting = CompactRaidFrameManager_GetSetting or function(_)
+        return false
+    end,
+
     EditModeManagerFrame = EditModeManagerFrame,
 
     -- settings
@@ -55,13 +58,16 @@ local wow = {
 
     -- state functions
     IsInInstance = IsInInstance,
-    IsInGroup = IsInGroup,
+    IsInGroup = IsInGroup or function()
+        return GetNumPartyMembers() > 0 or GetNumRaidMembers() > 0
+    end,
+
     IsInRaid = IsInRaid,
     InCombatLockdown = InCombatLockdown,
 
     -- group size functions
     GetNumGroupMembers = GetNumGroupMembers,
-    GetNumArenaOpponentSpecs = GetNumArenaOpponentSpecs,
+    GetNumArenaOpponentSpecs = GetNumArenaOpponentSpecs or GetNumArenaOpponents,
 
     -- utility
     wipe = wipe,
@@ -95,11 +101,32 @@ local wow = {
     C_Timer = C_Timer,
 
     -- addon related
-    GetAddOnEnableState = GetAddOnEnableState,
+    GetAddonInfo = C_AddOns and C_AddOns.GetAddonInfo or GetAddonInfo,
+    GetAddOnEnableState = function(character, name)
+        if C_AddOns then
+            -- argument order is reversed
+            return C_AddOns.GetAddOnEnableState(name, character)
+        end
+
+        if GetAddonEnableState then
+            return GetAddOnEnableState(character, name)
+        end
+
+        local getAddonInfo = C_AddOns and C_AddOns.GetAddonInfo or GetAddonInfo
+        local _, _, _, loadable, reason, _, _ = getAddonInfo(name)
+
+        if loadable and not reason then
+            return 1
+        else
+            return 0
+        end
+    end,
     GetAddOnMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata,
 
     -- time related
-    GetTimePreciseSec = GetTimePreciseSec,
+    GetTimePreciseSec = GetTimePreciseSec or function()
+        return debugprofilestop() / 1000
+    end,
 
     -- used for older clients that don't have the new attribute driver functions
     RegisterStateDriver = RegisterStateDriver,
@@ -255,30 +282,6 @@ wow.UnregisterAttributeDriver = wow.UnregisterAttributeDriver
         local attributeWithoutState = string.gsub(attribute, "state%-", "")
         wow.UnregisterStateDriver(frame, attributeWithoutState)
     end
-
-wow.GetTimePreciseSec = wow.GetTimePreciseSec or function()
-    return debugprofilestop() / 1000
-end
-
-wow.CompactRaidFrameManager_GetSetting = wow.CompactRaidFrameManager_GetSetting or function(_)
-    return false
-end
-
-wow.IsInGroup = wow.IsInGroup or function()
-    return GetNumPartyMembers() > 0 or GetNumRaidMembers() > 0
-end
-
-wow.GetAddOnEnableState = wow.GetAddOnEnableState
-    or function(_, name)
-        local _, _, _, loadable, reason, _, _ = GetAddOnInfo(name)
-        if loadable and not reason then
-            return 1
-        else
-            return 0
-        end
-    end
-
-wow.GetNumArenaOpponentSpecs = wow.GetNumArenaOpponentSpecs or GetNumArenaOpponents
 
 -- for unit tests
 wow.CopyTable = wow.CopyTable or function(t)
