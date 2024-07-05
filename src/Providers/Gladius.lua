@@ -39,25 +39,7 @@ function M:Containers()
         Frame = wow.UIParent,
         Type = fsFrame.ContainerType.EnemyArena,
         LayoutType = fsFrame.LayoutType.Soft,
-        SupportsSpacing = false,
         VisibleOnly = true,
-
-        -- not applicable
-        FramesOffset = function()
-            return nil
-        end,
-        IsGrouped = function()
-            return nil
-        end,
-        IsHorizontalLayout = function()
-            return nil
-        end,
-        GroupFramesOffset = function(_)
-            return nil
-        end,
-        FramesPerLine = function(_)
-            return nil
-        end,
     }
 
     return containers

@@ -16,14 +16,14 @@ local cvarsToUpdateContainer = {
     "HorizontalGroups",
     "KeepGroupsTogether",
     -- classic when changing between raid profiles
-    "activeCUFProfile"
+    "activeCUFProfile",
 }
 local cvarsPatternsToRunSort = {
     "raidOptionDisplay.*",
     "pvpOptionDisplay.*",
     "raidFrames.*",
     "pvpFrames.*",
-    "activeCUFProfile"
+    "activeCUFProfile",
 }
 
 fsProviders.Blizzard = M
@@ -180,14 +180,6 @@ function M:Containers()
             FramesOffset = function()
                 return GetOffset(wow.CompactPartyFrame)
             end,
-
-            -- not applicable
-            GroupFramesOffset = function(_)
-                return nil
-            end,
-            FramesPerLine = function(_)
-                return nil
-            end,
         }
     end
 
@@ -283,20 +275,6 @@ function M:Containers()
                 return GetOffset(wow.CompactArenaFrame)
             end,
             AnchorPoint = "TOPRIGHT",
-
-            -- not applicable
-            IsHorizontalLayout = function()
-                return nil
-            end,
-            IsGrouped = function()
-                return nil
-            end,
-            GroupFramesOffset = function(_)
-                return nil
-            end,
-            FramesPerLine = function(_)
-                return nil
-            end,
         }
     end
 
