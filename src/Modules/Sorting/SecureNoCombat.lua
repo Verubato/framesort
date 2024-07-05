@@ -442,12 +442,7 @@ local function TrySortContainerGroups(container)
             SupportsSpacing = container.SupportsSpacing,
             FramesPerLine = container.FramesPerLine,
             -- we want to use the group frames offset here
-            FramesOffset = function()
-                return container.GroupFramesOffset and container:GroupFramesOffset()
-            end,
-            GroupFramesOffset = function()
-                return nil
-            end,
+            FramesOffset = container.GroupFramesOffset,
             IsGrouped = function()
                 return false
             end,

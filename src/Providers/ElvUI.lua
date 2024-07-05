@@ -147,23 +147,6 @@ function M:Containers()
         Frame = ElvUF_PartyGroup1,
         Type = fsFrame.ContainerType.Party,
         LayoutType = fsFrame.LayoutType.NameList,
-
-        -- not applicable
-        IsHorizontalLayout = function()
-            return nil
-        end,
-        FramesOffset = function()
-            return nil
-        end,
-        IsGrouped = function()
-            return nil
-        end,
-        GroupFramesOffset = function(_)
-            return nil
-        end,
-        FramesPerLine = function(_)
-            return nil
-        end,
     }
 
     return {

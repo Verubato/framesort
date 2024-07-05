@@ -40,24 +40,6 @@ function M:Containers()
             Frame = GladiusExPartyFrame,
             Type = fsFrame.ContainerType.Party,
             LayoutType = fsFrame.LayoutType.Soft,
-            SupportsSpacing = false,
-
-            -- not applicable
-            FramesOffset = function()
-                return nil
-            end,
-            IsGrouped = function()
-                return nil
-            end,
-            IsHorizontalLayout = function()
-                return nil
-            end,
-            GroupFramesOffset = function(_)
-                return nil
-            end,
-            FramesPerLine = function(_)
-                return nil
-            end,
         }
     end
 
@@ -66,24 +48,6 @@ function M:Containers()
             Frame = GladiusExArenaFrame,
             Type = fsFrame.ContainerType.EnemyArena,
             LayoutType = fsFrame.LayoutType.Soft,
-            SupportsSpacing = false,
-
-            -- not applicable
-            FramesOffset = function()
-                return nil
-            end,
-            IsGrouped = function()
-                return nil
-            end,
-            IsHorizontalLayout = function()
-                return nil
-            end,
-            GroupFramesOffset = function(_)
-                return nil
-            end,
-            FramesPerLine = function(_)
-                return nil
-            end,
         }
     end
 
