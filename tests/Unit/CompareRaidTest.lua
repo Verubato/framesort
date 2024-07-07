@@ -1,72 +1,62 @@
-local deps = {
-    "Collections\\Enumerable.lua",
-    "Wow\\Unit.lua",
-    "Configuration\\SortMode.lua",
-    "Collections\\Comparer.lua",
-}
-
-local addon = nil
----@type Comparer
-local fsCompare = nil
----@type Configuration
-local fsConfig = nil
+local config
+local fsCompare
+local fsConfig
 local M = {}
 
+local function GenerateUnits(count, isRaid)
+    isRaid = isRaid or count > 5
+
+    local prefix = isRaid and "raid" or "party"
+    local toGenerate = isRaid and count or count - 1
+    local members = {}
+
+    -- raids don't have the "player" token
+    if not isRaid then
+        table.insert(members, "player")
+    end
+
+    for i = 1, toGenerate do
+        table.insert(members, prefix .. i)
+    end
+
+    return members
+end
+
 function M:setup()
-    addon = {
-        Collections = {},
-        Configuration = {
-            RoleOrdering = {
-                TankHealerDps = 1,
-                HealerTankDps = 2,
-                HealerDpsTank = 3
-            }
-        },
-        Numerics = {},
-        WoW = {
-            Api = {
-                MAX_RAID_MEMBERS = 40,
-                MEMBERS_PER_RAID_GROUP = 5
-            },
-        },
-        Utils = {},
-    }
+    local addonFactory = require("Mock\\AddonFactory")
+    local addon = addonFactory:Create()
 
-    local helper = require("Helper")
-    helper:LoadDependencies(addon, deps)
-
+    config = addon.DB.Options.Sorting.World
     fsCompare = addon.Collections.Comparer
     fsConfig = addon.Configuration
 
+    addon.DB.Options.Sorting.World.Enabled = true
+
     local playerToken = "raid2"
-    local members = helper:GenerateUnits(8)
+    local members = GenerateUnits(8)
+
     addon.WoW.Api.UnitExists = function(unit)
-        return unit == "player" or helper:UnitExists(unit, members)
-    end
-    addon.WoW.Api.IsInGroup = function()
-        return true
+        if unit == "player" then
+            return true
+        end
+
+        for _, x in pairs(members) do
+            if x == unit then
+                return true
+            end
+        end
+
+        return false
     end
     addon.WoW.Api.UnitIsUnit = function(left, right)
         return left == right or (left == playerToken and right == "player")
     end
-    addon.WoW.Api.IsInInstance = function() return false end
-    addon.WoW.Api.IsInRaid = function() return true end
-
-    addon.DB = {
-        Options = {
-            Sorting = {
-                World = {
-                    Enabled = true,
-                }
-            }
-        }
-    }
+    addon.WoW.Api.IsInRaid = function()
+        return true
+    end
 end
 
 function M:test_sort_player_top()
-    assert(addon)
-
-    local config = addon.DB.Options.Sorting.World
     config.PlayerSortMode = fsConfig.PlayerSortMode.Top
     config.GroupSortMode = fsConfig.GroupSortMode.Group
 
@@ -79,9 +69,6 @@ function M:test_sort_player_top()
 end
 
 function M:test_sort_player_bottom()
-    assert(addon)
-
-    local config = addon.DB.Options.Sorting.World
     config.PlayerSortMode = fsConfig.PlayerSortMode.Bottom
     config.GroupSortMode = fsConfig.GroupSortMode.Group
 
@@ -94,9 +81,6 @@ function M:test_sort_player_bottom()
 end
 
 function M:test_sort_player_middle()
-    assert(addon)
-
-    local config = addon.DB.Options.Sorting.World
     config.PlayerSortMode = fsConfig.PlayerSortMode.Middle
     config.GroupSortMode = fsConfig.GroupSortMode.Group
 

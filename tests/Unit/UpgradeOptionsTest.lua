@@ -1,23 +1,11 @@
-local deps = {
-    "WoW\\WoW.lua",
-    "Logging\\Log.lua",
-    "Configuration\\SortingMethod.lua",
-    "Configuration\\SortMode.lua",
-    "Configuration\\Upgrader.lua",
-    "Configuration\\Defaults.lua",
-}
-
-local addon = {
-    Configuration = {},
-    Logging = {},
-    Utils = {},
-    WoW = {}
-}
-local helper = require("Helper")
-helper:LoadDependencies(addon, deps)
-
-local upgrader = addon.Configuration.Upgrader
+local upgrader
 local M = {}
+
+function M:setup()
+    local addonFactory = require("Mock\\AddonFactory")
+    local addon = addonFactory:Create()
+    upgrader = addon.Configuration.Upgrader
+end
 
 function M:test_upgrade_options_version2()
     local options = {
@@ -1687,7 +1675,7 @@ function M:test_upgrade_options_version19()
                     PlayerSortMode = "Top",
                     GroupSortMode = "Group",
                     Reverse = false,
-                }
+                },
             },
             EnemyArena = {
                 Enabled = false,
@@ -1754,7 +1742,7 @@ function M:test_upgrade_options_version20()
                     PlayerSortMode = "Top",
                     GroupSortMode = "Group",
                     Reverse = false,
-                }
+                },
             },
             EnemyArena = {
                 Enabled = false,
@@ -1816,7 +1804,7 @@ function M:test_upgrade_options_version20()
                     PlayerSortMode = "Top",
                     GroupSortMode = "Group",
                     Reverse = false,
-                }
+                },
             },
             EnemyArena = {
                 Enabled = false,
@@ -1894,7 +1882,7 @@ function M:test_upgrade_options_version1_to_latest()
                     PlayerSortMode = "Top",
                     GroupSortMode = "Group",
                     Reverse = false,
-                }
+                },
             },
             EnemyArena = {
                 Enabled = false,

@@ -1,50 +1,55 @@
-local deps = {
-    "Collections\\Enumerable.lua",
-    "WoW\\Unit.lua",
-}
-
-local addon = {}
-local helper = {}
-local fsUnit = {}
+---@type UnitUtil
+local fsUnit
 local M = {}
 
+local function GenerateUnits(count, isRaid)
+    isRaid = isRaid or count > 5
+
+    local prefix = isRaid and "raid" or "party"
+    local toGenerate = isRaid and count or count - 1
+    local members = {}
+
+    -- raids don't have the "player" token
+    if not isRaid then
+        table.insert(members, "player")
+    end
+
+    for i = 1, toGenerate do
+        table.insert(members, prefix .. i)
+    end
+
+    return members
+end
+
+local function UnitExists(unit, members)
+    for _, x in pairs(members) do
+        if x == unit then
+            return true
+        end
+    end
+
+    return false
+end
+
 function M:setup()
-    addon = {
-        Collections = {},
-        WoW = {
-            Api = {
-                MAX_RAID_MEMBERS = 40,
-                MEMBERS_PER_RAID_GROUP = 5
-            }
-        },
-    }
-
-    helper = require("Helper")
-    helper:LoadDependencies(addon, deps)
-
-    addon.WoW.Api.MAX_RAID_MEMBERS = 40
-    addon.WoW.Api.MEMBERS_PER_RAID_GROUP = 5
+    local addonFactory = require("Mock\\AddonFactory")
+    addon = addonFactory:Create()
+    fsUnit = addon.WoW.Unit
 
     addon.WoW.Api.IsInGroup = function()
         return true
     end
-
     addon.WoW.Api.UnitIsUnit = function(x, y)
         return x == y
     end
-
-    fsUnit = addon.WoW.Unit
 end
 
 function M:test_party_full()
-    addon.WoW.Api.IsInRaid = function()
-        return false
-    end
-
     local count = 5
-    local members = helper:GenerateUnits(count)
+    local members = GenerateUnits(count)
+
     addon.WoW.Api.UnitExists = function(x)
-        return helper:UnitExists(x, members)
+        return UnitExists(x, members)
     end
 
     local units = fsUnit:FriendlyUnits()
@@ -63,9 +68,10 @@ function M:test_party3()
     end
 
     local count = 3
-    local members = helper:GenerateUnits(count)
+    local members = GenerateUnits(count)
+
     addon.WoW.Api.UnitExists = function(x)
-        return helper:UnitExists(x, members)
+        return UnitExists(x, members)
     end
 
     local units = fsUnit:FriendlyUnits()
@@ -84,9 +90,10 @@ function M:test_raid_full()
     end
 
     local count = 40
-    local members = helper:GenerateUnits(count, true)
+    local members = GenerateUnits(count, true)
+
     addon.WoW.Api.UnitExists = function(x)
-        return helper:UnitExists(x, members)
+        return UnitExists(x, members)
     end
 
     local units = fsUnit:FriendlyUnits()
@@ -117,9 +124,10 @@ function M:test_raid3()
     end
 
     local count = 3
-    local members = helper:GenerateUnits(count, true)
+    local members = GenerateUnits(count, true)
+
     addon.WoW.Api.UnitExists = function(x)
-        return helper:UnitExists(x, members)
+        return UnitExists(x, members)
     end
 
     local units = fsUnit:FriendlyUnits()

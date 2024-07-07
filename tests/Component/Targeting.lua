@@ -1,76 +1,76 @@
 ---@diagnostic disable: inject-field
-local addon = require("Mock\\Addon")
-local frame = require("Mock\\Frame")
-local wow = addon.WoW.Api
-local provider = addon.Providers.Test
-local fsFrame = addon.WoW.Frame
+local addon
+local wow
 local M = {}
-local restoreFunctions = {}
 
 function M:setup()
+    local addonFactory = require("Mock\\AddonFactory")
+    local providerFactory = require("Mock\\ProviderFactory")
+
+    addon = addonFactory:Create()
+    wow = addon.WoW.Api
+
     addon:InitDB()
     addon.Providers:Init()
     addon.Scheduling.Scheduler:Init()
     addon.Modules:Init()
 
+    local fsFrame = addon.WoW.Frame
+    local provider = providerFactory:Create()
+
+    addon.Providers.Test = provider
+    addon.Providers.All[#addon.Providers.All + 1] = provider
+
     local party = fsFrame:GetContainer(provider, fsFrame.ContainerType.Party)
-    local partyContainer = assert(party).Frame
+    local partyContainer = party.Frame
 
-    assert(partyContainer)
-
-    local player = frame:New("Frame", nil, partyContainer, nil)
+    local frameMock = require("Mock\\Frame")
+    local player = frameMock:New("Frame", nil, partyContainer, nil)
     player.State.Position.Top = 300
     player.unit = "player"
 
-    local p1 = frame:New("Frame", nil, partyContainer, nil)
+    local p1 = frameMock:New("Frame", nil, partyContainer, nil)
     p1.State.Position.Top = 100
     p1.unit = "party1"
 
-    local p2 = frame:New("Frame", nil, partyContainer, nil)
+    local p2 = frameMock:New("Frame", nil, partyContainer, nil)
     p2.State.Position.Top = 200
     p2.unit = "party2"
 
     local arena = fsFrame:GetContainer(provider, fsFrame.ContainerType.EnemyArena)
-    local arenaContainer = assert(arena).Frame
-    assert(arenaContainer)
+    local arenaContainer = arena.Frame
 
     -- enemy arena units aren't retrieved from the frame position
     -- so their position doesn't matter
-    local arena1 = frame:New("Frame", nil, arenaContainer, nil)
+    local arena1 = frameMock:New("Frame", nil, arenaContainer, nil)
     arena1.State.Position.Top = 100
     arena1.unit = "arena1"
 
-    local arena2 = frame:New("Frame", nil, arenaContainer, nil)
+    local arena2 = frameMock:New("Frame", nil, arenaContainer, nil)
     arena2.State.Position.Top = 200
     arena2.unit = "arena2"
 
-    local arena3 = frame:New("Frame", nil, arenaContainer, nil)
+    local arena3 = frameMock:New("Frame", nil, arenaContainer, nil)
     arena3.State.Position.Top = 300
     arena3.unit = "arena3"
 
-    restoreFunctions.GetNumGroupMembers = wow.GetNumGroupMembers
-    restoreFunctions.GetNumArenaOpponentSpecs = wow.GetNumArenaOpponentSpecs
-    restoreFunctions.IsInGroup = wow.IsInGroup
-    restoreFunctions.IsInInstance = wow.IsInGroup
-
-    wow.GetNumGroupMembers = function() return 3 end
-    wow.GetNumArenaOpponentSpecs = function() return 3 end
-    wow.IsInGroup = function() return true end
-    wow.IsInInstance = function() return true, "arena" end
+    wow.GetNumGroupMembers = function()
+        return 3
+    end
+    wow.GetNumArenaOpponentSpecs = function()
+        return 3
+    end
+    wow.IsInGroup = function()
+        return true
+    end
+    wow.IsInInstance = function()
+        return true, "arena"
+    end
 
     local config = addon.DB.Options.Sorting.EnemyArena
     config.Enabled = true
     config.Reverse = true
     config.GroupSortMode = "Group"
-end
-
-function M:teardown()
-    addon:Reset()
-
-    wow.GetNumGroupMembers = restoreFunctions.GetNumGroupMembers
-    wow.GetNumArenaOpponentSpecs = restoreFunctions.GetNumArenaOpponentSpecs
-    wow.IsInGroup = restoreFunctions.IsInGroup
-    wow.IsInInstance = restoreFunctions.IsInGroup
 end
 
 function M:test_targets_update_on_provider_callback()

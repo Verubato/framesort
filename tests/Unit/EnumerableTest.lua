@@ -1,16 +1,20 @@
-local deps = {
-    "Collections\\Enumerable.lua",
-}
-
-local addon = {
-    Utils = {},
-    Collections = {},
-}
-local helper = require("Helper")
-helper:LoadDependencies(addon, deps)
-
-local fsEnumerable = addon.Collections.Enumerable
+---@type Enumerable
+local fsEnumerable
 local M = {}
+
+function M:setup()
+    local addon = {
+        Utils = {},
+        Collections = {},
+    }
+
+    local module = loadfile("..\\src\\Collections\\Enumerable.lua")
+    assert(module)
+
+    module("UnitTest", addon)
+
+    fsEnumerable = addon.Collections.Enumerable
+end
 
 function M:test_new_instance()
     local table = { 1, 2, 3 }
@@ -135,7 +139,7 @@ function M:test_any()
 end
 
 function M:test_all()
-    assertEquals(fsEnumerable:From({}):All(), false)
+    assertEquals(fsEnumerable:From({}):All(function() return true end), false)
     assertEquals(
         fsEnumerable:From({ 1, 3, 5 }):All(function(x)
             return x % 2 == 1
