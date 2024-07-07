@@ -1,71 +1,51 @@
-local deps = {
-    "Collections\\Enumerable.lua",
-    "Wow\\Unit.lua",
-    "Configuration\\SortMode.lua",
-    "Collections\\Comparer.lua",
-}
-
-local addon = nil
----@type Comparer
-local fsCompare = nil
----@type Configuration
-local fsConfig = nil
+local config
+local fsCompare
+local fsConfig
 local M = {}
 
+local function GenerateUnits(count, isRaid)
+    isRaid = isRaid or count > 5
+
+    local prefix = isRaid and "raid" or "party"
+    local toGenerate = isRaid and count or count - 1
+    local members = {}
+
+    -- raids don't have the "player" token
+    if not isRaid then
+        table.insert(members, "player")
+    end
+
+    for i = 1, toGenerate do
+        table.insert(members, prefix .. i)
+    end
+
+    return members
+end
+
 function M:setup()
-    addon = {
-        Collections = {},
-        Configuration = {
-            RoleOrdering = {
-                TankHealerDps = 1,
-                HealerTankDps = 2,
-                HealerDpsTank = 3
-            }
-        },
-        Numerics = {},
-        WoW = {
-            Api = {
-                MAX_RAID_MEMBERS = 40,
-                MEMBERS_PER_RAID_GROUP = 5
-            },
-        },
-        Utils = {},
-    }
-
-    local helper = require("Helper")
-    helper:LoadDependencies(addon, deps)
-
+    local addonFactory = require("Mock\\AddonFactory")
+    local addon = addonFactory:Create()
+    config = addon.DB.Options.Sorting.World
     fsCompare = addon.Collections.Comparer
     fsConfig = addon.Configuration
 
-    local members = helper:GenerateUnits(5)
-    addon.WoW.Api.UnitExists = function(unit)
-        return helper:UnitExists(unit, members)
-    end
-    addon.WoW.Api.IsInGroup = function()
-        return true
-    end
-    addon.WoW.Api.UnitIsUnit = function(left, right)
-        return left == right
-    end
-    addon.WoW.Api.IsInInstance = function() return false end
-    addon.WoW.Api.IsInRaid = function() return false end
+    addon.DB.Options.Sorting.World.Enabled = true
 
-    addon.DB = {
-        Options = {
-            Sorting = {
-                World = {
-                    Enabled = true,
-                }
-            }
-        }
-    }
+    local members = GenerateUnits(5)
+
+    addon.WoW.Api.UnitExists = function(unit)
+        for _, x in pairs(members) do
+            if x == unit then
+                return true
+            end
+        end
+
+        return false
+    end
+    addon.WoW.Api.IsInGroup = function() return true end
 end
 
 function M:test_sort_player_top()
-    assert(addon)
-
-    local config = addon.DB.Options.Sorting.World
     config.PlayerSortMode = fsConfig.PlayerSortMode.Top
     config.GroupSortMode = fsConfig.GroupSortMode.Group
 
@@ -78,9 +58,6 @@ function M:test_sort_player_top()
 end
 
 function M:test_sort_player_bottom()
-    assert(addon)
-
-    local config = addon.DB.Options.Sorting.World
     config.PlayerSortMode = fsConfig.PlayerSortMode.Bottom
     config.GroupSortMode = fsConfig.GroupSortMode.Group
 
@@ -93,9 +70,6 @@ function M:test_sort_player_bottom()
 end
 
 function M:test_sort_player_middle_size_2()
-    assert(addon)
-
-    local config = addon.DB.Options.Sorting.World
     config.PlayerSortMode = fsConfig.PlayerSortMode.Middle
     config.GroupSortMode = fsConfig.GroupSortMode.Group
 
@@ -108,9 +82,6 @@ function M:test_sort_player_middle_size_2()
 end
 
 function M:test_sort_player_middle_size_3()
-    assert(addon)
-
-    local config = addon.DB.Options.Sorting.World
     config.PlayerSortMode = fsConfig.PlayerSortMode.Middle
     config.GroupSortMode = fsConfig.GroupSortMode.Group
 
@@ -123,9 +94,6 @@ function M:test_sort_player_middle_size_3()
 end
 
 function M:test_sort_player_middle_size_4()
-    assert(addon)
-
-    local config = addon.DB.Options.Sorting.World
     config.PlayerSortMode = fsConfig.PlayerSortMode.Middle
     config.GroupSortMode = fsConfig.GroupSortMode.Group
 
@@ -138,9 +106,6 @@ function M:test_sort_player_middle_size_4()
 end
 
 function M:test_sort_player_middle_size_5()
-    assert(addon)
-
-    local config = addon.DB.Options.Sorting.World
     config.PlayerSortMode = fsConfig.PlayerSortMode.Middle
     config.GroupSortMode = fsConfig.GroupSortMode.Group
 
@@ -153,9 +118,6 @@ function M:test_sort_player_middle_size_5()
 end
 
 function M:test_sort_with_nonexistant_units()
-    assert(addon)
-
-    local config = addon.DB.Options.Sorting.World
     config.PlayerSortMode = fsConfig.PlayerSortMode.Top
     config.GroupSortMode = fsConfig.GroupSortMode.Group
 

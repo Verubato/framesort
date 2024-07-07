@@ -1,57 +1,57 @@
-local addon = require("Mock\\Addon")
-local frame = require("Mock\\Frame")
-local wow = addon.WoW.Api
-local fsFrame = addon.WoW.Frame
-local provider = addon.Providers.Test
+---@type Addon
+local addon
 local M = {}
 local partyUnitsCount = 3
 local raidUnitsCount = 6
 local arenaUnitsCount = 3
-local restoreFunctions = {}
 
 function M:setup()
-    addon:InitDB()
+    local addonFactory = require("Mock\\AddonFactory")
+    local frameMock = require("Mock\\Frame")
+    local providerFactory = require("Mock\\ProviderFactory")
+
+    addon = addonFactory:Create()
     addon.Api:Init()
 
-    assertEquals(provider:Name(), "Test")
+    local fsFrame = addon.WoW.Frame
+    local provider = providerFactory:Create()
+
+    addon.Providers.Test = provider
+    addon.Providers.All[#addon.Providers.All + 1] = provider
 
     local party = fsFrame:GetContainer(provider, fsFrame.ContainerType.Party)
-    local partyContainer = assert(party).Frame
-
-    assert(partyContainer)
+    local partyContainer = party.Frame
 
     for i = 1, partyUnitsCount do
-        local unit = frame:New("Frame", nil, partyContainer, nil)
+        local unit = frameMock:New("Frame", nil, partyContainer, nil)
         unit.unit = "party" .. i
     end
 
     local raid = fsFrame:GetContainer(provider, fsFrame.ContainerType.Raid)
-    local raidContainer = assert(raid).Frame
-
-    assert(raidContainer)
+    local raidContainer = raid.Frame
 
     for i = 1, raidUnitsCount do
-        local unit = frame:New("Frame", nil, raidContainer, nil)
+        local unit = frameMock:New("Frame", nil, raidContainer, nil)
         unit.unit = "raid" .. i
     end
 
     local arena = fsFrame:GetContainer(provider, fsFrame.ContainerType.EnemyArena)
-    local arenaContainer = assert(arena).Frame
-
-    assert(arenaContainer)
+    local arenaContainer = arena.Frame
 
     for i = 1, arenaUnitsCount do
-        local unit = frame:New("Frame", nil, arenaContainer, nil)
+        local unit = frameMock:New("Frame", nil, arenaContainer, nil)
         unit.unit = "arena" .. i
     end
 
-    restoreFunctions.GetNumGroupMembers = wow.GetNumGroupMembers
-    restoreFunctions.GetNumArenaOpponentSpecs = wow.GetNumArenaOpponentSpecs
-    restoreFunctions.IsInInstance = wow.IsInInstance
-
-    wow.GetNumGroupMembers = function() return partyUnitsCount end
-    wow.IsInInstance = function() return true, "arena" end
-    wow.GetNumArenaOpponentSpecs = function() return arenaUnitsCount end
+    addon.WoW.Api.GetNumGroupMembers = function()
+        return partyUnitsCount
+    end
+    addon.WoW.Api.IsInInstance = function()
+        return true, "arena"
+    end
+    addon.WoW.Api.GetNumArenaOpponentSpecs = function()
+        return arenaUnitsCount
+    end
 
     -- disable sorting on config changes
     local config = addon.DB.Options.Sorting
@@ -61,14 +61,6 @@ function M:setup()
     config.Arena.Default.Enabled = false
     config.EnemyArena.Enabled = false
     config.Dungeon.Enabled = false
-end
-
-function M:teardown()
-    wow.GetNumGroupMembers = restoreFunctions.GetNumGroupMembers
-    wow.GetNumArenaOpponentSpecs = restoreFunctions.GetNumArenaOpponentSpecs
-    wow.IsInInstance = restoreFunctions.IsInInstance
-
-    addon:Reset()
 end
 
 function M:test_get_party_frames()

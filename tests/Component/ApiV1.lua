@@ -1,34 +1,38 @@
-local addon = require("Mock\\Addon")
-local frame = require("Mock\\Frame")
-local fsFrame = addon.WoW.Frame
-local provider = addon.Providers.Test
-local realBlizzardProvider = addon.Providers.Blizzard
+---@type Addon
+local addon
 local M = {}
 local partyUnitsCount = 3
 local raidUnitsCount = 6
 
 function M:setup()
+    local addonFactory = require("Mock\\AddonFactory")
+    local providerFactory = require("Mock\\ProviderFactory")
+    local frameMock = require("Mock\\Frame")
+
+    addon = addonFactory:Create()
+
+    local fsFrame = addon.WoW.Frame
+    local provider = providerFactory:Create()
+
+    addon.Providers.Test = provider
+    addon.Providers.All[#addon.Providers.All + 1] = provider
     addon.Providers.Blizzard = provider
-    addon:InitDB()
+
     addon.Api:Init()
 
     local party = fsFrame:GetContainer(provider, fsFrame.ContainerType.Party)
-    local partyContainer = assert(party).Frame
-
-    assert(partyContainer)
+    local partyContainer = party.Frame
 
     for i = 1, partyUnitsCount do
-        local unit = frame:New("Frame", nil, partyContainer, nil)
+        local unit = frameMock:New("Frame", nil, partyContainer, nil)
         unit.unit = "party" .. i
     end
 
     local raid = fsFrame:GetContainer(provider, fsFrame.ContainerType.Raid)
-    local raidContainer = assert(raid).Frame
-
-    assert(raidContainer)
+    local raidContainer = raid.Frame
 
     for i = 1, raidUnitsCount do
-        local unit = frame:New("Frame", nil, raidContainer, nil)
+        local unit = frameMock:New("Frame", nil, raidContainer, nil)
         unit.unit = "raid" .. i
     end
 
@@ -40,11 +44,6 @@ function M:setup()
     config.Arena.Default.Enabled = false
     config.EnemyArena.Enabled = false
     config.Dungeon.Enabled = false
-end
-
-function M:teardown()
-    addon.Providers.Blizzard = realBlizzardProvider
-    addon:Reset()
 end
 
 function M:test_get_party_frames()

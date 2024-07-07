@@ -1,8 +1,9 @@
-local addon = require("Mock\\Addon")
-local frame = require("Mock\\Frame")
-local provider = addon.Providers.Test
-local fsSort = addon.Modules.Sorting
-local fsFrame = addon.WoW.Frame
+---@type Addon
+local addon
+---@type SortingModule
+local fsSort
+---@type FrameUtil
+local fsFrame
 
 local M = {}
 local player = nil
@@ -10,26 +11,31 @@ local p1 = nil
 local p2 = nil
 
 function M:setup()
-    addon:InitDB()
+    local addonFactory = require("Mock\\AddonFactory")
+    local providerFactory = require("Mock\\ProviderFactory")
+    local frameMock = require("Mock\\Frame")
+
+    addon = addonFactory:Create()
+    fsSort = addon.Modules.Sorting
+    fsFrame = addon.WoW.Frame
+
     fsSort:Init()
 
+    local provider = providerFactory:Create()
+    addon.Providers.Test = provider
+    addon.Providers.All[#addon.Providers.All + 1] = provider
+
     local party = fsFrame:GetContainer(provider, fsFrame.ContainerType.Party)
-    local partyContainer = assert(party).Frame
+    local partyContainer = party.Frame
 
-    assert(partyContainer ~= nil)
-
-    p2 = frame:New("Frame", nil, partyContainer)
+    p2 = frameMock:New("Frame", nil, partyContainer)
     p2.unit = "party2"
 
-    player = frame:New("Frame", nil, partyContainer)
+    player = frameMock:New("Frame", nil, partyContainer)
     player.unit = "player"
 
-    p1 = frame:New("Frame", nil, partyContainer)
+    p1 = frameMock:New("Frame", nil, partyContainer)
     p1.unit = "party1"
-end
-
-function M:teardown()
-    addon:Reset()
 end
 
 function M:test_sort_party_frames_top()
@@ -41,10 +47,9 @@ function M:test_sort_party_frames_top()
     local width = 100
     local height = 100
 
-    local party = fsFrame:GetContainer(provider, fsFrame.ContainerType.Party)
+    local party = fsFrame:GetContainer(addon.Providers.Test, fsFrame.ContainerType.Party)
     local partyContainer = assert(party).Frame
 
-    assert(partyContainer)
     assert(player)
     assert(p1)
     assert(p2)

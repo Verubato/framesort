@@ -1,30 +1,13 @@
----@diagnostic disable: inject-field
-local deps = {
-    "Collections\\Enumerable.lua",
-    "WoW\\Unit.lua",
-    "Modules\\Macro\\Parser.lua",
-}
-
-local addon = {
-    Collections = {},
-    Modules = {
-        Macro = {}
-    },
-    WoW = {
-        Api = require("Mock\\WoW"),
-    },
-}
-
-local helper = require("Helper")
-helper:LoadDependencies(addon, deps)
-
-local fsMacro = addon.Modules.Macro.Parser
+---@type Addon
+local addon
+---@type MacroParser
+local fsMacro
 local M = {}
 
 function M:setup()
-    addon.WoW.Api.IsInGroup = function()
-        return true
-    end
+    local addonFactory = require("Mock\\AddonFactory")
+    addon = addonFactory:Create()
+    fsMacro = addon.Modules.Macro.Parser
 end
 
 function M:test_is_framesort_macro()
@@ -118,7 +101,7 @@ function M:test_separators()
         /cast [@party2][@party4][@party1][@party2][@player] Spell
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 
     macroText = [[
         #showtooltip
@@ -131,7 +114,7 @@ function M:test_separators()
         /cast [@party2][@party4][@party1][@party2][@player] Spell
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 
     macroText = [[
         #showtooltip
@@ -144,7 +127,7 @@ function M:test_separators()
         /cast [@party2][@party4][@party1][@party2][@player] Spell
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_one_selector()
@@ -169,7 +152,7 @@ function M:test_one_selector()
         /cast [@party1,exists][mod:shift,@focus][@mouseover,harm][] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_frame_123456()
@@ -185,7 +168,7 @@ function M:test_frame_123456()
         /cast [mod:ctrl,@party2][mod:shift,@party1][nomod,@player][something,@raid17][test,@raid4][@asdf1] Spell
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_frame_123456_abbreviated()
@@ -201,7 +184,7 @@ function M:test_frame_123456_abbreviated()
         /cast [mod:ctrl,@party2][mod:shift,@party1][nomod,@player][something,@raid17][test,@raid4][@asdf1] Spell
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_frame_123456_pet()
@@ -217,7 +200,7 @@ function M:test_frame_123456_pet()
         /cast [mod:ctrl,@partypet2][mod:shift,@partypet1][nomod,@pet][something,@raidpet17][test,@raidpet4][@asdfpet1] Spell
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_frame_123456_pet_abbreviated()
@@ -233,7 +216,7 @@ function M:test_frame_123456_pet_abbreviated()
         /cast [mod:ctrl,@partypet2][mod:shift,@partypet1][nomod,@pet][something,@raidpet17][test,@raidpet4][@asdfpet1] Spell
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_enemy_frame_123456()
@@ -314,7 +297,7 @@ function M:test_player()
         /cast [@player] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_tank()
@@ -335,7 +318,7 @@ function M:test_tank()
         /cast [@party3] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_tank_abbreviated()
@@ -356,7 +339,7 @@ function M:test_tank_abbreviated()
         /cast [@party3] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_healer()
@@ -377,7 +360,7 @@ function M:test_healer()
         /cast [@party1] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_healer_abbreviated()
@@ -398,7 +381,7 @@ function M:test_healer_abbreviated()
         /cast [@party1] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_dps()
@@ -423,7 +406,7 @@ function M:test_dps()
         /cast [@party4] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_dps_abbreviated()
@@ -448,7 +431,7 @@ function M:test_dps_abbreviated()
         /cast [@party4] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_other_dps()
@@ -473,7 +456,7 @@ function M:test_other_dps()
         /cast [@party2] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_other_dps_abbreviated()
@@ -498,7 +481,7 @@ function M:test_other_dps_abbreviated()
         /cast [@party2] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_target()
@@ -523,7 +506,7 @@ function M:test_target()
         /cast [@party1,exists][@Target] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_focus()
@@ -548,7 +531,7 @@ function M:test_focus()
         /cast [mod:shift,@Focus][@Target] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_tank_n()
@@ -569,7 +552,7 @@ function M:test_tank_n()
         /cast [@player] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 
     macroText = [[
         #showtooltip
@@ -582,7 +565,7 @@ function M:test_tank_n()
         /cast [@player] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 
     macroText = [[
         #showtooltip
@@ -595,7 +578,7 @@ function M:test_tank_n()
         /cast [@party1] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 
     macroText = [[
         #showtooltip
@@ -606,9 +589,17 @@ function M:test_tank_n()
         #showtooltip
         #framesort Tank5
         /cast [@party4] Spell;
-    ]]
+    ]]function M:UnitExists(unit, members)
+    for _, x in pairs(members) do
+        if x == unit then
+            return true
+        end
+    end
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    return false
+end
+
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_tank_n_abbreviated()
@@ -629,7 +620,7 @@ function M:test_tank_n_abbreviated()
         /cast [@player] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 
     macroText = [[
         #showtooltip
@@ -642,7 +633,7 @@ function M:test_tank_n_abbreviated()
         /cast [@player] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 
     macroText = [[
         #showtooltip
@@ -655,7 +646,7 @@ function M:test_tank_n_abbreviated()
         /cast [@party1] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 
     macroText = [[
         #showtooltip
@@ -668,7 +659,7 @@ function M:test_tank_n_abbreviated()
         /cast [@party4] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_healer_n()
@@ -689,7 +680,7 @@ function M:test_healer_n()
         /cast [@player,exists][@party2,exists][@party1,exists] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_healer_n_abbreviated()
@@ -710,7 +701,7 @@ function M:test_healer_n_abbreviated()
         /cast [@player,exists][@party2,exists][@party1,exists] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_role_dps()
@@ -731,7 +722,7 @@ function M:test_role_dps()
         /cast [@player] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 
     macroText = [[
         #showtooltip
@@ -744,7 +735,7 @@ function M:test_role_dps()
         /cast [@party2] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_role_dps_abbreviated()
@@ -765,7 +756,7 @@ function M:test_role_dps_abbreviated()
         /cast [@player] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 
     macroText = [[
         #showtooltip
@@ -778,7 +769,7 @@ function M:test_role_dps_abbreviated()
         /cast [@party2] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_role_multi_n()
@@ -806,7 +797,7 @@ function M:test_role_multi_n()
         /cast [@party2] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_target_of()
@@ -834,7 +825,7 @@ function M:test_target_of()
         /cast [@party1target] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 
     macroText = [[
         #showtooltip
@@ -847,7 +838,7 @@ function M:test_target_of()
         /cast [@party3target] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 
     macroText = [[
         #showtooltip
@@ -860,7 +851,7 @@ function M:test_target_of()
         /cast [@playertarget] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 
     macroText = [[
         #showtooltip
@@ -873,7 +864,7 @@ function M:test_target_of()
         /cast [@Target] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_target_of_abbreviated()
@@ -901,7 +892,7 @@ function M:test_target_of_abbreviated()
         /cast [@party1target] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 
     macroText = [[
         #showtooltip
@@ -914,7 +905,7 @@ function M:test_target_of_abbreviated()
         /cast [@party3target] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 
     macroText = [[
         #showtooltip
@@ -927,7 +918,7 @@ function M:test_target_of_abbreviated()
         /cast [@playertarget] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_specific()
@@ -944,7 +935,7 @@ function M:test_specific()
         /cast [mod:ctrl,@arena1][mod:shift,@arena2][@arena3] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 
     macroText = [[
         #showtooltip
@@ -957,14 +948,14 @@ function M:test_specific()
         /cast [mod:ctrl,@playername][mod:shift,@party1][@nochange] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_arena_3v3()
     local units = { "arena1", "arena2", "arena3" }
 
     addon.WoW.Api.GetArenaOpponentSpec = function(i)
-        return i
+        return i, 0
     end
     addon.WoW.Api.GetNumArenaOpponentSpecs = function()
         return 3
@@ -977,7 +968,7 @@ function M:test_arena_3v3()
             role = "DAMAGER"
         end
 
-        return nil, nil, nil, nil, role, nil, nil
+        return 0, "", "", 0, role, "", ""
     end
 
     local macroText = [[
@@ -998,7 +989,7 @@ function M:test_arena_3v3_abbreviated()
     local units = { "arena1", "arena2", "arena3" }
 
     addon.WoW.Api.GetArenaOpponentSpec = function(i)
-        return i
+        return i, 0
     end
     addon.WoW.Api.GetNumArenaOpponentSpecs = function()
         return 3
@@ -1011,7 +1002,7 @@ function M:test_arena_3v3_abbreviated()
             role = "DAMAGER"
         end
 
-        return nil, nil, nil, nil, role, nil, nil
+        return 0, "", "", 0, role, "", ""
     end
 
     local macroText = [[
@@ -1028,12 +1019,11 @@ function M:test_arena_3v3_abbreviated()
     assertEquals(fsMacro:GetNewBody(macroText, {}, units), expected)
 end
 
-
 function M:test_arena_3v3_order()
     local units = { "arena3", "arena2", "arena1" }
 
     addon.WoW.Api.GetArenaOpponentSpec = function(i)
-        return i
+        return i, 0
     end
     addon.WoW.Api.GetNumArenaOpponentSpecs = function()
         return 3
@@ -1046,7 +1036,7 @@ function M:test_arena_3v3_order()
             role = "DAMAGER"
         end
 
-        return nil, nil, nil, nil, role, nil, nil
+        return 0, "", "", 0, role, "", ""
     end
 
     local macroText = [[
@@ -1071,7 +1061,7 @@ function M:test_arena_5v5()
         return 5
     end
     addon.WoW.Api.GetArenaOpponentSpec = function(i)
-        return i
+        return i, 0
     end
     addon.WoW.Api.GetSpecializationInfoByID = function(i)
         local role = ""
@@ -1083,7 +1073,7 @@ function M:test_arena_5v5()
             role = "DAMAGER"
         end
 
-        return nil, nil, nil, nil, role, nil, nil
+        return 0, "", "", 0, role, "", ""
     end
 
     local macroText = [[
@@ -1118,7 +1108,7 @@ function M:test_multiline()
         /cast [@party2,exists] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 
     macroText = [[
         #showtooltip
@@ -1145,7 +1135,7 @@ function M:test_multiline()
         /cast [@party2,exists] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_long_syntax()
@@ -1166,7 +1156,7 @@ function M:test_long_syntax()
         /cast [target=party2,exists] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_syntax_combination()
@@ -1187,7 +1177,7 @@ function M:test_syntax_combination()
         /cast [target=party2,exists] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 
     macroText = [[
         #showtooltip
@@ -1200,7 +1190,7 @@ function M:test_syntax_combination()
         /cast [target=player, @party1, @party2, target=@player] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_skip_selector()
@@ -1217,7 +1207,7 @@ function M:test_skip_selector()
         /cast [@mouseover,exists][mod:shift,@focus][mod:ctrl,@party1][@target][] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 
     macroText = [[
         #showtooltip
@@ -1230,7 +1220,7 @@ function M:test_skip_selector()
         /cast [@mouseover,exists][mod:shift,@focus][mod:ctrl,@party1][@target][] Spell;
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 function M:test_short_header()
@@ -1247,7 +1237,7 @@ function M:test_short_header()
         /cast [@mouseover,exists][@party1] Spell
     ]]
 
-    assertEquals(fsMacro:GetNewBody(macroText, units), expected)
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
 return M
