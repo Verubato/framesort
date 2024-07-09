@@ -3,6 +3,7 @@ local luaunit = require("luaunit")
 -- unit tests
 TestPartyMembers = require("Unit\\ComparePartyTest")
 TestRaidMembers = require("Unit\\CompareRaidTest")
+TestArenaMembers = require("Unit\\CompareArenaTest")
 TestUnitGetUnits = require("Unit\\GetUnitsTest")
 TestUnitMacro = require("Unit\\MacroTest")
 TestUnitOptionsUpgrader = require("Unit\\UpgradeOptionsTest")

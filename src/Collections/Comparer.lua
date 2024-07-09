@@ -14,6 +14,58 @@ local roleOrdering = {
     -- healer > dps > tank
     [fsConfig.RoleOrdering.HealerDpsTank] = { HEALER = 1, DAMAGER = 2, TANK = 3, NONE = 4 },
 }
+local specOrdering = {
+    -- healers
+    65, -- hpal
+    105, -- rdruid
+    256, -- disc priest
+    257, -- holy priest
+    264, -- resto shaman
+    270, -- mistweaver
+    1468, -- preservation
+
+    -- ranged
+    62, -- arcane mage
+    63, -- fire mage
+    64, -- frost mage
+    102, -- boomkin
+    254, -- mm hunter
+    255, -- survival hunter
+    258, -- shadow priest
+    262, -- ele sham
+    265, -- affi lock
+    266, -- demo lock
+    267, -- destro lock
+    1467, -- devastation
+    1473, -- aug voker
+
+    -- melee
+    66, -- prot pally
+    70, -- ret pally
+    71, -- arms warr
+    72, -- fury warr
+    73, -- prot warrior
+    103, -- feral
+    104, -- guardian druid
+    250, -- blood dk
+    251, -- frost dk
+    252, -- unholy dk
+    253, -- bm hunter
+    259, -- assa rogue
+    260, -- outlaw rogue
+    261, -- sub rogue
+    263, -- enhance shaman
+    268, -- brewmaster
+    269, -- ww monk
+    577, -- havoc dh
+    581, -- vengeance
+}
+local specLookup = fsEnumerable:From(specOrdering):ToLookup(function(item, _)
+    return item
+end, function(_, index)
+    return index
+end)
+
 ---@class Comparer
 local M = {}
 addon.Collections.Comparer = M
@@ -69,6 +121,7 @@ end
 
 local function CompareRole(leftToken, rightToken, isArena)
     local leftRole, rightRole = nil, nil
+    local leftSpec, rightSpec = nil, nil
 
     if isArena then
         local leftId = tonumber(string.match(leftToken, "%d+"))
@@ -78,16 +131,31 @@ local function CompareRole(leftToken, rightToken, isArena)
             return leftToken < rightToken
         end
 
-        local leftSpecId = wow.GetArenaOpponentSpec(leftId)
-        local rightSpecId = wow.GetArenaOpponentSpec(rightId)
+        leftSpec = wow.GetArenaOpponentSpec(leftId)
+        rightSpec = wow.GetArenaOpponentSpec(rightId)
 
-        if leftSpecId and rightSpecId then
-            leftRole = select(5, wow.GetSpecializationInfoByID(leftSpecId))
-            rightRole = select(5, wow.GetSpecializationInfoByID(rightSpecId))
+        if not leftSpec or not rightSpec then
+            return leftToken < rightToken
         end
+
+        leftRole = select(5, wow.GetSpecializationInfoByID(leftSpec))
+        rightRole = select(5, wow.GetSpecializationInfoByID(rightSpec))
     else
-        leftRole = wow.UnitGroupRolesAssigned(leftToken)
-        rightRole = wow.UnitGroupRolesAssigned(rightToken)
+        if wow.GetInspectSpecialization and wow.GetSpecialization then
+            -- if by chance we have cached spec data locally then use it
+            -- normally this requires performing an inspect and waiting for the results which is way too slow to be usable
+            -- but in retail sometimes the data is available immediately
+            leftSpec = wow.UnitIsUnit(leftToken, "player") and wow.GetSpecialization() or wow.GetInspectSpecialization(leftToken)
+            rightSpec = wow.UnitIsUnit(rightToken, "player") and wow.GetSpecialization() or wow.GetInspectSpecialization(rightToken)
+        end
+
+        if leftSpec and rightSpec and leftSpec > 0 and rightSpec > 0 then
+            leftRole = select(5, wow.GetSpecializationInfoByID(leftSpec))
+            rightRole = select(5, wow.GetSpecializationInfoByID(rightSpec))
+        else
+            leftRole = wow.UnitGroupRolesAssigned(leftToken)
+            rightRole = wow.UnitGroupRolesAssigned(rightToken)
+        end
     end
 
     if not leftRole or not rightRole then
@@ -99,6 +167,15 @@ local function CompareRole(leftToken, rightToken, isArena)
 
     if leftValue ~= rightValue then
         return leftValue < rightValue
+    end
+
+    if leftSpec and leftSpec > 0 and rightSpec and rightSpec > 0 then
+        local leftSpecOrder = specLookup[leftSpec]
+        local rightSpecOrder = specLookup[rightSpec]
+
+        if leftSpecOrder and rightSpecOrder then
+            return leftSpecOrder < rightSpecOrder
+        end
     end
 
     return leftToken < rightToken

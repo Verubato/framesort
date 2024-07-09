@@ -1,5 +1,7 @@
 local config
+---@type Comparer
 local fsCompare
+---@type Configuration
 local fsConfig
 local M = {}
 
