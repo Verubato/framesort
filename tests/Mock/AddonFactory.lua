@@ -1,5 +1,6 @@
 local wowFactory = require("Mock\\WowFactory")
 local addonName = "Test"
+local moduleCache = {}
 
 local function DependenciesFromXml()
     local xmlFilePath = "..\\src\\Load.xml"
@@ -18,7 +19,11 @@ end
 
 local function LoadDependencies(addonTable, dependencies)
     for _, fileName in ipairs(dependencies) do
-        local module = loadfile("..\\src\\" .. fileName)
+        local path = "..\\src\\" .. fileName
+        local module = moduleCache[path] or loadfile(path)
+
+        moduleCache[path] = module
+
         assert(module ~= nil, "Failed to load " .. fileName)
 
         module(addonName, addonTable)
