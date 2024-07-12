@@ -24,13 +24,11 @@ local specOrdering = {
     270, -- mistweaver
     1468, -- preservation
 
-    -- ranged
+    -- casters
     62, -- arcane mage
     63, -- fire mage
     64, -- frost mage
     102, -- boomkin
-    254, -- mm hunter
-    255, -- survival hunter
     258, -- shadow priest
     262, -- ele sham
     265, -- affi lock
@@ -38,6 +36,11 @@ local specOrdering = {
     267, -- destro lock
     1467, -- devastation
     1473, -- aug voker
+
+    -- hunters
+    253, -- bm hunter
+    254, -- mm hunter
+    255, -- survival hunter
 
     -- melee
     66, -- prot pally
@@ -50,7 +53,6 @@ local specOrdering = {
     250, -- blood dk
     251, -- frost dk
     252, -- unholy dk
-    253, -- bm hunter
     259, -- assa rogue
     260, -- outlaw rogue
     261, -- sub rogue
