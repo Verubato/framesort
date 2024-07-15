@@ -235,9 +235,35 @@ function M:Containers()
             end
 
             local horizontal = raid:IsHorizontalLayout()
-            local lineSize = horizontal and wow.CompactRaidFrameContainer:GetWidth() or wow.CompactRaidFrameContainer:GetHeight()
-            local frameSize = nil
+            local lineSize = nil
 
+            if wow.IsRetail() then
+                lineSize = horizontal and wow.CompactRaidFrameContainer:GetWidth() or wow.CompactRaidFrameContainer:GetHeight()
+            else
+                -- cata has an annoying taint issue that we have to workaround
+                -- where calling GetWidth() or GetHeight() on CompactRaidFrameContainer taints raid frames
+                -- see https://github.com/Stanzilla/WoWUIBugs/issues/596 and https://github.com/Verubato/framesort/issues/38
+                local taintWorkaround = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureHandlerStateTemplate")
+
+                function taintWorkaround:Configure(width, height)
+                    lineSize = horizontal and width or height
+                end
+
+                wow.SecureHandlerSetFrameRef(taintWorkaround, "Target", wow.CompactRaidFrameContainer)
+                wow.SecureHandlerExecute(
+                    taintWorkaround,
+                    [[
+                        local run = control or self
+                        local target = self:GetFrameRef("Target")
+                        local width = target:GetWidth()
+                        local height = target:GetHeight()
+
+                        run:CallMethod("Configure", width, height)
+                    ]]
+                )
+            end
+
+            local frameSize = nil
             local o = DefaultCompactUnitFrameSetupOptions
             local f1 = CompactRaidFrame1
 
