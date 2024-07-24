@@ -1,4 +1,4 @@
-## Interface: 110002, 100207
+## Interface: 110002, 110000, 100207
 ## Title: FrameSort
 ## Notes: Places the player frame at the top/middle/bottom (configurable) of party/raid frames.
 ## Author: Verz
