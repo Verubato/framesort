@@ -289,20 +289,5 @@ function M:Containers()
         containers[#containers + 1] = raid
     end
 
-    if wow.CompactArenaFrame then
-        containers[#containers + 1] = {
-            Frame = wow.CompactArenaFrame,
-            Type = fsFrame.ContainerType.EnemyArena,
-            LayoutType = fsFrame.LayoutType.Hard,
-            VisibleOnly = true,
-            SupportsSpacing = true,
-            InCombatSortingRequired = true,
-            FramesOffset = function()
-                return GetOffset(wow.CompactArenaFrame)
-            end,
-            AnchorPoint = "TOPRIGHT",
-        }
-    end
-
     return containers
 end

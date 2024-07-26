@@ -187,9 +187,5 @@ function M:Build(parent)
     local title = wow.IsRetail() and "Raid" or "Group"
     anchor = BuildSpacingOptions(panel, anchor, title, config.Raid, true, true, verticalSpacing)
 
-    if wow.IsRetail() and wow.CompactArenaFrame then
-        anchor = BuildSpacingOptions(panel, anchor, "Enemy Arena", config.EnemyArena, false, true, verticalSpacing)
-    end
-
     return panel
 end

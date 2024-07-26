@@ -16,7 +16,12 @@ function M:Build(parent)
     title:SetText("Addons")
 
     local lines = {
-        "In addition to Blizzard frames, FrameSort also supports the following addons:",
+        "FrameSort supports the following:",
+        "",
+        "Blizzard",
+        " - Party: yes",
+        " - Raid: yes",
+        " - Arena: broken (will fix it eventually)",
         "",
         "ElvUI",
         " - Party: yes",
@@ -26,8 +31,7 @@ function M:Build(parent)
         "sArena",
         " - Arena: yes",
         "",
-        "Gladius *NEW*",
-        " - May not work 100%, needs testing.",
+        "Gladius",
         " - Arena: yes",
         " - Bicmex version: yes",
         "",
