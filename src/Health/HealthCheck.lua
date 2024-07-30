@@ -23,7 +23,8 @@ end
 
 local function IsSafeAddon(name)
     return name == addonName
-        -- wotlk uses a backport addon for raid frames
+        -- wotlk uses a backport addon for raid frames
+
         or name == "CompactRaidFrame"
 end
 
@@ -178,6 +179,26 @@ local function IsMainTankAssistEnabled()
     return wow.GetCVarBool("raidOptionDisplayMainTankAndAssist")
 end
 
+local function CheckCell()
+    local passed = false
+    local applicable = false
+
+    if Cell and CellDB and CellDB.layouts then
+        local selectedLayout = Cell.vars.currentLayout or "default"
+
+        applicable = true
+        -- when using combined layout, the group filter will show all groups
+        passed = CellDB.layouts[selectedLayout].main.combineGroups
+    end
+
+    return {
+        Applicable = applicable,
+        Passed = passed,
+        Description = "Using grouped layout for Cell raid frames",
+        Help = "Please check the 'Combined Groups (Raid)' option in Cell -> Layouts",
+    }
+end
+
 ---Returns true if the environment/settings is in a good state, otherwise false.
 ---@return boolean healthy,HealthCheckResult[] results
 function M:IsHealthy()
@@ -259,6 +280,8 @@ function M:IsHealthy()
         Description = "Main tank and assist setting disabled",
         Help = "Please disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames",
     }
+
+    results[#results + 1] = CheckCell()
 
     return fsEnumerable:From(results):All(function(x)
         return not x.Applicable or x.Passed
