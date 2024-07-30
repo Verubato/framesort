@@ -21,7 +21,7 @@ function M:Build(parent)
         "Blizzard",
         " - Party: yes",
         " - Raid: yes",
-        " - Arena: broken (will fix it eventually)",
+        " - Arena: broken (will fix it eventually).",
         "",
         "ElvUI",
         " - Party: yes",
@@ -38,6 +38,10 @@ function M:Build(parent)
         "GladiusEx",
         " - Party: yes",
         " - Arena: yes",
+        "",
+        "Cell *new*",
+        " - Party: yes",
+        " - Raid: yes, only when using combined groups.",
     }
 
     local anchor = title
