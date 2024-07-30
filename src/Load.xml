@@ -31,6 +31,7 @@
     <Script file="Providers\GladiusEx.lua"/>
     <Script file="Providers\Gladius.lua"/>
     <Script file="Providers\ElvUI.lua"/>
+    <Script file="Providers\Cell.lua"/>
 
     <!-- Health check requires frame providers -->
     <Script file="Health\HealthCheck.lua"/>

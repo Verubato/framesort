@@ -12,5 +12,6 @@
 ---@field sArena FrameProvider
 ---@field GladiusEx FrameProvider
 ---@field ElvUI FrameProvider
+---@field Cell FrameProvider
 ---@field All FrameProvider[]
 ---@field Enabled fun(self: table): FrameProvider[]

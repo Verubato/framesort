@@ -14,7 +14,11 @@
         "CUF_CVar",
         "DefaultCompactUnitFrameSetupOptions",
         "CompactRaidFrame1",
-        "CompactRaidFrameContainer_OnSizeChanged"
+        "CompactRaidFrameContainer_OnSizeChanged",
+        "Cell",
+        "CellPartyFrameHeader",
+        "CellRaidFrameHeader0",
+        "CellDB",
     ],
     "diagnostics.disable": [
         "inject-field"
