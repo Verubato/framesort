@@ -6,6 +6,7 @@ local fsScheduler = addon.Scheduling.Scheduler
 local wow = addon.WoW.Api
 local minSpacing = 0
 local maxSpacing = 100
+local systemChange = false
 local M = {}
 fsConfig.Panels.Spacing = M
 
@@ -40,6 +41,25 @@ local function ApplySpacing()
     end, "ApplySpacingConfig")
 end
 
+local function SetValue(auto, slider, box)
+    local value = tonumber(auto)
+
+    if not value or value < minSpacing or value > maxSpacing then
+        box:SetFontObject("GameFontRed")
+        return nil
+    end
+
+    local text = tostring(value)
+    box:SetFontObject("GameFontWhite")
+
+    systemChange = true
+    box:SetText(text)
+    slider:SetValue(value)
+    systemChange = false
+
+    return value
+end
+
 local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, addY, additionalTopSpacing)
     local verticalSpacing = fsConfig.VerticalSpacing
     local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
@@ -47,25 +67,6 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
     title:SetText(name)
 
     local anchor = title
-    local systemChange = false
-    local setValue = function(auto, slider, box)
-        local value = tonumber(auto)
-
-        if not value or value < minSpacing or value > maxSpacing then
-            box:SetFontObject("GameFontRed")
-            return nil
-        end
-
-        local text = tostring(value)
-        box:SetFontObject("GameFontWhite")
-
-        systemChange = true
-        box:SetText(text)
-        slider:SetValue(value)
-        systemChange = false
-
-        return value
-    end
 
     if addX then
         local label = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
@@ -80,6 +81,8 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
         box:SetPoint("CENTER", slider, "CENTER", 0, 30)
         ConfigureEditBox(box, spacing.Horizontal)
 
+        slider.EditBox = box
+
         slider:SetScript("OnValueChanged", function(_, sliderValue, userInput)
             if systemChange or (userInput ~= nil and not userInput) then
                 -- wotlk private doesn't have the userInput flag for sliders, but it does for text boxes
@@ -87,7 +90,7 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
                 return
             end
 
-            local value = setValue(sliderValue, slider, box)
+            local value = SetValue(sliderValue, slider, box)
             if value then
                 spacing.Horizontal = value
                 fsConfig:NotifyChanged()
@@ -100,7 +103,7 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
                 return
             end
 
-            local value = setValue(box:GetText(), slider, box)
+            local value = SetValue(box:GetText(), slider, box)
             if value then
                 spacing.Horizontal = value
                 fsConfig:NotifyChanged()
@@ -124,6 +127,8 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
         box:SetPoint("CENTER", slider, "CENTER", 0, 30)
         ConfigureEditBox(box, spacing.Vertical)
 
+        slider.EditBox = box
+
         slider:SetScript("OnValueChanged", function(_, sliderValue, userInput)
             if systemChange or (userInput ~= nil and not userInput) then
                 return
@@ -131,7 +136,7 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
 
             box:SetText(tostring(sliderValue))
 
-            local value = setValue(sliderValue, slider, box)
+            local value = SetValue(sliderValue, slider, box)
             if value then
                 spacing.Vertical = value
                 fsConfig:NotifyChanged()
@@ -144,7 +149,7 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
                 return
             end
 
-            local value = setValue(box:GetText(), slider, box)
+            local value = SetValue(box:GetText(), slider, box)
 
             if value then
                 spacing.Vertical = value
@@ -159,11 +164,27 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
     return anchor
 end
 
+local function RefreshValues()
+    local spacing = addon.DB.Options.Spacing
+    local partyX = _G["sldPartyXSpacing"]
+    local partyY = _G["sldPartyYSpacing"]
+    local raidX = _G["sldRaidXSpacing"]
+    local raidY = _G["sldRaidYSpacing"]
+
+    SetValue(spacing.Party.Horizontal, partyX, partyX.EditBox)
+    SetValue(spacing.Party.Vertical, partyY, partyY.EditBox)
+    SetValue(spacing.Raid.Horizontal, raidX, raidX.EditBox)
+    SetValue(spacing.Raid.Vertical, raidY, raidY.EditBox)
+end
+
 function M:Build(parent)
     local verticalSpacing = fsConfig.VerticalSpacing
     local panel = wow.CreateFrame("Frame", nil, parent)
     panel.name = "Spacing"
     panel.parent = parent.name
+
+    panel:HookScript("OnShow", RefreshValues)
+    fsConfig:RegisterConfigurationChangedCallback(RefreshValues)
 
     local spacingTitle = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     spacingTitle:SetPoint("TOPLEFT", panel, verticalSpacing, -verticalSpacing)
@@ -183,7 +204,6 @@ function M:Build(parent)
         -- for retail
         anchor = BuildSpacingOptions(panel, anchor, "Party", config.Party, true, true, 0)
     end
-
     local title = wow.IsRetail() and "Raid" or "Group"
     anchor = BuildSpacingOptions(panel, anchor, title, config.Raid, true, true, verticalSpacing)
 

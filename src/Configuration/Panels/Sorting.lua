@@ -255,7 +255,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         fsModules:Run()
     end)
 
-    parentPanel:HookScript("OnShow", function()
+    local function refresh()
         -- update checkboxes on show, in case the api updated them
         enabled:SetChecked(options.Enabled)
 
@@ -274,7 +274,10 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         end
 
         reverse:SetChecked(options.Reverse)
-    end)
+    end
+
+    parentPanel:HookScript("OnShow", refresh)
+    fsConfig:RegisterConfigurationChangedCallback(refresh)
 
     local controls = {
         playerLabel,
