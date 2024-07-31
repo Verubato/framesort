@@ -223,13 +223,3 @@ function M.Logging:SetEnabled(enable)
     addon.DB.Options.Logging.Enabled = enable
     fsConfig:NotifyChanged()
 end
-
----Exposes the addon table to the public when enabled.
-function M.Debugging:SetEnabled(enable)
-    if enable then
-        FrameSort = addon
-    else
-        ---@diagnostic disable-next-line: assign-type-mismatch
-        FrameSort = nil
-    end
-end
