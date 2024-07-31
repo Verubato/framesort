@@ -97,8 +97,4 @@ function fsConfig:Init()
             wow.InterfaceOptionsFrame_OpenToCategory(panel)
         end
     end
-
-    if #callbacks > 0 then
-        callbacks = {}
-    end
 end

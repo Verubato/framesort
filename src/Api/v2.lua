@@ -76,7 +76,21 @@ local function AreaOptions(area)
         return sorting.World
     end
 
-    error("Invalid area: " .. (area or "nil"))
+    error("Invalid sorting area: " .. (area or "nil"))
+end
+
+local function SpacingAreaOptions(area)
+    local spacing = addon.DB.Options.Spacing
+
+    if area == "EnemyArena" then
+        return spacing.EnemyArena
+    elseif area == "Party" then
+        return spacing.Party
+    elseif area == "Raid" then
+        return spacing.Raid
+    end
+
+    error("Invalid spacing area: " .. (area or "nil"))
 end
 
 ---@param type number
@@ -88,6 +102,12 @@ local function GetFrames(type)
     end
 
     return frames
+end
+
+---Enables/disables logging.
+function M.Logging:SetEnabled(enable)
+    addon.DB.Options.Logging.Enabled = enable
+    fsConfig:NotifyChanged()
 end
 
 ---Register a callback to invoke after sorting has been performed.
@@ -218,8 +238,21 @@ function M.Options:SetReverse(area, reverse)
     fsSort:Run()
 end
 
----Enables/disables logging.
-function M.Logging:SetEnabled(enable)
-    addon.DB.Options.Logging.Enabled = enable
+---Gets the current spacing values.
+---@param area SpacingArea
+function M.Options:GetSpacing(area)
+    return SpacingAreaOptions(area)
+end
+
+---Adds/removes spacing.
+---@param area SpacingArea
+---@param horizontal number
+---@param vertical number
+function M.Options:SetSpacing(area, horizontal, vertical)
+    local options = SpacingAreaOptions(area)
+    options.Horizontal = horizontal
+    options.Vertical = vertical
+
     fsConfig:NotifyChanged()
+    fsSort:Run()
 end
