@@ -39,3 +39,5 @@ end
 loader = wow.CreateFrame("Frame")
 loader:HookScript("OnEvent", OnLoadAddon)
 loader:RegisterEvent("ADDON_LOADED")
+
+FrameSort = addon
