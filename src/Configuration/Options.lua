@@ -37,6 +37,19 @@ function fsConfig:NotifyChanged()
     end
 end
 
+function fsConfig:TextBlock(lines, parent, anchor)
+    local textAnchor = anchor
+
+    for i, line in ipairs(lines) do
+        local description = parent:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+        description:SetPoint("TOPLEFT", textAnchor, "BOTTOMLEFT", 0, i == 1 and -fsConfig.VerticalSpacing or -fsConfig.VerticalSpacing / 2)
+        description:SetText(line)
+        textAnchor = description
+    end
+
+    return textAnchor
+end
+
 function fsConfig:Init()
     local panel = wow.CreateFrame("ScrollFrame", nil, nil, "UIPanelScrollFrameTemplate")
     panel.name = "FrameSort"

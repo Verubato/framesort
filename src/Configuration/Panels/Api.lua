@@ -33,12 +33,7 @@ function M:Build(parent)
         "Here are some examples.",
     }
 
-    for _, line in ipairs(intro) do
-        local subtitle = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-        subtitle:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
-        subtitle:SetText(line)
-        anchor = subtitle
-    end
+    anchor = fsConfig:TextBlock(intro, panel, title)
 
     local examples = {
         {

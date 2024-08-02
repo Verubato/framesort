@@ -12,6 +12,7 @@
 ---@field Upgrader OptionsUpgrader
 ---@field RegisterConfigurationChangedCallback fun(self: table, callback: fun())
 ---@field NotifyChanged fun(self: table)
+---@field TextBlock fun(self: table, lines: string[], parent: table, anchor: table): table anchor
 
 ---@class Panels
 ---@field Sorting OptionsPanel

@@ -45,13 +45,7 @@ function M:Build(parent)
         "Adjusts the position of each individual frame and doesn't bug/lock/taint the UI.",
     }
 
-    local anchor = secure
-    for i, line in ipairs(secureLines) do
-        local description = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-        description:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", i == 1 and 4 or 0, -verticalSpacing / 2)
-        description:SetText(line)
-        anchor = description
-    end
+    local anchor = fsConfig:TextBlock(secureLines, panel, secure)
 
     anchor = BuildDottedList(panel, anchor, "Pros: ", {
         "Can sort frames from other addons.",
@@ -76,18 +70,10 @@ function M:Build(parent)
         'This is the same as the "SetFlowSortFunction" script but with FrameSort configuration.',
     }
 
-    anchor = traditional
-    for i, line in ipairs(traditionalLines) do
-        local description = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-        description:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", i == 1 and 4 or 0, -verticalSpacing / 2)
-        description:SetText(line)
-        anchor = description
-    end
-
+    anchor = fsConfig:TextBlock(traditionalLines, panel, traditional)
     anchor = BuildDottedList(panel, anchor, "Pros: ", {
         "More stable/reliable as it leverages Blizzard's internal sorting methods.",
     })
-
     anchor = BuildDottedList(panel, anchor, "Cons: ", {
         "Only sorts Blizzard party frames, nothing else.",
         "Will cause Lua errors which is normal and can be ignored.",

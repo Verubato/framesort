@@ -15,23 +15,16 @@ function M:Build(parent)
     title:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
     title:SetText("Discord")
 
-    local anchor = title
     local intro = {
         "Need help with something?",
         "Talk directly with the developer on Discord.",
     }
 
-    for _, line in ipairs(intro) do
-        local subtitle = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-        subtitle:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
-        subtitle:SetText(line)
-        anchor = subtitle
-    end
-
+    local anchor = fsConfig:TextBlock(intro, panel, title)
     local link = "https://discord.gg/bF3XkyuU3E"
     local padding = 10
-
     local box = wow.CreateFrame("EditBox", nil, panel)
+
     box:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
     box:SetSize(500, 1)
     box:SetFontObject("GameFontWhite")

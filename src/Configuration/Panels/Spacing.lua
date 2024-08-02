@@ -190,20 +190,19 @@ function M:Build(parent)
     spacingTitle:SetPoint("TOPLEFT", panel, verticalSpacing, -verticalSpacing)
     spacingTitle:SetText("Spacing")
 
-    local descriptionLine1 = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-    descriptionLine1:SetPoint("TOPLEFT", spacingTitle, "BOTTOMLEFT", 0, -verticalSpacing)
-    descriptionLine1:SetText("Add some spacing between party/raid frames.")
+    local lines = {
+        "Add some spacing between party/raid frames.",
+        "This only applies to Blizzard frames.",
+    }
 
-    local descriptionLine2 = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-    descriptionLine2:SetPoint("TOPLEFT", descriptionLine1, "BOTTOMLEFT", 0, -verticalSpacing)
-    descriptionLine2:SetText("This only applies to Blizzard frames.")
-
-    local anchor = descriptionLine2
+    local anchor = fsConfig:TextBlock(lines, panel, spacingTitle)
     local config = addon.DB.Options.Spacing
+
     if wow.IsRetail() then
         -- for retail
         anchor = BuildSpacingOptions(panel, anchor, "Party", config.Party, true, true, 0)
     end
+
     local title = wow.IsRetail() and "Raid" or "Group"
     anchor = BuildSpacingOptions(panel, anchor, title, config.Raid, true, true, verticalSpacing)
 
