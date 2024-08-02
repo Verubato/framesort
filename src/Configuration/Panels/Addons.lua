@@ -44,13 +44,7 @@ function M:Build(parent)
         " - Raid: yes, only when using combined groups.",
     }
 
-    local anchor = title
-    for i, line in ipairs(lines) do
-        local description = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-        description:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, i == 1 and -verticalSpacing or -verticalSpacing / 2)
-        description:SetText(line)
-        anchor = description
-    end
+    fsConfig:TextBlock(lines, panel, title)
 
     return panel
 end

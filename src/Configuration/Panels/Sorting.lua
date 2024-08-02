@@ -327,7 +327,6 @@ end
 
 function M:Build(panel)
     local anchor = BuiltTitle(panel)
-
     local config = addon.DB.Options.Sorting
 
     if not wow.IsClassic() then

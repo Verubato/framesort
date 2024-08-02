@@ -57,14 +57,7 @@ function M:Build(parent)
         "Below are some examples on how to use this.",
     }
 
-    local anchor = countLine
-    for i, line in ipairs(intro) do
-        local description = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-        description:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, i == 1 and -verticalSpacing or -verticalSpacing / 2)
-        description:SetText(line)
-        anchor = description
-    end
-
+    local anchor = fsConfig:TextBlock(intro, panel, countLine)
     local examples = {
         [[#showtooltip
 #FrameSort Mouseover, Target, Healer
@@ -137,12 +130,7 @@ function M:Build(parent)
     notes[#notes + 1] = " - Add a number to choose the Nth target, e.g., DPS2 selects the 2nd DPS."
     notes[#notes + 1] = " - Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work."
 
-    for i, line in ipairs(notes) do
-        local description = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-        description:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, i == 1 and -verticalSpacing or -verticalSpacing / 2)
-        description:SetText(line)
-        anchor = description
-    end
+    anchor = fsConfig:TextBlock(notes, panel, anchor)
 
     local abbreviations = {
         "Need to save on macro characters? Use abbreviations to shorten them:",
@@ -162,12 +150,7 @@ function M:Build(parent)
         abbreviations[#abbreviations + 1] = " - ET, EH, DP = EnemyTank, EnemyHealer, EnemyDPS."
     end
 
-    for i, line in ipairs(abbreviations) do
-        local description = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-        description:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, i == 1 and -verticalSpacing or -verticalSpacing / 2)
-        description:SetText(line)
-        anchor = description
-    end
+    anchor = fsConfig:TextBlock(abbreviations, panel, anchor)
 
     local skipDescription = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
     skipDescription:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)

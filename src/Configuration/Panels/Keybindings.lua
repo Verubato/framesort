@@ -70,13 +70,6 @@ function M:Build(parent)
         "So targeting 'Frame 1' will target the Tank, 'Frame 2' the healer, 'Frame 3' the DPS in spot 3, and so on.",
     }
 
-    local anchor = title
-    for _, line in ipairs(lines) do
-        local description = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-        description:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing / 2)
-        description:SetText(line)
-        anchor = description
-    end
-
+    fsConfig:TextBlock(lines, panel, title)
     return panel
 end

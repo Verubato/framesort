@@ -20,13 +20,7 @@ function M:Build(parent)
         "Why? So healers can configure target marker icons and re-order party1/2 to their preference.",
     }
 
-    local anchor = title
-    for i, line in ipairs(lines) do
-        local text = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-        text:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, i == 1 and -verticalSpacing or -verticalSpacing / 2)
-        text:SetText(line)
-        anchor = text
-    end
+    local anchor = fsConfig:TextBlock(lines, panel, title)
 
     local enabled = wow.CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
     enabled:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", -4, -verticalSpacing)
