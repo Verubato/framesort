@@ -5,13 +5,14 @@ local fsScheduler = addon.Scheduling.Scheduler
 local fsMacroParser = addon.Modules.Macro.Parser
 local fsLog = addon.Logging.Log
 local fsTarget = addon.Modules.Targeting
-local maxMacros = 138
 local isSelfEditingMacro = false
+local eventFrame = nil
 ---@type table<number, boolean>
 local isFsMacroCache = {}
 ---@class MacroModule: IInitialise
 local M = addon.Modules.Macro
-local eventFrame = nil
+-- wow has 150 macro slots according to https://warcraft.wiki.gg/wiki/API_GetMacroInfo
+M.MaxMacros = 150
 
 ---@return boolean updated, boolean isFrameSortMacro, number newId
 local function Rewrite(id, friendlyUnits, enemyUnits)
@@ -65,7 +66,7 @@ local function ScanMacros()
     local enemyUnits = fsTarget:EnemyUnits()
     local updatedCount = 0
 
-    for id = 1, maxMacros do
+    for id = 1, M.MaxMacros do
         local updated = UpdateMacro(id, friendlyUnits, enemyUnits, false)
 
         if updated then
