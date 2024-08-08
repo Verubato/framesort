@@ -3,14 +3,13 @@ local _, addon = ...
 local wow = addon.WoW.Api
 local fsMacro = addon.Modules.Macro.Parser
 local fsConfig = addon.Configuration
-local maxMacros = 138
 local M = {}
 fsConfig.Panels.Macro = M
 
 local function CountMacros()
     local count = 0
 
-    for i = 1, maxMacros do
+    for i = 1, addon.Modules.Macro.MaxMacros do
         local _, _, body = wow.GetMacroInfo(i)
 
         if body and fsMacro:IsFrameSortMacro(body) then
