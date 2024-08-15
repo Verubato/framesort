@@ -4,6 +4,7 @@ local wow = addon.WoW.Api
 local fsHealth = addon.Health.HealthCheck
 local fsConfig = addon.Configuration
 local fsModules = addon.Modules
+local L = addon.Locale
 local verticalSpacing = fsConfig.VerticalSpacing
 local horizontalSpacing = fsConfig.HorizontalSpacing
 local labelWidth = 50
@@ -17,21 +18,20 @@ local function BuiltTitle(panel)
     local version = wow.GetAddOnMetadata("FrameSort", "Version")
     local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
-    title:SetText("FrameSort - " .. version)
+    title:SetText(string.format(L["FrameSort - %s"], version))
 
     local unhealthy = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
     unhealthy:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -verticalSpacing)
-    unhealthy:SetText("There are some issuse that may prevent FrameSort from working correctly.")
+    unhealthy:SetText(L["There are some issuse that may prevent FrameSort from working correctly."])
 
     local unhealthyGoto = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
     unhealthyGoto:SetPoint("TOPLEFT", unhealthy, "BOTTOMLEFT", 0, -verticalSpacing)
-    unhealthyGoto:SetText("Please go to the Health Check panel to view more details.")
+    unhealthyGoto:SetText(L["Please go to the Health Check panel to view more details."])
 
-    local lines = {
-        Group = "party1 > party2 > partyN > partyN+1",
-        Role = "tank > healer > dps",
-        Alpha = "NameA > NameB > NameZ",
-    }
+    local lines = {}
+    lines[L["Group"]] = L["party1 > party2 > partyN > partyN+1"]
+    lines[L["Role"]] = L["tank > healer > dps"]
+    lines[L["Alpha"]] = L["NameA > NameB > NameZ"]
 
     local keyWidth = 50
     local i = 1
@@ -52,7 +52,7 @@ local function BuiltTitle(panel)
         valueText:SetText(v)
         i = i + 1
 
-        if k == "Role" then
+        if k == L["Role"] then
             roleValueText = valueText
         end
 
@@ -78,11 +78,11 @@ local function BuiltTitle(panel)
         assert(roleValueText ~= nil)
 
         if addon.DB.Options.Sorting.RoleOrdering == fsConfig.RoleOrdering.HealerTankDps then
-            roleValueText:SetText("healer > tank > dps")
+            roleValueText:SetText(L["healer > tank > dps"])
         elseif addon.DB.Options.Sorting.RoleOrdering == fsConfig.RoleOrdering.HealerDpsTank then
-            roleValueText:SetText("healer > dps > tank")
+            roleValueText:SetText(L["healer > dps > tank"])
         else
-            roleValueText:SetText("tank > healer > dps")
+            roleValueText:SetText(L["tank > healer > dps"])
         end
 
         if healthy then
@@ -136,27 +136,27 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
     if hasPlayer then
         playerLabel = parentPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
         playerLabel:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, -verticalSpacing)
-        playerLabel:SetText("Player:")
+        playerLabel:SetText(L["Player:"])
         playerLabel:SetJustifyH("LEFT")
         playerLabel:SetWidth(labelWidth)
 
         top = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-        top.Text:SetText("Top")
+        top.Text:SetText(L["Top"])
         top:SetPoint("LEFT", playerLabel, "RIGHT", horizontalSpacing / 2, 0)
         top:SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Top)
 
         middle = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-        middle.Text:SetText("Middle")
+        middle.Text:SetText(L["Middle"])
         middle:SetPoint("LEFT", top, "RIGHT", horizontalSpacing, 0)
         middle:SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Middle)
 
         bottom = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-        bottom.Text:SetText("Bottom")
+        bottom.Text:SetText(L["Bottom"])
         bottom:SetPoint("LEFT", middle, "RIGHT", horizontalSpacing, 0)
         bottom:SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Bottom)
 
         hidden = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-        hidden.Text:SetText("Hidden")
+        hidden.Text:SetText(L["Hidden"])
         hidden:SetPoint("LEFT", bottom, "RIGHT", horizontalSpacing, 0)
         hidden:SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Hidden)
 
@@ -193,7 +193,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         modeLabel:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, -verticalSpacing)
     end
 
-    modeLabel:SetText("Sort:")
+    modeLabel:SetText(L["Sort:"])
     modeLabel:SetJustifyH("LEFT")
     modeLabel:SetWidth(labelWidth)
 
@@ -204,12 +204,12 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
     local group = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     group:SetPoint("LEFT", modeLabel, "RIGHT", horizontalSpacing / 2, 0)
 
-    group.Text:SetText(fsConfig.GroupSortMode.Group)
+    group.Text:SetText(L["Group"])
     group:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Group)
 
     local role = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     role:SetPoint("LEFT", group, "RIGHT", horizontalSpacing, 0)
-    role.Text:SetText(fsConfig.GroupSortMode.Role)
+    role.Text:SetText(L["Role"])
     role:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Role)
 
     local alpha = nil
@@ -221,7 +221,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
     if hasAlpha then
         alpha = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
         alpha:SetPoint("LEFT", role, "RIGHT", horizontalSpacing, 0)
-        alpha.Text:SetText("Alpha")
+        alpha.Text:SetText(L["Alpha"])
         alpha:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Alphabetical)
 
         modes[alpha] = fsConfig.GroupSortMode.Alphabetical
@@ -229,7 +229,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
 
     local reverse = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     reverse:SetPoint("LEFT", alpha or role, "RIGHT", horizontalSpacing, 0)
-    reverse.Text:SetText("Reverse")
+    reverse.Text:SetText(L["Reverse"])
     reverse:SetChecked(options.Reverse)
 
     local function onModeClick(sender)
@@ -330,19 +330,19 @@ function M:Build(panel)
     local config = addon.DB.Options.Sorting
 
     if not wow.IsClassic() then
-        anchor = BuildSortModeCheckboxes(panel, anchor, "Arena - 2v2", config.Arena.Twos)
+        anchor = BuildSortModeCheckboxes(panel, anchor, L["Arena - 2v2"], config.Arena.Twos)
 
-        local otherArenaSizes = wow.IsRetail() and "3v3" or "3v3 & 5v5"
-        anchor = BuildSortModeCheckboxes(panel, anchor, "Arena - " .. otherArenaSizes, config.Arena.Default)
+        local otherArenaSizes = wow.IsRetail() and L["3v3"] or L["3v3 & 5v5"]
+        anchor = BuildSortModeCheckboxes(panel, anchor, string.format(L["Arena - %s"], otherArenaSizes), config.Arena.Default)
     end
 
     if wow.IsRetail() then
-        anchor = BuildSortModeCheckboxes(panel, anchor, "Enemy Arena (see addons panel for supported addons)", config.EnemyArena, false, false)
+        anchor = BuildSortModeCheckboxes(panel, anchor, L["Enemy Arena (see addons panel for supported addons)"], config.EnemyArena, false, false)
     end
 
-    anchor = BuildSortModeCheckboxes(panel, anchor, "Dungeon (mythics, 5-mans)", config.Dungeon)
-    anchor = BuildSortModeCheckboxes(panel, anchor, "Raid (battlegrounds, raids)", config.Raid)
-    anchor = BuildSortModeCheckboxes(panel, anchor, "World (non-instance groups)", config.World)
+    anchor = BuildSortModeCheckboxes(panel, anchor, L["Dungeon (mythics, 5-mans)"], config.Dungeon)
+    anchor = BuildSortModeCheckboxes(panel, anchor, L["Raid (battlegrounds, raids)"], config.Raid)
+    anchor = BuildSortModeCheckboxes(panel, anchor, L["World (non-instance groups)"], config.World)
 
     return panel
 end

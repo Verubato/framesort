@@ -2,6 +2,7 @@
 local _, addon = ...
 local fsConfig = addon.Configuration
 local wow = addon.WoW.Api
+local L = addon.Locale
 local callbacks = {}
 
 fsConfig.VerticalSpacing = 13
@@ -50,9 +51,21 @@ function fsConfig:TextBlock(lines, parent, anchor)
     return textAnchor
 end
 
+function fsConfig:MultilineTextBlock(text, parent, anchor)
+    local lines = {}
+
+    for str in string.gmatch(text, "([^\n]+)") do
+        -- convert any \n literals into new lines
+        str = string.gsub(str, "\\n", "\n")
+        lines[#lines + 1] = str
+    end
+
+    return fsConfig:TextBlock(lines, parent, anchor)
+end
+
 function fsConfig:Init()
     local panel = wow.CreateFrame("ScrollFrame", nil, nil, "UIPanelScrollFrameTemplate")
-    panel.name = "FrameSort"
+    panel.name = L["FrameSort"]
 
     local main = wow.CreateFrame("Frame")
 

@@ -6,6 +6,7 @@ addon.Configuration = {
     Panels = {},
 }
 addon.Health = {}
+addon.Locale = {}
 addon.Logging = {}
 addon.Modules = {
     Sorting = {
