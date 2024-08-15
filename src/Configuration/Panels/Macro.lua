@@ -3,6 +3,7 @@ local _, addon = ...
 local wow = addon.WoW.Api
 local fsMacro = addon.Modules.Macro.Parser
 local fsConfig = addon.Configuration
+local L = addon.Locale
 local M = {}
 fsConfig.Panels.Macro = M
 
@@ -22,7 +23,7 @@ end
 
 function M:Build(parent)
     local scroller = wow.CreateFrame("ScrollFrame", nil, parent, "UIPanelScrollFrameTemplate")
-    scroller.name = "Macros"
+    scroller.name = L["Macros"]
     scroller.parent = parent.name
 
     local panel = wow.CreateFrame("Frame")
@@ -40,42 +41,35 @@ function M:Build(parent)
     local verticalSpacing = fsConfig.VerticalSpacing
     local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
-    title:SetText("Macros")
+    title:SetText(L["Macros"])
 
+    local countText = L["FrameSort has found %d|4macro:macros; to manage."]
     local countLine = panel:CreateFontString(nil, "ARTWORK", "GameFontGreen")
     countLine:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -verticalSpacing)
-    countLine:SetText("FrameSort has found 0 macros to manage.")
+    countLine:SetText(string.format(countText, 0))
 
     panel:HookScript("OnShow", function()
         local count = CountMacros()
-        countLine:SetText("FrameSort has found " .. count .. " |4macro:macros; to manage.")
+        countLine:SetText(string.format(countText, count))
     end)
 
     local intro = {
-        'FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.',
-        "Below are some examples on how to use this.",
+        L['FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.'],
+        L["Below are some examples on how to use this."],
     }
 
     local anchor = fsConfig:TextBlock(intro, panel, countLine)
     local examples = {
-        [[#showtooltip
-#FrameSort Mouseover, Target, Healer
-/cast [@mouseover,help][@target,help][@healer,exists] Blessing of Sanctuary]],
-
-        [[#showtooltip
-#FrameSort Frame1, Frame2, Player
-/cast [mod:ctrl,@frame1][mod:shift,@frame2][mod:alt,@player][] Dispel]],
-
-        [[#FrameSort EnemyHealer, EnemyHealer
-/cast [@doesntmatter] Shadowstep;
-/cast [@placeholder] Kick;]],
+        L["Macro_Example1"],
+        L["Macro_Example2"],
+        L["Macro_Example3"],
     }
 
     local padding = 10
     for i, example in ipairs(examples) do
         local header = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
         header:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
-        header:SetText(string.format("Example %d", i))
+        header:SetText(string.format(L["Example %d"], i))
 
         local box = wow.CreateFrame("EditBox", nil, panel)
         box:SetPoint("TOPLEFT", header, "BOTTOMLEFT", 0, -verticalSpacing)
@@ -111,13 +105,13 @@ function M:Build(parent)
     end
 
     local notes = {
-        "Supported variables:",
+        L["Supported variables:"],
         " - Frame1, Frame2, Frame3, etc.",
         " - Frame1Pet, Frame2Pet, Frame3Pet, etc.",
         " - BottomFrame",
         " - Tank, Healer, DPS",
         " - TankTarget, HealerTarget, Frame1Target, etc.",
-        " - OtherDps - The first DPS that's not you.",
+        " - OtherDps - " .. L["The first DPS that's not you."],
     }
 
     if wow.IsRetail() then
@@ -126,13 +120,13 @@ function M:Build(parent)
         notes[#notes + 1] = " - EnemyTank, EnemyHealer, EnemyDPS"
     end
 
-    notes[#notes + 1] = " - Add a number to choose the Nth target, e.g., DPS2 selects the 2nd DPS."
-    notes[#notes + 1] = " - Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work."
+    notes[#notes + 1] = " - " .. L["Add a number to choose the Nth target, e.g., DPS2 selects the 2nd DPS."]
+    notes[#notes + 1] = " - " .. L["Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work."]
 
     anchor = fsConfig:TextBlock(notes, panel, anchor)
 
     local abbreviations = {
-        "Need to save on macro characters? Use abbreviations to shorten them:",
+        L["Need to save on macro characters? Use abbreviations to shorten them:"],
         " - #FS = #FrameSort",
         " - F1, F2, F3 = Frame1, Frame2, Frame3",
         " - F1P, F2P, F3P = Frame1Pet, Frame2Pet, Frame3Pet",
@@ -153,12 +147,9 @@ function M:Build(parent)
 
     local skipDescription = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
     skipDescription:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
-    skipDescription:SetText('Use "X" to tell FrameSort to ignore an @unit selector:')
+    skipDescription:SetText(L['Use "X" to tell FrameSort to ignore an @unit selector:'])
 
-    local skipExample = [[
-#FS X X EnemyHealer
-/cast [mod:shift,@focus][@mouseover,harm][@enemyhealer,exists][] Spell;]]
-
+    local skipExample = L["Skip_Example"]
     local skipBox = wow.CreateFrame("EditBox", nil, panel)
     skipBox:SetPoint("TOPLEFT", skipDescription, "BOTTOMLEFT", 0, -verticalSpacing)
     skipBox:SetSize(500, 1)

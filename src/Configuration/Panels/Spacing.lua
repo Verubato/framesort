@@ -7,6 +7,7 @@ local wow = addon.WoW.Api
 local minSpacing = 0
 local maxSpacing = 100
 local systemChange = false
+local L = addon.Locale
 local M = {}
 fsConfig.Panels.Spacing = M
 
@@ -60,7 +61,7 @@ local function SetValue(auto, slider, box)
     return value
 end
 
-local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, addY, additionalTopSpacing)
+local function BuildSpacingOptions(panel, parentAnchor, name, sliderPrefix, spacing, addX, addY, additionalTopSpacing)
     local verticalSpacing = fsConfig.VerticalSpacing
     local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", parentAnchor, "BOTTOMLEFT", 0, -(verticalSpacing + additionalTopSpacing))
@@ -71,9 +72,9 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
     if addX then
         local label = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
         label:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
-        label:SetText("Horizontal")
+        label:SetText(L["Horizontal"])
 
-        local slider = wow.CreateFrame("Slider", "sld" .. name .. "XSpacing", panel, "OptionsSliderTemplate")
+        local slider = wow.CreateFrame("Slider", "sld" .. sliderPrefix .. "XSpacing", panel, "OptionsSliderTemplate")
         slider:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -verticalSpacing)
         ConfigureSlider(slider, spacing.Horizontal)
 
@@ -117,9 +118,9 @@ local function BuildSpacingOptions(panel, parentAnchor, name, spacing, addX, add
     if addY then
         local label = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
         label:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
-        label:SetText("Vertical")
+        label:SetText(L["Vertical"])
 
-        local slider = wow.CreateFrame("Slider", "sld" .. name .. "YSpacing", panel, "OptionsSliderTemplate")
+        local slider = wow.CreateFrame("Slider", "sld" .. sliderPrefix .. "YSpacing", panel, "OptionsSliderTemplate")
         slider:SetPoint("TOPLEFT", label, "BOTTOMLEFT", 0, -verticalSpacing)
         ConfigureSlider(slider, spacing.Vertical)
 
@@ -180,7 +181,7 @@ end
 function M:Build(parent)
     local verticalSpacing = fsConfig.VerticalSpacing
     local panel = wow.CreateFrame("Frame", nil, parent)
-    panel.name = "Spacing"
+    panel.name = L["Spacing"]
     panel.parent = parent.name
 
     panel:HookScript("OnShow", RefreshValues)
@@ -188,11 +189,11 @@ function M:Build(parent)
 
     local spacingTitle = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     spacingTitle:SetPoint("TOPLEFT", panel, verticalSpacing, -verticalSpacing)
-    spacingTitle:SetText("Spacing")
+    spacingTitle:SetText(L["Spacing"])
 
     local lines = {
-        "Add some spacing between party/raid frames.",
-        "This only applies to Blizzard frames.",
+        L["Add some spacing between party/raid frames."],
+        L["This only applies to Blizzard frames."],
     }
 
     local anchor = fsConfig:TextBlock(lines, panel, spacingTitle)
@@ -200,11 +201,11 @@ function M:Build(parent)
 
     if wow.IsRetail() then
         -- for retail
-        anchor = BuildSpacingOptions(panel, anchor, "Party", config.Party, true, true, 0)
+        anchor = BuildSpacingOptions(panel, anchor, L["Party"], "Party", config.Party, true, true, 0)
     end
 
     local title = wow.IsRetail() and "Raid" or "Group"
-    anchor = BuildSpacingOptions(panel, anchor, title, config.Raid, true, true, verticalSpacing)
+    anchor = BuildSpacingOptions(panel, anchor, L[title], title, config.Raid, true, true, verticalSpacing)
 
     return panel
 end

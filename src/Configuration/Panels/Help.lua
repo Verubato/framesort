@@ -2,22 +2,23 @@
 local _, addon = ...
 local wow = addon.WoW.Api
 local fsConfig = addon.Configuration
+local L = addon.Locale
 local M = {}
 fsConfig.Panels.Help = M
 
 function M:Build(parent)
     local panel = wow.CreateFrame("Frame", nil, parent)
-    panel.name = "Help"
+    panel.name = L["Help"]
     panel.parent = parent.name
 
     local verticalSpacing = fsConfig.VerticalSpacing
     local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
-    title:SetText("Discord")
+    title:SetText(L["Discord"])
 
     local intro = {
-        "Need help with something?",
-        "Talk directly with the developer on Discord.",
+        L["Need help with something?"],
+        L["Talk directly with the developer on Discord."],
     }
 
     local anchor = fsConfig:TextBlock(intro, panel, title)

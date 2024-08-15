@@ -5,6 +5,8 @@
 ---@field Collections Collections
 ---@field DB DB
 ---@field Health Health
+---@field Locale table<string, string>
+---@field Languages table
 ---@field Logging Logging
 ---@field Modules Modules
 ---@field Numerics Numerics

@@ -3,6 +3,15 @@ local addonName, addon = ...
 local wow = addon.WoW.Api
 local loader = nil
 
+function addon:InitLocale()
+    local function DefaultIndex(_, key)
+        -- if there is no translation specified, then use the the key itself
+        return key
+    end
+
+    setmetatable(addon.Locale, { __index = DefaultIndex })
+end
+
 function addon:InitDB()
     FrameSortDB = FrameSortDB or {}
     FrameSortDB.Options = FrameSortDB.Options or wow.CopyTable(addon.Configuration.Defaults)
@@ -13,6 +22,7 @@ end
 
 ---Initialises the addon.
 function addon:Init()
+    addon:InitLocale()
     addon:InitDB()
     addon.Configuration:Init()
     addon.Providers:Init()

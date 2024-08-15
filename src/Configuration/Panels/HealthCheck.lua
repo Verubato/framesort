@@ -3,6 +3,7 @@ local _, addon = ...
 local wow = addon.WoW.Api
 local fsHealth = addon.Health.HealthCheck
 local fsConfig = addon.Configuration
+local L = addon.Locale
 local lines = {}
 local M = {}
 fsConfig.Panels.Health = M
@@ -10,20 +11,20 @@ fsConfig.Panels.Health = M
 function M:Build(parent)
     local verticalSpacing = fsConfig.VerticalSpacing
     local panel = wow.CreateFrame("Frame", nil, parent)
-    panel.name = "Health Check"
+    panel.name = L["Health Check"]
     panel.parent = parent.name
 
     local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
-    title:SetText("Health Check")
+    title:SetText(L["Health Check"])
 
     local healthDescription = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
     healthDescription:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -verticalSpacing)
-    healthDescription:SetText("Any known issues with configuration or conflicting addons will be shown below.")
+    healthDescription:SetText(L["Any known issues with configuration or conflicting addons will be shown below."])
 
     local helpTitle = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     helpTitle:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
-    helpTitle:SetText("Help")
+    helpTitle:SetText(L["Try this"])
 
     panel:HookScript("OnShow", function()
         local healthy, results = fsHealth:IsHealthy()
@@ -50,10 +51,10 @@ function M:Build(parent)
             line.Description:SetPoint("TOPLEFT", anchor, 0, -verticalSpacing * 2)
 
             if result.Applicable then
-                line.Result:SetText(result.Passed and "Passed!" or "Failed")
+                line.Result:SetText(result.Passed and L["Passed!"] or L["Failed"])
                 line.Result:SetFontObject(result.Passed and "GameFontGreen" or "GameFontRed")
             else
-                line.Result:SetText("N/A")
+                line.Result:SetText(L["N/A"])
                 line.Result:SetFontObject("GameFontGreen")
             end
 
