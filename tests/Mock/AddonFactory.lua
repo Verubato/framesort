@@ -58,6 +58,7 @@ function factory:Create()
             Api = wowFactory:Create(),
         },
         DB = {},
+        Locale = {}
     }
 
     local dependencies = DependenciesFromXml()
