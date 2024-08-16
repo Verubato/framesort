@@ -6,251 +6,245 @@ if wow.GetLocale() ~= "deDE" then
     return
 end
 
-L["FrameSort"] = nil
+L["FrameSort"] = "RahmenSortieren"
 
 -- # Main Options screen #
--- used in FrameSort - 1.2.3 version header, %s is the version number
-L["FrameSort - %s"] = nil
-L["There are some issuse that may prevent FrameSort from working correctly."] = nil
-L["Please go to the Health Check panel to view more details."] = nil
-L["Role"] = nil
-L["Group"] = nil
-L["Alpha"] = nil
-L["party1 > party2 > partyN > partyN+1"] = nil
-L["tank > healer > dps"] = nil
-L["NameA > NameB > NameZ"] = nil
-L["healer > tank > dps"] = nil
-L["healer > dps > tank"] = nil
-L["tank > healer > dps"] = nil
-L["Arena - 2v2"] = nil
-L["3v3"] = nil
-L["3v3 & 5v5"] = nil
--- %s is either "3v3" or "3v3 & 5v5"
-L["Arena - %s"] = nil
-L["Enemy Arena (see addons panel for supported addons)"] = nil
-L["Dungeon (mythics, 5-mans)"] = nil
-L["Raid (battlegrounds, raids)"] = nil
-L["World (non-instance groups)"] = nil
-L["Player:"] = nil
-L["Top"] = nil
-L["Middle"] = nil
-L["Bottom"] = nil
-L["Hidden"] = nil
-L["Group"] = nil
-L["Role"] = nil
-L["Alpha"] = nil
-L["Reverse"] = nil
+L["FrameSort - %s"] = "RahmenSortieren - %s"
+L["There are some issuse that may prevent FrameSort from working correctly."] = "Es gibt einige Probleme, die verhindern könnten, dass RahmenSortieren korrekt funktioniert."
+L["Please go to the Health Check panel to view more details."] = "Bitte gehen Sie zum Gesundheitscheck-Panel, um weitere Details anzuzeigen."
+L["Role"] = "Rolle"
+L["Group"] = "Gruppe"
+L["Alpha"] = "Alpha"
+L["party1 > party2 > partyN > partyN+1"] = "party1 > party2 > partyN > partyN+1"
+L["tank > healer > dps"] = "Tank > Heiler > DPS"
+L["NameA > NameB > NameZ"] = "NameA > NameB > NameZ"
+L["healer > tank > dps"] = "Heiler > Tank > DPS"
+L["healer > dps > tank"] = "Heiler > DPS > Tank"
+L["tank > healer > dps"] = "Tank > Heiler > DPS"
+L["Arena - 2v2"] = "Arena - 2v2"
+L["3v3"] = "3v3"
+L["3v3 & 5v5"] = "3v3 & 5v5"
+L["Arena - %s"] = "Arena - %s"
+L["Enemy Arena (see addons panel for supported addons)"] = "Feindliche Arena (siehe Addons-Panel für unterstützte Addons)"
+L["Dungeon (mythics, 5-mans)"] = "Dungeon (Mythics, 5-Spieler)"
+L["Raid (battlegrounds, raids)"] = "Schlachtzug (Schlachtfelder, Raids)"
+L["World (non-instance groups)"] = "Welt (Nicht-Instanz-Gruppen)"
+L["Player:"] = "Spieler:"
+L["Top"] = "Oben"
+L["Middle"] = "Mitte"
+L["Bottom"] = "Unten"
+L["Hidden"] = "Versteckt"
+L["Group"] = "Gruppe"
+L["Role"] = "Rolle"
+L["Alpha"] = "Alpha"
+L["Reverse"] = "Umkehren"
 
 -- # Sorting Method screen #
-L["Sorting Method"] = nil
-L["Secure"] = nil
+L["Sorting Method"] = "Sortiermethode"
+L["Secure"] = "Sicher"
 L["SortingMethod_Secure_Description"] = [[
-Adjusts the position of each individual frame and doesn't bug/lock/taint the UI.
+Passt die Position jedes einzelnen Rahmens an und blockiert/sperrt/nicht den Blizzard-UI-Code.
 \n
-Pros:
- - Can sort frames from other addons.
- - Can apply frame spacing.
- - No taint (technical term for addons interfering with Blizzard's UI code).
+Vorteile:
+ - Kann Rahmen von anderen Addons sortieren.
+ - Kann Abstände zwischen Rahmen anwenden.
+ - Keine Verschmutzung (technischer Begriff für Addons, die den Blizzard-UI-Code beeinflussen).
 \n
-Cons:
- - Fragile house of cards situation to workaround Blizzard spaghetti.
- - May break with WoW patches and cause the developer to go insane.
+Nachteile:
+ - Fragile Situation, um Probleme mit Blizzard-Code zu vermeiden.
+ - Kann durch WoW-Patches kaputtgehen und den Entwickler verrückt machen.
 ]]
-L["Traditional"] = nil
+L["Traditional"] = "Traditionell"
 L["SortingMethod_Secure_Traditional"] = [[
-This is the standard sorting mode that addons and macros have used for 10+ years.
-It replaces the internal Blizzard sorting method with our own.
-This is the same as the 'SetFlowSortFunction' script but with FrameSort configuration.
+Dies ist der Standard-Sortiermodus, den Addons und Makros seit über 10 Jahren verwenden.
+Ersetzt die interne Sortiermethode von Blizzard durch unsere.
+Dies ist dasselbe wie das Skript 'SetFlowSortFunction', aber mit der RahmenSortieren-Einstellung.
 \n
-Pros:
- - More stable/reliable as it leverages Blizzard's internal sorting methods."] = nil
+Vorteile:
+ - Stabiler/zuverlässiger, da die internen Sortiermethoden von Blizzard genutzt werden.
 \n
-Cons:
- - Only sorts Blizzard party frames, nothing else.
- - Will cause Lua errors which is normal and can be ignored.
- - Cannot apply frame spacing.
+Nachteile:
+ - Sortiert nur die Blizzard-Gruppenrahmen, nichts weiter.
+ - Kann Lua-Fehler verursachen, die normal sind und ignoriert werden können.
+ - Kann keine Abstände zwischen Rahmen anwenden.
 ]]
-L["Please reload after changing these settings."] = nil
-L["Reload"] = nil
+L["Please reload after changing these settings."] = "Bitte laden Sie die Benutzeroberfläche neu, nachdem Sie diese Einstellungen geändert haben."
+L["Reload"] = "Neu laden"
 
 -- # Role Ordering screen #
-L["Role Ordering"] = nil
-L["Specify the ordering you wish to use when sorting by role."] = nil
-L["Tank > Healer > DPS"] = nil
-L["Healer > Tank > DPS"] = nil
-L["Healer > DPS > Tank"] = nil
+L["Role Ordering"] = "Rollenordnung"
+L["Specify the ordering you wish to use when sorting by role."] = "Geben Sie die Reihenfolge an, die Sie beim Sortieren nach Rolle verwenden möchten."
+L["Tank > Healer > DPS"] = "Tank > Heiler > DPS"
+L["Healer > Tank > DPS"] = "Heiler > Tank > DPS"
+L["Healer > DPS > Tank"] = "Heiler > DPS > Tank"
 
 -- # Auto Leader screen #
-L["Auto Leader"] = nil
-L["Auto promote healers to leader in solo shuffle."] = nil
-L["Why? So healers can configure target marker icons and re-order party1/2 to their preference."] = nil
-L["Enabled"] = nil
+L["Auto Leader"] = "Auto-Leder"
+L["Auto promote healers to leader in solo shuffle."] = "Heiler automatisch zum Anführer im Solo-Sortieren erheben."
+L["Why? So healers can configure target marker icons and re-order party1/2 to their preference."] = "Warum? Damit Heiler Zielmarkierungs-Symbole konfigurieren und party1/2 nach ihren Wünschen neu anordnen können."
+L["Enabled"] = "Aktiviert"
 
 -- # Blizzard Keybindings screen (FrameSort's section) #
-L["Targeting"] = nil
-L["Target frame 1 (top frame)"] = nil
-L["Target frame 2"] = nil
-L["Target frame 3"] = nil
-L["Target frame 4"] = nil
-L["Target frame 5"] = nil
-L["Target bottom frame"] = nil
-L["Target frame 1's pet"] = nil
-L["Target frame 2's pet"] = nil
-L["Target frame 3's pet"] = nil
-L["Target frame 4's pet"] = nil
-L["Target frame 5's pet"] = nil
-L["Target enemy frame 1"] = nil
-L["Target enemy frame 2"] = nil
-L["Target enemy frame 3"] = nil
-L["Target enemy frame 1's pet"] = nil
-L["Target enemy frame 2's pet"] = nil
-L["Target enemy frame 3's pet"] = nil
-L["Focus enemy frame 1"] = nil
-L["Focus enemy frame 2"] = nil
-L["Focus enemy frame 3"] = nil
-L["Cycle to the next frame"] = nil
-L["Cycle to the previous frame"] = nil
-L["Target the next frame"] = nil
-L["Target the previous frame"] = nil
+L["Targeting"] = "Zielen"
+L["Target frame 1 (top frame)"] = "Ziele den Rahmen 1 (oberster Rahmen)"
+L["Target frame 2"] = "Ziele den Rahmen 2"
+L["Target frame 3"] = "Ziele den Rahmen 3"
+L["Target frame 4"] = "Ziele den Rahmen 4"
+L["Target frame 5"] = "Ziele den Rahmen 5"
+L["Target bottom frame"] = "Ziele den unteren Rahmen"
+L["Target frame 1's pet"] = "Ziele das Haustier von Rahmen 1"
+L["Target frame 2's pet"] = "Ziele das Haustier von Rahmen 2"
+L["Target frame 3's pet"] = "Ziele das Haustier von Rahmen 3"
+L["Target frame 4's pet"] = "Ziele das Haustier von Rahmen 4"
+L["Target frame 5's pet"] = "Ziele das Haustier von Rahmen 5"
+L["Target enemy frame 1"] = "Ziele den feindlichen Rahmen 1"
+L["Target enemy frame 2"] = "Ziele den feindlichen Rahmen 2"
+L["Target enemy frame 3"] = "Ziele den feindlichen Rahmen 3"
+L["Target enemy frame 1's pet"] = "Ziele das Haustier des feindlichen Rahmens 1"
+L["Target enemy frame 2's pet"] = "Ziele das Haustier des feindlichen Rahmens 2"
+L["Target enemy frame 3's pet"] = "Ziele das Haustier des feindlichen Rahmens 3"
+L["Focus enemy frame 1"] = "Fokussiere den feindlichen Rahmen 1"
+L["Focus enemy frame 2"] = "Fokussiere den feindlichen Rahmen 2"
+L["Focus enemy frame 3"] = "Fokussiere den feindlichen Rahmen 3"
+L["Cycle to the next frame"] = "Zum nächsten Rahmen wechseln"
+L["Cycle to the previous frame"] = "Zum vorherigen Rahmen wechseln"
+L["Target the next frame"] = "Ziele den nächsten Rahmen an"
+L["Target the previous frame"] = "Ziele den vorherigen Rahmen an"
 
 -- # Keybindings screen #
-L["Keybindings"] = nil
+L["Keybindings"] = "Tastenkürzel"
 L["Keybindings_Description"] = [[
-You can find the FrameSort keybindings in the standard WoW keybindings area.
+Sie finden die Tastenkürzel von RahmenSortieren im Standardbereich der WoW-Tastenkürzel.
 \n
-What are the keybindings useful for?
-They are useful for targeting players by their visually ordered representation rather than their
-party position (party1/2/3/etc.)
+Wozu sind Tastenkürzel nützlich?
+Sie sind nützlich, um nach den visuellen Darstellungen der Spieler zu zielen, anstatt nach ihrer Position in der Gruppe (party1/2/3/etc.).
 \n
-For example, imagine a 5-man dungeon group sorted by role that looks like the following:
+Zum Beispiel, stellen Sie sich eine Dungeon-Gruppe mit 5 Personen vor, die nach Rolle sortiert ist und wie folgt aussieht:
   - Tank, party3
-  - Healer, player
+  - Heiler, Spieler
   - DPS, party1
   - DPS, party4
   - DPS, party2
 \n
-As you can see their visual representation differs to their actual party position which
-makes targeting confusing.
-If you were to /target party1, it would target the DPS player in position 3 rather than the tank.
+Wie Sie sehen können, unterscheidet sich ihre visuelle Darstellung von ihrer tatsächlichen Position in der Gruppe, was das Zielen verwirrend macht.
+Wenn Sie /target party1 verwenden, zielt es auf den DPS in Position 3 statt auf den Tank.
 \n
-FrameSort keybindings will target based on their visual frame position rather than party number.
-So targeting 'Frame 1' will target the Tank, 'Frame 2' the healer, 'Frame 3' the DPS in spot 3, and so on.
+Die Tastenkürzel von RahmenSortieren zielen basierend auf der visuellen Position des Rahmens statt auf der Gruppennummer.
+Also zielt 'Rahmen 1' auf den Tank, 'Rahmen 2' auf den Heiler, 'Rahmen 3' auf den DPS in Position 3 und so weiter.
 ]]
 
 -- # Macros screen # --
-L["Macros"] = nil
--- "|4macro:macros;" is a special command to pluralise the word "macro" to "macros" when %d is greater than 1
-L["FrameSort has found %d|4macro:macros; to manage."] = nil
-L['FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.'] = nil
-L["Below are some examples on how to use this."] = nil
-
-L["Macro_Example1"] = [[#showtooltip
-#FrameSort Mouseover, Target, Healer
-/cast [@mouseover,help][@target,help][@healer,exists] Blessing of Sanctuary]]
-
-L["Macro_Example2"] = [[#showtooltip
-#FrameSort Frame1, Frame2, Player
-/cast [mod:ctrl,@frame1][mod:shift,@frame2][mod:alt,@player][] Dispel]]
-
-L["Macro_Example3"] = [[#FrameSort EnemyHealer, EnemyHealer
-/cast [@doesntmatter] Shadowstep;
-/cast [@placeholder] Kick;]]
-
--- %d is the number for example 1/2/3
-L["Example %d"] = nil
-L["Supported variables:"] = nil
-L["The first DPS that's not you."] = nil
-L["Add a number to choose the Nth target, e.g., DPS2 selects the 2nd DPS."] = nil
-L["Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work."] = nil
-L["Need to save on macro characters? Use abbreviations to shorten them:"] = nil
-L['Use "X" to tell FrameSort to ignore an @unit selector:'] = nil
+L["Macros"] = "Makros"
+L["FrameSort has found %d|4macro:macros; to manage."] = "RahmenSortieren hat %d|4Makro:Makros; zum Verwalten gefunden."
+L['FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.'] = "RahmenSortieren wird Variablen in Makros, die den Header '#RahmenSortieren' enthalten, dynamisch aktualisieren."
+L["Below are some examples on how to use this."] = "Nachfolgend finden Sie einige Beispiele, wie dies verwendet werden kann."
+L["Macro Example"] = "Makro Beispiel"
+L["Macro_Example1"] = [[
+#showtooltip
+#FrameSort Tank, Heiler, DPS1
+/cast [mod:shift,@tank][mod:alt,@healer][mod:ctrl,@dps1][] Heilung]]
+L["Macro_Example2"] = [[
+#showtooltip
+#FrameSort Rahmen1, Rahmen2, Spieler
+/cast [mod:ctrl,@rahmen1][mod:shift,@rahmen2][mod:alt,@spieler][] Dispel]]
+L["Macro_Example3"] = [[
+#FrameSort GegnerHeiler, GegnerHeiler
+/cast [@egal] Schatten-Schritt;
+/cast [@platzhalter] Tretmine;]]
+L["Example %d"] = "Beispiel %d"
+L["Supported variables:"] = "Unterstützte Variablen:"
+L["The first DPS that's not you."] = "Der erste DPS, der nicht du bist."
+L["Add a number to choose the Nth target, e.g., DPS2 selects the 2nd DPS."] = "Fügen Sie eine Zahl hinzu, um das N-te Ziel auszuwählen, z.B. DPS2 wählt den 2. DPS."
+L["Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work."] = "Variablen sind nicht zwischen Groß- und Kleinschreibung unterschieden, daher funktionieren 'fRaMe1', 'Dps', 'enemyhealer' usw. alle."
+L["Need to save on macro characters? Use abbreviations to shorten them:"] = "Müssen Sie in Makro-Charakteren speichern? Verwenden Sie Abkürzungen, um sie zu verkürzen:"
+L['Use "X" to tell FrameSort to ignore an @unit selector:'] = 'Verwenden Sie "X", um RahmenSortieren zu sagen, dass es einen @unit-Selektor ignorieren soll:'
 L["Skip_Example"] = [[
-#FS X X EnemyHealer
-/cast [mod:shift,@focus][@mouseover,harm][@enemyhealer,exists][] Spell;]]
+#FS X X GegnerHeiler
+/cast [mod:shift,@focus][@mouseover,harm][@gegnerheiler,exists][] Zauber;]]
 
 -- # Spacing screen #
-L["Spacing"] = nil
-L["Add some spacing between party/raid frames."] = nil
-L["This only applies to Blizzard frames."] = nil
-L["Party"] = nil
-L["Raid"] = nil
-L["Group"] = nil
-L["Horizontal"] = nil
-L["Vertical"] = nil
+L["Spacing"] = "Abstand"
+L["Add some spacing between party/raid frames."] = "Fügen Sie etwas Abstand zwischen den Gruppen-/Raid-Rahmen hinzu."
+L["This only applies to Blizzard frames."] = "Dies gilt nur für Blizzard-Rahmen."
+L["Party"] = "Gruppe"
+L["Raid"] = "Schlachtzug"
+L["Group"] = "Gruppe"
+L["Horizontal"] = "Horizontal"
+L["Vertical"] = "Vertikal"
 
 -- # Addons screen #
-L["Addons"] = nil
+L["Addons"] = "Addons"
 L["Addons_Supported_Description"] = [[
-FrameSort supports the following:
+RahmenSortieren unterstützt die folgenden:
 \n
 Blizzard
- - Party: yes
- - Raid: yes
- - Arena: broken (will fix it eventually).
+ - Gruppe: ja
+ - Raid: ja
+ - Arena: kaputt (wir werden es irgendwann reparieren).
 \n
 ElvUI
- - Party: yes
- - Raid: no
- - Arena: no
+ - Gruppe: ja
+ - Raid: nein
+ - Arena: nein
 \n
 sArena
- - Arena: yes
+ - Arena: ja
 \n
 Gladius
- - Arena: yes
- - Bicmex version: yes
+ - Arena: ja
+ - Bicmex-Version: ja
 \n
 GladiusEx
- - Party: yes
- - Arena: yes
+ - Gruppe: ja
+ - Arena: ja
 \n
 Cell
- - Party: yes
- - Raid: yes, only when using combined groups.
+ - Gruppe: ja
+ - Raid: ja, nur bei Verwendung von kombinierten Gruppen.
 ]]
 
 -- # Api screen #
-L["Api"] = nil
-L["Want to integrate FrameSort into your addons, scripts, and Weak Auras?"] = nil
-L["Here are some examples."] = nil
-L["Retrieved an ordered array of party/raid unit tokens."] = nil
-L["Retrieved an ordered array of arena unit tokens."] = nil
-L["Register a callback function to run after FrameSort sorts frames."] = nil
-L["Retrieve an ordered array of party frames."] = nil
-L["Change a FrameSort setting."] = nil
-L["View a full listing of all API methods on GitHub."] = nil
+L["Api"] = "Api"
+L["Want to integrate FrameSort into your addons, scripts, and Weak Auras?"] = "Möchten Sie RahmenSortieren in Ihre Addons, Skripte und Schwache Auren integrieren?"
+L["Here are some examples."] = "Hier sind einige Beispiele."
+L["Retrieved an ordered array of party/raid unit tokens."] = "Eine sortierte Reihe von Gruppen-/Raid-Einheitentoken abgerufen."
+L["Retrieved an ordered array of arena unit tokens."] = "Eine sortierte Reihe von Arena-Einheitentoken abgerufen."
+L["Register a callback function to run after FrameSort sorts frames."] = "Registrieren Sie eine Rückruffunktion, die ausgeführt wird, nachdem RahmenSortieren die Rahmen sortiert hat."
+L["Retrieve an ordered array of party frames."] = "Eine sortierte Reihe von Gruppenrahmen abrufen."
+L["Change a FrameSort setting."] = "Ändern Sie eine RahmenSortieren-Einstellung."
+L["View a full listing of all API methods on GitHub."] = "Sehen Sie sich eine vollständige Liste aller API-Methoden auf GitHub an."
 
 -- # Help screen #
-L["Help"] = nil
-L["Discord"] = nil
-L["Need help with something?"] = nil
-L["Talk directly with the developer on Discord."] = nil
+L["Help"] = "Hilfe"
+L["Discord"] = "Discord"
+L["Need help with something?"] = "Brauchen Sie Hilfe bei etwas?"
+L["Talk directly with the developer on Discord."] = "Sprechen Sie direkt mit dem Entwickler auf Discord."
 
 -- # Health Check screen -- #
-L["Health Check"] = nil
-L["Try this"] = nil
-L["Any known issues with configuration or conflicting addons will be shown below."] = nil
-L["N/A"] = nil
-L["Passed!"] = nil
-L["Failed"] = nil
-L["(unknown)"] = nil
-L["(user macro)"] = nil
-L["Using grouped layout for Cell raid frames"] = nil
-L["Please check the 'Combined Groups (Raid)' option in Cell -> Layouts."] = nil
-L["Can detect frames"] = nil
-L["FrameSort currently supports frames from these addons: %s."] = nil
-L["Using Raid-Style Party Frames"] = nil
-L["Please enable 'Use Raid-Style Party Frames' in the Blizzard settings."] = nil
-L["Keep Groups Together setting disabled"] = nil
-L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode."] = nil
-L["Disable the 'Keep Groups Together' raid profile setting."] = nil
-L["Only using Blizzard frames with Traditional mode"] = nil
-L["Traditional mode can't sort your other frame addons: '%s'"] = nil
-L["Using Secure sorting mode when spacing is being used."] = nil
-L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method."] = nil
-L["Blizzard sorting functions not tampered with"] = nil
-L['"%s" may cause conflicts, consider disabling it.'] = nil
-L["No conflicting addons"] = nil
-L['"%s" may cause conflicts, consider disabling it.'] = nil
-L["Main tank and assist setting disabled"] = nil
-L["Please disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames."] = nil
+L["Health Check"] = "Gesundheitscheck"
+L["Try this"] = "Versuchen Sie dies"
+L["Any known issues with configuration or conflicting addons will be shown below."] = "Bekannte Probleme mit der Konfiguration oder konfliktierenden Addons werden unten angezeigt."
+L["N/A"] = "Nicht verfügbar"
+L["Passed!"] = "Bestanden!"
+L["Failed"] = "Fehlgeschlagen"
+L["(unknown)"] = "(unbekannt)"
+L["(user macro)"] = "(Benutzermakro)"
+L["Using grouped layout for Cell raid frames"] = "Verwenden eines gruppierten Layouts für die Cell-Raid-Rahmen"
+L["Please check the 'Combined Groups (Raid)' option in Cell -> Layouts."] = "Bitte überprüfen Sie die Option 'Kombinierte Gruppen (Raid)' in Cell -> Layouts."
+L["Can detect frames"] = "Kann Rahmen erkennen"
+L["FrameSort currently supports frames from these addons: %s."] = "RahmenSortieren unterstützt derzeit Rahmen von diesen Addons: %s."
+L["Using Raid-Style Party Frames"] = "Verwendung von Raid-Stil Gruppenrahmen"
+L["Please enable 'Use Raid-Style Party Frames' in the Blizzard settings."] = "Bitte aktivieren Sie 'Raid-Stil Gruppenrahmen verwenden' in den Blizzard-Einstellungen."
+L["Keep Groups Together setting disabled"] = "Einstellung 'Gruppen zusammenhalten' deaktiviert"
+L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode."] = "Ändern Sie den Raid-Anzeigemodus auf eine der 'Kombinierten Gruppen'-Optionen über den Bearbeitungsmodus."
+L["Disable the 'Keep Groups Together' raid profile setting."] = "Deaktivieren Sie die Raid-Profil-Einstellung 'Gruppen zusammenhalten'."
+L["Only using Blizzard frames with Traditional mode"] = "Verwendung von Blizzard-Rahmen nur im traditionellen Modus"
+L["Traditional mode can't sort your other frame addons: '%s'"] = "Der traditionelle Modus kann Ihre anderen Rahmen-Addons nicht sortieren: '%s'"
+L["Using Secure sorting mode when spacing is being used."] = "Verwendung des sicheren Sortiermodus, wenn Abstand verwendet wird."
+L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method."] = "Der traditionelle Modus kann Abstand nicht anwenden, ziehen Sie in Betracht, den Abstand zu entfernen oder die sichere Sortiermethode zu verwenden."
+L["Blizzard sorting functions not tampered with"] = "Blizzard-Sortierfunktionen nicht manipuliert"
+L['"%s" may cause conflicts, consider disabling it.'] = '"%s" kann Konflikte verursachen, ziehen Sie in Betracht, es zu deaktivieren.'
+L["No conflicting addons"] = "Keine konfliktierenden Addons"
+L['"%s" may cause conflicts, consider disabling it.'] = '"%s" kann Konflikte verursachen, ziehen Sie in Betracht, es zu deaktivieren.'
+L["Main tank and assist setting disabled"] = "Einstellung für Haupttank und Assistent deaktiviert"
+L["Please disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames."] = "Bitte deaktivieren Sie die Option 'Haupttank und Assistent anzeigen' in Optionen -> Interface -> Raid-Rahmen."
