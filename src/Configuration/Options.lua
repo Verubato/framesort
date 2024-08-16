@@ -65,7 +65,7 @@ end
 
 function fsConfig:Init()
     local panel = wow.CreateFrame("ScrollFrame", nil, nil, "UIPanelScrollFrameTemplate")
-    panel.name = L["FrameSort"]
+    panel.name = "FrameSort"
 
     local main = wow.CreateFrame("Frame")
 
