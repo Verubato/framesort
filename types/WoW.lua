@@ -73,6 +73,7 @@
 -- other
 ---@field ReloadUI fun()
 ---@field C_Timer table
+---@field GetLocale fun(): string
 -- non-blizzard
 ---@field IsRetail fun(): boolean
 ---@field IsClassic fun(): boolean

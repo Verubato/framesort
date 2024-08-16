@@ -2,9 +2,6 @@
     <!-- Load the addon table structure (pseudo-namespaces) first -->
     <Script file="Namespace.lua"/>
 
-    <!-- Language files -->
-    <Script file="Locales\enUS.lua"/>
-
     <!-- Load files that don't have any other dependencies -->
     <Script file="Logging\Log.lua"/>
     <Script file="Collections\Enumerable.lua"/>
@@ -17,6 +14,17 @@
     <Script file="WoW\WoW.lua"/>
     <Script file="WoW\Unit.lua"/>
     <Script file="Modules\Macro\Parser.lua"/>
+
+    <!-- Language files -->
+    <Script file="Locales\enUS.lua"/>
+    <Script file="Locales\deDE.lua"/>
+    <Script file="Locales\esES.lua"/>
+    <Script file="Locales\esMX.lua"/>
+    <Script file="Locales\frFR.lua"/>
+    <Script file="Locales\koKR.lua"/>
+    <Script file="Locales\ruRU.lua"/>
+    <Script file="Locales\zhCN.lua"/>
+    <Script file="Locales\zhTW.lua"/>
 
     <!-- Scheduler requires core wow files -->
     <Script file="Scheduling\Scheduler.lua"/>

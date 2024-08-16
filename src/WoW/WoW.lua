@@ -101,6 +101,7 @@ local wow = {
     -- other
     ReloadUI = ReloadUI,
     C_Timer = C_Timer,
+    GetLocale = GetLocale,
 
     -- addon related
     GetAddonInfo = C_AddOns and C_AddOns.GetAddonInfo or GetAddonInfo,
