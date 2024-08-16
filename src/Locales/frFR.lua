@@ -1,256 +1,247 @@
 local _, addon = ...
 local L = addon.Locale
-local wow = addon.WoW.Api
 
-if wow.GetLocale() ~= "frFR" then
-    return
-end
-
-L["FrameSort"] = nil
+L["FrameSort"] = "TriCadre"
 
 -- # Main Options screen #
--- used in FrameSort - 1.2.3 version header, %s is the version number
-L["FrameSort - %s"] = nil
-L["There are some issuse that may prevent FrameSort from working correctly."] = nil
-L["Please go to the Health Check panel to view more details."] = nil
-L["Role"] = nil
-L["Group"] = nil
-L["Alpha"] = nil
-L["party1 > party2 > partyN > partyN+1"] = nil
-L["tank > healer > dps"] = nil
-L["NameA > NameB > NameZ"] = nil
-L["healer > tank > dps"] = nil
-L["healer > dps > tank"] = nil
-L["tank > healer > dps"] = nil
-L["Arena - 2v2"] = nil
-L["3v3"] = nil
-L["3v3 & 5v5"] = nil
--- %s is either "3v3" or "3v3 & 5v5"
-L["Arena - %s"] = nil
-L["Enemy Arena (see addons panel for supported addons)"] = nil
-L["Dungeon (mythics, 5-mans)"] = nil
-L["Raid (battlegrounds, raids)"] = nil
-L["World (non-instance groups)"] = nil
-L["Player:"] = nil
-L["Top"] = nil
-L["Middle"] = nil
-L["Bottom"] = nil
-L["Hidden"] = nil
-L["Group"] = nil
-L["Role"] = nil
-L["Alpha"] = nil
-L["Reverse"] = nil
+L["FrameSort - %s"] = "TriCadre - %s"
+L["There are some issuse that may prevent FrameSort from working correctly."] = "Il y a des problèmes qui peuvent empêcher TriCadre de fonctionner correctement."
+L["Please go to the Health Check panel to view more details."] = "Veuillez aller sur le panneau de vérification de santé pour voir plus de détails."
+L["Role"] = "Rôle"
+L["Group"] = "Groupe"
+L["Alpha"] = "Alpha"
+L["party1 > party2 > partyN > partyN+1"] = "groupe1 > groupe2 > groupeN > groupeN+1"
+L["tank > healer > dps"] = "tank > soigneur > dps"
+L["NameA > NameB > NameZ"] = "NomA > NomB > NomZ"
+L["healer > tank > dps"] = "soigneur > tank > dps"
+L["healer > dps > tank"] = "soigneur > dps > tank"
+L["tank > healer > dps"] = "tank > soigneur > dps"
+L["Arena - 2v2"] = "Arène - 2v2"
+L["3v3"] = "3v3"
+L["3v3 & 5v5"] = "3v3 et 5v5"
+L["Arena - %s"] = "Arène - %s"
+L["Enemy Arena (see addons panel for supported addons)"] = "Arène ennemie (voir le panneau des addons pour les addons pris en charge)"
+L["Dungeon (mythics, 5-mans)"] = "Donjon (mythiques, 5-personnes)"
+L["Raid (battlegrounds, raids)"] = "Raid (champs de bataille, raids)"
+L["World (non-instance groups)"] = "Monde (groupes hors instance)"
+L["Player:"] = "Joueur :"
+L["Top"] = "Haut"
+L["Middle"] = "Milieu"
+L["Bottom"] = "Bas"
+L["Hidden"] = "Caché"
+L["Group"] = "Groupe"
+L["Role"] = "Rôle"
+L["Alpha"] = "Alpha"
+L["Reverse"] = "Inverser"
 
 -- # Sorting Method screen #
-L["Sorting Method"] = nil
-L["Secure"] = nil
+L["Sorting Method"] = "Méthode de tri"
+L["Secure"] = "Sécurisé"
 L["SortingMethod_Secure_Description"] = [[
-Adjusts the position of each individual frame and doesn't bug/lock/taint the UI.
+Ajuste la position de chaque cadre individuel et ne provoque pas de bugs/verrouillages/altérations de l'interface utilisateur.
 \n
-Pros:
- - Can sort frames from other addons.
- - Can apply frame spacing.
- - No taint (technical term for addons interfering with Blizzard's UI code).
+Avantages :
+ - Peut trier les cadres d'autres addons.
+ - Peut appliquer un espacement entre les cadres.
+ - Pas d'altération (terme technique pour les addons qui interfèrent avec le code de l'interface Blizzard).
 \n
-Cons:
- - Fragile house of cards situation to workaround Blizzard spaghetti.
- - May break with WoW patches and cause the developer to go insane.
+Inconvénients :
+ - Structure fragile, pouvant se casser lors des mises à jour de WoW et rendre le développeur fou.
+ - Peut se briser avec les mises à jour de WoW et rendre le développeur fou.
 ]]
-L["Traditional"] = nil
+L["Traditional"] = "Traditionnel"
 L["SortingMethod_Secure_Traditional"] = [[
-This is the standard sorting mode that addons and macros have used for 10+ years.
-It replaces the internal Blizzard sorting method with our own.
-This is the same as the 'SetFlowSortFunction' script but with FrameSort configuration.
+C'est le mode de tri standard utilisé par les addons et les macros depuis plus de 10 ans.
+Il remplace la méthode de tri interne de Blizzard par la nôtre.
+C'est la même chose que le script 'SetFlowSortFunction' mais avec la configuration de TriCadre.
 \n
-Pros:
- - More stable/reliable as it leverages Blizzard's internal sorting methods."] = nil
+Avantages :
+ - Plus stable/fiable car il utilise les méthodes de tri internes de Blizzard.
 \n
-Cons:
- - Only sorts Blizzard party frames, nothing else.
- - Will cause Lua errors which is normal and can be ignored.
- - Cannot apply frame spacing.
+Inconvénients :
+ - Ne trie que les cadres de groupe de Blizzard, rien d'autre.
+ - Peut provoquer des erreurs Lua, ce qui est normal et peut être ignoré.
+ - Impossible d'appliquer un espacement entre les cadres.
 ]]
-L["Please reload after changing these settings."] = nil
-L["Reload"] = nil
+L["Please reload after changing these settings."] = "Veuillez recharger après avoir modifié ces paramètres."
+L["Reload"] = "Recharger"
 
 -- # Role Ordering screen #
-L["Role Ordering"] = nil
-L["Specify the ordering you wish to use when sorting by role."] = nil
-L["Tank > Healer > DPS"] = nil
-L["Healer > Tank > DPS"] = nil
-L["Healer > DPS > Tank"] = nil
+L["Role Ordering"] = "Ordre des rôles"
+L["Specify the ordering you wish to use when sorting by role."] = "Spécifiez l'ordre que vous souhaitez utiliser lors du tri par rôle."
+L["Tank > Healer > DPS"] = "Tank > Soigneur > DPS"
+L["Healer > Tank > DPS"] = "Soigneur > Tank > DPS"
+L["Healer > DPS > Tank"] = "Soigneur > DPS > Tank"
 
 -- # Auto Leader screen #
-L["Auto Leader"] = nil
-L["Auto promote healers to leader in solo shuffle."] = nil
-L["Why? So healers can configure target marker icons and re-order party1/2 to their preference."] = nil
-L["Enabled"] = nil
+L["Auto Leader"] = "Chef automatique"
+L["Auto promote healers to leader in solo shuffle."] = "Promouvoir automatiquement les soigneurs en chef dans le mélange solo."
+L["Why? So healers can configure target marker icons and re-order party1/2 to their preference."] = "Pourquoi ? Pour que les soigneurs puissent configurer les icônes de marqueur de cible et réorganiser les groupes1/2 selon leurs préférences."
+L["Enabled"] = "Activé"
 
 -- # Blizzard Keybindings screen (FrameSort's section) #
-L["Targeting"] = nil
-L["Target frame 1 (top frame)"] = nil
-L["Target frame 2"] = nil
-L["Target frame 3"] = nil
-L["Target frame 4"] = nil
-L["Target frame 5"] = nil
-L["Target bottom frame"] = nil
-L["Target frame 1's pet"] = nil
-L["Target frame 2's pet"] = nil
-L["Target frame 3's pet"] = nil
-L["Target frame 4's pet"] = nil
-L["Target frame 5's pet"] = nil
-L["Target enemy frame 1"] = nil
-L["Target enemy frame 2"] = nil
-L["Target enemy frame 3"] = nil
-L["Target enemy frame 1's pet"] = nil
-L["Target enemy frame 2's pet"] = nil
-L["Target enemy frame 3's pet"] = nil
-L["Focus enemy frame 1"] = nil
-L["Focus enemy frame 2"] = nil
-L["Focus enemy frame 3"] = nil
-L["Cycle to the next frame"] = nil
-L["Cycle to the previous frame"] = nil
-L["Target the next frame"] = nil
-L["Target the previous frame"] = nil
+L["Targeting"] = "Ciblage"
+L["Target frame 1 (top frame)"] = "Cibler cadre 1 (cadre du haut)"
+L["Target frame 2"] = "Cibler cadre 2"
+L["Target frame 3"] = "Cibler cadre 3"
+L["Target frame 4"] = "Cibler cadre 4"
+L["Target frame 5"] = "Cibler cadre 5"
+L["Target bottom frame"] = "Cibler cadre du bas"
+L["Target frame 1's pet"] = "Cibler familier du cadre 1"
+L["Target frame 2's pet"] = "Cibler familier du cadre 2"
+L["Target frame 3's pet"] = "Cibler familier du cadre 3"
+L["Target frame 4's pet"] = "Cibler familier du cadre 4"
+L["Target frame 5's pet"] = "Cibler familier du cadre 5"
+L["Target enemy frame 1"] = "Cibler cadre ennemi 1"
+L["Target enemy frame 2"] = "Cibler cadre ennemi 2"
+L["Target enemy frame 3"] = "Cibler cadre ennemi 3"
+L["Target enemy frame 1's pet"] = "Cibler familier du cadre ennemi 1"
+L["Target enemy frame 2's pet"] = "Cibler familier du cadre ennemi 2"
+L["Target enemy frame 3's pet"] = "Cibler familier du cadre ennemi 3"
+L["Focus enemy frame 1"] = "Focus cadre ennemi 1"
+L["Focus enemy frame 2"] = "Focus cadre ennemi 2"
+L["Focus enemy frame 3"] = "Focus cadre ennemi 3"
+L["Cycle to the next frame"] = "Passer au cadre suivant"
+L["Cycle to the previous frame"] = "Passer au cadre précédent"
+L["Target the next frame"] = "Cibler le cadre suivant"
+L["Target the previous frame"] = "Cibler le cadre précédent"
 
 -- # Keybindings screen #
-L["Keybindings"] = nil
+L["Keybindings"] = "Raccourcis clavier"
 L["Keybindings_Description"] = [[
-You can find the FrameSort keybindings in the standard WoW keybindings area.
+Vous pouvez trouver les raccourcis clavier de TriCadre dans la zone des raccourcis clavier standard de WoW.
 \n
-What are the keybindings useful for?
-They are useful for targeting players by their visually ordered representation rather than their
-party position (party1/2/3/etc.)
+À quoi servent les raccourcis clavier ?
+Ils sont utiles pour cibler les joueurs en fonction de leur représentation visuelle plutôt que de leur position dans le groupe (groupe1/2/3/etc.)
 \n
-For example, imagine a 5-man dungeon group sorted by role that looks like the following:
-  - Tank, party3
-  - Healer, player
-  - DPS, party1
-  - DPS, party4
-  - DPS, party2
+Par exemple, imaginez un groupe de donjon à 5 joueurs trié par rôle qui ressemble à ceci :
+  - Tank, groupe3
+  - Soigneur, joueur
+  - DPS, groupe1
+  - DPS, groupe4
+  - DPS, groupe2
 \n
-As you can see their visual representation differs to their actual party position which
-makes targeting confusing.
-If you were to /target party1, it would target the DPS player in position 3 rather than the tank.
+Comme vous pouvez le voir, leur représentation visuelle diffère de leur position réelle dans le groupe, ce qui rend le ciblage confus.
+Si vous utilisez /target groupe1, cela ciblera le joueur DPS en position 3 au lieu du tank.
 \n
-FrameSort keybindings will target based on their visual frame position rather than party number.
-So targeting 'Frame 1' will target the Tank, 'Frame 2' the healer, 'Frame 3' the DPS in spot 3, and so on.
+Les raccourcis clavier de TriCadre cibleront en fonction de leur position visuelle plutôt que de leur numéro de groupe.
+Ainsi, cibler 'Cadre 1' ciblera le Tank, 'Cadre 2' le soigneur, 'Cadre 3' le DPS en position 3, et ainsi de suite.
 ]]
 
 -- # Macros screen # --
-L["Macros"] = nil
--- "|4macro:macros;" is a special command to pluralise the word "macro" to "macros" when %d is greater than 1
-L["FrameSort has found %d|4macro:macros; to manage."] = nil
-L['FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.'] = nil
-L["Below are some examples on how to use this."] = nil
+L["Macros"] = "Macros"
+L["FrameSort has found %d|4macro:macros; to manage."] = "TriCadre a trouvé %d|4macro:macros; à gérer."
+L['FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.'] = 'TriCadre mettra à jour dynamiquement les variables dans les macros contenant l’en-tête "#FrameSort".'
+L["Below are some examples on how to use this."] = "Vous trouverez ci-dessous des exemples sur la façon de l'utiliser."
 
 L["Macro_Example1"] = [[#showtooltip
-#FrameSort Mouseover, Target, Healer
-/cast [@mouseover,help][@target,help][@healer,exists] Blessing of Sanctuary]]
+#FrameSort Survol, Cible, Soigneur
+/cast [@mouseover,help][@target,help][@healer
+
+,exists] Bénédiction de sanctuaire]]
 
 L["Macro_Example2"] = [[#showtooltip
-#FrameSort Frame1, Frame2, Player
-/cast [mod:ctrl,@frame1][mod:shift,@frame2][mod:alt,@player][] Dispel]]
+#FrameSort Cadre1, Cadre2, Joueur
+/cast [mod:ctrl,@frame1][mod:shift,@frame2][mod:alt,@player][] Dissipation]]
 
-L["Macro_Example3"] = [[#FrameSort EnemyHealer, EnemyHealer
-/cast [@doesntmatter] Shadowstep;
-/cast [@placeholder] Kick;]]
+L["Macro_Example3"] = [[#FrameSort SoigneurEnnemi, SoigneurEnnemi
+/cast [@peuimporte] Pas de l'ombre;
+/cast [@remplaçant] Coup de pied;]]
 
--- %d is the number for example 1/2/3
-L["Example %d"] = nil
-L["Supported variables:"] = nil
-L["The first DPS that's not you."] = nil
-L["Add a number to choose the Nth target, e.g., DPS2 selects the 2nd DPS."] = nil
-L["Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work."] = nil
-L["Need to save on macro characters? Use abbreviations to shorten them:"] = nil
-L['Use "X" to tell FrameSort to ignore an @unit selector:'] = nil
+L["Example %d"] = "Exemple %d"
+L["Supported variables:"] = "Variables prises en charge :"
+L["The first DPS that's not you."] = "Le premier DPS qui n'est pas vous."
+L["Add a number to choose the Nth target, e.g., DPS2 selects the 2nd DPS."] = "Ajoutez un nombre pour choisir la Nième cible, par ex., DPS2 sélectionne le 2ème DPS."
+L["Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work."] = "Les variables ne sont pas sensibles à la casse, donc 'fRaMe1', 'Dps', 'enemyhealer', etc., fonctionneront toutes."
+L["Need to save on macro characters? Use abbreviations to shorten them:"] = "Besoin de gagner des caractères dans un macro? Utilisez des abréviations pour les raccourcir :"
+L['Use "X" to tell FrameSort to ignore an @unit selector:'] = 'Utilisez "X" pour dire à TriCadre d’ignorer un sélecteur @unit :'
 L["Skip_Example"] = [[
-#FS X X EnemyHealer
-/cast [mod:shift,@focus][@mouseover,harm][@enemyhealer,exists][] Spell;]]
+#FS X X SoigneurEnnemi
+/cast [mod:shift,@focus][@mouseover,harm][@enemyhealer,exists][] Sort;]]
 
 -- # Spacing screen #
-L["Spacing"] = nil
-L["Add some spacing between party/raid frames."] = nil
-L["This only applies to Blizzard frames."] = nil
-L["Party"] = nil
-L["Raid"] = nil
-L["Group"] = nil
-L["Horizontal"] = nil
-L["Vertical"] = nil
+L["Spacing"] = "Espacement"
+L["Add some spacing between party/raid frames."] = "Ajoutez un espacement entre les cadres de groupe/raid."
+L["This only applies to Blizzard frames."] = "Cela ne s'applique qu'aux cadres Blizzard."
+L["Party"] = "Groupe"
+L["Raid"] = "Raid"
+L["Group"] = "Groupe"
+L["Horizontal"] = "Horizontal"
+L["Vertical"] = "Vertical"
 
 -- # Addons screen #
-L["Addons"] = nil
+L["Addons"] = "Addons"
 L["Addons_Supported_Description"] = [[
-FrameSort supports the following:
+TriCadre prend en charge les éléments suivants :
 \n
 Blizzard
- - Party: yes
- - Raid: yes
- - Arena: broken (will fix it eventually).
+ - Groupe : oui
+ - Raid : oui
+ - Arène : cassé (sera réparé éventuellement).
 \n
 ElvUI
- - Party: yes
- - Raid: no
- - Arena: no
+ - Groupe : oui
+ - Raid : non
+ - Arène : non
 \n
 sArena
- - Arena: yes
+ - Arène : oui
 \n
 Gladius
- - Arena: yes
- - Bicmex version: yes
+ - Arène : oui
+ - Version Bicmex : oui
 \n
 GladiusEx
- - Party: yes
- - Arena: yes
+ - Groupe : oui
+ - Arène : oui
 \n
 Cell
- - Party: yes
- - Raid: yes, only when using combined groups.
+ - Groupe : oui
+ - Raid : oui, uniquement lors de l'utilisation de groupes combinés.
 ]]
 
 -- # Api screen #
-L["Api"] = nil
-L["Want to integrate FrameSort into your addons, scripts, and Weak Auras?"] = nil
-L["Here are some examples."] = nil
-L["Retrieved an ordered array of party/raid unit tokens."] = nil
-L["Retrieved an ordered array of arena unit tokens."] = nil
-L["Register a callback function to run after FrameSort sorts frames."] = nil
-L["Retrieve an ordered array of party frames."] = nil
-L["Change a FrameSort setting."] = nil
-L["View a full listing of all API methods on GitHub."] = nil
+L["Api"] = "Api"
+L["Want to integrate FrameSort into your addons, scripts, and Weak Auras?"] = "Vous souhaitez intégrer TriCadre dans vos addons, scripts et Weak Auras ?"
+L["Here are some examples."] = "Voici quelques exemples."
+L["Retrieved an ordered array of party/raid unit tokens."] = "Tableau ordonné des jetons d'unité de groupe/raid récupéré."
+L["Retrieved an ordered array of arena unit tokens."] = "Tableau ordonné des jetons d'unité d'arène récupéré."
+L["Register a callback function to run after FrameSort sorts frames."] = "Enregistrez une fonction de rappel à exécuter après que TriCadre ait trié les cadres."
+L["Retrieve an ordered array of party frames."] = "Récupérer un tableau ordonné des cadres de groupe."
+L["Change a FrameSort setting."] = "Modifier un paramètre de TriCadre."
+L["View a full listing of all API methods on GitHub."] = "Voir une liste complète de toutes les méthodes API sur GitHub."
 
 -- # Help screen #
-L["Help"] = nil
-L["Discord"] = nil
-L["Need help with something?"] = nil
-L["Talk directly with the developer on Discord."] = nil
+L["Help"] = "Aide"
+L["Discord"] = "Discord"
+L["Need help with something?"] = "Besoin d'aide pour quelque chose ?"
+L["Talk directly with the developer on Discord."] = "Parlez directement avec le développeur sur Discord."
 
 -- # Health Check screen -- #
-L["Health Check"] = nil
-L["Try this"] = nil
-L["Any known issues with configuration or conflicting addons will be shown below."] = nil
-L["N/A"] = nil
-L["Passed!"] = nil
-L["Failed"] = nil
-L["(unknown)"] = nil
-L["(user macro)"] = nil
-L["Using grouped layout for Cell raid frames"] = nil
-L["Please check the 'Combined Groups (Raid)' option in Cell -> Layouts."] = nil
-L["Can detect frames"] = nil
-L["FrameSort currently supports frames from these addons: %s."] = nil
-L["Using Raid-Style Party Frames"] = nil
-L["Please enable 'Use Raid-Style Party Frames' in the Blizzard settings."] = nil
-L["Keep Groups Together setting disabled"] = nil
-L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode."] = nil
-L["Disable the 'Keep Groups Together' raid profile setting."] = nil
-L["Only using Blizzard frames with Traditional mode"] = nil
-L["Traditional mode can't sort your other frame addons: '%s'"] = nil
-L["Using Secure sorting mode when spacing is being used."] = nil
-L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method."] = nil
-L["Blizzard sorting functions not tampered with"] = nil
-L['"%s" may cause conflicts, consider disabling it.'] = nil
-L["No conflicting addons"] = nil
-L['"%s" may cause conflicts, consider disabling it.'] = nil
-L["Main tank and assist setting disabled"] = nil
-L["Please disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames."] = nil
+L["Health Check"] = "Vérification de santé"
+L["Try this"] = "Essayez ceci"
+L["Any known issues with configuration or conflicting addons will be shown below."] = "Tous les problèmes connus de configuration ou de conflits avec des addons seront affichés ci-dessous."
+L["N/A"] = "N/D"
+L["Passed!"] = "Réussi !"
+L["Failed"] = "Échec"
+L["(unknown)"] = "(inconnu)"
+L["(user macro)"] = "(macro utilisateur)"
+L["Using grouped layout for Cell raid frames"] = "Utilisation de la disposition groupée pour les cadres de raid Cell"
+L["Please check the 'Combined Groups (Raid)' option in Cell -> Layouts."] = "Veuillez vérifier l'option 'Groupes combinés (Raid)' dans Cell -> Dispositions."
+L["Can detect frames"] = "Peut détecter les cadres"
+L["FrameSort currently supports frames from these addons: %s."] = "TriCadre prend actuellement en charge les cadres de ces addons : %s."
+L["Using Raid-Style Party Frames"] = "Utilisation des cadres de groupe en style Raid"
+L["Please enable 'Use Raid-Style Party Frames' in the Blizzard settings."] = "Veuillez activer 'Utiliser les cadres de groupe en style Raid' dans les paramètres de Blizzard."
+L["Keep Groups Together setting disabled"] = "Paramètre 'Garder les groupes ensemble' désactivé"
+L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode."] = "Changez le mode d'affichage du raid pour l'une des options 'Groupes combinés' via le Mode Édition."
+L["Disable the 'Keep Groups Together' raid profile setting."] = "Désactivez le paramètre de profil de raid 'Garder les groupes ensemble'."
+L["Only using Blizzard frames with Traditional mode"] = "Utilisation uniquement des cadres Blizzard avec le mode Traditionnel"
+L["Traditional mode can't sort your other frame addons: '%s'"] = "Le mode Traditionnel ne peut pas trier vos autres addons de cadre : '%s'"
+L["Using Secure sorting mode when spacing is being used."] = "Utilisation du mode de tri Sécurisé lorsque l'espacement est utilisé."
+L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method."] = "Le mode Traditionnel ne peut pas appliquer d'espacement, envisagez de supprimer l'espacement ou d'utiliser la méthode de tri Sécurisée."
+L["Blizzard sorting functions not tampered with"] = "Fonctions de tri Blizzard non altérées"
+L['"%s" may cause conflicts, consider disabling it.'] = '« %s » peut provoquer des conflits, envisagez de le désactiver.'
+L["No conflicting addons"] = "Pas d'addons en conflit"
+L['"%s" may cause conflicts, consider disabling it.'] = '« %s » peut provoquer des conflits, envisagez de le désactiver.'
+L["Main tank and assist setting disabled"] = "Paramètre du tank principal et de l'assistant désactivé"
+L["Please disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames."] = "Veuillez désactiver l'option 'Afficher le tank principal et l'assistant' dans Options -> Interface -> Cadres de raid."
