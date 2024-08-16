@@ -1,5 +1,10 @@
 local _, addon = ...
 local L = addon.Locale
+local wow = addon.WoW.Api
+
+if wow.GetLocale() ~= "ruRU" then
+    return
+end
 
 L["FrameSort"] = "СортировкаФреймов"
 
