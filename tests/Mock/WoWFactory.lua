@@ -181,6 +181,7 @@ function M:Create()
             return table
         end,
         CopyTable = CopyTable,
+        GetLocale = function() return "enUS" end,
 
         -- secure functions
         issecurevariable = function()
