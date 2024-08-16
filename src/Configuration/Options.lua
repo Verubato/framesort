@@ -44,6 +44,8 @@ function fsConfig:TextBlock(lines, parent, anchor)
     for i, line in ipairs(lines) do
         local description = parent:CreateFontString(nil, "ARTWORK", "GameFontWhite")
         description:SetPoint("TOPLEFT", textAnchor, "BOTTOMLEFT", 0, i == 1 and -fsConfig.VerticalSpacing or -fsConfig.VerticalSpacing / 2)
+        description:SetWidth(600)
+        description:SetJustifyH("LEFT")
         description:SetText(line)
         textAnchor = description
     end
