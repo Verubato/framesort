@@ -136,7 +136,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
     if hasPlayer then
         playerLabel = parentPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
         playerLabel:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, -verticalSpacing)
-        playerLabel:SetText(L["Player:"])
+        playerLabel:SetText(L["Player"] .. ":")
         playerLabel:SetJustifyH("LEFT")
         playerLabel:SetWidth(labelWidth)
 
@@ -193,7 +193,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         modeLabel:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, -verticalSpacing)
     end
 
-    modeLabel:SetText(L["Sort:"])
+    modeLabel:SetText(L["Sort"] .. ":")
     modeLabel:SetJustifyH("LEFT")
     modeLabel:SetWidth(labelWidth)
 
