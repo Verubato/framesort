@@ -202,6 +202,10 @@ GladiusEx
 Cell
  - 队伍：是
  - 团队：是，仅在使用组合组时。
+\n
+Shadowed Unit Frames
+ - 小队: 是
+ - 竞技场: 不确定，需要测试。
 ]]
 
 -- # Api screen #

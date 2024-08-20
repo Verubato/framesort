@@ -202,6 +202,10 @@ GladiusEx
 Cell
  - 파티: 예
  - 레이드: 예, 통합 그룹 사용 시에만.
+\n
+Shadowed Unit Frames
+ - 파티: 예
+ - 투기장: 불확실함, 테스트 필요.
 ]]
 
 -- # Api screen #

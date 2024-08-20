@@ -202,6 +202,10 @@ GladiusEx
 Cell
  - Grupo: sí
  - Banda: sí, solo cuando se usan grupos combinados.
+\n
+Shadowed Unit Frames
+ - Grupo: sí
+ - Arena: no estoy seguro, necesita pruebas.
 ]]
 
 -- # Api screen #

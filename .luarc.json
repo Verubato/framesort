@@ -19,6 +19,8 @@
         "CellPartyFrameHeader",
         "CellRaidFrameHeader0",
         "CellDB",
+        "SUFHeaderparty",
+        "SUFHeaderarena",
     ],
     "diagnostics.disable": [
         "inject-field"

@@ -202,6 +202,10 @@ GladiusEx
 Cell
  - Groupe : oui
  - Raid : oui, seulement lorsqu'on utilise des groupes combinés.
+\n
+Shadowed Unit Frames
+ - Groupe : oui
+ - Arène : incertain, nécessite des tests.
 ]]
 
 -- # Api screen #

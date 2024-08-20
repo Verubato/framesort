@@ -203,6 +203,10 @@ GladiusEx
 Cell
  - Party: yes
  - Raid: yes, only when using combined groups.
+\n
+Shadowed Unit Frames
+ - Party: yes
+ - Arena: unsure, needs testing.
 ]]
 
 -- # Api screen #
