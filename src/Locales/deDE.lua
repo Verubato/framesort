@@ -206,6 +206,10 @@ GladiusEx
 Cell
  - Gruppe: Ja
  - Schlachtzug: Ja, nur bei Verwendung kombinierter Gruppen.
+\n
+Shadowed Unit Frames
+ - Gruppe: ja
+ - Arena: unsicher, muss getestet werden.
 ]]
 
 -- # Api screen #
