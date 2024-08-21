@@ -32,7 +32,7 @@ local function OnHeaderUpdate(header)
 end
 
 function M:Name()
-    return "Cell"
+    return "Shadowed Unit Frames"
 end
 
 function M:Enabled()
