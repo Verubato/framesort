@@ -176,7 +176,7 @@ L["Vertical"] = "Vertical"
 -- # Addons screen #
 L["Addons"] = "Addons"
 L["Addons_Supported_Description"] = [[
-FrameSort soporta los siguientes:
+FrameSort es compatible con los siguientes:
 \n
 Blizzard
  - Grupo: sí
@@ -193,7 +193,7 @@ sArena
 \n
 Gladius
  - Arena: sí
- - Versión de Bicmex: sí
+ - Versión Bicmex: sí
 \n
 GladiusEx
  - Grupo: sí
@@ -201,11 +201,15 @@ GladiusEx
 \n
 Cell
  - Grupo: sí
- - Banda: sí, solo cuando se usan grupos combinados.
+ - Banda: sí, solo al usar grupos combinados.
 \n
 Shadowed Unit Frames
  - Grupo: sí
- - Arena: no estoy seguro, necesita pruebas.
+ - Arena: sí
+\n
+Grid2
+ - Grupo/banda: sí
+\n
 ]]
 
 -- # Api screen #

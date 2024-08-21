@@ -225,7 +225,7 @@ function M:IsHealthy()
 
     results[#results + 1] = {
         Applicable = true,
-        Passed = CanSeeFrames(),
+        Passed = false and CanSeeFrames(),
         Description = L["Can detect frames"],
         Help = string.format(L["FrameSort currently supports frames from these addons: %s."], allProvidersString),
     }

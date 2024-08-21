@@ -7,9 +7,21 @@ local M = {}
 fsConfig.Panels.Addons = M
 
 function M:Build(parent)
-    local panel = wow.CreateFrame("Frame", nil, parent)
-    panel.name = L["Addons"]
-    panel.parent = parent.name
+    local scroller = wow.CreateFrame("ScrollFrame", nil, nil, "UIPanelScrollFrameTemplate")
+    scroller.name = L["Addons"]
+    scroller.parent = parent.name
+
+    local panel = wow.CreateFrame("Frame")
+
+    if wow.IsRetail() then
+        panel:SetWidth(wow.SettingsPanel.Container:GetWidth())
+        panel:SetHeight(wow.SettingsPanel.Container:GetHeight())
+    else
+        panel:SetWidth(wow.InterfaceOptionsFramePanelContainer:GetWidth())
+        panel:SetHeight(wow.InterfaceOptionsFramePanelContainer:GetHeight())
+    end
+
+    scroller:SetScrollChild(panel)
 
     local verticalSpacing = fsConfig.VerticalSpacing
     local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
@@ -19,5 +31,5 @@ function M:Build(parent)
     local text = L["Addons_Supported_Description"]
     fsConfig:MultilineTextBlock(text, panel, title)
 
-    return panel
+    return scroller
 end

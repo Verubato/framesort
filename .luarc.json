@@ -21,6 +21,7 @@
         "CellDB",
         "SUFHeaderparty",
         "SUFHeaderarena",
+        "Grid2LayoutHeader1",
     ],
     "diagnostics.disable": [
         "inject-field"

@@ -47,6 +47,7 @@
     <Script file="Providers\ElvUI.lua"/>
     <Script file="Providers\Cell.lua"/>
     <Script file="Providers\Suf.lua"/>
+    <Script file="Providers\Grid2.lua"/>
 
     <!-- Health check requires frame providers -->
     <Script file="Health\HealthCheck.lua"/>
