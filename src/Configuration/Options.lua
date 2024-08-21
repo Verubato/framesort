@@ -2,11 +2,11 @@
 local _, addon = ...
 local fsConfig = addon.Configuration
 local wow = addon.WoW.Api
-local L = addon.Locale
 local callbacks = {}
 
 fsConfig.VerticalSpacing = 13
 fsConfig.HorizontalSpacing = 50
+fsConfig.TextMaxWidth = 600
 
 local function AddCategory(panel)
     if wow.IsRetail() then
@@ -38,16 +38,29 @@ function fsConfig:NotifyChanged()
     end
 end
 
+function fsConfig:TextLine(line, parent, anchor, font, verticalSpacing)
+    local fstring = parent:CreateFontString(nil, "ARTWORK", font or "GameFontWhite")
+    fstring:SetSpacing(0)
+
+    if anchor then
+        fstring:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, verticalSpacing)
+    end
+
+    fstring:SetWidth(fsConfig.TextMaxWidth)
+    fstring:SetJustifyH("LEFT")
+
+    if line then
+        fstring:SetText(line)
+    end
+
+    return fstring
+end
+
 function fsConfig:TextBlock(lines, parent, anchor)
     local textAnchor = anchor
 
     for i, line in ipairs(lines) do
-        local description = parent:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-        description:SetPoint("TOPLEFT", textAnchor, "BOTTOMLEFT", 0, i == 1 and -fsConfig.VerticalSpacing or -fsConfig.VerticalSpacing / 2)
-        description:SetWidth(600)
-        description:SetJustifyH("LEFT")
-        description:SetText(line)
-        textAnchor = description
+        textAnchor = fsConfig:TextLine(line, parent, textAnchor, nil, i == 1 and -fsConfig.VerticalSpacing or -fsConfig.VerticalSpacing / 2)
     end
 
     return textAnchor
@@ -57,8 +70,7 @@ function fsConfig:MultilineTextBlock(text, parent, anchor)
     local lines = {}
 
     for str in string.gmatch(text, "([^\n]+)") do
-        -- convert any \n literals into new lines
-        str = string.gsub(str, "\\n", "\n")
+        str = string.gsub(str, "\\n", "")
         lines[#lines + 1] = str
     end
 

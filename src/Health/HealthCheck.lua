@@ -196,7 +196,7 @@ local function CheckCell()
         Applicable = applicable,
         Passed = passed,
         Description = L["Using grouped layout for Cell raid frames"],
-        Help = L["Please check the 'Combined Groups (Raid)' option in Cell -> Layouts."],
+        Help = L["Please check the 'Combined Groups (Raid)' option in Cell -> Layouts"],
     }
 end
 
@@ -225,23 +225,23 @@ function M:IsHealthy()
 
     results[#results + 1] = {
         Applicable = true,
-        Passed = false and CanSeeFrames(),
+        Passed = CanSeeFrames(),
         Description = L["Can detect frames"],
-        Help = string.format(L["FrameSort currently supports frames from these addons: %s."], allProvidersString),
+        Help = string.format(L["FrameSort currently supports frames from these addons: %s"], allProvidersString),
     }
 
     results[#results + 1] = {
         Applicable = true,
         Passed = IsUsingRaidStyleFrames(),
         Description = L["Using Raid-Style Party Frames"],
-        Help = L["Please enable 'Use Raid-Style Party Frames' in the Blizzard settings."],
+        Help = L["Please enable 'Use Raid-Style Party Frames' in the Blizzard settings"],
     }
 
     results[#results + 1] = {
         Applicable = addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Traditional,
         Passed = not IsRaidGrouped(),
         Description = L["Keep Groups Together setting disabled"],
-        Help = wow.IsRetail() and L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode."] or L["Disable the 'Keep Groups Together' raid profile setting."],
+        Help = wow.IsRetail() and L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode."] or L["Disable the 'Keep Groups Together' raid profile setting"],
     }
 
     results[#results + 1] = {
@@ -255,7 +255,7 @@ function M:IsHealthy()
         Applicable = addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Traditional,
         Passed = not UsingSpacing(),
         Description = L["Using Secure sorting mode when spacing is being used."],
-        Help = L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method."],
+        Help = L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method"],
     }
 
     local conflictingSorter = SortingFunctionsTampered()
@@ -263,7 +263,7 @@ function M:IsHealthy()
         Applicable = addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Traditional,
         Passed = conflictingSorter == nil,
         Description = L["Blizzard sorting functions not tampered with"],
-        Help = string.format(L['"%s" may cause conflicts, consider disabling it.'], conflictingSorter or L["(unknown)"]),
+        Help = string.format(L['"%s" may cause conflicts, consider disabling it'], conflictingSorter or L["(unknown)"]),
     }
 
     local conflictingAddon = ConflictingAddons()
@@ -271,7 +271,7 @@ function M:IsHealthy()
         Applicable = true,
         Passed = conflictingAddon == nil,
         Description = L["No conflicting addons"],
-        Help = string.format(L['"%s" may cause conflicts, consider disabling it.'], conflictingAddon or L["(unknown)"]),
+        Help = string.format(L['"%s" may cause conflicts, consider disabling it'], conflictingAddon or L["(unknown)"]),
     }
 
     local mainTankAndAssist = IsMainTankAssistEnabled()
@@ -279,7 +279,7 @@ function M:IsHealthy()
         Applicable = wow.IsInRaid(),
         Passed = not mainTankAndAssist,
         Description = L["Main tank and assist setting disabled"],
-        Help = L["Please disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames."],
+        Help = L["Please disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"],
     }
 
     results[#results + 1] = CheckCell()

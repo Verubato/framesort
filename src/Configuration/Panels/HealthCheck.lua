@@ -32,7 +32,7 @@ function M:Build(parent)
         while #lines < #results do
             local description = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
             local result = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
-            local help = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+            local help = fsConfig:TextLine("", panel)
 
             result:SetPoint("TOPLEFT", description, "TOPRIGHT", 4, 0)
 
@@ -61,7 +61,7 @@ function M:Build(parent)
             anchor = line.Description
         end
 
-        helpTitle:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
+        helpTitle:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing * 2)
         helpTitle:SetShown(not healthy)
         anchor = helpTitle
 
@@ -71,7 +71,7 @@ function M:Build(parent)
             line.Help:SetShown(result.Applicable and not result.Passed)
 
             if result.Applicable and not result.Passed then
-                line.Help:SetPoint("TOPLEFT", anchor, 0, -verticalSpacing * 2)
+                line.Help:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
                 anchor = line.Help
             end
         end
