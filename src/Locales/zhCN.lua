@@ -176,15 +176,15 @@ L["Vertical"] = "垂直"
 -- # Addons screen #
 L["Addons"] = "插件"
 L["Addons_Supported_Description"] = [[
-FrameSort支持以下内容：
+FrameSort 支持以下内容：
 \n
 暴雪
- - 队伍：是
+ - 小队：是
  - 团队：是
- - 竞技场：已损坏（最终会修复）。
+ - 竞技场：损坏（最终会修复）。
 \n
 ElvUI
- - 队伍：是
+ - 小队：是
  - 团队：否
  - 竞技场：否
 \n
@@ -193,19 +193,23 @@ sArena
 \n
 Gladius
  - 竞技场：是
- - Bicmex版本：是
+ - Bicmex 版本：是
 \n
 GladiusEx
- - 队伍：是
+ - 小队：是
  - 竞技场：是
 \n
 Cell
- - 队伍：是
- - 团队：是，仅在使用组合组时。
+ - 小队：是
+ - 团队：是，仅当使用组合队伍时。
 \n
 Shadowed Unit Frames
- - 小队: 是
- - 竞技场: 不确定，需要测试。
+ - 小队：是
+ - 竞技场：是
+\n
+Grid2
+ - 小队/团队：是
+\n
 ]]
 
 -- # Api screen #

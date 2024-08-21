@@ -181,7 +181,7 @@ FrameSort prend en charge les éléments suivants :
 Blizzard
  - Groupe : oui
  - Raid : oui
- - Arène : cassé (sera corrigé éventuellement).
+ - Arène : cassé (je le réparerai éventuellement).
 \n
 ElvUI
  - Groupe : oui
@@ -201,11 +201,15 @@ GladiusEx
 \n
 Cell
  - Groupe : oui
- - Raid : oui, seulement lorsqu'on utilise des groupes combinés.
+ - Raid : oui, uniquement lors de l'utilisation de groupes combinés.
 \n
 Shadowed Unit Frames
  - Groupe : oui
- - Arène : incertain, nécessite des tests.
+ - Arène : oui
+\n
+Grid2
+ - Groupe/raid : oui
+\n
 ]]
 
 -- # Api screen #

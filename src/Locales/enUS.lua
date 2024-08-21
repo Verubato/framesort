@@ -206,7 +206,11 @@ Cell
 \n
 Shadowed Unit Frames
  - Party: yes
- - Arena: unsure, needs testing.
+ - Arena: yes
+\n
+Grid2
+ - Party/raid: yes
+\n
 ]]
 
 -- # Api screen #

@@ -180,36 +180,40 @@ L["Vertical"] = "Vertikal"
 -- # Addons screen #
 L["Addons"] = "Addons"
 L["Addons_Supported_Description"] = [[
-FrameSort unterstützt die folgenden:
+FrameSort unterstützt Folgendes:
 \n
 Blizzard
- - Gruppe: Ja
- - Schlachtzug: Ja
- - Arena: kaputt (wird irgendwann repariert).
+ - Gruppe: ja
+ - Schlachtzug: ja
+ - Arena: defekt (wird irgendwann repariert).
 \n
 ElvUI
- - Gruppe: Ja
- - Schlachtzug: Nein
- - Arena: Nein
+ - Gruppe: ja
+ - Schlachtzug: nein
+ - Arena: nein
 \n
 sArena
- - Arena: Ja
+ - Arena: ja
 \n
 Gladius
- - Arena: Ja
- - Bicmex-Version: Ja
+ - Arena: ja
+ - Bicmex-Version: ja
 \n
 GladiusEx
- - Gruppe: Ja
- - Arena: Ja
+ - Gruppe: ja
+ - Arena: ja
 \n
 Cell
- - Gruppe: Ja
- - Schlachtzug: Ja, nur bei Verwendung kombinierter Gruppen.
+ - Gruppe: ja
+ - Schlachtzug: ja, nur bei Verwendung kombinierter Gruppen.
 \n
 Shadowed Unit Frames
  - Gruppe: ja
- - Arena: unsicher, muss getestet werden.
+ - Arena: ja
+\n
+Grid2
+ - Gruppe/Schlachtzug: ja
+\n
 ]]
 
 -- # Api screen #
