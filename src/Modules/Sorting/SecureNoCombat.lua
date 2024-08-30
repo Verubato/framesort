@@ -284,8 +284,9 @@ local function SetNameList(container)
     local previousSortMethod = container.Frame:GetAttribute("sortMethod")
     local previousGroupFilter = container.Frame:GetAttribute("groupFilter")
 
-    container.Frame:SetAttribute("previousSortMethod", previousSortMethod)
-    container.Frame:SetAttribute("previousGroupFilter", previousGroupFilter)
+    container.Frame:SetAttribute("FrameSortHasSorted", true)
+    container.Frame:SetAttribute("FrameSortPreviousSortMethod", previousSortMethod)
+    container.Frame:SetAttribute("FrameSortPreviousGroupFilter", previousGroupFilter)
 
     -- groupFilter must be set to nil for nameList to be used
     container.Frame:SetAttribute("groupFilter", nil)
@@ -517,11 +518,15 @@ local function ClearSorting(providers, friendlyEnabled, enemyEnabled)
     for _, container in ipairs(nameListContainers) do
         container.Frame:SetAttribute("nameList", nil)
 
-        local previousSortMethod = container.Frame:GetAttribute("previousSortMethod") or "INDEX"
-        local previousGroupFilter = container.Frame:GetAttribute("previousGroupFilter")
+        local hasTouched = container.Frame:GetAttribute("FrameSortHasSorted") or false
 
-        container.Frame:SetAttribute("sortMethod", previousSortMethod)
-        container.Frame:SetAttribute("groupFilter", previousGroupFilter)
+        if hasTouched then
+            local previousSortMethod = container.Frame:GetAttribute("FrameSortPreviousSortMethod") or "INDEX"
+            local previousGroupFilter = container.Frame:GetAttribute("FrameSortPreviousGroupFilter")
+
+            container.Frame:SetAttribute("sortMethod", previousSortMethod)
+            container.Frame:SetAttribute("groupFilter", previousGroupFilter)
+        end
     end
 
     return #nameListContainers > 0
