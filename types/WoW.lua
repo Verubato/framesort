@@ -31,6 +31,7 @@
 ---@field GetMacroInfo fun(id: string|number): name: string, icon: number, body: string
 ---@field EditMacro fun(macroInfo: number|string, name: string?, icon: number|string?, body: string?): macroId: number
 -- unit functions
+---@field UnitGUID fun(unit: string): string
 ---@field UnitName fun(unit: string): string
 ---@field GetUnitName fun(unit: string, showServername: boolean): string
 ---@field UnitExists fun(unit: string): boolean

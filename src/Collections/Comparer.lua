@@ -68,22 +68,14 @@ end, function(_, index)
     return index
 end)
 
+local lgist = LibStub and LibStub:GetLibrary("LibGroupInSpecT-1.1")
+
 ---@class Comparer
 local M = {}
 addon.Collections.Comparer = M
 
 local function EmptyCompare(x, y)
     return x < y
-end
-
-local function CompareAlphabetical(leftToken, rightToken)
-    local name1, name2 = wow.UnitName(leftToken), wow.UnitName(rightToken)
-
-    if name1 and name2 then
-        return name1 < name2
-    end
-
-    return leftToken < rightToken
 end
 
 local function CompareGroup(leftToken, rightToken, isArena)
@@ -121,6 +113,16 @@ local function CompareGroup(leftToken, rightToken, isArena)
     return leftToken < rightToken
 end
 
+local function CompareAlphabetical(leftToken, rightToken)
+    local name1, name2 = wow.UnitName(leftToken), wow.UnitName(rightToken)
+
+    if name1 and name2 then
+        return name1 < name2
+    end
+
+    return CompareGroup(leftToken, rightToken, string.match(leftToken, "arena.*"))
+end
+
 local function CompareRole(leftToken, rightToken, isArena)
     local leftRole, rightRole = nil, nil
     local leftSpec, rightSpec = nil, nil
@@ -143,25 +145,28 @@ local function CompareRole(leftToken, rightToken, isArena)
         leftRole = select(5, wow.GetSpecializationInfoByID(leftSpec))
         rightRole = select(5, wow.GetSpecializationInfoByID(rightSpec))
     else
-        if wow.GetInspectSpecialization and wow.GetSpecialization then
-            -- if by chance we have cached spec data locally then use it
-            -- normally this requires performing an inspect and waiting for the results which is way too slow to be usable
-            -- but in retail sometimes the data is available immediately
-            leftSpec = wow.UnitIsUnit(leftToken, "player") and wow.GetSpecialization() or wow.GetInspectSpecialization(leftToken)
-            rightSpec = wow.UnitIsUnit(rightToken, "player") and wow.GetSpecialization() or wow.GetInspectSpecialization(rightToken)
+        -- can be null in unit tests
+        if lgist then
+            local leftData = lgist:GetCachedInfo(wow.UnitGUID(leftToken))
+            local rightData = lgist:GetCachedInfo(wow.UnitGUID(rightToken))
+
+            if leftData and rightData then
+                leftSpec = leftData and leftData.global_spec_id
+                rightSpec = rightData and rightData.global_spec_id
+
+                leftRole = leftData.spec_role
+                rightRole = rightData.spec_role
+            end
         end
 
-        if leftSpec and rightSpec and leftSpec > 0 and rightSpec > 0 then
-            leftRole = select(5, wow.GetSpecializationInfoByID(leftSpec))
-            rightRole = select(5, wow.GetSpecializationInfoByID(rightSpec))
-        else
+        if not leftRole or not rightRole then
             leftRole = wow.UnitGroupRolesAssigned(leftToken)
             rightRole = wow.UnitGroupRolesAssigned(rightToken)
         end
     end
 
     if not leftRole or not rightRole then
-        return leftToken < rightToken
+        return CompareGroup(leftToken, rightToken, isArena)
     end
 
     local roleValues = roleOrdering[addon.DB.Options.Sorting.RoleOrdering] or roleOrdering[1]

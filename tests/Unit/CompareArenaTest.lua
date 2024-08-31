@@ -44,7 +44,7 @@ function M:test_casters_before_melee()
 
         return 0, 0
     end
-    addon.WoW.Api.GetSpecializationInfoByID = function (specIndex)
+    addon.WoW.Api.GetSpecializationInfoByID = function(specIndex)
         if specIndex == 72 then
             return specIndex, "Fury", "", 0, "DAMAGER", "", ""
         elseif specIndex == 105 then
@@ -85,7 +85,7 @@ function M:test_hunters_between_casters_and_melee()
 
         return 0, 0
     end
-    addon.WoW.Api.GetSpecializationInfoByID = function (specIndex)
+    addon.WoW.Api.GetSpecializationInfoByID = function(specIndex)
         if specIndex == 254 then
             return specIndex, "Marksmanship", "", 0, "DAMAGER", "", ""
         elseif specIndex == 70 then

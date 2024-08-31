@@ -10,6 +10,7 @@ local timerFrame = nil
 local eventFrame = nil
 local pvpTimerType = 1
 local run = false
+local lgist = LibStub and LibStub:GetLibrary("LibGroupInSpecT-1.1")
 
 local function OnProviderRequiresSort(provider)
     fsLog:Debug(string.format("Provider %s requested sort.", provider:Name()))
@@ -116,4 +117,22 @@ function M:Init()
         fsLog:Debug("First run.")
         M:Run()
     end)
+
+    if not lgist then
+        -- will happen in unit tests
+        return
+    end
+
+    local cb = {}
+    function cb:OnSpecInfo()
+        local pending = lgist:QueuedInspections()
+
+        if pending and #pending > 0 then
+            return
+        end
+
+        M:Run()
+    end
+
+    lgist.RegisterCallback(cb, "GroupInSpecT_Update", "OnSpecInfo")
 end
