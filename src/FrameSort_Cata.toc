@@ -2,7 +2,6 @@
 ## Title: FrameSort
 ## Notes: Places the player frame at the top/middle/bottom (configurable) of party/raid frames.
 ## Notes-esES: Coloca el marco del jugador en la parte superior/media/inferior (configurable) de los marcos de grupo/raid.
-## Notes-esES: Coloca el marco del jugador en la parte superior/media/inferior (configurable) de los marcos de grupo/raid.
 ## Notes-esMX: Coloca el marco del jugador en la parte superior/media/inferior (configurable) de los marcos de grupo/raid.
 ## Notes-deDE: Platziert den Spielerrahmen oben/mitte/unten (konfigurierbar) der Gruppen-/Schlachtzugsrahmen.
 ## Notes-frFR: Place le cadre du joueur en haut/milieu/bas (configurable) des cadres de groupe/raid.
