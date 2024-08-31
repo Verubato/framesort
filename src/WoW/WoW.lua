@@ -45,6 +45,7 @@ local wow = {
     -- unit functions
     UnitName = UnitName,
     GetUnitName = GetUnitName,
+    UnitGUID = UnitGUID,
     UnitExists = UnitExists,
     UnitIsUnit = UnitIsUnit,
     UnitInRaid = UnitInRaid,

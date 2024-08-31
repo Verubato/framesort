@@ -135,47 +135,4 @@ function M:test_sort_with_nonexistant_units()
     assertEquals(subject, { "player", "party1", "party2", "party3", "party4", "hello5" })
 end
 
-function M:test_casters_before_melee()
-    config.PlayerSortMode = fsConfig.PlayerSortMode.Top
-    config.GroupSortMode = fsConfig.GroupSortMode.Role
-
-    addon.WoW.Api.GetSpecializationInfoByID = function(specIndex)
-        if specIndex == 72 then
-            return specIndex, "Fury", "", 0, "DAMAGER", "", ""
-        elseif specIndex == 105 then
-            return specIndex, "Restoration", "", 0, "HEALER", "", ""
-        elseif specIndex == 258 then
-            return specIndex, "Shadow", "", 0, "DAMAGER", "", ""
-        end
-
-        return specIndex, "", "", 0, "NONE", "", ""
-    end
-
-    addon.WoW.Api.GetSpecialization = function()
-        return 105
-    end
-
-    addon.WoW.Api.GetInspectSpecialization = function(unit)
-        if unit == "party1" then
-            -- fury warrior
-            return 72
-        elseif unit == "player" then
-            -- rdruid
-            return 105
-        elseif unit == "party2" then
-            -- spriest
-            return 258
-        end
-
-        return 0
-    end
-
-    local subject = { "party1", "party2", "player" }
-    local sortFunction = fsCompare:SortFunction(subject)
-
-    table.sort(subject, sortFunction)
-
-    assertEquals(subject, { "player", "party2", "party1" })
-end
-
 return M

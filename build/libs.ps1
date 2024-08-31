@@ -1,0 +1,1 @@
+svn checkout https://repos.curseforge.com/wow/libgroupinspect/trunk ..\src\Libs\LibGroupInSpecT
