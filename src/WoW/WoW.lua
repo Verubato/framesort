@@ -17,6 +17,8 @@ local wow = {
     PartyFrame = PartyFrame,
     CompactRaidFrameContainer = CompactRaidFrameContainer,
     CompactArenaFrame = CompactArenaFrame,
+    CompactArenaFrameTitle = CompactArenaFrameTitle,
+    CompactArenaFrameMember1 = CompactArenaFrameMember1,
     CompactRaidFrameContainer_SetFlowSortFunction = CompactRaidFrameContainer_SetFlowSortFunction,
     CompactRaidFrameManager_GetSetting = CompactRaidFrameManager_GetSetting or function(_)
         return false

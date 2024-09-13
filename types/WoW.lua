@@ -12,6 +12,8 @@
 ---@field PartyFrame table
 ---@field CompactRaidFrameContainer table
 ---@field CompactArenaFrame table
+---@field CompactArenaFrameTitle table
+---@field CompactArenaFrameMember1 table
 ---@field CompactRaidFrameContainer_SetFlowSortFunction fun(container: table, sortFunction: fun(unit1: string, unit2: string): boolean)
 ---@field CompactRaidFrameManager_GetSetting fun(name: string): boolean
 ---@field EditModeManagerFrame table
