@@ -395,6 +395,42 @@ function M:UpgradeToVersion20(options)
     options.Version = 20
 end
 
+function M:UpgradeToVersion21(options)
+    assert(options.Version == 20)
+
+    -- Tank -> Healer - > Dps
+    if options.Sorting.RoleOrdering == 1 or not options.Sorting.RoleOrdering then
+        options.Sorting.Ordering = {
+            Tanks = 1,
+            Healers = 2,
+            Casters = 3,
+            Hunters = 4,
+            Melee = 5,
+        }
+        -- Healer -> Tank - > Dps
+    elseif options.Sorting.RoleOrdering == 2 then
+        options.Sorting.Ordering = {
+            Healers = 1,
+            Tanks = 2,
+            Casters = 3,
+            Hunters = 4,
+            Melee = 5,
+        }
+        -- Healer -> Dps - > Tank
+    elseif options.Sorting.RoleOrdering == 3 then
+        options.Sorting.Ordering = {
+            Healers = 1,
+            Casters = 2,
+            Hunters = 3,
+            Melee = 4,
+            Tanks = 5,
+        }
+    end
+
+    options.Sorting.RoleOrdering = nil
+    options.Version = 21
+end
+
 ---Upgrades saved options to the current version.
 function M:UpgradeOptions(options)
     while (options.Version or 1) < fsConfig.Defaults.Version do

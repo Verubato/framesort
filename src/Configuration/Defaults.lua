@@ -4,12 +4,18 @@ local fsConfig = addon.Configuration
 
 ---@class Options
 fsConfig.Defaults = {
-    Version = 20,
+    Version = 21,
     Logging = {
         Enabled = false,
     },
     Sorting = {
-        RoleOrdering = 1,
+        Ordering = {
+            Tanks = 1,
+            Healers = 2,
+            Casters = 3,
+            Hunters = 4,
+            Melee = 5
+        },
         Method = fsConfig.SortingMethod.Secure,
         Arena = {
             Twos = {

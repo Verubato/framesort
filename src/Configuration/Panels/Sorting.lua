@@ -6,7 +6,7 @@ local fsConfig = addon.Configuration
 local fsModules = addon.Modules
 local L = addon.Locale
 local verticalSpacing = fsConfig.VerticalSpacing
-local horizontalSpacing = fsConfig.HorizontalSpacing
+local horizontalSpacing = fsConfig.HorizontalSpacing * 1.5
 local labelWidth = 50
 local M = {}
 fsConfig.Panels.Sorting = M
@@ -28,40 +28,7 @@ local function BuiltTitle(panel)
     unhealthyGoto:SetPoint("TOPLEFT", unhealthy, "BOTTOMLEFT", 0, -verticalSpacing)
     unhealthyGoto:SetText(L["Please go to the Health Check panel to view more details."])
 
-    local lines = {}
-    lines[L["Group"]] = L["party1 > party2 > partyN > partyN+1"]
-    lines[L["Role"]] = L["tank > healer > dps"]
-    lines[L["Alpha"]] = L["NameA > NameB > NameZ"]
-
-    local keyWidth = 50
-    local i = 1
     local anchor = title
-    local sortingRules = {}
-    local roleValueText = nil
-
-    for k, v in pairs(lines) do
-        local keyText = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-        keyText:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing * 0.75)
-        keyText:SetText(k .. ": ")
-        keyText:SetWidth(keyWidth)
-        keyText:SetJustifyH("LEFT")
-        anchor = keyText
-
-        local valueText = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-        valueText:SetPoint("LEFT", keyText, "RIGHT")
-        valueText:SetText(v)
-        i = i + 1
-
-        if k == L["Role"] then
-            roleValueText = valueText
-        end
-
-        sortingRules[#sortingRules + 1] = {
-            Key = keyText,
-            Value = valueText,
-        }
-    end
-
     local dynamicAnchor = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
     dynamicAnchor:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT")
 
@@ -70,23 +37,8 @@ local function BuiltTitle(panel)
         unhealthy:SetShown(not healthy)
         unhealthyGoto:SetShown(not healthy)
 
-        for _, rule in ipairs(sortingRules) do
-            rule.Key:SetShown(healthy)
-            rule.Value:SetShown(healthy)
-        end
-
-        assert(roleValueText ~= nil)
-
-        if addon.DB.Options.Sorting.RoleOrdering == fsConfig.RoleOrdering.HealerTankDps then
-            roleValueText:SetText(L["healer > tank > dps"])
-        elseif addon.DB.Options.Sorting.RoleOrdering == fsConfig.RoleOrdering.HealerDpsTank then
-            roleValueText:SetText(L["healer > dps > tank"])
-        else
-            roleValueText:SetText(L["tank > healer > dps"])
-        end
-
         if healthy then
-            dynamicAnchor:SetPoint("TOPLEFT", sortingRules[#sortingRules].Key, "BOTTOMLEFT")
+            dynamicAnchor:SetPoint("TOPLEFT", title, "BOTTOMLEFT")
         else
             dynamicAnchor:SetPoint("TOPLEFT", unhealthyGoto, "BOTTOMLEFT")
         end
@@ -209,7 +161,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
 
     local role = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     role:SetPoint("LEFT", group, "RIGHT", horizontalSpacing, 0)
-    role.Text:SetText(L["Role"])
+    role.Text:SetText(L["Role/spec"])
     role:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Role)
 
     local alpha = nil
@@ -221,7 +173,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
     if hasAlpha then
         alpha = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
         alpha:SetPoint("LEFT", role, "RIGHT", horizontalSpacing, 0)
-        alpha.Text:SetText(L["Alpha"])
+        alpha.Text:SetText(L["Alphabetical"])
         alpha:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Alphabetical)
 
         modes[alpha] = fsConfig.GroupSortMode.Alphabetical
