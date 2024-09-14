@@ -3,8 +3,9 @@ local _, addon = ...
 local fsConfig = addon.Configuration
 local wow = addon.WoW.Api
 local callbacks = {}
+local dropDownId = 1
 
-fsConfig.VerticalSpacing = 13
+fsConfig.VerticalSpacing = 12
 fsConfig.HorizontalSpacing = 50
 fsConfig.TextMaxWidth = 600
 
@@ -77,6 +78,60 @@ function fsConfig:MultilineTextBlock(text, parent, anchor)
     return fsConfig:TextBlock(lines, parent, anchor)
 end
 
+function fsConfig:Dropdown(parent, items, getValue, setSelected)
+    if wow.IsRetail() then
+        local dd = wow.CreateFrame("DropdownButton", nil, parent, "WowStyle1DropdownTemplate")
+        dd:SetupMenu(function(_, rootDescription)
+            for i, value in ipairs(items) do
+                rootDescription:CreateRadio(tostring(value), isSelected, setSelected, i)
+            end
+        end)
+
+        function dd:FrameSortRefresh()
+            self:Update()
+        end
+
+        return dd
+    else
+        local libDD = LibStub:GetLibrary("LibUIDropDownMenu-4.0")
+        -- needs a name to not bug out
+        local dd = libDD:Create_UIDropDownMenu("FrameSortDropDown" .. dropDownId, parent)
+        dropDownId = dropDownId + 1
+
+        libDD:UIDropDownMenu_Initialize(dd, function()
+            for _, value in ipairs(items) do
+                local info = libDD:UIDropDownMenu_CreateInfo()
+                info.text = tostring(value)
+                info.value = value
+
+                info.checked = function()
+                    return getValue() == value
+                end
+
+                -- onclick handler
+                info.func = function()
+                    libDD:UIDropDownMenu_SetSelectedID(dd, dd:GetID(info))
+                    libDD:UIDropDownMenu_SetText(dd, tostring(value))
+                    setSelected(value)
+                end
+
+                libDD:UIDropDownMenu_AddButton(info, 1)
+
+                -- if the config value matches this value, then set it as the selected item
+                if getValue() == value then
+                    libDD:UIDropDownMenu_SetSelectedID(dd, dd:GetID(info))
+                end
+            end
+        end)
+
+        function dd:FrameSortRefresh()
+            libDD:UIDropDownMenu_SetText(dd, getValue())
+        end
+
+        return dd
+    end
+end
+
 function fsConfig:Init()
     local panel = wow.CreateFrame("ScrollFrame", nil, nil, "UIPanelScrollFrameTemplate")
     panel.name = "FrameSort"
@@ -98,8 +153,8 @@ function fsConfig:Init()
     local panels = fsConfig.Panels
     panels.Sorting:Build(main)
 
+    local ordering = panels.Ordering:Build(panel)
     local sortingMethod = panels.SortingMethod:Build(panel)
-    local roleOrdering = panels.RoleOrdering:Build(panel)
     local autoLeader = wow.IsRetail() and panels.AutoLeader:Build(panel)
     local keybinding = panels.Keybinding:Build(panel)
     local macro = panels.Macro:Build(panel)
@@ -109,8 +164,8 @@ function fsConfig:Init()
     local health = panels.Health:Build(panel)
     local help = panels.Help:Build(panel)
 
+    AddSubCategory(ordering)
     AddSubCategory(sortingMethod)
-    AddSubCategory(roleOrdering)
 
     if wow.IsRetail() then
         AddSubCategory(autoLeader)

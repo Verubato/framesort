@@ -13,20 +13,35 @@ local M = {}
 addon.Collections.Comparer = M
 
 local function Ordering()
-    local config = addon.DB.Options.Sorting.RoleOrdering
     local ids = fsConfig.SpecIds
+    local config = addon.DB.Options.Sorting.Ordering
     local specOrdering = fsEnumerable:New()
-    local roleLookup = nil
+    local roleOrdering = fsEnumerable:New()
+    local ordering = {}
 
-    if config == fsConfig.RoleOrdering.TankHealerDps then
-        roleLookup = { TANK = 1, HEALER = 2, DAMAGER = 3, NONE = 4 }
-        specOrdering = specOrdering:Concat(ids.Tanks):Concat(ids.Healers):Concat(ids.Casters):Concat(ids.Hunters):Concat(ids.Melee)
-    elseif config == fsConfig.RoleOrdering.HealerTankDps then
-        roleLookup = { HEALER = 1, TANK = 2, DAMAGER = 3, NONE = 4 }
-        specOrdering = specOrdering:Concat(ids.Healers):Concat(ids.Tanks):Concat(ids.Casters):Concat(ids.Hunters):Concat(ids.Melee)
-    elseif config == fsConfig.RoleOrdering.HealerDpsTank then
-        roleLookup = { HEALER = 1, DAMAGER = 2, TANK = 3, NONE = 4 }
-        specOrdering = specOrdering:Concat(ids.Healers):Concat(ids.Casters):Concat(ids.Hunters):Concat(ids.Melee):Concat(ids.Tanks)
+    ordering[config.Tanks] = "Tanks"
+    ordering[config.Healers] = "Healers"
+    ordering[config.Casters] = "Casters"
+    ordering[config.Hunters] = "Hunters"
+    ordering[config.Melee] = "Melee"
+
+    for order, spec in pairs(ordering) do
+        if spec == "Tanks" then
+            roleOrdering = roleOrdering:Concat({ TANK = order })
+            specOrdering = specOrdering:Concat(ids.Tanks)
+        elseif spec == "Healers" then
+            roleOrdering = roleOrdering:Concat({ HEALER = order })
+            specOrdering = specOrdering:Concat(ids.Healers)
+        elseif spec == "Casters" then
+            roleOrdering = roleOrdering:Concat({ DAMAGER = order })
+            specOrdering = specOrdering:Concat(ids.Casters)
+        elseif spec == "Hunters" then
+            roleOrdering = roleOrdering:Concat({ DAMAGER = order })
+            specOrdering = specOrdering:Concat(ids.Hunters)
+        elseif spec == "Melee" then
+            roleOrdering = roleOrdering:Concat({ DAMAGER = order })
+            specOrdering = specOrdering:Concat(ids.Melee)
+        end
     end
 
     local specLookup = specOrdering:ToLookup(function(item, _)
@@ -35,7 +50,7 @@ local function Ordering()
         return index
     end)
 
-    return specLookup, roleLookup or {}
+    return specLookup, roleOrdering:ToTable()
 end
 
 local function EmptyCompare(x, y)

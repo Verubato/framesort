@@ -1868,7 +1868,13 @@ function M:test_upgrade_options_version1_to_latest()
             Enabled = false,
         },
         Sorting = {
-            RoleOrdering = 1,
+            Ordering = {
+                Tanks = 1,
+                Healers = 2,
+                Casters = 3,
+                Hunters = 4,
+                Melee = 5
+            },
             Method = "Secure",
             Arena = {
                 Twos = {
@@ -1925,7 +1931,7 @@ function M:test_upgrade_options_version1_to_latest()
                 Vertical = 0,
             },
         },
-        Version = 20,
+        Version = 21,
     }
 
     upgrader:UpgradeOptions(options)

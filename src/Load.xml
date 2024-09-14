@@ -3,6 +3,7 @@
     <Script file="Libs\LibGroupInSpecT\LibStub\LibStub.lua"/>
     <Script file="Libs\LibGroupInSpecT\CallbackHandler-1.0\CallbackHandler-1.0.lua"/>
     <Script file="Libs\LibGroupInSpecT\LibGroupInSpecT-1.1.lua"/>
+    <Include file="Libs\LibUIDropDownMenu\LibUIDropDownMenu.xml"/>
 
     <!-- Load the addon table structure (pseudo-namespaces) first -->
     <Script file="Namespace.lua"/>
@@ -12,7 +13,6 @@
     <Script file="Collections\Enumerable.lua"/>
     <Script file="Configuration\SortingMethod.lua"/>
     <Script file="Configuration\SortMode.lua"/>
-    <Script file="Configuration\RoleOrdering.lua"/>
     <Script file="Configuration\Spec.lua"/>
     <Script file="Numerics\Math.lua"/>
 
@@ -81,7 +81,7 @@
     <Script file="Configuration\Options.lua"/>
     <Script file="Configuration\Defaults.lua"/>
     <Script file="Configuration\Upgrader.lua"/>
-    <Script file="Configuration\Panels\RoleOrdering.lua"/>
+    <Script file="Configuration\Panels\Ordering.lua"/>
     <Script file="Configuration\Panels\AutoLeader.lua"/>
     <Script file="Configuration\Panels\Sorting.lua"/>
     <Script file="Configuration\Panels\Spacing.lua"/>
