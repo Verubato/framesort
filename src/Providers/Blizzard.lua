@@ -289,23 +289,23 @@ function M:Containers()
         containers[#containers + 1] = raid
     end
 
-    -- if wow.CompactArenaFrame then
-    --     containers[#containers + 1] = {
-    --         Frame = wow.CompactArenaFrame,
-    --         Type = fsFrame.ContainerType.EnemyArena,
-    --         LayoutType = fsFrame.LayoutType.Hard,
-    --         VisibleOnly = false,
-    --         SupportsSpacing = true,
-    --         InCombatSortingRequired = true,
-    --         AnchorPoint = "TOPRIGHT",
-    --         FramesOffset = function()
-    --             return {
-    --                 X = -(wow.CompactArenaFrameMember1 and (wow.CompactArenaFrameMember1.CcRemoverFrame:GetWidth() + 2) or 29),
-    --                 Y = -(wow.CompactArenaFrameTitle and wow.CompactArenaFrameTitle:GetHeight() or 14),
-    --             }
-    --         end,
-    --     }
-    -- end
+    if wow.CompactArenaFrame then
+        containers[#containers + 1] = {
+            Frame = wow.CompactArenaFrame,
+            Type = fsFrame.ContainerType.EnemyArena,
+            LayoutType = fsFrame.LayoutType.Hard,
+            VisibleOnly = false,
+            SupportsSpacing = true,
+            InCombatSortingRequired = true,
+            AnchorPoint = "TOPRIGHT",
+            FramesOffset = function()
+                return {
+                    X = -(wow.CompactArenaFrameMember1 and (wow.CompactArenaFrameMember1.CcRemoverFrame:GetWidth() + 2) or 29),
+                    Y = -(wow.CompactArenaFrameTitle and wow.CompactArenaFrameTitle:GetHeight() or 14),
+                }
+            end,
+        }
+    end
 
     return containers
 end

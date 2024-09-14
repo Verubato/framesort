@@ -15,6 +15,7 @@
 ---@field TextLine fun(self: table, line: string, parent: table, anchor: table?, font: string?, verticalSpacing: number?): table anchor
 ---@field TextBlock fun(self: table, lines: string[], parent: table, anchor: table): table anchor
 ---@field MultilineTextBlock fun(self: table, lines: string, parent: table, anchor: table): table anchor
+---@field SpecIds SpecIds
 
 ---@class Panels
 ---@field Sorting OptionsPanel
@@ -28,3 +29,10 @@
 ---@field SortingMethod OptionsPanel
 ---@field Api OptionsPanel
 ---@field Help OptionsPanel
+
+---@class SpecIds
+---@field Tanks table
+---@field Healers table
+---@field Casters table
+---@field Hunters table
+---@field Melee table
