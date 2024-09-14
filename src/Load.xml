@@ -32,9 +32,6 @@
     <Script file="Locales\zhCN.lua"/>
     <Script file="Locales\zhTW.lua"/>
 
-    <Script file="Locales\zhCN-override.lua"/>
-    <Script file="Locales\zhTW-override.lua"/>
-
     <!-- Scheduler requires core wow files -->
     <Script file="Scheduling\Scheduler.lua"/>
 
