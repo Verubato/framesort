@@ -83,7 +83,9 @@ function fsConfig:Dropdown(parent, items, getValue, setSelected)
         local dd = wow.CreateFrame("DropdownButton", nil, parent, "WowStyle1DropdownTemplate")
         dd:SetupMenu(function(_, rootDescription)
             for i, value in ipairs(items) do
-                rootDescription:CreateRadio(tostring(value), isSelected, setSelected, i)
+                rootDescription:CreateRadio(tostring(value), function(x)
+                    return x == getValue()
+                end, setSelected, i)
             end
         end)
 
