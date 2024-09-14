@@ -10,13 +10,7 @@ L["There are some issuse that may prevent FrameSort from working correctly."] = 
 L["Please go to the Health Check panel to view more details."] = nil
 L["Role"] = nil
 L["Group"] = nil
-L["Alpha"] = nil
-L["party1 > party2 > partyN > partyN+1"] = nil
-L["tank > healer > dps"] = nil
-L["NameA > NameB > NameZ"] = nil
-L["healer > tank > dps"] = nil
-L["healer > dps > tank"] = nil
-L["tank > healer > dps"] = nil
+L["Alphabetical"] = nil
 L["Arena - 2v2"] = nil
 L["3v3"] = nil
 L["3v3 & 5v5"] = nil
@@ -34,7 +28,6 @@ L["Bottom"] = nil
 L["Hidden"] = nil
 L["Group"] = nil
 L["Role"] = nil
-L["Alpha"] = nil
 L["Reverse"] = nil
 
 -- # Sorting Method screen #
@@ -69,12 +62,14 @@ Cons:
 L["Please reload after changing these settings."] = nil
 L["Reload"] = nil
 
--- # Role Ordering screen #
-L["Role Ordering"] = nil
+-- # Ordering screen #
+L["Role"] = nil
 L["Specify the ordering you wish to use when sorting by role."] = nil
-L["Tank > Healer > DPS"] = nil
-L["Healer > Tank > DPS"] = nil
-L["Healer > DPS > Tank"] = nil
+L["Tanks"] = nil
+L["Healers"] = nil
+L["Casters"] = nil
+L["Hunters"] = nil
+L["Melee"] = nil
 
 -- # Auto Leader screen #
 L["Auto Leader"] = nil

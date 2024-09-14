@@ -20,7 +20,7 @@ languages = {
 
 def translate_lua(localization_string, target_language):
     # Construct the prompt
-    prompt = f"Translate the following Lua localization code to {target_language}:\n\n{localization_string}"
+    prompt = f"Translate the following Lua localization code to {target_language}:\n\n{localization_string}, don't change the keys, only change the values, and don't translate the comments."
 
     # Make the API call
     response = openai.chat.completions.create(
