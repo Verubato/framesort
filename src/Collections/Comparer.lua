@@ -4,75 +4,39 @@ local wow = addon.WoW.Api
 local fsUnit = addon.WoW.Unit
 local fsMath = addon.Numerics.Math
 local fsEnumerable = addon.Collections.Enumerable
+local lgist = LibStub and LibStub:GetLibrary("LibGroupInSpecT-1.1")
 local fsConfig = addon.Configuration
 local fuzzyDecimalPlaces = 0
-local roleOrdering = {
-    -- tank > healer > dps
-    [fsConfig.RoleOrdering.TankHealerDps] = { TANK = 1, HEALER = 2, DAMAGER = 3, NONE = 4 },
-    -- healer > tank > dps
-    [fsConfig.RoleOrdering.HealerTankDps] = { HEALER = 1, TANK = 2, DAMAGER = 3, NONE = 4 },
-    -- healer > dps > tank
-    [fsConfig.RoleOrdering.HealerDpsTank] = { HEALER = 1, DAMAGER = 2, TANK = 3, NONE = 4 },
-}
-local specOrdering = {
-    -- healers
-    65, -- hpal
-    105, -- rdruid
-    256, -- disc priest
-    257, -- holy priest
-    264, -- resto shaman
-    270, -- mistweaver
-    1468, -- preservation
-
-    -- casters
-    62, -- arcane mage
-    63, -- fire mage
-    64, -- frost mage
-    102, -- boomkin
-    258, -- shadow priest
-    262, -- ele sham
-    265, -- affi lock
-    266, -- demo lock
-    267, -- destro lock
-    1467, -- devastation
-    1473, -- aug voker
-
-    -- hunters
-    253, -- bm hunter
-    254, -- mm hunter
-    255, -- survival hunter
-
-    -- melee
-    66, -- prot pally
-    70, -- ret pally
-    71, -- arms warr
-    72, -- fury warr
-    73, -- prot warrior
-    103, -- feral
-    104, -- guardian druid
-    250, -- blood dk
-    251, -- frost dk
-    252, -- unholy dk
-    259, -- assa rogue
-    260, -- outlaw rogue
-    261, -- sub rogue
-    263, -- enhance shaman
-    268, -- brewmaster
-    269, -- ww monk
-    577, -- havoc dh
-    581, -- vengeance
-}
-local specLookup = fsEnumerable:From(specOrdering):ToLookup(function(item, _)
-    return item
-end, function(_, index)
-    return index
-end)
-
-local lgist = LibStub and LibStub:GetLibrary("LibGroupInSpecT-1.1")
 
 ---@class Comparer
 local M = {}
 addon.Collections.Comparer = M
+
+local function Ordering()
+    local config = addon.DB.Options.Sorting.RoleOrdering
+    local ids = fsConfig.SpecIds
+    local specOrdering = fsEnumerable:New()
+    local roleLookup = nil
+
+    if config == fsConfig.RoleOrdering.TankHealerDps then
+        roleLookup = { TANK = 1, HEALER = 2, DAMAGER = 3, NONE = 4 }
+        specOrdering = specOrdering:Concat(ids.Tanks):Concat(ids.Healers):Concat(ids.Casters):Concat(ids.Hunters):Concat(ids.Melee)
+    elseif config == fsConfig.RoleOrdering.HealerTankDps then
+        roleLookup = { HEALER = 1, TANK = 2, DAMAGER = 3, NONE = 4 }
+        specOrdering = specOrdering:Concat(ids.Healers):Concat(ids.Tanks):Concat(ids.Casters):Concat(ids.Hunters):Concat(ids.Melee)
+    elseif config == fsConfig.RoleOrdering.HealerDpsTank then
+        roleLookup = { HEALER = 1, DAMAGER = 2, TANK = 3, NONE = 4 }
+        specOrdering = specOrdering:Concat(ids.Healers):Concat(ids.Casters):Concat(ids.Hunters):Concat(ids.Melee):Concat(ids.Tanks)
+    end
+
+    local specLookup = specOrdering:ToLookup(function(item, _)
+        return item
+    end, function(_, index)
+        return index
+    end)
+
+    return specLookup, roleLookup or {}
+end
 
 local function EmptyCompare(x, y)
     return x < y
@@ -132,14 +96,14 @@ local function CompareRole(leftToken, rightToken, isArena)
         local rightId = tonumber(string.match(rightToken, "%d+"))
 
         if not leftId or not rightId then
-            return leftToken < rightToken
+            return CompareGroup(leftToken, rightToken, isArena)
         end
 
         leftSpec = wow.GetArenaOpponentSpec(leftId)
         rightSpec = wow.GetArenaOpponentSpec(rightId)
 
         if not leftSpec or not rightSpec then
-            return leftToken < rightToken
+            return CompareGroup(leftToken, rightToken, isArena)
         end
 
         leftRole = select(5, wow.GetSpecializationInfoByID(leftSpec))
@@ -165,27 +129,26 @@ local function CompareRole(leftToken, rightToken, isArena)
         end
     end
 
-    if not leftRole or not rightRole then
-        return CompareGroup(leftToken, rightToken, isArena)
-    end
-
-    local roleValues = roleOrdering[addon.DB.Options.Sorting.RoleOrdering] or roleOrdering[1]
-    local leftValue, rightValue = roleValues[leftRole], roleValues[rightRole]
-
-    if leftValue ~= rightValue then
-        return leftValue < rightValue
-    end
+    local specOrdering, roleOrdering = Ordering()
 
     if leftSpec and leftSpec > 0 and rightSpec and rightSpec > 0 then
-        local leftSpecOrder = specLookup[leftSpec]
-        local rightSpecOrder = specLookup[rightSpec]
+        local leftSpecOrder = specOrdering[leftSpec]
+        local rightSpecOrder = specOrdering[rightSpec]
 
         if leftSpecOrder and rightSpecOrder then
             return leftSpecOrder < rightSpecOrder
         end
     end
 
-    return leftToken < rightToken
+    if leftRole and rightRole then
+        local leftValue, rightValue = roleOrdering[leftRole], roleOrdering[rightRole]
+
+        if leftValue ~= rightValue then
+            return leftValue < rightValue
+        end
+    end
+
+    return CompareGroup(leftToken, rightToken, isArena)
 end
 
 ---Returns true if the specified token is ordered after the mid point of player units.
