@@ -13,6 +13,6 @@
 ## Version: 6.13.0
 ## SavedVariables: FrameSortDB
 ## IconTexture: Interface\AddOns\FrameSort\Media\icon.blp
-## OptionalDeps: ElvUI, GladiusEx
+## OptionalDeps: Cell, ElvUI, Grid2, GladiusEx, ShadowedUnitFrames
 
 Load.xml
