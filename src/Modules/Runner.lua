@@ -131,8 +131,9 @@ function M:Init()
             return
         end
 
-        fsLog:Debug("LibGroupInSpecT finished gathering spec information, now performing sort.")
-        M:Run()
+        fsLog:Debug("LibGroupInSpecT finished gathering spec information, requesting sort.")
+        -- schedule a run
+        run = true
     end
 
     lgist.RegisterCallback(cb, "GroupInSpecT_Update", "OnSpecInfo")
