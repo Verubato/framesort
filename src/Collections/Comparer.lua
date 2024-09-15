@@ -371,7 +371,8 @@ function M:FriendlySortMode()
         local arena = instanceSize == 2 and config.Arena.Twos or config.Arena.Default
 
         return arena.Enabled, arena.PlayerSortMode, arena.GroupSortMode, arena.Reverse
-    elseif inInstance and instanceType == "party" then
+    elseif inInstance and (instanceType == "party" or instanceType == "scenario") then
+        -- scenario = delves
         return config.Dungeon.Enabled, config.Dungeon.PlayerSortMode, config.Dungeon.GroupSortMode, config.Dungeon.Reverse
     elseif inInstance and (instanceType == "raid" or instanceType == "pvp") then
         return config.Raid.Enabled, config.Raid.PlayerSortMode, config.Raid.GroupSortMode, config.Raid.Reverse
