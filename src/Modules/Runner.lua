@@ -131,6 +131,7 @@ function M:Init()
             return
         end
 
+        fsLog:Debug("LibGroupInSpecT finished gathering spec information, now performing sort.")
         M:Run()
     end
 
