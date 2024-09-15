@@ -292,7 +292,7 @@ function M:Build(panel)
         anchor = BuildSortModeCheckboxes(panel, anchor, L["Enemy Arena (see addons panel for supported addons)"], config.EnemyArena, false, false)
     end
 
-    anchor = BuildSortModeCheckboxes(panel, anchor, L["Dungeon (mythics, 5-mans)"], config.Dungeon)
+    anchor = BuildSortModeCheckboxes(panel, anchor, L["Dungeon (mythics, 5-mans, delves)"], config.Dungeon)
     anchor = BuildSortModeCheckboxes(panel, anchor, L["Raid (battlegrounds, raids)"], config.Raid)
     anchor = BuildSortModeCheckboxes(panel, anchor, L["World (non-instance groups)"], config.World)
 
