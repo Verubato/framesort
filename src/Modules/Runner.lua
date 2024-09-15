@@ -10,16 +10,22 @@ local timerFrame = nil
 local eventFrame = nil
 local pvpTimerType = 1
 local run = false
+local runProvider = nil
 local lgist = LibStub and LibStub:GetLibrary("LibGroupInSpecT-1.1")
+
+local function ScheduleSort(provider)
+    run = true
+    runProvider = provider
+end
 
 local function OnProviderRequiresSort(provider)
     fsLog:Debug(string.format("Provider %s requested sort.", provider:Name()))
-    M:Run(provider)
+    ScheduleSort(provider)
 end
 
 local function OnEditModeExited()
     if fsProviders.Blizzard:Enabled() then
-        M:Run(fsProviders.Blizzard)
+        ScheduleSort()
     end
 end
 
@@ -33,7 +39,8 @@ local function OnTimer(_, _, timerType, timeSeconds)
     -- but that bug was macro cache related and not a timing issue, so this workaround didn't do anything AFAIK
     -- would need to do more testing before feeling comfortable to remove this
     fsScheduler:RunAfter(timeSeconds + 1, function()
-        M:Run()
+        fsLog:Debug("Timer requested sort.")
+        ScheduleSort()
     end)
 end
 
@@ -42,8 +49,9 @@ local function OnUpdate()
         return
     end
 
+    M:Run(runProvider)
     run = false
-    M:Run()
+    runProvider = nil
 end
 
 local function OnEvent(_, event)
@@ -52,7 +60,7 @@ local function OnEvent(_, event)
     -- flag that a run needs to occur
     -- the reason we do this instead of just running straight away is because multiple events may have fired during a single frame
     -- and for efficiency/performance sake we only want to run once
-    run = true
+    ScheduleSort()
 end
 
 function M:Run(provider)
@@ -132,8 +140,7 @@ function M:Init()
         end
 
         fsLog:Debug("LibGroupInSpecT finished gathering spec information, requesting sort.")
-        -- schedule a run
-        run = true
+        ScheduleSort()
     end
 
     lgist.RegisterCallback(cb, "GroupInSpecT_Update", "OnSpecInfo")

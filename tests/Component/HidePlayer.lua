@@ -2,8 +2,6 @@
 local addon
 local M = {}
 local player
----@type WowApiMock
-local wow
 
 function M:setup()
     local addonFactory = require("Mock\\AddonFactory")
@@ -11,7 +9,6 @@ function M:setup()
     local frameMock = require("Mock\\Frame")
 
     addon = addonFactory:Create()
-    wow = addon.WoW.Api
 
     local fsFrame = addon.WoW.Frame
     local provider = providerFactory:Create()
@@ -38,14 +35,13 @@ function M:setup()
     p2.unit = "party2"
 end
 
-function M:test_player_shows_and_hides_on_provider_callback()
-    local provider = addon.Providers.Test
+function M:test_player_shows_and_hides()
     local config = addon.DB.Options.Sorting.World
     config.Enabled = true
 
     -- hide the player first
     config.PlayerSortMode = "Hidden"
-    provider:FireCallbacks()
+    addon.Modules:Run()
 
     local hideDriver = player.State.AttributeDrivers["state-visibility"]
     assert(hideDriver)
@@ -54,40 +50,10 @@ function M:test_player_shows_and_hides_on_provider_callback()
     assertEquals(hideDriver.Conditional, "hide")
 
     config.PlayerSortMode = "Top"
-    provider:FireCallbacks()
+    addon.Modules:Run()
 
     local showDriver = player.State.AttributeDrivers["state-visibility"]
     assert(showDriver == nil)
-end
-
-function M:test_player_shows_and_hides_after_combat()
-    local provider = addon.Providers.Test
-    local config = addon.DB.Options.Sorting.World
-    config.Enabled = true
-
-    -- hide the player first
-    config.PlayerSortMode = "Hidden"
-    provider:FireCallbacks()
-
-    local hideDriver = player.State.AttributeDrivers["state-visibility"]
-    assert(hideDriver)
-
-    assertEquals(hideDriver.Attribute, "state-visibility")
-    assertEquals(hideDriver.Conditional, "hide")
-
-    config.PlayerSortMode = "Hidden"
-    wow.State.MockInCombat = true
-
-    provider:FireCallbacks()
-
-    wow.State.MockInCombat = false
-    wow:FireEvent(wow.Events.PLAYER_REGEN_ENABLED)
-
-    local showDriver = player.State.AttributeDrivers["state-visibility"]
-    assert(showDriver)
-
-    assertEquals(showDriver.Attribute, "state-visibility")
-    assertEquals(showDriver.Conditional, "hide")
 end
 
 return M

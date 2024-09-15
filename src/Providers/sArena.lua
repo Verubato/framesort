@@ -3,7 +3,6 @@ local _, addon = ...
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local M = {}
-local callbacks = {}
 
 fsProviders.sArena = M
 table.insert(fsProviders.All, M)
@@ -19,22 +18,14 @@ function M:Enabled()
     return sArena ~= nil and type(sArena) == "table"
 end
 
-function M:Init()
-    if not M:Enabled() then
-        return
-    end
-
-    if #callbacks > 0 then
-        callbacks = {}
-    end
-end
+function M:Init() end
 
 function M:RegisterRequestSortCallback(_) end
 
 function M:RegisterContainersChangedCallback(_) end
 
 function M:Containers()
-    if not sArena then
+    if not M:Enabled() then
         return {}
     end
 

@@ -4,7 +4,6 @@ local wow = addon.WoW.Api
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local M = {}
-local callbacks = {}
 
 fsProviders.Gladius = M
 table.insert(fsProviders.All, M)
@@ -17,15 +16,7 @@ function M:Enabled()
     return wow.GetAddOnEnableState(nil, "Gladius") ~= 0
 end
 
-function M:Init()
-    if not M:Enabled() then
-        return
-    end
-
-    if #callbacks > 0 then
-        callbacks = {}
-    end
-end
+function M:Init() end
 
 function M:RegisterRequestSortCallback(_) end
 

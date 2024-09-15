@@ -5,11 +5,9 @@ local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsLog = addon.Logging.Log
 local M = {}
-local callbacks = {}
 local containersChangedCallbacks = {}
 local fsPlugin = nil
 local pluginName = "FrameSort"
-local updating = nil
 
 fsProviders.ElvUI = M
 table.insert(fsProviders.All, M)
@@ -32,34 +30,10 @@ local function PluginEnabled()
     return wow.GetAddOnEnableState(nil, "ElvUI") ~= 0 and ElvUI ~= nil
 end
 
-local function RequestSort()
-    if not IntegrationEnabled() then
-        return
-    end
-
-    for _, callback in ipairs(callbacks) do
-        callback(M)
-    end
-end
-
 local function RequestUpdateContainers()
     for _, callback in ipairs(containersChangedCallbacks) do
         callback(M)
     end
-end
-
-local function OnHeaderUpdate(header)
-    if header ~= ElvUF_PartyGroup1 then
-        return
-    end
-    -- prevent stack overflow as SetAttribute() calls will invoke another header update
-    if updating then
-        return
-    end
-
-    updating = true
-    RequestSort()
-    updating = false
 end
 
 function M:Name()
@@ -75,10 +49,6 @@ function M:Init()
         return
     end
 
-    if #callbacks > 0 then
-        callbacks = {}
-    end
-
     local E, _, _, P, _ = unpack(ElvUI)
     local EP = LibStub("LibElvUIPlugin-1.0")
     local UF = E:GetModule("UnitFrames")
@@ -91,8 +61,6 @@ function M:Init()
 
     function fsPlugin:Initialize()
         EP:RegisterPlugin(pluginName, fsPlugin.InsertOptions)
-
-        fsPlugin:SecureHook("SecureGroupHeader_Update", OnHeaderUpdate)
 
         fsPlugin:SecureHook(UF, "LoadUnits", function()
             if not ElvUF_PartyGroup1 then
@@ -129,9 +97,7 @@ function M:Init()
     E:RegisterModule(pluginName)
 end
 
-function M:RegisterRequestSortCallback(callback)
-    callbacks[#callbacks + 1] = callback
-end
+function M:RegisterRequestSortCallback(_) end
 
 function M:RegisterContainersChangedCallback(callback)
     containersChangedCallbacks[#containersChangedCallbacks + 1] = callback
