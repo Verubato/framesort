@@ -172,10 +172,15 @@ local function RefreshValues()
     local raidX = _G["sldRaidXSpacing"]
     local raidY = _G["sldRaidYSpacing"]
 
-    SetValue(spacing.Party.Horizontal, partyX, partyX.EditBox)
-    SetValue(spacing.Party.Vertical, partyY, partyY.EditBox)
-    SetValue(spacing.Raid.Horizontal, raidX, raidX.EditBox)
-    SetValue(spacing.Raid.Vertical, raidY, raidY.EditBox)
+    if partyX and partyY then
+        SetValue(spacing.Party.Horizontal, partyX, partyX.EditBox)
+        SetValue(spacing.Party.Vertical, partyY, partyY.EditBox)
+    end
+
+    if raidX and raidY then
+        SetValue(spacing.Raid.Horizontal, raidX, raidX.EditBox)
+        SetValue(spacing.Raid.Vertical, raidY, raidY.EditBox)
+    end
 end
 
 function M:Build(parent)
