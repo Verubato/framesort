@@ -45,6 +45,12 @@ secureMethods["InCombat"] = [[
 secureMethods["GetUnit"] = [[
     local framesVariable = ...
     local frame = _G[framesVariable]
+
+    local u = frame:GetAttribute("unit")
+    if u then
+        return u
+    end
+
     local name = frame:GetName() or ""
     local parent = frame:GetParent()
 
@@ -59,7 +65,7 @@ secureMethods["GetUnit"] = [[
         return unit
     end
 
-    return frame:GetAttribute("unit")
+    return nil
 ]]
 
 -- filters a set of frames to only unit frames
