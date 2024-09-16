@@ -150,8 +150,22 @@ end
 ---@param frame table
 ---@return string|nil
 function M:GetFrameUnit(frame)
+    if M:IsForbidden(frame) then
+        return nil
+    end
+
     local name = frame:GetName() or ""
     local parent = frame:GetParent()
+
+    if frame.unit then
+        return frame.unit
+    end
+
+    local u = frame:GetAttribute("unit")
+
+    if u then
+        return u
+    end
 
     if parent == wow.UIParent then
         -- don't want to inspect other frames of UIParent
@@ -160,17 +174,13 @@ function M:GetFrameUnit(frame)
         return replaced > 0 and unit or nil
     end
 
-    local unit, replaced = string.gsub(name, "GladiusButtonFrame", "")
+    local unit, replaced = string.gsub(name, "GladiusExButtonFrame", "")
 
     if replaced > 0 then
         return unit
     end
 
-    if frame.unit then
-        return frame.unit
-    end
-
-    return frame:GetAttribute("unit")
+    return nil
 end
 
 ---Returns a collection of unit frames from the specified container.
@@ -182,26 +192,28 @@ function M:ExtractUnitFrames(container, visibleOnly)
         return {}
     end
 
-    visibleOnly = visibleOnly or false
-
     return fsEnumerable
         :From({ container:GetChildren() })
         :Where(function(frame)
-            if type(frame) ~= "table" then
-                return false
-            end
             if M:IsForbidden(frame) then
-                return false
-            end
-            if frame:GetTop() == nil or frame:GetLeft() == nil then
-                return false
-            end
-            if visibleOnly and not frame:IsVisible() then
                 return false
             end
 
             local unit = M:GetFrameUnit(frame)
-            return unit ~= nil
+            if not unit then
+                return false
+            end
+
+            if frame:GetTop() == nil or frame:GetLeft() == nil then
+                -- TODO: does this still happen?
+                return false
+            end
+
+            if visibleOnly and not frame:IsVisible() then
+                return false
+            end
+
+            return true
         end)
         :ToTable()
 end
@@ -215,21 +227,10 @@ function M:ExtractGroups(container, visibleOnly)
         return {}
     end
 
-    visibleOnly = visibleOnly or false
-
     return fsEnumerable
         :From({ container:GetChildren() })
         :Where(function(frame)
-            if type(frame) ~= "table" then
-                return false
-            end
             if M:IsForbidden(frame) then
-                return false
-            end
-            if frame:GetTop() == nil or frame:GetLeft() == nil then
-                return false
-            end
-            if visibleOnly and not frame:IsVisible() then
                 return false
             end
 
@@ -240,12 +241,21 @@ function M:ExtractGroups(container, visibleOnly)
             end
 
             -- wotlk with 1 group uses the party frame
-            if string.match(name, "CompactPartyFrame") then
-                return true
+            -- only supports blizzard groups atm
+            if not string.match(name, "CompactPartyFrame") and not string.match(name, "CompactRaidGroup") then
+                return false
             end
 
-            -- only supports blizzard groups atm
-            return string.match(name, "CompactRaidGroup")
+            -- TODO: does this still happen?
+            if frame:GetTop() == nil or frame:GetLeft() == nil then
+                return false
+            end
+
+            if visibleOnly and not frame:IsVisible() then
+                return false
+            end
+
+            return true
         end)
         :ToTable()
 end
