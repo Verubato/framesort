@@ -108,14 +108,6 @@ function M:Init()
         return
     end
 
-    if #sortCallbacks > 0 then
-        sortCallbacks = {}
-    end
-
-    if #containersChangedCallbacks > 0 then
-        containersChangedCallbacks = {}
-    end
-
     if wow.IsRetail() then
         wow.EventRegistry:RegisterCallback(events.EditModeExit, OnEditModeExited)
 

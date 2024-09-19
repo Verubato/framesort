@@ -74,14 +74,6 @@ function M:RunWhenEnteringWorld(callback)
 end
 
 function M:Init()
-    if #combatEndCallbacks > 0 then
-        combatEndCallbacks = {}
-    end
-
-    if #combatEndKeyedCallbacks > 0 then
-        combatEndKeyedCallbacks = {}
-    end
-
     eventFrame = wow.CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", OnEvent)
     eventFrame:RegisterEvent(events.PLAYER_REGEN_ENABLED)
