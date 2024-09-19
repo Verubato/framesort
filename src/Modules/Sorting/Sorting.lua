@@ -52,8 +52,4 @@ function M:Init()
     if addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Secure then
         M.Secure:Init()
     end
-
-    if #callbacks > 0 then
-        callbacks = {}
-    end
 end
