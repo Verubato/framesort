@@ -278,22 +278,22 @@ end
 ---Returns the party frames of the specified provider.
 ---@param provider FrameProvider
 ---@return table[]
-function M:PartyFrames(provider)
-    return M:GetFrames(provider, M.ContainerType.Party)
+function M:PartyFrames(provider, visibleOnly)
+    return M:GetFrames(provider, M.ContainerType.Party, visibleOnly)
 end
 
 ---Returns the raid frames of the specified provider.
 ---@param provider FrameProvider
 ---@return table[]
-function M:RaidFrames(provider)
-    return M:GetFrames(provider, M.ContainerType.Raid)
+function M:RaidFrames(provider, visibleOnly)
+    return M:GetFrames(provider, M.ContainerType.Raid, visibleOnly)
 end
 
 ---Returns the enemy arena frames of the specified provider.
 ---@param provider FrameProvider
 ---@return table[]
-function M:ArenaFrames(provider)
-    return M:GetFrames(provider, M.ContainerType.EnemyArena)
+function M:ArenaFrames(provider, visibleOnly)
+    return M:GetFrames(provider, M.ContainerType.EnemyArena, visibleOnly)
 end
 
 function M:IsForbidden(frame)

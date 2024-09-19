@@ -22,20 +22,11 @@ local cyclePreviousFrame = nil
 local M = {}
 addon.Modules.Targeting = M
 
-local function WhereVisible(frames)
-    return fsEnumerable
-        :From(frames)
-        :Where(function(x)
-            return x:IsVisible()
-        end)
-        :ToTable()
-end
-
 local function GetFriendlyFrames(provider)
-    local frames = WhereVisible(fsFrame:PartyFrames(provider))
+    local frames = fsFrame:PartyFrames(provider, true)
 
     if #frames == 0 then
-        frames = WhereVisible(fsFrame:RaidFrames(provider))
+        frames = fsFrame:RaidFrames(provider, true)
     end
 
     return frames
@@ -274,12 +265,26 @@ function M:FriendlyFrames()
         return {}
     end
 
-    return fsEnumerable
+    local start1 = wow.GetTimePreciseSec()
+
+    local result = fsEnumerable
         :From(frames)
         :OrderBy(function(x, y)
             return fsCompare:CompareTopLeftFuzzy(x, y)
         end)
         :ToTable()
+
+    local stop1 = wow.GetTimePreciseSec()
+    local start2 = wow.GetTimePreciseSec()
+
+    table.sort(frames, function (x, y)
+        return fsCompare:CompareTopLeftFuzzy(x, y)
+    end)
+
+    local stop2 = wow.GetTimePreciseSec()
+    fsLog:Debug(string.format("Testing took took %fms, v2 %fms.", (stop1 - start1) * 1000, (stop2 - start2) * 1000))
+
+    return result
 end
 
 function M:FriendlyUnits()
