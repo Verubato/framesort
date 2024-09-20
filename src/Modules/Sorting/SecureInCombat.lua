@@ -51,7 +51,8 @@ secureMethods["GetUnit"] = [[
         return u
     end
 
-    return strmatch(name, "arena%d")
+    local name = frame:GetName()
+    return name and strmatch(name, "arena%d")
 ]]
 
 -- filters a set of frames to only unit frames
