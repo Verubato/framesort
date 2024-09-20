@@ -373,7 +373,7 @@ local function TrySortContainer(container)
         return SetNameList(container)
     end
 
-    local frames = fsFrame:ExtractUnitFrames(container.Frame, container.VisibleOnly)
+    local frames = (container.Frames and container:Frames()) or fsFrame:ExtractUnitFrames(container.Frame, container.VisibleOnly)
     local sortFunction = nil
 
     if container.Type == fsFrame.ContainerType.Party or container.Type == fsFrame.ContainerType.Raid then

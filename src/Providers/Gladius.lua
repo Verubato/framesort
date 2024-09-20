@@ -3,6 +3,7 @@ local _, addon = ...
 local wow = addon.WoW.Api
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
+local fsEnumerable = addon.Collections.Enumerable
 local M = {}
 
 fsProviders.Gladius = M
@@ -31,6 +32,21 @@ function M:Containers()
         Type = fsFrame.ContainerType.EnemyArena,
         LayoutType = fsFrame.LayoutType.Soft,
         VisibleOnly = true,
+        Frames = function(_)
+            return fsEnumerable
+                :From({
+                    ---@diagnostic disable: undefined-global
+                    GladiusButtonFramearena1,
+                    GladiusButtonFramearena2,
+                    GladiusButtonFramearena3,
+                    GladiusButtonFramearena4,
+                    GladiusButtonFramearena5,
+                })
+                :Where(function(frame)
+                    return frame:IsVisible()
+                end)
+                :ToTable()
+        end,
     }
 
     return containers

@@ -46,26 +46,12 @@ secureMethods["GetUnit"] = [[
     local framesVariable = ...
     local frame = _G[framesVariable]
 
-    local name = frame:GetName() or ""
-    local parent = frame:GetParent()
-
-    if parent and parent:GetName() == "UIParent" then
-        local unit, replaced = gsub(name, "GladiusButtonFrame", "")
-        return replaced > 0 and unit or nil
-    end
-
     local u = frame:GetAttribute("unit")
     if u then
         return u
     end
 
-    local unit, replaced = gsub(name, "GladiusExButtonFrame", "")
-
-    if replaced > 0 then
-        return unit
-    end
-
-    return nil
+    return strmatch(name, "arena%d")
 ]]
 
 -- filters a set of frames to only unit frames
@@ -886,11 +872,15 @@ secureMethods["TrySortContainer"] = [[
     Children = newtable()
     Frames = newtable()
 
-    -- import into the global table for filtering
-    container.Frame:GetChildList(Children)
+    if container.Frames then
+        Frames = container.Frames
+    else
+        -- import into the global table for filtering
+        container.Frame:GetChildList(Children)
 
-    if not run:RunAttribute("ExtractUnitFrames", "Children", "Frames", container.VisibleOnly) then
-        return false
+        if not run:RunAttribute("ExtractUnitFrames", "Children", "Frames", container.VisibleOnly) then
+            return false
+        end
     end
 
     Units = units or newtable()
@@ -1034,6 +1024,20 @@ secureMethods["LoadProvider"] = [[
             container.GroupOffset.Y = groupOffsetY or 0
         end
 
+        local framesCount = self:GetAttribute(prefix .. "FramesCount")
+
+        if framesCount then
+            local frames = newtable()
+
+            for j = 1, framesCount do
+                local frame = self:GetFrameRef(prefix .. "Frame" .. j)
+                frames[#frames + 1] = frame
+            end
+
+            container.Frames = frames
+            print("Loaded", framesCount)
+        end
+
         provider.Containers[#provider.Containers + 1] = container
     end
 ]]
@@ -1163,6 +1167,15 @@ local function LoadProvider(provider)
         manager:SetAttributeNoHandler(containerPrefix .. "OffsetY", offset and offset.Y)
         manager:SetAttributeNoHandler(containerPrefix .. "GroupOffsetX", groupOffset and groupOffset.X)
         manager:SetAttributeNoHandler(containerPrefix .. "GroupOffsetY", groupOffset and groupOffset.Y)
+
+        if container.Frames then
+            local frames = container.Frames()
+            manager:SetAttributeNoHandler(containerPrefix .. "FramesCount", #frames)
+
+            for j, frame in ipairs(frames) do
+                manager:SetFrameRef(containerPrefix .. "Frame" .. j, frame)
+            end
+        end
     end
 
     manager:SetAttributeNoHandler(provider:Name() .. "ContainersCount", #containers)

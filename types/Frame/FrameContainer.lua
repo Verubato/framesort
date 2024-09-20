@@ -12,3 +12,4 @@
 ---@field FramesPerLine? fun(self: table): number?: For the hard layout type, specify the number of frames per horizontal/vertical line.
 ---@field AnchorPoint string?: Only TOPLEFT or TOPRIGHT are supported.
 ---@field InCombatSortingRequired boolean?: Whether in-combat sorting is required.
+---@field Frames? fun(self: table): table[] Returns the set of frames to be used instead of being automatically determined.

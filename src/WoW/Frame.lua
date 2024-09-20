@@ -29,6 +29,7 @@ addon.WoW.Frame = M
 ---@param visibleOnly boolean? override the default container visibility filter
 function M:GetFrames(provider, type, visibleOnly)
     local target = M:GetContainer(provider, type)
+
     if not target then
         return {}
     end
@@ -37,7 +38,7 @@ function M:GetFrames(provider, type, visibleOnly)
         visibleOnly = target.VisibleOnly
     end
 
-    local frames = M:ExtractUnitFrames(target.Frame, visibleOnly)
+    local frames = (target.Frames and target:Frames()) or M:ExtractUnitFrames(target.Frame, visibleOnly)
 
     if not target.IsGrouped or not target:IsGrouped() then
         return frames
@@ -155,14 +156,6 @@ function M:GetFrameUnit(frame)
     end
 
     local name = frame:GetName() or ""
-    local parent = frame:GetParent()
-
-    if parent == wow.UIParent then
-        -- don't want to inspect other frames of UIParent
-        -- so if it's not gladius, then we'll return nil
-        local unit, replaced = string.gsub(name, "GladiusButtonFrame", "")
-        return replaced > 0 and unit or nil
-    end
 
     if frame.unit then
         return frame.unit
@@ -174,13 +167,7 @@ function M:GetFrameUnit(frame)
         return u
     end
 
-    local unit, replaced = string.gsub(name, "GladiusExButtonFrame", "")
-
-    if replaced > 0 then
-        return unit
-    end
-
-    return nil
+    return string.match(name, "arena%d")
 end
 
 ---Returns a collection of unit frames from the specified container.
