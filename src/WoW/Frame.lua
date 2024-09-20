@@ -157,6 +157,13 @@ function M:GetFrameUnit(frame)
     local name = frame:GetName() or ""
     local parent = frame:GetParent()
 
+    if parent == wow.UIParent then
+        -- don't want to inspect other frames of UIParent
+        -- so if it's not gladius, then we'll return nil
+        local unit, replaced = string.gsub(name, "GladiusButtonFrame", "")
+        return replaced > 0 and unit or nil
+    end
+
     if frame.unit then
         return frame.unit
     end
@@ -165,13 +172,6 @@ function M:GetFrameUnit(frame)
 
     if u then
         return u
-    end
-
-    if parent == wow.UIParent then
-        -- don't want to inspect other frames of UIParent
-        -- so if it's not gladius, then we'll return nil
-        local unit, replaced = string.gsub(name, "GladiusButtonFrame", "")
-        return replaced > 0 and unit or nil
     end
 
     local unit, replaced = string.gsub(name, "GladiusExButtonFrame", "")
