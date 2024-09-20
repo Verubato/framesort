@@ -92,7 +92,7 @@ local function CanSeeFrames()
         local containers = provider:Containers()
 
         for _, container in ipairs(containers) do
-            local frames = fsFrame:ExtractUnitFrames(container.Frame)
+            local frames = (container.Frames and container:Frames()) or fsFrame:ExtractUnitFrames(container.Frame)
             local anyVisible = fsEnumerable:From(frames):Any(function(frame)
                 return frame:IsVisible()
             end)
