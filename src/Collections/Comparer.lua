@@ -12,11 +12,20 @@ local fuzzyDecimalPlaces = 0
 local M = {}
 addon.Collections.Comparer = M
 
+local orderingCache = {}
+
 local function Ordering()
-    local ids = fsConfig.SpecIds
     local config = addon.DB.Options.Sorting.Ordering
+    local cacheKey = string.format("Tanks:%d,Healers:%d,Casters:%d,Hunters:%d,Melee:%d", config.Tanks, config.Healers, config.Casters, config.Hunters, config.Melee)
+    local cached = orderingCache[cacheKey]
+
+    if cached then
+        return cached.Spec, cached.Role
+    end
+
+    local ids = fsConfig.SpecIds
     local specOrdering = fsEnumerable:New()
-    local roleOrdering = fsEnumerable:New()
+    local roleLookup = {}
     local ordering = {}
 
     ordering[config.Tanks] = "Tanks"
@@ -27,19 +36,19 @@ local function Ordering()
 
     for order, spec in pairs(ordering) do
         if spec == "Tanks" then
-            roleOrdering = roleOrdering:Concat({ TANK = order })
+            roleLookup["TANK"] = order
             specOrdering = specOrdering:Concat(ids.Tanks)
         elseif spec == "Healers" then
-            roleOrdering = roleOrdering:Concat({ HEALER = order })
+            roleLookup["HEALER"] = order
             specOrdering = specOrdering:Concat(ids.Healers)
         elseif spec == "Casters" then
-            roleOrdering = roleOrdering:Concat({ DAMAGER = order })
+            roleLookup["DAMAGER"] = math.max(order, roleLookup["DAMAGER"] or 0)
             specOrdering = specOrdering:Concat(ids.Casters)
         elseif spec == "Hunters" then
-            roleOrdering = roleOrdering:Concat({ DAMAGER = order })
+            roleLookup["DAMAGER"] = math.max(order, roleLookup["DAMAGER"] or 0)
             specOrdering = specOrdering:Concat(ids.Hunters)
         elseif spec == "Melee" then
-            roleOrdering = roleOrdering:Concat({ DAMAGER = order })
+            roleLookup["DAMAGER"] = math.max(order, roleLookup["DAMAGER"] or 0)
             specOrdering = specOrdering:Concat(ids.Melee)
         end
     end
@@ -50,7 +59,12 @@ local function Ordering()
         return index
     end)
 
-    return specLookup, roleOrdering:ToTable()
+    orderingCache[cacheKey] = {
+        Spec = specLookup,
+        Role = roleLookup,
+    }
+
+    return specLookup, roleLookup
 end
 
 local function EmptyCompare(x, y)
