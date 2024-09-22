@@ -266,6 +266,10 @@ function M:Create()
             Attribute = attribute,
             Conditional = conditional,
         }
+
+        if attribute == "state-visibility" and conditional == "hide" then
+            frame.State.Attributes["statehidden"] = true
+        end
     end
 
     wow.UnregisterAttributeDriver = function(frame, attribute)
