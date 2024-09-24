@@ -7,6 +7,7 @@ local fsEnumerable = addon.Collections.Enumerable
 local lgist = LibStub and LibStub:GetLibrary("LibGroupInSpecT-1.1")
 local fsConfig = addon.Configuration
 local fuzzyDecimalPlaces = 0
+local defaultRoleOrdering = 99
 
 ---@class Comparer
 local M = {}
@@ -170,7 +171,8 @@ local function CompareRole(leftToken, rightToken, isArena)
     end
 
     if leftRole and rightRole then
-        local leftValue, rightValue = roleOrdering[leftRole], roleOrdering[rightRole]
+        -- role's of "NONE" or some invalid value default to 99 to be put at the end
+        local leftValue, rightValue = roleOrdering[leftRole] or defaultRoleOrdering, roleOrdering[rightRole] or defaultRoleOrdering
 
         if leftValue ~= rightValue then
             return leftValue < rightValue
