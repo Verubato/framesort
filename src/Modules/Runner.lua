@@ -11,7 +11,7 @@ local eventFrame = nil
 local pvpTimerType = 1
 local run = false
 local runProvider = nil
-local lgist = LibStub and LibStub:GetLibrary("LibGroupInSpecT-1.1")
+local lgist =  wow.IsRetail() and LibStub and LibStub:GetLibrary("LibGroupInSpecT-1.1")
 
 local function ScheduleSort(provider)
     run = true
@@ -127,7 +127,6 @@ function M:Init()
     end)
 
     if not lgist then
-        -- will happen in unit tests
         return
     end
 
