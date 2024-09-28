@@ -3,6 +3,7 @@ local _, addon = ...
 local fsSorting = addon.Modules.Sorting
 local fsConfig = addon.Configuration
 local fsScheduler = addon.Scheduling.Scheduler
+local fsLog = addon.Logging.Log
 local wow = addon.WoW.Api
 local minSpacing = 0
 local maxSpacing = 100
@@ -20,8 +21,15 @@ local function ConfigureSlider(slider, value)
     slider:SetHeight(20)
     slider:SetWidth(400)
 
-    _G[slider:GetName() .. "Low"]:SetText(minSpacing)
-    _G[slider:GetName() .. "High"]:SetText(maxSpacing)
+    local low = _G[slider:GetName() .. "Low"]
+    local high = _G[slider:GetName() .. "High"]
+
+    if low and high then
+        low:SetText(minSpacing)
+        high:SetText(maxSpacing)
+    else
+        fsLog:Error("Unable to configure low/high slider values.")
+    end
 end
 
 local function ConfigureEditBox(box, value)

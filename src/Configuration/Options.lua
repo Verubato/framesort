@@ -1,6 +1,7 @@
 ---@type string, Addon
 local _, addon = ...
 local fsConfig = addon.Configuration
+local fsLog = addon.Logging.Log
 local wow = addon.WoW.Api
 local callbacks = {}
 local dropDownId = 1
@@ -10,22 +11,26 @@ fsConfig.HorizontalSpacing = 50
 fsConfig.TextMaxWidth = 600
 
 local function AddCategory(panel)
-    if wow.IsRetail() then
+    if wow.Settings then
         local category = wow.Settings.RegisterCanvasLayoutCategory(panel, panel.name, panel.name)
         category.ID = panel.name
         wow.Settings.RegisterAddOnCategory(category)
-    else
+    elseif wow.InterfaceOptions_AddCategory then
         wow.InterfaceOptions_AddCategory(panel)
+    else
+        fsLog:Error("Unable to add options category.")
     end
 end
 
 local function AddSubCategory(panel)
-    if wow.IsRetail() then
+    if wow.Settings then
         local category = wow.Settings.GetCategory(panel.parent)
         local subcategory = wow.Settings.RegisterCanvasLayoutSubcategory(category, panel, panel.name, panel.name)
         subcategory.ID = panel.name
-    else
+    elseif wow.InterfaceOptions_AddCategory then
         wow.InterfaceOptions_AddCategory(panel)
+    else
+        fsLog:Error("Unable to add options sub category.")
     end
 end
 
@@ -140,12 +145,14 @@ function fsConfig:Init()
 
     local main = wow.CreateFrame("Frame")
 
-    if wow.IsRetail() then
+    if wow.SettingsPanel then
         main:SetWidth(wow.SettingsPanel.Container:GetWidth())
         main:SetHeight(wow.SettingsPanel.Container:GetHeight())
-    else
+    elseif wow.InterfaceOptionsFramePanelContainer then
         main:SetWidth(wow.InterfaceOptionsFramePanelContainer:GetWidth())
         main:SetHeight(wow.InterfaceOptionsFramePanelContainer:GetHeight())
+    else
+        fsLog:Error("Unable to set configuration panel width.")
     end
 
     panel:SetScrollChild(main)
@@ -185,9 +192,9 @@ function fsConfig:Init()
     SLASH_FRAMESORT2 = "/framesort"
 
     wow.SlashCmdList.FRAMESORT = function()
-        if wow.IsRetail() then
+        if wow.Settings then
             wow.Settings.OpenToCategory(panel.name)
-        else
+        elseif wow.InterfaceOptionsFrame_OpenToCategory then
             -- workaround the classic bug where the first call opens the Game interface
             -- and a second call is required
             wow.InterfaceOptionsFrame_OpenToCategory(panel)
