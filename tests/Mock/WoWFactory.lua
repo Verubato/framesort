@@ -181,7 +181,9 @@ function M:Create()
             return table
         end,
         CopyTable = CopyTable,
-        GetLocale = function() return "enUS" end,
+        GetLocale = function()
+            return "enUS"
+        end,
 
         -- secure functions
         issecurevariable = function()
@@ -267,8 +269,14 @@ function M:Create()
             Conditional = conditional,
         }
 
-        if attribute == "state-visibility" and conditional == "hide" then
-            frame.State.Attributes["statehidden"] = true
+        if attribute == "state-visibility" then
+            if conditional == "hide" then
+                frame.State.Attributes["statehidden"] = true
+                frame:Hide()
+            elseif conditional == "show" then
+                frame.State.Attributes["statehidden"] = false
+                frame:Show()
+            end
         end
     end
 
