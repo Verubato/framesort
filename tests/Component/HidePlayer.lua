@@ -33,6 +33,10 @@ function M:setup()
     local p2 = frameMock:New("Frame", nil, partyContainer, nil)
     p2.State.Position.Top = 100
     p2.unit = "party2"
+
+    addon.WoW.Api.UnitExists = function(unit)
+        return unit == "player" or unit == "party1" or unit == "party2"
+    end
 end
 
 function M:test_player_shows_and_hides()
@@ -49,11 +53,14 @@ function M:test_player_shows_and_hides()
     assertEquals(hideDriver.Attribute, "state-visibility")
     assertEquals(hideDriver.Conditional, "hide")
 
+    assert(not player:IsVisible())
+
     config.PlayerSortMode = "Top"
     addon.Modules:Run()
 
-    local showDriver = player.State.AttributeDrivers["state-visibility"]
-    assert(showDriver == nil)
+    hideDriver = player.State.AttributeDrivers["state-visibility"]
+    assert(not hideDriver)
+    assert(player:IsVisible())
 end
 
 return M

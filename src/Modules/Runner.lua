@@ -68,11 +68,11 @@ function M:Run(provider)
         -- run auto promotion first
         addon.Modules.AutoLeader:Run()
 
-        -- run sorting first as it affects the rest
-        addon.Modules.Sorting:Run(provider)
-
-        -- run hide player next as it may impact targeting and macros
+        -- run hide player first as it may impact the rest
         addon.Modules.HidePlayer:Run()
+
+        -- now sort as it affects targeting and macros
+        addon.Modules.Sorting:Run(provider)
 
         addon.Modules.Targeting:Run()
         addon.Modules.Macro:Run()

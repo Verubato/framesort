@@ -19,20 +19,13 @@ local function ShowHide(show)
     -- we need to update all frames as units are not fixed to a frame
     -- so the player unit may have moved from frame1 to frame3 for example
     for _, frame in ipairs(all) do
-        local unit = fsFrame:GetFrameUnit(frame)
+        local unit = assert(fsFrame:GetFrameUnit(frame))
 
-        assert(unit ~= nil)
-
-        local isPlayer = wow.UnitIsUnit(unit, "player")
-        local isHiddenByDriver = frame:GetAttribute("statehidden")
-
-        if show and isHiddenByDriver then
+        if show and wow.UnitExists(unit) and not frame:IsVisible() then
             -- the frame may have moved to a different unit or the user wants the player raid frame to be shown again
             wow.UnregisterAttributeDriver(frame, "state-visibility")
             frame:Show()
-        end
-
-        if isPlayer and not show then
+        elseif not show and wow.UnitIsUnit(unit, "player") then
             -- user has opted to hide the player unit frame
             wow.RegisterAttributeDriver(frame, "state-visibility", "hide")
         end

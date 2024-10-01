@@ -149,6 +149,14 @@ function M:IsVisible()
     return self.State.Visible
 end
 
+function M:Show()
+    self.State.Visible = true
+end
+
+function M:Hide()
+    self.State.Visible = false
+end
+
 function M:GetChildren()
     return unpack(self.State.Children)
 end
