@@ -1,23 +1,19 @@
 local _, addon = ...
 local L = addon.Locale
 
-L["FrameSort"] = nil
-
 -- # Main Options screen #
 -- used in FrameSort - 1.2.3 version header, %s is the version number
 L["FrameSort - %s"] = nil
 L["There are some issuse that may prevent FrameSort from working correctly."] = nil
 L["Please go to the Health Check panel to view more details."] = nil
-L["Role"] = nil
+L["Role/spec"] = nil
 L["Group"] = nil
 L["Alphabetical"] = nil
 L["Arena - 2v2"] = nil
-L["3v3"] = nil
-L["3v3 & 5v5"] = nil
--- %s is either "3v3" or "3v3 & 5v5"
-L["Arena - %s"] = nil
+L["Arena - 3v3"] = nil
+L["Arena - 3v3 & 5v5"] = nil
 L["Enemy Arena (see addons panel for supported addons)"] = nil
-L["Dungeon (mythics, 5-mans)"] = nil
+L["Dungeon (mythics, 5-mans, delves)"] = nil
 L["Raid (battlegrounds, raids)"] = nil
 L["World (non-instance groups)"] = nil
 L["Player"] = nil
@@ -27,7 +23,6 @@ L["Middle"] = nil
 L["Bottom"] = nil
 L["Hidden"] = nil
 L["Group"] = nil
-L["Role"] = nil
 L["Reverse"] = nil
 
 -- # Sorting Method screen #
@@ -63,7 +58,7 @@ L["Please reload after changing these settings."] = nil
 L["Reload"] = nil
 
 -- # Ordering screen #
-L["Role"] = nil
+L["Ordering"] = nil
 L["Specify the ordering you wish to use when sorting by role."] = nil
 L["Tanks"] = nil
 L["Healers"] = nil
@@ -235,21 +230,20 @@ L["Failed"] = nil
 L["(unknown)"] = nil
 L["(user macro)"] = nil
 L["Using grouped layout for Cell raid frames"] = nil
-L["Please check the 'Combined Groups (Raid)' option in Cell -> Layouts."] = nil
+L["Please check the 'Combined Groups (Raid)' option in Cell -> Layouts"] = nil
 L["Can detect frames"] = nil
-L["FrameSort currently supports frames from these addons: %s."] = nil
+L["FrameSort currently supports frames from these addons: %s"] = nil
 L["Using Raid-Style Party Frames"] = nil
-L["Please enable 'Use Raid-Style Party Frames' in the Blizzard settings."] = nil
+L["Please enable 'Use Raid-Style Party Frames' in the Blizzard settings"] = nil
 L["Keep Groups Together setting disabled"] = nil
-L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode."] = nil
+L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"] = nil
 L["Disable the 'Keep Groups Together' raid profile setting."] = nil
 L["Only using Blizzard frames with Traditional mode"] = nil
 L["Traditional mode can't sort your other frame addons: '%s'"] = nil
 L["Using Secure sorting mode when spacing is being used."] = nil
-L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method."] = nil
+L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method"] = nil
 L["Blizzard sorting functions not tampered with"] = nil
-L['"%s" may cause conflicts, consider disabling it.'] = nil
+L['"%s" may cause conflicts, consider disabling it'] = nil
 L["No conflicting addons"] = nil
-L['"%s" may cause conflicts, consider disabling it.'] = nil
 L["Main tank and assist setting disabled"] = nil
-L["Please disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames."] = nil
+L["Please disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] = nil

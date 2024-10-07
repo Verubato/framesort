@@ -284,8 +284,8 @@ function M:Build(panel)
     if not wow.IsClassic() then
         anchor = BuildSortModeCheckboxes(panel, anchor, L["Arena - 2v2"], config.Arena.Twos)
 
-        local otherArenaSizes = wow.IsRetail() and L["3v3"] or L["3v3 & 5v5"]
-        anchor = BuildSortModeCheckboxes(panel, anchor, string.format(L["Arena - %s"], otherArenaSizes), config.Arena.Default)
+        local otherArenaSizes = wow.IsRetail() and "3v3" or "3v3 & 5v5"
+        anchor = BuildSortModeCheckboxes(panel, anchor, L["Arena - " .. otherArenaSizes], config.Arena.Default)
     end
 
     if wow.IsRetail() then
