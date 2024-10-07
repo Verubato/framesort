@@ -241,7 +241,7 @@ function M:IsHealthy()
         Applicable = addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Traditional,
         Passed = not IsRaidGrouped(),
         Description = L["Keep Groups Together setting disabled"],
-        Help = wow.IsRetail() and L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode."] or L["Disable the 'Keep Groups Together' raid profile setting"],
+        Help = wow.IsRetail() and L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"] or L["Disable the 'Keep Groups Together' raid profile setting"],
     }
 
     results[#results + 1] = {
@@ -254,7 +254,7 @@ function M:IsHealthy()
     results[#results + 1] = {
         Applicable = addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Traditional,
         Passed = not UsingSpacing(),
-        Description = L["Using Secure sorting mode when spacing is being used."],
+        Description = L["Using Secure sorting mode when spacing is being used"],
         Help = L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method"],
     }
 
