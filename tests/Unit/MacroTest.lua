@@ -1240,4 +1240,29 @@ function M:test_short_header()
     assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
+function M:test_unaffected_modifiers()
+    local units = { "player", "party1", "party2" }
+
+    addon.WoW.Api.UnitGroupRolesAssigned = function(x)
+        if x == "party1" then
+            return "HEALER"
+        end
+
+        return "DAMAGER"
+    end
+
+    local macroText = [[
+        #showtooltip
+        #framesort Healer
+        /cast [@none,help][@mouseover,help][@target,help][] Spell;
+    ]]
+    local expected = [[
+        #showtooltip
+        #framesort Healer
+        /cast [@party1,help][@mouseover,help][@target,help][] Spell;
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
+end
+
 return M
