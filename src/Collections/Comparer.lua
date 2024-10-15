@@ -161,16 +161,16 @@ local function CompareRole(leftToken, rightToken, isArena)
 
     local specOrdering, roleOrdering = Ordering()
 
-    if leftSpec and leftSpec > 0 and rightSpec and rightSpec > 0 then
+    if leftSpec and leftSpec > 0 and rightSpec and rightSpec > 0 and leftSpec ~= rightSpec then
         local leftSpecOrder = specOrdering[leftSpec]
         local rightSpecOrder = specOrdering[rightSpec]
 
-        if leftSpecOrder and rightSpecOrder then
+        if leftSpecOrder and rightSpecOrder and leftSpecOrder ~= rightSpecOrder then
             return leftSpecOrder < rightSpecOrder
         end
     end
 
-    if leftRole and rightRole then
+    if leftRole and rightRole and leftRole ~= rightRole then
         -- role's of "NONE" or some invalid value default to 99 to be put at the end
         local leftValue, rightValue = roleOrdering[leftRole] or defaultRoleOrdering, roleOrdering[rightRole] or defaultRoleOrdering
 
