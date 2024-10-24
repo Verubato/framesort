@@ -277,6 +277,17 @@ local function SetNameList(container)
         units = { "player" }
     end
 
+    if container.ShowPlayer then
+        local filtered = fsEnumerable
+            :From(units)
+            :Where(function(unit)
+                return container:ShowPlayer(unit)
+            end)
+            :ToTable()
+
+        units = filtered
+    end
+
     local sortFunction = fsCompare:SortFunction(units)
 
     table.sort(units, sortFunction)
