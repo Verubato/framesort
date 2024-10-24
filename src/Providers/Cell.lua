@@ -3,6 +3,7 @@ local _, addon = ...
 local wow = addon.WoW.Api
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
+local fsEnumerable = addon.Collections.Enumerable
 local M = {}
 
 fsProviders.Cell = M
@@ -31,11 +32,51 @@ function M:Containers()
     }
 
     ---@type FrameContainer
-    local raid = CellRaidFrameHeader0 and {
-        Frame = CellRaidFrameHeader0,
-        Type = fsFrame.ContainerType.Raid,
-        LayoutType = fsFrame.LayoutType.NameList,
-    }
+    local raid = CellRaidFrameHeader0
+        and {
+            Frame = CellRaidFrameHeader0,
+            Type = fsFrame.ContainerType.Raid,
+            LayoutType = fsFrame.LayoutType.NameList,
+            ShowPlayer = function(_, unitId)
+                local selectedLayout = Cell.vars.currentLayout or "default"
+                local groupSettings = CellDB.layouts[selectedLayout].groupFilter
+                local anyHidden = false
+
+                if not groupSettings then
+                    return true
+                end
+
+                -- check if any groups should be hidden
+                for _, value in ipairs(groupSettings) do
+                    anyHidden = anyHidden or not value
+
+                    if anyHidden then
+                        break
+                    end
+                end
+
+                if not anyHidden then
+                    return true
+                end
+
+                -- it's safe to use GetNumGroupMembers here
+                local unitGroup = nil
+                for i = 1, wow.GetNumGroupMembers() do
+                    local name, _, subgroup, _ = wow.GetRaidRosterInfo(i)
+
+                    if name == wow.GetUnitName(unitId, true) then
+                        unitGroup = subgroup
+                        break
+                    end
+                end
+
+                if not unitGroup then
+                    return true
+                end
+
+                return groupSettings[unitGroup]
+            end,
+        }
 
     return {
         party,
