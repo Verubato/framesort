@@ -3,7 +3,6 @@ local _, addon = ...
 local wow = addon.WoW.Api
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
-local fsEnumerable = addon.Collections.Enumerable
 local M = {}
 
 fsProviders.Cell = M
