@@ -13,4 +13,5 @@
 ---@field AnchorPoint string?: Only TOPLEFT or TOPRIGHT are supported.
 ---@field InCombatSortingRequired boolean?: Whether in-combat sorting is required.
 ---@field Frames? fun(self: table): table[] Returns the set of frames to be used instead of being automatically determined.
----@field ShowUnit? fun(self: table, unitId: string): boolean Custom function to determine whether a unit should be shown; only applicable to NameList containers.
+---@field ShowUnit? fun(self: table, unitId: string): boolean Determines whether a unit should be shown; only applicable to NameList containers.
+---@field PostSort? fun(self: table) Optional callback function that's called after each sort.
