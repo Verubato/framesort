@@ -37,7 +37,7 @@ function M:Containers()
             Frame = CellRaidFrameHeader0,
             Type = fsFrame.ContainerType.Raid,
             LayoutType = fsFrame.LayoutType.NameList,
-            ShowPlayer = function(_, unitId)
+            ShowUnit = function(_, unitId)
                 local selectedLayout = Cell.vars.currentLayout or "default"
                 local groupSettings = CellDB.layouts[selectedLayout].groupFilter
                 local anyHidden = false
