@@ -277,11 +277,11 @@ local function SetNameList(container)
         units = { "player" }
     end
 
-    if container.ShowPlayer then
+    if container.ShowUnit then
         local filtered = fsEnumerable
             :From(units)
             :Where(function(unit)
-                return container:ShowPlayer(unit)
+                return container:ShowUnit(unit)
             end)
             :ToTable()
 
