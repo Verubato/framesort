@@ -419,14 +419,22 @@ local function TrySortContainer(container)
         end
     end
 
+    local sorted = false
+
     if container.LayoutType == fsFrame.LayoutType.Soft then
-        return SoftArrange(frames, spacing)
+        sorted = SoftArrange(frames, spacing)
     elseif container.LayoutType == fsFrame.LayoutType.Hard then
-        return HardArrange(container, frames, spacing)
+        sorted = HardArrange(container, frames, spacing)
     else
         fsLog:Error("Unknown layout type: " .. (container.Type or "nil"))
         return false
     end
+
+    if sorted and container.PostSort then
+        container:PostSort()
+    end
+
+    return sorted
 end
 
 ---@param container FrameContainer
