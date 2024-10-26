@@ -100,6 +100,8 @@ local wow = {
     hooksecurefunc = hooksecurefunc,
     RegisterAttributeDriver = RegisterAttributeDriver,
     UnregisterAttributeDriver = UnregisterAttributeDriver,
+    RegisterUnitWatch = RegisterUnitWatch,
+    UnregisterUnitWatch = UnregisterUnitWatch,
 
     -- other
     ReloadUI = ReloadUI,

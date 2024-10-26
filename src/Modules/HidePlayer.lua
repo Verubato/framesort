@@ -23,11 +23,12 @@ local function ShowHide(show)
 
         if show and wow.UnitExists(unit) and not frame:IsVisible() then
             -- the frame may have moved to a different unit or the user wants the player raid frame to be shown again
-            wow.UnregisterAttributeDriver(frame, "state-visibility")
+            wow.RegisterUnitWatch(frame)
             frame:Show()
         elseif not show and wow.UnitIsUnit(unit, "player") then
             -- user has opted to hide the player unit frame
-            wow.RegisterAttributeDriver(frame, "state-visibility", "hide")
+            wow.UnregisterUnitWatch(frame)
+            frame:Hide()
         end
     end
 end

@@ -65,9 +65,11 @@
 ---@field hooksecurefunc fun(...)
 ---@field RegisterAttributeDriver fun(frame: table, attribute: string, conditional: string)
 ---@field UnregisterAttributeDriver fun(frame: table, attribute: string)
----@field SecureHandlerWrapScript fun(frame, script, header, preBody, postBody)
----@field SecureHandlerSetFrameRef fun(frame, label, refFrame)
----@field SecureHandlerExecute fun(frame, body)
+---@field SecureHandlerWrapScript fun(frame: table, script: string, header: table, preBody: string?, postBody: string?)
+---@field SecureHandlerSetFrameRef fun(frame: table, label: string, refFrame: table)
+---@field SecureHandlerExecute fun(frame: table, body: string)
+---@field RegisterUnitWatch fun(frame: table)
+---@field UnregisterUnitWatch fun(frame: table)
 -- addon related
 ---@field GetAddOnEnableState fun(character: string?, addon: string): number
 ---@field GetAddOnMetadata fun(nameOrIndex: string, field: string): string
