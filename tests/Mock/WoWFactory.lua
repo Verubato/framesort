@@ -284,6 +284,14 @@ function M:Create()
         frame.State.AttributeDrivers[attribute] = nil
     end
 
+    wow.RegisterUnitWatch = function(frame)
+        frame.State.HasUnitWatch = true
+    end
+
+    wow.UnregisterUnitWatch = function(frame)
+        frame.State.HasUnitWatch = false
+    end
+
     -- macro
     wow.GetMacroInfo = function(id)
         local macro = wow.State.Macros[id]

@@ -47,19 +47,13 @@ function M:test_player_shows_and_hides()
     config.PlayerSortMode = "Hidden"
     addon.Modules:Run()
 
-    local hideDriver = player.State.AttributeDrivers["state-visibility"]
-    assert(hideDriver)
-
-    assertEquals(hideDriver.Attribute, "state-visibility")
-    assertEquals(hideDriver.Conditional, "hide")
-
+    assert(not player.State.HasUnitWatch)
     assert(not player:IsVisible())
 
     config.PlayerSortMode = "Top"
     addon.Modules:Run()
 
-    hideDriver = player.State.AttributeDrivers["state-visibility"]
-    assert(not hideDriver)
+    assert(player.State.HasUnitWatch)
     assert(player:IsVisible())
 end
 
