@@ -169,121 +169,98 @@ secureMethods["FrameChain"] = [[
     return true
 ]]
 
--- performs an in place sort on an array of frames by their visual order
-secureMethods["SortFramesByTopLeft"] = [[
+-- bubble sort because it's easier to write
+-- not going to write an nlog(n) sort algorithm in this environment
+secureMethods["Sort"] = [[
     local run = control or self
-    local framesVariable = ...
-    local frames = _G[framesVariable]
+    local arrayVariable, compareFunction = ...
+    local array, compare = _G[arrayVariable], _G[compareFunction]
 
-    -- bubble sort because it's easier to write
-    -- not going to write an Olog(n) sort algorithm in this environment
-    for i = 1, #frames do
-        for j = 1, #frames - i do
-            local left, bottom, width, height = frames[j]:GetRect()
-            local nextLeft, nextBottom, nextWidth, nextHeight = frames[j + 1]:GetRect()
+    for i = 1, #array do
+        for j = 1, #array - i do
+            Left, Right = array[j], array[j + 1]
 
-            local topFuzzy = run:RunAttribute("Round", bottom + height)
-            local nextTopFuzzy = run:RunAttribute("Round", nextBottom + nextHeight)
-            local leftFuzzy = run:RunAttribute("Round", left)
-            local nextLeftFuzzy = run:RunAttribute("Round", nextLeft)
-
-            if topFuzzy < nextTopFuzzy or leftFuzzy > nextLeftFuzzy then
-                frames[j], frames[j + 1] = frames[j + 1], frames[j]
+            if run:RunAttribute(compareFunction, "Left", "Right") then
+                array[j], array[j + 1] = array[j + 1], array[j]
             end
+
+            Left, Right = nil, nil
         end
     end
 ]]
 
--- performs an in place sort on an array of frames by their visual order
-secureMethods["SortFramesByTopRight"] = [[
+secureMethods["CompareFrameTopLeft"] = [[
     local run = control or self
-    local framesVariable = ...
-    local frames = _G[framesVariable]
+    local leftVariable, rightVariable = ...
+    local x, y = _G[leftVariable], _G[rightVariable]
 
-    for i = 1, #frames do
-        for j = 1, #frames - i do
-            local left, bottom, width, height = frames[j]:GetRect()
-            local nextLeft, nextBottom, nextWidth, nextHeight = frames[j + 1]:GetRect()
+    local left, bottom, width, height = x:GetRect()
+    local nextLeft, nextBottom, nextWidth, nextHeight = y:GetRect()
 
-            local topFuzzy = run:RunAttribute("Round", bottom + height)
-            local nextTopFuzzy = run:RunAttribute("Round", nextBottom + nextHeight)
-            local rightFuzzy = run:RunAttribute("Round", left + width)
-            local nextRightFuzzy = run:RunAttribute("Round", nextLeft + nextWidth)
+    local topFuzzy = run:RunAttribute("Round", bottom + height)
+    local nextTopFuzzy = run:RunAttribute("Round", nextBottom + nextHeight)
+    local leftFuzzy = run:RunAttribute("Round", left)
+    local nextLeftFuzzy = run:RunAttribute("Round", nextLeft)
 
-            if topFuzzy < nextTopFuzzy or rightFuzzy < nextRightFuzzy then
-                frames[j], frames[j + 1] = frames[j + 1], frames[j]
-            end
-        end
-    end
+    return topFuzzy < nextTopFuzzy or leftFuzzy > nextLeftFuzzy
 ]]
 
--- performs an in place sort on an array of frames by their visual order
-secureMethods["SortFramesByBottomLeft"] = [[
+secureMethods["CompareFrameTopRight"] = [[
     local run = control or self
-    local framesVariable = ...
-    local frames = _G[framesVariable]
+    local leftVariable, rightVariable = ...
+    local x, y = _G[leftVariable], _G[rightVariable]
 
-    for i = 1, #frames do
-        for j = 1, #frames - i do
-            local left, bottom, width, height = frames[j]:GetRect()
-            local nextLeft, nextBottom, nextWidth, nextHeight = frames[j + 1]:GetRect()
+    local left, bottom, width, height = x:GetRect()
+    local nextLeft, nextBottom, nextWidth, nextHeight = y:GetRect()
 
-            local bottomFuzzy = run:RunAttribute("Round", bottom)
-            local nextBottomFuzzy = run:RunAttribute("Round", nextBottom)
-            local leftFuzzy = run:RunAttribute("Round", left)
-            local nextLeftFuzzy = run:RunAttribute("Round", nextLeft)
+    local topFuzzy = run:RunAttribute("Round", bottom + height)
+    local nextTopFuzzy = run:RunAttribute("Round", nextBottom + nextHeight)
+    local rightFuzzy = run:RunAttribute("Round", left + width)
+    local nextRightFuzzy = run:RunAttribute("Round", nextLeft + nextWidth)
 
-            if bottomFuzzy > nextBottomFuzzy or leftFuzzy > nextLeftFuzzy then
-                frames[j], frames[j + 1] = frames[j + 1], frames[j]
-            end
-        end
-    end
+    return topFuzzy < nextTopFuzzy or rightFuzzy < nextRightFuzzy
 ]]
 
--- performs an in place sort on an array of points by their top left coordinate
-secureMethods["SortPointsByTopLeft"] = [[
+secureMethods["CompareFrameBottomLeft"] = [[
     local run = control or self
-    local pointsVariable = ...
-    local points = _G[pointsVariable]
+    local leftVariable, rightVariable = ...
+    local x, y = _G[leftVariable], _G[rightVariable]
 
-    for i = 1, #points do
-        for j = 1, #points - i do
-            local point = points[j]
-            local next = points[j + 1]
+    local left, bottom, width, height = x:GetRect()
+    local nextLeft, nextBottom, nextWidth, nextHeight = y:GetRect()
 
-            local topFuzzy = run:RunAttribute("Round", point.Bottom + point.Height)
-            local nextTopFuzzy = run:RunAttribute("Round", next.Bottom + next.Height)
-            local leftFuzzy = run:RunAttribute("Round", point.Left)
-            local nextLeftFuzzy = run:RunAttribute("Round", next.Left)
+    local bottomFuzzy = run:RunAttribute("Round", bottom)
+    local nextBottomFuzzy = run:RunAttribute("Round", nextBottom)
+    local leftFuzzy = run:RunAttribute("Round", left)
+    local nextLeftFuzzy = run:RunAttribute("Round", nextLeft)
 
-            if topFuzzy < nextTopFuzzy or leftFuzzy > nextLeftFuzzy then
-                points[j], points[j + 1] = points[j + 1], points[j]
-            end
-        end
-    end
+    return bottomFuzzy > nextBottomFuzzy or leftFuzzy > nextLeftFuzzy
 ]]
 
--- performs an in place sort on an array of points by their top left coordinate
-secureMethods["SortPointsByLeftTop"] = [[
+secureMethods["ComparePointTopLeft"] = [[
     local run = control or self
-    local pointsVariable = ...
-    local points = _G[pointsVariable]
+    local leftVariable, rightVariable = ...
+    local x, y = _G[leftVariable], _G[rightVariable]
 
-    for i = 1, #points do
-        for j = 1, #points - i do
-            local point = points[j]
-            local next = points[j + 1]
+    local topFuzzy = run:RunAttribute("Round", x.Bottom + x.Height)
+    local nextTopFuzzy = run:RunAttribute("Round", y.Bottom + y.Height)
+    local leftFuzzy = run:RunAttribute("Round", x.Left)
+    local nextLeftFuzzy = run:RunAttribute("Round", y.Left)
 
-            local topFuzzy = run:RunAttribute("Round", point.Bottom + point.Height)
-            local nextTopFuzzy = run:RunAttribute("Round", next.Bottom + next.Height)
-            local leftFuzzy = run:RunAttribute("Round", point.Left)
-            local nextLeftFuzzy = run:RunAttribute("Round", next.Left)
+    return topFuzzy < nextTopFuzzy or leftFuzzy > nextLeftFuzzy
+]]
 
-            if leftFuzzy > nextLeftFuzzy or topFuzzy < nextTopFuzzy then
-                points[j], points[j + 1] = points[j + 1], points[j]
-            end
-        end
-    end
+secureMethods["ComparePointLeftTop"] = [[
+    local run = control or self
+    local leftVariable, rightVariable = ...
+    local x, y = _G[leftVariable], _G[rightVariable]
+
+    local topFuzzy = run:RunAttribute("Round", x.Bottom + x.Height)
+    local nextTopFuzzy = run:RunAttribute("Round", y.Bottom + y.Height)
+    local leftFuzzy = run:RunAttribute("Round", x.Left)
+    local nextLeftFuzzy = run:RunAttribute("Round", y.Left)
+
+    return leftFuzzy > nextLeftFuzzy or topFuzzy < nextTopFuzzy
 ]]
 
 -- performs an out of place sort on an array frames by the order of the units array
@@ -398,8 +375,8 @@ secureMethods["ApplySpacing"] = [[
     run:RunAttribute("CopyTable", pointsVariable, "OrderedTopLeft")
     run:RunAttribute("CopyTable", pointsVariable, "OrderedLeftTop")
 
-    run:RunAttribute("SortPointsByTopLeft", "OrderedTopLeft")
-    run:RunAttribute("SortPointsByLeftTop", "OrderedLeftTop")
+    run:RunAttribute("Sort", "OrderedTopLeft", "ComparePointTopLeft")
+    run:RunAttribute("Sort", "OrderedLeftTop", "ComparePointLeftTop")
 
     local changed = false
 
@@ -494,7 +471,7 @@ secureMethods["SoftArrange"] = [[
     OrderedByTopLeft = newtable()
 
     run:RunAttribute("CopyTable", framesVariable, "OrderedByTopLeft")
-    run:RunAttribute("SortFramesByTopLeft", "OrderedByTopLeft")
+    run:RunAttribute("Sort", "OrderedByTopLeft", "CompareFrameTopLeft")
 
     local points = newtable()
     for _, frame in ipairs(OrderedByTopLeft) do
@@ -730,7 +707,7 @@ secureMethods["UngroupedOffset"] = [[
     local left, bottom, width, height = container.Frame:GetRect()
 
     if horizontal then
-        run:RunAttribute("SortFramesByBottomLeft", "OffsetGroupFrames")
+        run:RunAttribute("Sort", "OffsetGroupFrames", "CompareFrameBottomLeft")
 
         local bottomLeftFrame = OffsetGroupFrames[1]
         local bottomFrameLeft, bottomFrameBottom, _, _ = bottomLeftFrame:GetRect()
@@ -738,7 +715,7 @@ secureMethods["UngroupedOffset"] = [[
         x = -(left - bottomFrameLeft)
         y = -((bottom + height) - bottomFrameBottom + spacing.Vertical)
     else
-        run:RunAttribute("SortFramesByTopRight", "OffsetGroupFrames")
+        run:RunAttribute("Sort", "OffsetGroupFrames", "CompareFrameTopRight")
 
         local topRightFrame = OffsetGroupFrames[1]
         local topFrameLeft, topFrameBottom, topFrameWidth, topFrameHeight = topRightFrame:GetRect()
@@ -945,13 +922,13 @@ secureMethods["TrySort"] = [[
                 if not container.Frame:IsProtected() then
                     run:RunAttribute("Log", "Error", "Container for " .. provider.Name .. " must be protected.")
                 elseif container.Frame:IsVisible() and
-                    ((container.Type == ContainerType.Party or container.Type == ContainerType.Raid) and friendlyEnabled) or
-                    (container.Type == ContainerType.EnemyArena and enemyEnabled) then
-                        local add = newtable()
-                        add.Provider = provider
-                        add.Container = container
+                       ((container.Type == ContainerType.Party or container.Type == ContainerType.Raid) and friendlyEnabled) or
+                       (container.Type == ContainerType.EnemyArena and enemyEnabled) then
+                    local add = newtable()
+                    add.Provider = provider
+                    add.Container = container
 
-                        toSort[#toSort + 1] = add
+                    toSort[#toSort + 1] = add
                 end
             end
         end
@@ -1036,7 +1013,6 @@ secureMethods["LoadProvider"] = [[
             end
 
             container.Frames = frames
-            print("Loaded", framesCount)
         end
 
         provider.Containers[#provider.Containers + 1] = container
