@@ -172,7 +172,7 @@ FrameSort supports the following:
 Blizzard
  - Party: yes
  - Raid: yes
- - Arena: broken (will fix it eventually).
+ - Arena: yes
 \n
 ElvUI
  - Party: yes

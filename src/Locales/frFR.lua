@@ -174,7 +174,7 @@ FrameSort prend en charge les éléments suivants :
 Blizzard
  - Groupe : oui
  - Raid : oui
- - Arène : cassé (sera corrigé éventuellement).
+ - Arène : oui
 \n
 ElvUI
  - Groupe : oui

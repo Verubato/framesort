@@ -174,7 +174,7 @@ FrameSort unterstützt die folgenden:
 Blizzard
  - Gruppe: ja
  - Schlachtzug: ja
- - Arena: defekt (wir werden es irgendwann beheben).
+ - Arena: ja
 \n
 ElvUI
  - Gruppe: ja
