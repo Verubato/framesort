@@ -209,6 +209,9 @@ local wow = {
 
         -- fired when a macro is created/deleted/updated
         UPDATE_MACROS = "UPDATE_MACROS",
+
+        -- fires at start/end of an arena match/round
+        PVP_MATCH_STATE_CHANGED = "PVP_MATCH_STATE_CHANGED"
     },
 }
 

@@ -25,6 +25,7 @@ local cvarsPatternsToRunSort = {
     "pvpFrames.*",
     "activeCUFProfile",
 }
+local combatStatusFrame = nil
 
 fsProviders.Blizzard = M
 table.insert(fsProviders.All, M)
@@ -86,6 +87,24 @@ local function GetOffset(container)
     return nil
 end
 
+local function CombatChanging(_, event)
+    local toBlock = {
+        -- prevent 'seen' and 'stealth' events from causing frames to reposition
+        events.ARENA_OPPONENT_UPDATE,
+
+        -- prevent frames from going haywire at the end of a shuffle round
+        events.PVP_MATCH_STATE_CHANGED,
+    }
+
+    for _, ev in ipairs(toBlock) do
+        if event == events.PLAYER_REGEN_DISABLED then
+            wow.CompactArenaFrame:UnregisterEvent(ev)
+        elseif event == events.PLAYER_REGEN_ENABLED then
+            wow.CompactArenaFrame:RegisterEvent(ev)
+        end
+    end
+end
+
 function M:Name()
     return "Blizzard"
 end
@@ -132,6 +151,17 @@ function M:Init()
     if CompactRaidFrameContainer_OnSizeChanged then
         -- classic uses the container size to determine frames per line
         wow.hooksecurefunc("CompactRaidFrameContainer_OnSizeChanged", OnRaidContainerSizeChanged)
+    end
+
+    if wow.CompactArenaFrame then
+        combatStatusFrame = wow.CreateFrame("Frame")
+        combatStatusFrame:RegisterEvent(events.PLAYER_REGEN_ENABLED)
+        combatStatusFrame:RegisterEvent(events.PLAYER_REGEN_DISABLED)
+        combatStatusFrame:HookScript("OnEvent", CombatChanging)
+
+        wow.hooksecurefunc(wow.CompactArenaFrame, "UpdateLayout", function()
+            RequestSort()
+        end)
     end
 end
 
@@ -295,6 +325,11 @@ function M:Containers()
                     X = -(wow.CompactArenaFrameMember1 and (wow.CompactArenaFrameMember1.CcRemoverFrame:GetWidth() + 2) or 29),
                     Y = -(wow.CompactArenaFrameTitle and wow.CompactArenaFrameTitle:GetHeight() or 14),
                 }
+            end,
+            PostSort = function()
+                -- this is anchored to CompactArenaFrameMember1 by default which can move around
+                -- so just hide the title
+                wow.CompactArenaFrameTitle:Hide()
             end,
         }
     end

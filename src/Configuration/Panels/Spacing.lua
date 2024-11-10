@@ -205,7 +205,7 @@ function M:Build(parent)
     spacingTitle:SetText(L["Spacing"])
 
     local lines = {
-        L["Add some spacing between party/raid frames."],
+        L["Add some spacing between party, raid, and arena frames."],
         L["This only applies to Blizzard frames."],
     }
 
@@ -213,12 +213,15 @@ function M:Build(parent)
     local config = addon.DB.Options.Spacing
 
     if wow.IsRetail() then
-        -- for retail
         anchor = BuildSpacingOptions(panel, anchor, L["Party"], "Party", config.Party, true, true, 0)
     end
 
     local title = wow.IsRetail() and "Raid" or "Group"
     anchor = BuildSpacingOptions(panel, anchor, L[title], title, config.Raid, true, true, verticalSpacing)
+
+    if wow.IsRetail() then
+        anchor = BuildSpacingOptions(panel, anchor, L["Enemy Arena"], "Enemy Arena", config.EnemyArena, true, true, verticalSpacing)
+    end
 
     return panel
 end

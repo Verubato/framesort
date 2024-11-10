@@ -173,7 +173,7 @@ L["Addons_Supported_Description"] = [[
 블리자드
  - 파티: 예
  - 공격대: 예
- - 아레나: 고장 (결국 수정할 것입니다).
+ - 아레나: 예
 \n
 ElvUI
  - 파티: 예

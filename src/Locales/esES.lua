@@ -176,7 +176,7 @@ FrameSort soporta lo siguiente:
 Blizzard
  - Grupo: sí
  - Banda: sí
- - Arena: roto (lo arreglaré eventualmente).
+ - Arena: sí
 \n
 ElvUI
  - Grupo: sí
