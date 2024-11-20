@@ -111,7 +111,8 @@ local wow = {
     -- addon related
     GetAddonInfo = C_AddOns and C_AddOns.GetAddonInfo or GetAddonInfo,
     GetAddOnEnableState = function(character, name)
-        if C_AddOns then
+        -- in wotlk private 3.4.3 C_AddOns exists but C_AddOns.GetAddOnEnableState doesn't
+        if C_AddOns and C_AddOns.GetAddOnEnableState then
             -- argument order is reversed
             return C_AddOns.GetAddOnEnableState(name, character)
         end
