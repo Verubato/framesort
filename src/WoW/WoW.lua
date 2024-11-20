@@ -116,7 +116,7 @@ local wow = {
             return C_AddOns.GetAddOnEnableState(name, character)
         end
 
-        if GetAddonEnableState then
+        if GetAddOnEnableState then
             return GetAddOnEnableState(character, name)
         end
 
