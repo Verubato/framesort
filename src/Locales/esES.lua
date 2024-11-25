@@ -130,7 +130,7 @@ Así que apuntar a 'Marco 1' apuntará al Tanque, 'Marco 2' al sanador, 'Marco 3
 -- # Macros screen # --
 L["Macros"] = "Macros"
 -- "|4macro:macros;" es un comando especial para pluralizar la palabra "macro" a "macros" cuando %d es mayor que 1
-L["FrameSort has found %d|4macro:macros; to manage."] = "FrameSort ha encontrado %d|4macro:macros; para gestionar."
+L["FrameSort has found %d |4macro:macros; to manage."] = "FrameSort ha encontrado %d |4macro:macros; para gestionar."
 L['FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.'] = "FrameSort actualizará dinámicamente las variables dentro de los macros que contengan el encabezado '#FrameSort'."
 L["Below are some examples on how to use this."] = "A continuación se presentan algunos ejemplos sobre cómo usar esto."
 

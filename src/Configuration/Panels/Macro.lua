@@ -46,7 +46,7 @@ function M:Build(parent)
     title:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
     title:SetText(L["Macros"])
 
-    local countText = L["FrameSort has found %d|4macro:macros; to manage."]
+    local countText = L["FrameSort has found %d |4macro:macros; to manage."]
     local countLine = panel:CreateFontString(nil, "ARTWORK", "GameFontGreen")
     countLine:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -verticalSpacing)
     countLine:SetText(string.format(countText, 0))

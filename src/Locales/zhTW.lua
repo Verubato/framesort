@@ -127,7 +127,7 @@ FrameSort的快捷鍵將基於其視覺框架位置而非隊伍編號進行選�
 
 -- # Macros screen # --
 L["Macros"] = "宏"
-L["FrameSort has found %d|4macro:macros; to manage."] = "FrameSort 找到了 %d|4宏:宏; 需要管理。"
+L["FrameSort has found %d |4macro:macros; to manage."] = "FrameSort 找到了 %d |4宏:宏; 需要管理。"
 L['FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.'] = "FrameSort 將動態更新包含'#FrameSort'標題的宏內變數。"
 L["Below are some examples on how to use this."] = "下面是一些使用示例。"
 

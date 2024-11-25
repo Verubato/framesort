@@ -129,7 +129,7 @@ Donc cibler 'Cadre 1' ciblera le Tank, 'Cadre 2' le soigneur, 'Cadre 3' le DPS e
 
 -- # Macros screen # --
 L["Macros"] = "Macros"
-L["FrameSort has found %d|4macro:macros; to manage."] = "FrameSort a trouvé %d|4macro:macros; à gérer."
+L["FrameSort has found %d |4macro:macros; to manage."] = "FrameSort a trouvé %d |4macro:macros; à gérer."
 L['FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.'] = "FrameSort mettra à jour dynamiquement les variables au sein des macros contenant l'en-tête \"#FrameSort\"."
 L["Below are some examples on how to use this."] = "Voici quelques exemples sur la façon d'utiliser cela."
 

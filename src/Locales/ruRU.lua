@@ -129,7 +129,7 @@ L["Keybindings_Description"] = [[
 
 -- # Macros screen # --
 L["Macros"] = "Макросы"
-L["FrameSort has found %d|4macro:macros; to manage."] = "FrameSort нашёл %d|4макрос:макроса; для управления."
+L["FrameSort has found %d |4macro:macros; to manage."] = "FrameSort нашёл %d |4макрос:макроса; для управления."
 L['FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.'] = 'FrameSort динамически обновит переменные внутри макросов, содержащих заголовок "#FrameSort".'
 L["Below are some examples on how to use this."] = "Ниже приведены примеры использования этого."
 
