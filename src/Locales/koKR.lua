@@ -127,7 +127,7 @@ L["Keybindings_Description"] = [[
 
 -- # Macros screen # --
 L["Macros"] = "매크로"
-L["FrameSort has found %d|4macro:macros; to manage."] = "프레임정렬이 관리할 %d|4macro:매크로;을(를) 발견했습니다."
+L["FrameSort has found %d |4macro:macros; to manage."] = "프레임정렬이 관리할 %d |4macro:매크로;을(를) 발견했습니다."
 L['FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.'] = "프레임정렬은 '#FrameSort' 헤더를 포함하는 매크로 내에서 변수를 동적으로 업데이트합니다."
 L["Below are some examples on how to use this."] = "이를 사용하는 방법에 대한 몇 가지 예입니다."
 

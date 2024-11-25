@@ -129,7 +129,7 @@ FrameSort的快捷键绑定将根据它们的视觉框架位置而不是队伍�
 -- # Macros screen # --
 L["Macros"] = "宏"
 -- "|4macro:macros;" is a special command to pluralise the word "macro" to "macros" when %d is greater than 1
-L["FrameSort has found %d|4macro:macros; to manage."] = "FrameSort发现了%d个|4宏:宏;需要管理。"
+L["FrameSort has found %d |4macro:macros; to manage."] = "FrameSort 发现了 %d |4宏:宏;需要管理。"
 L['FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.'] = 'FrameSort将动态更新包含"#FrameSort"头的宏中的变量。'
 L["Below are some examples on how to use this."] = "以下是一些使用示例。"
 

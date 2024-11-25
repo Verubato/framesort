@@ -129,7 +129,7 @@ Das bedeutet, dass das Zielen auf 'Rahmen 1' den Tank zielt, 'Rahmen 2' den Heil
 
 -- # Macros screen # --
 L["Macros"] = "Makros"
-L["FrameSort has found %d|4macro:macros; to manage."] = "FrameSort hat %d|4Makro:Makros; gefunden, die verwaltet werden müssen."
+L["FrameSort has found %d |4macro:macros; to manage."] = "FrameSort hat %d |4Makro:Makros; gefunden, die verwaltet werden müssen."
 L['FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.'] = "FrameSort wird Variablen innerhalb von Makros, die den Kopfzeilen '#FrameSort' enthalten, dynamisch aktualisieren."
 L["Below are some examples on how to use this."] = "Im Folgenden sind einige Beispiele, wie man dies nutzt."
 

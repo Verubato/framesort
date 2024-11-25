@@ -126,7 +126,7 @@ So targeting 'Frame 1' will target the Tank, 'Frame 2' the healer, 'Frame 3' the
 -- # Macros screen # --
 L["Macros"] = nil
 -- "|4macro:macros;" is a special command to pluralise the word "macro" to "macros" when %d is greater than 1
-L["FrameSort has found %d|4macro:macros; to manage."] = nil
+L["FrameSort has found %d |4macro:macros; to manage."] = nil
 L['FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.'] = nil
 L["Below are some examples on how to use this."] = nil
 
