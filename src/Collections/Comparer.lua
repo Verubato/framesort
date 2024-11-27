@@ -218,13 +218,10 @@ end
 ---@return boolean
 local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse, preSortedUnits)
     -- if not in a group, we might be in test mode
-    if wow.IsInGroup() then
-        if not wow.UnitExists(leftToken) then
-            return false
-        end
-        if not wow.UnitExists(rightToken) then
-            return true
-        end
+    if wow.UnitExists(leftToken) and not wow.UnitExists(rightToken) then
+        return true
+    elseif wow.UnitExists(rightToken) and not wow.UnitExists(leftToken) then
+        return false
     end
 
     if fsUnit:IsPet(leftToken) or fsUnit:IsPet(rightToken) then
@@ -290,6 +287,12 @@ end
 ---@param reverse boolean?
 ---@return boolean
 local function EnemyCompare(leftToken, rightToken, groupSortMode, reverse)
+    if wow.UnitExists(leftToken) and not wow.UnitExists(rightToken) then
+        return true
+    elseif wow.UnitExists(rightToken) and not wow.UnitExists(leftToken) then
+        return false
+    end
+
     if fsUnit:IsPet(leftToken) or fsUnit:IsPet(rightToken) then
         -- place player before pets
         if not fsUnit:IsPet(leftToken) then
