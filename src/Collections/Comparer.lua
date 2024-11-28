@@ -287,12 +287,10 @@ end
 ---@param reverse boolean?
 ---@return boolean
 local function EnemyCompare(leftToken, rightToken, groupSortMode, reverse)
-    if wow.UnitExists(leftToken) and not wow.UnitExists(rightToken) then
-        return true
-    elseif wow.UnitExists(rightToken) and not wow.UnitExists(leftToken) then
-        return false
-    end
-
+    -- used to have UnitExists() checks here
+    -- but it returns false in the starting room
+    -- it also seemed to bring some problems when a new round starts in shuffle
+    -- so leaving it out for now
     if fsUnit:IsPet(leftToken) or fsUnit:IsPet(rightToken) then
         -- place player before pets
         if not fsUnit:IsPet(leftToken) then
