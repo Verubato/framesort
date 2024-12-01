@@ -9,6 +9,7 @@ local fsScheduler = addon.Scheduling.Scheduler
 local fsConfig = addon.Configuration
 local fsEnumerable = addon.Collections.Enumerable
 local fsLog = addon.Logging.Log
+local fsFrame = addon.WoW.Frame
 local M = {}
 addon.Modules.Sorting.Secure.InCombat = M
 
@@ -1218,10 +1219,57 @@ local function ResubscribeEvents()
     petHeader:RegisterEvent(wow.Events.UNIT_NAME_UPDATE)
 end
 
+---@param container FrameContainer
+local function WatchChildrenVisibility(container)
+    assert(manager)
+
+    local children = fsFrame:ExtractUnitFrames(container.Frame, false, false, false)
+
+    for _, child in ipairs(children) do
+        if not child:GetAttribute("framesort-watching-visibility") then
+            -- not sure why, but postBody scripts don't work for OnShow/OnHide
+            wow.SecureHandlerWrapScript(
+                child,
+                "OnShow",
+                manager,
+                [[ 
+                    self:SetAttribute("state-framesort-run", "ignore") 
+                ]]
+            )
+            wow.SecureHandlerWrapScript(
+                child,
+                "OnHide",
+                manager,
+                [[ 
+                    self:SetAttribute("state-framesort-run", "ignore") 
+                ]]
+            )
+
+            child:SetAttribute("framesort-watching-visibility", true)
+        end
+    end
+end
+
+local function WatchVisibility()
+    local containersToSubscribe = fsEnumerable
+        :From(fsProviders.All)
+        :Map(function(provider) return provider:Containers() end)
+        :Flatten()
+        :Where(function(container)
+            return container.SubscribeToVisibility
+        end)
+        :ToTable()
+
+    for _, container in ipairs(containersToSubscribe) do
+        WatchChildrenVisibility(container)
+    end
+end
+
 local function OnCombatStarting()
     LoadEnabled()
     LoadUnits()
     ResubscribeEvents()
+    WatchVisibility()
 end
 
 local function OnProviderContainersChanged(provider)

@@ -15,3 +15,4 @@
 ---@field Frames? fun(self: table): table[] Returns the set of frames to be used instead of being automatically determined.
 ---@field ShowUnit? fun(self: table, unitId: string): boolean Determines whether a unit should be shown; only applicable to NameList containers.
 ---@field PostSort? fun(self: table) Optional callback function that's called after each sort.
+---@field SubscribeToVisibility? boolean Whether to run sorting when a frame's visibility status changes.

@@ -320,6 +320,7 @@ function M:Containers()
             SupportsSpacing = true,
             InCombatSortingRequired = true,
             AnchorPoint = "TOPRIGHT",
+            SubscribeToVisibility = true,
             FramesOffset = function()
                 return {
                     X = -(wow.CompactArenaFrameMember1 and (wow.CompactArenaFrameMember1.CcRemoverFrame:GetWidth() + 2) or 29),

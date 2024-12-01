@@ -22,6 +22,7 @@
         "SUFHeaderparty",
         "SUFHeaderarena",
         "Grid2LayoutHeader1",
+        "CompactArenaFrame_RefreshMembers",
     ],
     "diagnostics.disable": [
         "inject-field"
