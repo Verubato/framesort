@@ -174,8 +174,20 @@ end
 ---@param container table
 ---@param visibleOnly boolean?
 ---@return table
-function M:ExtractUnitFrames(container, visibleOnly)
-    if not container or M:IsForbidden(container) or not container:IsVisible() then
+function M:ExtractUnitFrames(container, visibleOnly, hasUnit, containerVisible)
+    if hasUnit == nil then
+        hasUnit = true
+    end
+
+    if visibleOnly == nil then
+        visibleOnly = true
+    end
+
+    if containerVisible == nil then
+        containerVisible = true
+    end
+
+    if not container or M:IsForbidden(container) or (containerVisible and not container:IsVisible()) then
         return {}
     end
 
@@ -186,9 +198,23 @@ function M:ExtractUnitFrames(container, visibleOnly)
                 return false
             end
 
-            local unit = M:GetFrameUnit(frame)
-            if not unit then
-                return false
+            if hasUnit then
+                local unit = M:GetFrameUnit(frame)
+                if not unit then
+                    return false
+                end
+            else
+                local name = frame:GetName()
+
+                if not name then
+                    return false
+                end
+
+                -- without a unit check, we can end up with a lot of unrelated frames
+                -- so checking their name is a decent filter
+                if not string.match(name, "Member") and not string.match(name, "Pet") then
+                    return false
+                end
             end
 
             if frame:GetTop() == nil or frame:GetLeft() == nil then
