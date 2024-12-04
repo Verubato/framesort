@@ -408,7 +408,9 @@ local function TrySortContainer(container)
 
     local spacing = nil
 
-    if container.SupportsSpacing then
+    if container.Spacing then
+        spacing = container:Spacing()
+    elseif container.SupportsSpacing then
         local config = addon.DB.Options.Spacing
         if container.Type == fsFrame.ContainerType.Party then
             spacing = config.Party

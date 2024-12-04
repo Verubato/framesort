@@ -870,7 +870,11 @@ secureMethods["TrySortContainer"] = [[
 
     local sorted = false
 
-    if container.SupportsSpacing then
+    if container.Spacing then
+        Spacing = newtable()
+        Spacing.Horizontal = container.SpacingHorizontal
+        Spacing.Vertical = container.SpacingVertical
+    elseif container.SupportsSpacing then
         local horizontalSpacing, verticalSpacing = run:RunAttribute("SpacingForContainer", container.Type)
 
         if (horizontalSpacing and horizontalSpacing ~= 0) or (verticalSpacing and verticalSpacing ~= 0) then
@@ -979,6 +983,8 @@ secureMethods["LoadProvider"] = [[
         container.Type = self:GetAttribute(prefix .. "Type")
         container.LayoutType = self:GetAttribute(prefix .. "LayoutType")
         container.SupportsSpacing = self:GetAttribute(prefix .. "SupportsSpacing")
+        container.SpacingVertical = self:GetAttribute(prefix .. "SpacingVertical")
+        container.SpacingHorizontal = self:GetAttribute(prefix .. "SpacingHorizontal")
         container.VisibleOnly = self:GetAttribute(prefix .. "VisibleOnly")
         container.AnchorPoint = self:GetAttribute(prefix .. "AnchorPoint")
         container.IsGrouped = self:GetAttribute(prefix .. "IsGrouped")
@@ -1146,6 +1152,10 @@ local function LoadProvider(provider)
         manager:SetAttributeNoHandler(containerPrefix .. "GroupOffsetX", groupOffset and groupOffset.X)
         manager:SetAttributeNoHandler(containerPrefix .. "GroupOffsetY", groupOffset and groupOffset.Y)
 
+        local spacing = container.Spacing and container:Spacing()
+        manager:SetAttributeNoHandler(containerPrefix .. "SpacingHorizontal", spacing and spacing.Horizontal)
+        manager:SetAttributeNoHandler(containerPrefix .. "SpacingVertical", spacing and spacing.Vertical)
+
         if container.Frames then
             local frames = container.Frames()
             manager:SetAttributeNoHandler(containerPrefix .. "FramesCount", #frames)
@@ -1253,7 +1263,9 @@ end
 local function WatchVisibility()
     local containersToSubscribe = fsEnumerable
         :From(fsProviders.All)
-        :Map(function(provider) return provider:Containers() end)
+        :Map(function(provider)
+            return provider:Containers()
+        end)
         :Flatten()
         :Where(function(container)
             return container.SubscribeToVisibility
