@@ -33,7 +33,17 @@ function M:Containers()
     local arena = {
         Frame = sArena,
         Type = fsFrame.ContainerType.EnemyArena,
-        LayoutType = fsFrame.LayoutType.Soft,
+        LayoutType = fsFrame.LayoutType.Hard,
+        AnchorPoint = "CENTER",
+        Spacing = function()
+            local layout = sArena.db.profile.currentLayout
+            local settings = sArena.db.profile.layoutSettings[layout]
+
+            return {
+                Horizontal = 0,
+                Vertical = settings.spacing
+            }
+        end
     }
 
     return {
