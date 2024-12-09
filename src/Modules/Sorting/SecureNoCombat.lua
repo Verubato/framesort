@@ -66,23 +66,67 @@ local function Move(frames, points)
     return #framesToMove > 0
 end
 
----Rearranges frames by only modifying the X/Y offsets and not changing any point anchors.
+---Applies spacing on a set of points.
 ---@param frames table[]
----@param spacing Spacing?
----@return boolean sorted
-local function SoftArrange(frames, spacing)
-    if #frames == 0 then
-        return false
-    end
-
-    local ordered = fsEnumerable
+---@param spacing Spacing
+---@param pointsByFrame table<table, Point>
+local function ApplySpacing(frames, spacing, pointsByFrame)
+    local orderedTopLeft = fsEnumerable
         :From(frames)
         :OrderBy(function(x, y)
             return fsCompare:CompareTopLeftFuzzy(x, y)
         end)
         :ToTable()
+
+    local yDelta = 0
+    for i = 2, #orderedTopLeft do
+        local frame = orderedTopLeft[i]
+        local previous = orderedTopLeft[i - 1]
+        local point = pointsByFrame[frame]
+        local sameColumn = fsMath:Round(frame:GetLeft()) == fsMath:Round(previous:GetLeft())
+
+        if sameColumn then
+            local existingSpace = previous:GetBottom() - frame:GetTop()
+            yDelta = yDelta - (existingSpace - spacing.Vertical)
+            point.Top = point.Top - yDelta
+        end
+    end
+
+    local orderedLeftTop = fsEnumerable
+        :From(frames)
+        :OrderBy(function(x, y)
+            return fsCompare:CompareLeftTopFuzzy(x, y)
+        end)
+        :ToTable()
+
+    local xDelta = 0
+    for i = 2, #orderedLeftTop do
+        local frame = orderedLeftTop[i]
+        local previous = orderedTopLeft[i - 1]
+        local point = pointsByFrame[frame]
+        local sameRow = fsMath:Round(frame:GetTop()) == fsMath:Round(previous:GetTop())
+
+        if sameRow then
+            local existingSpace = previous:GetRight() - frame:GetLeft()
+            xDelta = xDelta + (existingSpace + spacing.Horizontal)
+            point.Left = point.Left + xDelta
+        end
+    end
+end
+
+---Applies spacing to a set of groups that contain frames.
+---@param frames table[]
+---@return boolean sorted
+local function SpaceGroups(frames, spacing)
+    if #frames == 0 then
+        return false
+    end
+
     local points = fsEnumerable
-        :From(ordered)
+        :From(frames)
+        :OrderBy(function(x, y)
+            return fsCompare:CompareTopLeftFuzzy(x, y)
+        end)
         :Map(function(frame)
             return {
                 Frame = frame,
@@ -98,49 +142,46 @@ local function SoftArrange(frames, spacing)
         return x
     end)
 
-    if spacing then
-        local orderedTopLeft = fsEnumerable
-            :From(frames)
-            :OrderBy(function(x, y)
-                return fsCompare:CompareTopLeftFuzzy(x, y)
-            end)
-            :ToTable()
+    ApplySpacing(frames, spacing, pointsByFrame)
 
-        local yDelta = 0
-        for i = 2, #orderedTopLeft do
-            local frame = orderedTopLeft[i]
-            local previous = orderedTopLeft[i - 1]
-            local point = pointsByFrame[frame]
-            local sameColumn = fsMath:Round(frame:GetLeft()) == fsMath:Round(previous:GetLeft())
+    local movedAny = false
+    for _, source in ipairs(frames) do
+        local desiredIndex = fsEnumerable:From(frames):IndexOf(source)
+        local destination = points[desiredIndex]
+        local xDelta = destination.Left - source:GetLeft()
+        local yDelta = destination.Top - source:GetTop()
 
-            if sameColumn then
-                local existingSpace = previous:GetBottom() - frame:GetTop()
-                yDelta = yDelta - (existingSpace - spacing.Vertical)
-                point.Top = point.Top - yDelta
-            end
-        end
-
-        local orderedLeftTop = fsEnumerable
-            :From(frames)
-            :OrderBy(function(x, y)
-                return fsCompare:CompareLeftTopFuzzy(x, y)
-            end)
-            :ToTable()
-
-        local xDelta = 0
-        for i = 2, #orderedLeftTop do
-            local frame = orderedLeftTop[i]
-            local previous = orderedTopLeft[i - 1]
-            local point = pointsByFrame[frame]
-            local sameRow = fsMath:Round(frame:GetTop()) == fsMath:Round(previous:GetTop())
-
-            if sameRow then
-                local existingSpace = previous:GetRight() - frame:GetLeft()
-                xDelta = xDelta + (existingSpace + spacing.Horizontal)
-                point.Left = point.Left + xDelta
-            end
+        if xDelta ~= 0 or yDelta ~= 0 then
+            source:AdjustPointsOffset(xDelta, yDelta)
+            movedAny = true
         end
     end
+
+    return movedAny
+end
+
+---Rearranges frames by only modifying the X/Y offsets and not changing any point anchors.
+---@param frames table[]
+---@return boolean sorted
+local function SoftArrange(frames)
+    if #frames == 0 then
+        return false
+    end
+
+    local points = fsEnumerable
+        :From(frames)
+        :OrderBy(function(x, y)
+            return fsCompare:CompareTopLeftFuzzy(x, y)
+        end)
+        :Map(function(frame)
+            return {
+                Frame = frame,
+                -- keep a copy of the frame positions before they are moved
+                Top = frame:GetTop(),
+                Left = frame:GetLeft(),
+            }
+        end)
+        :ToTable()
 
     local enumerationOrder = frames
     local chain = fsFrame:ToFrameChain(frames)
@@ -424,7 +465,7 @@ local function TrySortContainer(container)
     local sorted = false
 
     if container.LayoutType == fsFrame.LayoutType.Soft then
-        sorted = SoftArrange(frames, spacing)
+        sorted = SoftArrange(frames)
     elseif container.LayoutType == fsFrame.LayoutType.Hard then
         sorted = HardArrange(container, frames, spacing)
     else
@@ -493,7 +534,7 @@ local function TrySortContainerGroups(container)
         return sorted
     end
 
-    sorted = SoftArrange(groups, spacing) or sorted
+    sorted = SpaceGroups(groups, spacing) or sorted
 
     -- ungrouped frames include pets, vehicles, and main tank/assist frames
     local ungroupedFrames = fsFrame:ExtractUnitFrames(container.Frame, container.VisibleOnly)
