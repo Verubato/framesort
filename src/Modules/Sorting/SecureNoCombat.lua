@@ -163,7 +163,7 @@ end
 ---Rearranges frames by only modifying the X/Y offsets and not changing any point anchors.
 ---@param frames table[]
 ---@return boolean sorted
-local function SoftArrange(frames)
+local function SoftArrange(frames, spacing)
     if #frames == 0 then
         return false
     end
@@ -182,6 +182,16 @@ local function SoftArrange(frames)
             }
         end)
         :ToTable()
+
+    if spacing then
+        local pointsByFrame = fsEnumerable:From(points):ToLookup(function(x)
+            return x.Frame
+        end, function(x)
+            return x
+        end)
+
+        ApplySpacing(frames, spacing, pointsByFrame)
+    end
 
     local enumerationOrder = frames
     local chain = fsFrame:ToFrameChain(frames)
@@ -465,7 +475,7 @@ local function TrySortContainer(container)
     local sorted = false
 
     if container.LayoutType == fsFrame.LayoutType.Soft then
-        sorted = SoftArrange(frames)
+        sorted = SoftArrange(frames, spacing)
     elseif container.LayoutType == fsFrame.LayoutType.Hard then
         sorted = HardArrange(container, frames, spacing)
     else
