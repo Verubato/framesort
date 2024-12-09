@@ -11,7 +11,8 @@
 ---@field IsHorizontalLayout? fun(self: table): boolean? whether frames are placed horizontally, only applicable to when the layout type is "Hard".
 ---@field IsGrouped? fun(self: table): boolean? whether the container may or may not have groups within.
 ---@field FramesPerLine? fun(self: table): number?: For the hard layout type, specify the number of frames per horizontal/vertical line.
----@field AnchorPoint string?: anchor point of frames relative to their parent (TOPLEFT/TOPRIGHT/CENTER/etc).
+---@field Anchor table?: the frame anchor to use (defaults to parent).
+---@field AnchorPoint string?: anchor point of frames relative to their anchor (TOPLEFT/TOPRIGHT/CENTER/etc).
 ---@field InCombatSortingRequired boolean?: Whether in-combat sorting is required.
 ---@field Frames? fun(self: table): table[] Returns the set of frames to be used instead of being automatically determined.
 ---@field ShowUnit? fun(self: table, unitId: string): boolean Determines whether a unit should be shown; only applicable to NameList containers.

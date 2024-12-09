@@ -23,8 +23,12 @@
         "SUFHeaderarena",
         "Grid2LayoutHeader1",
         "CompactArenaFrame_RefreshMembers",
+        "GladiusExButtonAnchorarena",
+        "GladiusExButtonAnchorparty",
+        "GladiusExDB",
     ],
     "diagnostics.disable": [
-        "inject-field"
+        "inject-field",
+        "unused-local"
     ]
 }
