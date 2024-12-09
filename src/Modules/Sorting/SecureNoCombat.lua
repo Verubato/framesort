@@ -80,7 +80,7 @@ local function SoftArrange(frames, spacing)
         :OrderBy(function(x, y)
             return fsCompare:CompareTopLeftFuzzy(x, y)
         end)
-        :ToTable() or frames
+        :ToTable()
     local points = fsEnumerable
         :From(ordered)
         :Map(function(frame)
@@ -176,7 +176,7 @@ local function HardArrange(container, frames, spacing, offset, blockHeight)
         return false
     end
 
-    local relativeTo = container.Frame
+    local relativeTo = container.Anchor or container.Frame
     local isHorizontalLayout = container.IsHorizontalLayout and container:IsHorizontalLayout() or false
     local framesPerLine = container.FramesPerLine and container:FramesPerLine()
     local anchorPoint = container.AnchorPoint or "TOPLEFT"

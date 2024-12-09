@@ -1,7 +1,6 @@
 -- TODO: move this to a better namespace
 ---@type string, Addon
 local _, addon = ...
-local wow = addon.WoW.Api
 local fsEnumerable = addon.Collections.Enumerable
 ---@class FrameUtil
 local M = {
