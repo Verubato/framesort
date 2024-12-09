@@ -43,6 +43,13 @@ function M:Containers()
         LayoutType = fsFrame.LayoutType.Soft,
         VisibleOnly = false,
         Frames = getFrames,
+        Spacing = function()
+            -- while this isn't necessary, it fixes bugs with frames overlapping
+            return {
+                Horizontal = 0,
+                Vertical = 20
+            }
+        end,
         PostSort = function()
             local frames = getFrames()
 
