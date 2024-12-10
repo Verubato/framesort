@@ -57,6 +57,12 @@ function M:Containers()
         }
     end
 
+    local function GetProfileKey()
+        local name, server = wow.UnitFullName("player")
+        local fullName = name .. " - " .. server
+        return GladiusExDB.profileKeys[fullName]
+    end
+
     if GladiusExArenaFrame and GladiusExButtonAnchorarena then
         containers[#containers + 1] = {
             Frame = GladiusExArenaFrame,
@@ -65,8 +71,9 @@ function M:Containers()
             Type = fsFrame.ContainerType.EnemyArena,
             LayoutType = fsFrame.LayoutType.Hard,
             Spacing = function()
-                local margin = GladiusExDB.namespaces.arena.profiles.Default.margin or 20
-                local iconsHeight = GladiusExDB.namespaces.Cooldowns.profiles.Default.groups.group_1.cooldownsSize or 5
+                local profileKey = GetProfileKey()
+                local margin = GladiusExDB.namespaces.arena.profiles[profileKey].margin or 20
+                local iconsHeight = GladiusExDB.namespaces.Cooldowns.profiles[profileKey].groups.group_1.cooldownsSize or 5
                 local vertical = margin + iconsHeight
 
                 return {
@@ -75,7 +82,8 @@ function M:Containers()
                 }
             end,
             FramesOffset = function()
-                local castBarWidth = GladiusExDB.namespaces.CastBar.profiles.Default.castBarWidth or 175
+                local profileKey = GetProfileKey()
+                local castBarWidth = GladiusExDB.namespaces.CastBar.profiles[profileKey].castBarWidth or 175
 
                 return {
                     X = castBarWidth,
