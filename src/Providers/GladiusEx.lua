@@ -75,8 +75,8 @@ function M:Containers()
             LayoutType = fsFrame.LayoutType.Hard,
             Spacing = function()
                 local profileKey = GetProfileKey()
-                local margin = 20
-                local iconsHeight = 5
+                local margin = 5
+                local iconsHeight = 20
 
                 if GladiusExDB.namespaces.arena.profiles[profileKey] then
                     margin = GladiusExDB.namespaces.arena.profiles[profileKey].margin
