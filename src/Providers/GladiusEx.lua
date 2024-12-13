@@ -58,9 +58,12 @@ function M:Containers()
     end
 
     local function GetProfileKey()
-        local name, server = wow.UnitFullName("player")
-        local fullName = name .. " - " .. server
-        return GladiusExDB.profileKeys[fullName]
+        local name = wow.UnitName("player")
+        -- important to use GetRealmName() because this is what AceDB uses and it returns the realm name with spaces and hyphens
+        -- whereas UnitFullName returns the realm name without hyphens and spaces
+        local realm = wow.GetRealmName()
+        local fullName = name .. " - " .. realm
+        return GladiusExDB.profileKeys[fullName] or "Default"
     end
 
     if GladiusExArenaFrame and GladiusExButtonAnchorarena then
@@ -72,10 +75,18 @@ function M:Containers()
             LayoutType = fsFrame.LayoutType.Hard,
             Spacing = function()
                 local profileKey = GetProfileKey()
-                local margin = GladiusExDB.namespaces.arena.profiles[profileKey].margin or 20
-                local iconsHeight = GladiusExDB.namespaces.Cooldowns.profiles[profileKey].groups.group_1.cooldownsSize or 5
-                local vertical = margin + iconsHeight
+                local margin = 20
+                local iconsHeight = 5
 
+                if GladiusExDB.namespaces.arena.profiles[profileKey] then
+                    margin = GladiusExDB.namespaces.arena.profiles[profileKey].margin
+                end
+
+                if GladiusExDB.namespaces.Cooldowns.profiles[profileKey] then
+                    iconsHeight = GladiusExDB.namespaces.Cooldowns.profiles[profileKey].groups.group_1.cooldownsSize
+                end
+
+                local vertical = margin + iconsHeight
                 return {
                     Horizontal = 0,
                     Vertical = vertical,
@@ -83,7 +94,11 @@ function M:Containers()
             end,
             FramesOffset = function()
                 local profileKey = GetProfileKey()
-                local castBarWidth = GladiusExDB.namespaces.CastBar.profiles[profileKey].castBarWidth or 175
+                local castBarWidth = 175
+
+                if GladiusExDB.namespaces.CastBar.profiles[profileKey] then
+                    castBarWidth = GladiusExDB.namespaces.CastBar.profiles[profileKey].castBarWidth
+                end
 
                 return {
                     X = castBarWidth,
