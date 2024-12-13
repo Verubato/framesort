@@ -46,7 +46,6 @@ local wow = {
 
     -- unit functions
     UnitName = UnitName,
-    UnitFullName = UnitFullName,
     GetUnitName = GetUnitName,
     UnitGUID = UnitGUID,
     UnitExists = UnitExists,
@@ -108,6 +107,7 @@ local wow = {
     ReloadUI = ReloadUI,
     C_Timer = C_Timer,
     GetLocale = GetLocale,
+    GetRealmName = GetRealmName,
 
     -- addon related
     GetAddonInfo = C_AddOns and C_AddOns.GetAddonInfo or GetAddonInfo,
