@@ -82,8 +82,11 @@ function M:Containers()
                     margin = GladiusExDB.namespaces.arena.profiles[profileKey].margin
                 end
 
-                if GladiusExDB.namespaces.Cooldowns.profiles[profileKey] then
+                -- profiles may be null when they disable the Cooldowns module
+                if GladiusExDB.namespaces.Cooldowns.profiles and GladiusExDB.namespaces.Cooldowns.profiles[profileKey] then
                     iconsHeight = GladiusExDB.namespaces.Cooldowns.profiles[profileKey].groups.group_1.cooldownsSize
+                else
+                    iconsHeight = 0
                 end
 
                 local vertical = margin + iconsHeight
@@ -96,8 +99,11 @@ function M:Containers()
                 local profileKey = GetProfileKey()
                 local castBarWidth = 175
 
-                if GladiusExDB.namespaces.CastBar.profiles[profileKey] then
+                -- profiles may be null when they disable the CastBar module
+                if GladiusExDB.namespaces.CastBar.profiles and GladiusExDB.namespaces.CastBar.profiles[profileKey] then
                     castBarWidth = GladiusExDB.namespaces.CastBar.profiles[profileKey].castBarWidth
+                else
+                    castBarWidth = 0
                 end
 
                 return {
