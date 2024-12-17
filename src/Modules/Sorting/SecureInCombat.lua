@@ -1239,13 +1239,16 @@ local function WatchChildrenVisibility(container)
 
     for _, child in ipairs(children) do
         if not child:GetAttribute("framesort-watching-visibility") then
+            wow.SecureHandlerSetFrameRef(child, "Manager", manager)
+
             -- not sure why, but postBody scripts don't work for OnShow/OnHide
             wow.SecureHandlerWrapScript(
                 child,
                 "OnShow",
                 manager,
                 [[ 
-                    self:SetAttribute("state-framesort-run", "ignore") 
+                    local manager = self:GetFrameRef("Manager") 
+                    manager:SetAttribute("state-framesort-run", "ignore") 
                 ]]
             )
             wow.SecureHandlerWrapScript(
@@ -1253,7 +1256,8 @@ local function WatchChildrenVisibility(container)
                 "OnHide",
                 manager,
                 [[ 
-                    self:SetAttribute("state-framesort-run", "ignore") 
+                    local manager = self:GetFrameRef("Manager") 
+                    manager:SetAttribute("state-framesort-run", "ignore") 
                 ]]
             )
 
