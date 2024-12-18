@@ -7,12 +7,17 @@ addon.Collections.LuaEx = M
 
 ---Returns the result of a property chain e.g. Something.else.a.b.c
 ---Otherwise nil if any of the fields are nil
----@param table table root of the property chain
----@param chain table<string>
-function M:SafeGet(table, chain)
-    local next = table
+---@param root table root of the property chain
+---@param chain table<string> list of properties to evaluate
+---@return any
+function M:SafeGet(root, chain)
+    if not root or not chain then
+        return nil
+    end
 
-    for _, k in pairs(chain) do
+    local next = root
+
+    for _, k in ipairs(chain) do
         next = next[k]
 
         if next == nil then
