@@ -2,6 +2,7 @@
 local _, addon = ...
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
+local fsLuaEx = addon.Collections.LuaEx
 local M = {}
 
 fsProviders.sArena = M
@@ -36,12 +37,12 @@ function M:Containers()
         LayoutType = fsFrame.LayoutType.Hard,
         AnchorPoint = "CENTER",
         Spacing = function()
-            local layout = sArena.db.profile.currentLayout
-            local settings = sArena.db.profile.layoutSettings[layout]
+            local layout = fsLuaEx:SafeGet(sArena, { "db", "profile", "currentLayout" }) or "BlizzArena"
+            local vertical = fsLuaEx:SafeGet(sArena, { "db", "profile", "layoutSettings", layout, "spacing" }) or 20
 
             return {
                 Horizontal = 0,
-                Vertical = settings.spacing
+                Vertical = vertical
             }
         end
     }

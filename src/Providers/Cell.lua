@@ -3,6 +3,7 @@ local _, addon = ...
 local wow = addon.WoW.Api
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
+local fsLuaEx = addon.Collections.LuaEx
 local M = {}
 
 fsProviders.Cell = M
@@ -37,8 +38,8 @@ function M:Containers()
             Type = fsFrame.ContainerType.Raid,
             LayoutType = fsFrame.LayoutType.NameList,
             ShowUnit = function(_, unitId)
-                local selectedLayout = Cell.vars.currentLayout or "default"
-                local groupSettings = CellDB.layouts[selectedLayout].groupFilter
+                local selectedLayout = fsLuaEx:SafeGet(Cell, { "vars", "currentLayout" }) or "default"
+                local groupSettings = fsLuaEx:SafeGet(CellDB, { "layouts", selectedLayout, "groupFilter" })
                 local anyHidden = false
 
                 if not groupSettings then

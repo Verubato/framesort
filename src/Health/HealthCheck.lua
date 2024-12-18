@@ -5,6 +5,7 @@ local fsEnumerable = addon.Collections.Enumerable
 local fsProviders = addon.Providers
 local fsConfig = addon.Configuration
 local fsFrame = addon.WoW.Frame
+local fsLuaEx = addon.Collections.LuaEx
 local L = addon.Locale
 ---@class HealthChecker
 local M = {}
@@ -184,12 +185,12 @@ local function CheckCell()
     local passed = false
     local applicable = false
 
-    if Cell and CellDB and CellDB.layouts then
-        local selectedLayout = Cell.vars.currentLayout or "default"
-
+    if Cell and CellDB then
         applicable = true
+
+        local selectedLayout = fsLuaEx:SafeGet(Cell, { "vars", "currentLayout" }) or "default"
         -- when using combined layout, the group filter will show all groups
-        passed = CellDB.layouts[selectedLayout].main.combineGroups
+        passed = fsLuaEx:SafeGet(CellDB, { "layouts", selectedLayout, "main", "combineGroups" })
     end
 
     return {
