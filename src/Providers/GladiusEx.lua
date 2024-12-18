@@ -5,10 +5,36 @@ local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsEnumerable = addon.Collections.Enumerable
 local fsCompare = addon.Collections.Comparer
+local fsLuaEx = addon.Collections.LuaEx
 local M = {}
 
 fsProviders.GladiusEx = M
 table.insert(fsProviders.All, M)
+
+local function CalculateSpace(container)
+    local frames = fsEnumerable
+        :From(fsFrame:ExtractUnitFrames(container))
+        :OrderBy(function(x, y)
+            return fsCompare:CompareTopLeftFuzzy(x, y)
+        end)
+        :ToTable()
+
+    if #frames <= 1 then
+        return {
+            Horizontal = 0,
+            Vertical = 0,
+        }
+    end
+
+    local first = frames[1]
+    local second = frames[2]
+    local vertical = first:GetBottom() - second:GetTop()
+
+    return {
+        Horizontal = 0,
+        Vertical = vertical,
+    }
+end
 
 function M:Name()
     return "GladiusEx"
@@ -35,35 +61,8 @@ function M:Containers()
             AnchorPoint = "LEFT",
             Type = fsFrame.ContainerType.Party,
             LayoutType = fsFrame.LayoutType.Hard,
-            Spacing = function()
-                local margin = GladiusExDB.namespaces.party.profiles.Default.margin or 20
-                local iconsHeight = GladiusExDB.namespaces.Cooldowns.profiles.Default.groups.group_1.cooldownsSize or 5
-                local vertical = margin + iconsHeight
-
-                return {
-                    Horizontal = 0,
-                    Vertical = vertical,
-                }
-            end,
-            FramesOffset = function()
-                local castBarWidth = GladiusExDB.namespaces.CastBar.profiles.Default.castBarWidth or 175
-
-                return {
-                    X = castBarWidth,
-                    -- TODO: where does this come from?
-                    Y = 12,
-                }
-            end,
+            Spacing = function() return CalculateSpace(GladiusExPartyFrame) end,
         }
-    end
-
-    local function GetProfileKey()
-        local name = wow.UnitName("player")
-        -- important to use GetRealmName() because this is what AceDB uses and it returns the realm name with spaces and hyphens
-        -- whereas UnitFullName returns the realm name without hyphens and spaces
-        local realm = wow.GetRealmName()
-        local fullName = name .. " - " .. realm
-        return GladiusExDB.profileKeys[fullName] or "Default"
     end
 
     if GladiusExArenaFrame and GladiusExButtonAnchorarena then
@@ -73,45 +72,7 @@ function M:Containers()
             AnchorPoint = "LEFT",
             Type = fsFrame.ContainerType.EnemyArena,
             LayoutType = fsFrame.LayoutType.Hard,
-            Spacing = function()
-                local profileKey = GetProfileKey()
-                local margin = 5
-                local iconsHeight = 20
-
-                if GladiusExDB.namespaces.arena.profiles[profileKey] then
-                    margin = GladiusExDB.namespaces.arena.profiles[profileKey].margin
-                end
-
-                -- profiles may be null when they disable the Cooldowns module
-                if GladiusExDB.namespaces.Cooldowns.profiles and GladiusExDB.namespaces.Cooldowns.profiles[profileKey] then
-                    iconsHeight = GladiusExDB.namespaces.Cooldowns.profiles[profileKey].groups.group_1.cooldownsSize
-                else
-                    iconsHeight = 0
-                end
-
-                local vertical = margin + iconsHeight
-                return {
-                    Horizontal = 0,
-                    Vertical = vertical,
-                }
-            end,
-            FramesOffset = function()
-                local profileKey = GetProfileKey()
-                local castBarWidth = 175
-
-                -- profiles may be null when they disable the CastBar module
-                if GladiusExDB.namespaces.CastBar.profiles and GladiusExDB.namespaces.CastBar.profiles[profileKey] then
-                    castBarWidth = GladiusExDB.namespaces.CastBar.profiles[profileKey].castBarWidth
-                else
-                    castBarWidth = 0
-                end
-
-                return {
-                    X = castBarWidth,
-                    -- TODO: where does this come from?
-                    Y = 102,
-                }
-            end,
+            Spacing = function() return CalculateSpace(GladiusExArenaFrame) end,
         }
     end
 

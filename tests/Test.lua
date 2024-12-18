@@ -8,6 +8,7 @@ TestUnitGetUnits = require("Unit\\GetUnitsTest")
 TestUnitMacro = require("Unit\\MacroTest")
 TestUnitOptionsUpgrader = require("Unit\\UpgradeOptionsTest")
 TestUnitEnumerable = require("Unit\\EnumerableTest")
+TestLuaEx = require("Unit\\LuaExTest")
 
 -- component tests
 TestComponentTestApiV1 = require("Component\\ApiV1")
