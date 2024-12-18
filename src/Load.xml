@@ -5,6 +5,7 @@
     <!-- Load files that don't have any other dependencies -->
     <Script file="Logging\Log.lua"/>
     <Script file="Collections\Enumerable.lua"/>
+    <Script file="Collections\LuaEx.lua"/>
     <Script file="Configuration\SortingMethod.lua"/>
     <Script file="Configuration\SortMode.lua"/>
     <Script file="Configuration\Spec.lua"/>

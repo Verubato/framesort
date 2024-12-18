@@ -25,6 +25,7 @@
 ---@class Collections
 ---@field Enumerable Enumerable
 ---@field Comparer Comparer
+---@field LuaEx LuaEx
 
 ---@meta
 ---@class DB
