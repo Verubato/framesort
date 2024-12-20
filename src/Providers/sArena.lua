@@ -34,17 +34,17 @@ function M:Containers()
     local arena = {
         Frame = sArena,
         Type = fsFrame.ContainerType.EnemyArena,
-        LayoutType = fsFrame.LayoutType.Hard,
-        AnchorPoint = "CENTER",
+        LayoutType = fsFrame.LayoutType.Soft,
+        -- providing spacing instead of letting the soft arrange do it's job helps with preventing overlapping frames
         Spacing = function()
             local layout = fsLuaEx:SafeGet(sArena, { "db", "profile", "currentLayout" }) or "BlizzArena"
             local vertical = fsLuaEx:SafeGet(sArena, { "db", "profile", "layoutSettings", layout, "spacing" }) or 20
 
             return {
                 Horizontal = 0,
-                Vertical = vertical
+                Vertical = vertical,
             }
-        end
+        end,
     }
 
     return {
