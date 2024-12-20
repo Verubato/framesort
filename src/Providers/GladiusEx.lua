@@ -57,10 +57,8 @@ function M:Containers()
     if GladiusExPartyFrame and GladiusExButtonAnchorparty then
         containers[#containers + 1] = {
             Frame = GladiusExPartyFrame,
-            Anchor = GladiusExButtonAnchorparty,
-            AnchorPoint = "LEFT",
             Type = fsFrame.ContainerType.Party,
-            LayoutType = fsFrame.LayoutType.Hard,
+            LayoutType = fsFrame.LayoutType.Soft,
             Spacing = function() return CalculateSpace(GladiusExPartyFrame) end,
         }
     end
@@ -68,10 +66,8 @@ function M:Containers()
     if GladiusExArenaFrame and GladiusExButtonAnchorarena then
         containers[#containers + 1] = {
             Frame = GladiusExArenaFrame,
-            Anchor = GladiusExButtonAnchorarena,
-            AnchorPoint = "LEFT",
             Type = fsFrame.ContainerType.EnemyArena,
-            LayoutType = fsFrame.LayoutType.Hard,
+            LayoutType = fsFrame.LayoutType.Soft,
             Spacing = function() return CalculateSpace(GladiusExArenaFrame) end,
         }
     end
