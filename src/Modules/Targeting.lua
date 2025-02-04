@@ -234,6 +234,40 @@ local function InitAdjacentTargeting()
             self:SetAttribute("unit", unit)
         ]]
     )
+
+    -- Return the party index (1-based) that is the same person as "target".
+    --
+    -- If the target is not a party member (including when the player is not in
+    -- a party or the player is not targeting anyone), return 0.
+    local function CurrentTargetIndex(f)
+        local maxUnits = f:GetAttribute("FSUnitsCount")
+        for index = 1,maxUnits do
+            if UnitIsUnit("target", f:GetAttribute("FSUnit" .. index)) then
+                return index
+            end
+        end
+        return 0
+    end
+
+    -- Whenever the player changes its target, update "FSIndex" so that
+    -- subsequent button presses originate from that target.
+    --
+    -- If the target is none or not a team member, "FSIndex" is set to 0, so
+    -- that the next "down" targets player1, and the next "up" the last player.
+    --
+    -- We only need to register the event on one frame since all frames
+    -- synchronize attributes and this callback can update all buttons' FSIndex.
+    cycleNextFrame:RegisterEvent("PLAYER_TARGET_CHANGED")
+    cycleNextFrame:SetScript("OnEvent", function(self, event, ...)
+        if event == "PLAYER_TARGET_CHANGED" then
+            local index = CurrentTargetIndex(self)
+            local count = self:GetAttribute("RelatedButtonsCount")
+
+            for _, button in ipairs(buttons) do
+                button:SetAttribute("FSIndex", index)
+            end
+        end
+    end)
 end
 
 function M:FriendlyFrames()
