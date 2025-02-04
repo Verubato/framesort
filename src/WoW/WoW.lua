@@ -108,6 +108,7 @@ local wow = {
     C_Timer = C_Timer,
     GetLocale = GetLocale,
     GetRealmName = GetRealmName,
+    GetRealZoneText = GetRealZoneText,
 
     -- addon related
     GetAddonInfo = C_AddOns and C_AddOns.GetAddonInfo or GetAddonInfo,

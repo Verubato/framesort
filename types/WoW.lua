@@ -80,6 +80,7 @@
 ---@field C_Timer table
 ---@field GetLocale fun(): string
 ---@field GetRealmName fun(): string
+---@field GetRealZoneText fun(): string
 -- non-blizzard
 ---@field IsRetail fun(): boolean
 ---@field IsClassic fun(): boolean
