@@ -26,6 +26,7 @@
         "GladiusExButtonAnchorarena",
         "GladiusExButtonAnchorparty",
         "GladiusExDB",
+        "Grid2",
     ],
     "diagnostics.disable": [
         "inject-field",

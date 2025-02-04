@@ -59,9 +59,8 @@ function M:Containers()
                     return true
                 end
 
-                -- it's safe to use GetNumGroupMembers here
                 local unitGroup = nil
-                for i = 1, wow.GetNumGroupMembers() do
+                for i = 1, wow.MAX_RAID_MEMBERS do
                     local name, _, subgroup, _ = wow.GetRaidRosterInfo(i)
 
                     if name == wow.GetUnitName(unitId, true) then
