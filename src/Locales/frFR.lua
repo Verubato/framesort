@@ -45,7 +45,7 @@ Inconvénients:
  - Peut casser avec les patchs de WoW et faire perdre la raison au développeur.
 ]]
 L["Traditional"] = "Traditionnel"
-L["SortingMethod_Secure_Traditional"] = [[
+L["SortingMethod_Traditional_Description"] = [[
 C'est le mode de tri standard que les addons et macros utilisent depuis plus de 10 ans.
 Il remplace la méthode de tri interne de Blizzard par la nôtre.
 C'est la même chose que le script 'SetFlowSortFunction' mais avec la configuration de FrameSort.
@@ -158,7 +158,7 @@ L["Skip_Example"] = [[
 
 -- # Spacing screen #
 L["Spacing"] = "Espacement"
-L["Add some spacing between party/raid frames."] = "Ajoutez un peu d'espacement entre les cadres de groupe/raid."
+L["Add some spacing between party, raid, and arena frames."] = "Ajoutez un peu d'espacement entre les cadres de groupe/raid."
 L["This only applies to Blizzard frames."] = "Cela ne s'applique qu'aux cadres de Blizzard."
 L["Party"] = "Groupe"
 L["Raid"] = "Raid"
@@ -242,7 +242,7 @@ L["Change the raid display mode to one of the 'Combined Groups' options via Edit
 L["Disable the 'Keep Groups Together' raid profile setting."] = "Désactivez le paramètre de profil de raid 'Garder les groupes ensemble'."
 L["Only using Blizzard frames with Traditional mode"] = "Utilisation uniquement des cadres Blizzard avec le mode Traditionnel"
 L["Traditional mode can't sort your other frame addons: '%s'"] = "Le mode Traditionnel ne peut pas trier vos autres addons de cadre : '%s'"
-L["Using Secure sorting mode when spacing is being used."] = "Utilisation du mode de tri sécurisé lorsque l'espacement est utilisé."
+L["Using Secure sorting mode when spacing is being used"] = "Utilisation du mode de tri sécurisé lorsque l'espacement est utilisé."
 L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method"] = "Le mode Traditionnel ne peut pas appliquer d'espacement, envisagez de retirer l'espacement ou d'utiliser la méthode de tri sécurisé."
 L["Blizzard sorting functions not tampered with"] = "Fonctions de tri de Blizzard non modifiées"
 L['"%s" may cause conflicts, consider disabling it'] = '"%s" peut causer des conflits, envisagez de le désactiver'
