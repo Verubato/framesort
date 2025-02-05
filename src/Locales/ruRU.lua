@@ -45,7 +45,7 @@ L["SortingMethod_Secure_Description"] = [[
  - Может сломаться с патчами WoW и свести разработчика с ума.
 ]]
 L["Traditional"] = "Традиционный"
-L["SortingMethod_Secure_Traditional"] = [[
+L["SortingMethod_Traditional_Description"] = [[
 Это стандартный режим сортировки, который использовался дополнениями и макросами более 10 лет.
 Он заменяет внутренний метод сортировки Blizzard на наш.
 Это то же самое, что скрипт 'SetFlowSortFunction', но с конфигурацией FrameSort.
@@ -158,7 +158,7 @@ L["Skip_Example"] = [[
 
 -- # Spacing screen #
 L["Spacing"] = "Промежутки"
-L["Add some spacing between party/raid frames."] = "Добавьте промежутки между фреймами группы/рейда."
+L["Add some spacing between party, raid, and arena frames."] = "Добавьте промежутки между фреймами группы/рейда."
 L["This only applies to Blizzard frames."] = "Это применимо только к фреймам Blizzard."
 L["Party"] = "Группа"
 L["Raid"] = "Рейд"
@@ -242,7 +242,7 @@ L["Change the raid display mode to one of the 'Combined Groups' options via Edit
 L["Disable the 'Keep Groups Together' raid profile setting."] = "Отключите настройку профиля рейда 'Держать группы вместе'."
 L["Only using Blizzard frames with Traditional mode"] = "Используются только фреймы Blizzard в традиционном режиме"
 L["Traditional mode can't sort your other frame addons: '%s'"] = "Традиционный режим не может сортировать ваши другие дополнения для фреймов: '%s'"
-L["Using Secure sorting mode when spacing is being used."] = "Используется безопасный режим сортировки, когда используются промежутки."
+L["Using Secure sorting mode when spacing is being used"] = "Используется безопасный режим сортировки, когда используются промежутки."
 L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method"] = "Традиционный режим не может применять промежутки, рассмотрите возможность их удаления или использования безопасного метода сортировки"
 L["Blizzard sorting functions not tampered with"] = "Функции сортировки Blizzard не изменены"
 L['"%s" may cause conflicts, consider disabling it'] = '"%s" может вызвать конфликты, рассмотрите возможность его отключения'

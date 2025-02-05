@@ -45,7 +45,7 @@ L["SortingMethod_Secure_Description"] = [[
  - 可能會隨著魔獸世界的補丁而損壞，讓開發者瘋狂。
 ]]
 L["Traditional"] = "傳統"
-L["SortingMethod_Secure_Traditional"] = [[
+L["SortingMethod_Traditional_Description"] = [[
 這是插件和宏使用超過10年的標準排序模式。
 它用我們自己的排序方法取代了內部的暴雪排序方式。
 這與'設置流排序功能'腳本相同，但有 FrameSort 配置。
@@ -161,7 +161,7 @@ L["Skip_Example"] = [[
 
 -- # Spacing screen #
 L["Spacing"] = "間距"
-L["Add some spacing between party/raid frames."] = "在小隊/團隊框架之間添加一些間距。"
+L["Add some spacing between party, raid, and arena frames."] = "在小隊/團隊框架之間添加一些間距。"
 L["This only applies to Blizzard frames."] = "這僅適用於暴雪框架。"
 L["Party"] = "小隊"
 L["Raid"] = "團隊"
@@ -245,7 +245,7 @@ L["Change the raid display mode to one of the 'Combined Groups' options via Edit
 L["Disable the 'Keep Groups Together' raid profile setting."] = "禁用 '保持小組一起' 的團隊配置設定。"
 L["Only using Blizzard frames with Traditional mode"] = "僅使用暴雪框架的傳統模式"
 L["Traditional mode can't sort your other frame addons: '%s'"] = "傳統模式無法對其他框架插件進行排序：'%s'"
-L["Using Secure sorting mode when spacing is being used."] = "在使用間距時使用安全排序模式。"
+L["Using Secure sorting mode when spacing is being used"] = "在使用間距時使用安全排序模式。"
 L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method"] = "傳統模式無法應用間距，考慮移除間距或使用安全排序方法"
 L["Blizzard sorting functions not tampered with"] = "暴雪排序功能未被篡改"
 L['"%s" may cause conflicts, consider disabling it'] = '"%s" 可能會引起衝突，考慮禁用它'

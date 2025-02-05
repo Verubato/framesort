@@ -45,7 +45,7 @@ Contras:
  - Puede romperse con parches de WoW y hacer que el desarrollador se vuelva loco.
 ]]
 L["Traditional"] = "Tradicional"
-L["SortingMethod_Secure_Traditional"] = [[
+L["SortingMethod_Traditional_Description"] = [[
 Este es el modo de ordenamiento estándar que addons y macros han utilizado durante más de 10 años.
 Sustituye el método de ordenamiento interno de Blizzard por el nuestro.
 Esto es lo mismo que el script 'SetFlowSortFunction' pero con la configuración de FrameSort.
@@ -119,7 +119,7 @@ Por ejemplo, imagina un grupo de mazmorras de 5 personas ordenado por rol que se
   - DPS, party4
   - DPS, party2
 \n
-Como puedes ver, su representación visual difiere de su posición real en el grupo, lo que 
+Como puedes ver, su representación visual difiere de su posición real en el grupo, lo que
 hace que apuntar sea confuso.
 Si hicieras /target party1, apuntaría al jugador DPS en la posición 3 en lugar del tanque.
 \n
@@ -158,7 +158,7 @@ L["Skip_Example"] = [[
 
 -- # Spacing screen #
 L["Spacing"] = "Espaciado"
-L["Add some spacing between party/raid frames."] = "Agrega algo de espaciado entre los marcos de grupo/banda."
+L["Add some spacing between party, raid, and arena frames."] = "Agrega algo de espaciado entre los marcos de grupo/banda."
 L["This only applies to Blizzard frames."] = "Esto solo se aplica a los marcos de Blizzard."
 L["Party"] = "Grupo"
 L["Raid"] = "Banda"
@@ -242,7 +242,7 @@ L["Change the raid display mode to one of the 'Combined Groups' options via Edit
 L["Disable the 'Keep Groups Together' raid profile setting."] = "Deshabilita la configuración del perfil de banda 'Mantener Grupos Juntos'."
 L["Only using Blizzard frames with Traditional mode"] = "Solo se están usando marcos de Blizzard con el modo Tradicional"
 L["Traditional mode can't sort your other frame addons: '%s'"] = "El modo Tradicional no puede ordenar tus otros addons de marcos: '%s'"
-L["Using Secure sorting mode when spacing is being used."] = "Usando modo de ordenamiento Seguro cuando se está utilizando espaciado."
+L["Using Secure sorting mode when spacing is being used"] = "Usando modo de ordenamiento Seguro cuando se está utilizando espaciado."
 L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method"] = "El modo Tradicional no puede aplicar espaciado, considera eliminar el espaciado o usar el método de ordenamiento Seguro"
 L["Blizzard sorting functions not tampered with"] = "Funciones de ordenamiento de Blizzard no alteradas"
 L['"%s" may cause conflicts, consider disabling it'] = '"%s" puede causar conflictos, considera deshabilitarlo'

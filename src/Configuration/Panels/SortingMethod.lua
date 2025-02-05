@@ -28,7 +28,7 @@ function M:Build(parent)
     traditional.Text:SetFontObject("GameFontNormalLarge")
     traditional:SetChecked(addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Traditional)
 
-    local traditionalDescription = L["SortingMethod_Secure_Description"]
+    local traditionalDescription = L["SortingMethod_Traditional_Description"]
     anchor = fsConfig:MultilineTextBlock(traditionalDescription, panel, traditional)
 
     local reloadReminder = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")

@@ -45,7 +45,7 @@ L["SortingMethod_Secure_Description"] = [[
  - WoW 패치와 함께 깨질 수 있으며 개발자를 미치게 만들 수 있습니다.
 ]]
 L["Traditional"] = "전통적인"
-L["SortingMethod_Secure_Traditional"] = [[
+L["SortingMethod_Traditional_Description"] = [[
 이것은 애드온과 매크로가 10년 이상 사용해온 표준 정렬 모드입니다.
 내부 블리자드 정렬 방법을 우리의 것으로 대체합니다.
 이는 'SetFlowSortFunction' 스크립트와 동일하지만 프레임정렬 구성이 포함되어 있습니다.
@@ -157,7 +157,7 @@ L["Skip_Example"] = [[
 
 -- # Spacing screen #
 L["Spacing"] = "간격"
-L["Add some spacing between party/raid frames."] = "파티/공격대 프레임 간의 간격을 추가합니다."
+L["Add some spacing between party, raid, and arena frames."] = "파티/공격대 프레임 간의 간격을 추가합니다."
 L["This only applies to Blizzard frames."] = "이것은 블리자드 프레임에만 적용됩니다."
 L["Party"] = "파티"
 L["Raid"] = "공격대"
@@ -241,7 +241,7 @@ L["Change the raid display mode to one of the 'Combined Groups' options via Edit
 L["Disable the 'Keep Groups Together' raid profile setting."] = "'그룹 유지' 공격대 프로필 설정을 비활성화합니다."
 L["Only using Blizzard frames with Traditional mode"] = "전통 모드에서 블리자드 프레임만 사용하고 있습니다."
 L["Traditional mode can't sort your other frame addons: '%s'"] = "전통 모드는 당신의 다른 프레임 애드온을 정렬할 수 없습니다: '%s'"
-L["Using Secure sorting mode when spacing is being used."] = "간격이 사용될 때 보안 정렬 모드를 사용하고 있습니다."
+L["Using Secure sorting mode when spacing is being used"] = "간격이 사용될 때 보안 정렬 모드를 사용하고 있습니다."
 L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method"] = "전통 모드는 간격을 적용할 수 없으므로 간격을 제거하거나 보안 정렬 방법을 사용하는 것을 고려하십시오."
 L["Blizzard sorting functions not tampered with"] = "블리자드 정렬 함수가 손상되지 않았습니다."
 L['"%s" may cause conflicts, consider disabling it'] = '"%s"가 충돌을 일으킬 수 있으므로 비활성화하는 것을 고려하십시오.'
