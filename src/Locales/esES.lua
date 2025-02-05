@@ -45,7 +45,7 @@ Contras:
  - Puede romperse con los parches de WoW y causar que el desarrollador enloquezca.
 ]]
 L["Traditional"] = "Tradicional"
-L["SortingMethod_Secure_Traditional"] = [[
+L["SortingMethod_Traditional_Description"] = [[
 Este es el modo de ordenación estándar que los addons y macros han utilizado durante más de 10 años.
 Reemplaza el método interno de ordenación de Blizzard con el nuestro.
 Esto es lo mismo que el script 'SetFlowSortFunction', pero con la configuración de FrameSort.
@@ -160,7 +160,7 @@ L["Skip_Example"] = [[
 
 -- # Spacing screen #
 L["Spacing"] = "Espaciado"
-L["Add some spacing between party/raid frames."] = "Añade un poco de espaciado entre los marcos de grupo/banda."
+L["Add some spacing between party, raid, and arena frames."] = "Añade un poco de espaciado entre los marcos de grupo/banda."
 L["This only applies to Blizzard frames."] = "Esto solo se aplica a los marcos de Blizzard."
 L["Party"] = "Grupo"
 L["Raid"] = "Banda"
@@ -244,7 +244,7 @@ L["Change the raid display mode to one of the 'Combined Groups' options via Edit
 L["Disable the 'Keep Groups Together' raid profile setting."] = "Deshabilita la configuración del perfil de banda 'Mantener Grupos Juntos'."
 L["Only using Blizzard frames with Traditional mode"] = "Solo usando marcos de Blizzard con el modo Tradicional"
 L["Traditional mode can't sort your other frame addons: '%s'"] = "El modo Tradicional no puede ordenar tus otros addons de marcos: '%s'"
-L["Using Secure sorting mode when spacing is being used."] = "Usando modo de ordenación Seguro cuando se usa espaciado."
+L["Using Secure sorting mode when spacing is being used"] = "Usando modo de ordenación Seguro cuando se usa espaciado."
 L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method"] = "El modo Tradicional no puede aplicar espaciado, considera eliminar el espaciado o usar el método de ordenación Seguro."
 L["Blizzard sorting functions not tampered with"] = "Funciones de ordenación de Blizzard no alteradas"
 L['"%s" may cause conflicts, consider disabling it'] = '"%s" puede causar conflictos, considera deshabilitarlo'

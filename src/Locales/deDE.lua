@@ -45,7 +45,7 @@ Nachteile:
  - Kann bei WoW-Patches brechen und den Entwickler verrückt machen.
 ]]
 L["Traditional"] = "Traditionell"
-L["SortingMethod_Secure_Traditional"] = [[
+L["SortingMethod_Traditional_Description"] = [[
 Dies ist der Standard-Sortiermodus, den Addons und Makros seit über 10 Jahren verwenden.
 Es ersetzt die interne Blizzard-Sortiermethode durch unsere eigene.
 Dies ist dasselbe wie das Skript 'SetFlowSortFunction', aber mit FrameSort-Konfiguration.
@@ -109,7 +109,7 @@ L["Keybindings_Description"] = [[
 Sie finden die FrameSort-Tastenbelegungen im Standard-WoW-Bereich für Tastenbelegungen.
 \n
 Wozu sind die Tastenbelegungen nützlich?
-Sie sind nützlich, um Spieler anhand ihrer visuell angeordneten Darstellung zu zielen, anstatt ihrer 
+Sie sind nützlich, um Spieler anhand ihrer visuell angeordneten Darstellung zu zielen, anstatt ihrer
 Gruppenposition (party1/2/3/etc.).
 \n
 Zum Beispiel, stellen Sie sich eine Gruppe von 5 Spielern vor, sortiert nach Rolle, die wie folgt aussieht:
@@ -119,7 +119,7 @@ Zum Beispiel, stellen Sie sich eine Gruppe von 5 Spielern vor, sortiert nach Rol
   - DPS, party4
   - DPS, party2
 \n
-Wie Sie sehen können, unterscheidet sich ihre visuelle Darstellung von ihrer tatsächlichen Gruppenposition, was 
+Wie Sie sehen können, unterscheidet sich ihre visuelle Darstellung von ihrer tatsächlichen Gruppenposition, was
 das Zielen verwirrend macht.
 Wenn Sie /target party1 eingeben würden, würde es den DPS-Spieler in Position 3 zielen, anstatt den Tank.
 \n
@@ -158,7 +158,7 @@ L["Skip_Example"] = [[
 
 -- # Spacing screen #
 L["Spacing"] = "Abstände"
-L["Add some spacing between party/raid frames."] = "Fügen Sie einige Abstände zwischen Gruppen-/Schlachtzugsrahmen hinzu."
+L["Add some spacing between party, raid, and arena frames."] = "Fügen Sie einige Abstände zwischen Gruppen-/Schlachtzugsrahmen hinzu."
 L["This only applies to Blizzard frames."] = "Dies gilt nur für Blizzard-Rahmen."
 L["Party"] = "Gruppe"
 L["Raid"] = "Schlachtzug"
@@ -242,7 +242,7 @@ L["Change the raid display mode to one of the 'Combined Groups' options via Edit
 L["Disable the 'Keep Groups Together' raid profile setting."] = "Deaktivieren Sie die 'Gruppen zusammenhalten' Schlachtzugsprofileinstellung."
 L["Only using Blizzard frames with Traditional mode"] = "Verwenden nur Blizzard-Rahmen im traditionellen Modus"
 L["Traditional mode can't sort your other frame addons: '%s'"] = "Der traditionelle Modus kann Ihre anderen Rahmen-Addons nicht sortieren: '%s'"
-L["Using Secure sorting mode when spacing is being used."] = "Verwenden Sie den sicheren Sortiermodus, wenn Abstände verwendet werden."
+L["Using Secure sorting mode when spacing is being used"] = "Verwenden Sie den sicheren Sortiermodus, wenn Abstände verwendet werden."
 L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method"] = "Der traditionelle Modus kann keine Abstände anwenden. Erwägen Sie, Abstände zu entfernen oder die sichere Sortiermethode zu verwenden."
 L["Blizzard sorting functions not tampered with"] = "Blizzard-Sortierfunktionen nicht manipuliert"
 L['"%s" may cause conflicts, consider disabling it'] = '"%s" kann Konflikte verursachen, erwägen Sie, es zu deaktivieren'

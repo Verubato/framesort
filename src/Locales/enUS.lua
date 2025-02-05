@@ -41,7 +41,7 @@ Cons:
  - May break with WoW patches and cause the developer to go insane.
 ]]
 L["Traditional"] = nil
-L["SortingMethod_Secure_Traditional"] = [[
+L["SortingMethod_Traditional_Description"] = [[
 This is the standard sorting mode that addons and macros have used for 10+ years.
 It replaces the internal Blizzard sorting method with our own.
 This is the same as the 'SetFlowSortFunction' script but with FrameSort configuration.
@@ -156,7 +156,7 @@ L["Skip_Example"] = [[
 
 -- # Spacing screen #
 L["Spacing"] = nil
-L["Add some spacing between party/raid frames."] = nil
+L["Add some spacing between party, raid, and arena frames."] = nil
 L["This only applies to Blizzard frames."] = nil
 L["Party"] = nil
 L["Raid"] = nil
@@ -240,7 +240,7 @@ L["Change the raid display mode to one of the 'Combined Groups' options via Edit
 L["Disable the 'Keep Groups Together' raid profile setting."] = nil
 L["Only using Blizzard frames with Traditional mode"] = nil
 L["Traditional mode can't sort your other frame addons: '%s'"] = nil
-L["Using Secure sorting mode when spacing is being used."] = nil
+L["Using Secure sorting mode when spacing is being used"] = nil
 L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method"] = nil
 L["Blizzard sorting functions not tampered with"] = nil
 L['"%s" may cause conflicts, consider disabling it'] = nil
