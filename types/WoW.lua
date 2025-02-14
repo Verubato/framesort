@@ -2,6 +2,7 @@
 ---@class WowApi
 -- fields
 ---@field C_PvP C_PvP
+---@field C_Map C_Map
 -- constants
 ---@field MAX_RAID_MEMBERS number
 ---@field MEMBERS_PER_RAID_GROUP number
@@ -90,3 +91,6 @@
 ---@class C_PvP
 ---@field IsSoloShuffle fun(): boolean
 ---@field GetActiveMatchState fun(): number
+
+---@class C_Map
+---@field GetBestMapForUnit fun(unitId: string): number
