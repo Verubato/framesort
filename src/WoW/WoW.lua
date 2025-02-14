@@ -5,6 +5,7 @@ local _, addon = ...
 local wow = {
     -- fields
     C_PvP = C_PvP,
+    C_Map = C_Map,
 
     -- constants
     MAX_RAID_MEMBERS = MAX_RAID_MEMBERS or 40,
