@@ -35,7 +35,6 @@ function M:Containers()
                     return true
                 end
 
-                local instanceName = wow.GetRealZoneText()
                 local selectedLayout = fsLuaEx:SafeGet(Grid2, { "db", "profile", "raidSizeType" })
                 local onlyShowUnitsInRaid = 3
 
@@ -43,16 +42,10 @@ function M:Containers()
                     return true
                 end
 
-                local unitGroup = nil
-                for i = 1, wow.MAX_RAID_MEMBERS do
-                    local name, _, _, _, _, _, zone = wow.GetRaidRosterInfo(i)
+                local instanceId = wow.C_Map.GetBestMapForUnit("player")
+                local unitInstanceId = wow.C_Map.GetBestMapForUnit(unitId)
 
-                    if name == wow.GetUnitName(unitId, true) then
-                        return zone == instanceName
-                    end
-                end
-
-                return false
+                return instanceId == unitInstanceId
             end,
         }
 
