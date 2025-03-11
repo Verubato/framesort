@@ -52,10 +52,17 @@ local function UpdateAdjacentTargets(friendlyUnits)
     end
 end
 
+local function FilterPets(units)
+    return fsEnumerable
+        :From(units)
+        :Where(function(x) return not fsUnit:IsPet(x) end)
+        :ToTable()
+end
+
 local function UpdateTargets()
     local updatedCount = 0
     local start = wow.GetTimePreciseSec()
-    local friendlyUnits = M:FriendlyUnits()
+    local friendlyUnits = M:FriendlyNonPetUnits()
 
     -- if units has less than 5 items it's still fine as units[i] will just be nil
     for i, btn in ipairs(targetFrames) do
@@ -88,7 +95,7 @@ local function UpdateTargets()
         updatedCount = updatedCount + 1
     end
 
-    local enemyUnits = M:EnemyUnits()
+    local enemyUnits = M:EnemyNonPetUnits()
 
     for i, btn in ipairs(targetEnemyFrames) do
         local new = enemyUnits[i] or "none"
@@ -312,6 +319,10 @@ function M:FriendlyUnits()
     return units
 end
 
+function M:FriendlyNonPetUnits()
+    return FilterPets(M:FriendlyUnits())
+end
+
 function M:EnemyFrames()
     local units = fsUnit:EnemyUnits()
     local sortEnabled = fsCompare:EnemySortMode()
@@ -340,6 +351,10 @@ function M:EnemyUnits()
     table.sort(units, fsCompare:EnemySortFunction())
 
     return units
+end
+
+function M:EnemyNonPetUnits()
+    return FilterPets(M:EnemyUnits())
 end
 
 function M:Run()
