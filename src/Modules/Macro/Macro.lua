@@ -44,8 +44,8 @@ local function UpdateMacro(id, friendlyUnits, enemyUnits, bypassCache)
         return false
     end
 
-    friendlyUnits = friendlyUnits or fsTarget:FriendlyUnits()
-    enemyUnits = enemyUnits or fsTarget:EnemyUnits()
+    friendlyUnits = friendlyUnits or fsTarget:FriendlyNonPetUnits()
+    enemyUnits = enemyUnits or fsTarget:EnemyNonPetUnits()
 
     local updated, isFsMacro, newId = Rewrite(id, friendlyUnits, enemyUnits)
     isFsMacroCache[newId] = isFsMacro
@@ -62,8 +62,8 @@ end
 
 local function ScanMacros()
     local start = wow.GetTimePreciseSec()
-    local friendlyUnits = fsTarget:FriendlyUnits()
-    local enemyUnits = fsTarget:EnemyUnits()
+    local friendlyUnits = fsTarget:FriendlyNonPetUnits()
+    local enemyUnits = fsTarget:EnemyNonPetUnits()
     local updatedCount = 0
 
     for id = 1, M.MaxMacros do
