@@ -1,4 +1,4 @@
-## Interface: 40401
+## Interface: 40402
 ## Title: FrameSort
 ## Notes: Places the player frame at the top/middle/bottom (configurable) of party/raid frames.
 ## Notes-esES: Coloca el marco del jugador en la parte superior/media/inferior (configurable) de los marcos de grupo/raid.
