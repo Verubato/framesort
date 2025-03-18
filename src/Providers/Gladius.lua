@@ -29,16 +29,22 @@ function M:Containers()
     ---@type FrameContainer[]
     local containers = {}
     local function getFrames()
-        return fsEnumerable:From({
-            ---@diagnostic disable: undefined-global
-            GladiusButtonFramearena1,
-            GladiusButtonFramearena2,
-            GladiusButtonFramearena3,
-            GladiusButtonFramearena4,
-            GladiusButtonFramearena5,
-        })
-        :Where(function(frame) return frame:IsVisible() end)
-        :ToTable()
+        -- in test mode, get the number of frames shown
+        local isTest = fsLuaEx:SafeGet(Gladius, { "test" })
+        local testCount = fsLuaEx:SafeGet(Gladius, { "testCount" })
+        local count = isTest and testCount or wow.GetNumArenaOpponentSpecs()
+
+        return fsEnumerable
+            :From({
+                ---@diagnostic disable: undefined-global
+                GladiusButtonFramearena1,
+                GladiusButtonFramearena2,
+                GladiusButtonFramearena3,
+                GladiusButtonFramearena4,
+                GladiusButtonFramearena5,
+            })
+            :Take(count)
+            :ToTable()
     end
 
     local realmKey = wow.GetRealmName()
@@ -49,11 +55,23 @@ function M:Containers()
     containers[#containers + 1] = {
         Frame = wow.UIParent,
         Type = fsFrame.ContainerType.EnemyArena,
-        LayoutType = fsFrame.LayoutType.Soft,
-        VisibleOnly = true,
+        LayoutType = fsFrame.LayoutType.Hard,
+        AnchorPoint = "BOTTOMLEFT",
+        VisibleOnly = false,
         Frames = getFrames,
+        FramesOffset = function()
+            local arena1 = fsLuaEx:SafeGet(Gladius, { "buttons", "arena1" })
+
+            -- refer to Gladius.lua:581
+            local scale = arena1 and arena1:GetEffectiveScale() or 1
+            local x = (fsLuaEx:SafeGet(Gladius, { "db", "x", "arena1" }) or 0) / scale
+            local y = (fsLuaEx:SafeGet(Gladius, { "db", "y", "arena1" }) or 0) / scale
+
+            y = y - (arena1 and arena1:GetHeight())
+
+            return { X = x, Y = y }
+        end,
         Spacing = function()
-            -- while this isn't necessary, it fixes bugs with frames overlapping
             return {
                 Horizontal = 0,
                 Vertical = fsLuaEx:SafeGet(profile, { "bottomMargin" }) or 20,
