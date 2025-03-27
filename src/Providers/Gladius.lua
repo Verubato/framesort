@@ -7,9 +7,16 @@ local fsCompare = addon.Collections.Comparer
 local fsLuaEx = addon.Collections.LuaEx
 local fsEnumerable = addon.Collections.Enumerable
 local M = {}
+local sortCallbacks = {}
 
 fsProviders.Gladius = M
 table.insert(fsProviders.All, M)
+
+local function RequestSort()
+    for _, callback in ipairs(sortCallbacks) do
+        callback(M)
+    end
+end
 
 function M:Name()
     return "Gladius"
@@ -19,9 +26,18 @@ function M:Enabled()
     return wow.GetAddOnEnableState(nil, "Gladius") ~= 0
 end
 
-function M:Init() end
+function M:Init()
+    if Gladius and Gladius.UpdateUnit then
+        -- UpdateUnit moves the arena1 frame, so we need to resort
+        wow.hooksecurefunc(Gladius, "UpdateUnit", function()
+            RequestSort()
+        end)
+    end
+end
 
-function M:RegisterRequestSortCallback(_) end
+function M:RegisterRequestSortCallback(callback)
+    sortCallbacks[#sortCallbacks + 1] = callback
+end
 
 function M:RegisterContainersChangedCallback(_) end
 
@@ -47,8 +63,7 @@ function M:Containers()
             :ToTable()
     end
 
-    local realmKey = wow.GetRealmName()
-    local charKey = wow.UnitName("player") .. " - " .. realmKey
+    local charKey = wow.UnitName("player") .. " - " .. wow.GetRealmName()
     local profileKey = fsLuaEx:SafeGet(Gladius2DB, { "profileKeys", charKey })
     local profile = fsLuaEx:SafeGet(Gladius2DB, { "profiles", profileKey })
 
