@@ -10,17 +10,15 @@ local timerFrame = nil
 local eventFrame = nil
 local pvpTimerType = 1
 local run = false
-local runProvider = nil
-local lgist =  wow.IsRetail() and LibStub and LibStub:GetLibrary("LibGroupInSpecT-1.1")
+local lgist = wow.IsRetail() and LibStub and LibStub:GetLibrary("LibGroupInSpecT-1.1")
 
-local function ScheduleSort(provider)
+local function ScheduleSort()
     run = true
-    runProvider = provider
 end
 
 local function OnProviderRequiresSort(provider)
     fsLog:Debug(string.format("Provider %s requested sort.", provider:Name()))
-    ScheduleSort(provider)
+    ScheduleSort()
 end
 
 local function OnEditModeExited()
@@ -49,9 +47,8 @@ local function OnUpdate()
         return
     end
 
-    M:Run(runProvider)
     run = false
-    runProvider = nil
+    M:Run()
 end
 
 local function OnEvent(_, event)
