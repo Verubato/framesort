@@ -8,6 +8,7 @@ local events = wow.Events
 local M = addon.Modules
 local timerFrame = nil
 local eventFrame = nil
+local combatFrame = nil
 local pvpTimerType = 1
 local run = false
 local lgist = wow.IsRetail() and LibStub and LibStub:GetLibrary("LibGroupInSpecT-1.1")
@@ -24,6 +25,27 @@ end
 local function OnEditModeExited()
     if fsProviders.Blizzard:Enabled() then
         ScheduleSort()
+    end
+end
+
+local function OnCombat(_, event)
+    if not run then
+        return
+    end
+
+    if event == wow.Events.PLAYER_REGEN_DISABLED then
+        -- we are entering combat, last chance to run a sort if one was scheduled
+        -- there is a scenario with Gladius where an enemy stealthy comes out of stealth
+        -- at the same time as the play enters combat, e.g. a rogue cheapshot on you
+        -- at this time an ARENA_OPPONENT_UPDATE is sent with "seen" parameter
+        -- which triggers gladius to reposition it's frames
+        -- by default we would then schedule a sort to occur, but I think it's too late
+        -- as OnUpdate may have already ran this frame, and the next frame we are in lockdown
+        -- this is all conjecture, need to confirm what order of events this happens in
+        -- and whether this is actually needed or not
+        -- TODO: is this required, or will OnUpdate run anyway?
+        M:Run()
+        run = false
     end
 end
 
@@ -117,6 +139,11 @@ function M:Init()
             -- suspect ARENA_PREP_OPPONENT_SPECIALIZATIONS is sufficient for our use
             eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
         end
+
+        combatFrame = wow.CreateFrame("Frame")
+        combatFrame:HookScript("OnEvent", OnCombat)
+        combatFrame:RegisterEvent(wow.Events.PLAYER_REGEN_DISABLED)
+        combatFrame:RegisterEvent(wow.Events.PLAYER_REGEN_ENABLED)
 
         -- perform the initial run
         fsLog:Debug("First run.")
