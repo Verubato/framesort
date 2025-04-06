@@ -104,7 +104,10 @@ function M:Containers()
             end)
 
             local topFrame = frames[1]
-            GladiusButtonBackground:SetPoint("TOPLEFT", topFrame, -46, 5)
+
+            -- refer to Gladius.lua:632
+            local padding = fsLuaEx:SafeGet(Gladius, { "db", "backgroundPadding"} ) or 0
+            GladiusButtonBackground:SetPoint("TOPLEFT", topFrame, - padding + left, padding)
         end,
     }
 
