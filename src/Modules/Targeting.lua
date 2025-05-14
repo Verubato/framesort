@@ -8,6 +8,7 @@ local fsCompare = addon.Collections.Comparer
 local fsFrame = addon.WoW.Frame
 local fsLog = addon.Logging.Log
 local targetFrames = {}
+local targetReverseFrames = {}
 local targetPetFrames = {}
 local targetEnemyFrames = {}
 local targetEnemyPetFrames = {}
@@ -93,6 +94,17 @@ local function UpdateTargets()
     if bottomCurrentUnit ~= bottomNewUnit then
         targetBottomFrame:SetAttribute("unit", bottomNewUnit)
         updatedCount = updatedCount + 1
+    end
+
+
+    for i, btn in ipairs(targetReverseFrames) do
+        local new = friendlyUnits[#friendlyUnits - i] or "none"
+        local current = btn:GetAttribute("unit")
+
+        if current ~= new then
+            btn:SetAttribute("unit", new)
+            updatedCount = updatedCount + 1
+        end
     end
 
     local enemyUnits = M:EnemyNonPetUnits()
@@ -365,6 +377,7 @@ end
 
 function M:Init()
     local targetFriendlyCount = 5
+    local reverseFriendlyCount = 4
     local targetEnemyCount = 3
     local downOrUp = wow.GetCVarBool("ActionButtonUseKeyDown") and "AnyDown" or "AnyUp"
 
@@ -374,6 +387,10 @@ function M:Init()
 
     if #targetEnemyFrames > 0 then
         targetEnemyFrames = {}
+    end
+
+    if #targetReverseFrames > 0 then
+        targetReverseFrames = {}
     end
 
     for i = 1, targetFriendlyCount do
@@ -390,6 +407,16 @@ function M:Init()
 
         targetFrames[i] = button
         targetPetFrames[i] = pet
+    end
+
+    for i = 1, reverseFriendlyCount do
+        -- reverse
+        local reverse = wow.CreateFrame("Button", "FSTargetBottomMinus" .. i, wow.UIParent, "SecureActionButtonTemplate")
+        reverse:RegisterForClicks(downOrUp)
+        reverse:SetAttribute("type", "target")
+        reverse:SetAttribute("unit", "none")
+
+        targetReverseFrames[i] = reverse
     end
 
     for i = 1, targetEnemyCount do

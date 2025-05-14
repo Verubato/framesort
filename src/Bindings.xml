@@ -5,6 +5,10 @@
   <Binding name="CLICK FSTarget4:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
   <Binding name="CLICK FSTarget5:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
   <Binding name="CLICK FSTargetBottom:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
+  <Binding name="CLICK FSTargetBottomMinus1:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
+  <Binding name="CLICK FSTargetBottomMinus2:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
+  <Binding name="CLICK FSTargetBottomMinus3:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
+  <Binding name="CLICK FSTargetBottomMinus4:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
   <Binding name="CLICK FSTargetPet1:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
   <Binding name="CLICK FSTargetPet2:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
   <Binding name="CLICK FSTargetPet3:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
