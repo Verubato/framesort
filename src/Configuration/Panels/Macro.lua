@@ -112,6 +112,7 @@ function M:Build(parent)
         " - Frame1, Frame2, Frame3, etc.",
         " - Frame1Pet, Frame2Pet, Frame3Pet, etc.",
         " - BottomFrame",
+        " - BFM1, BFM2, BFM3 - Bottom Frame Minus 1/2/3, etc.",
         " - Tank, Healer, DPS",
         " - TankTarget, HealerTarget, Frame1Target, etc.",
         " - OtherDps - " .. L["The first DPS that's not you."],
