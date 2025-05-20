@@ -14,7 +14,6 @@ local function SetBindingNames()
     _G["BINDING_NAME_CLICK FSTarget4:LeftButton"] = L["Target frame 4"]
     _G["BINDING_NAME_CLICK FSTarget5:LeftButton"] = L["Target frame 5"]
     _G["BINDING_NAME_CLICK FSTargetBottom:LeftButton"] = L["Target bottom frame"]
-    -- TODO: localisation for the BottomMinusX text
     _G["BINDING_NAME_CLICK FSTargetBottomMinus1:LeftButton"] = L["Target 1 frame above bottom"]
     _G["BINDING_NAME_CLICK FSTargetBottomMinus2:LeftButton"] = L["Target 2 frames above bottom"]
     _G["BINDING_NAME_CLICK FSTargetBottomMinus3:LeftButton"] = L["Target 3 frames above bottom"]
