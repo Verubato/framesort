@@ -1265,4 +1265,21 @@ function M:test_unaffected_modifiers()
     assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
+function M:test_bottom_frame_minus_x()
+    local units = { "party3", "party1", "party2", "player" }
+
+    local macroText = [[
+        #showtooltip
+        #fs bfm1 bfm2
+        /cast [mod:shift,@bm1][@x] Spell
+    ]]
+    local expected = [[
+        #showtooltip
+        #fs bfm1 bfm2
+        /cast [mod:shift,@party2][@party1] Spell
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
+end
+
 return M

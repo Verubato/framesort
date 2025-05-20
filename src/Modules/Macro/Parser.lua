@@ -124,6 +124,11 @@ local function UnitForSelector(selector, friendlyUnits, enemyUnits)
     -- drop the number and make it case insensitive
     local type = string.gsub(lowercase, "%d+", "")
 
+    -- bottom frame minus X
+    if type == "bfm" then
+        return friendlyUnits[#friendlyUnits - number] or "none"
+    end
+
     -- bottom frame
     if type == "bottomframe" or type == "bf" then
         return friendlyUnits[#friendlyUnits] or "none"
