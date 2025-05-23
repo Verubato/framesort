@@ -104,6 +104,7 @@ function M:Containers()
             end)
 
             local topFrame = frames[1]
+    		local left, right = topFrame:GetHitRectInsets()
 
             -- refer to Gladius.lua:632
             local padding = fsLuaEx:SafeGet(Gladius, { "db", "backgroundPadding"} ) or 0
