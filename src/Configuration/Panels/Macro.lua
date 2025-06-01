@@ -118,7 +118,7 @@ function M:Build(parent)
         " - OtherDps - " .. L["The first DPS that's not you."],
     }
 
-    if wow.IsRetail() then
+    if wow.GetArenaOpponentSpec then
         notes[#notes + 1] = " - EnemyFrame1, EnemyFrame2, EnemyFrame3, etc."
         notes[#notes + 1] = " - EnemyFrame1Pet, EnemyFrame2Pet, EnemyFrame3Pet, etc."
         notes[#notes + 1] = " - EnemyTank, EnemyHealer, EnemyDPS"
@@ -141,7 +141,7 @@ function M:Build(parent)
         " - SomethingTG = SomethingTarget",
     }
 
-    if wow.IsRetail() then
+    if wow.GetArenaOpponentSpec then
         abbreviations[#abbreviations + 1] = " - EF1, EF2, EF3 = EnemyFrame1, EnemyFrame2, EnemyFrame3."
         abbreviations[#abbreviations + 1] = " - EF1P, EF2P, EF3P = EnemyFrame1Pet, EnemyFrame2Pet, EnemyFrame3Pet, etc."
         abbreviations[#abbreviations + 1] = " - ET, EH, DP = EnemyTank, EnemyHealer, EnemyDPS."
