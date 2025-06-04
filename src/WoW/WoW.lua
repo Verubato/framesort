@@ -164,6 +164,10 @@ local wow = {
         local version = GetBuildInfo()
         return version == "3.3.5"
     end,
+    SupportsSpecializationInfo = function()
+        -- MoP onwards have these functions; early xpacs do not
+        return wow.GetArenaOpponentSpec ~= nil and wow.GetSpecializationInfoByID ~= nil
+    end,
 
     ---@class WowEvents
     Events = {
@@ -215,7 +219,7 @@ local wow = {
         UPDATE_MACROS = "UPDATE_MACROS",
 
         -- fires at start/end of an arena match/round
-        PVP_MATCH_STATE_CHANGED = "PVP_MATCH_STATE_CHANGED"
+        PVP_MATCH_STATE_CHANGED = "PVP_MATCH_STATE_CHANGED",
     },
 }
 

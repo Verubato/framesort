@@ -169,8 +169,7 @@ local function UnitForSelector(selector, friendlyUnits, enemyUnits)
 
     -- enemy arena
     if enemyTank or enemyHealer or enemyDps then
-        -- MoP onwards have this function; early xpacs do not
-        if not wow.GetArenaOpponentSpec then
+        if not wow.SupportsSpecializationInfo
             return "none"
         end
 
