@@ -87,6 +87,7 @@
 ---@field IsClassic fun(): boolean
 ---@field IsWotlk fun(): boolean
 ---@field Events WowEvents
+---@field SupportsSpecializationInfo fun(): boolean
 
 ---@class C_PvP
 ---@field IsSoloShuffle fun(): boolean
