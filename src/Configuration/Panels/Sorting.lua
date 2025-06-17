@@ -281,14 +281,14 @@ function M:Build(panel)
     local anchor = BuiltTitle(panel)
     local config = addon.DB.Options.Sorting
 
-    if not wow.IsClassic() then
+    if wow.HasArena() then
         anchor = BuildSortModeCheckboxes(panel, anchor, L["Arena - 2v2"], config.Arena.Twos)
 
-        local otherArenaSizes = wow.IsRetail() and "3v3" or "3v3 & 5v5"
+        local otherArenaSizes = wow.Has5v5() and "3v3 & 5v5" or "3v3"
         anchor = BuildSortModeCheckboxes(panel, anchor, L["Arena - " .. otherArenaSizes], config.Arena.Default)
     end
 
-    if wow.SupportsSpecializationInfo then
+    if wow.HasSpecializationInfo() then
         anchor = BuildSortModeCheckboxes(panel, anchor, L["Enemy Arena (see addons panel for supported addons)"], config.EnemyArena, false, false)
     end
 

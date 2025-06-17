@@ -54,7 +54,7 @@ local function OnStateChanged()
 end
 
 function M:Init()
-    if not wow.IsRetail() then
+    if not wow.HasSoloShuffle() then
         return
     end
 
@@ -64,7 +64,7 @@ function M:Init()
 end
 
 function M:Run()
-    if not wow.IsRetail() then
+    if not wow.HasSoloShuffle() then
         return
     end
     if not addon.DB.Options.AutoLeader.Enabled then

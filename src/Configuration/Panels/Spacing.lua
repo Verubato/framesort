@@ -212,14 +212,14 @@ function M:Build(parent)
     local anchor = fsConfig:TextBlock(lines, panel, spacingTitle)
     local config = addon.DB.Options.Spacing
 
-    if wow.IsRetail() then
+    if wow.CompactPartyFrame then
         anchor = BuildSpacingOptions(panel, anchor, L["Party"], "Party", config.Party, true, true, 0)
     end
 
-    local title = wow.IsRetail() and "Raid" or "Group"
+    local title = wow.CompactRaidFrameContainer and "Raid" or "Group"
     anchor = BuildSpacingOptions(panel, anchor, L[title], title, config.Raid, true, true, verticalSpacing)
 
-    if wow.IsRetail() then
+    if wow.CompactArenaFrame then
         anchor = BuildSpacingOptions(panel, anchor, L["Enemy Arena"], "Enemy Arena", config.EnemyArena, true, true, verticalSpacing)
     end
 

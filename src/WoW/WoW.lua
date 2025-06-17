@@ -148,25 +148,24 @@ local wow = {
     SecureHandlerExecute = SecureHandlerExecute,
 
     -- non-blizzard related
-    IsRetail = function()
-        return WOW_PROJECT_ID ~= nil and WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
+    HasDropdown = function()
+       return WowStyle1DropdownTemplate ~= nil
     end,
-    IsWotlk = function()
-        return WOW_PROJECT_ID ~= nil and WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC
-    end,
-    IsCata = function()
-        return WOW_PROJECT_ID ~= nil and WOW_PROJECT_ID == WOW_PROJECT_CATACLYSM_CLASSIC
-    end,
-    IsClassic = function()
-        return WOW_PROJECT_ID ~= nil and WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
-    end,
-    IsWotlkPrivate = function()
-        local version = GetBuildInfo()
-        return version == "3.3.5"
-    end,
-    SupportsSpecializationInfo = function()
+    HasSpecializationInfo = function()
         -- MoP onwards have these functions; early xpacs do not
-        return wow.GetArenaOpponentSpec ~= nil and wow.GetSpecializationInfoByID ~= nil
+        return GetArenaOpponentSpec ~= nil and GetSpecializationInfoByID ~= nil
+    end,
+    HasArena = function()
+        return LE_EXPANSION_BURNING_CRUSADE and LE_EXPANSION_LEVEL_CURRENT >= LE_EXPANSION_BURNING_CRUSADE
+    end,
+    Has5v5 = function()
+        return LE_EXPANSION_BURNING_CRUSADE and LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_BURNING_CRUSADE
+    end,
+    HasSoloShuffle = function ()
+        return C_PvP and C_PvP.IsSoloShuffle ~= nil
+    end,
+    HasEditMode = function()
+        return LE_EXPANSION_DRAGONFLIGHT and LE_EXPANSION_LEVEL_CURRENT >= LE_EXPANSION_DRAGONFLIGHT
     end,
 
     ---@class WowEvents
@@ -227,6 +226,7 @@ addon.WoW.Api = wow
 
 -- shims for older clients
 local nextFrameId = 1
+local version = GetBuildInfo()
 
 local function FrameShims(frame)
     -- classic
@@ -274,7 +274,9 @@ local function FrameShims(frame)
 end
 
 wow.CreateFrame = function(frameType, name, parent, template, id)
-    if not name and wow.IsWotlkPrivate() then
+    local isWotlkPrivate = version == "3.3.5"
+
+    if not name and isWotlkPrivate then
         -- wotlk private requires name to not be nil
         name = "FSDummyName" .. nextFrameId
         nextFrameId = nextFrameId + 1

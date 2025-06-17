@@ -84,7 +84,7 @@ function fsConfig:MultilineTextBlock(text, parent, anchor)
 end
 
 function fsConfig:Dropdown(parent, items, getValue, setSelected)
-    if wow.IsRetail() then
+    if wow.HasDropdown then
         local dd = wow.CreateFrame("DropdownButton", nil, parent, "WowStyle1DropdownTemplate")
         dd:SetupMenu(function(_, rootDescription)
             for i, value in ipairs(items) do
@@ -164,7 +164,7 @@ function fsConfig:Init()
 
     local ordering = panels.Ordering:Build(panel)
     local sortingMethod = panels.SortingMethod:Build(panel)
-    local autoLeader = wow.IsRetail() and panels.AutoLeader:Build(panel)
+    local autoLeader = wow.HasSoloShuffle() and panels.AutoLeader:Build(panel)
     local keybinding = panels.Keybinding:Build(panel)
     local macro = panels.Macro:Build(panel)
     local spacing = panels.Spacing:Build(panel)
@@ -176,7 +176,7 @@ function fsConfig:Init()
     AddSubCategory(ordering)
     AddSubCategory(sortingMethod)
 
-    if wow.IsRetail() then
+    if wow.HasSoloShuffle() then
         AddSubCategory(autoLeader)
     end
 

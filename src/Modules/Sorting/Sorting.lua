@@ -25,7 +25,7 @@ end
 function M:Run(provider)
     assert(not wow.InCombatLockdown())
 
-    if wow.IsRetail() and wow.EditModeManagerFrame.editModeActive then
+    if wow.HasEditMode() and wow.EditModeManagerFrame.editModeActive then
         fsLog:Debug("Not sorting while edit mode active.")
         return
     end
