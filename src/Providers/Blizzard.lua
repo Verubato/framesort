@@ -127,7 +127,7 @@ function M:Init()
         return
     end
 
-    if wow.IsRetail() then
+    if wow.HasEditMode() then
         wow.EventRegistry:RegisterCallback(events.EditModeExit, OnEditModeExited)
 
         fsScheduler:RunWhenEnteringWorld(function()
@@ -189,7 +189,7 @@ function M:Containers()
                 return false
             end,
             IsHorizontalLayout = function()
-                if wow.IsRetail() then
+                if wow.HasEditMode() then
                     return wow.EditModeManagerFrame:GetSettingValueBool(
                         wow.Enum.EditModeSystem.UnitFrame,
                         wow.Enum.EditModeUnitFrameSystemIndices.Party,
@@ -214,7 +214,7 @@ function M:Containers()
             SupportsSpacing = true,
             InCombatSortingRequired = true,
             IsGrouped = function()
-                if wow.IsRetail() then
+                if wow.HasEditMode() then
                     local raidGroupDisplayType = wow.EditModeManagerFrame:GetSettingValue(
                         wow.Enum.EditModeSystem.UnitFrame,
                         wow.Enum.EditModeUnitFrameSystemIndices.Raid,
@@ -226,7 +226,7 @@ function M:Containers()
                 return wow.CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
             end,
             IsHorizontalLayout = function()
-                if wow.IsRetail() then
+                if wow.HasEditMode() then
                     local displayType = wow.EditModeManagerFrame:GetSettingValue(
                         wow.Enum.EditModeSystem.UnitFrame,
                         wow.Enum.EditModeUnitFrameSystemIndices.Raid,
@@ -259,31 +259,28 @@ function M:Containers()
             local horizontal = raid:IsHorizontalLayout()
             local lineSize = nil
 
-            if wow.IsRetail() then
-                lineSize = horizontal and wow.CompactRaidFrameContainer:GetWidth() or wow.CompactRaidFrameContainer:GetHeight()
-            else
-                -- cata has an annoying taint issue that we have to workaround
-                -- where calling GetWidth() or GetHeight() on CompactRaidFrameContainer taints raid frames
-                -- see https://github.com/Stanzilla/WoWUIBugs/issues/596 and https://github.com/Verubato/framesort/issues/38
-                local taintWorkaround = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureHandlerStateTemplate")
+            -- cata has an annoying taint issue that we have to workaround
+            -- where calling GetWidth() or GetHeight() on CompactRaidFrameContainer taints raid frames
+            -- see https://github.com/Stanzilla/WoWUIBugs/issues/596 and https://github.com/Verubato/framesort/issues/38
+            -- other expansions don't have this problem
+            local taintWorkaround = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureHandlerStateTemplate")
 
-                function taintWorkaround:Configure(width, height)
-                    lineSize = horizontal and width or height
-                end
-
-                wow.SecureHandlerSetFrameRef(taintWorkaround, "Target", wow.CompactRaidFrameContainer)
-                wow.SecureHandlerExecute(
-                    taintWorkaround,
-                    [[
-                        local run = control or self
-                        local target = self:GetFrameRef("Target")
-                        local width = target:GetWidth()
-                        local height = target:GetHeight()
-
-                        run:CallMethod("Configure", width, height)
-                    ]]
-                )
+            function taintWorkaround:Configure(width, height)
+                lineSize = horizontal and width or height
             end
+
+            wow.SecureHandlerSetFrameRef(taintWorkaround, "Target", wow.CompactRaidFrameContainer)
+            wow.SecureHandlerExecute(
+                taintWorkaround,
+                [[
+                    local run = control or self
+                    local target = self:GetFrameRef("Target")
+                    local width = target:GetWidth()
+                    local height = target:GetHeight()
+
+                    run:CallMethod("Configure", width, height)
+                ]]
+            )
 
             local frameSize = nil
             local o = DefaultCompactUnitFrameSetupOptions

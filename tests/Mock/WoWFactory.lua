@@ -208,15 +208,12 @@ function M:Create()
         end,
 
         -- non-blizzard
-        IsRetail = function()
-            return true
-        end,
-        IsWotlk = function()
-            return false
-        end,
-        IsClassic = function()
-            return false
-        end,
+        HasArena = function() return true end,
+        HasSpecializationInfo = function() return true end,
+        Has5v5 = function() return false end,
+        HasSoloShuffle = function() return true end,
+        HasDropdown = function() return true end,
+        HasEditMode = function() return true end,
 
         Events = {
             PLAYER_REGEN_ENABLED = "PLAYER_REGEN_ENABLED",

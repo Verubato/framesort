@@ -83,11 +83,13 @@
 ---@field GetRealmName fun(): string
 ---@field GetRealZoneText fun(): string
 -- non-blizzard
----@field IsRetail fun(): boolean
----@field IsClassic fun(): boolean
----@field IsWotlk fun(): boolean
 ---@field Events WowEvents
----@field SupportsSpecializationInfo fun(): boolean
+---@field HasDropdown fun(): boolean
+---@field HasArena fun(): boolean
+---@field HasSpecializationInfo fun(): boolean
+---@field Has5v5 fun(): boolean
+---@field HasSoloShuffle fun(): boolean
+---@field HasEditMode fun(): boolean
 
 ---@class C_PvP
 ---@field IsSoloShuffle fun(): boolean

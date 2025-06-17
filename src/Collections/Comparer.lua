@@ -4,7 +4,7 @@ local wow = addon.WoW.Api
 local fsUnit = addon.WoW.Unit
 local fsMath = addon.Numerics.Math
 local fsEnumerable = addon.Collections.Enumerable
-local lgist = wow.SupportsSpecializationInfo and LibStub and LibStub:GetLibrary("LibGroupInSpecT-1.1")
+local lgist = _G["LibGroupInSpecT-1.1_Frame"] and LibStub:GetLibrary("LibGroupInSpecT-1.1")
 local fsConfig = addon.Configuration
 local fuzzyDecimalPlaces = 0
 local defaultRoleOrdering = 99
@@ -121,7 +121,7 @@ local function CompareRole(leftToken, rightToken, isArena)
     local leftRole, rightRole = nil, nil
     local leftSpec, rightSpec = nil, nil
 
-    if isArena then
+    if isArena and wow.GetArenaOpponentSpec then
         local leftId = tonumber(string.match(leftToken, "%d+"))
         local rightId = tonumber(string.match(rightToken, "%d+"))
 
@@ -317,7 +317,7 @@ local function EnemyCompare(leftToken, rightToken, groupSortMode, reverse)
 
     local inInstance, instanceType = wow.IsInInstance()
 
-    if groupSortMode == fsConfig.GroupSortMode.Role and inInstance and instanceType == "arena" and wow.IsRetail() then
+    if groupSortMode == fsConfig.GroupSortMode.Role and inInstance and instanceType == "arena" then
         return CompareRole(leftToken, rightToken, true)
     end
 

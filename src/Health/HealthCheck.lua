@@ -155,7 +155,7 @@ local function UsingSpacing()
 end
 
 local function IsUsingRaidStyleFrames()
-    if wow.IsRetail() then
+    if wow.HasEditMode() then
         return wow.EditModeManagerFrame:UseRaidStylePartyFrames()
     end
 
@@ -168,7 +168,7 @@ local function IsUsingRaidStyleFrames()
 end
 
 local function IsRaidGrouped()
-    if wow.IsRetail() then
+    if wow.HasEditMode() then
         local raidGroupDisplayType =
             wow.EditModeManagerFrame:GetSettingValue(wow.Enum.EditModeSystem.UnitFrame, wow.Enum.EditModeUnitFrameSystemIndices.Raid, wow.Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
         return raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsVertical or raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsHorizontal
@@ -242,7 +242,7 @@ function M:IsHealthy()
         Applicable = addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Traditional,
         Passed = not IsRaidGrouped(),
         Description = L["Keep Groups Together setting disabled"],
-        Help = wow.IsRetail() and L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"] or L["Disable the 'Keep Groups Together' raid profile setting"],
+        Help = wow.HasEditMode() and L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"] or L["Disable the 'Keep Groups Together' raid profile setting"],
     }
 
     results[#results + 1] = {

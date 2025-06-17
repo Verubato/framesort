@@ -11,7 +11,7 @@ local eventFrame = nil
 local combatFrame = nil
 local pvpTimerType = 1
 local run = false
-local lgist = wow.IsRetail() and LibStub and LibStub:GetLibrary("LibGroupInSpecT-1.1")
+local lgist = _G["LibGroupInSpecT-1.1_Frame"] and LibStub:GetLibrary("LibGroupInSpecT-1.1")
 
 local function ScheduleSort()
     run = true
@@ -132,7 +132,7 @@ function M:Init()
         -- so trigger a sort once we know their role
         eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
 
-        if wow.SupportsSpecializationInfo then
+        if wow.HasSpecializationInfo() then
             eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
 
             -- TODO: is this event required? it's very noisy
