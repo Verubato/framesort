@@ -210,6 +210,11 @@ Shadowed Unit Frames
 Grid2
  - 小隊/團隊：是
 \n
+BattleGroundEnemies
+ - 小隊：是
+ - 競技場：是
+ - 團隊：否
+\n
 ]]
 
 -- # Api screen #

@@ -28,6 +28,8 @@
         "GladiusExDB",
         "Grid2",
         "Gladius",
+        "BattleGroundEnemies",
+        "BattleGroundEnemiesDB",
     ],
     "diagnostics.disable": [
         "inject-field",

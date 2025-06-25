@@ -206,6 +206,11 @@ Shadowed Unit Frames
 Grid2
  - 파티/공격대: 예
 \n
+BattleGroundEnemies
+ - 파티: 예
+ - 아레나: 예
+ - 레이드: 아니오
+\n
 ]]
 
 -- # Api screen #

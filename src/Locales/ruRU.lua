@@ -207,6 +207,11 @@ Shadowed Unit Frames
 Grid2
  - Группа/рейд: да
 \n
+BattleGroundEnemies
+ - Вечеринка: да
+ - Арена: да
+ - Рейд: нет
+\n
 ]]
 
 -- # Api screen #
