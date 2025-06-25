@@ -207,6 +207,11 @@ Shadowed Unit Frames
 Grid2
  - Groupe/raid : oui
 \n
+BattleGroundEnemies
+ - Party : oui
+ - Arena : oui
+ - Raid : non
+\n
 ]]
 
 -- # Api screen #
