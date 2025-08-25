@@ -926,14 +926,28 @@ secureMethods["TrySort"] = [[
             for _, container in ipairs(provider.Containers) do
                 if not container.Frame:IsProtected() then
                     run:RunAttribute("Log", "Error", "Container for " .. provider.Name .. " must be protected.")
-                elseif container.Frame:IsVisible() and
-                       ((container.Type == ContainerType.Party or container.Type == ContainerType.Raid) and friendlyEnabled) or
-                       (container.Type == ContainerType.EnemyArena and enemyEnabled) then
-                    local add = newtable()
-                    add.Provider = provider
-                    add.Container = container
+                elseif container.Frame:IsVisible() then
+                    local shouldAdd = false
 
-                    toSort[#toSort + 1] = add
+                    if (container.Type == ContainerType.Party or container.Type == ContainerType.Raid) and friendlyEnabled then
+                        shouldAdd = true
+                    end
+
+                    if container.Type == ContainerType.EnemyArena and enemyEnabled then
+                        shouldAdd = true
+                    end
+
+                    if container.EnableInBattlegrounds ~= nil and not container.EnableInBattlegrounds and self:GetAttribute("IsBattleground") then
+                        shouldAdd = false
+                    end
+
+                    if shouldAdd then
+                        local add = newtable()
+                        add.Provider = provider
+                        add.Container = container
+
+                        toSort[#toSort + 1] = add
+                    end
                 end
             end
         end
@@ -991,6 +1005,7 @@ secureMethods["LoadProvider"] = [[
         container.IsGrouped = self:GetAttribute(prefix .. "IsGrouped")
         container.IsHorizontalLayout = self:GetAttribute(prefix .. "IsHorizontalLayout")
         container.FramesPerLine = self:GetAttribute(prefix .. "FramesPerLine")
+        container.EnableInBattlegrounds = self:GetAttribute(prefix .. "EnableInBattlegrounds")
 
         local offsetX = self:GetAttribute(prefix .. "OffsetX")
         local offsetY = self:GetAttribute(prefix .. "OffsetY")
@@ -1153,6 +1168,7 @@ local function LoadProvider(provider)
         manager:SetAttributeNoHandler(containerPrefix .. "OffsetY", offset and offset.Y)
         manager:SetAttributeNoHandler(containerPrefix .. "GroupOffsetX", groupOffset and groupOffset.X)
         manager:SetAttributeNoHandler(containerPrefix .. "GroupOffsetY", groupOffset and groupOffset.Y)
+        manager:SetAttributeNoHandler(containerPrefix .. "EnableInBattlegrounds", container.EnableInBattlegrounds)
 
         local spacing = container.Spacing and container:Spacing()
         manager:SetAttributeNoHandler(containerPrefix .. "SpacingHorizontal", spacing and spacing.Horizontal)
@@ -1283,11 +1299,18 @@ local function WatchVisibility()
     end
 end
 
+local function LoadInstanceType()
+    assert(manager)
+
+    manager:SetAttribute("IsBattleground", wow.IsInstanceBattleground())
+end
+
 local function OnCombatStarting()
     LoadEnabled()
     LoadUnits()
     ResubscribeEvents()
     WatchVisibility()
+    LoadInstanceType()
 end
 
 local function OnProviderContainersChanged(provider)

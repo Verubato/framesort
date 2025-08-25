@@ -18,3 +18,4 @@
 ---@field ShowUnit? fun(self: table, unitId: string): boolean Determines whether a unit should be shown; only applicable to NameList containers.
 ---@field PostSort? fun(self: table) Optional callback function that's called after each sort.
 ---@field SubscribeToVisibility? boolean Whether to run sorting when a frame's visibility status changes.
+---@field EnableInBattlegrounds? boolean Whether to run sorting in battlegrounds.

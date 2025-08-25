@@ -149,7 +149,7 @@ local wow = {
 
     -- non-blizzard related
     HasDropdown = function()
-       return WowStyle1DropdownTemplate ~= nil
+        return WowStyle1DropdownTemplate ~= nil
     end,
     HasSpecializationInfo = function()
         -- MoP onwards have these functions; early xpacs do not
@@ -161,11 +161,19 @@ local wow = {
     Has5v5 = function()
         return LE_EXPANSION_BURNING_CRUSADE and LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_BURNING_CRUSADE
     end,
-    HasSoloShuffle = function ()
+    HasSoloShuffle = function()
         return C_PvP and C_PvP.IsSoloShuffle ~= nil
     end,
     HasEditMode = function()
         return LE_EXPANSION_DRAGONFLIGHT and LE_EXPANSION_LEVEL_CURRENT >= LE_EXPANSION_DRAGONFLIGHT
+    end,
+    IsInstanceBattleground = function()
+        if C_PvP then
+            return C_PvP.IsBattleground()
+        end
+
+        local inInstance, instanceType = IsInInstance()
+        return inInstance and instanceType == "pvp"
     end,
 
     ---@class WowEvents

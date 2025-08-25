@@ -638,6 +638,10 @@ function M:TrySort(provider)
                     return false
                 end
 
+                if container.EnableInBattlegrounds ~= nil and not container.EnableInBattlegrounds and wow.IsInstanceBattleground() then
+                    return false
+                end
+
                 return true
             end)
             :ToTable()

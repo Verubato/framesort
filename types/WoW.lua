@@ -90,10 +90,13 @@
 ---@field Has5v5 fun(): boolean
 ---@field HasSoloShuffle fun(): boolean
 ---@field HasEditMode fun(): boolean
+---@field IsInstanceBattleground fun(): boolean
 
 ---@class C_PvP
 ---@field IsSoloShuffle fun(): boolean
+---@field IsArena fun(): boolean
 ---@field GetActiveMatchState fun(): number
+---@field IsBattleground fun(): boolean
 
 ---@class C_Map
 ---@field GetBestMapForUnit fun(unitId: string): number

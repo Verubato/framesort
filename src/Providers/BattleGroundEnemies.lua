@@ -49,6 +49,7 @@ function M:Containers()
                     Vertical = verticalSpacing or 40,
                 }
             end,
+            EnableInBattlegrounds = false
         }
     end
 
@@ -68,6 +69,7 @@ function M:Containers()
                     Vertical = verticalSpacing or 40,
                 }
             end,
+            EnableInBattlegrounds = false
         }
     end
 
