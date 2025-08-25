@@ -3,6 +3,7 @@ local _, addon = ...
 local fsEnumerable = addon.Collections.Enumerable
 local fsCompare = addon.Collections.Comparer
 local fsSort = addon.Modules.Sorting
+local fsRun = addon.Modules
 local fsTarget = addon.Modules.Targeting
 local fsConfig = addon.Configuration
 local fsFrame = addon.WoW.Frame
@@ -176,7 +177,7 @@ function M.Options:SetPlayerSortMode(area, mode)
     options.PlayerSortMode = mode
 
     fsConfig:NotifyChanged()
-    fsSort:Run()
+    fsRun:Run()
 end
 
 ---Sets the group sort mode.
@@ -189,7 +190,7 @@ function M.Options:SetGroupSortMode(area, mode)
     options.GroupSortMode = mode
 
     fsConfig:NotifyChanged()
-    fsSort:Run()
+    fsRun:Run()
 end
 
 ---Gets the group sort mode.
@@ -216,7 +217,7 @@ function M.Options:SetEnabled(area, enabled)
     fsConfig:NotifyChanged()
 
     if enabled then
-        fsSort:Run()
+        fsRun:Run()
     end
 end
 
@@ -235,7 +236,7 @@ function M.Options:SetReverse(area, reverse)
     options.Reverse = reverse
 
     fsConfig:NotifyChanged()
-    fsSort:Run()
+    fsRun:Run()
 end
 
 ---Gets the current spacing values.
@@ -254,5 +255,5 @@ function M.Options:SetSpacing(area, horizontal, vertical)
     options.Vertical = vertical
 
     fsConfig:NotifyChanged()
-    fsSort:Run()
+    fsRun:Run()
 end
