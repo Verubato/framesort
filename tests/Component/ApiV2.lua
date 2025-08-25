@@ -12,6 +12,7 @@ function M:setup()
 
     addon = addonFactory:Create()
     addon.Api:Init()
+    addon.Modules:Init()
 
     local fsFrame = addon.WoW.Frame
     local provider = providerFactory:Create()
