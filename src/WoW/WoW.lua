@@ -168,7 +168,7 @@ local wow = {
         return LE_EXPANSION_DRAGONFLIGHT and LE_EXPANSION_LEVEL_CURRENT >= LE_EXPANSION_DRAGONFLIGHT
     end,
     IsInstanceBattleground = function()
-        if C_PvP then
+        if C_PvP and C_PvP.IsBattleground then
             return C_PvP.IsBattleground()
         end
 
