@@ -929,16 +929,12 @@ secureMethods["TrySort"] = [[
                 elseif container.Frame:IsVisible() then
                     local shouldAdd = false
 
-                    if (container.Type == ContainerType.Party or container.Type == ContainerType.Raid) and friendlyEnabled then
-                        shouldAdd = true
-                    end
-
-                    if container.Type == ContainerType.EnemyArena and enemyEnabled then
-                        shouldAdd = true
-                    end
-
                     if container.EnableInBattlegrounds ~= nil and not container.EnableInBattlegrounds and self:GetAttribute("IsBattleground") then
                         shouldAdd = false
+                    elseif (container.Type == ContainerType.Party or container.Type == ContainerType.Raid) and friendlyEnabled then
+                        shouldAdd = true
+                    elseif container.Type == ContainerType.EnemyArena and enemyEnabled then
+                        shouldAdd = true
                     end
 
                     if shouldAdd then
