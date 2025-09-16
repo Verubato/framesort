@@ -168,12 +168,16 @@ local wow = {
         return LE_EXPANSION_DRAGONFLIGHT and LE_EXPANSION_LEVEL_CURRENT >= LE_EXPANSION_DRAGONFLIGHT
     end,
     IsInstanceBattleground = function()
+        local inInstance, instanceType = IsInInstance()
+        local isBg = inInstance and instanceType == "pvp"
+
+        if isBg then return true end
+
         if C_PvP and C_PvP.IsBattleground then
             return C_PvP.IsBattleground()
         end
 
-        local inInstance, instanceType = IsInInstance()
-        return inInstance and instanceType == "pvp"
+        return false
     end,
 
     ---@class WowEvents
