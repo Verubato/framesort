@@ -30,6 +30,7 @@
         "Gladius",
         "BattleGroundEnemies",
         "BattleGroundEnemiesDB",
+        "GladdyFrame",
     ],
     "diagnostics.disable": [
         "inject-field",
