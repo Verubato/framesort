@@ -14,6 +14,6 @@
 ## SavedVariables: FrameSortDB
 ## IconTexture: Interface\AddOns\FrameSort\Media\icon.blp
 ## Dependencies: CompactRaidFrame
-## OptionalDeps: Cell, ElvUI, Grid2, Gladius, GladiusEx, ShadowedUnitFrames
+## OptionalDeps: Cell, ElvUI, Grid2, Gladius, GladiusEx, ShadowedUnitFrames, Gladdy
 
 Load-Classic.xml
