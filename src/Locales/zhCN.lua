@@ -214,6 +214,9 @@ BattleGroundEnemies
  - 竞技场：是
  - 团队：否
 \n
+Gladdy
+ - 竞技场：是
+\n
 ]]
 
 -- # Api screen #

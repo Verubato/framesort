@@ -212,6 +212,9 @@ BattleGroundEnemies
  - Арена: да
  - Рейд: нет
 \n
+Gladdy
+ - Арена: да
+\n
 ]]
 
 -- # Api screen #
