@@ -32,17 +32,19 @@ function M:Containers()
     end
 
     local function getFrames()
-        return fsEnumerable
-            :From({
-                ---@diagnostic disable: undefined-global
-                GladdyButtonFrame1,
-                GladdyButtonFrame2,
-                GladdyButtonFrame3,
-                GladdyButtonFrame4,
-                GladdyButtonFrame5,
-            })
-            :Where(function(frame) return frame:IsVisible() end)
-            :ToTable()
+        local inInstance, instaceType = wow.IsInInstance()
+        local isArena = inInstance and instaceType == "arena"
+        local frames = {
+            ---@diagnostic disable: undefined-global
+            GladdyButtonFrame1,
+            GladdyButtonFrame2,
+            GladdyButtonFrame3,
+            GladdyButtonFrame4,
+            GladdyButtonFrame5,
+        }
+
+        local count = isArena and wow.GetNumArenaOpponentSpecs() or 5
+        return fsEnumerable:From(frames):Take(count):ToTable()
     end
 
     local charKey = wow.UnitName("player") .. " - " .. wow.GetRealmName()
@@ -62,7 +64,7 @@ function M:Containers()
 
             return {
                 Horizontal = 0,
-                Vertical = margin + highlightBorderSize + powerBarHeight
+                Vertical = margin + highlightBorderSize + powerBarHeight,
             }
         end,
     }
