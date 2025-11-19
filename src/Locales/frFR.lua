@@ -212,6 +212,9 @@ BattleGroundEnemies
  - Arena : oui
  - Raid : non
 \n
+Gladdy
+ - Arena : oui
+\n
 ]]
 
 -- # Api screen #

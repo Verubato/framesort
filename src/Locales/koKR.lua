@@ -211,6 +211,9 @@ BattleGroundEnemies
  - 아레나: 예
  - 레이드: 아니오
 \n
+Gladdy
+ - 아레나: 예
+\n
 ]]
 
 -- # Api screen #
