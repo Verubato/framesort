@@ -127,7 +127,6 @@ function M:Init()
         eventFrame:HookScript("OnEvent", OnEvent)
         eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
         eventFrame:RegisterEvent(events.UNIT_PET)
-        eventFrame:RegisterEvent(events.INSPECT_READY)
 
         -- sometimes there is a delay from when a person joins group until their role is assigned
         -- so trigger a sort once we know their role
@@ -150,4 +149,6 @@ function M:Init()
         fsLog:Debug("First run.")
         M:Run()
     end)
+
+    addon.Modules.Inspector:RegisterCallback(ScheduleSort)
 end
