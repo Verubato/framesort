@@ -179,7 +179,9 @@ local wow = {
         local inInstance, instanceType = IsInInstance()
         local isBg = inInstance and instanceType == "pvp"
 
-        if isBg then return true end
+        if isBg then
+            return true
+        end
 
         if C_PvP and C_PvP.IsBattleground then
             return C_PvP.IsBattleground()
@@ -241,7 +243,10 @@ local wow = {
         PVP_MATCH_STATE_CHANGED = "PVP_MATCH_STATE_CHANGED",
 
         -- fired when the results of NotifyInspect are ready
-        INSPECT_READY = "INSPECT_READY"
+        INSPECT_READY = "INSPECT_READY",
+
+        -- fires multiple times when someone changes their spec
+        PLAYER_SPECIALIZATION_CHANGED = "PLAYER_SPECIALIZATION_CHANGED",
     },
 }
 
