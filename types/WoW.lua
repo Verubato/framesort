@@ -90,6 +90,8 @@ GetTime = GetTime,
 ---@field GetLocale fun(): string
 ---@field GetRealmName fun(): string
 ---@field GetRealZoneText fun(): string
+-- secrets
+---@field issecretvalue fun(value: any): boolean
 -- non-blizzard
 ---@field Events WowEvents
 ---@field HasDropdown fun(): boolean

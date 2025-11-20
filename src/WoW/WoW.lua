@@ -155,6 +155,9 @@ local wow = {
     SecureHandlerSetFrameRef = SecureHandlerSetFrameRef,
     SecureHandlerExecute = SecureHandlerExecute,
 
+    -- secrets
+    issecretvalue = issecretvalue or function() return false end,
+
     -- non-blizzard related
     HasDropdown = function()
         return WowStyle1DropdownTemplate ~= nil

@@ -319,13 +319,22 @@ function M:Containers()
             AnchorPoint = "TOPRIGHT",
             SubscribeToVisibility = true,
             FramesOffset = function()
+                -- not sure when, but it seems GetWidth() and GetHeight() are sometimes returning secret values
+                local ccRemoverWidth = wow.CompactArenaFrameMember1 and wow.CompactArenaFrameMember1.CcRemoverFrame and wow.CompactArenaFrameMember1.CcRemoverFrame:GetWidth()
+                local titleHeight = wow.CompactArenaFrameTitle and wow.CompactArenaFrameTitle:GetHeight()
+
+                if not ccRemoverWidth or wow.issecretvalue(ccRemoverWidth) then
+                    ccRemoverWidth = 27
+                end
+
+                if not titleHeight or wow.issecretvalue(titleHeight) then
+                    titleHeight = 14
+                end
+
                 return {
-                    -- these are secret values now so we can't get them dynamically
-                    -- TODO: test if value is secret and use, otherwise fallback
-                    -- X = -(wow.CompactArenaFrameMember1 and (wow.CompactArenaFrameMember1.CcRemoverFrame:GetWidth() + 2) or 29),
-                    -- Y = -(wow.CompactArenaFrameTitle and wow.CompactArenaFrameTitle:GetHeight() or 14),
-                    X = -29,
-                    Y = -14
+                    -- add 2 for some spacing
+                    X = -(ccRemoverWidth + 2),
+                    Y = -titleHeight,
                 }
             end,
             PostSort = function()

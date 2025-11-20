@@ -100,15 +100,19 @@ function M:IsPet(unit)
     return string.find(unit, "pet", nil, true) ~= nil
 end
 
----Returns the pet unit for the specified player unit.
+---Returns the pet unit for the specified unit.
 ---@param unit string
+---@param isEnemy boolean? pass true if unit is an enemy, used to avoid comparing secret values.
 ---@return string
-function M:PetFor(unit)
+function M:PetFor(unit, isEnemy)
     if not unit or unit == "none" then
         return "none"
     end
 
-    if unit == "player" or wow.UnitIsUnit(unit, "player") then
+    -- isEnemy used here as UnitIsUnit returns a secret value for enemy units (e.g. arena123)
+    local isPlayer = not isEnemy and wow.UnitIsUnit(unit, "player")
+
+    if unit == "player" or isPlayer then
         return "pet"
     end
 
