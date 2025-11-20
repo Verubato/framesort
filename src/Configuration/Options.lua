@@ -84,7 +84,7 @@ function fsConfig:MultilineTextBlock(text, parent, anchor)
 end
 
 function fsConfig:Dropdown(parent, items, getValue, setSelected)
-    if wow.HasDropdown then
+    if wow.HasDropdown() then
         local dd = wow.CreateFrame("DropdownButton", nil, parent, "WowStyle1DropdownTemplate")
         dd:SetupMenu(function(_, rootDescription)
             for i, value in ipairs(items) do
