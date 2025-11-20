@@ -137,7 +137,7 @@ local function UnitForSelector(selector, friendlyUnits, enemyUnits)
     -- enemy pet frame
     if type == "enemyframepet" or type == "efp" then
         local player = enemyUnits[number] or "none"
-        return fsUnit:PetFor(player)
+        return fsUnit:PetFor(player, true)
     end
 
     -- enemy frame
