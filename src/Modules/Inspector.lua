@@ -10,8 +10,8 @@ local fsLog = addon.Logging.Log
 local M = {}
 addon.Modules.Inspector = M
 
--- key = unit, value = { Stale: boolean, SpecId: number }
-local unitGuidToSpec = {}
+-- key = unit, value = { SpecId: number, LastAttempt: number, LastSeen: number }
+local unitGuidToSpec
 
 -- the latest/current unit we've requested an inspection for
 local unitInspecting
@@ -28,14 +28,14 @@ local inspectTimeout = 10
 -- if a cache entry has a spec id of 0 (i.e. no data), retry after X seconds
 local cacheTimeout = 60
 
+-- if a cache entry hasn't been updated in this amount of time, remove it
+-- 3 days
+local cacheExpiry = 60 * 60 * 24 * 3
+
 local function EnsureCacheEntry(unit)
     local guid = wow.UnitGUID(unit)
     local cacheEntry = unitGuidToSpec[guid] or {}
     unitGuidToSpec[guid] = cacheEntry
-
-    cacheEntry.SpecId = cacheEntry.SpecId or 0
-    cacheEntry.Stale = cacheEntry.Stale or true
-    cacheEntry.LastAttempt = nil
 
     return cacheEntry
 end
@@ -51,7 +51,7 @@ local function Inspect(unit)
 
     -- the spec id may be 0, in which case we'll use the previous value (if one exists)
     cacheEntry.SpecId = specId ~= 0 and specId or cacheEntry.SpecId
-    cacheEntry.LastAttempt = wow.GetTime()
+    cacheEntry.LastSeen = wow.GetTime()
 
     fsLog:Debug("Found spec information for unit: " .. unit .. " spec id: " .. specId)
 
@@ -76,7 +76,7 @@ local function GetNextTarget()
         local guid = wow.UnitGUID(unit)
         local cacheEntry = unitGuidToSpec[guid]
 
-        if cacheEntry and cacheEntry.SpecId == 0 and wow.CanInspect(unit) and wow.UnitIsConnected(unit) and (wow.GetTime() - cacheEntry.LastAttempt > cacheTimeout) then
+        if cacheEntry and cacheEntry.SpecId == 0 and wow.CanInspect(unit) and wow.UnitIsConnected(unit) and (not cacheEntry.LastAttempt or (wow.GetTime() - cacheEntry.LastAttempt > cacheTimeout)) then
             return unit
         end
     end
@@ -98,6 +98,10 @@ local function InspectNext()
 
     inspectStarted = wow.GetTime()
     unitInspecting = unit
+
+    -- create a cache entry for this unit so we don't attempt this unit again in the next iteration
+    local cacheEntry = EnsureCacheEntry(unit)
+    cacheEntry.LastAttempt = wow.GetTime()
 
     fsLog:Debug("Requesting inspection for unit: " .. unit)
 
@@ -129,6 +133,30 @@ local function OnUpdate()
     needUpdate = InspectNext()
 end
 
+local function OnNotifyInspect(unit)
+    -- override the inspected unit so we get it's information
+    unitInspecting = unit
+    inspectStarted = wow.GetTime()
+end
+
+local function PurgeOldEntries()
+    local now = wow.GetTime()
+    local toRemove = {}
+
+    -- to keep the saved variable size down
+    -- remove any old entries we don't care about anymore
+    for guid, entry in pairs(unitGuidToSpec) do
+        if not entry.LastSeen or (now - entry.LastSeen) > cacheExpiry then
+            toRemove[#toRemove + 1] = guid
+        end
+    end
+
+    for _, guid in ipairs(toRemove) do
+        fsLog:Debug("Purging expired cache entry for unit: " .. guid)
+        unitGuidToSpec[guid] = nil
+    end
+end
+
 function M:UnitSpec(unitGuid)
     if unitGuid == wow.UnitGUID("player") and wow.GetSpecialization and wow.GetSpecializationInfo then
         local index = wow.GetSpecialization()
@@ -145,9 +173,10 @@ function M:UnitSpec(unitGuid)
     return cacheEntry.SpecId
 end
 
--- for debugging purposes
-function M:GetCache()
-    return unitGuidToSpec
+function M:PurgeCache()
+    local db = addon.DB
+    db.SpecCache = {}
+    unitGuidToSpec = db.SpecCache
 end
 
 function M:Init()
@@ -158,9 +187,19 @@ function M:Init()
         return
     end
 
+    -- persist cache as a saved variable
+    local db = addon.DB
+    db.SpecCache = db.SpecCache or {}
+    unitGuidToSpec = db.SpecCache
+
+    PurgeOldEntries()
+
     local frame = wow.CreateFrame("Frame")
     frame:HookScript("OnEvent", OnEvent)
     frame:HookScript("OnUpdate", OnUpdate)
     frame:RegisterEvent(wow.Events.INSPECT_READY)
     frame:RegisterEvent(wow.Events.GROUP_ROSTER_UPDATE)
+
+    -- hook it so we gain the benefit inspection results from other callers
+    wow.hooksecurefunc("NotifyInspect", OnNotifyInspect)
 end
