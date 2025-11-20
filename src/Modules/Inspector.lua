@@ -108,13 +108,23 @@ local function InspectNext()
     return true
 end
 
-local function OnEvent(_, event)
+local function InvalidateEntry(unit)
+    -- could flag it as stale, but might as well just remove it entirely
+    local guid = wow.UnitGUID(unit)
+    unitGuidToSpec[guid] = nil
+
+    needUpdate = true
+end
+
+local function OnEvent(_, event, arg1)
     if event == wow.Events.INSPECT_READY then
         if unitInspecting then
             Inspect(unitInspecting)
         end
     elseif event == wow.Events.GROUP_ROSTER_UPDATE then
         needUpdate = true
+    elseif event == wow.Events.PLAYER_SPECIALIZATION_CHANGED then
+        InvalidateEntry(arg1)
     end
 end
 
@@ -199,6 +209,7 @@ function M:Init()
     frame:HookScript("OnUpdate", OnUpdate)
     frame:RegisterEvent(wow.Events.INSPECT_READY)
     frame:RegisterEvent(wow.Events.GROUP_ROSTER_UPDATE)
+    frame:RegisterEvent(wow.Events.PLAYER_SPECIALIZATION_CHANGED)
 
     -- hook it so we gain the benefit inspection results from other callers
     wow.hooksecurefunc("NotifyInspect", OnNotifyInspect)
