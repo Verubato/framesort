@@ -120,7 +120,7 @@ local function UpdateTargets()
     end
 
     for i, btn in ipairs(targetEnemyPetFrames) do
-        local new = fsUnit:PetFor(enemyUnits[i] or "none")
+        local new = fsUnit:PetFor(enemyUnits[i] or "none", true)
         local current = btn:GetAttribute("unit")
 
         if current ~= new then
