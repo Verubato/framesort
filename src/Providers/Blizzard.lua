@@ -320,8 +320,12 @@ function M:Containers()
             SubscribeToVisibility = true,
             FramesOffset = function()
                 return {
-                    X = -(wow.CompactArenaFrameMember1 and (wow.CompactArenaFrameMember1.CcRemoverFrame:GetWidth() + 2) or 29),
-                    Y = -(wow.CompactArenaFrameTitle and wow.CompactArenaFrameTitle:GetHeight() or 14),
+                    -- these are secret values now so we can't get them dynamically
+                    -- TODO: test if value is secret and use, otherwise fallback
+                    -- X = -(wow.CompactArenaFrameMember1 and (wow.CompactArenaFrameMember1.CcRemoverFrame:GetWidth() + 2) or 29),
+                    -- Y = -(wow.CompactArenaFrameTitle and wow.CompactArenaFrameTitle:GetHeight() or 14),
+                    X = -29,
+                    Y = -14
                 }
             end,
             PostSort = function()

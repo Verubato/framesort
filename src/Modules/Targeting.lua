@@ -349,7 +349,7 @@ function M:EnemyFrames()
 end
 
 function M:EnemyUnits()
-    -- GladiusEx, sArena, and Blizzar all show enemies in group order
+    -- GladiusEx, sArena, and Blizzard all show enemies in group order
     -- arena1, arena2, arena3
     -- so we can just grab the units directly instead of extracting units from frames
     -- this has the benefit of not having to worry about frame visibility and event ordering shenanigans
