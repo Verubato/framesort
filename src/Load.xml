@@ -49,16 +49,15 @@
     <!-- Health check requires frame providers -->
     <Script file="Health\HealthCheck.lua"/>
 
-    <!-- Sorting modules -->
+    <!-- Modules -->
+    <Script file="Modules\Inspector.lua"/>
     <Script file="Modules\Sorting\Comparer.lua"/>
     <Script file="Modules\Sorting\Traditional.lua"/>
     <Script file="Modules\Sorting\Secure.lua"/>
     <Script file="Modules\Sorting\SecureNoCombat.lua"/>
     <Script file="Modules\Sorting\SecureInCombat.lua"/>
     <Script file="Modules\Sorting\Sorting.lua"/>
-
-    <!-- Other modules -->
-    <Script file="Modules\Leader\AutoLeader.lua"/>
+    <Script file="Modules\AutoLeader.lua"/>
     <Script file="Modules\HidePlayer.lua"/>
     <Script file="Modules\Targeting.lua"/>
     <Script file="Modules\Macro\Macro.lua"/>

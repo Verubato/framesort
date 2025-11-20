@@ -46,6 +46,7 @@
 ---@field Targeting TargetingModule
 ---@field Macro MacroModule
 ---@field AutoLeader AutoLeaderModule
+---@field Inspector InspectorModule
 
 ---@class Scheduling
 ---@field Scheduler Scheduler
