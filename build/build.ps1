@@ -12,7 +12,7 @@ New-Item -ItemType Directory $addonFolderName | Out-Null
 cp ..\src\* $addonFolderName -Recurse
 
 # extract the version number
-$regex = Get-Content "$($addonFolderName)\FrameSort_Mainline.toc" | sls "(?<=Version: ).*" 
+$regex = Get-Content "$($addonFolderName)\FrameSort.toc" | sls "(?<=Version: ).*" 
 if (!$regex) { 
     Write-Error "Failed to extract version number"
 }
