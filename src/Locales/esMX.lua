@@ -10,7 +10,7 @@ end
 L["FrameSort - %s"] = "FrameSort - %s"
 L["There are some issuse that may prevent FrameSort from working correctly."] = "Hay algunos problemas que pueden evitar que FrameSort funcione correctamente."
 L["Please go to the Health Check panel to view more details."] = "Por favor, ve al panel de Chequeo de Salud para ver más detalles."
-L["Role/spec"] = "Rol/espec"
+L["Role"] = "Rol"
 L["Group"] = "Grupo"
 L["Alphabetical"] = "Alfabético"
 L["Arena - 2v2"] = "Arena - 2v2"
