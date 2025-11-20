@@ -32,6 +32,14 @@ local cacheTimeout = 60
 -- 3 days
 local cacheExpiry = 60 * 60 * 24 * 3
 
+local callbacks = {}
+
+local function OnNewSpecInformation()
+    for _, callback in ipairs(callbacks) do
+        pcall(callback)
+    end
+end
+
 local function EnsureCacheEntry(unit)
     local guid = wow.UnitGUID(unit)
     local cacheEntry = unitGuidToSpec[guid] or {}
@@ -50,7 +58,15 @@ local function Inspect(unit)
     local cacheEntry = EnsureCacheEntry(unit)
 
     -- the spec id may be 0, in which case we'll use the previous value (if one exists)
+    local before = cacheEntry.SpecId
     cacheEntry.SpecId = specId ~= 0 and specId or cacheEntry.SpecId
+    local after = cacheEntry.SpecId
+
+    if before ~= after then
+        fsLog:Debug("Found new spec information, notifying callbacks.")
+        OnNewSpecInformation()
+    end
+
     cacheEntry.LastSeen = wow.GetTime()
 
     fsLog:Debug("Found spec information for unit: " .. unit .. " spec id: " .. specId)
@@ -187,6 +203,12 @@ function M:PurgeCache()
     local db = addon.DB
     db.SpecCache = {}
     unitGuidToSpec = db.SpecCache
+end
+
+---Registers a callback to be invoked when new spec information has been found.
+---@param callback function
+function M:RegisterCallback(callback)
+    callbacks[#callbacks + 1] = callback
 end
 
 function M:Init()
