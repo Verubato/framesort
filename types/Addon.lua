@@ -29,6 +29,7 @@
 ---@meta
 ---@class DB
 ---@field Options Options
+---@field SpecCache any
 
 ---@class Logging
 ---@field Log Log
