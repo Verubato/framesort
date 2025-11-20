@@ -15,4 +15,4 @@
 ## IconTexture: Interface\AddOns\FrameSort\Media\icon.blp
 ## OptionalDeps: Cell, ElvUI, Grid2, Gladius, GladiusEx, ShadowedUnitFrames, Gladdy
 
-Load-Retail.xml
+Load.xml

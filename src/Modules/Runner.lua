@@ -11,7 +11,6 @@ local eventFrame = nil
 local combatFrame = nil
 local pvpTimerType = 1
 local run = false
-local lgist = _G["LibGroupInSpecT-1.1_Frame"] and LibStub:GetLibrary("LibGroupInSpecT-1.1")
 
 local function ScheduleSort()
     run = true
@@ -105,6 +104,7 @@ function M:Init()
     addon.Modules.Sorting:Init()
     addon.Modules.Targeting:Init()
     addon.Modules.Macro:Init()
+    addon.Modules.Inspector:Init()
 
     for _, provider in ipairs(fsProviders.All) do
         -- for any special events that individual providers request a sort for
@@ -127,6 +127,7 @@ function M:Init()
         eventFrame:HookScript("OnEvent", OnEvent)
         eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
         eventFrame:RegisterEvent(events.UNIT_PET)
+        eventFrame:RegisterEvent(events.INSPECT_READY)
 
         -- sometimes there is a delay from when a person joins group until their role is assigned
         -- so trigger a sort once we know their role
@@ -149,22 +150,4 @@ function M:Init()
         fsLog:Debug("First run.")
         M:Run()
     end)
-
-    if not lgist then
-        return
-    end
-
-    local cb = {}
-    function cb:OnSpecInfo()
-        local pending = lgist:QueuedInspections()
-
-        if pending and #pending > 0 then
-            return
-        end
-
-        fsLog:Debug("LibGroupInSpecT finished gathering spec information, requesting sort.")
-        ScheduleSort()
-    end
-
-    lgist.RegisterCallback(cb, "GroupInSpecT_Update", "OnSpecInfo")
 end

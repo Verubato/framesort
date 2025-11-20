@@ -1,4 +1,5 @@
 ---@meta
+GetTime = GetTime,
 ---@class WowApi
 -- fields
 ---@field C_PvP C_PvP
@@ -41,14 +42,20 @@
 ---@field UnitIsUnit fun(unit1: string, unit2: string): boolean
 ---@field UnitInRaid fun(unit: string): index: number?
 ---@field UnitIsPlayer fun(unit: string): boolean
+---@field UnitIsGroupLeader fun(unit: string, partyCategory: number?): boolean
+---@field UnitIsConnected fun(unit: string): boolean
+---@field UnitGroupRolesAssigned fun(unit: string): role: string
 ---@field GetRaidRosterInfo fun(id: number): ...
 ---@field GetArenaOpponentSpec fun(id: number): specId: number, gender: number
 ---@field GetSpecializationInfoByID fun(specIndex: number): id: number, name: string, description: string, icon: number, role: string, classFile: string, className: string
----@field UnitGroupRolesAssigned fun(unit: string): role: string
 ---@field GetInspectSpecialization fun(unit: string): specId: number
 ---@field GetSpecialization fun(isInspect: boolean?, isPet: boolean?, specGroup: number?): specId: number
----@field UnitIsGroupLeader fun(unit: string, partyCategory: number?): boolean
+---@field GetSpecializationInfo fun(specIndex: number): specId: number, name: string, description: string, icon: number, role: string
 ---@field PromoteToLeader fun(unitOrPlayerName: string)
+-- inspect functions
+---@field NotifyInspect fun(unit: string)
+---@field CanInspect fun(unit: string, showError: boolean?): canInspect: boolean
+---@field ClearInspectPlayer fun()
 -- group size functions
 ---@field GetNumGroupMembers fun(): number
 ---@field GetNumArenaOpponentSpecs fun(): number
@@ -61,6 +68,7 @@
 ---@field wipe fun(table: table): table
 ---@field CopyTable fun(table: table): table
 ---@field strjoin fun(delimiter: string, ...): string
+---@field GetTime fun(): number
 -- secure functions
 ---@field issecurevariable fun(tableOrName: table|string, name: string?): isSecure: boolean, taint: string?
 ---@field hooksecurefunc fun(...)

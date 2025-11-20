@@ -53,14 +53,21 @@ local wow = {
     UnitIsUnit = UnitIsUnit,
     UnitInRaid = UnitInRaid,
     UnitIsPlayer = UnitIsPlayer,
+    UnitIsConnected = UnitIsConnected,
+    UnitIsGroupLeader = UnitIsGroupLeader,
+    UnitGroupRolesAssigned = UnitGroupRolesAssigned,
     GetRaidRosterInfo = GetRaidRosterInfo,
     GetArenaOpponentSpec = GetArenaOpponentSpec,
     GetSpecializationInfoByID = GetSpecializationInfoByID,
     GetSpecialization = GetSpecialization,
     GetInspectSpecialization = GetInspectSpecialization,
-    UnitGroupRolesAssigned = UnitGroupRolesAssigned,
-    UnitIsGroupLeader = UnitIsGroupLeader,
+    GetSpecializationInfo = GetSpecializationInfo,
     PromoteToLeader = PromoteToLeader,
+
+    -- inspect functions
+    CanInspect = CanInspect,
+    NotifyInspect = NotifyInspect,
+    ClearInspectPlayer = ClearInspectPlayer,
 
     -- state functions
     IsInInstance = IsInInstance,
@@ -95,6 +102,7 @@ local wow = {
 
         return joined
     end,
+    GetTime = GetTime,
 
     -- secure functions
     issecurevariable = issecurevariable,
@@ -231,6 +239,9 @@ local wow = {
 
         -- fires at start/end of an arena match/round
         PVP_MATCH_STATE_CHANGED = "PVP_MATCH_STATE_CHANGED",
+
+        -- fired when the results of NotifyInspect are ready
+        INSPECT_READY = "INSPECT_READY"
     },
 }
 

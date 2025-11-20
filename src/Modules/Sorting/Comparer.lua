@@ -4,8 +4,8 @@ local wow = addon.WoW.Api
 local fsUnit = addon.WoW.Unit
 local fsMath = addon.Numerics.Math
 local fsEnumerable = addon.Collections.Enumerable
-local lgist = _G["LibGroupInSpecT-1.1_Frame"] and LibStub:GetLibrary("LibGroupInSpecT-1.1")
 local fsConfig = addon.Configuration
+local fsInspector = addon.Modules.Inspector
 local fuzzyDecimalPlaces = 0
 local defaultRoleOrdering = 99
 
@@ -139,21 +139,10 @@ local function CompareRole(leftToken, rightToken, isArena)
         leftRole = select(5, wow.GetSpecializationInfoByID(leftSpec))
         rightRole = select(5, wow.GetSpecializationInfoByID(rightSpec))
     else
-        -- can be null in unit tests
-        if lgist then
-            local leftData = lgist:GetCachedInfo(wow.UnitGUID(leftToken))
-            local rightData = lgist:GetCachedInfo(wow.UnitGUID(rightToken))
+        leftSpec = fsInspector:UnitSpec(wow.UnitGUID(leftToken))
+        rightSpec = fsInspector:UnitSpec(wow.UnitGUID(rightToken))
 
-            if leftData and rightData then
-                leftSpec = leftData and leftData.global_spec_id
-                rightSpec = rightData and rightData.global_spec_id
-
-                leftRole = leftData.spec_role
-                rightRole = rightData.spec_role
-            end
-        end
-
-        if not leftRole or not rightRole then
+        if leftSpec and rightSpec and leftSpec > 0 and rightSpec > 0 then
             leftRole = wow.UnitGroupRolesAssigned(leftToken)
             rightRole = wow.UnitGroupRolesAssigned(rightToken)
         end
