@@ -1,7 +1,7 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
-local fsCompare = addon.Collections.Comparer
+local fsCompare = addon.Modules.Sorting.Comparer
 local fsConfig = addon.Configuration
 local fsProviders = addon.Providers
 local fsFrame = addon.WoW.Frame

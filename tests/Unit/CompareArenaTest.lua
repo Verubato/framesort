@@ -12,7 +12,7 @@ function M:setup()
 
     addon = addonFactory:Create()
     config = addon.DB.Options.Sorting.EnemyArena
-    fsCompare = addon.Collections.Comparer
+    fsCompare = addon.Modules.Sorting.Comparer
     fsConfig = addon.Configuration
 
     addon.WoW.Api.UnitIsUnit = function(left, right)

@@ -30,9 +30,6 @@
     <!-- Scheduler requires core wow files -->
     <Script file="Scheduling\Scheduler.lua"/>
 
-    <!-- Comparer requires core wow files -->
-    <Script file="Collections\Comparer.lua"/>
-
     <!-- Frame requires Comparer -->
     <Script file="WoW\Frame.lua"/>
 
@@ -53,14 +50,15 @@
     <Script file="Health\HealthCheck.lua"/>
 
     <!-- Sorting modules -->
-    <Script file="Modules\Leader\AutoLeader.lua"/>
+    <Script file="Modules\Sorting\Comparer.lua"/>
     <Script file="Modules\Sorting\Traditional.lua"/>
     <Script file="Modules\Sorting\Secure.lua"/>
     <Script file="Modules\Sorting\SecureNoCombat.lua"/>
     <Script file="Modules\Sorting\SecureInCombat.lua"/>
     <Script file="Modules\Sorting\Sorting.lua"/>
 
-    <!-- Load modules -->
+    <!-- Other modules -->
+    <Script file="Modules\Leader\AutoLeader.lua"/>
     <Script file="Modules\HidePlayer.lua"/>
     <Script file="Modules\Targeting.lua"/>
     <Script file="Modules\Macro\Macro.lua"/>

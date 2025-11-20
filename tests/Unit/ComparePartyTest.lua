@@ -30,7 +30,7 @@ function M:setup()
     local addonFactory = require("Mock\\AddonFactory")
     addon = addonFactory:Create()
     config = addon.DB.Options.Sorting.World
-    fsCompare = addon.Collections.Comparer
+    fsCompare = addon.Modules.Sorting.Comparer
     fsConfig = addon.Configuration
 
     addon.DB.Options.Sorting.World.Enabled = true

@@ -24,7 +24,6 @@
 
 ---@class Collections
 ---@field Enumerable Enumerable
----@field Comparer Comparer
 ---@field LuaEx LuaEx
 
 ---@meta
@@ -60,6 +59,7 @@
 ---@field Parser MacroParser
 
 ---@class SortingModule : IRun, IInitialise
+---@field Comparer Comparer
 ---@field Traditional TraditionalSortingModule
 ---@field Secure SecureSortingModule
 ---@field RegisterPostSortCallback fun(self: table, callback: function)

@@ -2,7 +2,7 @@
 local _, addon = ...
 local wow = addon.WoW.Api
 local fsSorting = addon.Modules.Sorting
-local fsCompare = addon.Collections.Comparer
+local fsCompare = addon.Modules.Sorting.Comparer
 local fsProviders = addon.Providers
 local fsUnit = addon.WoW.Unit
 local fsScheduler = addon.Scheduling.Scheduler
