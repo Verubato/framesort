@@ -10,7 +10,7 @@ end
 L["FrameSort - %s"] = "FrameSort - %s"
 L["There are some issuse that may prevent FrameSort from working correctly."] = "有一些問題可能會妨礙 FrameSort 正常工作。"
 L["Please go to the Health Check panel to view more details."] = "請前往健康檢查面板以查看更多詳情。"
-L["Role/spec"] = "角色/專精"
+L["Role"] = "角色"
 L["Group"] = "小隊"
 L["Alphabetical"] = "字母順序"
 L["Arena - 2v2"] = "競技場 - 2v2"

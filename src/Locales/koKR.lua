@@ -10,7 +10,7 @@ end
 L["FrameSort - %s"] = "프레임정렬 - %s"
 L["There are some issuse that may prevent FrameSort from working correctly."] = "프레임정렬이 제대로 작동하지 못하도록 하는 문제가 있습니다."
 L["Please go to the Health Check panel to view more details."] = "더 많은 세부정보를 보려면 건강 검사 패널로 이동하십시오."
-L["Role/spec"] = "역할/전문화"
+L["Role"] = "역할"
 L["Group"] = "그룹"
 L["Alphabetical"] = "알파벳순"
 L["Arena - 2v2"] = "아레나 - 2v2"
