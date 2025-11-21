@@ -102,7 +102,6 @@ local wow = {
 
         return joined
     end,
-    GetTime = GetTime,
 
     -- secure functions
     issecurevariable = issecurevariable,
@@ -144,6 +143,9 @@ local wow = {
     GetAddOnMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata,
 
     -- time related
+    GetTime = GetTime or function()
+        return debugprofilestop() / 1000
+    end,
     GetTimePreciseSec = GetTimePreciseSec or function()
         return debugprofilestop() / 1000
     end,
