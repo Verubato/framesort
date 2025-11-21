@@ -26,7 +26,6 @@ end
 local function IsSafeAddon(name)
     return name == addonName
         -- wotlk uses a backport addon for raid frames
-
         or name == "CompactRaidFrame"
 end
 
@@ -125,12 +124,13 @@ local function CanSeeFrames()
 end
 
 local function OnlyUsingBlizzard()
-    -- TODO: make this more generic, probs need a supporting method added to providers
-    if addon.DB.Options.Sorting.EnemyArena.Enabled and (fsProviders.GladiusEx:Enabled() or fsProviders.sArena:Enabled()) then
-        return false
+    for _, provider in pairs(fsProviders.All) do
+        if provider ~= fsProviders.Blizzard and provider:Enabled() then
+            return false
+        end
     end
 
-    return not fsProviders.ElvUI:Enabled()
+    return fsProviders.Blizzard:Enabled()
 end
 
 local function UsingSpacing()
