@@ -85,20 +85,34 @@ local function GetNextTarget()
     -- first attempt to find someone we don't have any information for
     for _, unit in ipairs(units) do
         local guid = wow.UnitGUID(unit)
-        local cacheEntry = unitGuidToSpec[guid]
 
-        if not wow.UnitIsUnit(unit, "player") and not cacheEntry and wow.CanInspect(unit) and wow.UnitIsConnected(unit) then
-            return unit
+        -- this shouldn't be possible, but it does happen for some reason
+        if not wow.issecretvalue(guid) then
+            local cacheEntry = unitGuidToSpec[guid]
+
+            if not wow.UnitIsUnit(unit, "player") and not cacheEntry and wow.CanInspect(unit) and wow.UnitIsConnected(unit) then
+                return unit
+            end
         end
     end
 
     -- now attempt to find someone we have stale information for
     for _, unit in ipairs(units) do
         local guid = wow.UnitGUID(unit)
-        local cacheEntry = unitGuidToSpec[guid]
 
-        if cacheEntry and cacheEntry.SpecId == 0 and wow.CanInspect(unit) and wow.UnitIsConnected(unit) and (not cacheEntry.LastAttempt or (wow.GetTime() - cacheEntry.LastAttempt > cacheTimeout)) then
-            return unit
+        -- this shouldn't be possible, but it does happen for some reason
+        if not wow.issecretvalue(guid) then
+            local cacheEntry = unitGuidToSpec[guid]
+
+            if
+                cacheEntry
+                and cacheEntry.SpecId == 0
+                and wow.CanInspect(unit)
+                and wow.UnitIsConnected(unit)
+                and (not cacheEntry.LastAttempt or (wow.GetTime() - cacheEntry.LastAttempt > cacheTimeout))
+            then
+                return unit
+            end
         end
     end
 
