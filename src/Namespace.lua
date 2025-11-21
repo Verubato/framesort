@@ -2,6 +2,7 @@ local _, addon = ...
 
 addon.Api = {}
 addon.Collections = {}
+addon.Language = {}
 addon.Configuration = {
     Panels = {},
 }
