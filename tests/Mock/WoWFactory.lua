@@ -207,6 +207,8 @@ function M:Create()
             return os.time()
         end,
 
+        issecretvalue = function() return false end,
+
         -- non-blizzard
         HasArena = function() return true end,
         HasSpecializationInfo = function() return true end,

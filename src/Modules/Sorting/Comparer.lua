@@ -231,7 +231,7 @@ local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, rev
     end
 
     if playerSortMode and playerSortMode ~= "" then
-        if leftToken == "player" or wow.UnitIsUnit(leftToken, "player") then
+        if fsUnit:IsPlayer(leftToken) then
             if playerSortMode == fsConfig.PlayerSortMode.Hidden then
                 return false
             elseif playerSortMode == fsConfig.PlayerSortMode.Middle then
@@ -242,7 +242,7 @@ local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, rev
             end
         end
 
-        if rightToken == "player" or wow.UnitIsUnit(rightToken, "player") then
+        if fsUnit:IsPlayer(rightToken) then
             if playerSortMode == fsConfig.PlayerSortMode.Hidden then
                 return true
             elseif playerSortMode == fsConfig.PlayerSortMode.Middle then
