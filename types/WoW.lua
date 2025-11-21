@@ -27,7 +27,7 @@
 ---@field InterfaceOptionsFramePanelContainer table
 ---@field Enum table
 ---@field EventRegistry EventRegistry
----@field Settings table
+---@field Settings Settings
 -- cvars
 ---@field GetCVarBool fun(name: string): boolean?
 ---@field GetCVar fun(name: string): any?
@@ -115,3 +115,10 @@
 
 ---@class EventRegistry
 ---@field RegisterCallback fun(self: table, name: string, callback: function)
+
+---@class Settings
+---@field GetCategory fun(panel: table): category: string
+---@field RegisterAddOnCategory fun(category: string)
+---@field OpenToCategory fun(category: string)
+---@field RegisterCanvasLayoutCategory fun(frame: table, name: string)
+---@field RegisterCanvasLayoutSubcategory fun(parentCategory: string, frame:table, name: string)

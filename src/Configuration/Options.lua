@@ -12,7 +12,7 @@ fsConfig.TextMaxWidth = 600
 
 local function AddCategory(panel)
     if wow.Settings then
-        local category = wow.Settings.RegisterCanvasLayoutCategory(panel, panel.name, panel.name)
+        local category = wow.Settings.RegisterCanvasLayoutCategory(panel, panel.name)
         category.ID = panel.name
         wow.Settings.RegisterAddOnCategory(category)
     elseif wow.InterfaceOptions_AddCategory then
@@ -25,7 +25,7 @@ end
 local function AddSubCategory(panel)
     if wow.Settings then
         local category = wow.Settings.GetCategory(panel.parent)
-        local subcategory = wow.Settings.RegisterCanvasLayoutSubcategory(category, panel, panel.name, panel.name)
+        local subcategory = wow.Settings.RegisterCanvasLayoutSubcategory(category, panel, panel.name)
         subcategory.ID = panel.name
     elseif wow.InterfaceOptions_AddCategory then
         wow.InterfaceOptions_AddCategory(panel)
