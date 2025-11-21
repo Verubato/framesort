@@ -3,7 +3,7 @@ local _, addon = ...
 local wow = addon.WoW.Api
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
-local fsLuaEx = addon.Collections.LuaEx
+local fsLuaEx = addon.Language.LuaEx
 local M = {}
 
 fsProviders.Grid2 = M

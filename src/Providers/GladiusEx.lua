@@ -5,7 +5,7 @@ local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsEnumerable = addon.Collections.Enumerable
 local fsCompare = addon.Modules.Sorting.Comparer
-local fsLuaEx = addon.Collections.LuaEx
+local fsLuaEx = addon.Language.LuaEx
 local M = {}
 
 fsProviders.GladiusEx = M

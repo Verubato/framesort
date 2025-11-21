@@ -2,11 +2,11 @@
 ---@class Addon
 ---@field Api Api
 ---@field Configuration Configuration
+---@field Language Language
 ---@field Collections Collections
 ---@field DB DB
 ---@field Health Health
 ---@field Locale table<string, string>
----@field Languages table
 ---@field Logging Logging
 ---@field Modules Modules
 ---@field Numerics Numerics
@@ -17,16 +17,16 @@
 ---@field Init fun(self: table)
 ---@field InitDB fun(self: table)
 
----@meta
 ---@class Api: IInitialise
 ---@field v1 ApiV1
 ---@field v2 ApiV2
 
 ---@class Collections
 ---@field Enumerable Enumerable
+
+---@class Language
 ---@field LuaEx LuaEx
 
----@meta
 ---@class DB
 ---@field Options Options
 ---@field SpecCache any
@@ -40,7 +40,6 @@
 ---@class Numerics
 ---@field Math Math
 
----@meta
 ---@class Modules : IInitialise, IRun
 ---@field Sorting SortingModule
 ---@field HidePlayer HidePlayerModule

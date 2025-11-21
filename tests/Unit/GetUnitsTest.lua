@@ -1,5 +1,6 @@
 ---@type UnitUtil
 local fsUnit
+local addon
 local M = {}
 
 local function GenerateUnits(count, isRaid)
@@ -32,7 +33,7 @@ local function UnitExists(unit, members)
 end
 
 function M:setup()
-    local addonFactory = require("Mock\\AddonFactory")
+    local addonFactory = require("TestHarness\\AddonFactory")
     addon = addonFactory:Create()
     fsUnit = addon.WoW.Unit
 

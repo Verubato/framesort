@@ -5,7 +5,7 @@ local fsEnumerable = addon.Collections.Enumerable
 local fsProviders = addon.Providers
 local fsConfig = addon.Configuration
 local fsFrame = addon.WoW.Frame
-local fsLuaEx = addon.Collections.LuaEx
+local fsLuaEx = addon.Language.LuaEx
 local L = addon.Locale
 ---@class HealthChecker
 local M = {}

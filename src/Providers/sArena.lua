@@ -2,7 +2,7 @@
 local _, addon = ...
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
-local fsLuaEx = addon.Collections.LuaEx
+local fsLuaEx = addon.Language.LuaEx
 local M = {}
 
 fsProviders.sArena = M
