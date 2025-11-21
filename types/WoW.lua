@@ -26,7 +26,7 @@
 ---@field InterfaceOptionsFrame_OpenToCategory fun(panel: table)
 ---@field InterfaceOptionsFramePanelContainer table
 ---@field Enum table
----@field EventRegistry table
+---@field EventRegistry EventRegistry
 ---@field Settings table
 -- cvars
 ---@field GetCVarBool fun(name: string): boolean?
@@ -112,3 +112,6 @@
 
 ---@class C_Timer
 ---@field After fun(seconds: number, callback: function)
+
+---@class EventRegistry
+---@field RegisterCallback fun(self: table, name: string, callback: function)
