@@ -97,7 +97,7 @@ end
 ---Returns true if the unit token is a pet.
 ---@param unit string
 function M:IsPet(unit)
-    return string.find(unit, "pet", nil, true) ~= nil
+    return unit ~= nil and string.find(unit, "pet", nil, true) ~= nil
 end
 
 ---Returns the pet unit for the specified unit.
@@ -105,7 +105,7 @@ end
 ---@param isEnemy boolean? pass true if unit is an enemy, used to avoid comparing secret values.
 ---@return string
 function M:PetFor(unit, isEnemy)
-    if not unit or unit == "none" then
+    if not unit or unit == "" or unit == "none" then
         return "none"
     end
 
