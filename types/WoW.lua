@@ -3,6 +3,7 @@
 -- fields
 ---@field C_PvP C_PvP
 ---@field C_Map C_Map
+---@field C_Timer C_Timer
 -- constants
 ---@field MAX_RAID_MEMBERS number
 ---@field MEMBERS_PER_RAID_GROUP number
@@ -85,7 +86,6 @@
 ---@field GetTime fun(): number
 -- other
 ---@field ReloadUI fun()
----@field C_Timer table
 ---@field GetLocale fun(): string
 ---@field GetRealmName fun(): string
 ---@field GetRealZoneText fun(): string
@@ -109,3 +109,6 @@
 
 ---@class C_Map
 ---@field GetBestMapForUnit fun(unitId: string): number
+
+---@class C_Timer
+---@field After fun(seconds: number, callback: function)
