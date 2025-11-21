@@ -1,5 +1,4 @@
 ---@meta
-GetTime = GetTime,
 ---@class WowApi
 -- fields
 ---@field C_PvP C_PvP
@@ -68,7 +67,6 @@ GetTime = GetTime,
 ---@field wipe fun(table: table): table
 ---@field CopyTable fun(table: table): table
 ---@field strjoin fun(delimiter: string, ...): string
----@field GetTime fun(): number
 -- secure functions
 ---@field issecurevariable fun(tableOrName: table|string, name: string?): isSecure: boolean, taint: string?
 ---@field hooksecurefunc fun(...)
@@ -84,6 +82,7 @@ GetTime = GetTime,
 ---@field GetAddOnMetadata fun(nameOrIndex: string, field: string): string
 -- time related
 ---@field GetTimePreciseSec fun(): number
+---@field GetTime fun(): number
 -- other
 ---@field ReloadUI fun()
 ---@field C_Timer table
