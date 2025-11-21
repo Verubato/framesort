@@ -52,8 +52,13 @@ local function Inspect(unit)
     -- it's entirely possible someone else requested an inspection for a different unit
     -- in which case our request is stale and we won't get any data returned
     -- this is fine and we'll just retry later
-
     local guid = wow.UnitGUID(unit)
+
+    if wow.issecretvalue(guid) then
+        -- it'll be a secret value when this is an enemy unit
+        return
+    end
+
     local specId = wow.GetInspectSpecialization(unit)
     local cacheEntry = EnsureCacheEntry(unit)
 
