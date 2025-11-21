@@ -132,6 +132,11 @@ end
 local function InvalidateEntry(unit)
     -- could flag it as stale, but might as well just remove it entirely
     local guid = wow.UnitGUID(unit)
+
+    if wow.issecretvalue(guid) then
+        return
+    end
+
     unitGuidToSpec[guid] = nil
 
     needUpdate = true
