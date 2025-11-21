@@ -110,7 +110,7 @@ function M:PetFor(unit, isEnemy)
     end
 
     -- isEnemy used here as UnitIsUnit returns a secret value for enemy units (e.g. arena123)
-    local isPlayer = not isEnemy and wow.UnitIsUnit(unit, "player")
+    local isPlayer = not isEnemy and M:IsPlayer(unit)
 
     if unit == "player" or isPlayer then
         return "pet"
@@ -118,4 +118,16 @@ function M:PetFor(unit, isEnemy)
 
     local pet, _ = string.gsub(unit, "%a+", "%1pet")
     return pet
+end
+
+---A safe check wrapper that returns true if the unit is "player"
+---@param unit string
+function M:IsPlayer(unit)
+    local isPlayerMaybeSecret = wow.UnitIsUnit(unit, "player")
+
+    if wow.issecretvalue(isPlayerMaybeSecret) then
+        return false
+    end
+
+    return isPlayerMaybeSecret
 end
