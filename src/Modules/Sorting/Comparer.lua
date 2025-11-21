@@ -141,11 +141,8 @@ local function CompareRole(leftToken, rightToken, isArena)
     else
         leftSpec = fsInspector:UnitSpec(wow.UnitGUID(leftToken))
         rightSpec = fsInspector:UnitSpec(wow.UnitGUID(rightToken))
-
-        if leftSpec and rightSpec and leftSpec > 0 and rightSpec > 0 then
-            leftRole = wow.UnitGroupRolesAssigned(leftToken)
-            rightRole = wow.UnitGroupRolesAssigned(rightToken)
-        end
+        leftRole = wow.UnitGroupRolesAssigned(leftToken)
+        rightRole = wow.UnitGroupRolesAssigned(rightToken)
     end
 
     local specOrdering, roleOrdering = Ordering()
