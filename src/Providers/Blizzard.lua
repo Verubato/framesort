@@ -65,6 +65,7 @@ local function OnCvarUpdate(_, _, name)
     for _, cvar in ipairs(cvarsToUpdateContainer) do
         if name == cvar then
             RequestUpdateContainers()
+            break
         end
     end
 
@@ -72,6 +73,7 @@ local function OnCvarUpdate(_, _, name)
         if string.match(name, pattern) then
             -- run next frame to allow cvars to take effect
             fsScheduler:RunNextFrame(RequestSort)
+            break
         end
     end
 end
