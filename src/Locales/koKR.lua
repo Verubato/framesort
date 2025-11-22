@@ -260,3 +260,6 @@ L['"%s" may cause conflicts, consider disabling it'] = '"%s"가 충돌을 일으
 L["No conflicting addons"] = "충돌하는 애드온 없음"
 L["Main tank and assist setting disabled"] = "주탱과 보조 설정이 비활성화되었습니다."
 L["Please disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] = "옵션 -> 인터페이스 -> 공격대 프레임에서 '주탱과 보조 표시' 옵션을 비활성화하십시오."
+
+-- # Log Screen -- #
+L["FrameSort log to help with diagnosing issues."] = "문제 진단을 돕기 위한 FrameSort 로그입니다."

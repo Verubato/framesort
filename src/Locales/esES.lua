@@ -263,3 +263,6 @@ L['"%s" may cause conflicts, consider disabling it'] = '"%s" puede causar confli
 L["No conflicting addons"] = "No hay addons en conflicto"
 L["Main tank and assist setting disabled"] = "Configuración de tanque principal y asistente deshabilitada"
 L["Please disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] = "Por favor, deshabilita la opción 'Mostrar Tanque Principal y Asistente' en Opciones -> Interfaz -> Marcos de Banda"
+
+-- # Log Screen -- #
+L["FrameSort log to help with diagnosing issues."] = "Registro de FrameSort para ayudar a diagnosticar problemas."
