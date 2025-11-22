@@ -161,8 +161,11 @@ function M:Init()
         combatStatusFrame:RegisterEvent(events.PLAYER_REGEN_DISABLED)
         combatStatusFrame:HookScript("OnEvent", CombatChanging)
 
-        wow.hooksecurefunc(wow.CompactArenaFrame, "UpdateLayout", function()
-            RequestSort()
+        -- run this next frame to avoid request sort spam on startup
+        fsScheduler:RunNextFrame(function()
+            wow.hooksecurefunc(wow.CompactArenaFrame, "UpdateLayout", function()
+                RequestSort()
+            end)
         end)
     end
 end
