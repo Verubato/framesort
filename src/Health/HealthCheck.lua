@@ -290,11 +290,5 @@ function M:IsHealthy()
         return not x.Applicable or x.Passed
     end)
 
-    if not healthy then
-        fsLog:Error("Health check failed.")
-    else
-        fsLog:Debug("Health check passed successfully.")
-    end
-
     return healthy, results
 end

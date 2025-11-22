@@ -3,6 +3,7 @@ local _, addon = ...
 local wow = addon.WoW.Api
 local fsHealth = addon.Health.HealthCheck
 local fsConfig = addon.Configuration
+local fsLog = addon.Logging.Log
 local L = addon.Locale
 local lines = {}
 local M = {}
@@ -28,6 +29,12 @@ function M:Build(parent)
 
     panel:HookScript("OnShow", function()
         local healthy, results = fsHealth:IsHealthy()
+
+        if not healthy then
+            fsLog:Error("Health check failed.")
+        else
+            fsLog:Debug("Health check passed successfully.")
+        end
 
         while #lines < #results do
             local description = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
