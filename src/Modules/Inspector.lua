@@ -6,6 +6,7 @@ local wow = addon.WoW.Api
 local fsUnit = addon.WoW.Unit
 local fsEnumerable = addon.Collections.Enumerable
 local fsLog = addon.Logging.Log
+local fsConfig = addon.Configuration
 ---@class InspectorModule : IInitialise
 local M = {}
 addon.Modules.Inspector = M
@@ -168,7 +169,28 @@ local function OnEvent(_, event, arg1)
     end
 end
 
+local function RoleSortingEnabled()
+    local db = addon.DB
+    local sorting = db.Options.Sorting
+
+    if sorting.Dungeon.Enabled and sorting.Dungeon.GroupSortMode == fsConfig.GroupSortMode.Role then
+        return true
+    end
+    if sorting.World.Enabled and sorting.World.GroupSortMode == fsConfig.GroupSortMode.Role then
+        return true
+    end
+    if sorting.Raid.Enabled and sorting.Raid.GroupSortMode == fsConfig.GroupSortMode.Role then
+        return true
+    end
+
+    return false
+end
+
 local function OnUpdate()
+    if not RoleSortingEnabled() then
+        return
+    end
+
     local timeSinceLastInspect = inspectStarted and (wow.GetTime() - inspectStarted)
 
     -- if we've requested an inspection and we're still within the timeout period
