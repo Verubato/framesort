@@ -56,6 +56,12 @@ function M:Error(msg)
     Write(msg, logLevelError)
 end
 
+---Logs a message.
+---@param msg string
+function M:Log(msg, level)
+    Write(msg, level)
+end
+
 ---Adds a callback to be invoked whenever a log entry is added.
 ---@param callback function
 function M:AddLogCallback(callback)

@@ -19,14 +19,6 @@ local petHeader = nil
 local headers = {}
 local secureMethods = {}
 
--- prints a log message
-secureMethods["Log"] = [[
-    if not self:GetAttribute("LoggingEnabled") then return end
-
-    local level, message = ...
-    print(format("FrameSort - %s: %s", level, message))
-]]
-
 -- rounds a number to the specified decimal places
 secureMethods["Round"] = [[
     local number, decimalPlaces = ...
@@ -540,7 +532,7 @@ secureMethods["SoftArrange"] = [[
                 Frame = nil
             end
         else
-            run:RunAttribute("Log", "Warning", "Unable to determine frame's desired index")
+            run:CallMethod("Log", "Unable to determine frame's desired index", "Warning")
         end
     end
 
@@ -844,7 +836,7 @@ secureMethods["TrySortContainer"] = [[
     elseif container.Type == ContainerType.EnemyArena then
         units = EnemyUnits
     else
-        run:RunAttribute("Log", "Error", "Invalid container type: " .. (container.Type or 'nil'))
+        run:CallMethod("Log", "Invalid container type: " .. (container.Type or 'nil'), "Error")
         return false
     end
 
@@ -925,7 +917,7 @@ secureMethods["TrySort"] = [[
         if providerEnabled then
             for _, container in ipairs(provider.Containers) do
                 if not container.Frame:IsProtected() then
-                    run:RunAttribute("Log", "Error", "Container for " .. provider.Name .. " must be protected.")
+                    run:CallMethod("Log", "Container for " .. provider.Name .. " must be protected.", "Error")
                 elseif container.Frame:IsVisible() then
                     local shouldAdd = false
 
@@ -1112,7 +1104,6 @@ local function LoadEnabled()
 
     manager:SetAttributeNoHandler("FriendlySortEnabled", friendlyEnabled)
     manager:SetAttributeNoHandler("EnemySortEnabled", enemyEnabled)
-    manager:SetAttributeNoHandler("LoggingEnabled", addon.DB.Options.Logging.Enabled)
 
     for _, provider in ipairs(fsProviders.All) do
         manager:SetAttributeNoHandler("Provider" .. provider:Name() .. "Enabled", provider:Enabled())
@@ -1423,6 +1414,10 @@ function M:Init()
         if sorted then
             fsSorting:NotifySorted()
         end
+    end
+
+    function manager:Log(msg, level)
+        fsLog:Log(msg, level)
     end
 
     for name, snippet in pairs(secureMethods) do
