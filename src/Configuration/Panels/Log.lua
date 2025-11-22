@@ -54,7 +54,6 @@ function M:Build(parent)
         height = wow.InterfaceOptionsFramePanelContainer:GetHeight() - margin
     end
 
-    -- Basic settings
     logFrame:SetSize(width, height)
     logFrame:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
     logFrame:SetFontObject("GameFontWhite")
@@ -104,8 +103,6 @@ function M:Build(parent)
 
     fsLog:ClearAndDisableCache()
     fsLog:AddLogCallback(OnLogEntry)
-
-    anchor = logFrame
 
     return panel
 end
