@@ -6,6 +6,7 @@ local fsProviders = addon.Providers
 local fsConfig = addon.Configuration
 local fsFrame = addon.WoW.Frame
 local fsLuaEx = addon.Language.LuaEx
+local fsLog = addon.Logging.Log
 local L = addon.Locale
 ---@class HealthChecker
 local M = {}
@@ -285,7 +286,15 @@ function M:IsHealthy()
 
     results[#results + 1] = CheckCell()
 
-    return fsEnumerable:From(results):All(function(x)
+    local healthy = fsEnumerable:From(results):All(function(x)
         return not x.Applicable or x.Passed
-    end), results
+    end)
+
+    if not healthy then
+        fsLog:Error("Health check failed.")
+    else
+        fsLog:Debug("Health check passed successfully.")
+    end
+
+    return healthy, results
 end

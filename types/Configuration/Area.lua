@@ -6,3 +6,7 @@
 ---| "Dungeon"
 ---| "Raid"
 ---| "World"
+
+---@class SpacingArea
+---@field Horizontal number
+---@field Vertical number

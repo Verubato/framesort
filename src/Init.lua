@@ -1,11 +1,17 @@
 ---@type string, Addon
 local addonName, addon = ...
 local wow = addon.WoW.Api
+local fsLog = addon.Logging.Log
 local loader = nil
 
 function addon:InitLocale()
     local function DefaultIndex(_, key)
         -- if there is no translation specified, then use the the key itself
+        local locale = wow.GetLocale()
+        if locale ~= "enUS" then
+            fsLog:Warning(string.format("Missing translation for key '%s' and locale '%s'", key, locale))
+        end
+
         return key
     end
 
@@ -13,6 +19,7 @@ function addon:InitLocale()
 end
 
 function addon:InitDB()
+    fsLog:Debug("Loading saved variables.")
     FrameSortDB = FrameSortDB or {}
     FrameSortDB.Options = FrameSortDB.Options or wow.CopyTable(addon.Configuration.Defaults)
 
@@ -22,6 +29,7 @@ end
 
 ---Initialises the addon.
 function addon:Init()
+    fsLog:Debug("Initialising.")
     addon:InitLocale()
     addon:InitDB()
     addon.Configuration:Init()
@@ -31,6 +39,7 @@ function addon:Init()
     addon.Scheduling.Scheduler:Init()
 
     addon.Loaded = true
+    fsLog:Debug("Initialisation finished.")
 end
 
 ---Listens for our to be loaded and then initialises it.

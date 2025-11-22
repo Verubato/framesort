@@ -239,7 +239,7 @@ function M:Init()
     local canRun = (wow.CanInspect and wow.NotifyInspect and wow.ClearInspectPlayer and wow.GetInspectSpecialization) ~= nil
 
     if not canRun then
-        fsLog:Warning("Inspector unable to run, role sorting won't work.")
+        fsLog:Warning("Inspector module unable to run, role sorting won't work.")
         return
     end
 
@@ -259,4 +259,5 @@ function M:Init()
 
     -- hook it so we gain the benefit inspection results from other callers
     wow.hooksecurefunc("NotifyInspect", OnNotifyInspect)
+    fsLog:Debug("Initialised the spec inspector module.")
 end

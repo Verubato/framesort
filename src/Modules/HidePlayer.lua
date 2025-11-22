@@ -6,6 +6,7 @@ local fsConfig = addon.Configuration
 local fsProviders = addon.Providers
 local fsFrame = addon.WoW.Frame
 local fsEnumerable = addon.Collections.Enumerable
+local fsLog = addon.Logging.Log
 ---@class HidePlayerModule: IInitialise
 local M = {}
 addon.Modules.HidePlayer = M
@@ -47,4 +48,6 @@ function M:Run()
     ShowHide(show)
 end
 
-function M:Init() end
+function M:Init()
+    fsLog:Debug("Initialised the hide player module.")
+end

@@ -122,4 +122,6 @@ function M:Init()
     eventFrame = wow.CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", OnUpdateMacros)
     eventFrame:RegisterEvent(wow.Events.UPDATE_MACROS)
+
+    fsLog:Debug("Initialised the macro module.")
 end

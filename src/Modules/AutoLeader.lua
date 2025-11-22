@@ -3,6 +3,7 @@ local _, addon = ...
 local wow = addon.WoW.Api
 local fsUnit = addon.WoW.Unit
 local fsEnumerable = addon.Collections.Enumerable
+local fsLog = addon.Logging.Log
 ---@class AutoLeaderModule : IInitialise, IRun
 local M = {}
 addon.Modules.AutoLeader = M
@@ -55,12 +56,14 @@ end
 
 function M:Init()
     if not wow.HasSoloShuffle() then
+        fsLog:Debug("Not loading AutoLeader module because this wow client doesn't have solo shuffle.")
         return
     end
 
     local frame = wow.CreateFrame("Frame")
     frame:HookScript("OnEvent", OnStateChanged)
     frame:RegisterEvent("PVP_MATCH_STATE_CHANGED")
+    fsLog:Debug("Initialised the auto leader module.")
 end
 
 function M:Run()
