@@ -284,26 +284,11 @@ function M:FriendlyFrames()
         return {}
     end
 
-    local start1 = wow.GetTimePreciseSec()
-
-    local result = fsEnumerable
-        :From(frames)
-        :OrderBy(function(x, y)
-            return fsCompare:CompareTopLeftFuzzy(x, y)
-        end)
-        :ToTable()
-
-    local stop1 = wow.GetTimePreciseSec()
-    local start2 = wow.GetTimePreciseSec()
-
     table.sort(frames, function (x, y)
         return fsCompare:CompareTopLeftFuzzy(x, y)
     end)
 
-    local stop2 = wow.GetTimePreciseSec()
-    fsLog:Debug(string.format("Testing took took %fms, v2 %fms.", (stop1 - start1) * 1000, (stop2 - start2) * 1000))
-
-    return result
+    return frames
 end
 
 function M:FriendlyUnits()
