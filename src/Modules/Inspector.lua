@@ -184,6 +184,10 @@ local function OnUpdate()
 end
 
 local function OnNotifyInspect(unit)
+    if unit ~= unitInspecting and unitInspecting then
+        fsLog:Warning("Someone else has overridden our inspect player request.")
+    end
+
     -- override the inspected unit so we get it's information
     unitInspecting = unit
     inspectStarted = wow.GetTime()
@@ -239,7 +243,7 @@ function M:Init()
     local canRun = (wow.CanInspect and wow.NotifyInspect and wow.ClearInspectPlayer and wow.GetInspectSpecialization) ~= nil
 
     if not canRun then
-        fsLog:Warning("Inspector module unable to run, role sorting won't work.")
+        fsLog:Warning("Inspector module unable to run, spec sorting won't work.")
         return
     end
 
