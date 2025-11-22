@@ -447,4 +447,5 @@ function M:Init()
     targetBottomFrame:SetAttribute("unit", "none")
 
     InitAdjacentTargeting()
+    fsLog:Debug("Initialised the targeting module.")
 end

@@ -39,6 +39,8 @@ function fsConfig:RegisterConfigurationChangedCallback(callback)
 end
 
 function fsConfig:NotifyChanged()
+    fsLog:Debug("Configuration has changed.")
+
     for _, callback in ipairs(callbacks) do
         pcall(callback)
     end
@@ -172,6 +174,7 @@ function fsConfig:Init()
     local api = panels.Api:Build(panel)
     local health = panels.Health:Build(panel)
     local help = panels.Help:Build(panel)
+    local log = panels.Log:Build(panel)
 
     AddSubCategory(ordering)
     AddSubCategory(sortingMethod)
@@ -187,6 +190,7 @@ function fsConfig:Init()
     AddSubCategory(api)
     AddSubCategory(health)
     AddSubCategory(help)
+    AddSubCategory(log)
 
     SLASH_FRAMESORT1 = "/fs"
     SLASH_FRAMESORT2 = "/framesort"

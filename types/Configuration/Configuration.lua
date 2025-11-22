@@ -29,6 +29,7 @@
 ---@field SortingMethod OptionsPanel
 ---@field Api OptionsPanel
 ---@field Help OptionsPanel
+---@field Log OptionsPanel
 
 ---@class SpecIds
 ---@field Tanks table

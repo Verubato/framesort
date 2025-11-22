@@ -51,5 +51,8 @@ end
 function M:Init()
     if addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Secure then
         M.Secure:Init()
+        fsLog:Debug("Initialised the secure sorting module.")
+    else
+        fsLog:Debug("Initialised the traditional sorting module.")
     end
 end
