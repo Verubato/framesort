@@ -47,7 +47,7 @@ It replaces the internal Blizzard sorting method with our own.
 This is the same as the 'SetFlowSortFunction' script but with FrameSort configuration.
 \n
 Pros:
- - More stable/reliable as it leverages Blizzard's internal sorting methods."] = nil
+ - More stable/reliable as it leverages Blizzard's internal sorting methods.
 \n
 Cons:
  - Only sorts Blizzard party frames, nothing else.
