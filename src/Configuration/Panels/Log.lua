@@ -1,5 +1,5 @@
 ---@type string, Addon
-local _, addon = ...
+local addonName, addon = ...
 local wow = addon.WoW.Api
 local fsConfig = addon.Configuration
 local fsLog = addon.Logging.Log
@@ -63,7 +63,6 @@ function M:Build(parent)
     logFrame:SetInsertMode("TOP")
     logFrame:SetMaxLines(5000)
 
-    -- scroll bar
     local scrollbar = wow.CreateFrame("Slider", nil, logFrame, "UIPanelScrollBarTemplate")
     scrollbar:SetPoint("TOPRIGHT", logFrame, "TOPRIGHT", 20, -16)
     scrollbar:SetPoint("BOTTOMRIGHT", logFrame, "BOTTOMRIGHT", 20, 16)
@@ -77,7 +76,6 @@ function M:Build(parent)
         logFrame:SetScrollOffset(max - value)
     end)
 
-    -- Sync scrollbar to mouse wheel / messages
     local function UpdateScrollbar()
         local max = logFrame:GetNumMessages()
         local offset = logFrame:GetScrollOffset()

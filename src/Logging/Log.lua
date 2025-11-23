@@ -1,5 +1,5 @@
 ---@type string, Addon
-local _, addon = ...
+local addonName, addon = ...
 local wow = addon.WoW.Api
 local logLevelDebug = "Debug"
 local logLevelWarning = "Warning"
@@ -26,7 +26,7 @@ local function Write(msg, level)
         cache[#cache + 1] = {
             Message = msg,
             Level = level,
-            Timestamp = wow.GetTimePreciseSec() - started
+            Timestamp = wow.GetTimePreciseSec() - started,
         }
     end
 
@@ -36,6 +36,14 @@ local function Write(msg, level)
     end
 
     print(string.format("FrameSort: %s - %s", level, msg))
+end
+
+local function OnAddonError(_, eventName, errorAddon, error)
+    if errorAddon ~= addonName then
+        return
+    end
+
+    Write(error, "Error")
 end
 
 ---Logs a debug message.
@@ -77,4 +85,11 @@ end
 ---Returns a collection of { Message, Level, Timestamp } cached log entries.
 function M:GetCachedEntries()
     return cache
+end
+
+function M:Init()
+    local frame = wow.CreateFrame("Frame")
+    frame:HookScript("OnEvent", OnAddonError)
+    frame:RegisterEvent(wow.Events.ADDON_ACTION_BLOCKED)
+    frame:RegisterEvent(wow.Events.ADDON_ACTION_FORBIDDEN)
 end

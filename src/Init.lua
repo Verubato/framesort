@@ -30,6 +30,7 @@ end
 ---Initialises the addon.
 function addon:Init()
     fsLog:Debug("Initialising.")
+    fsLog:Init()
     addon:InitLocale()
     addon:InitDB()
     addon.Configuration:Init()

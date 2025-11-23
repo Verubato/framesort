@@ -94,6 +94,8 @@ local function GetNextTarget()
             if not wow.UnitIsUnit(unit, "player") and not cacheEntry and wow.CanInspect(unit) and wow.UnitIsConnected(unit) then
                 return unit
             end
+        else
+            fsLog:Warning(string.format("Unable to request spec information for unit %s because their GUID is a secret.", unit))
         end
     end
 
@@ -114,6 +116,8 @@ local function GetNextTarget()
             then
                 return unit
             end
+        else
+            fsLog:Warning(string.format("Unable to request spec information for unit '%s' because their GUID is a secret.", unit))
         end
     end
 
