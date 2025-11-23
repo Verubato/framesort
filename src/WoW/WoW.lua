@@ -178,7 +178,7 @@ local wow = {
         return C_PvP and C_PvP.IsSoloShuffle ~= nil
     end,
     HasEditMode = function()
-        return LE_EXPANSION_DRAGONFLIGHT and LE_EXPANSION_LEVEL_CURRENT >= LE_EXPANSION_DRAGONFLIGHT
+        return EditModeManagerFrame ~= nil
     end,
     IsInstanceBattleground = function()
         local inInstance, instanceType = IsInInstance()
