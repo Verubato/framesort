@@ -6,6 +6,7 @@ local fsMath = addon.Numerics.Math
 local fsEnumerable = addon.Collections.Enumerable
 local fsConfig = addon.Configuration
 local fsInspector = addon.Modules.Inspector
+local fsLog = addon.Logging.Log
 local fuzzyDecimalPlaces = 0
 local defaultRoleOrdering = 99
 
@@ -121,28 +122,50 @@ local function CompareRole(leftToken, rightToken, isArena)
     local leftRole, rightRole = nil, nil
     local leftSpec, rightSpec = nil, nil
 
-    if isArena and wow.GetArenaOpponentSpec then
+    if isArena then
         local leftId = tonumber(string.match(leftToken, "%d+"))
         local rightId = tonumber(string.match(rightToken, "%d+"))
 
         if not leftId or not rightId then
+            fsLog:Error("Arena unit tokens are missing numbers.")
             return CompareGroup(leftToken, rightToken, isArena)
         end
 
-        leftSpec = wow.GetArenaOpponentSpec(leftId)
-        rightSpec = wow.GetArenaOpponentSpec(rightId)
+        if wow.GetArenaOpponentSpec then
+            leftSpec = wow.GetArenaOpponentSpec(leftId)
+            rightSpec = wow.GetArenaOpponentSpec(rightId)
+        else
+            fsLog:Error("Your wow client is missing the GetArenaOpponentSpec API.")
+        end
 
         if not leftSpec or not rightSpec then
+            fsLog:Error("Failed to determine specs for arena units, falling back to group sort.")
             return CompareGroup(leftToken, rightToken, isArena)
         end
 
-        leftRole = select(5, wow.GetSpecializationInfoByID(leftSpec))
-        rightRole = select(5, wow.GetSpecializationInfoByID(rightSpec))
+        if wow.GetSpecializationInfoByID then
+            leftRole = select(5, wow.GetSpecializationInfoByID(leftSpec))
+            rightRole = select(5, wow.GetSpecializationInfoByID(rightSpec))
+        else
+            fsLog:Error("Your wow client is missing the GetSpecializationInfoByID API.")
+        end
     else
-        leftSpec = fsInspector:UnitSpec(wow.UnitGUID(leftToken))
-        rightSpec = fsInspector:UnitSpec(wow.UnitGUID(rightToken))
-        leftRole = wow.UnitGroupRolesAssigned(leftToken)
-        rightRole = wow.UnitGroupRolesAssigned(rightToken)
+        local leftGuid = wow.UnitGUID(leftToken)
+        local rightGuid = wow.UnitGUID(rightToken)
+
+        if not wow.issecretvalue(leftGuid) and not wow.issecretvalue(rightGuid) then
+            leftSpec = fsInspector:UnitSpec(leftGuid)
+            rightSpec = fsInspector:UnitSpec(rightGuid)
+        else
+            fsLog:Warning("Unable to determine unit specs as their guid's are secret values.")
+        end
+
+        if wow.UnitGroupRolesAssigned then
+            leftRole = wow.UnitGroupRolesAssigned(leftToken)
+            rightRole = wow.UnitGroupRolesAssigned(rightToken)
+        else
+            fsLog:Error("Your wow client is missing the UnitGroupRolesAssigned API.")
+        end
     end
 
     local specOrdering, roleOrdering = Ordering()
@@ -165,6 +188,7 @@ local function CompareRole(leftToken, rightToken, isArena)
         end
     end
 
+    fsLog:Error("Failed to sort" .. (isArena and " arena " or " ") .. "units by role, falling back to group sort.")
     return CompareGroup(leftToken, rightToken, isArena)
 end
 

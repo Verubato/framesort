@@ -252,6 +252,12 @@ local wow = {
 
         -- fires multiple times when someone changes their spec
         PLAYER_SPECIALIZATION_CHANGED = "PLAYER_SPECIALIZATION_CHANGED",
+
+        -- Fires when a protected function is being called from tainted code, e.g. taint from an addon. 
+        ADDON_ACTION_BLOCKED = "ADDON_ACTION_BLOCKED",
+
+        -- Fires when an AddOn tries use actions that are always forbidden (movement, targeting, etc.).
+        ADDON_ACTION_FORBIDDEN = "ADDON_ACTION_FORBIDDEN",
     },
 }
 

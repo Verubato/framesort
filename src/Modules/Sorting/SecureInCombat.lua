@@ -63,9 +63,15 @@ secureMethods["ExtractUnitFrames"] = [[
         -- in some rare cases frames can have no position, so exclude them
         local left, bottom, width, height = child:GetRect()
 
+        local hasSize =  left and bottom and width and height
+
+        if not hasSize then
+            run:CallMethod("Log", "Frame '" .. child:GetName() .. "' has no size.", "Warning")
+        end
+
         if unit and
             (child:IsVisible() or not visibleOnly) and
-            (left and bottom and width and height) then
+            (hasSize) then
             unitFrames[#unitFrames + 1] = child
         end
     end
@@ -1375,7 +1381,6 @@ local function ConfigureHeader(header)
         if Header.CallMethod then
             Header:CallMethod("UnitButtonCreated", UnitButtonsCount)
         else
-            -- backwards compatibility for wotlk private
             local run = control or self
             run:RunFor(Header, [[
                 control:CallMethod("UnitButtonCreated")

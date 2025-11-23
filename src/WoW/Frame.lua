@@ -2,6 +2,7 @@
 ---@type string, Addon
 local _, addon = ...
 local fsEnumerable = addon.Collections.Enumerable
+local fsLog = addon.Logging.Log
 ---@class FrameUtil
 local M = {
     ---@class ContainerType
@@ -160,10 +161,10 @@ function M:GetFrameUnit(frame)
         return frame.unit
     end
 
-    local u = frame:GetAttribute("unit")
+    local unit = frame:GetAttribute("unit")
 
-    if u then
-        return u
+    if unit then
+        return unit
     end
 
     return string.match(name, "arena%d")
@@ -218,6 +219,7 @@ function M:ExtractUnitFrames(container, visibleOnly, hasUnit, containerVisible)
 
             if frame:GetTop() == nil or frame:GetLeft() == nil then
                 -- TODO: does this still happen?
+                fsLog:Warning("Frame '" .. frame:GetName() .. "' has no position.")
                 return false
             end
 
@@ -258,8 +260,9 @@ function M:ExtractGroups(container, visibleOnly)
                 return false
             end
 
-            -- TODO: does this still happen?
             if frame:GetTop() == nil or frame:GetLeft() == nil then
+                -- TODO: does this still happen?
+                fsLog:Warning("Frame '" .. frame:GetName() .. "' has no position.")
                 return false
             end
 
@@ -314,5 +317,11 @@ function M:IsForbidden(frame)
         return false
     end
 
-    return frame:IsForbidden()
+    local forbidden = frame:IsForbidden()
+
+    if forbidden then
+        fsLog:Warning("Detected forbidden frame.")
+    end
+
+    return forbidden
 end
