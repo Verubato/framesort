@@ -8,6 +8,16 @@ local fsTarget = addon.Modules.Targeting
 local fsConfig = addon.Configuration
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
+
+---@class ApiV2
+local M = {
+    Sorting = {},
+    Options = {},
+    Debugging = {},
+    Logging = {},
+}
+addon.Api.v2 = M
+
 ---@type PlayerSortMode[]
 local playerSortModes = {
     "Top",
@@ -21,15 +31,6 @@ local groupSortModes = {
     "Group",
     "Alphabetical",
 }
-
----@class ApiV2
-local M = {
-    Sorting = {},
-    Options = {},
-    Debugging = {},
-    Logging = {},
-}
-addon.Api.v2 = M
 
 local function VisualOrder(framesOrFunction)
     return fsEnumerable
