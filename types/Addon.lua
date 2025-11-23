@@ -20,6 +20,7 @@
 ---@class Api: IInitialise
 ---@field v1 ApiV1
 ---@field v2 ApiV2
+---@field v3 ApiV3
 
 ---@class Collections
 ---@field Enumerable Enumerable

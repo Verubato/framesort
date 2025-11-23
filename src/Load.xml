@@ -73,6 +73,7 @@
     <Script file="Api\Api.lua"/>
     <Script file="Api\v1.lua"/>
     <Script file="Api\v2.lua"/>
+    <Script file="Api\v3.lua"/>
 
     <!-- Configuration requires modules -->
     <Script file="Configuration\Options.lua"/>
