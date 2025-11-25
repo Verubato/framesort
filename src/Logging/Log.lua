@@ -29,13 +29,6 @@ local function Write(msg, level)
             Timestamp = wow.GetTimePreciseSec() - started,
         }
     end
-
-    local enabled = addon.DB and addon.DB.Options and addon.DB.Options.Logging and addon.DB.Options.Logging.Enabled
-    if not enabled then
-        return
-    end
-
-    print(string.format("FrameSort: %s - %s", level, msg))
 end
 
 local function OnAddonError(_, eventName, errorAddon, error)
