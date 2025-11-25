@@ -16,7 +16,6 @@ local M = {
     Sorting = {},
     Options = {},
     Debugging = {},
-    Logging = {},
     Inspector = {}
 }
 addon.Api.v3 = M
@@ -107,12 +106,6 @@ local function GetFrames(type)
     end
 
     return frames
-end
-
----Enables/disables logging.
-function M.Logging:SetEnabled(enable)
-    addon.DB.Options.Logging.Enabled = enable
-    fsConfig:NotifyChanged()
 end
 
 ---Register a callback to invoke after sorting has been performed.
