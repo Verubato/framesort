@@ -108,8 +108,8 @@ end
 
 ---Enables/disables logging.
 function M.Logging:SetEnabled(enable)
-    addon.DB.Options.Logging.Enabled = enable
-    fsConfig:NotifyChanged()
+    -- logging is always enabled now
+    -- and the config value has been removed
 end
 
 ---Register a callback to invoke after sorting has been performed.
