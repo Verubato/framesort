@@ -4,10 +4,7 @@ local fsConfig = addon.Configuration
 
 ---@class Options
 fsConfig.Defaults = {
-    Version = 21,
-    Logging = {
-        Enabled = false,
-    },
+    Version = 22,
     Sorting = {
         Ordering = {
             Tanks = 1,

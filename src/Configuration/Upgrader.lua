@@ -431,6 +431,13 @@ function M:UpgradeToVersion21(options)
     options.Version = 21
 end
 
+function M:UpgradeToVersion22(options)
+    assert(options.Version == 21)
+
+    options.Logging = nil
+    options.Version = 22
+end
+
 ---Upgrades saved options to the current version.
 function M:UpgradeOptions(options)
     while (options.Version or 1) < fsConfig.Defaults.Version do
