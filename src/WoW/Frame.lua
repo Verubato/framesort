@@ -155,8 +155,6 @@ function M:GetFrameUnit(frame)
         return nil
     end
 
-    local name = frame:GetName() or ""
-
     if frame.unit then
         return frame.unit
     end
@@ -167,6 +165,7 @@ function M:GetFrameUnit(frame)
         return unit
     end
 
+    local name = frame:GetName() or ""
     return string.match(name, "arena%d")
 end
 

@@ -131,3 +131,16 @@ function M:IsPlayer(unit)
 
     return isPlayerMaybeSecret
 end
+
+---Returns true if the unit is friendly to the current player.
+---@param unit string
+function M:IsFriendlyUnit(unit)
+    return wow.UnitIsFriend("player", unit)
+end
+
+
+---Returns true if the unit is an enemy of the current player.
+---@param unit string
+function M:IsEnemyUnit(unit)
+    return wow.UnitIsEnemy("player", unit)
+end
