@@ -188,7 +188,10 @@ local function CompareRole(leftToken, rightToken, isArena)
         end
     end
 
-    fsLog:Error("Failed to sort" .. (isArena and " arena " or " ") .. "units by role, falling back to group sort.")
+    if not leftRole and not rightRole then
+        fsLog:Error("Failed to sort" .. (isArena and " arena " or " ") .. "units by role, falling back to group sort.")
+    end
+
     return CompareGroup(leftToken, rightToken, isArena)
 end
 
