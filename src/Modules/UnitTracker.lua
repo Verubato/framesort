@@ -36,11 +36,19 @@ end
 function M:GetFrameForUnit(unit)
     local cachedFrame = frameByUnit[unit]
 
-    if fsProviders.Blizzard:Enabled() and cachedFrame and cachedFrame.unit then
-        local isUnitOrSecret = wow.UnitIsUnit(cachedFrame.unit, unit)
+    if cachedFrame then
+        local isUnitOrSecret = cachedFrame.unit ~= nil and wow.UnitIsUnit(cachedFrame.unit, unit)
+        local matchesUnit = wow.issecretvalue(isUnitOrSecret) and isUnitOrSecret
 
-        if not wow.issecretvalue(isUnitOrSecret) and isUnitOrSecret then
-            return cachedFrame
+        if matchesUnit then
+            -- check the visibility of the frame, as blizzard frames may have been hidden by an addon
+            -- in which case we don't want to use it
+            if cachedFrame:IsVisible() then
+                return cachedFrame
+            end
+        else
+            cachedFrame = nil
+            frameByUnit[unit] = nil
         end
     end
 
@@ -52,29 +60,42 @@ function M:GetFrameForUnit(unit)
             local partyFound = FindUnitFrame(party, unit)
 
             if partyFound then
-                cachedFrame[unit] = partyFound
-                return partyFound
+                frameByUnit[unit] = partyFound
+                cachedFrame = partyFound
+
+                if cachedFrame:IsVisible() then
+                    return cachedFrame
+                end
             end
 
             local raid = fsFrame:RaidFrames(provider, false)
             local raidFound = FindUnitFrame(raid, false)
 
             if raidFound then
-                cachedFrame[unit] = raidFound
-                return raidFound
+                frameByUnit[unit] = raidFound
+                cachedFrame = raidFound
+
+                if cachedFrame:IsVisible() then
+                    return cachedFrame
+                end
             end
         else
             local arena = fsFrame:ArenaFrames(provider, false)
             local arenaFound = FindUnitFrame(arena, unit)
 
             if arenaFound then
-                cachedFrame[unit] = arenaFound
-                return arenaFound
+                frameByUnit[unit] = arenaFound
+                cachedFrame = arenaFound
+
+                if cachedFrame:IsVisible() then
+                    return cachedFrame
+                end
             end
         end
     end
 
-    return nil
+    -- fallback to whatever we found that's not visible
+    return cachedFrame
 end
 
 function M:Init()
