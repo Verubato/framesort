@@ -18,8 +18,6 @@ local M = {
     Sorting = {},
     Options = {},
     Debugging = {},
-    Inspector = {},
-    Frame = {}
 }
 addon.Api.v2 = M
 
@@ -258,59 +256,4 @@ function M.Options:SetSpacing(area, horizontal, vertical)
 
     fsConfig:NotifyChanged()
     fsRun:Run()
-end
-
----Returns the class specialization id of the specified unit guid, or 0/nil if unknown.
----@param unitGuid string
----@return number|nil
-function M.Inspector:GetSpecId(unitGuid)
-    return fsInspector:UnitSpec(unitGuid)
-end
-
----Returns the class specialization id of the specified unit, or 0/nil if unknown.
----@param unit string
----@return number|nil
-function M.Inspector:GetUnitSpecId(unit)
-    local guid = wow.UnitGUID(unit)
-
-    if wow.issecretvalue(guid) then
-        return nil
-    end
-
-    return fsInspector:UnitSpec(guid)
-end
-
----Returns the unit token from the given frame.
----@param frame table
-function M.Frame:UnitFromFrame(frame)
-    return fsFrame:GetFrameUnit(frame)
-end
-
----Returns the ordered frame number for the specified unit.
----@param unit string
----@return number|nil
-function M.Frame:FrameNumberForUnit(unit)
-    local isFriendly = fsUnit:IsFriendlyUnit(unit)
-    local units = isFriendly and M.Sorting:GetFriendlyUnits() or M.Sorting:GetEnemyUnits()
-
-    for index, u in ipairs(units) do
-        if u == unit then
-            return index
-        end
-
-        local isUnitOrSecret = wow.UnitIsUnit(u, unit)
-
-        if not wow.issecretvalue(isUnitOrSecret) and isUnitOrSecret then
-            return index
-        end
-    end
-
-    return nil
-end
-
----Returns the party/raid/arena frame for the given unit.
----@param unit string
----@returns frame table
-function M.Frame:FrameForUnit(unit)
-    return fsUnitTracker:GetFrameForUnit(unit)
 end

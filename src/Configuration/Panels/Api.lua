@@ -42,23 +42,23 @@ function M:Build(parent)
     local examples = {
         {
             Description = L["Retrieved an ordered array of party/raid unit tokens."],
-            Text = "/dump FrameSortApi.v2.Sorting:GetFriendlyUnits()",
+            Text = "/dump FrameSortApi.v3.Sorting:GetFriendlyUnits()",
         },
         {
             Description = L["Retrieved an ordered array of arena unit tokens."],
-            Text = "/dump FrameSortApi.v2.Sorting:GetEnemyUnits()",
+            Text = "/dump FrameSortApi.v3.Sorting:GetEnemyUnits()",
         },
         {
             Description = L["Register a callback function to run after FrameSort sorts frames."],
-            Text = [[/run FrameSortApi.v2.Sorting:RegisterPostSortCallback(function() print("FrameSort has sorted frames.") end)]],
+            Text = [[/run FrameSortApi.v3.Sorting:RegisterPostSortCallback(function() print("FrameSort has sorted frames.") end)]],
         },
         {
             Description = L["Retrieve an ordered array of party frames."],
-            Text = "/dump FrameSortApi.v2.Sorting:GetPartyFrames()",
+            Text = "/dump FrameSortApi.v3.Sorting:GetPartyFrames()",
         },
         {
             Description = L["Change a FrameSort setting."],
-            Text = [[/run FrameSortApi.v2.Options:SetPlayerSortMode("Arena - 2v2", "Top")]],
+            Text = [[/run FrameSortApi.v3.Options:SetPlayerSortMode("Arena - 2v2", "Top")]],
         },
         {
             Description = L["View a full listing of all API methods on GitHub."],
