@@ -40,6 +40,8 @@
 ---@field GetUnitName fun(unit: string, showServername: boolean): string
 ---@field UnitExists fun(unit: string): boolean
 ---@field UnitIsUnit fun(unit1: string, unit2: string): boolean
+---@field UnitIsFriend fun(unit1: string, unit2: string): boolean
+---@field UnitIsEnemy fun(unit1: string, unit2: string): boolean
 ---@field UnitInRaid fun(unit: string): index: number?
 ---@field UnitIsPlayer fun(unit: string): boolean
 ---@field UnitIsGroupLeader fun(unit: string, partyCategory: number?): boolean

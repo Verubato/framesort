@@ -9,6 +9,8 @@ local fsConfig = addon.Configuration
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsInspector = addon.Modules.Inspector
+local fsUnit = addon.WoW.Unit
+local fsUnitTracker = addon.Modules.UnitTracker
 local wow = addon.WoW.Api
 
 ---@class ApiV3
@@ -16,7 +18,8 @@ local M = {
     Sorting = {},
     Options = {},
     Debugging = {},
-    Inspector = {}
+    Inspector = {},
+    Frame = {}
 }
 addon.Api.v3 = M
 
@@ -275,4 +278,39 @@ function M.Inspector:GetUnitSpecId(unit)
     end
 
     return fsInspector:UnitSpec(guid)
+end
+
+---Returns the unit token from the given frame.
+---@param frame table
+function M.Frame:UnitFromFrame(frame)
+    return fsFrame:GetFrameUnit(frame)
+end
+
+---Returns the ordered frame number for the specified unit.
+---@param unit string
+---@return number|nil
+function M.Frame:FrameNumberForUnit(unit)
+    local isFriendly = fsUnit:IsFriendlyUnit(unit)
+    local units = isFriendly and M.Sorting:GetFriendlyUnits() or M.Sorting:GetEnemyUnits()
+
+    for index, u in ipairs(units) do
+        if u == unit then
+            return index
+        end
+
+        local isUnitOrSecret = wow.UnitIsUnit(u, unit)
+
+        if not wow.issecretvalue(isUnitOrSecret) and isUnitOrSecret then
+            return index
+        end
+    end
+
+    return nil
+end
+
+---Returns the party/raid/arena frame for the given unit.
+---@param unit string
+---@returns frame table
+function M.Frame:FrameForUnit(unit)
+    return fsUnitTracker:GetFrameForUnit(unit)
 end

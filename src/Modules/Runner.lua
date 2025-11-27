@@ -105,6 +105,7 @@ function M:Init()
     addon.Modules.Targeting:Init()
     addon.Modules.Macro:Init()
     addon.Modules.Inspector:Init()
+    addon.Modules.UnitTracker:Init()
 
     for _, provider in ipairs(fsProviders.All) do
         -- for any special events that individual providers request a sort for

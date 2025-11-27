@@ -48,6 +48,7 @@
 ---@field Macro MacroModule
 ---@field AutoLeader AutoLeaderModule
 ---@field Inspector InspectorModule
+---@field UnitTracker UnitTrackerModule
 
 ---@class Scheduling
 ---@field Scheduler Scheduler
