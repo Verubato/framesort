@@ -69,7 +69,7 @@ function M:GetFrameForUnit(unit)
             end
 
             local raid = fsFrame:RaidFrames(provider, false)
-            local raidFound = FindUnitFrame(raid, false)
+            local raidFound = FindUnitFrame(raid, unit)
 
             if raidFound then
                 frameByUnit[unit] = raidFound
