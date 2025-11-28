@@ -17,6 +17,9 @@ local unitGuidToSpec
 -- the latest/current unit we've requested an inspection for
 local unitInspecting
 
+--- true if we requested this inspection
+local weRequestedInspect
+
 -- true if we need to run and update spec information
 local needUpdate = true
 
@@ -74,7 +77,9 @@ local function Inspect(unit)
         OnNewSpecInformation()
     end
 
-    wow.ClearInspectPlayer()
+    if weRequestedInspect then
+        wow.ClearInspectPlayer()
+    end
 end
 
 local function GetNextTarget()
@@ -132,6 +137,7 @@ local function InspectNext()
 
     wow.ClearInspectPlayer()
     wow.NotifyInspect(unit)
+    weRequestedInspect = true
 
     inspectStarted = wow.GetTime()
     unitInspecting = unit
@@ -214,6 +220,7 @@ local function OnNotifyInspect(unit)
     -- override the inspected unit so we get it's information
     unitInspecting = unit
     inspectStarted = wow.GetTime()
+    weRequestedInspect = false
 end
 
 local function PurgeOldEntries()
