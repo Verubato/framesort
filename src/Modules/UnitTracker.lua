@@ -13,7 +13,7 @@ addon.Modules.UnitTracker = M
 local frameByUnit = {}
 
 local function OnSetUnit(frame, unit)
-    if not frame or not unit then
+    if not frame or not unit or fsFrame:IsForbidden(frame) then
         return
     end
 
@@ -36,17 +36,19 @@ end
 function M:GetFrameForUnit(unit)
     local cachedFrame = frameByUnit[unit]
 
-    if cachedFrame then
-        local isUnitOrSecret = cachedFrame.unit ~= nil and wow.UnitIsUnit(cachedFrame.unit, unit)
+    if cachedFrame and fsFrame:IsForbidden(cachedFrame) then
+        cachedFrame = nil
+        frameByUnit[unit] = nil
+    elseif cachedFrame then
+        local frameUnit = fsFrame:GetFrameUnit(cachedFrame)
+        local isUnitOrSecret = frameUnit ~= nil and wow.UnitIsUnit(frameUnit, unit)
         local matchesUnit = wow.issecretvalue(isUnitOrSecret) and isUnitOrSecret
 
-        if matchesUnit then
-            -- check the visibility of the frame, as blizzard frames may have been hidden by an addon
-            -- in which case we don't want to use it
-            if cachedFrame:IsVisible() then
-                return cachedFrame
-            end
-        else
+        -- check the visibility of the frame, as blizzard frames may have been hidden by an addon
+        -- in which case we don't want to use it
+        if matchesUnit and cachedFrame:IsVisible() then
+            return cachedFrame
+        elseif not matchesUnit then
             cachedFrame = nil
             frameByUnit[unit] = nil
         end
