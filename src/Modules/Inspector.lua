@@ -66,16 +66,13 @@ local function Inspect(unit)
     -- the spec id may be 0, in which case we'll use the previous value (if one exists)
     local before = cacheEntry.SpecId
     cacheEntry.SpecId = specId ~= 0 and specId or cacheEntry.SpecId
+    cacheEntry.LastSeen = wow.GetTime()
     local after = cacheEntry.SpecId
 
     if before ~= after then
-        fsLog:Debug("Found new spec information, notifying callbacks.")
+        fsLog:Debug("Found spec information for unit: " .. unit .. " spec id: " .. specId)
         OnNewSpecInformation()
     end
-
-    cacheEntry.LastSeen = wow.GetTime()
-
-    fsLog:Debug("Found spec information for unit: " .. unit .. " spec id: " .. specId)
 
     wow.ClearInspectPlayer()
 end
