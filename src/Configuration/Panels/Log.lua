@@ -78,7 +78,9 @@ function M:Build(parent)
 
     local function UpdateScrollbar()
         local max = logFrame:GetNumMessages()
-        local offset = logFrame:GetScrollOffset()
+        -- wow 3.3.5 has GetCurrentScroll instead of GetScrollOffset
+        local scrollMethod = logFrame.GetScrollOffset or logFrame.GetCurrentScroll
+        local offset = scrollMethod(logFrame)
         scrollbar:SetMinMaxValues(0, max)
         scrollbar:SetValue(max - offset)
     end
