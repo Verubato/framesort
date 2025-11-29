@@ -58,6 +58,11 @@ local function Inspect(unit)
     -- this is fine and we'll just retry later
     local guid = wow.UnitGUID(unit)
 
+    -- this can happen if the unit is "mouseover"
+    if not guid then
+        return
+    end
+
     if wow.issecretvalue(guid) then
         -- it'll be a secret value when this is an enemy unit
         return
@@ -89,8 +94,10 @@ local function GetNextTarget()
     for _, unit in ipairs(units) do
         local guid = wow.UnitGUID(unit)
 
+        if not guid then
+            fsLog:Warning(string.format("Unable to request spec information for unit %s because their GUID is nil.", unit))
         -- this shouldn't be possible, but it does happen for some reason
-        if not wow.issecretvalue(guid) then
+        elseif not wow.issecretvalue(guid) then
             local cacheEntry = unitGuidToSpec[guid]
 
             if not wow.UnitIsUnit(unit, "player") and not cacheEntry and wow.CanInspect(unit) and wow.UnitIsConnected(unit) then
@@ -105,8 +112,10 @@ local function GetNextTarget()
     for _, unit in ipairs(units) do
         local guid = wow.UnitGUID(unit)
 
+        if not guid then
+            fsLog:Warning(string.format("Unable to request spec information for unit %s because their GUID is nil.", unit))
         -- this shouldn't be possible, but it does happen for some reason
-        if not wow.issecretvalue(guid) then
+        elseif not wow.issecretvalue(guid) then
             local cacheEntry = unitGuidToSpec[guid]
 
             if
