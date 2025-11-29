@@ -152,12 +152,20 @@ local function CompareRole(leftToken, rightToken, isArena)
     else
         local leftGuid = wow.UnitGUID(leftToken)
         local rightGuid = wow.UnitGUID(rightToken)
+        local nilGuidError = "Unable to determine unit spec for '%s' as it's guid is nil."
+        local secretGuidError = "Unable to determine unit spec for '%s' as it's guid is a secret value."
 
-        if not wow.issecretvalue(leftGuid) and not wow.issecretvalue(rightGuid) then
+        if not leftGuid then
+            fsLog:Warning(string.format(nilGuidError, leftToken))
+        elseif not rightGuid then
+            fsLog:Warning(string.format(nilGuidError, rightToken))
+        elseif wow.issecretvalue(leftGuid) then
+            fsLog:Warning(string.format(secretGuidError, leftToken))
+        elseif wow.issecretvalue(rightGuid)
+            fsLog:Warning(string.format(secretGuidError, rightToken))
+        else
             leftSpec = fsInspector:UnitSpec(leftGuid)
             rightSpec = fsInspector:UnitSpec(rightGuid)
-        else
-            fsLog:Warning("Unable to determine unit specs as their guid's are secret values.")
         end
 
         if wow.UnitGroupRolesAssigned then
@@ -226,7 +234,6 @@ end
 ---@param preSortedUnits table?
 ---@return boolean
 local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse, preSortedUnits)
-    -- if not in a group, we might be in test mode
     if wow.UnitExists(leftToken) and not wow.UnitExists(rightToken) then
         return true
     elseif wow.UnitExists(rightToken) and not wow.UnitExists(leftToken) then
@@ -234,10 +241,11 @@ local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, rev
     end
 
     if fsUnit:IsPet(leftToken) or fsUnit:IsPet(rightToken) then
-        -- place player before pets
+        -- place players before pets
         if not fsUnit:IsPet(leftToken) then
             return true
         end
+
         if not fsUnit:IsPet(rightToken) then
             return false
         end

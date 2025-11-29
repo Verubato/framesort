@@ -13,7 +13,7 @@ local M = {
     Options = {},
     Debugging = {},
     Inspector = {},
-    Frame = {}
+    Frame = {},
 }
 addon.Api.v3 = M
 
@@ -123,6 +123,11 @@ end
 ---@param unitGuid string
 ---@return number|nil
 function M.Inspector:GetSpecId(unitGuid)
+    if not unitGuid then
+        error("Unit must not be nil.")
+        return
+    end
+
     return fsInspector:UnitSpec(unitGuid)
 end
 
@@ -130,7 +135,16 @@ end
 ---@param unit string
 ---@return number|nil
 function M.Inspector:GetUnitSpecId(unit)
+    if not unit then
+        error("Unit must not be nil.")
+        return
+    end
+
     local guid = wow.UnitGUID(unit)
+
+    if not guid then
+        return nil
+    end
 
     if wow.issecretvalue(guid) then
         return nil
@@ -142,6 +156,11 @@ end
 ---Returns the unit token from the given frame.
 ---@param frame table
 function M.Frame:UnitFromFrame(frame)
+    if not frame then
+        error("Frame must not be nil.")
+        return
+    end
+
     return fsFrame:GetFrameUnit(frame)
 end
 
@@ -149,6 +168,11 @@ end
 ---@param unit string
 ---@return number|nil
 function M.Frame:FrameNumberForUnit(unit)
+    if not unit then
+        error("Unit must not be nil.")
+        return
+    end
+
     local isFriendly = fsUnit:IsFriendlyUnit(unit)
     local units = isFriendly and M.Sorting:GetFriendlyUnits() or M.Sorting:GetEnemyUnits()
 
@@ -171,5 +195,10 @@ end
 ---@param unit string
 ---@returns frame table
 function M.Frame:FrameForUnit(unit)
+    if not unit then
+        error("Unit must not be nil.")
+        return
+    end
+
     return fsUnitTracker:GetFrameForUnit(unit)
 end
