@@ -161,7 +161,7 @@ local function CompareRole(leftToken, rightToken, isArena)
             fsLog:Warning(string.format(nilGuidError, rightToken))
         elseif wow.issecretvalue(leftGuid) then
             fsLog:Warning(string.format(secretGuidError, leftToken))
-        elseif wow.issecretvalue(rightGuid)
+        elseif wow.issecretvalue(rightGuid) then
             fsLog:Warning(string.format(secretGuidError, rightToken))
         else
             leftSpec = fsInspector:UnitSpec(leftGuid)

@@ -16,8 +16,7 @@ local wow = addon.WoW.Api
 ---@class ApiV2
 local M = {
     Sorting = {},
-    Options = {},
-    Debugging = {},
+    Options = {}
 }
 addon.Api.v2 = M
 
