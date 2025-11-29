@@ -175,47 +175,27 @@ L["Vertical"] = "Vertical"
 -- # Addons screen #
 L["Addons"] = "Addons"
 L["Addons_Supported_Description"] = [[
-FrameSort soporta lo siguiente:
+FrameSort es compatible con lo siguiente:
 \n
-Blizzard
- - Grupo: sí
- - Banda: sí
- - Arena: sí
+  - Blizzard: grupo, banda, arena.
 \n
-ElvUI
- - Grupo: sí
- - Banda: no
- - Arena: no
+  - ElvUI: grupo.
 \n
-sArena
- - Arena: sí
+  - sArena: arena.
 \n
-Gladius
- - Arena: sí
- - versión Bicmex: sí
+  - Gladius: arena.
 \n
-GladiusEx
- - Grupo: sí
- - Arena: sí
+  - GladiusEx: grupo, arena.
 \n
-Cell
- - Grupo: sí
- - Banda: sí, solo cuando se usan grupos combinados.
+  - Cell: grupo, banda (solo cuando se usan grupos combinados).
 \n
-Shadowed Unit Frames
- - Grupo: sí
- - Arena: sí
+  - Shadowed Unit Frames: grupo, arena.
 \n
-Grid2
- - Grupo/banda: sí
+  - Grid2: grupo, banda.
 \n
-BattleGroundEnemies
- - Party: sí
- - Arena: sí
- - Raid: no
+  - BattleGroundEnemies: grupo, arena.
 \n
-Gladdy
- - Arena: sí
+  - Gladdy: arena.
 \n
 ]]
 

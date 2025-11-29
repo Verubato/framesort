@@ -172,47 +172,27 @@ L["Vertical"] = "수직"
 -- # Addons screen #
 L["Addons"] = "애드온"
 L["Addons_Supported_Description"] = [[
-프레임정렬은 다음을 지원합니다:
+FrameSort는 다음 애드온을 지원합니다:
 \n
-블리자드
- - 파티: 예
- - 공격대: 예
- - 아레나: 예
+  - Blizzard: 파티, 공격대, 투기장.
 \n
-ElvUI
- - 파티: 예
- - 공격대: 아니오
- - 아레나: 아니오
+  - ElvUI: 파티.
 \n
-sArena
- - 아레나: 예
+  - sArena: 투기장.
 \n
-Gladius
- - 아레나: 예
- - Bicmex 버전: 예
+  - Gladius: 투기장.
 \n
-GladiusEx
- - 파티: 예
- - 아레나: 예
+  - GladiusEx: 파티, 투기장.
 \n
-Cell
- - 파티: 예
- - 공격대: 예, 복합 그룹을 사용할 때만.
+  - Cell: 파티, 공격대 (통합 그룹 사용 시에만).
 \n
-Shadowed Unit Frames
- - 파티: 예
- - 아레나: 예
+  - Shadowed Unit Frames: 파티, 투기장.
 \n
-Grid2
- - 파티/공격대: 예
+  - Grid2: 파티, 공격대.
 \n
-BattleGroundEnemies
- - 파티: 예
- - 아레나: 예
- - 레이드: 아니오
+  - BattleGroundEnemies: 파티, 투기장.
 \n
-Gladdy
- - 아레나: 예
+  - Gladdy: 투기장.
 \n
 ]]
 
