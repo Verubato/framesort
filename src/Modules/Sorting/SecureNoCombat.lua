@@ -626,6 +626,10 @@ function M:TrySort(provider)
         local containers = fsEnumerable
             :From(p:Containers())
             :Where(function(container)
+                if not container.Frame then
+                    return false
+                end
+
                 if not container.Frame:IsVisible() then
                     return false
                 end
