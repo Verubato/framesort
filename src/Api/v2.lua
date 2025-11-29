@@ -70,6 +70,10 @@ local function AreaOptions(area)
 
     if area == "Arena - 2v2" then
         return sorting.Arena.Twos
+    elseif area == "Arena - 3v3" then
+        return sorting.Arena.Default
+    elseif area == "Arena - 5v5" then
+        return sorting.Arena.Default
     elseif area == "Arena - Default" then
         return sorting.Arena.Default
     elseif area == "EnemyArena" then
