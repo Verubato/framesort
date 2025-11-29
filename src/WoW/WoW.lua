@@ -160,7 +160,9 @@ local wow = {
     SecureHandlerExecute = SecureHandlerExecute,
 
     -- secrets
-    issecretvalue = issecretvalue or function() return false end,
+    issecretvalue = issecretvalue or function()
+        return false
+    end,
 
     -- non-blizzard related
     HasDropdown = function()
@@ -180,7 +182,7 @@ local wow = {
         return C_PvP and C_PvP.IsSoloShuffle ~= nil
     end,
     HasEditMode = function()
-        return EditModeManagerFrame ~= nil
+        return EditModeManagerFrame ~= nil and EditModeManagerFrame.UseRaidStylePartyFrames ~= nil and EditModeManagerFrame.GetSettingValue ~= nil and EventRegistry ~= nil
     end,
     IsInstanceBattleground = function()
         local inInstance, instanceType = IsInInstance()
@@ -255,7 +257,7 @@ local wow = {
         -- fires multiple times when someone changes their spec
         PLAYER_SPECIALIZATION_CHANGED = "PLAYER_SPECIALIZATION_CHANGED",
 
-        -- Fires when a protected function is being called from tainted code, e.g. taint from an addon. 
+        -- Fires when a protected function is being called from tainted code, e.g. taint from an addon.
         ADDON_ACTION_BLOCKED = "ADDON_ACTION_BLOCKED",
 
         -- Fires when an AddOn tries use actions that are always forbidden (movement, targeting, etc.).
