@@ -173,45 +173,25 @@ L["Addons"] = nil
 L["Addons_Supported_Description"] = [[
 FrameSort supports the following:
 \n
-Blizzard
- - Party: yes
- - Raid: yes
- - Arena: yes
+  - Blizzard: party, raid, arena.
 \n
-ElvUI
- - Party: yes
- - Raid: no
- - Arena: no
+  - ElvUI: party.
 \n
-sArena
- - Arena: yes
+  - sArena: arena.
 \n
-Gladius
- - Arena: yes
- - Bicmex version: yes
+  - Gladius: arena.
 \n
-GladiusEx
- - Party: yes
- - Arena: yes
+  - GladiusEx: party, arena.
 \n
-Cell
- - Party: yes
- - Raid: yes, only when using combined groups.
+  - Cell: party, raid (only when using combined groups).
 \n
-Shadowed Unit Frames
- - Party: yes
- - Arena: yes
+  - Shadowed Unit Frames: party, arena.
 \n
-Grid2
- - Party/raid: yes
+  - Grid2: party, raid.
 \n
-BattleGroundEnemies
- - Party: yes
- - Arena: yes
- - Raid: no
+  - BattleGroundEnemies: party, arena.
 \n
-Gladdy
- - Arena: yes
+  - Gladdy: arena.
 \n
 ]]
 

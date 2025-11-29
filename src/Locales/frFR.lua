@@ -175,45 +175,25 @@ L["Addons"] = "Addons"
 L["Addons_Supported_Description"] = [[
 FrameSort prend en charge les éléments suivants :
 \n
-Blizzard
- - Groupe : oui
- - Raid : oui
- - Arène : oui
+  - Blizzard : groupe, raid, arène.
 \n
-ElvUI
- - Groupe : oui
- - Raid : non
- - Arène : non
+  - ElvUI : groupe.
 \n
-sArena
- - Arène : oui
+  - sArena : arène.
 \n
-Gladius
- - Arène : oui
- - version Bicmex : oui
+  - Gladius : arène.
 \n
-GladiusEx
- - Groupe : oui
- - Arène : oui
+  - GladiusEx : groupe, arène.
 \n
-Cell
- - Groupe : oui
- - Raid : oui, seulement lors de l'utilisation de groupes combinés.
+  - Cell : groupe, raid (uniquement avec les groupes combinés).
 \n
-Shadowed Unit Frames
- - Groupe : oui
- - Arène : oui
+  - Shadowed Unit Frames : groupe, arène.
 \n
-Grid2
- - Groupe/raid : oui
+  - Grid2 : groupe, raid.
 \n
-BattleGroundEnemies
- - Party : oui
- - Arena : oui
- - Raid : non
+  - BattleGroundEnemies : groupe, arène.
 \n
-Gladdy
- - Arena : oui
+  - Gladdy : arène.
 \n
 ]]
 

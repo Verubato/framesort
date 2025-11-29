@@ -175,45 +175,25 @@ L["Addons"] = "Дополнения"
 L["Addons_Supported_Description"] = [[
 FrameSort поддерживает следующее:
 \n
-Blizzard
- - Группа: да
- - Рейд: да
- - Арена: да
+  - Blizzard: группа, рейд, арена.
 \n
-ElvUI
- - Группа: да
- - Рейд: нет
- - Арена: нет
+  - ElvUI: группа.
 \n
-sArena
- - Арена: да
+  - sArena: арена.
 \n
-Gladius
- - Арена: да
- - Версия Bicmex: да
+  - Gladius: арена.
 \n
-GladiusEx
- - Группа: да
- - Арена: да
+  - GladiusEx: группа, арена.
 \n
-Cell
- - Группа: да
- - Рейд: да, только при использовании объединённых групп.
+  - Cell: группа, рейд (только при использовании объединённых групп).
 \n
-Shadowed Unit Frames
- - Группа: да
- - Арена: да
+  - Shadowed Unit Frames: группа, арена.
 \n
-Grid2
- - Группа/рейд: да
+  - Grid2: группа, рейд.
 \n
-BattleGroundEnemies
- - Вечеринка: да
- - Арена: да
- - Рейд: нет
+  - BattleGroundEnemies: группа, арена.
 \n
-Gladdy
- - Арена: да
+  - Gladdy: арена.
 \n
 ]]
 

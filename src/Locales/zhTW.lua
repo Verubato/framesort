@@ -178,45 +178,25 @@ L["Addons"] = "插件"
 L["Addons_Supported_Description"] = [[
 FrameSort 支援以下內容：
 \n
-暴雪
- - 小隊：是
- - 團隊：是
- - 競技場：是
+  - 暴雪：隊伍、團隊、競技場。
 \n
-ElvUI
- - 小隊：是
- - 團隊：否
- - 競技場：否
+  - ElvUI：隊伍。
 \n
-sArena
- - 競技場：是
+  - sArena：競技場。
 \n
-Gladius
- - 競技場：是
- - Bicmex 版本：是
+  - Gladius：競技場。
 \n
-GladiusEx
- - 小隊：是
- - 競技場：是
+  - GladiusEx：隊伍、競技場。
 \n
-Cell
- - 小隊：是
- - 團隊：是，僅在使用合併小組時。
+  - Cell：隊伍、團隊（僅在使用合併隊伍時）。
 \n
-Shadowed Unit Frames
- - 小隊：是
- - 競技場：是
+  - Shadowed Unit Frames：隊伍、競技場。
 \n
-Grid2
- - 小隊/團隊：是
+  - Grid2：隊伍、團隊。
 \n
-BattleGroundEnemies
- - 小隊：是
- - 競技場：是
- - 團隊：否
+  - BattleGroundEnemies：隊伍、競技場。
 \n
-Gladdy
- - 競技場：是
+  - Gladdy：競技場。
 \n
 ]]
 
