@@ -11,7 +11,6 @@ local v2 = addon.Api.v2
 local M = {
     Sorting = {},
     Options = {},
-    Debugging = {},
     Inspector = {},
     Frame = {},
 }

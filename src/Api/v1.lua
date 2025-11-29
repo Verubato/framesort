@@ -228,16 +228,10 @@ end
 
 ---Enables/disables logging.
 function M.Logging:SetEnabled(enable)
-    addon.DB.Options.Logging.Enabled = enable
-    fsConfig:NotifyChanged()
+    -- logging is always enabled now
 end
 
 ---Exposes the addon table to the public when enabled.
 function M.Debugging:SetEnabled(enable)
-    if enable then
-        FrameSort = addon
-    else
-        ---@diagnostic disable-next-line: assign-type-mismatch
-        FrameSort = nil
-    end
+    -- addon table is exposed by default now
 end
