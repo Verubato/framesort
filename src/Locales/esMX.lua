@@ -243,4 +243,5 @@ L["Main tank and assist setting disabled"] = "Configuración de tanque principal
 L["Please disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] = "Por favor, desactiva la opción 'Mostrar Tanque Principal y Asistente' en Opciones -> Interfaz -> Marcos de Banda"
 
 -- # Log Screen -- #
+L["Log"] = "Registro"
 L["FrameSort log to help with diagnosing issues."] = "Registro de FrameSort para ayudar a diagnosticar problemas."
