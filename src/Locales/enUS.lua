@@ -239,3 +239,7 @@ L['"%s" may cause conflicts, consider disabling it'] = nil
 L["No conflicting addons"] = nil
 L["Main tank and assist setting disabled"] = nil
 L["Please disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] = nil
+
+-- # Log Screen -- #
+L["Log"] = nil
+L["FrameSort log to help with diagnosing issues."] = nil

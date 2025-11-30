@@ -243,4 +243,5 @@ L["Main tank and assist setting disabled"] = "Настройка основно�
 L["Please disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] = "Пожалуйста, отключите опцию 'Отображать основного танка и ассистента' в Настройки -> Интерфейс -> Рейдовые фреймы"
 
 -- # Log Screen -- #
+L["Log"] = "Журнал"
 L["FrameSort log to help with diagnosing issues."] = "Журнал FrameSort для помощи в диагностике проблем."

@@ -243,4 +243,5 @@ L["Main tank and assist setting disabled"] = "Paramètre de tank principal et d'
 L["Please disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] = "Veuillez désactiver l'option 'Afficher le tank principal et l'assistance' dans Options -> Interface -> Cadres de raid"
 
 -- # Log Screen -- #
+L["Log"] = "Journal"
 L["FrameSort log to help with diagnosing issues."] = "Journal FrameSort pour aider à diagnostiquer les problèmes."

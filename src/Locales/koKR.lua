@@ -242,4 +242,5 @@ L["Main tank and assist setting disabled"] = "주탱과 보조 설정이 비활�
 L["Please disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] = "옵션 -> 인터페이스 -> 공격대 프레임에서 '주탱과 보조 표시' 옵션을 비활성화하십시오."
 
 -- # Log Screen -- #
+L["Log"] = "로그"
 L["FrameSort log to help with diagnosing issues."] = "문제 진단을 돕기 위한 FrameSort 로그입니다."

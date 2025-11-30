@@ -246,4 +246,5 @@ L["Main tank and assist setting disabled"] = "主坦克和助攻設定已禁用"
 L["Please disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] = "請在選項 -> 介面 -> 團隊框架中禁用 '顯示主坦克和助攻' 選項"
 
 -- # Log Screen -- #
+L["Log"] = "日誌"
 L["FrameSort log to help with diagnosing issues."] = "用於協助診斷問題的 FrameSort 日誌。"
