@@ -1,5 +1,6 @@
 ---@type string, Addon
 local _, addon = ...
+local fsConfig = addon.Configuration
 local fsFrame = addon.WoW.Frame
 local fsInspector = addon.Modules.Inspector
 local fsUnit = addon.WoW.Unit
@@ -108,6 +109,12 @@ end
 ---@param area SpacingArea
 function M.Options:GetSpacing(area)
     return v2.Options:GetSpacing(area)
+end
+
+---Registers a callback to invoke when configuration changes.
+---@param callback function
+function M.Options:RegisterConfigurationChangedCallback(callback)
+    fsConfig:RegisterConfigurationChangedCallback(callback)
 end
 
 ---Adds/removes spacing.
