@@ -259,6 +259,22 @@ local function CompareRole(leftToken, rightToken, isArena)
         end
     end
 
+    if not leftRole then
+        fsLog:Warning("Failed to determine role for unit " .. leftToken)
+    end
+
+    if not rightRole then
+        fsLog:Warning("Failed to determine role for unit " .. rightToken)
+    end
+
+    if not leftClass then
+        fsLog:Warning("Failed to determine class for unit " .. leftToken)
+    end
+
+    if not rightClass then
+        fsLog:Warning("Failed to determine class for unit " .. rightToken)
+    end
+
     -- check their role + class combination
     if leftRole and rightRole then
         local leftRoleOrder = RoleAndClassValue(leftRole, leftClass)
