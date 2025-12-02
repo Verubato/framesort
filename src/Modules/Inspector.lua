@@ -12,7 +12,7 @@ local M = {}
 addon.Modules.Inspector = M
 
 -- key = unit, value = { SpecId: number, LastAttempt: number, LastSeen: number }
-local unitGuidToSpec
+local unitGuidToSpec = {}
 
 -- the latest/current unit we've requested an inspection for
 local unitInspecting

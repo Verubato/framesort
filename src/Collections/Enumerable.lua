@@ -156,6 +156,28 @@ function M:First(predicate)
     return next, next and index or nil
 end
 
+---Returns the last instance that matches the predicate.
+---@param predicate? fun(item: any): boolean
+---@return any? item, number? index
+function M:Last(predicate)
+    local next = self.Next()
+    local nextIndex = 1
+    local last = nil
+    local lastIndex = 1
+
+    while next do
+        if not predicate or predicate(next) then
+            last = next
+            lastIndex = nextIndex
+        end
+
+        next = self.Next()
+        nextIndex = nextIndex + 1
+    end
+
+    return last, last and lastIndex or nil
+end
+
 ---Returns true if any item matches the predicate, or if no predicate is provided then returns true if any item exists.
 ---@param predicate? fun(item: any): boolean
 ---@return any? item, number? index
@@ -184,11 +206,22 @@ function M:All(predicate)
     return true
 end
 
----Returns the first instance that matches the predicate.
+---Returns the first index that matches the predicate.
 ---@param item any
 ---@return any? number? index
 function M:IndexOf(item)
     local _, index = self:First(function(x)
+        return x == item
+    end)
+
+    return index
+end
+
+---Returns the last index that matches the predicate.
+---@param item any
+---@return any? number? index
+function M:LastIndexOf(item)
+    local _, index = self:Last(function(x)
         return x == item
     end)
 

@@ -94,6 +94,16 @@ function M:test_first()
     assertEquals(fsEnumerable:From({ "a", "b", "c" }):First(), "a")
 end
 
+function M:test_last()
+    assertEquals(
+        fsEnumerable:From({ 1, 3, 5, 6, 8, 9 }):Last(function(x)
+            return x % 2 == 0
+        end),
+        8
+    )
+    assertEquals(fsEnumerable:From({ "a", "b", "c" }):Last(), "c")
+end
+
 function M:test_nth()
     assertEquals(
         fsEnumerable:From({ 1, 2, 3 }):Nth(0, function(_)
@@ -165,6 +175,13 @@ function M:test_indexof()
     assertEquals(fsEnumerable:From({ "a", "b", "c" }):IndexOf("b"), 2)
     assertEquals(fsEnumerable:From({ "a", "b", "c" }):IndexOf("c"), 3)
     assertEquals(fsEnumerable:From({ "a", "b", "c" }):IndexOf("d"), nil)
+end
+
+function M:test_last_indexof()
+    assertEquals(fsEnumerable:From({ "a", "b", "c" }):LastIndexOf("c"), 3)
+    assertEquals(fsEnumerable:From({ "a", "b", "c" }):LastIndexOf("b"), 2)
+    assertEquals(fsEnumerable:From({ "a", "a", "a" }):LastIndexOf("a"), 3)
+    assertEquals(fsEnumerable:From({ "a", "b", "c" }):LastIndexOf("d"), nil)
 end
 
 function M:test_tolookup()

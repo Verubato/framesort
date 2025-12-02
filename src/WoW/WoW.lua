@@ -46,10 +46,11 @@ local wow = {
     EditMacro = EditMacro,
 
     -- unit functions
-    UnitName = UnitName,
     GetUnitName = GetUnitName,
+    UnitName = UnitName,
     UnitGUID = UnitGUID,
     UnitExists = UnitExists,
+    UnitClass = UnitClass,
     UnitIsUnit = UnitIsUnit,
     UnitIsEnemy = UnitIsEnemy,
     UnitIsFriend = UnitIsFriend,

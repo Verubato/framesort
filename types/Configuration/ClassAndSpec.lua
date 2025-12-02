@@ -1,0 +1,4 @@
+---@class SpecInfo
+---@field ClassId number
+---@field SpecId number
+---@field Type number

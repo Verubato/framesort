@@ -135,4 +135,104 @@ function M:test_sort_with_nonexistant_units()
     assertEquals(subject, { "player", "party1", "party2", "party3", "party4", "hello5" })
 end
 
+function M:test_sort_role_tank_healer_dps()
+    config.PlayerSortMode = nil
+    config.GroupSortMode = fsConfig.GroupSortMode.Role
+
+    local unitToRole = {
+        ["player"] = "HEALER",
+        ["party1"] = "DAMAGER",
+        ["party2"] = "TANK",
+        ["party3"] = "DAMAGER",
+        ["party4"] = "DAMAGER",
+    }
+
+    local unitToClass = {
+        -- rdruid
+        ["player"] = 11,
+        -- unholy  dk,
+        ["party1"] = 6,
+        -- prot warrior
+        ["party2"] = 1,
+        -- bm hunter
+        ["party3"] = 3,
+        -- arcane mage
+        ["party4"] = 8,
+    }
+
+    addon.WoW.Api.UnitGroupRolesAssigned = function(unit)
+        return unitToRole[unit]
+    end
+    addon.WoW.Api.UnitClass = function(unit)
+        return "", "", unitToClass[unit]
+    end
+    addon.WoW.Api.UnitGUID = function(unit)
+        return unit .. unit
+    end
+
+    local ordering = addon.DB.Options.Sorting.Ordering
+    ordering.Tanks = 1
+    ordering.Healers = 2
+    ordering.Hunters = 3
+    ordering.Casters = 4
+    ordering.Melee = 5
+
+    local subject = { "player", "party1", "party2", "party3", "party4" }
+    local sortFunction = fsCompare:SortFunction(subject)
+
+    table.sort(subject, sortFunction)
+
+    assertEquals(subject, { "party2", "player", "party3", "party4", "party1" })
+end
+
+function M:test_sort_role_melee_caster_hunter_healer_tank()
+    config.PlayerSortMode = nil
+    config.GroupSortMode = fsConfig.GroupSortMode.Role
+
+    local unitToRole = {
+        ["player"] = "HEALER",
+        ["party1"] = "DAMAGER",
+        ["party2"] = "TANK",
+        ["party3"] = "DAMAGER",
+        ["party4"] = "DAMAGER",
+    }
+
+    local unitToClass = {
+        -- rdruid
+        ["player"] = 11,
+        -- unholy  dk,
+        ["party1"] = 6,
+        -- prot warrior
+        ["party2"] = 1,
+        -- bm hunter
+        ["party3"] = 3,
+        -- arcane mage
+        ["party4"] = 8,
+    }
+
+    addon.WoW.Api.UnitGroupRolesAssigned = function(unit)
+        return unitToRole[unit]
+    end
+    addon.WoW.Api.UnitClass = function(unit)
+        return "", "", unitToClass[unit]
+    end
+    addon.WoW.Api.UnitGUID = function(unit)
+        return unit .. unit
+    end
+
+    local ordering = addon.DB.Options.Sorting.Ordering
+    ordering.Tanks = 5
+    ordering.Healers = 4
+    ordering.Hunters = 3
+    ordering.Casters = 2
+    ordering.Melee = 1
+
+    local subject = { "player", "party1", "party2", "party3", "party4" }
+    local sortFunction = fsCompare:SortFunction(subject)
+
+    table.sort(subject, sortFunction)
+
+    assertEquals(subject, { "party1", "party4", "party3", "player", "party2" })
+end
+
 return M
