@@ -564,10 +564,9 @@ secureMethods["HardArrange"] = [[
     offset.Y = offset.Y or 0
 
     local pointsByFrame = newtable()
-    local row, col = 1, 1
+    local row, col = 0, 0
     local xOffset = offset.X
     local yOffset = offset.Y
-    local rowHeight = 0
     local currentBlockHeight = 0
 
     for _, frame in ipairs(frames) do
@@ -579,49 +578,39 @@ secureMethods["HardArrange"] = [[
         framePoint.YOffset = yOffset
         pointsByFrame[frame] = framePoint
 
-        local _, _, _, height = frame:GetRect()
+        currentBlockHeight = currentBlockHeight + frame:GetHeight()
 
-        if isHorizontalLayout then
-            col = (col + 1)
-            xOffset = xOffset + blockWidth + horizontalSpacing
-            -- keep track of the tallest frame within the row
-            -- as the next row will be the tallest row frame + spacing
-            rowHeight = max(rowHeight, height)
+        -- subtract 1 for a bit of breathing room for rounding errors
+        local isNewBlock = currentBlockHeight >= (blockHeight - 1)
 
-            -- if we've reached the end then wrap around
-            if container.FramesPerLine and col > container.FramesPerLine then
-                xOffset = offset.X
-                yOffset = yOffset - rowHeight - verticalSpacing
+        if isNewBlock then
+            currentBlockHeight = 0
 
-                row = row + 1
-                col = 1
-                rowHeight = 0
-            end
-        else
-            currentBlockHeight = currentBlockHeight + height
-
-            -- subtract 1 for a bit of breathing room for rounding errors
-            local isNewRow = currentBlockHeight >= (blockHeight - 1)
-
-            if isNewRow then
-                currentBlockHeight = 0
-            end
-
-            if isNewRow then
-                yOffset = yOffset - height - verticalSpacing
-                row = (row + 1)
-            else
-                -- don't add spacing if we're still within a block
-                yOffset = yOffset - height
-            end
-
-            -- if we've reached the end then wrap around
-            if container.FramesPerLine and row > container.FramesPerLine then
-                row = 1
+            if isHorizontalLayout then
                 col = col + 1
-                yOffset = offset.Y
-                xOffset = xOffset + blockWidth + horizontalSpacing
+            else
+                row = row + 1
             end
+
+            xOffset = col * (blockWidth + spacing.Horizontal) + offset.X
+            yOffset = -row * (blockHeight + spacing.Vertical) + offset.Y
+        else
+            yOffset = yOffset - frame:GetHeight()
+        end
+
+        -- if we've reached the end then wrap around
+        if isHorizontalLayout and container.FramesPerLine and col > container.FramesPerLine then
+            col = 0
+            row = row + 1
+
+            xOffset = offset.X
+            yOffset = -row * (blockHeight + spacing.Vertical) + offset.Y
+        elseif not isHorizontalLayout and container.FramesPerLine and row > container.FramesPerLine then
+            row = 0
+            col = col + 1
+
+            yOffset = offset.Y
+            xOffset = col * (blockWidth + spacing.Horizontal) + offset.X
         end
     end
 
