@@ -35,10 +35,11 @@
 ---@field GetMacroInfo fun(id: string|number): name: string, icon: number, body: string
 ---@field EditMacro fun(macroInfo: number|string, name: string?, icon: number|string?, body: string?): macroId: number
 -- unit functions
----@field UnitGUID fun(unit: string): string
----@field UnitName fun(unit: string): string
 ---@field GetUnitName fun(unit: string, showServername: boolean): string
+---@field UnitName fun(unit: string): string
+---@field UnitGUID fun(unit: string): string
 ---@field UnitExists fun(unit: string): boolean
+---@field UnitClass fun(unit: string): className: string,  classFilename: string, classId: number
 ---@field UnitIsUnit fun(unit1: string, unit2: string): boolean
 ---@field UnitIsFriend fun(unit1: string, unit2: string): boolean
 ---@field UnitIsEnemy fun(unit1: string, unit2: string): boolean

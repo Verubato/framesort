@@ -8,7 +8,12 @@ local fsConfig = addon.Configuration
 local fsInspector = addon.Modules.Inspector
 local fsLog = addon.Logging.Log
 local fuzzyDecimalPlaces = 0
-local defaultRoleOrdering = 99
+---@return { [number]: SpecInfo }
+local specIdLookup = fsEnumerable:From(fsConfig.Specs.Specs):ToLookup(function(item)
+    return item.SpecId
+end, function(item)
+    return item
+end)
 
 ---@class Comparer
 local M = {}
@@ -16,16 +21,19 @@ addon.Modules.Sorting.Comparer = M
 
 local orderingCache = {}
 
+---@return { [string]: number } roleOrderLookup
+---@return { [number]: number } specOrderLookup
+---@return { [number]: number } classOrderLookup
 local function Ordering()
     local config = addon.DB.Options.Sorting.Ordering
     local cacheKey = string.format("Tanks:%d,Healers:%d,Casters:%d,Hunters:%d,Melee:%d", config.Tanks, config.Healers, config.Casters, config.Hunters, config.Melee)
     local cached = orderingCache[cacheKey]
 
     if cached then
-        return cached.Spec, cached.Role
+        return cached.RoleLookup, cached.SpecLookup, cached.ClassLookup
     end
 
-    local ids = fsConfig.SpecIds
+    local specs = fsConfig.Specs
     local specOrdering = fsEnumerable:New()
     local roleLookup = {}
     local ordering = {}
@@ -36,37 +44,89 @@ local function Ordering()
     ordering[config.Hunters] = "Hunters"
     ordering[config.Melee] = "Melee"
 
-    for order, spec in pairs(ordering) do
-        if spec == "Tanks" then
+    for order, type in pairs(ordering) do
+        if type == "Tanks" then
+            local tanks = fsEnumerable:From(specs.Specs):Where(function(item)
+                return item.Type == specs.Type.Tank
+            end)
+
+            specOrdering = specOrdering:Concat(tanks)
             roleLookup["TANK"] = order
-            specOrdering = specOrdering:Concat(ids.Tanks)
-        elseif spec == "Healers" then
+        elseif type == "Healers" then
+            local healers = fsEnumerable:From(specs.Specs):Where(function(item)
+                return item.Type == specs.Type.Healer
+            end)
+
+            specOrdering = specOrdering:Concat(healers)
             roleLookup["HEALER"] = order
-            specOrdering = specOrdering:Concat(ids.Healers)
-        elseif spec == "Casters" then
-            roleLookup["DAMAGER"] = math.max(order, roleLookup["DAMAGER"] or 0)
-            specOrdering = specOrdering:Concat(ids.Casters)
-        elseif spec == "Hunters" then
-            roleLookup["DAMAGER"] = math.max(order, roleLookup["DAMAGER"] or 0)
-            specOrdering = specOrdering:Concat(ids.Hunters)
-        elseif spec == "Melee" then
-            roleLookup["DAMAGER"] = math.max(order, roleLookup["DAMAGER"] or 0)
-            specOrdering = specOrdering:Concat(ids.Melee)
+        elseif type == "Casters" then
+            local casters = fsEnumerable:From(specs.Specs):Where(function(item)
+                return item.Type == specs.Type.Caster
+            end)
+
+            specOrdering = specOrdering:Concat(casters)
+        elseif type == "Hunters" then
+            local hunters = fsEnumerable:From(specs.Specs):Where(function(item)
+                return item.Type == specs.Type.Hunter
+            end)
+
+            specOrdering = specOrdering:Concat(hunters)
+        elseif type == "Melee" then
+            local melee = fsEnumerable:From(specs.Specs):Where(function(item)
+                return item.Type == specs.Type.Melee
+            end)
+
+            specOrdering = specOrdering:Concat(melee)
         end
     end
 
     local specLookup = specOrdering:ToLookup(function(item, _)
-        return item
+        return item.SpecId
     end, function(_, index)
         return index
     end)
 
+    local classLookup = fsEnumerable:From(specs.Specs):ToLookup(function(item)
+        return item.ClassId
+    end, function(item)
+        if item.Type == specs.Type.Tank then
+            return config.Tanks
+        elseif item.Type == specs.Type.Healer then
+            return config.Healers
+        elseif item.Type == specs.Type.Hunter then
+            return config.Hunters
+        elseif item.Type == specs.Type.Caster then
+            return config.Casters
+        elseif item.Type == specs.Type.Melee then
+            return config.Melee
+        else
+            return 99
+        end
+    end)
+
     orderingCache[cacheKey] = {
-        Spec = specLookup,
-        Role = roleLookup,
+        RoleLookup = roleLookup,
+        SpecLookup = specLookup,
+        ClassLookup = classLookup,
     }
 
-    return specLookup, roleLookup
+    return roleLookup, specLookup, classLookup
+end
+
+local function RoleAndClassValue(role, class)
+    local roleOrderLookup, _, classOrderLookup = Ordering()
+    local roleOrder = roleOrderLookup[role]
+
+    if roleOrder then
+        return roleOrder
+    end
+
+    if class then
+        local classOrder = classOrderLookup[class]
+        return classOrder
+    end
+
+    return nil
 end
 
 local function EmptyCompare(x, y)
@@ -121,6 +181,7 @@ end
 local function CompareRole(leftToken, rightToken, isArena)
     local leftRole, rightRole = nil, nil
     local leftSpec, rightSpec = nil, nil
+    local leftClass, rightClass = nil, nil
 
     if isArena then
         local leftId = tonumber(string.match(leftToken, "%d+"))
@@ -149,6 +210,12 @@ local function CompareRole(leftToken, rightToken, isArena)
         else
             fsLog:Error("Your wow client is missing the GetSpecializationInfoByID API.")
         end
+
+        local leftSpecInfo = specIdLookup[leftSpec]
+        local rightSpecInfo = specIdLookup[rightSpec]
+
+        leftClass = leftSpecInfo and leftSpecInfo.ClassId
+        rightClass = rightSpecInfo and rightSpecInfo.ClassId
     else
         local leftGuid = wow.UnitGUID(leftToken)
         local rightGuid = wow.UnitGUID(rightToken)
@@ -174,28 +241,40 @@ local function CompareRole(leftToken, rightToken, isArena)
         else
             fsLog:Error("Your wow client is missing the UnitGroupRolesAssigned API.")
         end
+
+        leftClass = select(3, wow.UnitClass(leftToken))
+        rightClass = select(3, wow.UnitClass(rightToken))
     end
 
-    local specOrdering, roleOrdering = Ordering()
+    -- grab our ordering values
+    local _, specOrderLookup, _ = Ordering()
 
+    -- prioritise their spec information if we have it
     if leftSpec and leftSpec > 0 and rightSpec and rightSpec > 0 and leftSpec ~= rightSpec then
-        local leftSpecOrder = specOrdering[leftSpec]
-        local rightSpecOrder = specOrdering[rightSpec]
+        local leftSpecOrder = specOrderLookup[leftSpec]
+        local rightSpecOrder = specOrderLookup[rightSpec]
 
         if leftSpecOrder and rightSpecOrder and leftSpecOrder ~= rightSpecOrder then
             return leftSpecOrder < rightSpecOrder
         end
     end
 
-    if leftRole and rightRole and leftRole ~= rightRole then
-        -- role's of "NONE" or some invalid value default to 99 to be put at the end
-        local leftValue, rightValue = roleOrdering[leftRole] or defaultRoleOrdering, roleOrdering[rightRole] or defaultRoleOrdering
+    -- check their role + class combination
+    if leftRole and rightRole then
+        local leftRoleOrder = RoleAndClassValue(leftRole, leftClass)
+        local rightRoleOrder = RoleAndClassValue(rightRole, rightClass)
 
-        if leftValue ~= rightValue then
-            return leftValue < rightValue
+        if leftRoleOrder and rightRoleOrder and leftRoleOrder ~= rightRoleOrder then
+            return leftRoleOrder < rightRoleOrder
         end
     end
 
+    -- check the class on its own
+    if leftClass and rightClass and leftClass ~= rightClass then
+        return leftClass < rightClass
+    end
+
+    -- if they are the same role, class, and spec, then fallback to group sort
     return CompareGroup(leftToken, rightToken, isArena)
 end
 

@@ -15,7 +15,7 @@
 ---@field TextBlock fun(self: table, lines: string[], parent: table, anchor: table): table anchor
 ---@field MultilineTextBlock fun(self: table, lines: string, parent: table, anchor: table): table anchor
 ---@field Dropdown fun(self: table, parent: table, items: table, getValue: (fun(): any), setValue: (fun(value: any))): table
----@field SpecIds SpecIds
+---@field Specs Specs
 
 ---@class Panels
 ---@field Sorting OptionsPanel
@@ -31,9 +31,6 @@
 ---@field Help OptionsPanel
 ---@field Log OptionsPanel
 
----@class SpecIds
----@field Tanks table
----@field Healers table
----@field Casters table
----@field Hunters table
----@field Melee table
+---@class Specs
+---@field Specs SpecInfo[]
+---@field Type SpecType
