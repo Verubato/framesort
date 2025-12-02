@@ -229,7 +229,7 @@ local function HardArrange(container, frames, spacing, offset, blockHeight)
 
     local relativeTo = container.Anchor or container.Frame
     local isHorizontalLayout = container.IsHorizontalLayout and container:IsHorizontalLayout() or false
-    local framesPerLine = container.FramesPerLine and container:FramesPerLine()
+    local blocksPerLine = container.FramesPerLine and container:FramesPerLine()
     local anchorPoint = container.AnchorPoint or "TOPLEFT"
 
     offset = offset or (container.FramesOffset and container:FramesOffset())
@@ -254,10 +254,9 @@ local function HardArrange(container, frames, spacing, offset, blockHeight)
 
     ---@type table<table, Point>
     local pointsByFrame = {}
-    local row, col = 1, 1
+    local row, col = 0, 0
     local xOffset = offset.X
     local yOffset = offset.Y
-    local rowHeight = 0
     local currentBlockHeight = 0
 
     for _, frame in ipairs(frames) do
@@ -269,47 +268,39 @@ local function HardArrange(container, frames, spacing, offset, blockHeight)
             YOffset = yOffset,
         }
 
-        if isHorizontalLayout then
-            col = (col + 1)
-            xOffset = xOffset + blockWidth + spacing.Horizontal
-            -- keep track of the tallest frame within the row
-            -- as the next row will be the tallest row frame + spacing
-            rowHeight = math.max(rowHeight, frame:GetHeight())
+        currentBlockHeight = currentBlockHeight + frame:GetHeight()
 
-            -- if we've reached the end then wrap around
-            if framesPerLine and col > framesPerLine then
-                xOffset = offset.X
-                yOffset = yOffset - rowHeight - spacing.Vertical
+        -- subtract 1 for a bit of breathing room for rounding errors
+        local isNewBlock = currentBlockHeight >= (blockHeight - 1)
 
-                row = row + 1
-                col = 1
-                rowHeight = 0
-            end
-        else
-            currentBlockHeight = currentBlockHeight + frame:GetHeight()
+        if isNewBlock then
+            currentBlockHeight = 0
 
-            -- subtract 1 for a bit of breathing room for rounding errors
-            local isNewRow = currentBlockHeight >= (blockHeight - 1)
-
-            if isNewRow then
-                currentBlockHeight = 0
-            end
-
-            if isNewRow then
-                yOffset = yOffset - frame:GetHeight() - spacing.Vertical
-                row = (row + 1)
-            else
-                -- don't add spacing if we're still within a block
-                yOffset = yOffset - frame:GetHeight()
-            end
-
-            -- if we've reached the end then wrap around
-            if framesPerLine and row > framesPerLine then
-                row = 1
+            if isHorizontalLayout then
                 col = col + 1
-                yOffset = offset.Y
-                xOffset = xOffset + blockWidth + spacing.Horizontal
+            else
+                row = row + 1
             end
+
+            xOffset = col * (blockWidth + spacing.Horizontal) + offset.X
+            yOffset = -row * (blockHeight + spacing.Vertical) + offset.Y
+        else
+            yOffset = yOffset - frame:GetHeight()
+        end
+
+        -- if we've reached the end then wrap around
+        if isHorizontalLayout and blocksPerLine and col > blocksPerLine then
+            col = 0
+            row = row + 1
+
+            xOffset = offset.X
+            yOffset = -row * (blockHeight + spacing.Vertical) + offset.Y
+        elseif not isHorizontalLayout and blocksPerLine and row > blocksPerLine then
+            row = 0
+            col = col + 1
+
+            yOffset = offset.Y
+            xOffset = col * (blockWidth + spacing.Horizontal) + offset.X
         end
     end
 
