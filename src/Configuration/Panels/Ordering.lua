@@ -46,6 +46,7 @@ function M:Build(parent)
         local currentValue = config[type]
         config[type] = value
         config[toSwap] = currentValue
+        fsConfig:NotifyChanged()
 
         for _, ddl in ipairs(all) do
             ddl:FrameSortRefresh()
