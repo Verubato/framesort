@@ -592,8 +592,8 @@ secureMethods["HardArrange"] = [[
                 row = row + 1
             end
 
-            xOffset = col * (blockWidth + spacing.Horizontal) + offset.X
-            yOffset = -row * (blockHeight + spacing.Vertical) + offset.Y
+            xOffset = col * (blockWidth + horizontalSpacing) + offset.X
+            yOffset = -row * (blockHeight + verticalSpacing) + offset.Y
         else
             yOffset = yOffset - frame:GetHeight()
         end
@@ -604,13 +604,13 @@ secureMethods["HardArrange"] = [[
             row = row + 1
 
             xOffset = offset.X
-            yOffset = -row * (blockHeight + spacing.Vertical) + offset.Y
+            yOffset = -row * (blockHeight + verticalSpacing) + offset.Y
         elseif not isHorizontalLayout and container.FramesPerLine and row > container.FramesPerLine then
             row = 0
             col = col + 1
 
             yOffset = offset.Y
-            xOffset = col * (blockWidth + spacing.Horizontal) + offset.X
+            xOffset = col * (blockWidth + horizontalSpacing) + offset.X
         end
     end
 
