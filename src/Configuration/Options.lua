@@ -13,20 +13,22 @@ fsConfig.TextMaxWidth = 600
 local function AddCategory(panel)
     if wow.Settings then
         local category = wow.Settings.RegisterCanvasLayoutCategory(panel, panel.name)
-        category.ID = panel.name
         wow.Settings.RegisterAddOnCategory(category)
+
+        return category
     elseif wow.InterfaceOptions_AddCategory then
         wow.InterfaceOptions_AddCategory(panel)
     else
         fsLog:Error("Unable to add options category.")
     end
+
+    return nil
 end
 
-local function AddSubCategory(panel)
+local function AddSubCategory(parentCategory, panel)
     if wow.Settings then
-        local category = wow.Settings.GetCategory(panel.parent)
-        local subcategory = wow.Settings.RegisterCanvasLayoutSubcategory(category, panel, panel.name)
-        subcategory.ID = panel.name
+        assert(parentCategory)
+        local subcategory = wow.Settings.RegisterCanvasLayoutSubcategory(parentCategory, panel, panel.name)
     elseif wow.InterfaceOptions_AddCategory then
         wow.InterfaceOptions_AddCategory(panel)
     else
@@ -159,8 +161,7 @@ function fsConfig:Init()
 
     panel:SetScrollChild(main)
 
-    AddCategory(panel)
-
+    local category = AddCategory(panel)
     local panels = fsConfig.Panels
     panels.Sorting:Build(main)
 
@@ -176,28 +177,29 @@ function fsConfig:Init()
     local help = panels.Help:Build(panel)
     local log = panels.Log:Build(panel)
 
-    AddSubCategory(ordering)
-    AddSubCategory(sortingMethod)
+    AddSubCategory(category, ordering)
+    AddSubCategory(category, sortingMethod)
 
     if wow.HasSoloShuffle() then
-        AddSubCategory(autoLeader)
+        AddSubCategory(category, autoLeader)
     end
 
-    AddSubCategory(keybinding)
-    AddSubCategory(macro)
-    AddSubCategory(spacing)
-    AddSubCategory(addons)
-    AddSubCategory(api)
-    AddSubCategory(health)
-    AddSubCategory(help)
-    AddSubCategory(log)
+    AddSubCategory(category, keybinding)
+    AddSubCategory(category, macro)
+    AddSubCategory(category, spacing)
+    AddSubCategory(category, addons)
+    AddSubCategory(category, api)
+    AddSubCategory(category, health)
+    AddSubCategory(category, help)
+    AddSubCategory(category, log)
 
     SLASH_FRAMESORT1 = "/fs"
     SLASH_FRAMESORT2 = "/framesort"
 
     wow.SlashCmdList.FRAMESORT = function()
         if wow.Settings then
-            wow.Settings.OpenToCategory(panel.name)
+            assert(category)
+            wow.Settings.OpenToCategory(category:GetID())
         elseif wow.InterfaceOptionsFrame_OpenToCategory then
             -- workaround the classic bug where the first call opens the Game interface
             -- and a second call is required
