@@ -318,6 +318,9 @@ function M:Containers()
             Frame = wow.CompactArenaFrame,
             Type = fsFrame.ContainerType.EnemyArena,
             LayoutType = fsFrame.LayoutType.Hard,
+            -- in the prep room, and for invisible units, they hide behind a "prep" frame
+            -- so the arena frame becomes invisible and the prep frame overlays and anchors to the arena frame
+            -- in this case we still want to sort the arena frames which has the benefit of sorting the prep frames too
             VisibleOnly = false,
             SupportsSpacing = true,
             InCombatSortingRequired = true,
