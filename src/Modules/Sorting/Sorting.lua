@@ -25,10 +25,10 @@ end
 function M:Run(provider)
     assert(not wow.InCombatLockdown())
 
-    if wow.HasEditMode() and wow.EditModeManagerFrame.editModeActive then
-        fsLog:Debug("Not sorting while edit mode active.")
-        return
-    end
+    -- if wow.HasEditMode() and wow.EditModeManagerFrame.editModeActive then
+    --     fsLog:Debug("Not sorting while edit mode active.")
+    --     return
+    -- end
 
     local start = wow.GetTimePreciseSec()
     local sorted = false

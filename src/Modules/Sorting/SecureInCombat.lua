@@ -570,18 +570,11 @@ secureMethods["HardArrange"] = [[
     local currentBlockHeight = 0
 
     for _, frame in ipairs(frames) do
-        local framePoint = newtable()
-        framePoint.Point = container.AnchorPoint or "TOPLEFT"
-        framePoint.RelativeTo = container.Anchor or container.Frame
-        framePoint.RelativePoint = container.AnchorPoint or "TOPLEFT"
-        framePoint.XOffset = xOffset
-        framePoint.YOffset = yOffset
-        pointsByFrame[frame] = framePoint
-
-        currentBlockHeight = currentBlockHeight + frame:GetHeight()
-
-        -- subtract 1 for a bit of breathing room for rounding errors
-        local isNewBlock = currentBlockHeight >= (blockHeight - 1)
+        local isNewBlock = currentBlockHeight > 0
+            -- subtract 1 for a bit of breathing room for rounding errors
+            and currentBlockHeight >= (blockHeight - 1)
+            -- add 2 so that if we can squeeze multiple frames in we do so
+            or (currentBlockHeight + frame:GetHeight()) >= (blockHeight + 2)
 
         if isNewBlock then
             currentBlockHeight = 0
@@ -594,24 +587,33 @@ secureMethods["HardArrange"] = [[
 
             xOffset = col * (blockWidth + horizontalSpacing) + offset.X
             yOffset = -row * (blockHeight + verticalSpacing) + offset.Y
-        else
-            yOffset = yOffset - frame:GetHeight()
         end
 
         -- if we've reached the end then wrap around
-        if isHorizontalLayout and container.FramesPerLine and col > container.FramesPerLine then
+        if isHorizontalLayout and container.FramesPerLine and col >= container.FramesPerLine then
             col = 0
             row = row + 1
 
             xOffset = offset.X
             yOffset = -row * (blockHeight + verticalSpacing) + offset.Y
-        elseif not isHorizontalLayout and container.FramesPerLine and row > container.FramesPerLine then
+        elseif not isHorizontalLayout and container.FramesPerLine and row >= container.FramesPerLine then
             row = 0
             col = col + 1
 
             yOffset = offset.Y
             xOffset = col * (blockWidth + horizontalSpacing) + offset.X
         end
+
+        local framePoint = newtable()
+        framePoint.Point = container.AnchorPoint or "TOPLEFT"
+        framePoint.RelativeTo = container.Anchor or container.Frame
+        framePoint.RelativePoint = container.AnchorPoint or "TOPLEFT"
+        framePoint.XOffset = xOffset
+        framePoint.YOffset = yOffset
+        pointsByFrame[frame] = framePoint
+
+        currentBlockHeight = currentBlockHeight + frame:GetHeight()
+        yOffset = yOffset - frame:GetHeight()
     end
 
     local framesToMove = newtable()
