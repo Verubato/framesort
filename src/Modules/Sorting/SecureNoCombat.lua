@@ -259,19 +259,12 @@ local function HardArrange(container, frames, spacing, offset, blockHeight)
     local yOffset = offset.Y
     local currentBlockHeight = 0
 
-    for _, frame in ipairs(frames) do
-        pointsByFrame[frame] = {
-            Point = anchorPoint,
-            RelativeTo = relativeTo,
-            RelativePoint = anchorPoint,
-            XOffset = xOffset,
-            YOffset = yOffset,
-        }
-
-        currentBlockHeight = currentBlockHeight + frame:GetHeight()
-
-        -- subtract 1 for a bit of breathing room for rounding errors
-        local isNewBlock = currentBlockHeight >= (blockHeight - 1)
+    for i, frame in ipairs(frames) do
+        local isNewBlock = currentBlockHeight > 0
+            -- subtract 1 for a bit of breathing room for rounding errors
+            and currentBlockHeight >= (blockHeight - 1)
+            -- add 2 so that if we can squeeze multiple frames in we do so
+            or (currentBlockHeight + frame:GetHeight()) >= (blockHeight + 2)
 
         if isNewBlock then
             currentBlockHeight = 0
@@ -284,24 +277,33 @@ local function HardArrange(container, frames, spacing, offset, blockHeight)
 
             xOffset = col * (blockWidth + spacing.Horizontal) + offset.X
             yOffset = -row * (blockHeight + spacing.Vertical) + offset.Y
-        else
-            yOffset = yOffset - frame:GetHeight()
         end
 
         -- if we've reached the end then wrap around
-        if isHorizontalLayout and blocksPerLine and col > blocksPerLine then
+        if isHorizontalLayout and blocksPerLine and col >= blocksPerLine then
             col = 0
             row = row + 1
 
             xOffset = offset.X
             yOffset = -row * (blockHeight + spacing.Vertical) + offset.Y
-        elseif not isHorizontalLayout and blocksPerLine and row > blocksPerLine then
+        elseif not isHorizontalLayout and blocksPerLine and row >= blocksPerLine then
             row = 0
             col = col + 1
 
             yOffset = offset.Y
             xOffset = col * (blockWidth + spacing.Horizontal) + offset.X
         end
+
+        pointsByFrame[frame] = {
+            Point = anchorPoint,
+            RelativeTo = relativeTo,
+            RelativePoint = anchorPoint,
+            XOffset = xOffset,
+            YOffset = yOffset,
+        }
+
+        currentBlockHeight = currentBlockHeight + frame:GetHeight()
+        yOffset = yOffset - frame:GetHeight()
     end
 
     return Move(frames, pointsByFrame)
