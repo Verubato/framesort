@@ -259,25 +259,14 @@ local function HardArrange(container, frames, spacing, offset, blockHeight)
     local yOffset = offset.Y
     local currentBlockHeight = 0
 
-    for i, frame in ipairs(frames) do
+    for _, frame in ipairs(frames) do
         local isNewBlock = currentBlockHeight > 0
             -- subtract 1 for a bit of breathing room for rounding errors
-            and currentBlockHeight >= (blockHeight - 1)
-            -- add 2 so that if we can squeeze multiple frames in we do so
-            or (currentBlockHeight + frame:GetHeight()) >= (blockHeight + 2)
-
-        if isNewBlock then
-            currentBlockHeight = 0
-
-            if isHorizontalLayout then
-                col = col + 1
-            else
-                row = row + 1
-            end
-
-            xOffset = col * (blockWidth + spacing.Horizontal) + offset.X
-            yOffset = -row * (blockHeight + spacing.Vertical) + offset.Y
-        end
+            and (
+                currentBlockHeight >= (blockHeight - 1)
+                -- add 2 so that if we can squeeze multiple frames in we do so
+                or (currentBlockHeight + frame:GetHeight()) >= (blockHeight + 2)
+            )
 
         -- if we've reached the end then wrap around
         if isHorizontalLayout and blocksPerLine and col >= blocksPerLine then
@@ -292,6 +281,17 @@ local function HardArrange(container, frames, spacing, offset, blockHeight)
 
             yOffset = offset.Y
             xOffset = col * (blockWidth + spacing.Horizontal) + offset.X
+        elseif isNewBlock then
+            currentBlockHeight = 0
+
+            if isHorizontalLayout then
+                col = col + 1
+            else
+                row = row + 1
+            end
+
+            xOffset = col * (blockWidth + spacing.Horizontal) + offset.X
+            yOffset = -row * (blockHeight + spacing.Vertical) + offset.Y
         end
 
         pointsByFrame[frame] = {

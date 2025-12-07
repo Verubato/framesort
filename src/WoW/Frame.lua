@@ -155,6 +155,12 @@ function M:GetFrameUnit(frame)
         return nil
     end
 
+    -- note frame.unit can differ from the "unit" attribute
+    -- as the unit attribute can be the displayUnit
+    -- e.g. when the player is in a vehicle:
+    -- frame.unit = "raid13"
+    -- frame:GetAttribute("unit") = "raid13pet"
+    -- where possible we want the underlying unit
     if frame.unit then
         return frame.unit
     end
