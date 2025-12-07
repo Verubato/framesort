@@ -4,11 +4,11 @@ local wow = addon.WoW.Api
 local fsConfig = addon.Configuration
 local L = addon.Locale
 local M = {}
-fsConfig.Panels.Help = M
+fsConfig.Panels.Discord = M
 
 function M:Build(parent)
     local panel = wow.CreateFrame("Frame", nil, parent)
-    panel.name = L["Help"]
+    panel.name = L["Discord"]
     panel.parent = parent.name
 
     local verticalSpacing = fsConfig.VerticalSpacing
@@ -22,7 +22,6 @@ function M:Build(parent)
     }
 
     local anchor = fsConfig:TextBlock(intro, panel, title)
-    local link = "https://discord.gg/bF3XkyuU3E"
     local padding = 10
     local box = wow.CreateFrame("EditBox", nil, panel)
 
@@ -31,7 +30,7 @@ function M:Build(parent)
     box:SetFontObject("GameFontWhite")
     box:SetAutoFocus(false)
     box:SetMultiLine(true)
-    box:SetText(link)
+    box:SetText(fsConfig.DiscordUrl)
     box:SetCursorPosition(0)
 
     -- undo any user changes
@@ -40,7 +39,7 @@ function M:Build(parent)
             return
         end
 
-        box:SetText(link)
+        box:SetText(fsConfig.DiscordUrl)
     end)
 
     box:SetScript("OnEscapePressed", function()

@@ -148,7 +148,16 @@ L["Macro_Example3"] = [[#FrameSort EnemyHealer, EnemyHealer
 
 -- %d is the number for example 1/2/3
 L["Example %d"] = nil
-L["Supported variables:"] = nil
+L["Discord Bot Blurb"] = [[
+Need help creating a macro? 
+\n
+Head over to the FrameSort discord server and use our AI powered macro bot!
+\n
+Simply '@Macro Bot' with your question in the macro-bot-channel.
+]]
+
+-- # Macro Variables screen # --
+L["Macro Variables"] = nil
 L["The first DPS that's not you."] = nil
 L["Add a number to choose the Nth target, e.g., DPS2 selects the 2nd DPS."] = nil
 L["Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work."] = nil
@@ -206,8 +215,7 @@ L["Retrieve an ordered array of party frames."] = nil
 L["Change a FrameSort setting."] = nil
 L["View a full listing of all API methods on GitHub."] = nil
 
--- # Help screen #
-L["Help"] = nil
+-- # Discord screen #
 L["Discord"] = nil
 L["Need help with something?"] = nil
 L["Talk directly with the developer on Discord."] = nil
