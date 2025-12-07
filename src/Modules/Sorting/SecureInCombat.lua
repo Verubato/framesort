@@ -39,13 +39,20 @@ secureMethods["GetUnit"] = [[
     local framesVariable = ...
     local frame = _G[framesVariable]
 
-    local u = frame:GetAttribute("unit")
-    if u then
-        return u
+    local unit = frame:GetAttribute("unit")
+    
+    if not unit then
+        local name = frame:GetName()
+        return name and strmatch(name, "arena%d")
     end
 
-    local name = frame:GetName()
-    return name and strmatch(name, "arena%d")
+    local underlyingUnit = gsub(unit, "pet", "")
+
+    if UnitHasVehicleUI(underlyingUnit) then
+        return underlyingUnit
+    end
+
+    return unit
 ]]
 
 -- filters a set of frames to only unit frames
@@ -280,9 +287,26 @@ secureMethods["SortFramesByUnits"] = [[
         Frame = nil
 
         if unit then
-            framesByUnit[unit] = frame
+            local existingFrame = framesByUnit[unit]
+
+            if existingFrame then
+                -- this happens when the unit is in a vehicle
+                -- in which case they will have 2 frames; their player frame which becomesvehicle frame, and a pet frame
+                -- we want the player frame first, so sort by frame height
+
+                if frame:GetHeight() > existingFrame:GetHeight() then
+                    -- unsort the existing frame and it'll just go to the end
+                    frameWasSorted[existingFrame] = false
+
+                    -- insert the new frame
+                    framesByUnit[unit] = frame
+                    frameWasSorted[frame] = true
+                end
+            else
+                framesByUnit[unit] = frame
+            end
         else
-            framesWithoutUnits = frame
+            run:CallMethod("Log", "Failed to determine unit of frame: " .. (frame:GetName() or "nil"), "Warning")
         end
 
         frameWasSorted[frame] = false
@@ -572,22 +596,11 @@ secureMethods["HardArrange"] = [[
     for _, frame in ipairs(frames) do
         local isNewBlock = currentBlockHeight > 0
             -- subtract 1 for a bit of breathing room for rounding errors
-            and currentBlockHeight >= (blockHeight - 1)
-            -- add 2 so that if we can squeeze multiple frames in we do so
-            or (currentBlockHeight + frame:GetHeight()) >= (blockHeight + 2)
-
-        if isNewBlock then
-            currentBlockHeight = 0
-
-            if isHorizontalLayout then
-                col = col + 1
-            else
-                row = row + 1
-            end
-
-            xOffset = col * (blockWidth + horizontalSpacing) + offset.X
-            yOffset = -row * (blockHeight + verticalSpacing) + offset.Y
-        end
+            and (
+                currentBlockHeight >= (blockHeight - 1)
+                -- add 2 so that if we can squeeze multiple frames in we do so
+                or (currentBlockHeight + frame:GetHeight()) >= (blockHeight + 2)
+            )
 
         -- if we've reached the end then wrap around
         if isHorizontalLayout and container.FramesPerLine and col >= container.FramesPerLine then
@@ -602,6 +615,17 @@ secureMethods["HardArrange"] = [[
 
             yOffset = offset.Y
             xOffset = col * (blockWidth + horizontalSpacing) + offset.X
+        elseif isNewBlock then
+            currentBlockHeight = 0
+
+            if isHorizontalLayout then
+                col = col + 1
+            else
+                row = row + 1
+            end
+
+            xOffset = col * (blockWidth + horizontalSpacing) + offset.X
+            yOffset = -row * (blockHeight + verticalSpacing) + offset.Y
         end
 
         local framePoint = newtable()
@@ -1068,8 +1092,6 @@ secureMethods["Init"] = [[
 local function LoadUnits()
     assert(manager)
 
-    -- TODO: we could transfer unit info to the restricted environment
-    -- then perform the unit sort inside which would give us more control
     local friendlyUnits = fsUnit:FriendlyUnits()
     local enemyUnits = fsUnit:EnemyUnits()
     local friendlyCompare = fsCompare:SortFunction(friendlyUnits)
