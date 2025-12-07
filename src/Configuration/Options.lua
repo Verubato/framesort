@@ -9,6 +9,7 @@ local dropDownId = 1
 fsConfig.VerticalSpacing = 12
 fsConfig.HorizontalSpacing = 50
 fsConfig.TextMaxWidth = 600
+fsConfig.DiscordUrl = "https://discord.gg/bF3XkyuU3E"
 
 local function AddCategory(panel)
     if wow.Settings then
@@ -170,11 +171,12 @@ function fsConfig:Init()
     local autoLeader = wow.HasSoloShuffle() and panels.AutoLeader:Build(panel)
     local keybinding = panels.Keybinding:Build(panel)
     local macro = panels.Macro:Build(panel)
+    local variables = panels.MacroVariables:Build(panel)
     local spacing = panels.Spacing:Build(panel)
     local addons = panels.Addons:Build(panel)
     local api = panels.Api:Build(panel)
     local health = panels.Health:Build(panel)
-    local help = panels.Help:Build(panel)
+    local discord = panels.Discord:Build(panel)
     local log = panels.Log:Build(panel)
 
     AddSubCategory(category, ordering)
@@ -186,11 +188,12 @@ function fsConfig:Init()
 
     AddSubCategory(category, keybinding)
     AddSubCategory(category, macro)
+    AddSubCategory(category, variables)
     AddSubCategory(category, spacing)
     AddSubCategory(category, addons)
     AddSubCategory(category, api)
     AddSubCategory(category, health)
-    AddSubCategory(category, help)
+    AddSubCategory(category, discord)
     AddSubCategory(category, log)
 
     SLASH_FRAMESORT1 = "/fs"

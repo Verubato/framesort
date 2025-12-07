@@ -16,6 +16,7 @@
 ---@field MultilineTextBlock fun(self: table, lines: string, parent: table, anchor: table): table anchor
 ---@field Dropdown fun(self: table, parent: table, items: table, getValue: (fun(): any), setValue: (fun(value: any))): table
 ---@field Specs Specs
+---@field DiscordUrl string
 
 ---@class Panels
 ---@field Sorting OptionsPanel
@@ -23,12 +24,13 @@
 ---@field Health OptionsPanel
 ---@field Keybinding OptionsPanel
 ---@field Macro OptionsPanel
+---@field MacroVariables OptionsPanel
 ---@field Addons OptionsPanel
 ---@field Ordering OptionsPanel
 ---@field AutoLeader OptionsPanel
 ---@field SortingMethod OptionsPanel
 ---@field Api OptionsPanel
----@field Help OptionsPanel
+---@field Discord OptionsPanel
 ---@field Log OptionsPanel
 
 ---@class Specs

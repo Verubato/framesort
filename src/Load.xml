@@ -88,11 +88,12 @@
     <Script file="Configuration\Panels\Spacing.lua"/>
     <Script file="Configuration\Panels\Keybindings.lua"/>
     <Script file="Configuration\Panels\Macro.lua"/>
+    <Script file="Configuration\Panels\MacroVariables.lua"/>
     <Script file="Configuration\Panels\SortingMethod.lua"/>
     <Script file="Configuration\Panels\Addons.lua"/>
     <Script file="Configuration\Panels\HealthCheck.lua"/>
     <Script file="Configuration\Panels\Api.lua"/>
-    <Script file="Configuration\Panels\Help.lua"/>
+    <Script file="Configuration\Panels\Discord.lua"/>
     <Script file="Configuration\Panels\Log.lua"/>
 
     <!-- Now initialise the addon -->
