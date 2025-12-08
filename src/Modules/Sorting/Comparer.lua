@@ -200,11 +200,11 @@ local function CompareRole(leftToken, rightToken, isArena)
         end
 
         if not leftSpec then
-            fsLog:Error("Failed to determine spec for arena unit " .. leftToken)
+            fsLog:Warning("Failed to determine spec for arena unit " .. leftToken)
         end
 
         if not rightSpec then
-            fsLog:Error("Failed to determine spec for arena unit " .. rightToken)
+            fsLog:Warning("Failed to determine spec for arena unit " .. rightToken)
         end
 
         if not leftSpec or not rightSpec then
