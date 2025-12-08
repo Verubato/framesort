@@ -68,6 +68,7 @@ local function OnCombat()
     -- this is all conjecture, need to confirm what order of events this happens in
     -- and whether this is actually needed or not
     -- TODO: is this required, or will OnUpdate run anyway?
+    fsLog:Debug("Running sort just before combat starts.")
     Run(true)
 end
 
