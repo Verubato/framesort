@@ -227,7 +227,6 @@ local function HardArrange(container, frames, spacing, offset, blockHeight)
         return false
     end
 
-    local start = wow.GetTimePreciseSec()
     local relativeTo = container.Anchor or container.Frame
     local isHorizontalLayout = container.IsHorizontalLayout and container:IsHorizontalLayout() or false
     local blocksPerLine = container.FramesPerLine and container:FramesPerLine()
@@ -307,11 +306,7 @@ local function HardArrange(container, frames, spacing, offset, blockHeight)
         yOffset = yOffset - frame:GetHeight()
     end
 
-    local result = Move(frames, pointsByFrame)
-    local stop = wow.GetTimePreciseSec()
-    fsLog:Debug("Arranging frames for %s took %fms", container.Frame:GetName() or "nil", (stop - start) * 1000)
-
-    return result
+    return Move(frames, pointsByFrame)
 end
 
 ---@param container FrameContainer
@@ -453,10 +448,7 @@ local function TrySortContainer(container)
         return false
     end
 
-    local start = wow.GetTimePreciseSec()
     table.sort(frames, sortFunction)
-    local stop = wow.GetTimePreciseSec()
-    fsLog:Debug("table.sort() took %fms", (stop - start) * 1000)
 
     local spacing = nil
 
