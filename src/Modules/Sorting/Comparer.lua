@@ -199,12 +199,14 @@ local function CompareRole(leftToken, rightToken, isArena)
             fsLog:Error("Your wow client is missing the GetArenaOpponentSpec API.")
         end
 
+        local specError = "Failed to determine spec for arena unit %s."
+
         if not leftSpec then
-            fsLog:Warning("Failed to determine spec for arena unit " .. leftToken)
+            fsLog:Warning(specError, leftToken)
         end
 
         if not rightSpec then
-            fsLog:Warning("Failed to determine spec for arena unit " .. rightToken)
+            fsLog:Warning(specError, rightToken)
         end
 
         if not leftSpec or not rightSpec then
@@ -230,13 +232,13 @@ local function CompareRole(leftToken, rightToken, isArena)
         local secretGuidError = "Unable to determine unit spec for '%s' as it's guid is a secret value."
 
         if not leftGuid then
-            fsLog:Warning(string.format(nilGuidError, leftToken))
+            fsLog:Warning(nilGuidError, leftToken)
         elseif not rightGuid then
-            fsLog:Warning(string.format(nilGuidError, rightToken))
+            fsLog:Warning(nilGuidError, rightToken)
         elseif wow.issecretvalue(leftGuid) then
-            fsLog:Warning(string.format(secretGuidError, leftToken))
+            fsLog:Warning(secretGuidError, leftToken)
         elseif wow.issecretvalue(rightGuid) then
-            fsLog:Warning(string.format(secretGuidError, rightToken))
+            fsLog:Warning(secretGuidError, rightToken)
         else
             leftSpec = fsInspector:UnitSpec(leftGuid)
             rightSpec = fsInspector:UnitSpec(rightGuid)
@@ -266,20 +268,23 @@ local function CompareRole(leftToken, rightToken, isArena)
         end
     end
 
+    local roleError = "Failed to determine role for unit %s."
+    local classError = "Failed to determine class for unit %s."
+
     if not leftRole then
-        fsLog:Warning("Failed to determine role for unit " .. leftToken)
+        fsLog:Warning(roleError, leftToken)
     end
 
     if not rightRole then
-        fsLog:Warning("Failed to determine role for unit " .. rightToken)
+        fsLog:Warning(roleError, rightToken)
     end
 
     if not leftClass then
-        fsLog:Warning("Failed to determine class for unit " .. leftToken)
+        fsLog:Warning(classError, leftToken)
     end
 
     if not rightClass then
-        fsLog:Warning("Failed to determine class for unit " .. rightToken)
+        fsLog:Warning(classError, rightToken)
     end
 
     -- check their role + class combination

@@ -1450,7 +1450,7 @@ function M:Init()
         manager.TimeStop = wow.GetTimePreciseSec()
 
         local ms = (manager.TimeStop - manager.TimeStart) * 1000
-        fsLog:Debug(string.format("In-combat sort for %s took %fms, result: %s.", providerName, ms, sorted and "sorted" or "not sorted"))
+        fsLog:Debug("In-combat sort for %s took %fms, result: %s.", providerName, ms, sorted and "sorted" or "not sorted")
     end
 
     function manager:NotifySorted()

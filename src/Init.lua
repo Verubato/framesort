@@ -9,7 +9,7 @@ function addon:InitLocale()
         -- if there is no translation specified, then use the the key itself
         local locale = wow.GetLocale()
         if locale ~= "enUS" then
-            fsLog:Warning(string.format("Missing translation for key '%s' and locale '%s'", key, locale))
+            fsLog:Warning("Missing translation for key '%s' and locale '%s'", key, locale)
         end
 
         return key

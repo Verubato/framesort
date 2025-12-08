@@ -26,7 +26,7 @@ local function ScheduleSort(provider)
 end
 
 local function OnProviderRequiresSort(provider)
-    fsLog:Debug(string.format("Provider %s requested sort.", provider:Name()))
+    fsLog:Debug("Provider %s requested sort.", provider:Name())
     ScheduleSort(provider)
 end
 
@@ -128,7 +128,7 @@ function M:Run(providers)
         addon.Modules.Macro:Run()
 
         local stop = wow.GetTimePreciseSec()
-        fsLog:Debug(string.format("Overall run time took %fms", (stop - start) * 1000))
+        fsLog:Debug("Overall run time took %fms", (stop - start) * 1000)
     end, "Runner")
 end
 
