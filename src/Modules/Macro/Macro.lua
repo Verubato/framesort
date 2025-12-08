@@ -88,7 +88,7 @@ local function OnEditMacro(id, _, _, _)
         local updated = UpdateMacro(id, nil, nil, true)
 
         if updated then
-            fsLog:Debug("Updated macro: " .. id)
+            fsLog:Debug("Updated macro: %s", id)
         end
     end, "EditMacro" .. id)
 end

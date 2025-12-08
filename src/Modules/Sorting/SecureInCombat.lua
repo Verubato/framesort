@@ -1362,7 +1362,7 @@ local function ConfigureHeader(header)
         local frame = children[index]
 
         if not frame then
-            fsLog:Error("Failed to find unit button " .. index)
+            fsLog:Error("Failed to find unit button %s", index)
             return
         end
 

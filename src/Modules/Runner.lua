@@ -95,7 +95,7 @@ local function OnUpdate()
 end
 
 local function OnEvent(_, event)
-    fsLog:Debug("Event: " .. event)
+    fsLog:Debug("Event: %s", event)
 
     -- flag that a run needs to occur
     -- the reason we do this instead of just running straight away is because multiple events may have fired during a single frame

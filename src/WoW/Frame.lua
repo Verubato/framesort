@@ -224,7 +224,7 @@ function M:ExtractUnitFrames(container, visibleOnly, hasUnit, containerVisible)
 
             if frame:GetTop() == nil or frame:GetLeft() == nil then
                 -- TODO: does this still happen?
-                fsLog:Warning("Frame '" .. frame:GetName() .. "' has no position.")
+                fsLog:Warning("Frame '%s' has no position.", frame:GetName() or "nil")
                 return false
             end
 
@@ -267,7 +267,7 @@ function M:ExtractGroups(container, visibleOnly)
 
             if frame:GetTop() == nil or frame:GetLeft() == nil then
                 -- TODO: does this still happen?
-                fsLog:Warning("Frame '" .. frame:GetName() .. "' has no position.")
+                fsLog:Warning("Frame '%s' has no position.", frame:GetName() or "nil")
                 return false
             end
 
