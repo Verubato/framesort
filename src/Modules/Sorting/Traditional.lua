@@ -36,7 +36,7 @@ function M:TrySort()
     end
 
     local stop = wow.GetTimePreciseSec()
-    fsLog:Debug(string.format("Traditional sort took %fms, result: %s.", (stop - start) * 1000, sorted and "sorted" or "not sorted"))
+    fsLog:Debug("Traditional sort took %fms, result: %s.", (stop - start) * 1000, sorted and "sorted" or "not sorted")
 
     return sorted
 end

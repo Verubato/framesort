@@ -41,26 +41,30 @@ end
 
 ---Logs a debug message.
 ---@param msg string
-function M:Debug(msg)
-    Write(msg, logLevelDebug)
+function M:Debug(msg, ...)
+    local formatted = string.format(msg, ...)
+    Write(formatted, logLevelDebug)
 end
 
 ---Logs a warning message.
 ---@param msg string
-function M:Warning(msg)
-    Write(msg, logLevelWarning)
+function M:Warning(msg, ...)
+    local formatted = string.format(msg, ...)
+    Write(formatted, logLevelWarning)
 end
 
 ---Logs an error message.
 ---@param msg string
-function M:Error(msg)
-    Write(msg, logLevelError)
+function M:Error(msg, ...)
+    local formatted = string.format(msg, ...)
+    Write(formatted, logLevelError)
 end
 
 ---Logs a message.
 ---@param msg string
-function M:Log(msg, level)
-    Write(msg, level)
+function M:Log(msg, level, ...)
+    local formatted = string.format(msg, ...)
+    Write(formatted, level)
 end
 
 ---Adds a callback to be invoked whenever a log entry is added.

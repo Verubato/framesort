@@ -95,7 +95,7 @@ local function GetNextTarget()
         local guid = wow.UnitGUID(unit)
 
         if not guid then
-            fsLog:Warning(string.format("Unable to request spec information for unit %s because their GUID is nil.", unit))
+            fsLog:Warning("Unable to request spec information for unit %s because their GUID is nil.", unit)
         -- this shouldn't be possible, but it does happen for some reason
         elseif not wow.issecretvalue(guid) then
             local cacheEntry = unitGuidToSpec[guid]
@@ -104,7 +104,7 @@ local function GetNextTarget()
                 return unit
             end
         else
-            fsLog:Warning(string.format("Unable to request spec information for unit %s because their GUID is a secret.", unit))
+            fsLog:Warning("Unable to request spec information for unit %s because their GUID is a secret.", unit)
         end
     end
 
@@ -113,7 +113,7 @@ local function GetNextTarget()
         local guid = wow.UnitGUID(unit)
 
         if not guid then
-            fsLog:Warning(string.format("Unable to request spec information for unit %s because their GUID is nil.", unit))
+            fsLog:Warning("Unable to request spec information for unit %s because their GUID is nil.", unit)
         -- this shouldn't be possible, but it does happen for some reason
         elseif not wow.issecretvalue(guid) then
             local cacheEntry = unitGuidToSpec[guid]
@@ -128,7 +128,7 @@ local function GetNextTarget()
                 return unit
             end
         else
-            fsLog:Warning(string.format("Unable to request spec information for unit '%s' because their GUID is a secret.", unit))
+            fsLog:Warning("Unable to request spec information for unit '%s' because their GUID is a secret.", unit)
         end
     end
 

@@ -142,7 +142,7 @@ local function UpdateTargets()
     UpdateAdjacentTargets(friendlyUnits)
 
     local stop = wow.GetTimePreciseSec()
-    fsLog:Debug(string.format("Update targets took %fms, %d updated.", (stop - start) * 1000, updatedCount))
+    fsLog:Debug("Update targets took %fms, %d updated.", (stop - start) * 1000, updatedCount)
 end
 
 local function InitAdjacentTargeting()
