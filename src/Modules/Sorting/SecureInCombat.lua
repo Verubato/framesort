@@ -19,6 +19,31 @@ local petHeader = nil
 local headers = {}
 local secureMethods = {}
 
+-- Findings:
+-- * Calling RunAttribute has a massive overhead.
+-- * RoundNative performs about 10x faster than the RunAttribute version.
+-- So we want to avoid calling RunAttribute and instead inline code for tight loops.
+secureMethods["OverheadTest"] = [[
+    local run = control or self
+    local times = 1000
+    local decimalPlaces = 0
+
+    run:CallMethod("StartTimer", "RoundMethod")
+    for i = 1, times do
+        local number = i + random()
+        local rounded = run:RunAttribute("Round", number, decimalPlaces)
+    end
+    run:CallMethod("StopTimer", "RoundMethod", "RoundMethod took %fms.")
+
+    run:CallMethod("StartTimer", "RoundNative")
+    for i = 1, times do
+        local number = i + random()
+        local mult = 10 ^ (decimalPlaces or 0)
+        local rounded = math.floor(number * mult + 0.5) / mult
+    end
+    run:CallMethod("StopTimer", "RoundNative", "RoundNative took %fms.")
+]]
+
 -- rounds a number to the specified decimal places
 secureMethods["Round"] = [[
     local number, decimalPlaces = ...
@@ -1437,6 +1462,18 @@ local function ConfigureHeader(header)
     -- must be shown for it to work
     header:SetPoint("TOPLEFT", wow.UIParent, "TOPLEFT")
     header:Show()
+end
+
+function M:RunOverheadTest()
+    if wow.InCombatLockdown() or not manager then
+        return
+    end
+
+    manager:Execute([[
+        local run = control or self
+
+        run:RunAttribute("OverheadTest")
+    ]])
 end
 
 function M:Init()
