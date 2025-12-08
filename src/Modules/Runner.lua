@@ -38,12 +38,10 @@ end
 
 local function Run(forceRunAll)
     if runAll or forceRunAll then
-        fsLog:Debug("Sorting all frame providers.")
         M:Run()
     else
         local array = {}
         for provider, _ in pairs(runProviders) do
-            fsLog:Debug("Sorting " .. provider:Name())
             array[#array + 1] = provider
         end
 
