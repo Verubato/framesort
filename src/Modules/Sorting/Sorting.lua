@@ -30,7 +30,6 @@ function M:Run(provider)
         return
     end
 
-    local start = wow.GetTimePreciseSec()
     local sorted = false
 
     if addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Traditional then
@@ -38,9 +37,6 @@ function M:Run(provider)
     elseif addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Secure then
         sorted = M.Secure:TrySort(provider)
     end
-
-    local stop = wow.GetTimePreciseSec()
-    fsLog:Debug(string.format("Sort took %fms, result: %s.", (stop - start) * 1000, sorted and "sorted" or "not sorted"))
 
     if sorted then
         M:NotifySorted()

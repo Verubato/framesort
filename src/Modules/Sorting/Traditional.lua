@@ -3,6 +3,7 @@ local _, addon = ...
 local wow = addon.WoW.Api
 local fsCompare = addon.Modules.Sorting.Comparer
 local fsFrame = addon.WoW.Frame
+local fsLog = addon.Logging.Log
 local M = {}
 addon.Modules.Sorting.Traditional = M
 
@@ -15,6 +16,7 @@ function M:TrySort()
         return false
     end
 
+    local start = wow.GetTimePreciseSec()
     local sorted = false
     local sortFunction = fsCompare:SortFunction()
 
@@ -32,6 +34,9 @@ function M:TrySort()
         wow.CompactRaidFrameContainer_SetFlowSortFunction(wow.CompactRaidFrameContainer, sortFunction)
         sorted = true
     end
+
+    local stop = wow.GetTimePreciseSec()
+    fsLog:Debug(string.format("Traditional sort took %fms, result: %s.", (stop - start) * 1000, sorted and "sorted" or "not sorted"))
 
     return sorted
 end
