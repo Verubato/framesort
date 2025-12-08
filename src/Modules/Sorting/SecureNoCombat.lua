@@ -444,7 +444,7 @@ local function TrySortContainer(container)
         local unitSortFunction = fsCompare:EnemySortFunction()
         sortFunction = FrameSortFunction(unitSortFunction)
     else
-        fsLog:Error("Unknown container type: " .. (container.Type or "nil"))
+        fsLog:Error("Unknown container type: %s", container.Type or "nil")
         return false
     end
 
@@ -472,7 +472,7 @@ local function TrySortContainer(container)
     elseif container.LayoutType == fsFrame.LayoutType.Hard then
         sorted = HardArrange(container, frames, spacing)
     else
-        fsLog:Error("Unknown layout type: " .. (container.Type or "nil"))
+        fsLog:Error("Unknown layout type: %s", container.Type or "nil")
         return false
     end
 

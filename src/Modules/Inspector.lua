@@ -78,7 +78,7 @@ local function Inspect(unit)
     local after = cacheEntry.SpecId
 
     if before ~= after then
-        fsLog:Debug("Found spec information for unit: " .. unit .. " spec id: " .. specId)
+        fsLog:Debug("Found spec information for unit %s spec id %s.", unit, specId)
         OnNewSpecInformation()
     end
 

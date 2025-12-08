@@ -447,7 +447,7 @@ function M:UpgradeOptions(options)
 
         assert(next ~= nil)
 
-        fsLog:Debug("Upgrading options to version " .. nextVersion .. ".")
+        fsLog:Debug("Upgrading options to version %s.", nextVersion)
         next(M, options)
     end
 end
