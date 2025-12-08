@@ -205,6 +205,8 @@ FrameSort поддерживает следующее:
 \n
   - Gladdy: арена.
 \n
+  - Arena Core: 0.9.1.7+.
+\n
 ]]
 
 -- # Api screen #

@@ -207,6 +207,8 @@ FrameSort는 다음을 지원합니다:
 \n
   - Gladdy: 투기장.
 \n
+  - Arena Core: 0.9.1.7+.
+\n
 ]]
 
 -- # Api screen #

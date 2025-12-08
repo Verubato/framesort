@@ -207,6 +207,8 @@ FrameSort prend en charge les éléments suivants :
 \n
   - Gladdy : arène.
 \n
+  - Arena Core: 0.9.1.7+.
+\n
 ]]
 
 -- # Api screen #

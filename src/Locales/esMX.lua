@@ -207,6 +207,8 @@ FrameSort es compatible con lo siguiente:
 \n
   - Gladdy: arena.
 \n
+  - Arena Core: 0.9.1.7+.
+\n
 ]]
 
 -- # Api screen #
