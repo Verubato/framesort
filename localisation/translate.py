@@ -24,7 +24,7 @@ def translate_lua(localization_string, target_language):
 
     # Make the API call
     response = openai.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gpt-5",
         messages=[
             {"role": "system", "content": "You are a helpful assistant who translates code."},
             {"role": "user", "content": prompt}
