@@ -175,24 +175,40 @@ secureMethods["FrameChain"] = [[
     return true
 ]]
 
--- bubble sort because it's easier to write
+-- stable insertion sort
 -- not going to write an nlog(n) sort algorithm in this environment
 secureMethods["Sort"] = [[
     local run = control or self
-    local arrayVariable, compareFunction = ...
-    local array, compare = _G[arrayVariable], _G[compareFunction]
+    local arrayName, compareName = ...
+    local array = _G[arrayName]
 
-    for i = 1, #array do
-        for j = 1, #array - i do
-            Left, Right = array[j], array[j + 1]
+    for i = 2, #array do
+        local currentValue = array[i]
+        local insertPos = i - 1
 
-            if run:RunAttribute(compareFunction, "Left", "Right") then
-                array[j], array[j + 1] = array[j + 1], array[j]
+        -- Shift larger elements to the right
+        while insertPos >= 1 do
+            Left  = array[insertPos]
+            Right = currentValue
+
+            -- Should Left move after Right?
+            local shouldShift = run:RunAttribute(compareName, "Left", "Right")
+
+            if shouldShift then
+                -- Move the larger element one slot to the right
+                array[insertPos + 1] = array[insertPos]
+                insertPos = insertPos - 1
+            else
+                break
             end
-
-            Left, Right = nil, nil
         end
+
+        -- Insert the saved element into its final position
+        array[insertPos + 1] = currentValue
     end
+
+    -- Cleanup
+    Left, Right = nil, nil
 ]]
 
 secureMethods["CompareFrameTopLeft"] = [[
