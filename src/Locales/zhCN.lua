@@ -207,6 +207,8 @@ FrameSort 支持以下内容：
 \n
   - Gladdy：竞技场。
 \n
+  - Arena Core: 0.9.1.7+.
+\n
 ]]
 
 -- # Api screen #
