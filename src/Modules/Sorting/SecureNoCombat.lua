@@ -229,7 +229,8 @@ local function HardArrange(container, frames, spacing, offset, blockHeight)
 
     local relativeTo = container.Anchor or container.Frame
     local isHorizontalLayout = container.IsHorizontalLayout and container:IsHorizontalLayout() or false
-    local blocksPerLine = container.FramesPerLine and container:FramesPerLine()
+    -- subtract 1 because row/col are 0 based
+    local blocksPerLine = (container.FramesPerLine and container:FramesPerLine() or 6) - 1
     local anchorPoint = container.AnchorPoint or "TOPLEFT"
 
     offset = offset or (container.FramesOffset and container:FramesOffset())

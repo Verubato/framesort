@@ -595,6 +595,7 @@ secureMethods["HardArrange"] = [[
     local verticalSpacing = spacing and spacing.Vertical or 0
     local horizontalSpacing = spacing and spacing.Horizontal or 0
     local isHorizontalLayout = container.IsHorizontalLayout
+    local blocksPerLine = (container.FramesPerLine or 6) - 1
     local _, _, firstFrameWidth, firstFrameHeight = frames[1]:GetRect()
     local offset = container.Offset or newtable()
     local blockWidth = firstFrameWidth
@@ -619,13 +620,13 @@ secureMethods["HardArrange"] = [[
             )
 
         -- if we've reached the end then wrap around
-        if isHorizontalLayout and container.FramesPerLine and col >= container.FramesPerLine then
+        if isHorizontalLayout and col >= blocksPerLine then
             col = 0
             row = row + 1
 
             xOffset = offset.X
             yOffset = -row * (blockHeight + verticalSpacing) + offset.Y
-        elseif not isHorizontalLayout and container.FramesPerLine and row >= container.FramesPerLine then
+        elseif not isHorizontalLayout and row >= blocksPerLine then
             row = 0
             col = col + 1
 
