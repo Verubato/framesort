@@ -983,7 +983,7 @@ secureMethods["TrySort"] = [[
         Container = item.Container
         Provider = item.Provider
 
-        run:CallMethod("ProviderSortStarting", Provider.Name)
+        run:CallMethod("StartTimer", "TrySort")
 
         local providerSorted = false
 
@@ -993,7 +993,8 @@ secureMethods["TrySort"] = [[
             providerSorted = run:RunAttribute("TrySortContainer", "Container", "Provider") or providerSorted
         end
 
-        run:CallMethod("ProviderSortEnding", Provider.Name, providerSorted)
+        local message = format("In-combat sort for %s took %sms, result: %s.", Provider.Name, "%f", providerSorted and "sorted" or "not sorted")
+        run:CallMethod("StopTimer", "TrySort", message)
         Provider = nil
         Container = nil
 
@@ -1443,15 +1444,29 @@ function M:Init()
 
     InjectSecureHelpers(manager)
 
-    function manager:ProviderSortStarting()
-        manager.TimeStart = wow.GetTimePreciseSec()
+    function manager:StartTimer(name)
+        if not name then
+            fsLog:Error("StartTimer called without a name.")
+            return
+        end
+
+        manager[name .. "TimeStart"] = wow.GetTimePreciseSec()
     end
 
-    function manager:ProviderSortEnding(providerName, sorted)
-        manager.TimeStop = wow.GetTimePreciseSec()
+    function manager:StopTimer(name, message)
+        local start = manager[name .. "TimeStart"]
 
-        local ms = (manager.TimeStop - manager.TimeStart) * 1000
-        fsLog:Debug("In-combat sort for %s took %fms, result: %s.", providerName, ms, sorted and "sorted" or "not sorted")
+        if not start then
+            fsLog:Error("StopTimer called without corresponding StartTimer for %s.", name)
+            return
+        end
+
+        local stop = wow.GetTimePreciseSec()
+
+        local ms = (stop - start) * 1000
+        fsLog:Debug(message, ms)
+
+        manager[name .. "TimeStart"] = nil
     end
 
     function manager:NotifySorted()
