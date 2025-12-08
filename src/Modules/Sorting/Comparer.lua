@@ -199,8 +199,15 @@ local function CompareRole(leftToken, rightToken, isArena)
             fsLog:Error("Your wow client is missing the GetArenaOpponentSpec API.")
         end
 
+        if not leftSpec then
+            fsLog:Error("Failed to determine spec for arena unit " .. leftToken)
+        end
+
+        if not rightSpec then
+            fsLog:Error("Failed to determine spec for arena unit " .. rightToken)
+        end
+
         if not leftSpec or not rightSpec then
-            fsLog:Error("Failed to determine specs for arena units, falling back to group sort.")
             return CompareGroup(leftToken, rightToken, isArena)
         end
 
