@@ -74,7 +74,7 @@ local function Inspect(unit)
     -- the spec id may be 0, in which case we'll use the previous value (if one exists)
     local before = cacheEntry.SpecId
     cacheEntry.SpecId = specId ~= 0 and specId or cacheEntry.SpecId
-    cacheEntry.LastSeen = wow.GetTime()
+    cacheEntry.LastSeen = wow.GetTimePreciseSec()
     local after = cacheEntry.SpecId
 
     if before ~= after then
@@ -123,7 +123,7 @@ local function GetNextTarget()
                 and cacheEntry.SpecId == 0
                 and wow.CanInspect(unit)
                 and wow.UnitIsConnected(unit)
-                and (not cacheEntry.LastAttempt or (wow.GetTime() - cacheEntry.LastAttempt > cacheTimeout))
+                and (not cacheEntry.LastAttempt or (wow.GetTimePreciseSec() - cacheEntry.LastAttempt > cacheTimeout))
             then
                 return unit
             end
@@ -148,12 +148,12 @@ local function InspectNext()
     wow.NotifyInspect(unit)
     weRequestedInspect = true
 
-    inspectStarted = wow.GetTime()
+    inspectStarted = wow.GetTimePreciseSec()
     unitInspecting = unit
 
     -- create a cache entry for this unit so we don't attempt this unit again in the next iteration
     local cacheEntry = EnsureCacheEntry(unit)
-    cacheEntry.LastAttempt = wow.GetTime()
+    cacheEntry.LastAttempt = wow.GetTimePreciseSec()
 
     fsLog:Debug("Requesting inspection for unit: " .. unit)
 
@@ -211,7 +211,7 @@ local function OnUpdate()
         return
     end
 
-    local timeSinceLastInspect = inspectStarted and (wow.GetTime() - inspectStarted)
+    local timeSinceLastInspect = inspectStarted and (wow.GetTimePreciseSec() - inspectStarted)
 
     -- if we've requested an inspection and we're still within the timeout period
     if unitInspecting ~= nil and timeSinceLastInspect < inspectTimeout then
@@ -232,12 +232,12 @@ local function OnNotifyInspect(unit)
 
     -- override the inspected unit so we get it's information
     unitInspecting = unit
-    inspectStarted = wow.GetTime()
+    inspectStarted = wow.GetTimePreciseSec()
     weRequestedInspect = false
 end
 
 local function PurgeOldEntries()
-    local now = wow.GetTime()
+    local now = wow.GetTimePreciseSec()
     local toRemove = {}
 
     -- to keep the saved variable size down
