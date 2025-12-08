@@ -11,41 +11,66 @@ local eventFrame = nil
 local combatFrame = nil
 local pvpTimerType = 1
 local run = false
+local runAll = false
+---@type { [FrameProvider]: boolean }
+local runProviders = {}
 
-local function ScheduleSort()
+local function ScheduleSort(provider)
     run = true
+
+    if provider then
+        runProviders[provider] = true
+    else
+        runAll = true
+    end
 end
 
 local function OnProviderRequiresSort(provider)
     fsLog:Debug(string.format("Provider %s requested sort.", provider:Name()))
-    ScheduleSort()
+    ScheduleSort(provider)
 end
 
 local function OnEditModeExited()
     if fsProviders.Blizzard:Enabled() then
-        ScheduleSort()
+        ScheduleSort(fsProviders.Blizzard)
     end
 end
 
-local function OnCombat(_, event)
+local function Run(forceRunAll)
+    if runAll or forceRunAll then
+        fsLog:Debug("Sorting all frame providers.")
+        M:Run()
+    else
+        local array = {}
+        for provider, _ in pairs(runProviders) do
+            fsLog:Debug("Sorting " .. provider:Name())
+            array[#array + 1] = provider
+        end
+
+        M:Run(array)
+    end
+
+    runProviders = {}
+    runAll = false
+    run = false
+end
+
+local function OnCombat()
     if not run then
         return
     end
 
-    if event == wow.Events.PLAYER_REGEN_DISABLED then
-        -- we are entering combat, last chance to run a sort if one was scheduled
-        -- there is a scenario with Gladius where an enemy stealthy comes out of stealth
-        -- at the same time as the play enters combat, e.g. a rogue cheapshot on you
-        -- at this time an ARENA_OPPONENT_UPDATE is sent with "seen" parameter
-        -- which triggers gladius to reposition it's frames
-        -- by default we would then schedule a sort to occur, but I think it's too late
-        -- as OnUpdate may have already ran this frame, and the next frame we are in lockdown
-        -- this is all conjecture, need to confirm what order of events this happens in
-        -- and whether this is actually needed or not
-        -- TODO: is this required, or will OnUpdate run anyway?
-        M:Run()
-        run = false
-    end
+    -- we are entering combat, last chance to run a sort if one was scheduled
+    -- there is a scenario with Gladius where an enemy stealthy comes out of stealth
+    -- at the same time as the play enters combat, e.g. a rogue cheapshot on you
+    -- at this time an ARENA_OPPONENT_UPDATE is sent with "seen" parameter
+    -- which triggers gladius to reposition it's frames
+    -- by default we would then schedule a sort to occur, but I think it's too late
+    -- as OnUpdate may have already ran this frame, and the next frame we are in lockdown
+    -- this is all conjecture, need to confirm what order of events this happens in
+    -- and whether this is actually needed or not
+    -- TODO: is this required, or will OnUpdate run anyway?
+    Run(true)
 end
 
 local function OnTimer(_, _, timerType, timeSeconds)
@@ -68,8 +93,7 @@ local function OnUpdate()
         return
     end
 
-    run = false
-    M:Run()
+    Run()
 end
 
 local function OnEvent(_, event)
@@ -81,7 +105,7 @@ local function OnEvent(_, event)
     ScheduleSort()
 end
 
-function M:Run(provider)
+function M:Run(providers)
     fsScheduler:RunWhenCombatEnds(function()
         -- run auto promotion first
         addon.Modules.AutoLeader:Run()
@@ -90,7 +114,13 @@ function M:Run(provider)
         addon.Modules.HidePlayer:Run()
 
         -- now sort as it affects targeting and macros
-        addon.Modules.Sorting:Run(provider)
+        if providers and #providers > 0 then
+            for _, provider in ipairs(providers) do
+                addon.Modules.Sorting:Run(provider)
+            end
+        else
+            addon.Modules.Sorting:Run()
+        end
 
         addon.Modules.Targeting:Run()
         addon.Modules.Macro:Run()
@@ -144,7 +174,6 @@ function M:Init()
         combatFrame = wow.CreateFrame("Frame")
         combatFrame:HookScript("OnEvent", OnCombat)
         combatFrame:RegisterEvent(wow.Events.PLAYER_REGEN_DISABLED)
-        combatFrame:RegisterEvent(wow.Events.PLAYER_REGEN_ENABLED)
 
         -- perform the initial run
         fsLog:Debug("First run.")
