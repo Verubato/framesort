@@ -938,8 +938,6 @@ secureMethods["TrySort"] = [[
 
     if not friendlyEnabled and not enemyEnabled then return false end
 
-    run:CallMethod("SortStarting")
-
     local loadedUnits = self:GetAttribute("LoadedUnits")
     if not loadedUnits then
         run:RunAttribute("LoadUnits")
@@ -984,17 +982,26 @@ secureMethods["TrySort"] = [[
         Container = item.Container
         Provider = item.Provider
 
+        run:CallMethod("ProviderSortStarting", Provider.Name)
+
+        local providerSorted = false
+
         if Container.IsGrouped then
-            sorted = run:RunAttribute("TrySortContainerGroups", "Container", "Provider") or sorted
+            providerSorted = run:RunAttribute("TrySortContainerGroups", "Container", "Provider") or providerSorted
         else
-            sorted = run:RunAttribute("TrySortContainer", "Container", "Provider") or sorted
+            providerSorted = run:RunAttribute("TrySortContainer", "Container", "Provider") or providerSorted
         end
 
+        run:CallMethod("ProviderSortEnding", Provider.Name, providerSorted)
         Provider = nil
         Container = nil
+
+        sorted = sorted or providerSorted
     end
 
-    run:CallMethod("SortEnding", sorted)
+    if sorted then
+        run:CallMethod("NotifySorted")
+    end
 
     return sorted
 ]]
@@ -1435,19 +1442,19 @@ function M:Init()
 
     InjectSecureHelpers(manager)
 
-    function manager:SortStarting()
+    function manager:ProviderSortStarting()
         manager.TimeStart = wow.GetTimePreciseSec()
     end
 
-    function manager:SortEnding(sorted)
+    function manager:ProviderSortEnding(providerName, sorted)
         manager.TimeStop = wow.GetTimePreciseSec()
 
         local ms = (manager.TimeStop - manager.TimeStart) * 1000
-        fsLog:Debug(string.format("In-combat sort took %fms, result: %s.", ms, sorted and "sorted" or "not sorted"))
+        fsLog:Debug(string.format("In-combat sort for %s took %fms, result: %s.", providerName, ms, sorted and "sorted" or "not sorted"))
+    end
 
-        if sorted then
-            fsSorting:NotifySorted()
-        end
+    function manager:NotifySorted()
+        fsSorting:NotifySorted()
     end
 
     function manager:Log(msg, level)

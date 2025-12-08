@@ -616,6 +616,7 @@ function M:TrySort(provider)
     end
 
     for _, p in ipairs(providers) do
+        local start = wow.GetTimePreciseSec()
         local containers = fsEnumerable
             :From(p:Containers())
             :Where(function(container)
@@ -643,13 +644,19 @@ function M:TrySort(provider)
             end)
             :ToTable()
 
+        local providerSorted = false
         for _, container in ipairs(containers) do
             if container.IsGrouped and container:IsGrouped() then
-                sorted = TrySortContainerGroups(container) or sorted
+                providerSorted = TrySortContainerGroups(container) or providerSorted
             else
-                sorted = TrySortContainer(container) or sorted
+                providerSorted = TrySortContainer(container) or providerSorted
             end
         end
+
+        sorted = sorted or providerSorted
+
+        local stop = wow.GetTimePreciseSec()
+        fsLog:Debug(string.format("Sort for %s took %fms, result: %s.", p:Name(), (stop - start) * 1000, providerSorted and "sorted" or "not sorted"))
     end
 
     return sorted

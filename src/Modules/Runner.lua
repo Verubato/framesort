@@ -107,6 +107,8 @@ end
 
 function M:Run(providers)
     fsScheduler:RunWhenCombatEnds(function()
+        local start = wow.GetTimePreciseSec()
+
         -- run auto promotion first
         addon.Modules.AutoLeader:Run()
 
@@ -124,6 +126,9 @@ function M:Run(providers)
 
         addon.Modules.Targeting:Run()
         addon.Modules.Macro:Run()
+
+        local stop = wow.GetTimePreciseSec()
+        fsLog:Debug(string.format("Overall run time took %fms", (stop - start) * 1000))
     end, "Runner")
 end
 
