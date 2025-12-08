@@ -30,12 +30,6 @@ local function OnProviderRequiresSort(provider)
     ScheduleSort(provider)
 end
 
-local function OnEditModeExited()
-    if fsProviders.Blizzard:Enabled() then
-        ScheduleSort(fsProviders.Blizzard)
-    end
-end
-
 local function Run(forceRunAll)
     if runAll or forceRunAll then
         M:Run()
@@ -144,10 +138,6 @@ function M:Init()
     for _, provider in ipairs(fsProviders.All) do
         -- for any special events that individual providers request a sort for
         provider:RegisterRequestSortCallback(OnProviderRequiresSort)
-    end
-
-    if wow.EventRegistry then
-        wow.EventRegistry:RegisterCallback(events.EditModeExit, OnEditModeExited)
     end
 
     -- delay the event subscriptions to hopefully help with being notified after other addons
