@@ -86,7 +86,6 @@
 ---@field GetAddOnMetadata fun(nameOrIndex: string, field: string): string
 -- time related
 ---@field GetTimePreciseSec fun(): number
----@field GetTime fun(): number
 -- other
 ---@field ReloadUI fun()
 ---@field GetLocale fun(): string
