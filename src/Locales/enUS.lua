@@ -153,7 +153,7 @@ Need help creating a macro?
 \n
 Head over to the FrameSort discord server and use our AI powered macro bot!
 \n
-Simply '@Macro Bot' with your question in the macro-bot-channel.
+Simply '@Macro Bot' with your question in the #macro-bot-channel.
 ]]
 
 -- # Macro Variables screen # --

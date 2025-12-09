@@ -158,7 +158,7 @@ L["Discord Bot Blurb"] = [[
 \n
 前往 FrameSort 的 Discord 服务器，使用我们的 AI 宏机器人！
 \n
-只需在 macro-bot-channel 中 '@Macro Bot' 提问即可。
+只需在 #macro-bot-channel 中 '@Macro Bot' 提问即可。
 ]]
 
 -- # Macro Variables screen # --

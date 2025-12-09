@@ -156,7 +156,7 @@ L["Discord Bot Blurb"] = [[
 \n
 Зайдите на сервер Discord FrameSort и воспользуйтесь нашим ботом для макросов на базе ИИ!
 \n
-Просто напишите '@Macro Bot' со своим вопросом в канале macro-bot-channel.
+Просто напишите '@Macro Bot' со своим вопросом в канале #macro-bot-channel.
 ]]
 
 -- # Macro Variables screen # --
