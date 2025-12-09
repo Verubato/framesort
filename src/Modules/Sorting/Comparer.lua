@@ -125,6 +125,11 @@ end
 
 local function PrecomputeUnitMetadata(units)
     local meta = {}
+
+    if #units == 0 then
+        return meta
+    end
+
     local start = wow.GetTimePreciseSec()
     local inRaid = wow.IsInRaid()
     local trim = inRaid and 5 or 6
