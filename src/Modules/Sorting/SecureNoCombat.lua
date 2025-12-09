@@ -4,6 +4,7 @@ local fsProviders = addon.Providers
 local fsCompare = addon.Modules.Sorting.Comparer
 local fsFrame = addon.WoW.Frame
 local fsUnit = addon.WoW.Unit
+local fsSortedUnits = addon.Modules.Sorting.SortedUnits
 local fsEnumerable = addon.Collections.Enumerable
 local fsMath = addon.Numerics.Math
 local fsLog = addon.Logging.Log
@@ -11,22 +12,42 @@ local wow = addon.WoW.Api
 local M = {}
 addon.Modules.Sorting.Secure.NoCombat = M
 
-local function FrameSortFunction(unitSortFunction)
-    return function(left, right)
+local function SortFramesByUnits(frames, sortedUnits)
+    local unitsToIndex = {}
+    for index, unit in ipairs(sortedUnits) do
+        unitsToIndex[unit] = index
+    end
+
+    local lookupError = "Failed to determine position of unit %s within the sorted array"
+
+    table.sort(frames, function(leftFrame, rightFrame)
         -- not sure why sometimes we get null arguments here, but it does happen on very rare occasions
         -- https://github.com/Verubato/framesort/issues/33
-        if not left then
+        if not leftFrame then
             return false
         end
-        if not right then
+        if not rightFrame then
             return true
         end
 
-        local leftUnit = fsFrame:GetFrameUnit(left)
-        local rightUnit = fsFrame:GetFrameUnit(right)
+        local leftUnit = fsFrame:GetFrameUnit(leftFrame)
+        local rightUnit = fsFrame:GetFrameUnit(rightFrame)
 
-        return unitSortFunction(leftUnit, rightUnit)
-    end
+        local leftIndex = unitsToIndex[leftUnit]
+        local rightIndex = unitsToIndex[rightUnit]
+
+        if not leftIndex then
+            fsLog:Error(lookupError, leftUnit)
+            return false
+        end
+
+        if not rightIndex then
+            fsLog:Error(lookupError, rightUnit)
+            return false
+        end
+
+        return leftIndex < rightIndex
+    end)
 end
 
 ---@return boolean sorted
@@ -314,7 +335,7 @@ end
 ---@return boolean
 local function SetNameList(container)
     local isFriendly = container.Type == fsFrame.ContainerType.Party or container.Type == fsFrame.ContainerType.Raid
-    local units = isFriendly and fsUnit:FriendlyUnits() or fsUnit:EnemyUnits()
+    local units = isFriendly and fsSortedUnits:FriendlyUnits() or fsSortedUnits:EnemyUnits()
 
     if isFriendly and #units == 0 then
         -- ensure player always exists for friendly units
@@ -332,10 +353,6 @@ local function SetNameList(container)
 
         units = filtered
     end
-
-    local sortFunction = fsCompare:SortFunction(units)
-
-    table.sort(units, sortFunction)
 
     local previousSortMethod = container.Frame:GetAttribute("sortMethod")
     local previousGroupFilter = container.Frame:GetAttribute("groupFilter")
@@ -429,27 +446,19 @@ local function TrySortContainer(container)
         return SetNameList(container)
     end
 
+    local sortedUnits = nil
     local frames = (container.Frames and container:Frames()) or fsFrame:ExtractUnitFrames(container.Frame, container.VisibleOnly)
-    local sortFunction = nil
 
     if container.Type == fsFrame.ContainerType.Party or container.Type == fsFrame.ContainerType.Raid then
-        local units = fsEnumerable
-            :From(frames)
-            :Map(function(frame)
-                return fsFrame:GetFrameUnit(frame)
-            end)
-            :ToTable()
-        local unitSortFunction = fsCompare:SortFunction(units)
-        sortFunction = FrameSortFunction(unitSortFunction)
+        sortedUnits = fsSortedUnits:FriendlyUnits()
     elseif container.Type == fsFrame.ContainerType.EnemyArena then
-        local unitSortFunction = fsCompare:EnemySortFunction()
-        sortFunction = FrameSortFunction(unitSortFunction)
+        sortedUnits = fsSortedUnits:EnemyUnits()
     else
         fsLog:Error("Unknown container type: %s", container.Type or "nil")
         return false
     end
 
-    table.sort(frames, sortFunction)
+    SortFramesByUnits(frames, sortedUnits)
 
     local spacing = nil
 

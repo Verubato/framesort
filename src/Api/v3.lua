@@ -5,6 +5,7 @@ local fsFrame = addon.WoW.Frame
 local fsInspector = addon.Modules.Inspector
 local fsUnit = addon.WoW.Unit
 local fsUnitTracker = addon.Modules.UnitTracker
+local fsSortedUnits = addon.Modules.Sorting.SortedUnits
 local wow = addon.WoW.Api
 local v2 = addon.Api.v2
 
@@ -45,12 +46,12 @@ end
 
 ---Returns a sorted array of friendly unit tokens.
 function M.Sorting:GetFriendlyUnits()
-    return v2.Sorting:GetFriendlyUnits()
+    return fsSortedUnits:FriendlyUnits()
 end
 
 ---Returns a sorted array of enemy unit tokens.
 function M.Sorting:GetEnemyUnits()
-    return v2.Sorting:GetEnemyUnits()
+    return fsSortedUnits:EnemyUnits()
 end
 
 ---Gets the player sort mode.

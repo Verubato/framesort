@@ -3,6 +3,7 @@ local _, addon = ...
 local wow = addon.WoW.Api
 local fsProviders = addon.Providers
 local fsUnit = addon.WoW.Unit
+local fsSortedUnits = addon.Modules.Sorting.SortedUnits
 local fsEnumerable = addon.Collections.Enumerable
 local fsCompare = addon.Modules.Sorting.Comparer
 local fsFrame = addon.WoW.Frame
@@ -56,7 +57,9 @@ end
 local function FilterPets(units)
     return fsEnumerable
         :From(units)
-        :Where(function(x) return not fsUnit:IsPet(x) end)
+        :Where(function(x)
+            return not fsUnit:IsPet(x)
+        end)
         :ToTable()
 end
 
@@ -95,7 +98,6 @@ local function UpdateTargets()
         targetBottomFrame:SetAttribute("unit", bottomNewUnit)
         updatedCount = updatedCount + 1
     end
-
 
     for i, btn in ipairs(targetReverseFrames) do
         local new = friendlyUnits[#friendlyUnits - i] or "none"
@@ -284,7 +286,7 @@ function M:FriendlyFrames()
         return {}
     end
 
-    table.sort(frames, function (x, y)
+    table.sort(frames, function(x, y)
         return fsCompare:CompareTopLeftFuzzy(x, y)
     end)
 
@@ -292,45 +294,25 @@ function M:FriendlyFrames()
 end
 
 function M:FriendlyUnits()
-    local frames = M:FriendlyFrames()
-
-    if frames and #frames > 0 then
-        return fsEnumerable
-            :From(frames)
-            :Map(function(x)
-                return fsFrame:GetFrameUnit(x)
-            end)
-            :ToTable()
-    end
-
-    -- no frames found, fallback to units
-    local units = fsUnit:FriendlyUnits()
     local sortEnabled = fsCompare:FriendlySortMode()
 
-    if not sortEnabled then
-        return units
+    if sortEnabled then
+        return fsSortedUnits:FriendlyUnits()
     end
 
-    table.sort(units, fsCompare:SortFunction(units))
+    -- sort not enabled, fallback to frames
+    local frames = M:FriendlyFrames()
 
-    return units
+    return fsEnumerable
+        :From(frames)
+        :Map(function(x)
+            return fsFrame:GetFrameUnit(x)
+        end)
+        :ToTable()
 end
 
 function M:FriendlyNonPetUnits()
     return FilterPets(M:FriendlyUnits())
-end
-
-function M:EnemyFrames()
-    local units = fsUnit:EnemyUnits()
-    local sortEnabled = fsCompare:EnemySortMode()
-
-    if not sortEnabled then
-        return units
-    end
-
-    table.sort(units, fsCompare:EnemySortFunction())
-
-    return units
 end
 
 function M:EnemyUnits()

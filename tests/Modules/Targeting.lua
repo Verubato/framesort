@@ -1,4 +1,4 @@
----@diagnostic disable: inject-field
+---@type Addon
 local addon
 local wow
 local M = {}
@@ -66,11 +66,19 @@ function M:setup()
     wow.IsInInstance = function()
         return true, "arena"
     end
+    wow.UnitExists = function(unit)
+        return unit == "player" or unit == "party1" or unit == "party2"
+    end
 
-    local config = addon.DB.Options.Sorting.EnemyArena
-    config.Enabled = true
-    config.Reverse = true
-    config.GroupSortMode = "Group"
+    local enemyConfig = addon.DB.Options.Sorting.EnemyArena
+    enemyConfig.Enabled = true
+    enemyConfig.Reverse = true
+    enemyConfig.GroupSortMode = "Group"
+
+    local allyConfig = addon.DB.Options.Sorting.Arena.Default
+    allyConfig.Enabled = true
+    allyConfig.Reverse = true
+    allyConfig.GroupSortMode = "Group"
 end
 
 function M:test_targets_update_on_provider_callback()

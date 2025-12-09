@@ -34,6 +34,9 @@ function M:setup()
     p2.State.Position.Top = 100
     p2.unit = "party2"
 
+    addon.WoW.Api.IsInGroup = function ()
+        return true
+    end
     addon.WoW.Api.UnitExists = function(unit)
         return unit == "player" or unit == "party1" or unit == "party2"
     end

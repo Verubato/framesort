@@ -63,6 +63,7 @@
 
 ---@class SortingModule : IRun, IInitialise
 ---@field Comparer Comparer
+---@field SortedUnits SortedUnits
 ---@field Traditional TraditionalSortingModule
 ---@field Secure SecureSortingModule
 ---@field RegisterPostSortCallback fun(self: table, callback: function)

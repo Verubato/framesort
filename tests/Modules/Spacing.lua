@@ -4,6 +4,8 @@ local addon
 local fsSort
 ---@type FrameUtil
 local fsFrame
+---@type WowApi
+local wow
 
 local M = {}
 local player = nil
@@ -36,6 +38,14 @@ function M:setup()
 
     p2 = frameMock:New("Frame", nil, partyContainer)
     p2.unit = "party2"
+
+    wow = addon.WoW.Api
+    wow.IsInGroup = function()
+        return true
+    end
+    wow.UnitExists = function(unit)
+        return unit == "player" or unit == "party1" or unit == "party2"
+    end
 end
 
 function M:test_space_party_frames()
@@ -81,34 +91,31 @@ function M:test_space_party_frames()
     end
 
     -- top frame shouldn't have moved
-    assertEquals(toPos(player.State.Point),
-        {
-            Point = "TOPLEFT",
-            RelativeTo = partyContainer:GetName(),
-            RelativePoint = "TOPLEFT",
-            XOffset = 0,
-            YOffset = 0,
-        })
+    assertEquals(toPos(player.State.Point), {
+        Point = "TOPLEFT",
+        RelativeTo = partyContainer:GetName(),
+        RelativePoint = "TOPLEFT",
+        XOffset = 0,
+        YOffset = 0,
+    })
 
     -- next frame down should have moved 10 units
-    assertEquals(toPos(p1.State.Point),
-        {
-            Point = "TOPLEFT",
-            RelativeTo = partyContainer:GetName(),
-            RelativePoint = "TOPLEFT",
-            XOffset = 0,
-            YOffset = -110,
-        })
+    assertEquals(toPos(p1.State.Point), {
+        Point = "TOPLEFT",
+        RelativeTo = partyContainer:GetName(),
+        RelativePoint = "TOPLEFT",
+        XOffset = 0,
+        YOffset = -110,
+    })
 
     -- next frame down should have moved 20 units
-    assertEquals(toPos(p2.State.Point),
-        {
-            Point = "TOPLEFT",
-            RelativeTo = partyContainer:GetName(),
-            RelativePoint = "TOPLEFT",
-            XOffset = 0,
-            YOffset = -220,
-        })
+    assertEquals(toPos(p2.State.Point), {
+        Point = "TOPLEFT",
+        RelativeTo = partyContainer:GetName(),
+        RelativePoint = "TOPLEFT",
+        XOffset = 0,
+        YOffset = -220,
+    })
 end
 
 return M
