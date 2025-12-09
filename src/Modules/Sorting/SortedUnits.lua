@@ -122,7 +122,7 @@ local function RefreshEnemyUnits(existingUnits)
 
     local toSort = existingUnits and MergeNewUnits(existingUnits, units) or units
 
-    table.sort(toSort, fsCompare:EnemySortFunction())
+    table.sort(toSort, fsCompare:EnemySortFunction(toSort))
 
     return toSort
 end

@@ -327,7 +327,7 @@ function M:EnemyUnits()
         return units
     end
 
-    table.sort(units, fsCompare:EnemySortFunction())
+    table.sort(units, fsCompare:EnemySortFunction(units))
 
     return units
 end

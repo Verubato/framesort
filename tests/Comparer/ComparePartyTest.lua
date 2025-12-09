@@ -56,7 +56,7 @@ function M:test_sort_player_top()
     config.GroupSortMode = fsConfig.GroupSortMode.Group
 
     local subject = { "party2", "party1", "player", "party3", "party4" }
-    local sortFunction = fsCompare:SortFunction()
+    local sortFunction = fsCompare:SortFunction(subject)
 
     table.sort(subject, sortFunction)
 
@@ -68,7 +68,7 @@ function M:test_sort_player_bottom()
     config.GroupSortMode = fsConfig.GroupSortMode.Group
 
     local subject = { "party2", "party1", "player", "party3", "party4" }
-    local sortFunction = fsCompare:SortFunction()
+    local sortFunction = fsCompare:SortFunction(subject)
 
     table.sort(subject, sortFunction)
 
