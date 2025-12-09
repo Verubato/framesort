@@ -4,6 +4,7 @@ local wow = addon.WoW.Api
 local logLevelDebug = "Debug"
 local logLevelWarning = "Warning"
 local logLevelError = "Error"
+local logLevelCritical = "Critical"
 ---@class Log
 local M = {}
 addon.Logging.Log = M
@@ -28,6 +29,11 @@ local function Write(msg, level)
             Level = level,
             Timestamp = wow.GetTimePreciseSec() - started,
         }
+    end
+
+    -- print critical errors to chat
+    if level == logLevelCritical then
+        print(string.format("|cFFFF0000FrameSort - %s|r", msg))
     end
 end
 

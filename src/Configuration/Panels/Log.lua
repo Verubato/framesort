@@ -16,7 +16,7 @@ local function OnLogEntry(msg, level, timestamp)
 
     local formatted = string.format("%dm %ds %s - %s", timestamp / 60, timestamp % 60, level, msg)
 
-    if level == "Error" then
+    if level == "Error" or level == "Critical" then
         logFrame:AddMessage(formatted, 1, 0, 0)
     elseif level == "Warning" then
         logFrame:AddMessage(formatted, 1, 1, 0)

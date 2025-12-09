@@ -207,7 +207,7 @@ secureMethods["FrameChain"] = [[
 -- not going to write an nlog(n) sort algorithm in this environment
 secureMethods["Sort"] = [[
     local run = control or self
-    local arrayName, compareName = ...
+    local arrayName, compareName, extraArg1 = ...
     local array = _G[arrayName]
 
     for i = 2, #array do
@@ -220,7 +220,7 @@ secureMethods["Sort"] = [[
             Right = currentValue
 
             -- Should Left move after Right?
-            local shouldShift = run:RunAttribute(compareName, "Left", "Right")
+            local shouldShift = run:RunAttribute(compareName, "Left", "Right", extraArg1)
 
             if shouldShift then
                 -- Move the larger element one slot to the right
@@ -318,10 +318,53 @@ secureMethods["ComparePointLeftTop"] = [[
     return leftFuzzy > nextLeftFuzzy or topFuzzy < nextTopFuzzy
 ]]
 
+secureMethods["CompareFrameGroup"] = [[
+    local run = control or self
+    local leftVariable, rightVariable, playerSortMode = ...
+    local leftFrame = _G[leftVariable]
+    local rightFrame = _G[rightVariable]
+
+    -- Get their units
+    Frame = leftFrame
+    local leftUnit = run:RunAttribute("GetUnit", "Frame")
+    Frame = rightFrame
+    local rightUnit = run:RunAttribute("GetUnit", "Frame")
+    Frame = nil
+
+    if not leftUnit or not rightUnit then
+        -- if we don't know, keep existing order
+        return false
+    end
+
+    local isLeftPet = strfind(leftUnit, "pet") ~= nil
+    local isRightPet = strfind(rightUnit, "pet") ~= nil
+
+    if isLeftPet and not isRightPet then
+        return true
+    elseif not isLeftPet and isRightPet then
+        return false
+    end
+
+    -- Top/Bottom is good enough, won't worry about middle in this environment
+    -- if we got here we're in a fallback position anyway
+    if leftUnit == "player" and playerSortMode then
+        return playerSortMode == "Top"
+    end
+
+    if rightUnit == "player" and playerSortMode then
+        return playerSortMode == "Bottom"
+    end
+
+    local leftIndex = tonumber(strmatch(leftUnit, "%d+")) or 0
+    local rightIndex = tonumber(strmatch(rightUnit, "%d+")) or 0
+
+    return leftIndex < rightIndex
+]]
+
 -- performs an out of place sort on an array frames by the order of the units array
 secureMethods["SortFramesByUnits"] = [[
     local run = control or self
-    local framesVariable, unitsVariable, destinationVariable = ...
+    local framesVariable, unitsVariable, sortMode, playerSortMode, destinationVariable = ...
     local frames = _G[framesVariable]
     local units = _G[unitsVariable]
     local index = 1
@@ -373,17 +416,60 @@ secureMethods["SortFramesByUnits"] = [[
         end
     end
 
-    -- we may not have all unit information
-    -- so any frames that didn't make it we can just add on to the end
+    -- any frames left unsorted at this point?
+    local unsortedFrames = false
+
     for i = 1, #frames do
         local frame = frames[i]
 
         if not frameWasSorted[frame] then
-            sorted[#sorted + 1] = frame
+            Frame = frame
+            local unit = run:RunAttribute("GetUnit", "Frame")
+            Frame = nil
+
+            local isPet = strfind(unit or "", "pet") ~= nil
+
+            -- don't care if it's an unsorted pet, as we'll just place them at the end
+            if not isPet then
+                unsortedFrames = true
+                break
+            end
+        end
+    end
+
+    if unsortedFrames then
+        -- fallback to group sort
+
+        FallbackFrames = newtable()
+
+        for i = 1, #frames do
+            FallbackFrames[i] = frames[i]
+        end
+
+        run:RunAttribute("Sort", "FallbackFrames", "CompareFrameGroup", playerSortMode)
+
+        sorted = FallbackFrames
+        FallbackFrames = nil
+    else
+        -- we may not have all pet unit information
+        -- so any frames that didn't make it we can just add on to the end
+        for i = 1, #frames do
+            local frame = frames[i]
+
+            if not frameWasSorted[frame] then
+                sorted[#sorted + 1] = frame
+            end
         end
     end
 
     _G[destinationVariable] = sorted
+
+    if not unsortedFrames then
+        return true
+    end
+
+    -- if the user sorted by Group, then we sorted by their preference anyway
+    return sortMode == "Group"
 ]]
 
 -- adjusts the x and y offsets of a frame
@@ -897,14 +983,20 @@ secureMethods["TrySortContainerGroups"] = [[
 ]]
 
 -- attempts to sort the frames within the container
-secureMethods["TrySortContainer"] = [[
+secureMethods["TrySortContainer"] = [=[
     local run = control or self
     local friendlyEnabled = self:GetAttribute("FriendlySortEnabled")
     local enemyEnabled = self:GetAttribute("EnemySortEnabled")
+    local friendlyGroupMode = self:GetAttribute("FriendlyGroupSortMode")
+    local friendlyPlayerMode = self:GetAttribute("FriendlyPlayerSortMode")
+    local enemyGroupMode = self:GetAttribute("EnemyGroupSortMode")
+    local enemyPlayerMode = self:GetAttribute("EnemyPlayerSortMode")
     local containerVariable, providerVariable = ...
     local container = _G[containerVariable]
     local provider = _G[providerVariable]
     local units = nil
+    local sortMode = nil
+    local playerSortMode = nil
 
     if container.LayoutType == LayoutType.NameList then
         -- there's no way to get a unit's name in the restricted environment
@@ -912,12 +1004,14 @@ secureMethods["TrySortContainer"] = [[
         return false
     end
 
-    if container.Type == ContainerType.Party then
+    if container.Type == ContainerType.Party or container.Type == ContainerType.Raid then
         units = FriendlyUnits
-    elseif container.Type == ContainerType.Raid then
-        units = FriendlyUnits
+        sortMode = friendlyGroupMode
+        playerSortMode = friendlyPlayerMode
     elseif container.Type == ContainerType.EnemyArena then
         units = EnemyUnits
+        sortMode = enemyGroupMode
+        playerSortMode = enemyPlayerMode
     else
         run:CallMethod("Log", format("Invalid container type: %s", container.Type or "nil"), "Error")
         return false
@@ -941,7 +1035,13 @@ secureMethods["TrySortContainer"] = [[
 
     -- sort the frames to the desired locations
     FramesInUnitOrder = nil
-    run:RunAttribute("SortFramesByUnits", "Frames", "Units", "FramesInUnitOrder")
+    local sortedAccurately = run:RunAttribute("SortFramesByUnits", "Frames", "Units", sortMode, playerSortMode, "FramesInUnitOrder")
+
+    if not sortedAccurately then
+        run:CallMethod("Log", format(
+            "Sorry, we were unable to sort your frames accurately during combat by '%s' and there is nothing we can do about it due to Blizzard API restrictions. " ..
+            "We've temporarily sorted by group until combat drops.", sortMode), "Critical")
+    end
 
     local sorted = false
 
@@ -971,7 +1071,7 @@ secureMethods["TrySortContainer"] = [[
     Spacing = nil
 
     return sorted
-]]
+]=]
 
 -- top level perform sort routine
 secureMethods["TrySort"] = [[
@@ -1180,14 +1280,19 @@ local function LoadUnits()
     manager:SetAttributeNoHandler("LoadedUnits", false)
 end
 
-local function LoadEnabled()
+local function LoadSortMode()
     assert(manager)
 
-    local friendlyEnabled = fsCompare:FriendlySortMode()
-    local enemyEnabled = fsCompare:EnemySortMode()
+    local friendlyEnabled, friendlyPlayerMode, friendlyGroupMode = fsCompare:FriendlySortMode()
+    local enemyEnabled, enemyPlayerMode, enemyGroupMode = fsCompare:EnemySortMode()
 
     manager:SetAttributeNoHandler("FriendlySortEnabled", friendlyEnabled)
+    manager:SetAttributeNoHandler("FriendlyPlayerSortMode", friendlyPlayerMode)
+    manager:SetAttributeNoHandler("FriendlyGroupSortMode", friendlyGroupMode)
+
     manager:SetAttributeNoHandler("EnemySortEnabled", enemyEnabled)
+    manager:SetAttributeNoHandler("EnemyPlayerSortMode", enemyPlayerMode)
+    manager:SetAttributeNoHandler("EnemyGroupSortMode", enemyGroupMode)
 
     for _, provider in ipairs(fsProviders.All) do
         manager:SetAttributeNoHandler("Provider" .. provider:Name() .. "Enabled", provider:Enabled())
@@ -1377,7 +1482,7 @@ local function LoadInstanceType()
 end
 
 local function OnCombatStarting()
-    LoadEnabled()
+    LoadSortMode()
     LoadUnits()
     ResubscribeEvents()
     WatchVisibility()
@@ -1578,7 +1683,7 @@ function M:Init()
         end
     end)
 
-    LoadEnabled()
+    LoadSortMode()
     LoadSpacing()
 
     fsConfig:RegisterConfigurationChangedCallback(OnConfigChanged)
