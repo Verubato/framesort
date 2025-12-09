@@ -219,15 +219,16 @@ secureMethods["Sort"] = [[
             Left  = array[insertPos]
             Right = currentValue
 
-            -- Should Left move after Right?
-            local shouldShift = run:RunAttribute(compareName, "Left", "Right", extraArg1)
+            -- true means left should come before right
+            local leftBeforeRight = run:RunAttribute(compareName, "Left", "Right", extraArg1)
 
-            if shouldShift then
-                -- Move the larger element one slot to the right
+            if leftBeforeRight then
+                -- we've found the correct spot, bail out
+                break
+            else
+                -- shift one step to the right
                 array[insertPos + 1] = array[insertPos]
                 insertPos = insertPos - 1
-            else
-                break
             end
         end
 
@@ -250,10 +251,15 @@ secureMethods["CompareFrameTopLeft"] = [[
     local mult = 10 ^ DecimalSanity
     local topFuzzy = math.floor((bottom + height) * mult + 0.5) / mult
     local nextTopFuzzy = math.floor((nextBottom + nextHeight) * mult + 0.5) / mult
+
+    if topFuzzy ~= nextTopFuzzy then
+        return topFuzzy > nextTopFuzzy
+    end
+
     local leftFuzzy = math.floor(left * mult + 0.5) / mult
     local nextLeftFuzzy = math.floor(nextLeftFuzzy * mult + 0.5) / mult
 
-    return topFuzzy < nextTopFuzzy or leftFuzzy > nextLeftFuzzy
+    return leftFuzzy < nextLeftFuzzy
 ]]
 
 secureMethods["CompareFrameTopRight"] = [[
@@ -267,10 +273,15 @@ secureMethods["CompareFrameTopRight"] = [[
     local mult = 10 ^ DecimalSanity
     local topFuzzy = math.floor((bottom + height) * mult + 0.5) / mult
     local nextTopFuzzy = math.floor((nextBottom + nextHeight) * mult + 0.5) / mult
+
+    if topFuzzy ~= nextTopFuzzy then
+        return topFuzzy > nextTopFuzzy
+    end
+
     local rightFuzzy = math.floor((left + width) * mult + 0.5) / mult
     local nextRightFuzzy = math.floor((nextLeft + nextWidth) * mult + 0.5) / mult 
 
-    return topFuzzy < nextTopFuzzy or rightFuzzy < nextRightFuzzy
+    return rightFuzzy > nextRightFuzzy
 ]]
 
 secureMethods["CompareFrameBottomLeft"] = [[
@@ -284,10 +295,15 @@ secureMethods["CompareFrameBottomLeft"] = [[
     local mult = 10 ^ DecimalSanity
     local bottomFuzzy = math.floor(bottom * mult + 0.5) / mult
     local nextBottomFuzzy = math.floor(nextBottom * mult + 0.5) / mult
+
+    if bottomFuzzy ~= nextBottomFuzzy then
+        return bottomFuzzy < nextBottomFuzzy
+    end
+
     local leftFuzzy = math.floor(left * mult + 0.5) / mult
     local nextLeftFuzzy = math.floor(nextLeftFuzzy * mult + 0.5) / mult
 
-    return bottomFuzzy > nextBottomFuzzy or leftFuzzy > nextLeftFuzzy
+    return leftFuzzy < nextLeftFuzzy
 ]]
 
 secureMethods["ComparePointTopLeft"] = [[
@@ -298,10 +314,15 @@ secureMethods["ComparePointTopLeft"] = [[
     local mult = 10 ^ DecimalSanity
     local topFuzzy = math.floor((x.Bottom + x.Height) * mult + 0.5) / mult
     local nextTopFuzzy = math.floor((y.Bottom + y.Height) * mult + 0.5) / mult
+
+    if topFuzzy ~= nextTopFuzzy then
+        return topFuzzy > nextTopFuzzy
+    end
+
     local leftFuzzy = math.floor(x.Left * mult + 0.5) / mult
     local nextLeftFuzzy = math.floor(y.Left * mult + 0.5) / mult
 
-    return topFuzzy < nextTopFuzzy or leftFuzzy > nextLeftFuzzy
+    return leftFuzzy < nextLeftFuzzy
 ]]
 
 secureMethods["ComparePointLeftTop"] = [[
@@ -312,10 +333,15 @@ secureMethods["ComparePointLeftTop"] = [[
     local mult = 10 ^ DecimalSanity
     local topFuzzy = math.floor((x.Bottom + x.Height) * mult + 0.5) / mult
     local nextTopFuzzy = math.floor((y.Bottom + y.Height) * mult + 0.5) / mult
+    
+    if topFuzzy ~= nextTopFuzzy then
+        return topFuzzy > nextTopFuzzy
+    end
+
     local leftFuzzy = math.floor(x.Left * mult + 0.5) / mult
     local nextLeftFuzzy = math.floor(y.Left * mult + 0.5) / mult
 
-    return leftFuzzy > nextLeftFuzzy or topFuzzy < nextTopFuzzy
+    return leftFuzzy < nextLeftFuzzy
 ]]
 
 secureMethods["CompareFrameGroup"] = [[
@@ -340,9 +366,9 @@ secureMethods["CompareFrameGroup"] = [[
     local isRightPet = strfind(rightUnit, "pet") ~= nil
 
     if isLeftPet and not isRightPet then
-        return true
-    elseif not isLeftPet and isRightPet then
         return false
+    elseif not isLeftPet and isRightPet then
+        return true
     end
 
     -- Top/Bottom is good enough, won't worry about middle in this environment
