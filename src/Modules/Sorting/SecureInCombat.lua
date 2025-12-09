@@ -45,7 +45,9 @@ secureMethods["OverheadTest"] = [[
     run:CallMethod("StopTimer", "RoundNative", "RoundNative took %fms.")
 ]]
 
--- rounds a number to the specified decimal places
+-- this method is no longer used because the overhead of calling RunAttribute is very expensive
+-- and Round was being called in tight loops which caused significant time increase
+-- even though overall we're only talking in milliseconds difference I still want to run as fast as possible
 secureMethods["Round"] = [[
     local number, decimalPlaces = ...
 
@@ -245,10 +247,11 @@ secureMethods["CompareFrameTopLeft"] = [[
     local left, bottom, width, height = x:GetRect()
     local nextLeft, nextBottom, nextWidth, nextHeight = y:GetRect()
 
-    local topFuzzy = run:RunAttribute("Round", bottom + height)
-    local nextTopFuzzy = run:RunAttribute("Round", nextBottom + nextHeight)
-    local leftFuzzy = run:RunAttribute("Round", left)
-    local nextLeftFuzzy = run:RunAttribute("Round", nextLeft)
+    local mult = 10 ^ DecimalSanity
+    local topFuzzy = math.floor((bottom + height) * mult + 0.5) / mult
+    local nextTopFuzzy = math.floor((nextBottom + nextHeight) * mult + 0.5) / mult
+    local leftFuzzy = math.floor(left * mult + 0.5) / mult
+    local nextLeftFuzzy = math.floor(nextLeftFuzzy * mult + 0.5) / mult
 
     return topFuzzy < nextTopFuzzy or leftFuzzy > nextLeftFuzzy
 ]]
@@ -261,10 +264,11 @@ secureMethods["CompareFrameTopRight"] = [[
     local left, bottom, width, height = x:GetRect()
     local nextLeft, nextBottom, nextWidth, nextHeight = y:GetRect()
 
-    local topFuzzy = run:RunAttribute("Round", bottom + height)
-    local nextTopFuzzy = run:RunAttribute("Round", nextBottom + nextHeight)
-    local rightFuzzy = run:RunAttribute("Round", left + width)
-    local nextRightFuzzy = run:RunAttribute("Round", nextLeft + nextWidth)
+    local mult = 10 ^ DecimalSanity
+    local topFuzzy = math.floor((bottom + height) * mult + 0.5) / mult
+    local nextTopFuzzy = math.floor((nextBottom + nextHeight) * mult + 0.5) / mult
+    local rightFuzzy = math.floor((left + width) * mult + 0.5) / mult
+    local nextRightFuzzy = math.floor((nextLeft + nextWidth) * mult + 0.5) / mult 
 
     return topFuzzy < nextTopFuzzy or rightFuzzy < nextRightFuzzy
 ]]
@@ -277,10 +281,11 @@ secureMethods["CompareFrameBottomLeft"] = [[
     local left, bottom, width, height = x:GetRect()
     local nextLeft, nextBottom, nextWidth, nextHeight = y:GetRect()
 
-    local bottomFuzzy = run:RunAttribute("Round", bottom)
-    local nextBottomFuzzy = run:RunAttribute("Round", nextBottom)
-    local leftFuzzy = run:RunAttribute("Round", left)
-    local nextLeftFuzzy = run:RunAttribute("Round", nextLeft)
+    local mult = 10 ^ DecimalSanity
+    local bottomFuzzy = math.floor(bottom * mult + 0.5) / mult
+    local nextBottomFuzzy = math.floor(nextBottom * mult + 0.5) / mult
+    local leftFuzzy = math.floor(left * mult + 0.5) / mult
+    local nextLeftFuzzy = math.floor(nextLeftFuzzy * mult + 0.5) / mult
 
     return bottomFuzzy > nextBottomFuzzy or leftFuzzy > nextLeftFuzzy
 ]]
@@ -290,10 +295,11 @@ secureMethods["ComparePointTopLeft"] = [[
     local leftVariable, rightVariable = ...
     local x, y = _G[leftVariable], _G[rightVariable]
 
-    local topFuzzy = run:RunAttribute("Round", x.Bottom + x.Height)
-    local nextTopFuzzy = run:RunAttribute("Round", y.Bottom + y.Height)
-    local leftFuzzy = run:RunAttribute("Round", x.Left)
-    local nextLeftFuzzy = run:RunAttribute("Round", y.Left)
+    local mult = 10 ^ DecimalSanity
+    local topFuzzy = math.floor((x.Bottom + x.Height) * mult + 0.5) / mult
+    local nextTopFuzzy = math.floor((y.Bottom + y.Height) * mult + 0.5) / mult
+    local leftFuzzy = math.floor(x.Left * mult + 0.5) / mult
+    local nextLeftFuzzy = math.floor(y.Left * mult + 0.5) / mult
 
     return topFuzzy < nextTopFuzzy or leftFuzzy > nextLeftFuzzy
 ]]
@@ -303,10 +309,11 @@ secureMethods["ComparePointLeftTop"] = [[
     local leftVariable, rightVariable = ...
     local x, y = _G[leftVariable], _G[rightVariable]
 
-    local topFuzzy = run:RunAttribute("Round", x.Bottom + x.Height)
-    local nextTopFuzzy = run:RunAttribute("Round", y.Bottom + y.Height)
-    local leftFuzzy = run:RunAttribute("Round", x.Left)
-    local nextLeftFuzzy = run:RunAttribute("Round", y.Left)
+    local mult = 10 ^ DecimalSanity
+    local topFuzzy = math.floor((x.Bottom + x.Height) * mult + 0.5) / mult
+    local nextTopFuzzy = math.floor((y.Bottom + y.Height) * mult + 0.5) / mult
+    local leftFuzzy = math.floor(x.Left * mult + 0.5) / mult
+    local nextLeftFuzzy = math.floor(y.Left * mult + 0.5) / mult
 
     return leftFuzzy > nextLeftFuzzy or topFuzzy < nextTopFuzzy
 ]]
@@ -444,11 +451,14 @@ secureMethods["ApplySpacing"] = [[
     run:RunAttribute("Sort", "OrderedLeftTop", "ComparePointLeftTop")
 
     local changed = false
+    local mult = 10 ^ DecimalSanity
 
     for i = 2, #OrderedLeftTop do
         local point = OrderedLeftTop[i]
         local previous = OrderedLeftTop[i - 1]
-        local sameRow = run:RunAttribute("Round", point.Bottom + point.Height) == run:RunAttribute("Round", previous.Bottom + previous.Height)
+        local pointTopFuzzy = math.floor((point.Bottom + point.Height) * mult + 0.5) / mult
+        local previousTopFuzzy = math.floor((previous.Bottom + previous.Height) * mult + 0.5) / mult
+        local sameRow = pointTopFuzzy == previousTopFuzzy
 
         if sameRow then
             local existingSpace = point.Left - (previous.Left + previous.Width)
@@ -461,7 +471,9 @@ secureMethods["ApplySpacing"] = [[
     for i = 2, #OrderedTopLeft do
         local point = OrderedTopLeft[i]
         local previous = OrderedTopLeft[i - 1]
-        local sameColumn = run:RunAttribute("Round", point.Left) == run:RunAttribute("Round", previous.Left)
+        local leftFuzzy = math.floor(point.Left * mult + 0.5) / mult
+        local previousLeftFuzzy = math.floor(previous.Left * mult + 0.5) / mult
+        local sameColumn = leftFuzzy == previousLeftFuzzy
 
         if sameColumn then
             local existingSpace = previous.Bottom - (point.Bottom + point.Height)
@@ -507,14 +519,15 @@ secureMethods["SpaceGroups"] = [[
     GroupPoints = nil
 
     local movedAny = false
+    local mult = 10 ^ DecimalSanity
 
     for _, group in ipairs(groups) do
         local point = pointsByGroup[group]
         local left, bottom, _, _ = group:GetRect()
         local xDelta = point.Left - left
         local yDelta = point.Bottom - bottom
-        local xDeltaRounded = run:RunAttribute("Round", xDelta, DecimalSanity)
-        local yDeltaRounded = run:RunAttribute("Round", yDelta, DecimalSanity)
+        local xDeltaRounded = math.floor(xDelta * mult + 0.5) / mult
+        local yDeltaRounded = math.floor(yDelta * mult + 0.5) / mult
 
         if xDeltaRounded ~= 0 or yDeltaRounded ~= 0 then
             Group = group
@@ -579,6 +592,7 @@ secureMethods["SoftArrange"] = [[
     OrderedByTopLeft = nil
 
     local movedAny = false
+    local mult = 10 ^ DecimalSanity
 
     for i, source in ipairs(enumerationOrder) do
         local desiredIndex = -1
@@ -594,8 +608,8 @@ secureMethods["SoftArrange"] = [[
             local destination = points[desiredIndex]
             local xDelta = destination.Left - left
             local yDelta = destination.Bottom - bottom
-            local xDeltaRounded = run:RunAttribute("Round", xDelta, DecimalSanity)
-            local yDeltaRounded = run:RunAttribute("Round", yDelta, DecimalSanity)
+            local xDeltaRounded = math.floor(xDelta * mult + 0.5) / mult
+            local yDeltaRounded = math.floor(yDelta * mult + 0.5) / mult
 
             if xDeltaRounded ~= 0 or yDeltaRounded ~= 0 then
                 Frame = source
@@ -635,6 +649,7 @@ secureMethods["HardArrange"] = [[
     local xOffset = offset.X
     local yOffset = offset.Y
     local currentBlockHeight = 0
+    local mult = 10 ^ DecimalSanity
 
     for _, frame in ipairs(frames) do
         local isNewBlock = currentBlockHeight > 0
@@ -688,12 +703,17 @@ secureMethods["HardArrange"] = [[
     for _, frame in ipairs(frames) do
         local to = pointsByFrame[frame]
         local point, relativeTo, relativePoint, xOffset, yOffset = frame:GetPoint()
+        local xOffsetRounded = math.floor(xOffset * mult + 0.5) / mult
+        local yOffsetRounded = math.floor(yOffset * mult + 0.5) / mult
+        local toXOffsetRounded = math.floor(to.XOffset * mult + 0.5) / mult
+        local toYOffsetRounded = math.floor(to.YOffset * mult + 0.5) / mult
+
         local different =
             point ~= to.Point or
             relativeTo ~= to.RelativeTo or
             relativePoint ~= to.RelativePoint or
-            run:RunAttribute("Round", xOffset, DecimalSanity) ~= run:RunAttribute("Round", to.XOffset, DecimalSanity) or
-            run:RunAttribute("Round", yOffset, DecimalSanity) ~= run:RunAttribute("Round", to.YOffset, DecimalSanity)
+            xOffsetRounded ~= toXOffsetRounded or
+            yOffsetRounded ~= toYOffsetRounded
 
         if different then
             framesToMove[#framesToMove + 1] = frame
