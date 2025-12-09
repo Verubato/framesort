@@ -309,38 +309,28 @@ end
 ---Returns true if the specified token is ordered after the mid point of player units.
 ---Pet units are ignored.
 ---@param token string
----@param sortedUnits table
+---@param context table
 ---@return boolean
-local function CompareMiddle(token, sortedUnits)
-    local notPets = fsEnumerable
-        :From(sortedUnits)
-        :Where(function(unit)
-            return not fsUnit:IsPet(unit) and wow.UnitExists(unit)
-        end)
-        :ToTable()
+local function CompareMiddle(token, context)
+    local index = context.IndexLookup[token]
 
-    -- index of the token we are comparing with
-    local index = fsEnumerable:From(notPets):IndexOf(token)
-
-    -- most likely a non-existant unit
     if not index then
         return false
     end
 
-    local mid = math.floor(#notPets / 2)
-    return index > mid
+    return index > context.Mid
 end
 
 ---Returns true if the left token should be ordered before the right token.
----preSortedUnits is required if playerSortMode == Middle.
+---middleContext is required if playerSortMode == Middle.
 ---@param leftToken string
 ---@param rightToken string
 ---@param playerSortMode? string
 ---@param groupSortMode? string
 ---@param reverse boolean?
----@param preSortedUnits table?
+---@param middleContext table?
 ---@return boolean
-local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse, preSortedUnits)
+local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse, middleContext)
     if wow.UnitExists(leftToken) and not wow.UnitExists(rightToken) then
         return true
     elseif wow.UnitExists(rightToken) and not wow.UnitExists(leftToken) then
@@ -362,7 +352,7 @@ local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, rev
         local leftTokenParent = leftToken == "pet" and "player" or string.gsub(leftToken, "pet", "")
         local rightTokenParent = rightToken == "pet" and "player" or string.gsub(rightToken, "pet", "")
 
-        return Compare(leftTokenParent, rightTokenParent, playerSortMode, groupSortMode, reverse, preSortedUnits)
+        return Compare(leftTokenParent, rightTokenParent, playerSortMode, groupSortMode, reverse, middleContext)
     end
 
     if playerSortMode and playerSortMode ~= "" then
@@ -370,8 +360,8 @@ local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, rev
             if playerSortMode == fsConfig.PlayerSortMode.Hidden then
                 return false
             elseif playerSortMode == fsConfig.PlayerSortMode.Middle then
-                assert(preSortedUnits ~= nil)
-                return CompareMiddle(rightToken, preSortedUnits)
+                assert(middleContext ~= nil)
+                return CompareMiddle(rightToken, middleContext)
             else
                 return playerSortMode == fsConfig.PlayerSortMode.Top
             end
@@ -381,8 +371,8 @@ local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, rev
             if playerSortMode == fsConfig.PlayerSortMode.Hidden then
                 return true
             elseif playerSortMode == fsConfig.PlayerSortMode.Middle then
-                assert(preSortedUnits ~= nil)
-                return not CompareMiddle(leftToken, preSortedUnits)
+                assert(middleContext ~= nil)
+                return not CompareMiddle(leftToken, middleContext)
             else
                 return playerSortMode == fsConfig.PlayerSortMode.Bottom
             end
@@ -479,8 +469,24 @@ function M:SortFunction(units)
         end)
         :ToTable()
 
+    -- prepare data used for the middle sort comparator
+    local index = {}
+    local notPets = {}
+
+    for _, unit in ipairs(units) do
+        if not fsUnit:IsPet(unit) and wow.UnitExists(unit) then
+            notPets[#notPets + 1] = unit
+            index[unit] = #notPets
+        end
+    end
+
+    local middleContext = {
+        IndexLookup = index,
+        Mid = math.floor(#notPets / 2),
+    }
+
     return function(x, y)
-        return Compare(x, y, playerSortMode, groupSortMode, reverse, units)
+        return Compare(x, y, playerSortMode, groupSortMode, reverse, middleContext)
     end
 end
 
