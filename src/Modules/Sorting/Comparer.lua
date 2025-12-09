@@ -19,18 +19,28 @@ end)
 local M = {}
 addon.Modules.Sorting.Comparer = M
 
-local orderingCache = {}
+local cachedRoleLookup, cachedSpecLookup, cachedClassLookup
+local cachedConfigSnapshot
+
+local function SnapshotOrderingConfig(config)
+    return table.concat({
+        config.Tanks,
+        config.Healers,
+        config.Casters,
+        config.Hunters,
+        config.Melee,
+    }, ":")
+end
 
 ---@return { [string]: number } roleOrderLookup
 ---@return { [number]: number } specOrderLookup
 ---@return { [number]: number } classOrderLookup
 local function Ordering()
     local config = addon.DB.Options.Sorting.Ordering
-    local cacheKey = string.format("Tanks:%d,Healers:%d,Casters:%d,Hunters:%d,Melee:%d", config.Tanks, config.Healers, config.Casters, config.Hunters, config.Melee)
-    local cached = orderingCache[cacheKey]
+    local currentSnapshot = SnapshotOrderingConfig(config)
 
-    if cached then
-        return cached.RoleLookup, cached.SpecLookup, cached.ClassLookup
+    if cachedConfigSnapshot == currentSnapshot and cachedRoleLookup then
+        return cachedRoleLookup, cachedSpecLookup, cachedClassLookup
     end
 
     local specs = fsConfig.Specs
@@ -104,11 +114,10 @@ local function Ordering()
         end
     end)
 
-    orderingCache[cacheKey] = {
-        RoleLookup = roleLookup,
-        SpecLookup = specLookup,
-        ClassLookup = classLookup,
-    }
+    cachedConfigSnapshot = currentSnapshot
+    cachedRoleLookup = roleLookup
+    cachedSpecLookup = specLookup
+    cachedClassLookup = classLookup
 
     return roleLookup, specLookup, classLookup
 end
