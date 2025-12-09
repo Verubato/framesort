@@ -158,7 +158,7 @@ Brauchst du Hilfe beim Erstellen eines Makros?
 \n
 Schau auf dem FrameSort-Discord vorbei und nutze unseren KI-gestützten Macro-Bot!
 \n
-Schreibe einfach '@Macro Bot' mit deiner Frage im Kanal macro-bot-channel.
+Schreibe einfach '@Macro Bot' mit deiner Frage im Kanal #macro-bot-channel.
 ]]
 
 -- # Macro Variables screen # --

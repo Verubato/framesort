@@ -158,7 +158,7 @@ L["Discord Bot Blurb"] = [[
 \n
 ¡Ve al servidor de Discord de FrameSort y usa nuestro bot de macros con IA!
 \n
-Simplemente escribe '@Macro Bot' con tu pregunta en el canal macro-bot-channel.
+Simplemente escribe '@Macro Bot' con tu pregunta en el canal #macro-bot-channel.
 ]]
 
 -- # Macro Variables screen # --
