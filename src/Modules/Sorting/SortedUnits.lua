@@ -36,8 +36,8 @@ local cachedEnemyUnits = {}
 local cachedFriendlyUnits = {}
 
 -- log stats ever X hits/misses
-local currentStatsInterval = 0
-local logStatsInterval = 20
+local currentStatsTick = 0
+local logStatsInterval = 10
 
 local function InvalidateFriendlyCache()
     friendlyCacheValid = false
@@ -130,15 +130,15 @@ local function RefreshEnemyUnits(existingUnits)
     return toSort
 end
 
-function LogStatsInterval()
-    currentStatsInterval = currentStatsInterval + 1
+function LogStatsTick()
+    currentStatsTick = currentStatsTick + 1
 
-    if currentStatsInterval < logStatsInterval then
+    if currentStatsTick < logStatsInterval then
         return
     end
 
     M:LogStats()
-    currentStatsInterval = 0
+    currentStatsTick = 0
 end
 
 ---@return string[]
@@ -151,7 +151,7 @@ function M:FriendlyUnits()
         -- don't want our stats to reflect empty cache hits and misses
         if #cachedFriendlyUnits > 0 then
             friendlyCacheHits = friendlyCacheHits + 1
-            LogStatsInterval()
+            LogStatsTick()
         end
 
         return cachedFriendlyUnits
@@ -162,7 +162,7 @@ function M:FriendlyUnits()
 
     if #cachedFriendlyUnits > 0 then
         friendlyCacheMisses = friendlyCacheMisses + 1
-        LogStatsInterval()
+        LogStatsTick()
     end
 
     return cachedFriendlyUnits
@@ -177,7 +177,7 @@ function M:EnemyUnits()
     if enemyCacheValid then
         if #cachedEnemyUnits > 0 then
             enemyCacheHits = enemyCacheHits + 1
-            LogStatsInterval()
+            LogStatsTick()
         end
 
         return cachedEnemyUnits
@@ -188,7 +188,7 @@ function M:EnemyUnits()
 
     if #cachedEnemyUnits > 0 then
         enemyCacheMisses = enemyCacheMisses + 1
-        LogStatsInterval()
+        LogStatsTick()
     end
 
     return cachedEnemyUnits
