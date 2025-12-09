@@ -28,6 +28,11 @@ local function OnEnteringWorld()
     for _, callback in pairs(enteringWorldCallbacks) do
         callback()
     end
+
+    -- PLAYER_ENTERING_WORLD can fire multiple times per addon load
+    -- but we only want to invoke our callbacks the first time
+    -- so run once and clear
+    enteringWorldCallbacks = {}
 end
 
 local function OnEvent(_, event)
@@ -69,7 +74,7 @@ function M:RunWhenCombatEnds(callback, key)
     end
 end
 
-function M:RunWhenEnteringWorld(callback)
+function M:RunWhenEnteringWorldOnce(callback)
     enteringWorldCallbacks[#enteringWorldCallbacks + 1] = callback
 end
 

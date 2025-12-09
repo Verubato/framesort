@@ -132,7 +132,7 @@ function M:Init()
     if wow.HasEditMode() then
         wow.EventRegistry:RegisterCallback(events.EditModeExit, OnEditModeExited)
 
-        fsScheduler:RunWhenEnteringWorld(function()
+        fsScheduler:RunWhenEnteringWorldOnce(function()
             -- this event always fires when loading
             -- and we don't care about the first one
             -- so to avoid running modules multiple times on first load, delay the event registration

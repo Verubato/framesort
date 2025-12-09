@@ -1553,7 +1553,7 @@ function M:Init()
     end
 
     -- wait until the providers have created their frames
-    fsScheduler:RunWhenEnteringWorld(function()
+    fsScheduler:RunWhenEnteringWorldOnce(function()
         for _, provider in ipairs(fsProviders:Enabled()) do
             LoadProvider(provider)
         end

@@ -182,7 +182,7 @@ function M:Init()
 
     -- delay the event subscriptions to hopefully help with being notified after other addons
     -- probably not needed anymore now that we sort in OnUpdate
-    fsScheduler:RunWhenEnteringWorld(function()
+    fsScheduler:RunWhenEnteringWorldOnce(function()
         timerFrame = wow.CreateFrame("Frame")
         timerFrame:HookScript("OnEvent", OnTimer)
         timerFrame:HookScript("OnUpdate", OnUpdate)
