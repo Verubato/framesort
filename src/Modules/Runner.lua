@@ -2,6 +2,8 @@
 local _, addon = ...
 local fsProviders = addon.Providers
 local fsScheduler = addon.Scheduling.Scheduler
+local fsInspector = addon.Modules.Inspector
+local fsUnit = addon.WoW.Unit
 local fsLog = addon.Logging.Log
 local wow = addon.WoW.Api
 local events = wow.Events
@@ -81,6 +83,43 @@ local function OnTimer(_, _, timerType, timeSeconds)
     end)
 end
 
+local function OnInspectorInfo()
+    -- technically it's beneficial if we know at least 2 specs then perform a sort
+    -- but from a practical standpoint it's probably better for performance to wait until we have quorum
+    -- and it might help reduce frame flicker as it reduces sorting noise
+    local units = fsUnit:FriendlyUnits()
+
+    if #units == 0 then
+        return
+    end
+
+    local knownSpecs = 0
+
+    for i = 1, #units do
+        local unit = units[i]
+        local guid = wow.UnitGUID(unit)
+
+        if guid and not wow.issecretvalue(guid) then
+            local spec = fsInspector:UnitSpec(guid)
+
+            if spec then
+                knownSpecs = knownSpecs + 1
+            end
+        end
+    end
+
+    -- re-sort every 5th spec known
+    local everyNth = 5
+    local shouldSort = knownSpecs == #units or knownSpecs % everyNth == 0
+
+    if not shouldSort then
+        return
+    end
+
+    fsLog:Debug("Scheduling sort as we have spec quorum of %d/%d.", knownSpecs, #units)
+    ScheduleSort()
+end
+
 local function OnUpdate()
     if not run then
         return
@@ -127,6 +166,7 @@ end
 
 ---Initialises all modules.
 function M:Init()
+    addon.Modules.Sorting.SortedUnits:Init()
     addon.Modules.AutoLeader:Init()
     addon.Modules.HidePlayer:Init()
     addon.Modules.Sorting:Init()
@@ -159,9 +199,6 @@ function M:Init()
 
         if wow.HasSpecializationInfo() then
             eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
-
-            -- TODO: is this event required? it's very noisy
-            -- suspect ARENA_PREP_OPPONENT_SPECIALIZATIONS is sufficient for our use
             eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
         end
 
@@ -174,5 +211,5 @@ function M:Init()
         M:Run()
     end)
 
-    addon.Modules.Inspector:RegisterCallback(ScheduleSort)
+    fsInspector:RegisterCallback(OnInspectorInfo)
 end

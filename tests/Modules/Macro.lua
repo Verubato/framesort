@@ -39,6 +39,13 @@ function M:setup()
     local p2 = frameMock:New("Frame", nil, partyContainer, nil)
     p2.State.Position.Top = 200
     p2.unit = "party2"
+
+    wow.IsInGroup = function()
+        return true
+    end
+    wow.UnitExists = function(unit)
+        return unit == "player" or unit == "party1" or unit == "party2"
+    end
 end
 
 function M:test_macro_updates_on_run()

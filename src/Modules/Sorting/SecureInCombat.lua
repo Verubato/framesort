@@ -5,6 +5,7 @@ local fsSorting = addon.Modules.Sorting
 local fsCompare = addon.Modules.Sorting.Comparer
 local fsProviders = addon.Providers
 local fsUnit = addon.WoW.Unit
+local fsSortedUnits = addon.Modules.Sorting.SortedUnits
 local fsScheduler = addon.Scheduling.Scheduler
 local fsConfig = addon.Configuration
 local fsEnumerable = addon.Collections.Enumerable
@@ -1142,13 +1143,8 @@ secureMethods["Init"] = [[
 local function LoadUnits()
     assert(manager)
 
-    local friendlyUnits = fsUnit:FriendlyUnits()
-    local enemyUnits = fsUnit:EnemyUnits()
-    local friendlyCompare = fsCompare:SortFunction(friendlyUnits)
-    local enemyCompare = fsCompare:EnemySortFunction()
-
-    table.sort(friendlyUnits, friendlyCompare)
-    table.sort(enemyUnits, enemyCompare)
+    local friendlyUnits = fsSortedUnits:FriendlyUnits()
+    local enemyUnits = fsSortedUnits:EnemyUnits()
 
     for i, unit in ipairs(friendlyUnits) do
         manager:SetAttributeNoHandler("FriendlyUnit" .. i, unit)

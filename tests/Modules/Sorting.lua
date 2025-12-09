@@ -4,6 +4,8 @@ local addon
 local fsSort
 ---@type FrameUtil
 local fsFrame
+---@type WoWApi
+local wow
 
 local M = {}
 local player = nil
@@ -36,6 +38,14 @@ function M:setup()
 
     p1 = frameMock:New("Frame", nil, partyContainer)
     p1.unit = "party1"
+
+    wow = addon.WoW.Api
+    wow.IsInGroup = function()
+        return true
+    end
+    wow.UnitExists = function(unit)
+        return unit == "player" or unit == "party1" or unit == "party2"
+    end
 end
 
 function M:test_sort_party_frames_top()
