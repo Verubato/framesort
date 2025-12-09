@@ -1514,8 +1514,8 @@ function M:Init()
         end
 
         local stop = wow.GetTimePreciseSec()
-
         local ms = (stop - start) * 1000
+
         fsLog:Debug(message, ms)
 
         manager[name .. "TimeStart"] = nil
