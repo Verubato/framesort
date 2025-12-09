@@ -37,7 +37,7 @@ local cachedFriendlyUnits = {}
 
 -- log stats ever X hits/misses
 local currentStatsInterval = 0
-local logStatsInterval = 100
+local logStatsInterval = 20
 
 local function InvalidateFriendlyCache()
     friendlyCacheValid = false
@@ -107,7 +107,7 @@ local function RefreshFriendlyUnits(existingUnits)
     local start = wow.GetTimePreciseSec()
     table.sort(toSort, fsCompare:SortFunction(toSort))
     local stop = wow.GetTimePreciseSec()
-    fsLog:Debug("table.sort() took %fms.", (stop - start) * 1000)
+    fsLog:Debug("Friendly units table.sort() took %fms.", (stop - start) * 1000)
 
     return toSort
 end
@@ -122,7 +122,10 @@ local function RefreshEnemyUnits(existingUnits)
 
     local toSort = existingUnits and MergeNewUnits(existingUnits, units) or units
 
+    local start = wow.GetTimePreciseSec()
     table.sort(toSort, fsCompare:EnemySortFunction(toSort))
+    local stop = wow.GetTimePreciseSec()
+    fsLog:Debug("Enemy units table.sort() took %fms.", (stop - start) * 1000)
 
     return toSort
 end

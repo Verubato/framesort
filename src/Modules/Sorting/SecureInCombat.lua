@@ -99,7 +99,7 @@ secureMethods["ExtractUnitFrames"] = [[
         local hasSize =  left and bottom and width and height
 
         if not hasSize then
-            run:CallMethod("Log", "Frame '" .. child:GetName() .. "' has no size.", "Warning")
+            run:CallMethod("Log", format("Frame '%s' has no size.", child:GetName() or "nil"), "Warning")
         end
 
         if unit and
@@ -348,7 +348,7 @@ secureMethods["SortFramesByUnits"] = [[
                 framesByUnit[unit] = frame
             end
         else
-            run:CallMethod("Log", "Failed to determine unit of frame: " .. (frame:GetName() or "nil"), "Warning")
+            run:CallMethod("Log", format("Failed to determine unit of frame: %s.", frame:GetName() or "nil"), "Warning")
         end
 
         frameWasSorted[frame] = false
@@ -838,7 +838,6 @@ secureMethods["TrySortContainerGroups"] = [[
 
     sorted = run:RunAttribute("SpaceGroups", "Groups", "GroupSpacing") or sorted
 
-    -- TODO: I think something from here onwards is very slow, investigate
     local offsetX, offsetY = run:RunAttribute("UngroupedOffset", containerVariable, "GroupSpacing")
 
     UngroupedChildren = newtable()
@@ -900,7 +899,7 @@ secureMethods["TrySortContainer"] = [[
     elseif container.Type == ContainerType.EnemyArena then
         units = EnemyUnits
     else
-        run:CallMethod("Log", "Invalid container type: " .. (container.Type or 'nil'), "Error")
+        run:CallMethod("Log", format("Invalid container type: %s", container.Type or "nil"), "Error")
         return false
     end
 
@@ -979,7 +978,7 @@ secureMethods["TrySort"] = [[
         if providerEnabled then
             for _, container in ipairs(provider.Containers) do
                 if not container.Frame:IsProtected() then
-                    run:CallMethod("Log", "Container for " .. provider.Name .. " must be protected.", "Error")
+                    run:CallMethod("Log", format("Container for %s must be protected.", provider.Name), "Error")
                 elseif container.Frame:IsVisible() then
                     local shouldAdd = false
 
