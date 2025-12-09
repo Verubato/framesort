@@ -1062,11 +1062,15 @@ secureMethods["TrySortContainer"] = [=[
     -- sort the frames to the desired locations
     FramesInUnitOrder = nil
     local sortedAccurately = run:RunAttribute("SortFramesByUnits", "Frames", "Units", sortMode, playerSortMode, "FramesInUnitOrder")
+    local warnedAlready = self:GetAttribute("WarnedAboutUnsorted")
 
-    if not sortedAccurately then
+    print(sortedAccurately, warnedAlready)
+    if not sortedAccurately and not warnedAlready then
         run:CallMethod("Log", format(
             "Sorry, we were unable to sort your frames accurately during combat by '%s' and there is nothing we can do about it due to Blizzard API restrictions. " ..
             "We've temporarily sorted by group until combat drops.", sortMode), "Critical")
+
+        self:SetAttribute("WarnedAboutUnsorted", true)
     end
 
     local sorted = false
@@ -1284,6 +1288,12 @@ secureMethods["Init"] = [[
     LayoutType.Hard = 2
     LayoutType.NameList = 3
 ]]
+
+local function ResetWarnings()
+    assert(manager)
+
+    manager:SetAttributeNoHandler("WarnedAboutUnsorted", false)
+end
 
 local function LoadUnits()
     assert(manager)
@@ -1513,6 +1523,7 @@ local function OnCombatStarting()
     ResubscribeEvents()
     WatchVisibility()
     LoadInstanceType()
+    ResetWarnings()
 end
 
 local function OnProviderContainersChanged(provider)
