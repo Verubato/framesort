@@ -19,6 +19,7 @@ end)
 local M = {}
 addon.Modules.Sorting.Comparer = M
 
+local warnedAbout = {}
 local cachedRoleLookup, cachedSpecLookup, cachedClassLookup
 local cachedConfigSnapshot
 
@@ -122,16 +123,100 @@ local function Ordering()
     return roleLookup, specLookup, classLookup
 end
 
-local function RoleAndClassValue(role, class)
-    local roleOrderLookup, _, classOrderLookup = Ordering()
-    local roleOrder = roleOrderLookup[role]
+local function PrecomputeUnitMetadata(units)
+    local meta = {}
+    local start = wow.GetTimePreciseSec()
+    local inRaid = wow.IsInRaid()
+    local trim = inRaid and 5 or 6
+    local roleOrderLookup, specOrderLookup, classOrderLookup = Ordering()
+
+    meta.RoleOrderLookup = roleOrderLookup
+    meta.SpecOrderLookup = specOrderLookup
+    meta.ClassOrderLookup = classOrderLookup
+
+    if not wow.GetArenaOpponentSpec and not warnedAbout["GetArenaOpponentSpec"] then
+        fsLog:Error("Your wow client is missing the GetArenaOpponentSpec API.")
+        warnedAbout["GetArenaOpponentSpec"] = true
+    end
+
+    if not wow.GetSpecializationInfoByID and not warnedAbout["GetSpecializationInfoByID"] then
+        fsLog:Error("Your wow client is missing the GetSpecializationInfoByID API.")
+        warnedAbout["GetSpecializationInfoByID"] = true
+    end
+
+    if not wow.UnitGroupRolesAssigned and not warnedAbout["UnitGroupRolesAssigned"] then
+        fsLog:Error("Your wow client is missing the UnitGroupRolesAssigned API.")
+        warnedAbout["UnitGroupRolesAssigned"] = true
+    end
+
+    for _, unit in ipairs(units) do
+        local data = {}
+        meta[unit] = data
+
+        data.IsPet = fsUnit:IsPet(unit)
+        data.IsArena = unit:sub(1, 5) == "arena"
+        data.IsPlayer = not data.IsPet and fsUnit:IsPlayer(unit)
+
+        if data.IsArena then
+            data.Exists = fsUnit:ArenaUnitExists(unit)
+            data.UnitNumber = tonumber(string.sub(unit, 6))
+
+            data.SpecId = wow.GetArenaOpponentSpec and wow.GetArenaOpponentSpec(data.UnitNumber)
+            data.Role = wow.GetSpecializationInfoByID and select(5, wow.GetSpecializationInfoByID(data.SpecId))
+
+            local specInfo = data.SpecId and specIdLookup[data.SpecId]
+            data.ClassId = specInfo and specInfo.ClassId
+        else
+            data.Exists = wow.UnitExists(unit)
+            data.Name = wow.UnitName and wow.UnitName(unit)
+
+            if not data.IsPet then
+                data.UnitNumber = tonumber(string.sub(unit, trim))
+                data.Role = wow.UnitGroupRolesAssigned and wow.UnitGroupRolesAssigned(unit)
+                data.Guid = wow.UnitGUID and wow.UnitGUID(unit)
+                data.ClassId = wow.UnitClass and select(3, wow.UnitClass(unit))
+
+                if not data.Guid then
+                    fsLog:Warning("Unable to determine unit spec for '%s' as it's guid is nil.", unit)
+                elseif wow.issecretvalue(data.Guid) then
+                    fsLog:Warning("Unable to determine unit spec for '%s' as it's guid is a secret value.", unit)
+                else
+                    data.SpecId = fsInspector:UnitSpec(data.Guid)
+                end
+            end
+        end
+
+        if not data.UnitNumber then
+            -- fallback to a slower but more reliable method
+            -- mostly for pets
+            data.UnitNumber = tonumber(string.match(unit, "%d+"))
+        end
+
+        if not data.IsPet then
+            if not data.Role then
+                fsLog:Warning("Failed to determine role for unit %s.", unit)
+            end
+            if not data.ClassId then
+                fsLog:Warning("Failed to determine class for unit %s.", unit)
+            end
+        end
+    end
+
+    local stop = wow.GetTimePreciseSec()
+    fsLog:Debug("Pre-computing unit metadata took %fms for %d units.", (stop - start) * 1000, #units)
+
+    return meta
+end
+
+local function RoleAndClassValue(role, class, meta)
+    local roleOrder = meta.RoleOrderLookup[role]
 
     if roleOrder then
         return roleOrder
     end
 
     if class then
-        local classOrder = classOrderLookup[class]
+        local classOrder = meta.ClassOrderLookup[class]
         return classOrder
     end
 
@@ -142,164 +227,67 @@ local function EmptyCompare(x, y)
     return x < y
 end
 
-local function CompareGroup(leftToken, rightToken, isArena)
-    if not wow.IsInRaid() then
-        -- string comparison is ok to use as party doesn't go above 1 digit
-        return leftToken < rightToken
+local function CompareGroup(leftToken, rightToken, meta)
+    local leftMeta, rightMeta = meta[leftToken], meta[rightToken]
+
+    assert(leftMeta)
+    assert(rightMeta)
+
+    if leftMeta.UnitNumber and rightMeta.UnitNumber then
+        return leftMeta.UnitNumber < rightMeta.UnitNumber
     end
 
-    if isArena then
-        local id1 = tonumber(string.sub(leftToken, 6))
-        local id2 = tonumber(string.sub(rightToken, 6))
-
-        if id1 and id2 then
-            return id1 < id2
-        end
-    else
-        -- the same way blizzard do it in CRFSort_Group
-        local id1 = tonumber(string.sub(leftToken, 5))
-        local id2 = tonumber(string.sub(rightToken, 5))
-
-        if id1 and id2 then
-            return id1 < id2
-        end
-    end
-
-    -- the below probably isn't needed anymore
-    -- fallback to a slower but more reliable comparison
-    local left = tonumber(string.match(leftToken, "%d+"))
-    local right = tonumber(string.match(rightToken, "%d+"))
-
-    if left and right then
-        return left < right
-    end
-
+    -- could be "player" or "pet"
     return leftToken < rightToken
 end
 
-local function CompareAlphabetical(leftToken, rightToken)
-    local name1, name2 = wow.UnitName(leftToken), wow.UnitName(rightToken)
+local function CompareAlphabetical(leftToken, rightToken, meta)
+    local leftMeta, rightMeta = meta[leftToken], meta[rightToken]
 
-    if name1 and name2 then
-        return name1 < name2
+    assert(leftMeta)
+    assert(rightMeta)
+
+    local leftName, rightName = leftMeta.Name, rightMeta.Name
+
+    if leftName and rightName then
+        return leftName < rightName
     end
 
-    return CompareGroup(leftToken, rightToken, string.match(leftToken, "arena.*"))
+    return CompareGroup(leftToken, rightToken, meta)
 end
 
-local function CompareRole(leftToken, rightToken, isArena)
+local function CompareRole(leftToken, rightToken, meta)
+    local leftMeta, rightMeta = meta[leftToken], meta[rightToken]
     local leftRole, rightRole = nil, nil
     local leftSpec, rightSpec = nil, nil
     local leftClass, rightClass = nil, nil
 
-    if isArena then
-        local leftId = tonumber(string.match(leftToken, "%d+"))
-        local rightId = tonumber(string.match(rightToken, "%d+"))
+    assert(leftMeta)
+    assert(rightMeta)
 
-        if not leftId or not rightId then
-            fsLog:Error("Arena unit tokens are missing numbers.")
-            return CompareGroup(leftToken, rightToken, isArena)
-        end
+    leftSpec = leftMeta.SpecId
+    rightSpec = rightMeta.SpecId
 
-        if wow.GetArenaOpponentSpec then
-            leftSpec = wow.GetArenaOpponentSpec(leftId)
-            rightSpec = wow.GetArenaOpponentSpec(rightId)
-        else
-            fsLog:Error("Your wow client is missing the GetArenaOpponentSpec API.")
-        end
+    leftRole = leftMeta.Role
+    rightRole = rightMeta.Role
 
-        local specError = "Failed to determine spec for arena unit %s."
-
-        if not leftSpec then
-            fsLog:Warning(specError, leftToken)
-        end
-
-        if not rightSpec then
-            fsLog:Warning(specError, rightToken)
-        end
-
-        if not leftSpec or not rightSpec then
-            return CompareGroup(leftToken, rightToken, isArena)
-        end
-
-        if wow.GetSpecializationInfoByID then
-            leftRole = select(5, wow.GetSpecializationInfoByID(leftSpec))
-            rightRole = select(5, wow.GetSpecializationInfoByID(rightSpec))
-        else
-            fsLog:Error("Your wow client is missing the GetSpecializationInfoByID API.")
-        end
-
-        local leftSpecInfo = specIdLookup[leftSpec]
-        local rightSpecInfo = specIdLookup[rightSpec]
-
-        leftClass = leftSpecInfo and leftSpecInfo.ClassId
-        rightClass = rightSpecInfo and rightSpecInfo.ClassId
-    else
-        local leftGuid = wow.UnitGUID(leftToken)
-        local rightGuid = wow.UnitGUID(rightToken)
-        local nilGuidError = "Unable to determine unit spec for '%s' as it's guid is nil."
-        local secretGuidError = "Unable to determine unit spec for '%s' as it's guid is a secret value."
-
-        if not leftGuid then
-            fsLog:Warning(nilGuidError, leftToken)
-        elseif not rightGuid then
-            fsLog:Warning(nilGuidError, rightToken)
-        elseif wow.issecretvalue(leftGuid) then
-            fsLog:Warning(secretGuidError, leftToken)
-        elseif wow.issecretvalue(rightGuid) then
-            fsLog:Warning(secretGuidError, rightToken)
-        else
-            leftSpec = fsInspector:UnitSpec(leftGuid)
-            rightSpec = fsInspector:UnitSpec(rightGuid)
-        end
-
-        if wow.UnitGroupRolesAssigned then
-            leftRole = wow.UnitGroupRolesAssigned(leftToken)
-            rightRole = wow.UnitGroupRolesAssigned(rightToken)
-        else
-            fsLog:Error("Your wow client is missing the UnitGroupRolesAssigned API.")
-        end
-
-        leftClass = select(3, wow.UnitClass(leftToken))
-        rightClass = select(3, wow.UnitClass(rightToken))
-    end
-
-    -- grab our ordering values
-    local _, specOrderLookup, _ = Ordering()
+    leftClass = leftMeta.ClassId
+    rightClass = rightMeta.ClassId
 
     -- prioritise their spec information if we have it
     if leftSpec and leftSpec > 0 and rightSpec and rightSpec > 0 and leftSpec ~= rightSpec then
-        local leftSpecOrder = specOrderLookup[leftSpec]
-        local rightSpecOrder = specOrderLookup[rightSpec]
+        local leftSpecOrder = meta.SpecOrderLookup[leftSpec]
+        local rightSpecOrder = meta.SpecOrderLookup[rightSpec]
 
         if leftSpecOrder and rightSpecOrder and leftSpecOrder ~= rightSpecOrder then
             return leftSpecOrder < rightSpecOrder
         end
     end
 
-    local roleError = "Failed to determine role for unit %s."
-    local classError = "Failed to determine class for unit %s."
-
-    if not leftRole then
-        fsLog:Warning(roleError, leftToken)
-    end
-
-    if not rightRole then
-        fsLog:Warning(roleError, rightToken)
-    end
-
-    if not leftClass then
-        fsLog:Warning(classError, leftToken)
-    end
-
-    if not rightClass then
-        fsLog:Warning(classError, rightToken)
-    end
-
     -- check their role + class combination
     if leftRole and rightRole then
-        local leftRoleOrder = RoleAndClassValue(leftRole, leftClass)
-        local rightRoleOrder = RoleAndClassValue(rightRole, rightClass)
+        local leftRoleOrder = RoleAndClassValue(leftRole, leftClass, meta)
+        local rightRoleOrder = RoleAndClassValue(rightRole, rightClass, meta)
 
         if leftRoleOrder and rightRoleOrder and leftRoleOrder ~= rightRoleOrder then
             return leftRoleOrder < rightRoleOrder
@@ -312,76 +300,77 @@ local function CompareRole(leftToken, rightToken, isArena)
     end
 
     -- if they are the same role, class, and spec, then fallback to group sort
-    return CompareGroup(leftToken, rightToken, isArena)
+    return CompareGroup(leftToken, rightToken, meta)
 end
 
 ---Returns true if the specified token is ordered after the mid point of player units.
 ---Pet units are ignored.
 ---@param token string
----@param context table
+---@param meta table
 ---@return boolean
-local function CompareMiddle(token, context)
-    local index = context.IndexLookup[token]
+local function CompareMiddle(token, meta)
+    local index = meta.IndexLookup[token]
 
     if not index then
         return false
     end
 
-    return index > context.Mid
+    return index > meta.Mid
 end
 
 ---Returns true if the left token should be ordered before the right token.
----middleContext is required if playerSortMode == Middle.
 ---@param leftToken string
 ---@param rightToken string
 ---@param playerSortMode? string
 ---@param groupSortMode? string
 ---@param reverse boolean?
----@param middleContext table?
+---@param meta table
 ---@return boolean
-local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse, middleContext)
-    if wow.UnitExists(leftToken) and not wow.UnitExists(rightToken) then
+local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse, meta)
+    local leftMeta, rightMeta = meta[leftToken], meta[rightToken]
+
+    assert(leftMeta)
+    assert(rightMeta)
+
+    if leftMeta.Exists and not rightMeta.Exists then
         return true
-    elseif wow.UnitExists(rightToken) and not wow.UnitExists(leftToken) then
+    elseif not leftMeta.Exists and rightMeta.Exists then
         return false
     end
 
-    if fsUnit:IsPet(leftToken) or fsUnit:IsPet(rightToken) then
+    if leftMeta.IsPet or rightMeta.IsPet then
         -- place players before pets
-        if not fsUnit:IsPet(leftToken) then
+        if not leftMeta.IsPet then
             return true
         end
 
-        if not fsUnit:IsPet(rightToken) then
+        if not rightMeta.IsPet then
             return false
         end
 
         -- both are pets, compare their parent
-        -- remove "pet" from the token to get the parent
-        local leftTokenParent = leftToken == "pet" and "player" or string.gsub(leftToken, "pet", "")
-        local rightTokenParent = rightToken == "pet" and "player" or string.gsub(rightToken, "pet", "")
+        local leftTokenParent = fsUnit:PetParent(leftToken)
+        local rightTokenParent = fsUnit:PetParent(rightToken)
 
-        return Compare(leftTokenParent, rightTokenParent, playerSortMode, groupSortMode, reverse, middleContext)
+        return Compare(leftTokenParent, rightTokenParent, playerSortMode, groupSortMode, reverse, meta)
     end
 
     if playerSortMode and playerSortMode ~= "" then
-        if fsUnit:IsPlayer(leftToken) then
+        if leftMeta.IsPlayer then
             if playerSortMode == fsConfig.PlayerSortMode.Hidden then
                 return false
             elseif playerSortMode == fsConfig.PlayerSortMode.Middle then
-                assert(middleContext ~= nil)
-                return CompareMiddle(rightToken, middleContext)
+                return CompareMiddle(rightToken, meta)
             else
                 return playerSortMode == fsConfig.PlayerSortMode.Top
             end
         end
 
-        if fsUnit:IsPlayer(rightToken) then
+        if rightMeta.IsPlayer then
             if playerSortMode == fsConfig.PlayerSortMode.Hidden then
                 return true
             elseif playerSortMode == fsConfig.PlayerSortMode.Middle then
-                assert(middleContext ~= nil)
-                return not CompareMiddle(leftToken, middleContext)
+                return not CompareMiddle(leftToken, meta)
             else
                 return playerSortMode == fsConfig.PlayerSortMode.Bottom
             end
@@ -393,11 +382,11 @@ local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, rev
     end
 
     if groupSortMode == fsConfig.GroupSortMode.Group then
-        return CompareGroup(leftToken, rightToken)
+        return CompareGroup(leftToken, rightToken, meta)
     elseif groupSortMode == fsConfig.GroupSortMode.Role then
-        return CompareRole(leftToken, rightToken)
+        return CompareRole(leftToken, rightToken, meta)
     elseif groupSortMode == fsConfig.GroupSortMode.Alphabetical then
-        return CompareAlphabetical(leftToken, rightToken)
+        return CompareAlphabetical(leftToken, rightToken, meta)
     end
 
     return leftToken < rightToken
@@ -408,26 +397,32 @@ end
 ---@param rightToken string
 ---@param groupSortMode? string
 ---@param reverse boolean?
+---@param meta table
 ---@return boolean
-local function EnemyCompare(leftToken, rightToken, groupSortMode, reverse)
+local function EnemyCompare(leftToken, rightToken, groupSortMode, reverse, meta)
+    local leftMeta, rightMeta = meta[leftToken], meta[rightToken]
+
+    assert(leftMeta)
+    assert(rightMeta)
+
     -- used to have UnitExists() checks here
     -- but it returns false in the starting room
     -- it also seemed to bring some problems when a new round starts in shuffle
     -- so leaving it out for now
-    if fsUnit:IsPet(leftToken) or fsUnit:IsPet(rightToken) then
+    if leftMeta.IsPet or rightMeta.IsPet then
         -- place player before pets
-        if not fsUnit:IsPet(leftToken) then
+        if not leftMeta.IsPet then
             return true
         end
-        if not fsUnit:IsPet(rightToken) then
+        if not rightMeta.IsPet then
             return false
         end
 
         -- both are pets, compare their parent
-        local leftTokenParent = string.gsub(leftToken, "pet", "")
-        local rightTokenParent = string.gsub(rightToken, "pet", "")
+        local leftTokenParent = fsUnit:PetParent(leftToken)
+        local rightTokenParent = fsUnit:PetParent(rightToken)
 
-        return EnemyCompare(leftTokenParent, rightTokenParent, groupSortMode, reverse)
+        return EnemyCompare(leftTokenParent, rightTokenParent, groupSortMode, reverse, meta)
     end
 
     if reverse then
@@ -435,13 +430,13 @@ local function EnemyCompare(leftToken, rightToken, groupSortMode, reverse)
     end
 
     if groupSortMode == fsConfig.GroupSortMode.Group then
-        return CompareGroup(leftToken, rightToken, true)
+        return CompareGroup(leftToken, rightToken, meta)
     end
 
     local inInstance, instanceType = wow.IsInInstance()
 
     if groupSortMode == fsConfig.GroupSortMode.Role and inInstance and instanceType == "arena" then
-        return CompareRole(leftToken, rightToken, true)
+        return CompareRole(leftToken, rightToken, meta)
     end
 
     return leftToken < rightToken
@@ -449,7 +444,7 @@ end
 
 ---Returns a function that accepts two parameters of unit tokens and returns true if the left token should be ordered before the right.
 ---Sorting is based on the current instance and configured options.
----@param units string[]? the set of all unit tokens, only required if the player sort mode is "Middle"
+---@param units string[]? the unit tokens that will be sorted. required for performance reasons.
 ---@return function sort
 function M:SortFunction(units)
     local enabled, playerSortMode, groupSortMode, reverse = M:FriendlySortMode()
@@ -458,13 +453,14 @@ function M:SortFunction(units)
         return EmptyCompare
     end
 
+    units = units or fsUnit:FriendlyUnits()
+    local meta = PrecomputeUnitMetadata(units)
+
     if playerSortMode ~= fsConfig.PlayerSortMode.Middle then
         return function(x, y)
-            return Compare(x, y, playerSortMode, groupSortMode, reverse)
+            return Compare(x, y, playerSortMode, groupSortMode, reverse, meta)
         end
     end
-
-    units = units or fsUnit:FriendlyUnits()
 
     -- we need to pre-sort to determine where the middle actually is
     -- making use of Enumerable:OrderBy() so we don't re-order the original array
@@ -474,7 +470,7 @@ function M:SortFunction(units)
             return not wow.UnitIsUnit(x, "player")
         end)
         :OrderBy(function(x, y)
-            return Compare(x, y, fsConfig.PlayerSortMode.Top, groupSortMode, reverse)
+            return Compare(x, y, fsConfig.PlayerSortMode.Top, groupSortMode, reverse, meta)
         end)
         :ToTable()
 
@@ -483,33 +479,37 @@ function M:SortFunction(units)
     local notPets = {}
 
     for _, unit in ipairs(units) do
-        if not fsUnit:IsPet(unit) and wow.UnitExists(unit) then
+        local unitMeta = meta[unit]
+
+        if not unitMeta.IsPet and unitMeta.Exists then
             notPets[#notPets + 1] = unit
             index[unit] = #notPets
         end
     end
 
-    local middleContext = {
-        IndexLookup = index,
-        Mid = math.floor(#notPets / 2),
-    }
+    meta.IndexLookup = index
+    meta.Mid = math.floor(#notPets / 2)
 
     return function(x, y)
-        return Compare(x, y, playerSortMode, groupSortMode, reverse, middleContext)
+        return Compare(x, y, playerSortMode, groupSortMode, reverse, meta)
     end
 end
 
 ---Returns a function that accepts two parameters of unit tokens and returns true if the left token should be ordered before the right.
+---@param units string[] the unit tokens that will be sorted. required for performance reasons.
 ---@return function sort
-function M:EnemySortFunction()
+function M:EnemySortFunction(units)
     local enabled, groupSortMode, reverse = M:EnemySortMode()
 
     if not enabled then
         return EmptyCompare
     end
 
+    units = units or fsUnit:EnemyUnits()
+
+    local meta = PrecomputeUnitMetadata(units)
     return function(x, y)
-        return EnemyCompare(x, y, groupSortMode, reverse)
+        return EnemyCompare(x, y, groupSortMode, reverse, meta)
     end
 end
 

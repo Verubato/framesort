@@ -193,6 +193,16 @@ function M:test_pet_for()
     assertEquals(fsUnit:PetFor("nameplate1", true), "nameplatepet1")
 end
 
+function M:test_owner_for()
+    ---@diagnostic disable-next-line: param-type-mismatch
+    assertEquals(fsUnit:PetParent(nil), "none")
+    assertEquals(fsUnit:PetParent(""), "none")
+    assertEquals(fsUnit:PetParent("pet"), "player")
+    assertEquals(fsUnit:PetParent("partypet1"), "party1")
+    assertEquals(fsUnit:PetParent("raidpet1"), "raid1")
+    assertEquals(fsUnit:PetParent("nameplatepet1"), "nameplate1")
+end
+
 function M:test_is_player_when_secret()
     addon.WoW.Api.issecretvalue = function(value)
         return true

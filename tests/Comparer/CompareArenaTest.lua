@@ -19,11 +19,13 @@ function M:setup()
         return left == right
     end
     addon.WoW.Api.IsInInstance = function()
+        assert("wtf")
         return true, "arena"
     end
 end
 
 function M:test_casters_before_melee()
+    config = addon.DB.Options.Sorting.EnemyArena
     config.Enabled = true
     config.GroupSortMode = fsConfig.GroupSortMode.Role
 
@@ -42,6 +44,7 @@ function M:test_casters_before_melee()
             return 258, 0
         end
 
+        assert(false)
         return 0, 0
     end
     addon.WoW.Api.GetSpecializationInfoByID = function(specIndex)
@@ -53,11 +56,12 @@ function M:test_casters_before_melee()
             return specIndex, "Shadow", "", 0, "DAMAGER", "", ""
         end
 
+        assert(false)
         return specIndex, "", "", 0, "NONE", "", ""
     end
 
     local subject = { "arena1", "arena2", "arena3" }
-    local sortFunction = fsCompare:EnemySortFunction()
+    local sortFunction = fsCompare:EnemySortFunction(subject)
 
     table.sort(subject, sortFunction)
 
@@ -83,6 +87,7 @@ function M:test_hunters_between_casters_and_melee()
             return 258, 0
         end
 
+        assert(false)
         return 0, 0
     end
     addon.WoW.Api.GetSpecializationInfoByID = function(specIndex)
@@ -94,11 +99,12 @@ function M:test_hunters_between_casters_and_melee()
             return specIndex, "Shadow", "", 0, "DAMAGER", "", ""
         end
 
+        assert(false)
         return specIndex, "", "", 0, "NONE", "", ""
     end
 
     local subject = { "arena1", "arena2", "arena3" }
-    local sortFunction = fsCompare:EnemySortFunction()
+    local sortFunction = fsCompare:EnemySortFunction(subject)
 
     table.sort(subject, sortFunction)
 

@@ -36,14 +36,14 @@ for i = 1, wow.MEMBERS_PER_RAID_GROUP do
     allEnemyUnitsIds[#allEnemyUnitsIds + 1] = "arenapet" .. i
 end
 
-local function ArenaUnitExists(token)
+function M:ArenaUnitExists(unit)
     -- after the gates open UnitExists will start working
-    if wow.UnitExists(token) then
+    if wow.UnitExists(unit) then
         return true
     end
 
     -- get the number from the token, e.g. "2" from "arena2"
-    local idStr = string.match(token, "%d+")
+    local idStr = string.match(unit, "%d+")
     if not idStr then
         return false
     end
@@ -89,7 +89,7 @@ function M:EnemyUnits()
     return fsEnumerable
         :From(allEnemyUnitsIds)
         :Where(function(unit)
-            return ArenaUnitExists(unit)
+            return M:ArenaUnitExists(unit)
         end)
         :ToTable()
 end
@@ -120,6 +120,26 @@ function M:PetFor(unit, isEnemy)
     return pet
 end
 
+---Returns the parent token of a given pet unit, e.g. arenapet3 becomes arena3
+---@param petUnit any
+---@return string
+function M:PetParent(petUnit)
+    if not petUnit or petUnit == "" or petUnit == "none" then
+        return "none"
+    end
+
+    if petUnit == "pet" then
+        return "player"
+    end
+
+    local pos = string.find(petUnit, "pet", 1, true)
+    if not pos then
+        return petUnit
+    end
+
+    return petUnit:sub(1, pos - 1) .. petUnit:sub(pos + 3)
+end
+
 ---A safe check wrapper that returns true if the unit is "player"
 ---@param unit string
 function M:IsPlayer(unit)
@@ -137,7 +157,6 @@ end
 function M:IsFriendlyUnit(unit)
     return wow.UnitIsFriend("player", unit)
 end
-
 
 ---Returns true if the unit is an enemy of the current player.
 ---@param unit string
