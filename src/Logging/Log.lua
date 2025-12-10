@@ -1,12 +1,16 @@
 ---@type string, Addon
 local addonName, addon = ...
 local wow = addon.WoW.Api
-local logLevelDebug = "Debug"
-local logLevelWarning = "Warning"
-local logLevelError = "Error"
-local logLevelCritical = "Critical"
 ---@class Log
-local M = {}
+local M = {
+    Level = {
+        Debug = 1,
+        Notify = 2,
+        Warning = 3,
+        Error = 4,
+        Critical = 5,
+    },
+}
 addon.Logging.Log = M
 
 local started = wow.GetTimePreciseSec()
@@ -31,8 +35,9 @@ local function Write(msg, level)
         }
     end
 
-    -- print critical errors to chat
-    if level == logLevelCritical then
+    if level == M.Level.Notify then
+        print(string.format("FrameSort - %s", msg))
+    elseif level == M.Level.Critical then
         print(string.format("|cFFFF0000FrameSort - %s|r", msg))
     end
 end
@@ -42,28 +47,59 @@ local function OnAddonError(_, eventName, errorAddon, error)
         return
     end
 
-    Write(error, "Error")
+    Write(error, M.Level.Error)
+end
+
+---Returns a text representation of the log level.
+function M:LevelText(level)
+    if level == M.Level.Debug then
+        return "Debug"
+    elseif level == M.Level.Notify then
+        return "Notify"
+    elseif level == M.Level.Warning then
+        return "Warning"
+    elseif level == M.Level.Error then
+        return "Error"
+    elseif level == M.Level.Critical then
+        return "Critical"
+    end
+
+    return "Unknown"
 end
 
 ---Logs a debug message.
 ---@param msg string
 function M:Debug(msg, ...)
     local formatted = string.format(msg, ...)
-    Write(formatted, logLevelDebug)
+    Write(formatted, M.Level.Debug)
+end
+
+---Logs and prints a notification message.
+---@param msg string
+function M:Notify(msg, ...)
+    local formatted = string.format(msg, ...)
+    Write(formatted, M.Level.Notify)
 end
 
 ---Logs a warning message.
 ---@param msg string
 function M:Warning(msg, ...)
     local formatted = string.format(msg, ...)
-    Write(formatted, logLevelWarning)
+    Write(formatted, M.Level.Warning)
 end
 
 ---Logs an error message.
 ---@param msg string
 function M:Error(msg, ...)
     local formatted = string.format(msg, ...)
-    Write(formatted, logLevelError)
+    Write(formatted, M.Level.Error)
+end
+
+---Logs and prints a critical error message.
+---@param msg string
+function M:Critical(msg, ...)
+    local formatted = string.format(msg, ...)
+    Write(formatted, M.Level.Critical)
 end
 
 ---Logs a message.

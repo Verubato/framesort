@@ -176,6 +176,9 @@ local wow = {
     Has5v5 = function()
         return LE_EXPANSION_BURNING_CRUSADE and LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_BURNING_CRUSADE
     end,
+    CanOpenOptionsDuringCombat = function()
+        return not LE_EXPANSION_MIDNIGHT or LE_EXPANSION_LEVEL_CURRENT < LE_EXPANSION_MIDNIGHT
+    end,
     HasSoloShuffle = function()
         return C_PvP and C_PvP.IsSoloShuffle ~= nil
     end,
