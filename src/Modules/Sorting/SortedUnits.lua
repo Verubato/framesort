@@ -6,6 +6,7 @@ local fsUnit = addon.WoW.Unit
 local fsEnumerable = addon.Collections.Enumerable
 local fsInspector = addon.Modules.Inspector
 local fsConfig = addon.Configuration
+local fsSortedFrames = addon.Modules.Sorting.SortedFrames
 local wow = addon.WoW.Api
 local events = wow.Events
 local fsLog = addon.Logging.Log
@@ -81,6 +82,20 @@ local function RefreshFriendlyUnits(existingUnits)
         return units
     end
 
+    -- fallback to get units from frames
+    -- this pretty much only happens when they are in test/edit mode and not in a group
+    if #units == 0 then
+        fsLog:Warning("No friendly units detected, falling back to retrieving units from frames.")
+
+        local frames = fsSortedFrames:FriendlyFrames()
+        units = fsEnumerable
+            :From(frames)
+            :Map(function(x)
+                return fsFrame:GetFrameUnit(x)
+            end)
+            :ToTable()
+    end
+
     local start = wow.GetTimePreciseSec()
     table.sort(units, fsCompare:SortFunction(units))
     local stop = wow.GetTimePreciseSec()
@@ -95,6 +110,18 @@ local function RefreshEnemyUnits(existingUnits)
 
     if not sortEnabled then
         return units
+    end
+
+    if #units == 0 then
+        fsLog:Warning("No enemy units detected, falling back to retrieving units from frames.")
+
+        local frames = fsSortedFrames:ArenaFrames()
+        units = fsEnumerable
+            :From(frames)
+            :Map(function(x)
+                return fsFrame:GetFrameUnit(x)
+            end)
+            :ToTable()
     end
 
     local start = wow.GetTimePreciseSec()

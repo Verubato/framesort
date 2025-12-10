@@ -154,24 +154,7 @@ end
 
 ---Returns a sorted array of friendly unit tokens.
 function M.Sorting:GetFriendlyUnits()
-    local units = fsSortedUnits:FriendlyUnits()
-
-    -- fallback to frames if no units were found
-    if #units > 0 then
-        return units
-    end
-
-    local frames = fsSortedFrames:FriendlyFrames()
-
-    units = fsEnumerable
-        :From(frames)
-        :Map(function(x)
-            return fsFrame:GetFrameUnit(x)
-        end)
-        :ToTable()
-
-    table.sort(units, fsCompare:SortFunction(units))
-    return units
+    return fsSortedUnits:FriendlyUnits()
 end
 
 ---Returns a sorted array of enemy unit tokens.

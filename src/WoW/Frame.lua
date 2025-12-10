@@ -2,6 +2,7 @@
 ---@type string, Addon
 local _, addon = ...
 local fsEnumerable = addon.Collections.Enumerable
+local fsUnit = addon.WoW.Unit
 local fsLog = addon.Logging.Log
 ---@class FrameUtil
 local M = {
@@ -38,7 +39,7 @@ function M:GetFrames(provider, type, visibleOnly)
         visibleOnly = target.VisibleOnly
     end
 
-    local frames = (target.Frames and target:Frames()) or M:ExtractUnitFrames(target.Frame, visibleOnly)
+    local frames = (target.Frames and target:Frames()) or M:ExtractUnitFrames(target.Frame, true, visibleOnly)
 
     if not target.IsGrouped or not target:IsGrouped() then
         return frames
@@ -179,7 +180,7 @@ end
 ---@param container table
 ---@param visibleOnly boolean?
 ---@return table
-function M:ExtractUnitFrames(container, visibleOnly, hasUnit, containerVisible)
+function M:ExtractUnitFrames(container, containerVisible, visibleOnly, hasUnit)
     if hasUnit == nil then
         hasUnit = true
     end
