@@ -453,7 +453,7 @@ secureMethods["SortFramesByUnits"] = [[
             local unit, maybePet = run:RunAttribute("GetUnit", "Frame")
             Frame = nil
 
-            local isPet = strfind(maybePet or "", "pet") ~= nil
+            local isPet = maybePet and strfind(maybePet, "pet") ~= nil
 
             -- don't care if it's an unsorted pet, as we'll just place them at the end
             if not isPet then
