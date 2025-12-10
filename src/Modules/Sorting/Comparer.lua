@@ -167,7 +167,7 @@ local function PrecomputeUnitMetadata(units)
             data.UnitNumber = tonumber(string.sub(unit, 6))
 
             data.SpecId = wow.GetArenaOpponentSpec and wow.GetArenaOpponentSpec(data.UnitNumber)
-            data.Role = wow.GetSpecializationInfoByID and select(5, wow.GetSpecializationInfoByID(data.SpecId))
+            data.Role = wow.GetSpecializationInfoByID and data.SpecId and select(5, wow.GetSpecializationInfoByID(data.SpecId))
 
             local specInfo = data.SpecId and specIdLookup[data.SpecId]
             data.ClassId = specInfo and specInfo.ClassId
