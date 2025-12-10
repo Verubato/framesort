@@ -97,7 +97,7 @@
 ---@field Events WowEvents
 ---@field HasDropdown fun(): boolean
 ---@field HasArena fun(): boolean
----@field HasSpecializationInfo fun(): boolean
+---@field HasEnemySpecSupport fun(): boolean
 ---@field Has5v5 fun(): boolean
 ---@field HasSoloShuffle fun(): boolean
 ---@field HasEditMode fun(): boolean

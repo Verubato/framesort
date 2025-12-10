@@ -210,7 +210,7 @@ function M:Init()
         -- so trigger a sort once we know their role
         eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
 
-        if wow.HasSpecializationInfo() then
+        if wow.HasEnemySpecSupport() then
             eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
             eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
         end

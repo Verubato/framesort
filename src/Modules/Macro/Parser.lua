@@ -169,7 +169,7 @@ local function UnitForSelector(selector, friendlyUnits, enemyUnits)
 
     -- enemy arena
     if enemyTank or enemyHealer or enemyDps then
-        if not wow.HasSpecializationInfo then
+        if not wow.HasEnemySpecSupport() then
             return "none"
         end
 

@@ -288,7 +288,7 @@ function M:Build(panel)
         anchor = BuildSortModeCheckboxes(panel, anchor, L["Arena - " .. otherArenaSizes], config.Arena.Default)
     end
 
-    if wow.HasSpecializationInfo() then
+    if wow.HasEnemySpecSupport() then
         anchor = BuildSortModeCheckboxes(panel, anchor, L["Enemy Arena (see addons panel for supported addons)"], config.EnemyArena, false, false)
     end
 

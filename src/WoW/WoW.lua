@@ -166,7 +166,7 @@ local wow = {
     HasDropdown = function()
         return WowStyle1DropdownTemplate ~= nil
     end,
-    HasSpecializationInfo = function()
+    HasEnemySpecSupport = function()
         -- MoP onwards have these functions; early xpacs do not
         return GetArenaOpponentSpec ~= nil and GetSpecializationInfoByID ~= nil
     end,
