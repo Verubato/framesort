@@ -152,9 +152,9 @@ function M:FriendlyUnits()
     end
 
     cachedFriendlyUnits = RefreshFriendlyUnits()
-    friendlyCacheValid = true
 
     if #cachedFriendlyUnits > 0 then
+        friendlyCacheValid = true
         friendlyCacheMisses = friendlyCacheMisses + 1
         LogStatsTick()
     end
@@ -178,9 +178,9 @@ function M:EnemyUnits()
     end
 
     cachedEnemyUnits = RefreshEnemyUnits()
-    enemyCacheValid = true
 
     if #cachedEnemyUnits > 0 then
+        enemyCacheValid = true
         enemyCacheMisses = enemyCacheMisses + 1
         LogStatsTick()
     end
