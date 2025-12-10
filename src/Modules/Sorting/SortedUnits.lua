@@ -74,22 +74,47 @@ local function OnConfigChanged()
     InvalidateEnemyCache()
 end
 
-local function RefreshFriendlyUnits()
+local function FriendlyUnitsFromFrames()
+    local frames = fsSortedFrames:FriendlyFrames()
+    local units = fsEnumerable
+        :From(frames)
+        :Map(function(x)
+            return fsFrame:GetFrameUnit(x)
+        end)
+        :ToTable()
+
+    local start = wow.GetTimePreciseSec()
+    table.sort(units, fsCompare:SortFunction(units))
+    local stop = wow.GetTimePreciseSec()
+    fsLog:Debug("Friendly units table.sort() took %fms.", (stop - start) * 1000)
+
+    return units
+end
+
+local function EnemyUnitsFromFrames()
+    local frames = fsSortedFrames:ArenaFrames()
+    local units = fsEnumerable
+        :From(frames)
+        :Map(function(x)
+            return fsFrame:GetFrameUnit(x)
+        end)
+        :ToTable()
+
+    local start = wow.GetTimePreciseSec()
+    table.sort(units, fsCompare:EnemySortFunction(units))
+    local stop = wow.GetTimePreciseSec()
+    fsLog:Debug("Enemy units table.sort() took %fms.", (stop - start) * 1000)
+
+    return units
+end
+
+local function FriendlyUnits()
     local units = fsUnit:FriendlyUnits()
     local sortEnabled = fsCompare:FriendlySortMode()
 
     -- if sorting is disabled, fallback to whatever frame order they have
-    -- or if we were unable to detect units for some reason, which happens in addon tests and edit mode
-    if not sortEnabled or #units == 0 then
-        fsLog:Warning("No friendly units detected, falling back to retrieving units from frames.")
-
-        local frames = fsSortedFrames:FriendlyFrames()
-        units = fsEnumerable
-            :From(frames)
-            :Map(function(x)
-                return fsFrame:GetFrameUnit(x)
-            end)
-            :ToTable()
+    if not sortEnabled then
+        return {}
     end
 
     local start = wow.GetTimePreciseSec()
@@ -100,20 +125,12 @@ local function RefreshFriendlyUnits()
     return units
 end
 
-local function RefreshEnemyUnits()
+local function EnemyUnits()
     local units = fsUnit:EnemyUnits()
     local sortEnabled = fsCompare:EnemySortMode()
 
-    if not sortEnabled or #units == 0 then
-        fsLog:Warning("No enemy units detected, falling back to retrieving units from frames.")
-
-        local frames = fsSortedFrames:ArenaFrames()
-        units = fsEnumerable
-            :From(frames)
-            :Map(function(x)
-                return fsFrame:GetFrameUnit(x)
-            end)
-            :ToTable()
+    if not sortEnabled then
+        return {}
     end
 
     local start = wow.GetTimePreciseSec()
@@ -138,7 +155,7 @@ end
 ---@return string[]
 function M:FriendlyUnits()
     if not cacheEnabled then
-        return RefreshFriendlyUnits()
+        return FriendlyUnits()
     end
 
     if friendlyCacheValid then
@@ -151,10 +168,16 @@ function M:FriendlyUnits()
         return cachedFriendlyUnits
     end
 
-    cachedFriendlyUnits = RefreshFriendlyUnits()
+    cachedFriendlyUnits = FriendlyUnits()
 
     if #cachedFriendlyUnits > 0 then
         friendlyCacheValid = true
+        friendlyCacheMisses = friendlyCacheMisses + 1
+        LogStatsTick()
+    else
+        -- try from frames, but don't cache the result
+        -- as frames can change without us knowing
+        cachedFriendlyUnits = FriendlyUnitsFromFrames()
         friendlyCacheMisses = friendlyCacheMisses + 1
         LogStatsTick()
     end
@@ -165,7 +188,7 @@ end
 ---@return string[]
 function M:EnemyUnits()
     if not cacheEnabled then
-        return RefreshEnemyUnits()
+        return EnemyUnits()
     end
 
     if enemyCacheValid then
@@ -177,10 +200,14 @@ function M:EnemyUnits()
         return cachedEnemyUnits
     end
 
-    cachedEnemyUnits = RefreshEnemyUnits()
+    cachedEnemyUnits = EnemyUnits()
 
     if #cachedEnemyUnits > 0 then
         enemyCacheValid = true
+        enemyCacheMisses = enemyCacheMisses + 1
+        LogStatsTick()
+    else
+        cachedEnemyUnits = EnemyUnitsFromFrames()
         enemyCacheMisses = enemyCacheMisses + 1
         LogStatsTick()
     end
