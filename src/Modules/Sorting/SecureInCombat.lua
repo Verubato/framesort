@@ -747,7 +747,7 @@ secureMethods["HardArrange"] = [[
     local verticalSpacing = spacing and spacing.Vertical or 0
     local horizontalSpacing = spacing and spacing.Horizontal or 0
     local isHorizontalLayout = container.IsHorizontalLayout
-    local blocksPerLine = (container.FramesPerLine or 6) - 1
+    local blocksPerLine = container.FramesPerLine
     local _, _, firstFrameWidth, firstFrameHeight = frames[1]:GetRect()
     local offset = container.Offset or newtable()
     local blockWidth = firstFrameWidth
@@ -765,27 +765,13 @@ secureMethods["HardArrange"] = [[
 
     for _, frame in ipairs(frames) do
         local isNewBlock = currentBlockHeight > 0
-            -- subtract 1 for a bit of breathing room for rounding errors
+            -- add/subtract 1 for a bit of breathing room for rounding errors
             and (
                 currentBlockHeight >= (blockHeight - 1)
-                -- add 2 so that if we can squeeze multiple frames in we do so
-                or (currentBlockHeight + frame:GetHeight()) >= (blockHeight + 2)
+                or (currentBlockHeight + frame:GetHeight()) >= (blockHeight + 1)
             )
 
-        -- if we've reached the end then wrap around
-        if isHorizontalLayout and col >= blocksPerLine then
-            col = 0
-            row = row + 1
-
-            xOffset = offset.X
-            yOffset = -row * (blockHeight + verticalSpacing) + offset.Y
-        elseif not isHorizontalLayout and row >= blocksPerLine then
-            row = 0
-            col = col + 1
-
-            yOffset = offset.Y
-            xOffset = col * (blockWidth + horizontalSpacing) + offset.X
-        elseif isNewBlock then
+        if isNewBlock then
             currentBlockHeight = 0
 
             if isHorizontalLayout then
@@ -796,6 +782,23 @@ secureMethods["HardArrange"] = [[
 
             xOffset = col * (blockWidth + horizontalSpacing) + offset.X
             yOffset = -row * (blockHeight + verticalSpacing) + offset.Y
+        end
+
+        -- if we've reached the end then wrap around
+        if isHorizontalLayout and blocksPerLine and col >= blocksPerLine then
+            col = 0
+            row = row + 1
+
+            xOffset = offset.X
+            yOffset = -row * (blockHeight + verticalSpacing) + offset.Y
+            currentBlockHeight = 0
+        elseif not isHorizontalLayout and blocksPerLine and row >= blocksPerLine then
+            row = 0
+            col = col + 1
+
+            yOffset = offset.Y
+            xOffset = col * (blockWidth + horizontalSpacing) + offset.X
+            currentBlockHeight = 0
         end
 
         local framePoint = newtable()
