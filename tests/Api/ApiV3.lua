@@ -61,7 +61,7 @@ function M:test_frame_number_for_unit()
     ---@type ApiV3
     local v3 = FrameSortApi.v3
 
-    assertEquals(v3.Frame:FrameNumberForUnit("party1"), 2)
+    assertEquals(v3.Frame:FrameNumberForUnit("party1"), 1)
 end
 
 return M

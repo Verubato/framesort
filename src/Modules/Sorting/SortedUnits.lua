@@ -78,13 +78,9 @@ local function RefreshFriendlyUnits(existingUnits)
     local units = fsUnit:FriendlyUnits()
     local sortEnabled = fsCompare:FriendlySortMode()
 
-    if not sortEnabled then
-        return units
-    end
-
-    -- fallback to get units from frames
-    -- this pretty much only happens when they are in test/edit mode and not in a group
-    if #units == 0 then
+    -- if sorting is disabled, fallback to whatever frame order they have
+    -- or if we were unable to detect units for some reason, which happens in addon tests and edit mode
+    if not sortEnabled or #units == 0 then
         fsLog:Warning("No friendly units detected, falling back to retrieving units from frames.")
 
         local frames = fsSortedFrames:FriendlyFrames()
@@ -108,11 +104,7 @@ local function RefreshEnemyUnits(existingUnits)
     local units = fsUnit:EnemyUnits()
     local sortEnabled = fsCompare:EnemySortMode()
 
-    if not sortEnabled then
-        return units
-    end
-
-    if #units == 0 then
+    if not sortEnabled or #units == 0 then
         fsLog:Warning("No enemy units detected, falling back to retrieving units from frames.")
 
         local frames = fsSortedFrames:ArenaFrames()
