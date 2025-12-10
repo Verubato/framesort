@@ -554,9 +554,14 @@ end
 ---@return string? groupMode the group sort mode.
 ---@return boolean? reverse whether the sorting is reversed.
 function M:EnemySortMode()
+    local inInstance, instanceType = wow.IsInInstance()
     local config = addon.DB.Options.Sorting.EnemyArena
 
-    return config.Enabled, config.GroupSortMode, config.Reverse
+    if inInstance and instanceType == "arena" then
+        return config.Enabled, config.GroupSortMode, config.Reverse
+    end
+
+    return false, nil, false
 end
 
 ---Returns true if the left frame is "earlier" than the right frame.
