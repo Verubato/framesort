@@ -1046,6 +1046,10 @@ secureMethods["TrySortContainer"] = [=[
         return false
     end
 
+    if not sortMode then
+        print("SortMode is nil", container.Frame:GetName() or "name nil", container.Type, playerSortMode)
+    end
+
     Children = newtable()
     Frames = newtable()
 

@@ -28,11 +28,13 @@ for i = 1, wow.MAX_RAID_MEMBERS do
     allRaidUnitsIds[#allRaidUnitsIds + 1] = "raidpet" .. i
 end
 
-for i = 1, wow.MEMBERS_PER_RAID_GROUP do
+-- brawl can have 15 people in arena
+local maxArena = 15
+for i = 1, maxArena do
     allEnemyUnitsIds[#allEnemyUnitsIds + 1] = "arena" .. i
 end
 
-for i = 1, wow.MEMBERS_PER_RAID_GROUP do
+for i = 1, maxArena do
     allEnemyUnitsIds[#allEnemyUnitsIds + 1] = "arenapet" .. i
 end
 
