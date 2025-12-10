@@ -94,8 +94,7 @@ end
 function M:test_get_enemy_units()
     local units = FrameSortApi.v2.Sorting:GetEnemyUnits()
 
-    -- times 2 for pets
-    assertEquals(#units, arenaUnitsCount * 2)
+    assertEquals(#units, arenaUnitsCount)
 end
 
 function M:test_get_sort_mode()
