@@ -35,33 +35,46 @@ function M:setup()
         unit.unit = "arena" .. i
     end
 
-    addon.WoW.Api.GetNumGroupMembers = function()
-        return partyUnitsCount
-    end
     addon.WoW.Api.IsInInstance = function()
         return true, "arena"
+    end
+    addon.WoW.Api.GetNumGroupMembers = function()
+        return partyUnitsCount
     end
     addon.WoW.Api.GetNumArenaOpponentSpecs = function()
         return arenaUnitsCount
     end
-    addon.WoW.Api.UnitIsFriend = function(unit)
-        return not unit:match("arena")
-    end
+    addon.WoW.Api.UnitExists = function(unit)
+        local number = tonumber(unit:match("%d+"))
 
-    local config = addon.DB.Options.Sorting
-    config.World.Enabled = true
-    config.Raid.Enabled = true
-    config.Arena.Twos.Enabled = true
-    config.Arena.Default.Enabled = true
-    config.EnemyArena.Enabled = true
-    config.Dungeon.Enabled = true
+        assert(number and number > 0)
+
+        return number <= 3
+    end
 end
 
 function M:test_frame_number_for_unit()
     ---@type ApiV3
     local v3 = FrameSortApi.v3
+    local config = addon.DB.Options.Sorting
 
-    assertEquals(v3.Frame:FrameNumberForUnit("party1"), 1)
+    -- reverse the ordering to ensure we're not lucky
+    config.Arena.Default.Enabled = true
+    config.Arena.Default.Reverse = true
+
+    config.EnemyArena.Enabled = true
+    config.EnemyArena.Reverse = true
+
+    assertEquals(v3.Frame:FrameNumberForUnit("party1"), 3)
+    assertEquals(v3.Frame:FrameNumberForUnit("party2"), 2)
+    assertEquals(v3.Frame:FrameNumberForUnit("party3"), 1)
+
+    assertEquals(v3.Frame:FrameNumberForUnit("arena1"), 3)
+    assertEquals(v3.Frame:FrameNumberForUnit("arena2"), 2)
+    assertEquals(v3.Frame:FrameNumberForUnit("arena3"), 1)
+
+    assertEquals(v3.Frame:FrameNumberForUnit(""), nil)
+    assertEquals(v3.Frame:FrameNumberForUnit("party99"), nil)
 end
 
 return M
