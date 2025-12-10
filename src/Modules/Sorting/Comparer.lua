@@ -235,8 +235,9 @@ end
 local function CompareGroup(leftToken, rightToken, meta)
     local leftMeta, rightMeta = meta[leftToken], meta[rightToken]
 
-    assert(leftMeta)
-    assert(rightMeta)
+    if not leftMeta or not rightMeta then
+        return leftToken < rightToken
+    end
 
     if leftMeta.UnitNumber and rightMeta.UnitNumber then
         return leftMeta.UnitNumber < rightMeta.UnitNumber
@@ -249,8 +250,9 @@ end
 local function CompareAlphabetical(leftToken, rightToken, meta)
     local leftMeta, rightMeta = meta[leftToken], meta[rightToken]
 
-    assert(leftMeta)
-    assert(rightMeta)
+    if not leftMeta or not rightMeta then
+        return leftToken < rightToken
+    end
 
     local leftName, rightName = leftMeta.Name, rightMeta.Name
 
@@ -267,8 +269,9 @@ local function CompareRole(leftToken, rightToken, meta)
     local leftSpec, rightSpec = nil, nil
     local leftClass, rightClass = nil, nil
 
-    assert(leftMeta)
-    assert(rightMeta)
+    if not leftMeta or not rightMeta then
+        return leftToken < rightToken
+    end
 
     leftSpec = leftMeta.SpecId
     rightSpec = rightMeta.SpecId
@@ -334,8 +337,10 @@ end
 local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse, meta)
     local leftMeta, rightMeta = meta[leftToken], meta[rightToken]
 
-    assert(leftMeta)
-    assert(rightMeta)
+    if not leftMeta or not rightMeta then
+        -- this would be a bug, but prefer to fail gracefully rather than explode with an assertion error
+        return leftToken < rightToken
+    end
 
     if leftMeta.Exists and not rightMeta.Exists then
         return true
@@ -407,8 +412,9 @@ end
 local function EnemyCompare(leftToken, rightToken, groupSortMode, reverse, meta)
     local leftMeta, rightMeta = meta[leftToken], meta[rightToken]
 
-    assert(leftMeta)
-    assert(rightMeta)
+    if not leftMeta or not rightMeta then
+        return leftToken < rightToken
+    end
 
     -- used to have UnitExists() checks here
     -- but it returns false in the starting room
