@@ -74,7 +74,7 @@ local function OnConfigChanged()
     InvalidateEnemyCache()
 end
 
-local function RefreshFriendlyUnits(existingUnits)
+local function RefreshFriendlyUnits()
     local units = fsUnit:FriendlyUnits()
     local sortEnabled = fsCompare:FriendlySortMode()
 
@@ -100,7 +100,7 @@ local function RefreshFriendlyUnits(existingUnits)
     return units
 end
 
-local function RefreshEnemyUnits(existingUnits)
+local function RefreshEnemyUnits()
     local units = fsUnit:EnemyUnits()
     local sortEnabled = fsCompare:EnemySortMode()
 
@@ -151,7 +151,7 @@ function M:FriendlyUnits()
         return cachedFriendlyUnits
     end
 
-    cachedFriendlyUnits = RefreshFriendlyUnits(cachedFriendlyUnits)
+    cachedFriendlyUnits = RefreshFriendlyUnits()
     friendlyCacheValid = true
 
     if #cachedFriendlyUnits > 0 then
@@ -177,7 +177,7 @@ function M:EnemyUnits()
         return cachedEnemyUnits
     end
 
-    cachedEnemyUnits = RefreshEnemyUnits(cachedEnemyUnits)
+    cachedEnemyUnits = RefreshEnemyUnits()
     enemyCacheValid = true
 
     if #cachedEnemyUnits > 0 then
