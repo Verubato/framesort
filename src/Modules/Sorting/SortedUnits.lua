@@ -83,7 +83,7 @@ local function FriendlyUnitsFromFrames(sort)
         end)
         :ToTable()
 
-    if not sort then
+    if not sort or #units == 0 then
         return units
     end
 
@@ -104,7 +104,7 @@ local function EnemyUnitsFromFrames(sort)
         end)
         :ToTable()
 
-    if not sort then
+    if not sort or #units == 0 then
         return units
     end
 
@@ -118,6 +118,11 @@ end
 
 local function FriendlyUnits()
     local units = fsUnit:FriendlyUnits()
+
+    if #units == 0 then
+        return units
+    end
+
     local start = wow.GetTimePreciseSec()
     table.sort(units, fsCompare:SortFunction(units))
     local stop = wow.GetTimePreciseSec()
@@ -128,6 +133,11 @@ end
 
 local function EnemyUnits()
     local units = fsUnit:EnemyUnits()
+
+    if #units == 0 then
+        return units
+    end
+
     local start = wow.GetTimePreciseSec()
     table.sort(units, fsCompare:EnemySortFunction(units))
     local stop = wow.GetTimePreciseSec()
