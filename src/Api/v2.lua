@@ -4,19 +4,18 @@ local fsEnumerable = addon.Collections.Enumerable
 local fsCompare = addon.Modules.Sorting.Comparer
 local fsSort = addon.Modules.Sorting
 local fsRun = addon.Modules
-local fsTarget = addon.Modules.Targeting
 local fsConfig = addon.Configuration
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
-local fsInspector = addon.Modules.Inspector
-local fsUnit = addon.WoW.Unit
 local fsUnitTracker = addon.Modules.UnitTracker
+local fsSortedUnits = addon.Modules.Sorting.SortedUnits
+local fsSortedFrames = addon.Modules.Sorting.SortedFrames
 local wow = addon.WoW.Api
 
 ---@class ApiV2
 local M = {
     Sorting = {},
-    Options = {}
+    Options = {},
 }
 addon.Api.v2 = M
 
@@ -155,12 +154,29 @@ end
 
 ---Returns a sorted array of friendly unit tokens.
 function M.Sorting:GetFriendlyUnits()
-    return fsTarget:FriendlyUnits()
+    local units = fsSortedUnits:FriendlyUnits()
+
+    -- fallback to frames if no units were found
+    if #units > 0 then
+        return units
+    end
+
+    local frames = fsSortedFrames:FriendlyFrames()
+
+    units = fsEnumerable
+        :From(frames)
+        :Map(function(x)
+            return fsFrame:GetFrameUnit(x)
+        end)
+        :ToTable()
+
+    table.sort(units, fsCompare:SortFunction(units))
+    return units
 end
 
 ---Returns a sorted array of enemy unit tokens.
 function M.Sorting:GetEnemyUnits()
-    return fsTarget:EnemyUnits()
+    return fsSortedUnits:EnemyUnits()
 end
 
 ---Gets the player sort mode.

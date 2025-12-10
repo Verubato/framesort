@@ -4,7 +4,9 @@ local wow = addon.WoW.Api
 local fsScheduler = addon.Scheduling.Scheduler
 local fsMacroParser = addon.Modules.Macro.Parser
 local fsLog = addon.Logging.Log
-local fsTarget = addon.Modules.Targeting
+local fsUnit = addon.WoW.Unit
+local fsSortedUnits = addon.Modules.Sorting.SortedUnits
+local fsEnumerable = addon.Collections.Enumerable
 local isSelfEditingMacro = false
 local eventFrame = nil
 ---@type table<number, boolean>
@@ -13,6 +15,15 @@ local isFsMacroCache = {}
 local M = addon.Modules.Macro
 -- wow has 150 macro slots according to https://warcraft.wiki.gg/wiki/API_GetMacroInfo
 M.MaxMacros = 150
+
+local function FilterPets(units)
+    return fsEnumerable
+        :From(units)
+        :Where(function(x)
+            return not fsUnit:IsPet(x)
+        end)
+        :ToTable()
+end
 
 ---@return boolean updated, boolean isFrameSortMacro, number newId
 local function Rewrite(id, friendlyUnits, enemyUnits)
@@ -44,8 +55,8 @@ local function UpdateMacro(id, friendlyUnits, enemyUnits, bypassCache)
         return false
     end
 
-    friendlyUnits = friendlyUnits or fsTarget:FriendlyNonPetUnits()
-    enemyUnits = enemyUnits or fsTarget:EnemyNonPetUnits()
+    friendlyUnits = friendlyUnits or FilterPets(fsSortedUnits:FriendlyUnits())
+    enemyUnits = enemyUnits or FilterPets(fsSortedUnits:EnemyUnits())
 
     local updated, isFsMacro, newId = Rewrite(id, friendlyUnits, enemyUnits)
     isFsMacroCache[newId] = isFsMacro
@@ -62,8 +73,8 @@ end
 
 local function ScanMacros()
     local start = wow.GetTimePreciseSec()
-    local friendlyUnits = fsTarget:FriendlyNonPetUnits()
-    local enemyUnits = fsTarget:EnemyNonPetUnits()
+    local friendlyUnits = FilterPets(fsSortedUnits:FriendlyUnits())
+    local enemyUnits = FilterPets(fsSortedUnits:EnemyUnits())
     local updatedCount = 0
 
     for id = 1, M.MaxMacros do

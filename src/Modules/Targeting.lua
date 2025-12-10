@@ -4,6 +4,7 @@ local wow = addon.WoW.Api
 local fsProviders = addon.Providers
 local fsUnit = addon.WoW.Unit
 local fsSortedUnits = addon.Modules.Sorting.SortedUnits
+local fsSortedFrames = addon.Modules.Sorting.SortedFrames
 local fsEnumerable = addon.Collections.Enumerable
 local fsCompare = addon.Modules.Sorting.Comparer
 local fsFrame = addon.WoW.Frame
@@ -24,14 +25,22 @@ local cyclePreviousFrame = nil
 local M = {}
 addon.Modules.Targeting = M
 
-local function GetFriendlyFrames(provider)
-    local frames = fsFrame:PartyFrames(provider, true)
+local function FriendlyUnits()
+    local sortEnabled = fsCompare:FriendlySortMode()
 
-    if #frames == 0 then
-        frames = fsFrame:RaidFrames(provider, true)
+    if sortEnabled then
+        return fsSortedUnits:FriendlyUnits()
     end
 
-    return frames
+    -- sort not enabled, fallback to frames
+    local frames = fsSortedFrames:FriendlyFrames()
+
+    return fsEnumerable
+        :From(frames)
+        :Map(function(x)
+            return fsFrame:GetFrameUnit(x)
+        end)
+        :ToTable()
 end
 
 local function UpdateAdjacentTargets(friendlyUnits)
@@ -66,7 +75,7 @@ end
 local function UpdateTargets()
     local updatedCount = 0
     local start = wow.GetTimePreciseSec()
-    local friendlyUnits = M:FriendlyNonPetUnits()
+    local friendlyUnits = FilterPets(FriendlyUnits())
 
     -- if units has less than 5 items it's still fine as units[i] will just be nil
     for i, btn in ipairs(targetFrames) do
@@ -109,7 +118,7 @@ local function UpdateTargets()
         end
     end
 
-    local enemyUnits = M:EnemyNonPetUnits()
+    local enemyUnits = FilterPets(fsSortedUnits:EnemyUnits())
 
     for i, btn in ipairs(targetEnemyFrames) do
         local new = enemyUnits[i] or "none"
@@ -255,85 +264,6 @@ local function InitAdjacentTargeting()
             self:SetAttribute("unit", unit)
         ]]
     )
-end
-
-function M:FriendlyFrames()
-    local frames = nil
-
-    -- prefer Blizzard frames
-    if fsProviders.Blizzard:Enabled() then
-        frames = GetFriendlyFrames(fsProviders.Blizzard)
-    end
-
-    if not frames or #frames == 0 then
-        local nonBlizzard = fsEnumerable
-            :From(fsProviders:Enabled())
-            :Where(function(provider)
-                return provider ~= fsProviders.Blizzard
-            end)
-            :ToTable()
-
-        for _, provider in ipairs(nonBlizzard) do
-            frames = GetFriendlyFrames(provider)
-
-            if #frames > 0 then
-                break
-            end
-        end
-    end
-
-    if not frames or #frames == 0 then
-        return {}
-    end
-
-    table.sort(frames, function(x, y)
-        return fsCompare:CompareTopLeftFuzzy(x, y)
-    end)
-
-    return frames
-end
-
-function M:FriendlyUnits()
-    local sortEnabled = fsCompare:FriendlySortMode()
-
-    if sortEnabled then
-        return fsSortedUnits:FriendlyUnits()
-    end
-
-    -- sort not enabled, fallback to frames
-    local frames = M:FriendlyFrames()
-
-    return fsEnumerable
-        :From(frames)
-        :Map(function(x)
-            return fsFrame:GetFrameUnit(x)
-        end)
-        :ToTable()
-end
-
-function M:FriendlyNonPetUnits()
-    return FilterPets(M:FriendlyUnits())
-end
-
-function M:EnemyUnits()
-    -- GladiusEx, sArena, and Blizzard all show enemies in group order
-    -- arena1, arena2, arena3
-    -- so we can just grab the units directly instead of extracting units from frames
-    -- this has the benefit of not having to worry about frame visibility and event ordering shenanigans
-    local units = fsUnit:EnemyUnits()
-    local sortEnabled = fsCompare:EnemySortMode()
-
-    if not sortEnabled then
-        return units
-    end
-
-    table.sort(units, fsCompare:EnemySortFunction(units))
-
-    return units
-end
-
-function M:EnemyNonPetUnits()
-    return FilterPets(M:EnemyUnits())
 end
 
 function M:Run()
