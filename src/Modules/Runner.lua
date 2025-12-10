@@ -5,6 +5,7 @@ local fsScheduler = addon.Scheduling.Scheduler
 local fsInspector = addon.Modules.Inspector
 local fsUnit = addon.WoW.Unit
 local fsLog = addon.Logging.Log
+local fsEnumerable = addon.Collections.Enumerable
 local wow = addon.WoW.Api
 local events = wow.Events
 local M = addon.Modules
@@ -98,10 +99,17 @@ local function OnInspectorInfo()
         return
     end
 
+    local nonPets = fsEnumerable
+        :From(units)
+        :Where(function(unit)
+            return not fsUnit:IsPet(unit)
+        end)
+        :ToTable()
+
     local knownSpecs = 0
 
-    for i = 1, #units do
-        local unit = units[i]
+    for i = 1, #nonPets do
+        local unit = nonPets[i]
         local guid = wow.UnitGUID(unit)
 
         if guid and not wow.issecretvalue(guid) then
@@ -115,13 +123,13 @@ local function OnInspectorInfo()
 
     -- re-sort every 5th spec known
     local everyNth = 5
-    local shouldSort = knownSpecs == #units or knownSpecs % everyNth == 0
+    local shouldSort = knownSpecs == #nonPets or knownSpecs % everyNth == 0
 
     if not shouldSort then
         return
     end
 
-    fsLog:Debug("Scheduling sort as we have spec quorum of %d/%d.", knownSpecs, #units)
+    fsLog:Debug("Scheduling sort as we have spec quorum of %d/%d.", knownSpecs, #nonPets)
     ScheduleSort()
 end
 
