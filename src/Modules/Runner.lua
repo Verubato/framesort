@@ -33,20 +33,25 @@ local function OnProviderRequiresSort(provider)
 end
 
 local function Run(forceRunAll)
-    if runAll or forceRunAll then
-        M:Run()
-    else
-        local array = {}
-        for provider, _ in pairs(runProviders) do
-            array[#array + 1] = provider
-        end
+    local all = runAll or forceRunAll
 
-        M:Run(array)
-    end
-
-    runProviders = {}
+    -- swap the flags before attempting to run
+    -- as this is happening in OnUpdate, if we for some reason encounter an error then we don't want to retry the run
     runAll = false
     run = false
+    local providers = nil
+
+    if not runAll then
+        providers = {}
+
+        for provider, _ in pairs(runProviders) do
+            providers[#providers + 1] = provider
+        end
+
+        runProviders = {}
+    end
+
+    M:Run(providers)
 end
 
 local function OnCombat()
