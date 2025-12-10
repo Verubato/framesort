@@ -74,7 +74,7 @@ local function OnConfigChanged()
     InvalidateEnemyCache()
 end
 
-local function FriendlyUnitsFromFrames()
+local function FriendlyUnitsFromFrames(sort)
     local frames = fsSortedFrames:FriendlyFrames()
     local units = fsEnumerable
         :From(frames)
@@ -82,6 +82,10 @@ local function FriendlyUnitsFromFrames()
             return fsFrame:GetFrameUnit(x)
         end)
         :ToTable()
+
+    if not sort then
+        return units
+    end
 
     local start = wow.GetTimePreciseSec()
     table.sort(units, fsCompare:SortFunction(units))
@@ -91,7 +95,7 @@ local function FriendlyUnitsFromFrames()
     return units
 end
 
-local function EnemyUnitsFromFrames()
+local function EnemyUnitsFromFrames(sort)
     local frames = fsSortedFrames:ArenaFrames()
     local units = fsEnumerable
         :From(frames)
@@ -99,6 +103,10 @@ local function EnemyUnitsFromFrames()
             return fsFrame:GetFrameUnit(x)
         end)
         :ToTable()
+
+    if not sort then
+        return units
+    end
 
     local start = wow.GetTimePreciseSec()
     table.sort(units, fsCompare:EnemySortFunction(units))
@@ -110,13 +118,6 @@ end
 
 local function FriendlyUnits()
     local units = fsUnit:FriendlyUnits()
-    local sortEnabled = fsCompare:FriendlySortMode()
-
-    -- if sorting is disabled, fallback to whatever frame order they have
-    if not sortEnabled then
-        return {}
-    end
-
     local start = wow.GetTimePreciseSec()
     table.sort(units, fsCompare:SortFunction(units))
     local stop = wow.GetTimePreciseSec()
@@ -127,12 +128,6 @@ end
 
 local function EnemyUnits()
     local units = fsUnit:EnemyUnits()
-    local sortEnabled = fsCompare:EnemySortMode()
-
-    if not sortEnabled then
-        return {}
-    end
-
     local start = wow.GetTimePreciseSec()
     table.sort(units, fsCompare:EnemySortFunction(units))
     local stop = wow.GetTimePreciseSec()
@@ -154,65 +149,94 @@ end
 
 ---@return string[]
 function M:FriendlyUnits()
-    if not cacheEnabled then
-        return FriendlyUnits()
+    local sortEnabled = fsCompare:FriendlySortMode()
+
+    -- sorting disabled, fallback to frame order
+    if not sortEnabled then
+        return FriendlyUnitsFromFrames(sortEnabled)
     end
+
+    local hit = false
+    local cache = true
+    local units = nil
 
     if friendlyCacheValid then
         -- don't want our stats to reflect empty cache hits and misses
-        if #cachedFriendlyUnits > 0 then
-            friendlyCacheHits = friendlyCacheHits + 1
-            LogStatsTick()
+        hit = #cachedFriendlyUnits > 0
+        units = cachedFriendlyUnits
+    else
+        units = FriendlyUnits()
+    end
+
+    -- try from frames, but don't cache the result
+    -- as frames can change without us knowing
+    if not units or #units == 0 then
+        units = FriendlyUnitsFromFrames(true)
+        cache = false
+    end
+
+    if cacheEnabled then
+        if cache then
+            cachedFriendlyUnits = units
+            friendlyCacheValid = #units > 0
         end
 
-        return cachedFriendlyUnits
-    end
+        if hit then
+            friendlyCacheHits = friendlyCacheHits + 1
+        else
+            friendlyCacheMisses = friendlyCacheMisses + 1
+        end
 
-    cachedFriendlyUnits = FriendlyUnits()
-
-    if #cachedFriendlyUnits > 0 then
-        friendlyCacheValid = true
-        friendlyCacheMisses = friendlyCacheMisses + 1
-        LogStatsTick()
-    else
-        -- try from frames, but don't cache the result
-        -- as frames can change without us knowing
-        cachedFriendlyUnits = FriendlyUnitsFromFrames()
-        friendlyCacheMisses = friendlyCacheMisses + 1
         LogStatsTick()
     end
 
-    return cachedFriendlyUnits
+    return units
 end
 
 ---@return string[]
 function M:EnemyUnits()
-    if not cacheEnabled then
-        return EnemyUnits()
+    local sortEnabled = fsCompare:EnemySortMode()
+
+    -- sorting disabled, fallback to frame order
+    if not sortEnabled then
+        return EnemyUnitsFromFrames(sortEnabled)
     end
+
+    local hit = false
+    local cache = true
+    local units = nil
 
     if enemyCacheValid then
-        if #cachedEnemyUnits > 0 then
-            enemyCacheHits = enemyCacheHits + 1
-            LogStatsTick()
+        -- don't want our stats to reflect empty cache hits and misses
+        hit = #cachedEnemyUnits > 0
+        units = cachedEnemyUnits
+    else
+        units = EnemyUnits()
+    end
+
+    -- try from frames, but don't cache the result
+    -- as frames can change without us knowing
+    if not units or #units == 0 then
+        units = EnemyUnitsFromFrames(true)
+        cache = false
+    end
+
+    if cacheEnabled then
+        if cache then
+            cachedEnemyUnits = units
+            enemyCacheValid = #units > 0
         end
 
-        return cachedEnemyUnits
-    end
+        if hit then
+            enemyCacheHits = enemyCacheHits + 1
+        else
+            enemyCacheMisses = enemyCacheMisses + 1
+        end
 
-    cachedEnemyUnits = EnemyUnits()
-
-    if #cachedEnemyUnits > 0 then
-        enemyCacheValid = true
-        enemyCacheMisses = enemyCacheMisses + 1
-        LogStatsTick()
-    else
-        cachedEnemyUnits = EnemyUnitsFromFrames()
-        enemyCacheMisses = enemyCacheMisses + 1
         LogStatsTick()
     end
 
-    return cachedEnemyUnits
+    return units
 end
 
 function M:InvalidateCache()

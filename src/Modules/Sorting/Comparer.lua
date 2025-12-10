@@ -229,7 +229,7 @@ local function RoleAndClassValue(role, class, meta)
 end
 
 local function EmptyCompare(x, y)
-    return x < y
+    return false
 end
 
 local function CompareGroup(leftToken, rightToken, meta)
