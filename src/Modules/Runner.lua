@@ -42,7 +42,7 @@ local function Run(forceRunAll)
     run = false
     local providers = nil
 
-    if not runAll then
+    if not all then
         providers = {}
 
         for provider, _ in pairs(runProviders) do
