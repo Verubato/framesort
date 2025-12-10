@@ -373,11 +373,11 @@ secureMethods["CompareFrameGroup"] = [[
 
     -- Top/Bottom is good enough, won't worry about middle in this environment
     -- if we got here we're in a fallback position anyway
-    if leftUnit == "player" and playerSortMode then
+    if playerSortMode and leftUnit == "player" then
         return playerSortMode == "Top"
     end
 
-    if rightUnit == "player" and playerSortMode then
+    if playerSortMode and rightUnit == "player" then
         return playerSortMode == "Bottom"
     end
 
@@ -1019,7 +1019,6 @@ secureMethods["TrySortContainer"] = [=[
     local friendlyPlayerMode = self:GetAttribute("FriendlyPlayerSortMode")
     local friendlyGroupMode = self:GetAttribute("FriendlyGroupSortMode")
     local enemyGroupMode = self:GetAttribute("EnemyGroupSortMode")
-    local enemyPlayerMode = self:GetAttribute("EnemyPlayerSortMode")
     local containerVariable, providerVariable = ...
     local container = _G[containerVariable]
     local provider = _G[providerVariable]
@@ -1040,14 +1039,9 @@ secureMethods["TrySortContainer"] = [=[
     elseif container.Type == ContainerType.EnemyArena then
         units = EnemyUnits
         sortMode = enemyGroupMode
-        playerSortMode = enemyPlayerMode
     else
         run:CallMethod("Log", format("Invalid container type: %s", container.Type or "nil"), "Error")
         return false
-    end
-
-    if not sortMode then
-        print("SortMode is nil", container.Frame:GetName() or "name nil", container.Type, playerSortMode)
     end
 
     Children = newtable()
@@ -1326,14 +1320,13 @@ local function LoadSortMode()
     assert(manager)
 
     local friendlyEnabled, friendlyPlayerMode, friendlyGroupMode = fsCompare:FriendlySortMode()
-    local enemyEnabled, enemyPlayerMode, enemyGroupMode = fsCompare:EnemySortMode()
+    local enemyEnabled, enemyGroupMode = fsCompare:EnemySortMode()
 
     manager:SetAttributeNoHandler("FriendlySortEnabled", friendlyEnabled)
     manager:SetAttributeNoHandler("FriendlyPlayerSortMode", friendlyPlayerMode)
     manager:SetAttributeNoHandler("FriendlyGroupSortMode", friendlyGroupMode)
 
     manager:SetAttributeNoHandler("EnemySortEnabled", enemyEnabled)
-    manager:SetAttributeNoHandler("EnemyPlayerSortMode", enemyPlayerMode)
     manager:SetAttributeNoHandler("EnemyGroupSortMode", enemyGroupMode)
 
     for _, provider in ipairs(fsProviders.All) do
