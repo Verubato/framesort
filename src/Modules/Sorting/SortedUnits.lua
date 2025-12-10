@@ -200,7 +200,7 @@ function M:InvalidateCache()
 end
 
 function M:LogStats()
-    fsLog:Debug("Friendly cache hits %d misses %d, enemy cache hits %d misses %d.", friendlyCacheHits, friendlyCacheMisses, enemyCacheHits, enemyCacheMisses)
+    fsLog:Debug("Friendly cache %d hits %d misses, enemy cache %d hits %d misses.", friendlyCacheHits, friendlyCacheMisses, enemyCacheHits, enemyCacheMisses)
 end
 
 function M:Init()
