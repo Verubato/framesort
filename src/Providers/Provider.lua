@@ -24,7 +24,7 @@ function fsProviders:Init()
     fsScheduler:RunWhenEnteringWorldOnce(function()
         for _, provider in pairs(fsProviders.All) do
             if provider:Enabled() then
-                fsLog:Debug("Detected the '%s' frame addon is enabled.", provider:Name())
+                fsLog:Debug("Detected the '%s' addon is enabled.", provider:Name())
             end
         end
     end)
