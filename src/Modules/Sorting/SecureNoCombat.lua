@@ -467,6 +467,10 @@ local function TrySortContainer(container)
     local sortedUnits = nil
     local frames = (container.Frames and container:Frames()) or fsFrame:ExtractUnitFrames(container.Frame, true, container.VisibleOnly)
 
+    if #frames == 0 then
+        return false
+    end
+
     if container.Type == fsFrame.ContainerType.Party or container.Type == fsFrame.ContainerType.Raid then
         sortedUnits = fsSortedUnits:FriendlyUnits()
     elseif container.Type == fsFrame.ContainerType.EnemyArena then
