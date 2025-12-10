@@ -43,8 +43,8 @@
     <Script file="Modules\Inspector.lua"/>
     <Script file="Modules\UnitTracker.lua"/>
     <Script file="Modules\Sorting\Comparer.lua"/>
-    <Script file="Modules\Sorting\SortedUnits.lua"/>
     <Script file="Modules\Sorting\SortedFrames.lua"/>
+    <Script file="Modules\Sorting\SortedUnits.lua"/>
 
     <!-- Frame providers require core wow files -->
     <Script file="Providers\Provider.lua"/>

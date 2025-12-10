@@ -18,8 +18,6 @@ local function SortFramesByUnits(frames, sortedUnits)
         unitsToIndex[unit] = index
     end
 
-    local lookupError = "Failed to determine position of unit %s within the sorted array"
-
     table.sort(frames, function(leftFrame, rightFrame)
         -- not sure why sometimes we get null arguments here, but it does happen on very rare occasions
         -- https://github.com/Verubato/framesort/issues/33
@@ -30,23 +28,39 @@ local function SortFramesByUnits(frames, sortedUnits)
             return true
         end
 
+        if fsFrame:IsForbidden(leftFrame) then
+            return false
+        end
+
+        if fsFrame:IsForbidden(rightFrame) then
+            return true
+        end
+
         local leftUnit = fsFrame:GetFrameUnit(leftFrame)
         local rightUnit = fsFrame:GetFrameUnit(rightFrame)
 
         local leftIndex = unitsToIndex[leftUnit]
         local rightIndex = unitsToIndex[rightUnit]
 
-        if not leftIndex then
-            fsLog:Error(lookupError, leftUnit)
+        if leftIndex and rightIndex and leftIndex ~= rightIndex then
+            return leftIndex < rightIndex
+        end
+
+        -- from here on out, pretty much only happens in test/edit mode
+        if leftFrame:IsVisible() and not rightFrame:IsVisible() then
+            return true
+        elseif not leftFrame:IsVisible() and rightFrame:IsVisible() then
             return false
         end
 
-        if not rightIndex then
-            fsLog:Error(lookupError, rightUnit)
-            return false
+        local leftName = leftFrame:GetName()
+        local rightName = rightFrame:GetName()
+
+        if leftName and rightName then
+            return leftName < rightName
         end
 
-        return leftIndex < rightIndex
+        return leftUnit < rightUnit
     end)
 end
 
@@ -284,10 +298,7 @@ local function HardArrange(container, frames, spacing, offset, blockHeight)
     for _, frame in ipairs(frames) do
         local isNewBlock = currentBlockHeight > 0
             -- add/subtract 1 for a bit of breathing room for rounding errors
-            and (
-                currentBlockHeight >= (blockHeight - 1)
-                or (currentBlockHeight + frame:GetHeight()) >= (blockHeight + 1)
-            )
+            and (currentBlockHeight >= (blockHeight - 1) or (currentBlockHeight + frame:GetHeight()) >= (blockHeight + 1))
 
         if isNewBlock then
             currentBlockHeight = 0
@@ -415,7 +426,7 @@ local function UngroupedOffset(container, spacing)
         return offset
     end
 
-    local frames = fsFrame:ExtractUnitFrames(lastGroup, container.VisibleOnly)
+    local frames = fsFrame:ExtractUnitFrames(lastGroup, container.VisibleOnly, container.ExistsOnly)
 
     if #frames == 0 then
         return offset
@@ -454,7 +465,7 @@ local function TrySortContainer(container)
     end
 
     local sortedUnits = nil
-    local frames = (container.Frames and container:Frames()) or fsFrame:ExtractUnitFrames(container.Frame, container.VisibleOnly)
+    local frames = (container.Frames and container:Frames()) or fsFrame:ExtractUnitFrames(container.Frame, true, container.VisibleOnly)
 
     if container.Type == fsFrame.ContainerType.Party or container.Type == fsFrame.ContainerType.Raid then
         sortedUnits = fsSortedUnits:FriendlyUnits()
@@ -557,7 +568,7 @@ local function TrySortContainerGroups(container)
     sorted = SpaceGroups(groups, spacing) or sorted
 
     -- ungrouped frames include pets, vehicles, and main tank/assist frames
-    local ungroupedFrames = fsFrame:ExtractUnitFrames(container.Frame, container.VisibleOnly)
+    local ungroupedFrames = fsFrame:ExtractUnitFrames(container.Frame, true, container.VisibleOnly)
 
     if #ungroupedFrames == 0 then
         return sorted

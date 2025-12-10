@@ -1016,8 +1016,8 @@ secureMethods["TrySortContainer"] = [=[
     local run = control or self
     local friendlyEnabled = self:GetAttribute("FriendlySortEnabled")
     local enemyEnabled = self:GetAttribute("EnemySortEnabled")
-    local friendlyGroupMode = self:GetAttribute("FriendlyGroupSortMode")
     local friendlyPlayerMode = self:GetAttribute("FriendlyPlayerSortMode")
+    local friendlyGroupMode = self:GetAttribute("FriendlyGroupSortMode")
     local enemyGroupMode = self:GetAttribute("EnemyGroupSortMode")
     local enemyPlayerMode = self:GetAttribute("EnemyPlayerSortMode")
     local containerVariable, providerVariable = ...
