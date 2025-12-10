@@ -15,6 +15,7 @@ local M = {
     Options = {},
     Inspector = {},
     Frame = {},
+    Caching = {}
 }
 addon.Api.v3 = M
 
@@ -208,4 +209,9 @@ function M.Frame:FrameForUnit(unit)
     end
 
     return fsUnitTracker:GetFrameForUnit(unit)
+end
+
+---Invalidates the unit cache.
+function M.Caching:Invalidate()
+    fsSortedUnits:InvalidateCache()
 end
