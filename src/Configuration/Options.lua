@@ -202,7 +202,12 @@ function fsConfig:Init()
     wow.SlashCmdList.FRAMESORT = function()
         if wow.Settings then
             assert(category)
-            wow.Settings.OpenToCategory(category:GetID())
+
+            if wow.CanOpenOptionsDuringCombat() then
+                wow.Settings.OpenToCategory(category:GetID())
+            else
+                fsLog:Notify("Can't do that during combat.")
+            end
         elseif wow.InterfaceOptionsFrame_OpenToCategory then
             -- workaround the classic bug where the first call opens the Game interface
             -- and a second call is required
