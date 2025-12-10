@@ -77,10 +77,10 @@ secureMethods["GetUnit"] = [[
     local underlyingUnit = gsub(unit, "pet", "")
 
     if UnitHasVehicleUI(underlyingUnit) then
-        return underlyingUnit
+        return underlyingUnit, unit
     end
 
-    return unit
+    return unit, unit
 ]]
 
 -- filters a set of frames to only unit frames
@@ -450,10 +450,10 @@ secureMethods["SortFramesByUnits"] = [[
 
         if not frameWasSorted[frame] then
             Frame = frame
-            local unit = run:RunAttribute("GetUnit", "Frame")
+            local unit, maybePet = run:RunAttribute("GetUnit", "Frame")
             Frame = nil
 
-            local isPet = strfind(unit or "", "pet") ~= nil
+            local isPet = strfind(maybePet or "", "pet") ~= nil
 
             -- don't care if it's an unsorted pet, as we'll just place them at the end
             if not isPet then
@@ -1064,7 +1064,6 @@ secureMethods["TrySortContainer"] = [=[
     local sortedAccurately = run:RunAttribute("SortFramesByUnits", "Frames", "Units", sortMode, playerSortMode, "FramesInUnitOrder")
     local warnedAlready = self:GetAttribute("WarnedAboutUnsorted")
 
-    print(sortedAccurately, warnedAlready)
     if not sortedAccurately and not warnedAlready then
         run:CallMethod("Log", format(
             "Sorry, we were unable to sort your frames accurately during combat by '%s' and there is nothing we can do about it due to Blizzard API restrictions. " ..
