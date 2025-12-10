@@ -73,27 +73,6 @@ local function OnConfigChanged()
     InvalidateEnemyCache()
 end
 
--- merge new units into our probably almost sorted array
--- then do a sorting pass over it to finalise the array
-local function MergeNewUnits(sortedUnits, newUnits)
-    local seen = {}
-
-    for i = 1, #sortedUnits do
-        seen[sortedUnits[i]] = true
-    end
-
-    for i = 1, #newUnits do
-        local unit = newUnits[i]
-
-        if not seen[unit] then
-            seen[unit] = true
-            sortedUnits[#sortedUnits + 1] = unit
-        end
-    end
-
-    return sortedUnits
-end
-
 local function RefreshFriendlyUnits(existingUnits)
     local units = fsUnit:FriendlyUnits()
     local sortEnabled = fsCompare:FriendlySortMode()
@@ -102,14 +81,12 @@ local function RefreshFriendlyUnits(existingUnits)
         return units
     end
 
-    local toSort = existingUnits and MergeNewUnits(existingUnits, units) or units
-
     local start = wow.GetTimePreciseSec()
-    table.sort(toSort, fsCompare:SortFunction(toSort))
+    table.sort(units, fsCompare:SortFunction(units))
     local stop = wow.GetTimePreciseSec()
     fsLog:Debug("Friendly units table.sort() took %fms.", (stop - start) * 1000)
 
-    return toSort
+    return units
 end
 
 local function RefreshEnemyUnits(existingUnits)
@@ -120,14 +97,12 @@ local function RefreshEnemyUnits(existingUnits)
         return units
     end
 
-    local toSort = existingUnits and MergeNewUnits(existingUnits, units) or units
-
     local start = wow.GetTimePreciseSec()
-    table.sort(toSort, fsCompare:EnemySortFunction(toSort))
+    table.sort(units, fsCompare:EnemySortFunction(units))
     local stop = wow.GetTimePreciseSec()
     fsLog:Debug("Enemy units table.sort() took %fms.", (stop - start) * 1000)
 
-    return toSort
+    return units
 end
 
 function LogStatsTick()
