@@ -170,7 +170,7 @@ function M:FriendlyUnits()
     local cache = true
     local units = nil
 
-    if friendlyCacheValid then
+    if cacheEnabled and friendlyCacheValid then
         -- don't want our stats to reflect empty cache hits and misses
         hit = #cachedFriendlyUnits > 0
         units = cachedFriendlyUnits
@@ -216,7 +216,7 @@ function M:EnemyUnits()
     local cache = true
     local units = nil
 
-    if enemyCacheValid then
+    if cacheEnabled and enemyCacheValid then
         -- don't want our stats to reflect empty cache hits and misses
         hit = #cachedEnemyUnits > 0
         units = cachedEnemyUnits
