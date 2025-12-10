@@ -211,7 +211,7 @@ function M:Create()
 
         -- non-blizzard
         HasArena = function() return true end,
-        HasSpecializationInfo = function() return true end,
+        HasEnemySpecSupport = function() return true end,
         Has5v5 = function() return false end,
         HasSoloShuffle = function() return true end,
         HasDropdown = function() return true end,

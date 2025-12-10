@@ -272,7 +272,7 @@ function M:Init()
     petEventsFrame:HookScript("OnEvent", OnPetEvent)
     petEventsFrame:RegisterEvent(events.UNIT_PET)
 
-    if wow.HasSpecializationInfo() then
+    if wow.HasEnemySpecSupport() then
         enemyEventsFrame = wow.CreateFrame("Frame")
         enemyEventsFrame:HookScript("OnEvent", OnEnemyEvent)
         enemyEventsFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
