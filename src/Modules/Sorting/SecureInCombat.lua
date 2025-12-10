@@ -1068,9 +1068,9 @@ secureMethods["TrySortContainer"] = [=[
     local warnedAlready = self:GetAttribute("WarnedAboutUnsorted")
 
     if not sortedAccurately and not warnedAlready then
-        run:CallMethod("Log", format(
-            "Sorry, we were unable to sort your frames accurately during combat by '%s' and there is nothing we can do about it due to Blizzard API restrictions. " ..
-            "We've temporarily sorted by group until combat drops.", sortMode), "Critical")
+        run:CallMethod("Log", 
+            "Sorry, we were unable to sort your frames accurately during combat by '" .. (sortMode or "nil").. "' and there is nothing we can do about it due to Blizzard API restrictions. " ..
+            "We've temporarily sorted by group until combat drops.", "Critical")
 
         self:SetAttribute("WarnedAboutUnsorted", true)
     end
@@ -1465,7 +1465,7 @@ end
 local function WatchChildrenVisibility(container)
     assert(manager)
 
-    local children = fsFrame:ExtractUnitFrames(container.Frame, false, false, false)
+    local children = fsFrame:ExtractUnitFrames(container.Frame, false, false, false, false)
 
     for _, child in ipairs(children) do
         if not child:GetAttribute("framesort-watching-visibility") then
