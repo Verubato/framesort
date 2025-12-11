@@ -457,6 +457,7 @@ secureMethods["SortFramesByUnits"] = [[
 
             -- don't care if it's an unsorted pet, as we'll just place them at the end
             if not isPet then
+                run:CallMethod("Log", format("Couldn't find destination position for frame %s with unit %s", frame:GetName() or "nil", unit or "nil"), LogLevel.Error)
                 unsortedFrames = true
                 break
             end
