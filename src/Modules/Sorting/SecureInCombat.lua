@@ -101,7 +101,7 @@ secureMethods["ExtractUnitFrames"] = [[
         local hasSize =  left and bottom and width and height
 
         if not hasSize then
-            run:CallMethod("Log", format("Frame '%s' has no size.", child:GetName() or "nil"), LogLevelWarning)
+            run:CallMethod("Log", format("Frame '%s' has no size.", child:GetName() or "nil"), LogLevel.Warning)
         end
 
         if unit and
@@ -424,7 +424,7 @@ secureMethods["SortFramesByUnits"] = [[
                 framesByUnit[unit] = frame
             end
         else
-            run:CallMethod("Log", format("Failed to determine unit of frame: %s.", frame:GetName() or "nil"), LogLevelWarning)
+            run:CallMethod("Log", format("Failed to determine unit of frame: %s.", frame:GetName() or "nil"), LogLevel.Warning)
         end
 
         frameWasSorted[frame] = false
@@ -730,7 +730,7 @@ secureMethods["SoftArrange"] = [[
                 Frame = nil
             end
         else
-            run:CallMethod("Log", "Unable to determine frame's desired index", LogLevelWarning)
+            run:CallMethod("Log", "Unable to determine frame's desired index", LogLevel.Warning)
         end
     end
 
@@ -1040,7 +1040,7 @@ secureMethods["TrySortContainer"] = [=[
         units = EnemyUnits
         sortMode = enemyGroupMode
     else
-        run:CallMethod("Log", format("Invalid container type: %s", container.Type or "nil"), LogLevelError)
+        run:CallMethod("Log", format("Invalid container type: %s", container.Type or "nil"), LogLevel.Error)
         return false
     end
 
@@ -1068,7 +1068,7 @@ secureMethods["TrySortContainer"] = [=[
     if not sortedAccurately and not warnedAlready then
         run:CallMethod("Log", 
             "Sorry, we were unable to sort your frames accurately during combat by '" .. (sortMode or "nil").. "' and there is nothing we can do about it due to Blizzard API restrictions. " ..
-            "We've temporarily sorted by group until combat drops.", LogLevelCritical)
+            "We've temporarily sorted by group until combat drops.", LogLevel.Critical)
 
         self:SetAttribute("WarnedAboutUnsorted", true)
     end
@@ -1128,7 +1128,7 @@ secureMethods["TrySort"] = [[
         if providerEnabled then
             for _, container in ipairs(provider.Containers) do
                 if not container.Frame:IsProtected() then
-                    run:CallMethod("Log", format("Container for %s must be protected.", provider.Name), LogLevelError)
+                    run:CallMethod("Log", format("Container for %s must be protected.", provider.Name), LogLevel.Error)
                 elseif container.Frame:IsVisible() then
                     local shouldAdd = false
 
@@ -1288,11 +1288,12 @@ secureMethods["Init"] = [[
     LayoutType.Hard = 2
     LayoutType.NameList = 3
 
-    LogLevelDebug = 1
-    LogLevelNotify = 2
-    LogLevelWarning = 3
-    LogLevelError = 4
-    LogLevelCritical = 5
+    LogLevel = newtable()
+    LogLevel.Debug = 1
+    LogLevel.Notify = 2
+    LogLevel.Warning = 3
+    LogLevel.Error = 4
+    LogLevel.Critical = 5
 ]]
 
 local function ResetWarnings()
