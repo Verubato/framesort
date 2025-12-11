@@ -15,7 +15,7 @@ local M = {
     Options = {},
     Inspector = {},
     Frame = {},
-    Caching = {}
+    Caching = {},
 }
 addon.Api.v3 = M
 
@@ -132,11 +132,11 @@ end
 ---@return number|nil
 function M.Inspector:GetSpecId(unitGuid)
     if not unitGuid then
-        error("Unit must not be nil.")
+        error("Unit guid must not be nil.")
         return
     end
 
-    return fsInspector:UnitSpec(unitGuid)
+    return fsInspector:FriendlyUnitSpec(unitGuid)
 end
 
 ---Returns the class specialization id of the specified unit, or 0/nil if unknown.
@@ -146,6 +146,10 @@ function M.Inspector:GetUnitSpecId(unit)
     if not unit then
         error("Unit must not be nil.")
         return
+    end
+
+    if fsUnit:IsEnemyUnit(unit) then
+        return fsInspector:ArenaUnitSpec(unit)
     end
 
     local guid = wow.UnitGUID(unit)
@@ -158,7 +162,7 @@ function M.Inspector:GetUnitSpecId(unit)
         return nil
     end
 
-    return fsInspector:UnitSpec(guid)
+    return fsInspector:FriendlyUnitSpec(guid)
 end
 
 ---Returns the unit token from the given frame.

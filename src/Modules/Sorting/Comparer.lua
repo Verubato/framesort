@@ -6,14 +6,9 @@ local fsMath = addon.Numerics.Math
 local fsEnumerable = addon.Collections.Enumerable
 local fsConfig = addon.Configuration
 local fsInspector = addon.Modules.Inspector
+local fsSpec = addon.Configuration.Specs
 local fsLog = addon.Logging.Log
 local fuzzyDecimalPlaces = 0
----@return { [number]: SpecInfo }
-local specIdLookup = fsEnumerable:From(fsConfig.Specs.Specs):ToLookup(function(item)
-    return item.SpecId
-end, function(item)
-    return item
-end)
 
 ---@class Comparer
 local M = {}
@@ -163,14 +158,16 @@ local function PrecomputeUnitMetadata(units)
         data.IsPlayer = not data.IsPet and fsUnit:IsPlayer(unit)
 
         if data.IsArena then
-            data.Exists = fsUnit:ArenaUnitExists(unit)
-            data.UnitNumber = tonumber(string.sub(unit, 6))
+            data.Exists = fsUnit:ArenaUnitProbablyExists(unit)
 
-            data.SpecId = wow.GetArenaOpponentSpec and wow.GetArenaOpponentSpec(data.UnitNumber)
-            data.Role = wow.GetSpecializationInfoByID and data.SpecId and select(5, wow.GetSpecializationInfoByID(data.SpecId))
+            if not data.IsPet then
+                data.UnitNumber = tonumber(string.sub(unit, 6))
+                data.SpecId = fsInspector:ArenaUnitSpec(unit)
+                data.Role = wow.GetSpecializationInfoByID and data.SpecId and select(5, wow.GetSpecializationInfoByID(data.SpecId))
 
-            local specInfo = data.SpecId and specIdLookup[data.SpecId]
-            data.ClassId = specInfo and specInfo.ClassId
+                local specInfo = data.SpecId and fsSpec:GetSpecInfo(data.SpecId)
+                data.ClassId = specInfo and specInfo.ClassId
+            end
         else
             data.Exists = wow.UnitExists(unit)
             data.Name = wow.UnitName and wow.UnitName(unit)
@@ -186,7 +183,7 @@ local function PrecomputeUnitMetadata(units)
                 elseif wow.issecretvalue(data.Guid) then
                     fsLog:Warning("Unable to determine unit spec for '%s' as it's guid is a secret value.", unit)
                 else
-                    data.SpecId = fsInspector:UnitSpec(data.Guid)
+                    data.SpecId = fsInspector:FriendlyUnitSpec(data.Guid)
                 end
             end
         end
@@ -442,11 +439,7 @@ local function EnemyCompare(leftToken, rightToken, groupSortMode, reverse, meta)
 
     if groupSortMode == fsConfig.GroupSortMode.Group then
         return CompareGroup(leftToken, rightToken, meta)
-    end
-
-    local inInstance, instanceType = wow.IsInInstance()
-
-    if groupSortMode == fsConfig.GroupSortMode.Role and inInstance and instanceType == "arena" then
+    elseif groupSortMode == fsConfig.GroupSortMode.Role then
         return CompareRole(leftToken, rightToken, meta)
     end
 

@@ -113,7 +113,7 @@ local function OnInspectorInfo()
         local guid = wow.UnitGUID(unit)
 
         if guid and not wow.issecretvalue(guid) then
-            local spec = fsInspector:UnitSpec(guid)
+            local spec = fsInspector:FriendlyUnitSpec(guid)
 
             if spec then
                 knownSpecs = knownSpecs + 1

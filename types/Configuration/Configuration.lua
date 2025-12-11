@@ -32,7 +32,3 @@
 ---@field Api OptionsPanel
 ---@field Discord OptionsPanel
 ---@field Log OptionsPanel
-
----@class Specs
----@field Specs SpecInfo[]
----@field Type SpecType

@@ -84,6 +84,7 @@ local wow = {
     -- group size functions
     GetNumGroupMembers = GetNumGroupMembers,
     GetNumArenaOpponentSpecs = GetNumArenaOpponentSpecs or GetNumArenaOpponents,
+    GetNumBattlefieldScores = GetNumBattlefieldScores,
 
     -- utility
     wipe = wipe,
@@ -113,6 +114,14 @@ local wow = {
     UnregisterAttributeDriver = UnregisterAttributeDriver,
     RegisterUnitWatch = RegisterUnitWatch,
     UnregisterUnitWatch = UnregisterUnitWatch,
+
+    -- class related
+    GetClassInfo = GetClassInfo,
+    GetNumSpecializationsForClassID = C_SpecializationInfo and C_SpecializationInfo.GetNumSpecializationsForClassID or GetNumSpecializationsForClassID,
+    GetSpecializationInfoForClassID = C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfoForClassID or GetSpecializationInfoForClassID,
+
+    -- bg related
+    GetBattlefieldScore = GetBattlefieldScore,
 
     -- other
     ReloadUI = ReloadUI,

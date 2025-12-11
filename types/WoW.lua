@@ -86,6 +86,13 @@
 ---@field GetAddOnMetadata fun(nameOrIndex: string, field: string): string
 -- time related
 ---@field GetTimePreciseSec fun(): number
+-- class related
+---@field GetClassInfo fun(classId: number): className: string, classFile: string, classId: number
+---@field GetNumSpecializationsForClassID fun(classId: number): specCount: number
+---@field GetSpecializationInfoForClassID fun(classId: number, specIndex: number): id: number, name: string, description: string, icon: number, role: string, recommended: string, allowedForboost: boolean, masterySpell1: number?, masterySpell2: number?
+-- bg related
+---@field GetBattlefieldScore fun(index: number): name: string, killingBlows: number, honorableKills: number, deaths: number, honorGained: number, faction: number, race: string, class: string, classToken: string, damageDone: number, healingDone: number, bgRating: number, ratingChange: number, prematchMMR: number, mmrChange: number, talentSpec: string
+---@field GetNumBattlefieldScores fun(): scores: number
 -- other
 ---@field ReloadUI fun()
 ---@field GetLocale fun(): string
