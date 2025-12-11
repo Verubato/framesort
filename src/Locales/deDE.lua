@@ -258,3 +258,4 @@ L["Please disable the 'Display Main Tank and Assist' option in Options -> Interf
 -- # Log Screen -- #
 L["Log"] = "Protokoll"
 L["FrameSort log to help with diagnosing issues."] = "FrameSort-Protokoll zur Unterstützung bei der Fehlerdiagnose."
+L["Copy Log"] = "Protokoll kopieren"

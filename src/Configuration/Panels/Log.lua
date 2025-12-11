@@ -8,6 +8,80 @@ local M = {}
 fsConfig.Panels.Log = M
 
 local logFrame
+local copyWindow
+local copyEditBox
+
+local function GetAllLogMessages()
+    if not logFrame then
+        return ""
+    end
+
+    local lines = {}
+    local num = logFrame:GetNumMessages() or 0
+
+    for i = 1, num do
+        local msg = logFrame:GetMessageInfo(i)
+        if msg and msg ~= "" then
+            lines[#lines + 1] = msg
+        end
+    end
+
+    return table.concat(lines, "\n")
+end
+
+local function CreateCopyWindow()
+    copyWindow = wow.CreateFrame("Frame", nil, nil, "BackdropTemplate")
+    copyWindow:SetSize(800, 500)
+    copyWindow:SetPoint("CENTER")
+    copyWindow:SetFrameStrata("DIALOG")
+    copyWindow:SetClampedToScreen(true)
+    copyWindow:EnableMouse(true)
+    copyWindow:SetMovable(true)
+    copyWindow:RegisterForDrag("LeftButton")
+    copyWindow:SetScript("OnDragStart", copyWindow.StartMoving)
+    copyWindow:SetScript("OnDragStop", copyWindow.StopMovingOrSizing)
+    copyWindow:Hide()
+
+    copyWindow:SetBackdrop({
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+        tile = true,
+        tileSize = 32,
+        edgeSize = 32,
+        insets = { left = 11, right = 12, top = 12, bottom = 11 },
+    })
+
+    local title = copyWindow:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    title:SetPoint("TOP", 0, -16)
+    title:SetText(L["Log"])
+
+    local close = wow.CreateFrame("Button", nil, copyWindow, "UIPanelCloseButton")
+    close:SetPoint("TOPRIGHT", -4, -4)
+
+    local scrollFrame = wow.CreateFrame("ScrollFrame", nil, copyWindow, "UIPanelScrollFrameTemplate")
+    scrollFrame:SetPoint("TOPLEFT", 20, -40)
+    scrollFrame:SetPoint("BOTTOMRIGHT", -32, 20)
+
+    copyEditBox = wow.CreateFrame("EditBox", nil, scrollFrame)
+    copyEditBox:SetMultiLine(true)
+    copyEditBox:SetFontObject("GameFontHighlightSmall")
+    copyEditBox:SetWidth(scrollFrame:GetWidth())
+    copyEditBox:SetAutoFocus(true)
+    copyEditBox:SetScript("OnEscapePressed", function()
+        copyWindow:Hide()
+    end)
+
+    scrollFrame:SetScrollChild(copyEditBox)
+end
+
+local function ShowCopyWindow()
+    local text = GetAllLogMessages()
+    copyEditBox:SetText(text or "")
+    copyEditBox:HighlightText()
+    copyEditBox:SetFocus()
+
+    copyWindow:Show()
+end
 
 local function OnLogEntry(msg, level, timestamp)
     if not logFrame then
@@ -35,6 +109,14 @@ function M:Build(parent)
     local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
     title:SetText(L["Log"])
+
+    local copyButton = wow.CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
+    copyButton:SetSize(120, 22)
+    copyButton:SetPoint("TOPRIGHT", -verticalSpacing, -verticalSpacing)
+    copyButton:SetText(L["Copy Log"])
+    copyButton:SetScript("OnClick", function()
+        ShowCopyWindow()
+    end)
 
     local intro = {
         L["FrameSort log to help with diagnosing issues."],
@@ -104,6 +186,8 @@ function M:Build(parent)
 
     fsLog:ClearAndDisableCache()
     fsLog:AddLogCallback(OnLogEntry)
+
+    CreateCopyWindow()
 
     return panel
 end

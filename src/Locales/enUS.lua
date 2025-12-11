@@ -253,3 +253,4 @@ L["Please disable the 'Display Main Tank and Assist' option in Options -> Interf
 -- # Log Screen -- #
 L["Log"] = nil
 L["FrameSort log to help with diagnosing issues."] = nil
+L["Copy Log"] = nil
