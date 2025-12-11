@@ -256,3 +256,4 @@ L["Please disable the 'Display Main Tank and Assist' option in Options -> Interf
 -- # Log Screen -- #
 L["Log"] = "日誌"
 L["FrameSort log to help with diagnosing issues."] = "FrameSort 日誌，用於協助診斷問題。"
+L["Copy Log"] = "複製日誌"
