@@ -118,18 +118,13 @@ local function Ordering()
     return roleLookup, specLookup, classLookup
 end
 
-local function PrecomputeUnitMetadata(units)
+local function PrecomputeGlobalMetadata()
     local meta = {}
-
-    if #units == 0 then
-        return meta
-    end
-
     local start = wow.GetTimePreciseSec()
-    local inRaid = wow.IsInRaid()
-    local trim = inRaid and 5 or 6
     local roleOrderLookup, specOrderLookup, classOrderLookup = Ordering()
 
+    meta.InRaid = wow.IsInRaid()
+    meta.UnitNumberIndex = meta.InRaid and 5 or 6
     meta.RoleOrderLookup = roleOrderLookup
     meta.SpecOrderLookup = specOrderLookup
     meta.ClassOrderLookup = classOrderLookup
@@ -149,59 +144,76 @@ local function PrecomputeUnitMetadata(units)
         warnedAbout["UnitGroupRolesAssigned"] = true
     end
 
-    for _, unit in ipairs(units) do
-        local data = {}
-        meta[unit] = data
+    return meta
+end
 
-        data.IsPet = fsUnit:IsPet(unit)
-        data.IsArena = unit:sub(1, 5) == "arena"
-        data.IsPlayer = not data.IsPet and fsUnit:IsPlayer(unit)
+local function PrecomputeUnitMetadata(unit, meta)
+    local data = {}
 
-        if data.IsArena then
-            data.Exists = fsUnit:ArenaUnitProbablyExists(unit)
+    data.IsPet = fsUnit:IsPet(unit)
+    data.IsArena = unit:sub(1, 5) == "arena"
+    data.IsPlayer = not data.IsPet and fsUnit:IsPlayer(unit)
 
-            if not data.IsPet then
-                data.UnitNumber = tonumber(string.sub(unit, 6))
-                data.SpecId = fsInspector:ArenaUnitSpec(unit)
-                data.Role = wow.GetSpecializationInfoByID and data.SpecId and select(5, wow.GetSpecializationInfoByID(data.SpecId))
-
-                local specInfo = data.SpecId and fsSpec:GetSpecInfo(data.SpecId)
-                data.ClassId = specInfo and specInfo.ClassId
-            end
-        else
-            data.Exists = wow.UnitExists(unit)
-            data.Name = wow.UnitName and wow.UnitName(unit)
-
-            if not data.IsPet then
-                data.UnitNumber = tonumber(string.sub(unit, trim))
-                data.Role = wow.UnitGroupRolesAssigned and wow.UnitGroupRolesAssigned(unit)
-                data.Guid = wow.UnitGUID and wow.UnitGUID(unit)
-                data.ClassId = wow.UnitClass and select(3, wow.UnitClass(unit))
-
-                if not data.Guid then
-                    fsLog:Warning("Unable to determine unit spec for '%s' as it's guid is nil.", unit)
-                elseif wow.issecretvalue(data.Guid) then
-                    fsLog:Warning("Unable to determine unit spec for '%s' as it's guid is a secret value.", unit)
-                else
-                    data.SpecId = fsInspector:FriendlyUnitSpec(data.Guid)
-                end
-            end
-        end
-
-        if not data.UnitNumber then
-            -- fallback to a slower but more reliable method
-            -- mostly for pets
-            data.UnitNumber = tonumber(string.match(unit, "%d+"))
-        end
+    if data.IsArena then
+        data.Exists = fsUnit:ArenaUnitProbablyExists(unit)
 
         if not data.IsPet then
-            if not data.Role then
-                fsLog:Warning("Failed to determine role for unit %s.", unit)
-            end
-            if not data.ClassId then
-                fsLog:Warning("Failed to determine class for unit %s.", unit)
+            data.UnitNumber = tonumber(string.sub(unit, 6))
+            data.SpecId = fsInspector:ArenaUnitSpec(unit)
+            data.Role = wow.GetSpecializationInfoByID and data.SpecId and select(5, wow.GetSpecializationInfoByID(data.SpecId))
+
+            local specInfo = data.SpecId and fsSpec:GetSpecInfo(data.SpecId)
+            data.ClassId = specInfo and specInfo.ClassId
+        end
+    else
+        data.Exists = wow.UnitExists(unit)
+        data.Name = wow.UnitName and wow.UnitName(unit)
+
+        if not data.IsPet then
+            data.UnitNumber = tonumber(string.sub(unit, meta.UnitNumberIndex))
+            data.Role = wow.UnitGroupRolesAssigned and wow.UnitGroupRolesAssigned(unit)
+            data.Guid = wow.UnitGUID and wow.UnitGUID(unit)
+            data.ClassId = wow.UnitClass and select(3, wow.UnitClass(unit))
+
+            if not data.Guid then
+                fsLog:Warning("Unable to determine unit spec for '%s' as it's guid is nil.", unit)
+            elseif wow.issecretvalue(data.Guid) then
+                fsLog:Warning("Unable to determine unit spec for '%s' as it's guid is a secret value.", unit)
+            else
+                data.SpecId = fsInspector:FriendlyUnitSpec(data.Guid)
             end
         end
+    end
+
+    if not data.UnitNumber then
+        -- fallback to a slower but more reliable method
+        -- mostly for pets
+        data.UnitNumber = tonumber(string.match(unit, "%d+"))
+    end
+
+    if not data.IsPet then
+        if not data.Role then
+            fsLog:Warning("Failed to determine role for unit %s.", unit)
+        end
+        if not data.ClassId then
+            fsLog:Warning("Failed to determine class for unit %s.", unit)
+        end
+    end
+
+    return data
+end
+
+local function PrecomputeMetadata(units)
+    if #units == 0 then
+        return {}
+    end
+
+    local start = wow.GetTimePreciseSec()
+    local meta = PrecomputeGlobalMetadata()
+
+    for _, unit in ipairs(units) do
+        local data = PrecomputeUnitMetadata(unit, meta)
+        meta[unit] = data
     end
 
     local stop = wow.GetTimePreciseSec()
@@ -335,8 +347,12 @@ local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, rev
     local leftMeta, rightMeta = meta[leftToken], meta[rightToken]
 
     if not leftMeta or not rightMeta then
-        -- this would be a bug, but prefer to fail gracefully rather than explode with an assertion error
-        return leftToken < rightToken
+        -- this is either a bug, or we're in traditional mode where we don't get a chance to precompute the units
+        leftMeta = leftMeta or PrecomputeUnitMetadata(leftToken, meta)
+        rightMeta = rightMeta or PrecomputeUnitMetadata(rightToken, meta)
+
+        meta[leftToken] = leftMeta
+        meta[rightToken] = rightMeta
     end
 
     if leftMeta.Exists and not rightMeta.Exists then
@@ -448,7 +464,7 @@ end
 
 ---Returns a function that accepts two parameters of unit tokens and returns true if the left token should be ordered before the right.
 ---Sorting is based on the current instance and configured options.
----@param units string[]? the unit tokens that will be sorted. required for performance reasons.
+---@param units string[]? optional unit tokens that will be sorted. providing this upfront improves performance.
 ---@return function sort
 function M:SortFunction(units)
     local enabled, playerSortMode, groupSortMode, reverse = M:FriendlySortMode()
@@ -458,7 +474,7 @@ function M:SortFunction(units)
     end
 
     units = units or fsUnit:FriendlyUnits()
-    local meta = PrecomputeUnitMetadata(units)
+    local meta = PrecomputeMetadata(units)
 
     if playerSortMode ~= fsConfig.PlayerSortMode.Middle then
         return function(x, y)
@@ -511,7 +527,7 @@ function M:EnemySortFunction(units)
 
     units = units or fsUnit:EnemyUnits()
 
-    local meta = PrecomputeUnitMetadata(units)
+    local meta = PrecomputeMetadata(units)
     return function(x, y)
         return EnemyCompare(x, y, groupSortMode, reverse, meta)
     end
