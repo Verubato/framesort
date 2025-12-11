@@ -7,6 +7,7 @@ local fsUnit = addon.WoW.Unit
 local fsEnumerable = addon.Collections.Enumerable
 local fsLog = addon.Logging.Log
 local fsConfig = addon.Configuration
+local fsSpec = addon.Configuration.Specs
 ---@class InspectorModule : IInitialise
 local M = {}
 addon.Modules.Inspector = M
@@ -254,7 +255,12 @@ local function PurgeOldEntries()
     end
 end
 
-function M:UnitSpec(unitGuid)
+---Returns the spec id of a friendly player unit.
+---@param unitGuid string
+---@return number|nil
+function M:FriendlyUnitSpec(unitGuid)
+    assert(unitGuid)
+
     if unitGuid == wow.UnitGUID("player") and wow.GetSpecialization and wow.GetSpecializationInfo then
         local index = wow.GetSpecialization()
         local id = wow.GetSpecializationInfo(index)
@@ -268,6 +274,38 @@ function M:UnitSpec(unitGuid)
     end
 
     return cacheEntry.SpecId
+end
+
+---Returns the spec id of an arena unit
+---@param unit string
+---@return number|nil
+function M:ArenaUnitSpec(unit)
+    assert(unit)
+
+    local unitNumber = tonumber(string.sub(unit, 6))
+
+    if not unitNumber then
+        return nil
+    end
+
+    local specId = wow.GetArenaOpponentSpec and wow.GetArenaOpponentSpec(unitNumber)
+
+    if specId then
+        return specId
+    end
+
+    if not wow.GetBattlefieldScore then
+        return nil
+    end
+
+    -- we might be in a bg or a 15v15 brawl in which case we need to use GetBattlefieldScore
+    local _, _, _, _, _, _, _, _, classToken, _, _, _, _, _, _, talentSpec = wow.GetBattlefieldScore(unitNumber)
+
+    if classToken and talentSpec then
+        return fsSpec:SpecIdFromName(classToken, talentSpec)
+    end
+
+    return nil
 end
 
 function M:PurgeCache()

@@ -678,11 +678,17 @@ function M:TrySort(provider)
 
         local providerSorted = false
         for _, container in ipairs(containers) do
+            local containerSorted = false
+
             if container.IsGrouped and container:IsGrouped() then
-                providerSorted = TrySortContainerGroups(container) or providerSorted
+                containerSorted = TrySortContainerGroups(container)
             else
-                providerSorted = TrySortContainer(container) or providerSorted
+                containerSorted = TrySortContainer(container)
             end
+
+            providerSorted = providerSorted or containerSorted
+
+            fsLog:Debug("Container %s for provider %s was %s.", container.Frame:GetName() or "nil", p:Name(), containerSorted and "sorted" or "not sorted")
         end
 
         sorted = sorted or providerSorted

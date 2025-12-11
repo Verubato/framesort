@@ -38,7 +38,7 @@ for i = 1, maxArena do
     allEnemyUnitsIds[#allEnemyUnitsIds + 1] = "arenapet" .. i
 end
 
-function M:ArenaUnitExists(unit)
+function M:ArenaUnitProbablyExists(unit)
     -- after the gates open UnitExists will start working
     if wow.UnitExists(unit) then
         return true
@@ -52,10 +52,11 @@ function M:ArenaUnitExists(unit)
 
     -- if only 2 members load in a 3v3, then not all information is available
     -- e.g. in a 2v2, 2v3, or 3v2 inside a 3v3 environment GetNumArenaOpponentSpecs() doesn't return the right value
-    -- so give it a best guess
-    local enemyCount = wow.GetNumArenaOpponentSpecs()
-    local allyCount = wow.GetNumGroupMembers()
-    local instanceSize = math.max(enemyCount, allyCount)
+    local arenaCount = wow.GetNumArenaOpponentSpecs() or 0
+    local groupCount = wow.GetNumGroupMembers() or 0
+    -- in 15v15 brawl, GetNumArenaOpponentSpecs returns 0 so we use GetNumBattlefieldScores instead
+    local bgCount = wow.GetNumBattlefieldScores() or 0
+    local instanceSize = math.max(arenaCount, groupCount, bgCount)
 
     local id = tonumber(idStr)
     return id <= instanceSize
@@ -91,7 +92,7 @@ function M:EnemyUnits()
     return fsEnumerable
         :From(allEnemyUnitsIds)
         :Where(function(unit)
-            return M:ArenaUnitExists(unit)
+            return M:ArenaUnitProbablyExists(unit)
         end)
         :ToTable()
 end

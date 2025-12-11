@@ -1,6 +1,8 @@
 ---@type string, Addon
 local _, addon = ...
+local wow = addon.WoW.Api
 local fsEnumerable = addon.Collections.Enumerable
+---@class Specs
 local M = {}
 
 addon.Configuration.Specs = M
@@ -99,3 +101,61 @@ M.Specs = {
     -- havoc dh
     { ClassId = 12, SpecId = 577, Type = M.Type.Melee },
 }
+
+-- reverse lookup of a spec's name to it's id
+-- this is because annoyingly GetBattlefieldScore returns the spec name and not the id
+M.SpecNameLookup = {}
+
+---@type { [number]: SpecInfo }
+M.SpecIdLookup = fsEnumerable:From(M.Specs):ToLookup(function(item)
+    return item.SpecId
+end, function(item)
+    return item
+end)
+
+---Returns the spec id for a given class id and spec name combination
+---@param classToken string
+---@param specName string
+---@return number|nil
+function M:SpecIdFromName(classToken, specName)
+    local classLookup = M.SpecNameLookup[classToken]
+
+    if not classLookup then
+        return nil
+    end
+
+    return classLookup[specName]
+end
+
+---@return SpecInfo|nil
+function M:GetSpecInfo(specId)
+    return M.SpecIdLookup[specId]
+end
+
+function M:Init()
+    if not wow.GetClassInfo or not wow.GetNumSpecializationsForClassID or not wow.GetSpecializationInfoForClassID then
+        -- can happen in unit tests
+        return
+    end
+
+    -- currently evokers
+    local maxClass = 13
+
+    for classID = 1, maxClass do
+        local _, classToken = wow.GetClassInfo(classID)
+
+        if classToken then
+            M.SpecNameLookup[classToken] = M.SpecNameLookup[classToken] or {}
+
+            local numSpecs = wow.GetNumSpecializationsForClassID(classID) or 0
+
+            for index = 1, numSpecs do
+                local specID, specName = wow.GetSpecializationInfoForClassID(classID, index)
+
+                if specID and specName and specName ~= "" then
+                    M.SpecNameLookup[classToken][specName] = specID
+                end
+            end
+        end
+    end
+end
