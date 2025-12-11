@@ -254,8 +254,8 @@ function M:IsHealthy()
     }
 
     results[#results + 1] = {
-        Applicable = addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Traditional,
-        Passed = not UsingSpacing(),
+        Applicable = true,
+        Passed = not UsingSpacing() or addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Secure,
         Description = L["Using Secure sorting mode when spacing is being used"],
         Help = L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method"],
     }
