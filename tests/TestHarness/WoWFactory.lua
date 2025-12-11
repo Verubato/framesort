@@ -218,6 +218,11 @@ function M:Create()
             return false
         end,
 
+        -- bg related
+        GetNumBattlefieldScores = function()
+            return 0
+        end,
+
         -- non-blizzard
         HasArena = function()
             return true
