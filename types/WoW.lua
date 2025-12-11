@@ -116,6 +116,7 @@
 ---@field IsArena fun(): boolean
 ---@field GetActiveMatchState fun(): number
 ---@field IsBattleground fun(): boolean
+---@field IsInBrawl fun(): boolean
 
 ---@class C_Map
 ---@field GetBestMapForUnit fun(unitId: string): number
