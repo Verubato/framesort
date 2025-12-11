@@ -54,8 +54,13 @@ function M:ArenaUnitProbablyExists(unit)
     -- e.g. in a 2v2, 2v3, or 3v2 inside a 3v3 environment GetNumArenaOpponentSpecs() doesn't return the right value
     local arenaCount = wow.GetNumArenaOpponentSpecs() or 0
     local groupCount = wow.GetNumGroupMembers() or 0
-    -- in 15v15 brawl, GetNumArenaOpponentSpecs returns 0 so we use GetNumBattlefieldScores instead
-    local bgCount = wow.GetNumBattlefieldScores() or 0
+    local bgCount = 0
+
+    if wow.IsInstanceBattleground() or (wow.C_PvP.IsInBrawl and wow.C_PvP.IsInBrawl()) then
+        -- in 15v15 brawl, GetNumArenaOpponentSpecs returns 0 so we use GetNumBattlefieldScores instead
+        bgCount = wow.GetNumBattlefieldScores() or 0
+    end
+
     local instanceSize = math.max(arenaCount, groupCount, bgCount)
 
     local id = tonumber(idStr)
