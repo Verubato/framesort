@@ -448,7 +448,7 @@ secureMethods["SortFramesByUnits"] = [[
     for i = 1, #frames do
         local frame = frames[i]
 
-        if not frameWasSorted[frame] then
+        if not frameWasSorted[frame] and frame:IsVisible() then
             Frame = frame
             local unit, maybePet = run:RunAttribute("GetUnit", "Frame")
             Frame = nil
