@@ -1,4 +1,4 @@
----@typ string, Addon
+---@type string, Addon
 local _, addon = ...
 ---@class Math
 local M = {}

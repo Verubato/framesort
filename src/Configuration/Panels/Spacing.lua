@@ -28,7 +28,7 @@ local function ConfigureSlider(slider, value)
         low:SetText(minSpacing)
         high:SetText(maxSpacing)
     else
-        fsLog:Error("Unable to configure low/high slider values.")
+        fsLog:Bug("Unable to configure low/high slider values.")
     end
 end
 

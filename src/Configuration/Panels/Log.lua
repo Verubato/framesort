@@ -91,7 +91,7 @@ local function OnLogEntry(msg, level, timestamp)
     local levelText = fsLog:LevelText(level)
     local formatted = string.format("%dm %ds %s - %s", timestamp / 60, timestamp % 60, levelText, msg)
 
-    if level == fsLog.Level.Error or level == fsLog.Level.Critical then
+    if level == fsLog.Level.Error or level == fsLog.Level.Critical or level == fsLog.Level.Bug then
         logFrame:AddMessage(formatted, 1, 0, 0)
     elseif level == fsLog.Level.Warning then
         logFrame:AddMessage(formatted, 1, 1, 0)

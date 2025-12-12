@@ -6,6 +6,7 @@ local fsProviders = addon.Providers
 local fsCompare = addon.Modules.Sorting.Comparer
 local fsLuaEx = addon.Language.LuaEx
 local fsEnumerable = addon.Collections.Enumerable
+local fsLog = addon.Logging.Log
 local M = {}
 local sortCallbacks = {}
 
@@ -30,6 +31,7 @@ function M:Init()
     if Gladius and Gladius.UpdateUnit then
         -- UpdateUnit moves the arena1 frame, so we need to resort
         wow.hooksecurefunc(Gladius, "UpdateUnit", function()
+            fsLog:Debug("Gladius updated units, requesting sort.")
             RequestSort()
         end)
     end
@@ -42,8 +44,12 @@ end
 function M:RegisterContainersChangedCallback(_) end
 
 function M:Containers()
-    ---@type FrameContainer[]
     local containers = {}
+
+    if not M:Enabled() then
+        return containers
+    end
+
     local function getFrames()
         -- in test mode, get the number of frames shown
         local isTest = fsLuaEx:SafeGet(Gladius, { "test" })
@@ -67,7 +73,8 @@ function M:Containers()
     local profileKey = fsLuaEx:SafeGet(Gladius2DB, { "profileKeys", charKey })
     local profile = fsLuaEx:SafeGet(Gladius2DB, { "profiles", profileKey })
 
-    containers[#containers + 1] = {
+    ---@type FrameContainer
+    local arena = {
         Frame = wow.UIParent,
         Type = fsFrame.ContainerType.EnemyArena,
         LayoutType = fsFrame.LayoutType.Hard,
@@ -93,6 +100,10 @@ function M:Containers()
             }
         end,
         PostSort = function()
+            if not GladiusButtonBackground then
+                return
+            end
+
             local frames = getFrames()
 
             if #frames == 0 then
@@ -104,13 +115,15 @@ function M:Containers()
             end)
 
             local topFrame = frames[1]
-    		local left, right = topFrame:GetHitRectInsets()
+            local left, right = topFrame:GetHitRectInsets()
 
             -- refer to Gladius.lua:632
-            local padding = fsLuaEx:SafeGet(Gladius, { "db", "backgroundPadding"} ) or 0
-            GladiusButtonBackground:SetPoint("TOPLEFT", topFrame, - padding + left, padding)
+            local padding = fsLuaEx:SafeGet(Gladius, { "db", "backgroundPadding" }) or 0
+            GladiusButtonBackground:SetPoint("TOPLEFT", topFrame, -padding + left, padding)
         end,
     }
+
+    containers[#containers + 1] = arena
 
     return containers
 end

@@ -476,7 +476,7 @@ local function TrySortContainer(container)
     elseif container.Type == fsFrame.ContainerType.EnemyArena then
         sortedUnits = fsSortedUnits:EnemyUnits()
     else
-        fsLog:Error("Unknown container type: %s", container.Type or "nil")
+        fsLog:Bug("Unknown container type: %s.", container.Type or "nil")
         return false
     end
 
@@ -504,7 +504,7 @@ local function TrySortContainer(container)
     elseif container.LayoutType == fsFrame.LayoutType.Hard then
         sorted = HardArrange(container, frames, spacing)
     else
-        fsLog:Error("Unknown layout type: %s", container.Type or "nil")
+        fsLog:Bug("Unknown layout type: %s.", container.Type or "nil")
         return false
     end
 

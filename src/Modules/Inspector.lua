@@ -228,7 +228,7 @@ end
 
 local function OnNotifyInspect(unit)
     if unit ~= unitInspecting and unitInspecting then
-        fsLog:Warning("Someone else has overridden our inspect player request.")
+        fsLog:Debug("Someone else has overridden our inspect player request.")
     end
 
     -- override the inspected unit so we get it's information

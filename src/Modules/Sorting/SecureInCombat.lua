@@ -1547,7 +1547,7 @@ local function ConfigureHeader(header)
         local frame = children[index]
 
         if not frame then
-            fsLog:Error("Failed to find unit button %s", index)
+            fsLog:Bug("Failed to find unit button %s", index)
             return
         end
 
@@ -1641,7 +1641,7 @@ function M:Init()
 
     function manager:StartTimer(name)
         if not name then
-            fsLog:Error("StartTimer called without a name.")
+            fsLog:Bug("StartTimer called without a name.")
             return
         end
 
@@ -1652,7 +1652,7 @@ function M:Init()
         local start = manager[name .. "TimeStart"]
 
         if not start then
-            fsLog:Error("StopTimer called without corresponding StartTimer for %s.", name)
+            fsLog:Bug("StopTimer called without corresponding StartTimer for %s.", name)
             return
         end
 

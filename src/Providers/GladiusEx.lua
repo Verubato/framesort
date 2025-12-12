@@ -6,6 +6,7 @@ local fsProviders = addon.Providers
 local fsEnumerable = addon.Collections.Enumerable
 local fsCompare = addon.Modules.Sorting.Comparer
 local fsLuaEx = addon.Language.LuaEx
+local fsLog = addon.Logging.Log
 local M = {}
 
 fsProviders.GladiusEx = M
@@ -45,31 +46,46 @@ function M:Enabled()
 end
 
 function M:Init() end
-
-function M:RegisterRequestSortCallback(_) end
-
-function M:RegisterContainersChangedCallback(_) end
+function M:RegisterRequestSortCallback() end
+function M:RegisterContainersChangedCallback() end
 
 function M:Containers()
-    ---@type FrameContainer[]
     local containers = {}
 
-    if GladiusExPartyFrame and GladiusExButtonAnchorparty then
-        containers[#containers + 1] = {
+    if not M:Enabled() then
+        return containers
+    end
+
+    if GladiusExPartyFrame then
+        ---@type FrameContainer
+        local party = {
             Frame = GladiusExPartyFrame,
             Type = fsFrame.ContainerType.Party,
             LayoutType = fsFrame.LayoutType.Soft,
-            Spacing = function() return CalculateSpace(GladiusExPartyFrame) end,
+            Spacing = function()
+                return CalculateSpace(GladiusExPartyFrame)
+            end,
         }
+
+        containers[#containers + 1] = party
+    else
+        fsLog:Bug("Missing frame GladiusExPartyFrame.")
     end
 
-    if GladiusExArenaFrame and GladiusExButtonAnchorarena then
-        containers[#containers + 1] = {
+    if GladiusExArenaFrame then
+        ---@type FrameContainer
+        local arena = {
             Frame = GladiusExArenaFrame,
             Type = fsFrame.ContainerType.EnemyArena,
             LayoutType = fsFrame.LayoutType.Soft,
-            Spacing = function() return CalculateSpace(GladiusExArenaFrame) end,
+            Spacing = function()
+                return CalculateSpace(GladiusExArenaFrame)
+            end,
         }
+
+        containers[#containers + 1] = arena
+    else
+        fsLog:Bug("Missing frame GladiusExArenaFrame.")
     end
 
     return containers

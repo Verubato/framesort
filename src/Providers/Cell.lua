@@ -4,6 +4,7 @@ local wow = addon.WoW.Api
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsLuaEx = addon.Language.LuaEx
+local fsLog = addon.Logging.Log
 local M = {}
 
 fsProviders.Cell = M
@@ -18,22 +19,32 @@ function M:Enabled()
 end
 
 function M:Init() end
-
-function M:RegisterRequestSortCallback(_) end
-
-function M:RegisterContainersChangedCallback(_) end
+function M:RegisterRequestSortCallback() end
+function M:RegisterContainersChangedCallback() end
 
 function M:Containers()
-    ---@type FrameContainer
-    local party = CellPartyFrameHeader and {
-        Frame = CellPartyFrameHeader,
-        Type = fsFrame.ContainerType.Party,
-        LayoutType = fsFrame.LayoutType.NameList,
-    }
+    local containers = {}
 
-    ---@type FrameContainer
-    local raid = CellRaidFrameHeader0
-        and {
+    if not M:Enabled() then
+        return containers
+    end
+
+    if CellPartyFrameHeader then
+        ---@type FrameContainer
+        local party = {
+            Frame = CellPartyFrameHeader,
+            Type = fsFrame.ContainerType.Party,
+            LayoutType = fsFrame.LayoutType.NameList,
+        }
+
+        containers[#containers + 1] = party
+    else
+        fsLog:Bug("Missing frame CellPartyFrameHeader.")
+    end
+
+    if CellRaidFrameHeader0 then
+        ---@type FrameContainer
+        local raid = {
             Frame = CellRaidFrameHeader0,
             Type = fsFrame.ContainerType.Raid,
             LayoutType = fsFrame.LayoutType.NameList,
@@ -77,8 +88,10 @@ function M:Containers()
             end,
         }
 
-    return {
-        party,
-        raid,
-    }
+        containers[#containers + 1] = raid
+    else
+        fsLog:Bug("Missing frame CellRaidFrameHeader0.")
+    end
+
+    return containers
 end

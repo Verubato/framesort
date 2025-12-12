@@ -20,10 +20,8 @@ function M:Enabled()
 end
 
 function M:Init() end
-
-function M:RegisterRequestSortCallback(_) end
-
-function M:RegisterContainersChangedCallback(_) end
+function M:RegisterRequestSortCallback() end
+function M:RegisterContainersChangedCallback() end
 
 function M:Containers()
     if not M:Enabled() then

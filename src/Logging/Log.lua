@@ -9,6 +9,7 @@ local M = {
         Warning = 3,
         Error = 4,
         Critical = 5,
+        Bug = 6,
     },
 }
 addon.Logging.Log = M
@@ -37,7 +38,7 @@ local function Write(msg, level)
 
     if level == M.Level.Notify then
         print(string.format("FrameSort - %s", msg))
-    elseif level == M.Level.Critical then
+    elseif level == M.Level.Critical or level == M.Level.Bug then
         print(string.format("|cFFFF0000FrameSort - %s|r", msg))
     end
 end
@@ -62,6 +63,8 @@ function M:LevelText(level)
         return "Error"
     elseif level == M.Level.Critical then
         return "Critical"
+    elseif level == M.Level.Bug then
+        return "Bug"
     end
 
     return "Unknown"
@@ -100,6 +103,13 @@ end
 function M:Critical(msg, ...)
     local formatted = string.format(msg, ...)
     Write(formatted, M.Level.Critical)
+end
+
+---Logs and prints a critical error bug message.
+---@param msg string
+function M:Bug(msg, ...)
+    local formatted = string.format(msg, ...) .. " Please notify the developer about this."
+    Write(formatted, M.Level.Bug)
 end
 
 ---Logs a message.
