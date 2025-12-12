@@ -55,8 +55,6 @@ function M:Containers()
         }
 
         containers[#containers + 1] = party
-    else
-        fsLog:Bug("Missing frame Grid2LayoutHeader1.")
     end
 
     return containers

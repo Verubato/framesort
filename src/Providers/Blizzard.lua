@@ -208,6 +208,8 @@ function M:Containers()
         return containers
     end
 
+    -- CompactPartyFrame doesn't exist on MoP classic and below
+    -- CompactRaidFrameContainer does exist though
     if wow.CompactPartyFrame then
         ---@type FrameContainer
         local party = {
@@ -237,8 +239,6 @@ function M:Containers()
         }
 
         containers[#containers + 1] = party
-    else
-        fsLog:Bug("Missing frame CompactPartyFrame.")
     end
 
     if wow.CompactRaidFrameContainer then
@@ -343,8 +343,6 @@ function M:Containers()
         end
 
         containers[#containers + 1] = raid
-    else
-        fsLog:Bug("Missing frame CompactRaidFrameContainer.")
     end
 
     if wow.CompactArenaFrame then

@@ -53,8 +53,6 @@ function M:Containers()
             end,
             EnableInBattlegrounds = false
         }
-    else
-        fsLog:Bug("Missing frame BattleGroundEnemies.Allies.")
     end
 
     if arenaFrame then
@@ -75,8 +73,6 @@ function M:Containers()
             end,
             EnableInBattlegrounds = false
         }
-    else
-        fsLog:Bug("Missing frame BattleGroundEnemies.Enemies.")
     end
 
     return containers
