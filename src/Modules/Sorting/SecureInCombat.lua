@@ -1043,6 +1043,11 @@ secureMethods["TrySortContainer"] = [=[
         end
     end
 
+    if #Frames <= 1 then
+        -- nothing to do
+        return true
+    end
+
     Units = units or newtable()
 
     -- sort the frames to the desired locations
