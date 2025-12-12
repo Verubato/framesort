@@ -17,6 +17,7 @@
 ---@field Dropdown fun(self: table, parent: table, items: table, getValue: (fun(): any), setValue: (fun(value: any))): table
 ---@field Specs Specs
 ---@field DiscordUrl string
+---@field SettingsSize fun(self: table): width: number, height: number
 
 ---@class Panels
 ---@field Sorting OptionsPanel

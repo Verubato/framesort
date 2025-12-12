@@ -144,21 +144,31 @@ function fsConfig:Dropdown(parent, items, getValue, setSelected)
     end
 end
 
+function fsConfig:SettingsSize()
+    local settingsContainer = wow.SettingsPanel and wow.SettingsPanel.Container
+
+    if settingsContainer then
+        return settingsContainer:GetWidth(), settingsContainer:GetHeight()
+    end
+
+    if wow.InterfaceOptionsFramePanelContainer then
+        return wow.InterfaceOptionsFramePanelContainer:GetWidth(), wow.InterfaceOptionsFramePanelContainer:GetHeight()
+    end
+
+    fsLog:Error("Unable to determine configuration panel width.")
+
+    return 600, 600
+end
+
 function fsConfig:Init()
     local panel = wow.CreateFrame("ScrollFrame", nil, nil, "UIPanelScrollFrameTemplate")
     panel.name = "FrameSort"
 
     local main = wow.CreateFrame("Frame")
+    local width, height = fsConfig:SettingsSize()
 
-    if wow.SettingsPanel then
-        main:SetWidth(wow.SettingsPanel.Container:GetWidth())
-        main:SetHeight(wow.SettingsPanel.Container:GetHeight())
-    elseif wow.InterfaceOptionsFramePanelContainer then
-        main:SetWidth(wow.InterfaceOptionsFramePanelContainer:GetWidth())
-        main:SetHeight(wow.InterfaceOptionsFramePanelContainer:GetHeight())
-    else
-        fsLog:Critical("Unable to set configuration panel width.")
-    end
+    main:SetWidth(width)
+    main:SetHeight(height)
 
     panel:SetScrollChild(main)
 
