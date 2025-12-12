@@ -467,7 +467,7 @@ local function TrySortContainer(container)
     local sortedUnits = nil
     local frames = (container.Frames and container:Frames()) or fsFrame:ExtractUnitFrames(container.Frame, true, container.VisibleOnly)
 
-    if #frames == 0 then
+    if #frames <= 1 then
         return false
     end
 
@@ -521,7 +521,7 @@ local function TrySortContainerGroups(container)
     local sorted = false
     local groups = fsFrame:ExtractGroups(container.Frame, container.VisibleOnly)
 
-    if #groups == 0 then
+    if #groups <= 1 then
         return false
     end
 
