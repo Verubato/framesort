@@ -390,7 +390,7 @@ secureMethods["CompareFrameGroup"] = [[
 -- performs an out of place sort on an array frames by the order of the units array
 secureMethods["SortFramesByUnits"] = [[
     local run = control or self
-    local framesVariable, unitsVariable, sortMode, playerSortMode, destinationVariable = ...
+    local framesVariable, unitsVariable, destinationVariable = ...
     local frames = _G[framesVariable]
     local units = _G[unitsVariable]
     local index = 1
@@ -464,39 +464,23 @@ secureMethods["SortFramesByUnits"] = [[
         end
     end
 
+    -- we can't sort frames, something has changed during combat
     if unsortedFrames then
-        -- fallback to group sort
+        return false
+    end
 
-        FallbackFrames = newtable()
+    -- we may not have all pet unit information
+    -- so any frames that didn't make it we can just add on to the end
+    for i = 1, #frames do
+        local frame = frames[i]
 
-        for i = 1, #frames do
-            FallbackFrames[i] = frames[i]
-        end
-
-        run:RunAttribute("Sort", "FallbackFrames", "CompareFrameGroup", playerSortMode)
-
-        sorted = FallbackFrames
-        FallbackFrames = nil
-    else
-        -- we may not have all pet unit information
-        -- so any frames that didn't make it we can just add on to the end
-        for i = 1, #frames do
-            local frame = frames[i]
-
-            if not frameWasSorted[frame] then
-                sorted[#sorted + 1] = frame
-            end
+        if not frameWasSorted[frame] then
+            sorted[#sorted + 1] = frame
         end
     end
 
     _G[destinationVariable] = sorted
-
-    if not unsortedFrames then
-        return true
-    end
-
-    -- if the user sorted by Group, then we sorted by their preference anyway
-    return sortMode == "Group"
+    return true
 ]]
 
 -- adjusts the x and y offsets of a frame
@@ -1062,18 +1046,23 @@ secureMethods["TrySortContainer"] = [=[
     Units = units or newtable()
 
     -- sort the frames to the desired locations
-    FramesInUnitOrder = nil
-    local sortedAccurately = run:RunAttribute("SortFramesByUnits", "Frames", "Units", sortMode, playerSortMode, "FramesInUnitOrder")
+    SortedFrames = nil
+    local couldSort = run:RunAttribute("SortFramesByUnits", "Frames", "Units", "SortedFrames")
     local warnedAlready = self:GetAttribute("WarnedAboutUnsorted")
 
-    if not sortedAccurately and not warnedAlready then
-        run:CallMethod("Log", 
-            "Sorry, we were unable to sort your frames accurately during combat by '" .. (sortMode or "nil").. "' and there is nothing we can do about it due to Blizzard API restrictions. " ..
-            "We've temporarily sorted by group until combat drops.", LogLevel.Critical)
+    if not couldSort then
+        run:RunAttribute("Sort", "Frames", "CompareFrameGroup", playerSortMode)
+        SortedFrames = Frames
 
-        self:SetAttribute("WarnedAboutUnsorted", true)
+        if sortMode ~= "Group" and not warnedAlready then
+            run:CallMethod("Log", 
+                "Sorry, we were unable to sort your frames accurately during combat by '" .. (sortMode or "nil").. "' and there is nothing we can do about it due to Blizzard API restrictions. " ..
+                "We've temporarily sorted by group until combat drops.", LogLevel.Critical)
+
+            self:SetAttribute("WarnedAboutUnsorted", true)
+        end
     end
-
+    
     local sorted = false
 
     if container.Spacing then
@@ -1091,12 +1080,12 @@ secureMethods["TrySortContainer"] = [=[
     end
 
     if container.LayoutType == LayoutType.Hard then
-        sorted = run:RunAttribute("HardArrange", "FramesInUnitOrder", containerVariable, Spacing and "Spacing")
+        sorted = run:RunAttribute("HardArrange", "SortedFrames", containerVariable, Spacing and "Spacing")
     elseif container.LayoutType == LayoutType.Soft then
-        sorted = run:RunAttribute("SoftArrange", "FramesInUnitOrder", Spacing and "Spacing")
+        sorted = run:RunAttribute("SoftArrange", "SortedFrames", Spacing and "Spacing")
     end
 
-    FramesInUnitOrder = nil
+    SortedFrames = nil
     Children = nil
     Frames = nil
     Spacing = nil
