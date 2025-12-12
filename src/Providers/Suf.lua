@@ -37,8 +37,6 @@ function M:Containers()
         }
 
         containers[#containers + 1] = party
-    else
-        fsLog:Bug("Missing SUFHeaderparty frame.")
     end
 
     if SUFHeaderarena then
@@ -50,8 +48,6 @@ function M:Containers()
         }
 
         containers[#containers + 1] = arena
-    else
-        fsLog:Bug("Missing SUFHeaderarena frame.")
     end
 
     return containers

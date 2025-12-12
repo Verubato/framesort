@@ -72,8 +72,6 @@ function M:Containers()
         }
 
         containers[#containers + 1] = arena
-    else
-        fsLog:Bug("Missing frame GladdyFrame.")
     end
 
     return containers

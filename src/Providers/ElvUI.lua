@@ -119,8 +119,6 @@ function M:Containers()
         }
 
         containers[#containers + 1] = party
-    else
-        fsLog:Bug("Missing frame ElvUF_PartyGroup1.")
     end
 
     return containers

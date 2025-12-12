@@ -38,8 +38,6 @@ function M:Containers()
         }
 
         containers[#containers + 1] = party
-    else
-        fsLog:Bug("Missing frame CellPartyFrameHeader.")
     end
 
     if CellRaidFrameHeader0 then
@@ -89,8 +87,6 @@ function M:Containers()
         }
 
         containers[#containers + 1] = raid
-    else
-        fsLog:Bug("Missing frame CellRaidFrameHeader0.")
     end
 
     return containers

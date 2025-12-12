@@ -68,8 +68,6 @@ function M:Containers()
         }
 
         containers[#containers + 1] = party
-    else
-        fsLog:Bug("Missing frame GladiusExPartyFrame.")
     end
 
     if GladiusExArenaFrame then
@@ -84,8 +82,6 @@ function M:Containers()
         }
 
         containers[#containers + 1] = arena
-    else
-        fsLog:Bug("Missing frame GladiusExArenaFrame.")
     end
 
     return containers
