@@ -10,6 +10,7 @@ local fsMath = addon.Numerics.Math
 local M = {}
 local layoutEventFrame = nil
 local cvarEventFrame = nil
+local pvpStateFrame = nil
 local sortCallbacks = {}
 local containersChangedCallbacks = {}
 local cvarsToUpdateContainer = {
@@ -59,6 +60,10 @@ end
 
 local function OnRaidContainerSizeChanged()
     RequestUpdateContainers()
+end
+
+local function OnPvpStateChanged()
+    RequestSort()
 end
 
 local function OnCvarUpdate(_, _, name)
@@ -160,6 +165,11 @@ function M:Init()
         combatStatusFrame:RegisterEvent(events.PLAYER_REGEN_ENABLED)
         combatStatusFrame:RegisterEvent(events.PLAYER_REGEN_DISABLED)
         combatStatusFrame:HookScript("OnEvent", CombatChanging)
+
+        -- compact arena frame listens and refreshes it's members on this event
+        pvpStateFrame = wow.CreateFrame("Frame")
+        pvpStateFrame:HookScript("OnEvent", OnPvpStateChanged)
+        pvpStateFrame:RegisterEvent(events.PVP_MATCH_STATE_CHANGED)
     end
 end
 
