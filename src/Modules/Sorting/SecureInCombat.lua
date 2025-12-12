@@ -426,8 +426,6 @@ secureMethods["SortFramesByUnits"] = [[
         else
             run:CallMethod("Log", format("Failed to determine unit of frame: %s.", frame:GetName() or "nil"), LogLevel.Warning)
         end
-
-        frameWasSorted[frame] = false
     end
 
     local sorted = newtable()
