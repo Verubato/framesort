@@ -107,6 +107,10 @@ local function GetOffset(container)
 end
 
 local function CombatChanging(_, event)
+    if not wow.CompactArenaFrame then
+        return
+    end
+
     local toBlock = {
         -- prevent 'seen' and 'stealth' events from causing frames to reposition
         events.ARENA_OPPONENT_UPDATE,
@@ -137,7 +141,7 @@ function M:Enabled()
 
     for _, frame in pairs(frames) do
         -- frame addons will usually disable blizzard via unsubscribing group update events
-        if frame:IsVisible() or frame:IsEventRegistered("GROUP_ROSTER_UPDATE") then
+        if frame and (frame:IsVisible() or frame:IsEventRegistered("GROUP_ROSTER_UPDATE")) then
             return true
         end
     end
@@ -379,6 +383,10 @@ function M:Containers()
             PostSort = function()
                 -- this is anchored to CompactArenaFrameMember1 by default which can move around
                 -- so just hide the title
+                if not wow.CompactArenaFrameTitle or not wow.CompactArenaFrameTitle.Hide then
+                    return
+                end
+
                 wow.CompactArenaFrameTitle:Hide()
             end,
         }
