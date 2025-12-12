@@ -137,7 +137,7 @@ local function ApplySpacing(frames, spacing, pointsByFrame)
     local xDelta = 0
     for i = 2, #orderedLeftTop do
         local frame = orderedLeftTop[i]
-        local previous = orderedTopLeft[i - 1]
+        local previous = orderedLeftTop[i - 1]
         local point = pointsByFrame[frame]
         local sameRow = fsMath:Round(frame:GetTop()) == fsMath:Round(previous:GetTop())
 
