@@ -51,6 +51,7 @@ end
 local function OnEditModeExited()
     -- user may have changed frame settings
     RequestUpdateContainers()
+    RequestSort()
 end
 
 local function OnRaidGroupLoaded()
