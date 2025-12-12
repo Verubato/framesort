@@ -171,6 +171,9 @@ function M:Create()
         IsInRaid = function()
             return false
         end,
+        IsInstanceBattleground = function()
+            return false
+        end,
 
         -- utility
         ReloadUI = function() end,
