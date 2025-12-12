@@ -39,7 +39,7 @@ function M:Build(parent)
         end
 
         if not toSwap then
-            fsLog:Error("Couldn't determine existing value to swap.")
+            fsLog:Bug("Couldn't determine existing value to swap.")
             return
         end
 

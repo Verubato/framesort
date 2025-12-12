@@ -4,6 +4,7 @@ local wow = addon.WoW.Api
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsLuaEx = addon.Language.LuaEx
+local fsLog = addon.Logging.Log
 local M = {}
 
 fsProviders.Grid2 = M
@@ -18,15 +19,19 @@ function M:Enabled()
 end
 
 function M:Init() end
-
-function M:RegisterRequestSortCallback(_) end
-
-function M:RegisterContainersChangedCallback(_) end
+function M:RegisterRequestSortCallback() end
+function M:RegisterContainersChangedCallback() end
 
 function M:Containers()
-    ---@type FrameContainer
-    local party = Grid2LayoutHeader1
-        and {
+    local containers = {}
+
+    if not M:Enabled() then
+        return containers
+    end
+
+    if Grid2LayoutHeader1 then
+        ---@type FrameContainer
+        local party = {
             Frame = Grid2LayoutHeader1,
             Type = fsFrame.ContainerType.Party,
             LayoutType = fsFrame.LayoutType.NameList,
@@ -49,7 +54,10 @@ function M:Containers()
             end,
         }
 
-    return {
-        party,
-    }
+        containers[#containers + 1] = party
+    else
+        fsLog:Bug("Missing frame Grid2LayoutHeader1.")
+    end
+
+    return containers
 end

@@ -3,6 +3,7 @@ local _, addon = ...
 local wow = addon.WoW.Api
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
+local fsLog = addon.Logging.Log
 local M = {}
 
 fsProviders.Suf = M
@@ -17,28 +18,41 @@ function M:Enabled()
 end
 
 function M:Init() end
-
-function M:RegisterRequestSortCallback(_) end
-
-function M:RegisterContainersChangedCallback(_) end
+function M:RegisterRequestSortCallback() end
+function M:RegisterContainersChangedCallback() end
 
 function M:Containers()
-    ---@type FrameContainer
-    local party = SUFHeaderparty and {
-        Frame = SUFHeaderparty,
-        Type = fsFrame.ContainerType.Party,
-        LayoutType = fsFrame.LayoutType.NameList,
-    }
+    local containers = {}
 
-    ---@type FrameContainer
-    local arena = SUFHeaderarena and {
-        Frame = SUFHeaderarena,
-        Type = fsFrame.ContainerType.EnemyArena,
-        LayoutType = fsFrame.LayoutType.NameList,
-    }
+    if not M:Enabled() then
+        return
+    end
 
-    return {
-        party,
-        arena,
-    }
+    if SUFHeaderparty then
+        ---@type FrameContainer
+        local party = {
+            Frame = SUFHeaderparty,
+            Type = fsFrame.ContainerType.Party,
+            LayoutType = fsFrame.LayoutType.NameList,
+        }
+
+        containers[#containers + 1] = party
+    else
+        fsLog:Bug("Missing SUFHeaderparty frame.")
+    end
+
+    if SUFHeaderarena then
+        ---@type FrameContainer
+        local arena = {
+            Frame = SUFHeaderarena,
+            Type = fsFrame.ContainerType.EnemyArena,
+            LayoutType = fsFrame.LayoutType.NameList,
+        }
+
+        containers[#containers + 1] = arena
+    else
+        fsLog:Bug("Missing SUFHeaderarena frame.")
+    end
+
+    return containers
 end

@@ -26,7 +26,7 @@ local function IntegrationEnabled()
     return E.db.FrameSort.Enabled
 end
 
-local function PluginEnabled()
+local function ElvUiEnabled()
     return wow.GetAddOnEnableState(nil, "ElvUI") ~= 0 and ElvUI ~= nil
 end
 
@@ -41,11 +41,11 @@ function M:Name()
 end
 
 function M:Enabled()
-    return PluginEnabled() and IntegrationEnabled()
+    return ElvUiEnabled() and IntegrationEnabled()
 end
 
 function M:Init()
-    if not PluginEnabled() then
+    if not ElvUiEnabled() then
         return
     end
 
@@ -64,10 +64,10 @@ function M:Init()
 
         fsPlugin:SecureHook(UF, "LoadUnits", function()
             if not ElvUF_PartyGroup1 then
-                fsLog:Error("ElvUF_PartyGroup1 container is nil")
                 return
             end
 
+            fsLog:Debug("ElvUI loaded units, requesting container update.")
             RequestUpdateContainers()
         end)
     end
@@ -97,25 +97,31 @@ function M:Init()
     E:RegisterModule(pluginName)
 end
 
-function M:RegisterRequestSortCallback(_) end
+function M:RegisterRequestSortCallback() end
 
 function M:RegisterContainersChangedCallback(callback)
     containersChangedCallbacks[#containersChangedCallbacks + 1] = callback
 end
 
 function M:Containers()
-    if not ElvUF_PartyGroup1 then
-        return {}
+    local containers = {}
+
+    if not ElvUiEnabled() then
+        return containers
     end
 
-    ---@type FrameContainer
-    local party = {
-        Frame = ElvUF_PartyGroup1,
-        Type = fsFrame.ContainerType.Party,
-        LayoutType = fsFrame.LayoutType.NameList,
-    }
+    if ElvUF_PartyGroup1 then
+        ---@type FrameContainer
+        local party = {
+            Frame = ElvUF_PartyGroup1,
+            Type = fsFrame.ContainerType.Party,
+            LayoutType = fsFrame.LayoutType.NameList,
+        }
 
-    return {
-        party,
-    }
+        containers[#containers + 1] = party
+    else
+        fsLog:Bug("Missing frame ElvUF_PartyGroup1.")
+    end
+
+    return containers
 end

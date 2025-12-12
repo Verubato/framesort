@@ -21,7 +21,7 @@ function M:Build(parent)
         panel:SetWidth(wow.InterfaceOptionsFramePanelContainer:GetWidth())
         panel:SetHeight(wow.InterfaceOptionsFramePanelContainer:GetHeight())
     else
-        fsLog:Error("Unable to set configuration panel width.")
+        fsLog:Bug("Unable to set configuration panel width.")
     end
 
     scroller:SetScrollChild(panel)

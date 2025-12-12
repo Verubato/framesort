@@ -6,6 +6,7 @@ local fsProviders = addon.Providers
 local fsScheduler = addon.Scheduling.Scheduler
 local events = addon.WoW.Api.Events
 local fsMath = addon.Numerics.Math
+local fsLog = addon.Logging.Log
 ---@class BlizzardFrameProvider: FrameProvider
 local M = {}
 local layoutEventFrame = nil
@@ -44,32 +45,41 @@ local function RequestUpdateContainers()
 end
 
 local function OnLayoutsApplied()
+    fsLog:Debug("Edit mode layout was applied, requesting container update.")
     -- user or system changed their layout
     RequestUpdateContainers()
 end
 
 local function OnEditModeExited()
-    -- user may have changed frame settings
+    fsLog:Debug("Edit mode was closed, requesting sort and container update.")
+
     RequestUpdateContainers()
     RequestSort()
 end
 
 local function OnRaidGroupLoaded()
+    fsLog:Debug("Raid group frame was loaded, requesting container update.")
+
     -- refresh group frame offsets once a group has been loaded
     RequestUpdateContainers()
 end
 
 local function OnRaidContainerSizeChanged()
+    fsLog:Debug("Raid container frame size changed, requesting container update.")
+
     RequestUpdateContainers()
 end
 
 local function OnPvpStateChanged()
+    fsLog:Debug("PvP match state changed, requesting sort.")
+
     RequestSort()
 end
 
 local function OnCvarUpdate(_, _, name)
     for _, cvar in ipairs(cvarsToUpdateContainer) do
         if name == cvar then
+            fsLog:Debug("Detected cvar update for %s, requesting container update.", name)
             RequestUpdateContainers()
             break
         end
@@ -77,6 +87,7 @@ local function OnCvarUpdate(_, _, name)
 
     for _, pattern in ipairs(cvarsPatternsToRunSort) do
         if string.match(name, pattern) then
+            fsLog:Debug("Detected cvar update for %s, requesting sort.", name)
             -- run next frame to allow cvars to take effect
             fsScheduler:RunNextFrame(RequestSort)
             break
@@ -118,11 +129,15 @@ function M:Name()
 end
 
 function M:Enabled()
-    local containers = M:Containers()
+    local frames = {
+        wow.CompactPartyFrame,
+        wow.CompactRaidFrameContainer,
+        wow.CompactArenaFrame,
+    }
 
-    for _, container in ipairs(containers) do
+    for _, frame in pairs(frames) do
         -- frame addons will usually disable blizzard via unsubscribing group update events
-        if container.Frame:IsVisible() or container.Frame:IsEventRegistered("GROUP_ROSTER_UPDATE") then
+        if frame:IsVisible() or frame:IsEventRegistered("GROUP_ROSTER_UPDATE") then
             return true
         end
     end
@@ -183,11 +198,15 @@ function M:RegisterContainersChangedCallback(callback)
 end
 
 function M:Containers()
-    ---@type FrameContainer[]
     local containers = {}
 
+    if not M:Enabled() then
+        return containers
+    end
+
     if wow.CompactPartyFrame then
-        containers[#containers + 1] = {
+        ---@type FrameContainer
+        local party = {
             Frame = wow.CompactPartyFrame,
             Type = fsFrame.ContainerType.Party,
             LayoutType = fsFrame.LayoutType.Hard,
@@ -212,9 +231,14 @@ function M:Containers()
                 return GetOffset(wow.CompactPartyFrame)
             end,
         }
+
+        containers[#containers + 1] = party
+    else
+        fsLog:Bug("Missing frame CompactPartyFrame.")
     end
 
     if wow.CompactRaidFrameContainer then
+        ---@type FrameContainer
         local raid = {
             Frame = wow.CompactRaidFrameContainer,
             Type = fsFrame.ContainerType.Raid,
@@ -315,10 +339,13 @@ function M:Containers()
         end
 
         containers[#containers + 1] = raid
+    else
+        fsLog:Bug("Missing frame CompactRaidFrameContainer.")
     end
 
     if wow.CompactArenaFrame then
-        containers[#containers + 1] = {
+        ---@type FrameContainer
+        local arena = {
             Frame = wow.CompactArenaFrame,
             Type = fsFrame.ContainerType.EnemyArena,
             LayoutType = fsFrame.LayoutType.Hard,
@@ -355,6 +382,8 @@ function M:Containers()
                 wow.CompactArenaFrameTitle:Hide()
             end,
         }
+
+        containers[#containers + 1] = arena
     end
 
     return containers

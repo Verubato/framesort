@@ -6,6 +6,7 @@ local fsProviders = addon.Providers
 local fsCompare = addon.Modules.Sorting.Comparer
 local fsLuaEx = addon.Language.LuaEx
 local fsEnumerable = addon.Collections.Enumerable
+local fsLog = addon.Logging.Log
 local M = {}
 local sortCallbacks = {}
 
@@ -21,19 +22,19 @@ function M:Enabled()
 end
 
 function M:Init() end
-
-function M:RegisterRequestSortCallback(callback) end
-
-function M:RegisterContainersChangedCallback(_) end
+function M:RegisterRequestSortCallback() end
+function M:RegisterContainersChangedCallback() end
 
 function M:Containers()
+    local containers = {}
+
     if not M:Enabled() then
-        return {}
+        return containers
     end
 
     local function getFrames()
-        local inInstance, instaceType = wow.IsInInstance()
-        local isArena = inInstance and instaceType == "arena"
+        local inInstance, instanceType = wow.IsInInstance()
+        local isArena = inInstance and instanceType == "arena"
         local frames = {
             ---@diagnostic disable: undefined-global
             GladdyButtonFrame1,
@@ -51,25 +52,29 @@ function M:Containers()
     local profileKey = fsLuaEx:SafeGet(GladdyXZ, { "profileKeys", charKey })
     local profile = fsLuaEx:SafeGet(GladdyXZ, { "profiles", profileKey })
 
-    ---@type FrameContainer
-    local arena = {
-        Frame = GladdyFrame,
-        Type = fsFrame.ContainerType.EnemyArena,
-        LayoutType = fsFrame.LayoutType.Hard,
-        Frames = getFrames,
-        Spacing = function()
-            local margin = fsLuaEx:SafeGet(profile, { "bottomMargin" }) or 95
-            local highlightBorderSize = fsLuaEx:SafeGet(profile, { "highlightInset" }) and 0 or fsLuaEx:SafeGet(profile, { "highlightBorderSize" }) * 2
-            local powerBarHeight = fsLuaEx:SafeGet(profile, { "powerBarEnabled" }) and (fsLuaEx:SafeGet(profile, { "powerBarHeight" }) + 1) or 0
+    if GladdyFrame then
+        ---@type FrameContainer
+        local arena = {
+            Frame = GladdyFrame,
+            Type = fsFrame.ContainerType.EnemyArena,
+            LayoutType = fsFrame.LayoutType.Hard,
+            Frames = getFrames,
+            Spacing = function()
+                local margin = fsLuaEx:SafeGet(profile, { "bottomMargin" }) or 95
+                local highlightBorderSize = fsLuaEx:SafeGet(profile, { "highlightInset" }) and 0 or fsLuaEx:SafeGet(profile, { "highlightBorderSize" }) * 2
+                local powerBarHeight = fsLuaEx:SafeGet(profile, { "powerBarEnabled" }) and (fsLuaEx:SafeGet(profile, { "powerBarHeight" }) + 1) or 0
 
-            return {
-                Horizontal = 0,
-                Vertical = margin + highlightBorderSize + powerBarHeight,
-            }
-        end,
-    }
+                return {
+                    Horizontal = 0,
+                    Vertical = margin + highlightBorderSize + powerBarHeight,
+                }
+            end,
+        }
 
-    return {
-        arena,
-    }
+        containers[#containers + 1] = arena
+    else
+        fsLog:Bug("Missing frame GladdyFrame.")
+    end
+
+    return containers
 end

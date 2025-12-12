@@ -20,7 +20,7 @@ local function AddCategory(panel)
     elseif wow.InterfaceOptions_AddCategory then
         wow.InterfaceOptions_AddCategory(panel)
     else
-        fsLog:Error("Unable to add options category.")
+        fsLog:Critical("Unable to add options category.")
     end
 
     return nil
@@ -33,7 +33,7 @@ local function AddSubCategory(parentCategory, panel)
     elseif wow.InterfaceOptions_AddCategory then
         wow.InterfaceOptions_AddCategory(panel)
     else
-        fsLog:Error("Unable to add options sub category.")
+        fsLog:Critical("Unable to add options sub category.")
     end
 end
 
@@ -157,7 +157,7 @@ function fsConfig:Init()
         main:SetWidth(wow.InterfaceOptionsFramePanelContainer:GetWidth())
         main:SetHeight(wow.InterfaceOptionsFramePanelContainer:GetHeight())
     else
-        fsLog:Error("Unable to set configuration panel width.")
+        fsLog:Critical("Unable to set configuration panel width.")
     end
 
     panel:SetScrollChild(main)

@@ -7,7 +7,7 @@ local M = {}
 addon.Scheduling.Scheduler = M
 
 local eventFrame = nil
-local enteringWorldCallbacks = {}
+local enteringWorldOnceCallbacks = {}
 local combatEndCallbacks = {}
 local combatEndKeyedCallbacks = {}
 
@@ -25,14 +25,14 @@ local function OnCombatEnded()
 end
 
 local function OnEnteringWorld()
-    for _, callback in pairs(enteringWorldCallbacks) do
+    for _, callback in pairs(enteringWorldOnceCallbacks) do
         callback()
     end
 
     -- PLAYER_ENTERING_WORLD can fire multiple times per addon load
     -- but we only want to invoke our callbacks the first time
     -- so run once and clear
-    enteringWorldCallbacks = {}
+    enteringWorldOnceCallbacks = {}
 end
 
 local function OnEvent(_, event)
@@ -51,7 +51,7 @@ function M:RunNextFrame(callback)
     wow.C_Timer.After(0, callback)
 end
 
---- invokes the callback after the specified number of seconds.
+--- Invokes the callback after the specified number of seconds.
 ---@param callback fun()
 ---@param seconds number
 function M:RunAfter(seconds, callback)
@@ -75,7 +75,7 @@ function M:RunWhenCombatEnds(callback, key)
 end
 
 function M:RunWhenEnteringWorldOnce(callback)
-    enteringWorldCallbacks[#enteringWorldCallbacks + 1] = callback
+    enteringWorldOnceCallbacks[#enteringWorldOnceCallbacks + 1] = callback
 end
 
 function M:Init()

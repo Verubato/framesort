@@ -42,6 +42,7 @@ local function Run()
         return
     end
 
+    fsLog:Debug("Auto promoting healer unit %s to leader.", healer)
     wow.PromoteToLeader(healer)
 end
 

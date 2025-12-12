@@ -4,6 +4,7 @@ local wow = addon.WoW.Api
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsLuaEx = addon.Language.LuaEx
+local fsLog = addon.Logging.Log
 local M = {}
 
 fsProviders.BattleGroundEnemies = M
@@ -22,11 +23,12 @@ function M:RegisterRequestSortCallback() end
 function M:RegisterContainersChangedCallback() end
 
 function M:Containers()
-    if not self:Enabled() then
-        return {}
+    local containers = {}
+
+    if not M:Enabled() then
+        return containers
     end
 
-    local containers = {}
     local arenaFrame = BattleGroundEnemies.Enemies
     local allyFrame = BattleGroundEnemies.Allies
     local charKey = wow.UnitName("player") .. " - " .. wow.GetRealmName()
@@ -51,6 +53,8 @@ function M:Containers()
             end,
             EnableInBattlegrounds = false
         }
+    else
+        fsLog:Bug("Missing frame BattleGroundEnemies.Allies.")
     end
 
     if arenaFrame then
@@ -71,6 +75,8 @@ function M:Containers()
             end,
             EnableInBattlegrounds = false
         }
+    else
+        fsLog:Bug("Missing frame BattleGroundEnemies.Enemies.")
     end
 
     return containers
