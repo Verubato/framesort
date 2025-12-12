@@ -13,16 +13,10 @@ function M:Build(parent)
     scroller.parent = parent.name
 
     local panel = wow.CreateFrame("Frame")
+    local width, height = fsConfig:SettingsSize()
 
-    if wow.SettingsPanel then
-        panel:SetWidth(wow.SettingsPanel.Container:GetWidth())
-        panel:SetHeight(wow.SettingsPanel.Container:GetHeight())
-    elseif wow.InterfaceOptionsFramePanelContainer then
-        panel:SetWidth(wow.InterfaceOptionsFramePanelContainer:GetWidth())
-        panel:SetHeight(wow.InterfaceOptionsFramePanelContainer:GetHeight())
-    else
-        fsLog:Bug("Unable to set configuration panel width.")
-    end
+    panel:SetWidth(width)
+    panel:SetHeight(height)
 
     scroller:SetScrollChild(panel)
 

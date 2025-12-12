@@ -128,14 +128,10 @@ function M:Build(parent)
     local width = 800
     local height = 800
     local margin = 100
+    local panelWidth, panelHeight = fsConfig:SettingsSize()
 
-    if wow.SettingsPanel then
-        width = wow.SettingsPanel.Container:GetWidth() - margin
-        height = wow.SettingsPanel.Container:GetHeight() - margin
-    elseif wow.InterfaceOptionsFramePanelContainer then
-        width = wow.InterfaceOptionsFramePanelContainer:GetWidth() - margin
-        height = wow.InterfaceOptionsFramePanelContainer:GetHeight() - margin
-    end
+    width = panelWidth - margin
+    height = panelHeight - margin
 
     logFrame:SetSize(width, height)
     logFrame:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)
