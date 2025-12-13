@@ -35,11 +35,12 @@ function M:Build(parent)
         for k, v in pairs(config) do
             if v == value then
                 toSwap = k
+                break
             end
         end
 
         if not toSwap then
-            fsLog:Bug("Couldn't determine existing value to swap.")
+            fsLog:Bug("Couldn't determine existing value to swap for %d.", value)
             return
         end
 
