@@ -39,6 +39,14 @@ local function SortFramesByUnits(frames, sortedUnits)
         local leftUnit = fsFrame:GetFrameUnit(leftFrame)
         local rightUnit = fsFrame:GetFrameUnit(rightFrame)
 
+        if not leftUnit then
+            return false
+        end
+
+        if not rightUnit then
+            return true
+        end
+
         local leftIndex = unitsToIndex[leftUnit]
         local rightIndex = unitsToIndex[rightUnit]
 

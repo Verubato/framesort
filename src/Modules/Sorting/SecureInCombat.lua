@@ -801,10 +801,10 @@ secureMethods["HardArrange"] = [[
     for _, frame in ipairs(frames) do
         local to = pointsByFrame[frame]
         local point, relativeTo, relativePoint, xOffset, yOffset = frame:GetPoint()
-        local xOffsetRounded = math.floor(xOffset * mult + 0.5) / mult
-        local yOffsetRounded = math.floor(yOffset * mult + 0.5) / mult
-        local toXOffsetRounded = math.floor(to.XOffset * mult + 0.5) / mult
-        local toYOffsetRounded = math.floor(to.YOffset * mult + 0.5) / mult
+        local xOffsetRounded = math.floor((xOffset or 0) * mult + 0.5) / mult
+        local yOffsetRounded = math.floor((yOffset or 0) * mult + 0.5) / mult
+        local toXOffsetRounded = math.floor((to.XOffset or 0) * mult + 0.5) / mult
+        local toYOffsetRounded = math.floor((to.YOffset or 0) * mult + 0.5) / mult
 
         local different =
             point ~= to.Point or
@@ -1037,12 +1037,14 @@ secureMethods["TrySortContainer"] = [=[
         container.Frame:GetChildList(Children)
 
         if not run:RunAttribute("ExtractUnitFrames", "Children", "Frames", container.VisibleOnly) then
+            Children, Frames = nil, nil
             return false
         end
     end
 
     if #Frames <= 1 then
         -- nothing to do
+        Children, Frames = nil, nil
         return true
     end
 
