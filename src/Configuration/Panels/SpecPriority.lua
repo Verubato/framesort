@@ -52,12 +52,25 @@ end
 local function SpecName(specId)
     if wow.GetSpecializationInfoByID then
         local _, name, _, _, _, _, class = wow.GetSpecializationInfoByID(specId)
+
         if name and class then
             return string.format("%s - %s", class, name)
         end
     end
 
     return string.format("Spec Id %d", specId)
+end
+
+local function HasSpec(specId)
+    if not wow.GetSpecializationInfoByID then
+        -- might as well just show spec ids
+        return true
+    end
+
+    -- we might be in an older expansion that doesn't have all the specs
+    local _, name, _, _, _, _, class = wow.GetSpecializationInfoByID(specId)
+
+    return name ~= nil and class ~= nil
 end
 
 local function Move(tbl, from, to)
@@ -93,7 +106,7 @@ local function EnsureDbOrder(specType)
     end
 
     for _, info in ipairs(fsSpecs.Specs) do
-        if info.Type == specType and info.SpecId then
+        if info.Type == specType and info.SpecId and HasSpec(info.SpecId) then
             priority[#priority + 1] = info.SpecId
         end
     end
@@ -260,14 +273,22 @@ local function Refresh()
         return
     end
 
+    -- clean up the db if we have existing unknown specs
+    for i = #order, 1, -1 do
+        if not HasSpec(order[i]) then
+            table.remove(order, i)
+        end
+    end
+
     for i = 1, #order do
         local row = rows[i]
         local specId = order[i]
+        local specName = SpecName(specId)
+        local text = string.format("%d. %s", i, specName)
 
-        row:Show()
         row.SpecIndex = i
         row.SpecId = specId
-        row.Text:SetText(("%d. %s"):format(i, SpecName(specId)))
+        row.Text:SetText(text)
 
         local r, g, b = ClassColorForSpec(specId)
         row.ClassR, row.ClassG, row.ClassB = r, g, b
@@ -276,14 +297,17 @@ local function Refresh()
         if dragIndex then
             row:ClearHover()
         end
+
+        row:Show()
     end
 
     -- Hide any extra rows (e.g. switching to a type with fewer specs)
     for i = #order + 1, #rows do
         local row = rows[i]
-        row:Hide()
         row.SpecId = nil
         row.SpecIndex = nil
+
+        row:Hide()
         row:ClearHover()
 
         row.BaseR, row.BaseG, row.BaseB = nil, nil, nil
