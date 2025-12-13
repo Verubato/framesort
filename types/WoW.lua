@@ -4,6 +4,7 @@
 ---@field C_PvP C_PvP
 ---@field C_Map C_Map
 ---@field C_Timer C_Timer
+---@field RAID_CLASS_COLORS table
 -- constants
 ---@field MAX_RAID_MEMBERS number
 ---@field MEMBERS_PER_RAID_GROUP number

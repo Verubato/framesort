@@ -34,6 +34,21 @@ local insertLine = nil
 
 local selectedType = fsSpecs.Type.Tank
 
+local function ClassColorForSpec(specId)
+    if not wow.GetSpecializationInfoByID then
+        return 0.9, 0.9, 0.9
+    end
+
+    local _, _, _, _, _, classFile = wow.GetSpecializationInfoByID(specId)
+
+    if classFile and wow.RAID_CLASS_COLORS and wow.RAID_CLASS_COLORS[classFile] then
+        local c = wow.RAID_CLASS_COLORS[classFile]
+        return c.r, c.g, c.b
+    end
+
+    return 0.9, 0.9, 0.9
+end
+
 local function SpecName(specId)
     if wow.GetSpecializationInfoByID then
         local _, name, _, _, _, _, class = wow.GetSpecializationInfoByID(specId)
@@ -121,9 +136,17 @@ local function SpecTypeLabel(specType)
 end
 
 local function AddHoverAnimation(row, isDragging)
+    local function ApplyBase(self)
+        local r = self.ClassR or 0.9
+        local g = self.ClassG or 0.9
+        local b = self.ClassB or 0.9
+
+        self.Text:SetTextColor(r, g, b)
+    end
+
     local function Clear(self)
         self.Highlight:SetAlpha(0)
-        self.Text:SetTextColor(0.9, 0.9, 0.9)
+        ApplyBase(self)
     end
 
     row:SetScript("OnEnter", function(self)
@@ -133,7 +156,13 @@ local function AddHoverAnimation(row, isDragging)
         end
 
         self.Highlight:SetAlpha(1)
-        self.Text:SetTextColor(1, 1, 1)
+
+        -- brighten the color slightly on hover
+        local r = self.ClassR or 0.9
+        local g = self.ClassG or 0.9
+        local b = self.ClassB or 0.9
+
+        self.Text:SetTextColor(math.min(1, r + 0.15), math.min(1, g + 0.15), math.min(1, b + 0.15))
     end)
 
     row:SetScript("OnLeave", function(self)
@@ -239,9 +268,12 @@ local function Refresh()
         row.SpecIndex = i
         row.SpecId = specId
         row.Text:SetText(("%d. %s"):format(i, SpecName(specId)))
-        row.Text:SetTextColor(0.9, 0.9, 0.9)
 
-        if dragIndex and row.ClearHover then
+        local r, g, b = ClassColorForSpec(specId)
+        row.ClassR, row.ClassG, row.ClassB = r, g, b
+        row.Text:SetTextColor(r, g, b)
+
+        if dragIndex then
             row:ClearHover()
         end
     end
@@ -252,9 +284,9 @@ local function Refresh()
         row:Hide()
         row.SpecId = nil
         row.SpecIndex = nil
-        if row.ClearHover then
-            row:ClearHover()
-        end
+        row:ClearHover()
+
+        row.BaseR, row.BaseG, row.BaseB = nil, nil, nil
     end
 end
 
@@ -296,10 +328,11 @@ local function CreateRow(index, list)
         dragIndex = row.SpecIndex
         dropIndex = row.SpecIndex
 
-        if row.ClearHover then
-            row:ClearHover()
-        end
+        row:ClearHover()
 
+        local r, g, b = ClassColorForSpec(row.SpecId)
+
+        dragGhost.Text:SetTextColor(r, g, b)
         dragGhost.Text:SetText(SpecName(row.SpecId))
         dragGhost:Show()
 
