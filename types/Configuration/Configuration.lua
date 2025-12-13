@@ -14,7 +14,7 @@
 ---@field TextLine fun(self: table, line: string, parent: table, anchor: table?, font: string?, verticalSpacing: number?): table anchor
 ---@field TextBlock fun(self: table, lines: string[], parent: table, anchor: table): table anchor
 ---@field MultilineTextBlock fun(self: table, lines: string, parent: table, anchor: table): table anchor
----@field Dropdown fun(self: table, parent: table, items: table, getValue: (fun(): any), setValue: (fun(value: any))): table
+---@field Dropdown fun(self: table, parent: table, items: table, getValue: (fun(): any), setValue: (fun(value: any)), getText?: (fun(value: any): string)): table
 ---@field Specs Specs
 ---@field DiscordUrl string
 ---@field SettingsSize fun(self: table): width: number, height: number
@@ -27,7 +27,8 @@
 ---@field Macro OptionsPanel
 ---@field MacroVariables OptionsPanel
 ---@field Addons OptionsPanel
----@field Ordering OptionsPanel
+---@field SpecOrdering OptionsPanel
+---@field SpecPriority OptionsPanel
 ---@field AutoLeader OptionsPanel
 ---@field SortingMethod OptionsPanel
 ---@field Api OptionsPanel

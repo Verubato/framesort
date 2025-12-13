@@ -24,8 +24,10 @@ local wow = {
     CompactRaidFrameManager_GetSetting = CompactRaidFrameManager_GetSetting or function(_)
         return false
     end,
-
     EditModeManagerFrame = EditModeManagerFrame,
+
+    -- mouse
+    GetCursorPosition = GetCursorPosition,
 
     -- settings
     SlashCmdList = SlashCmdList,

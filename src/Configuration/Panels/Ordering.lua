@@ -6,7 +6,7 @@ local fsLog = addon.Logging.Log
 local modules = addon.Modules
 local L = addon.Locale
 local M = {}
-fsConfig.Panels.Ordering = M
+fsConfig.Panels.SpecOrdering = M
 
 function M:Build(parent)
     local verticalSpacing = fsConfig.VerticalSpacing
@@ -22,7 +22,7 @@ function M:Build(parent)
 
     local description = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
     description:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -verticalSpacing)
-    description:SetText(L["Specify the ordering you wish to use when sorting by role."])
+    description:SetText(L["Specify the ordering you wish to use when sorting by spec."])
 
     local all = {}
 

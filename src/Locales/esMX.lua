@@ -12,6 +12,7 @@ L["FrameSort - %s"] = "FrameSort - %s"
 L["There are some issuse that may prevent FrameSort from working correctly."] = "Hay algunos problemas que pueden impedir que FrameSort funcione correctamente."
 L["Please go to the Health Check panel to view more details."] = "Ve al panel Revisión de estado para ver más detalles."
 L["Role"] = "Rol"
+L["Spec"] = "Spec"
 L["Group"] = "Grupo"
 L["Alphabetical"] = "Alfabético"
 L["Arena - 2v2"] = "Arena - 2v2"
@@ -64,12 +65,28 @@ L["Reload"] = "Recargar"
 
 -- # Ordering screen #
 L["Ordering"] = "Orden"
-L["Specify the ordering you wish to use when sorting by role."] = "Especifica el orden que deseas usar al ordenar por rol."
+L["Specify the ordering you wish to use when sorting by spec."] = "Especifica el orden que deseas usar al ordenar por especialización."
 L["Tanks"] = "Tanques"
 L["Healers"] = "Sanadores"
 L["Casters"] = "Lanzadores"
 L["Hunters"] = "Cazadores"
 L["Melee"] = "Cuerpo a cuerpo"
+
+-- # Spec Priority screen # --
+L["Spec Priority"] = "Prioridad de especialización"
+L["Spec Type"] = "Tipo de especialización"
+L["Choose a spec type, then drag and drop to control priority."] = "Elige un tipo de especialización y arrastra y suelta para controlar la prioridad."
+L["Tank"] = "Tanque"
+L["Healer"] = "Sanador"
+L["Caster"] = "Lanzador"
+L["Hunter"] = "Cazador"
+L["Melee"] = "Cuerpo a cuerpo"
+L["Reset this type"] = "Restablecer este tipo"
+L["Spec query note"] = [[
+Ten en cuenta que la información de especialización se consulta desde el servidor, lo que tarda entre 1 y 2 segundos por jugador.
+\n
+Esto significa que puede tardar un poco antes de que podamos ordenar correctamente.
+]]
 
 -- # Auto Leader screen #
 L["Auto Leader"] = "Líder automático"

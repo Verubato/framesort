@@ -44,50 +44,48 @@ local function Ordering()
     local roleLookup = {}
     local ordering = {}
 
-    ordering[config.Tanks] = "Tanks"
-    ordering[config.Healers] = "Healers"
-    ordering[config.Casters] = "Casters"
-    ordering[config.Hunters] = "Hunters"
-    ordering[config.Melee] = "Melee"
+    local tankKey = fsSpec:SpecTypeKey(fsSpec.Type.Tank)
+    local healerKey = fsSpec:SpecTypeKey(fsSpec.Type.Healer)
+    local castersKey = fsSpec:SpecTypeKey(fsSpec.Type.Caster)
+    local huntersKey = fsSpec:SpecTypeKey(fsSpec.Type.Hunter)
+    local meleeKey = fsSpec:SpecTypeKey(fsSpec.Type.Melee)
 
-    for order, type in pairs(ordering) do
-        if type == "Tanks" then
-            local tanks = fsEnumerable:From(specs.Specs):Where(function(item)
-                return item.Type == specs.Type.Tank
-            end)
+    ordering[config.Tanks] = { Key = tankKey, Type = fsSpec.Type.Tank }
+    ordering[config.Healers] = { Key = healerKey, Type = fsSpec.Type.Healer }
+    ordering[config.Casters] = { Key = castersKey, Type = fsSpec.Type.Caster }
+    ordering[config.Hunters] = { Key = huntersKey, Type = fsSpec.Type.Hunter }
+    ordering[config.Melee] = { Key = meleeKey, Type = fsSpec.Type.Melee }
 
-            specOrdering = specOrdering:Concat(tanks)
+    local function Priority(type, key)
+        local priority = addon.DB.Options.Sorting.SpecPriority and addon.DB.Options.Sorting.SpecPriority[key]
+
+        if not priority or #priority == 0 then
+            priority = fsEnumerable
+                :From(specs.Specs)
+                :Where(function(item)
+                    return item.Type == type
+                end)
+                :Map(function(item)
+                    return item.SpecId
+                end)
+        end
+
+        return priority
+    end
+
+    for order, item in pairs(ordering) do
+        local priority = Priority(item.Type, item.Key)
+        specOrdering = specOrdering:Concat(priority)
+
+        if item.Type == fsSpec.Type.Tank then
             roleLookup["TANK"] = order
-        elseif type == "Healers" then
-            local healers = fsEnumerable:From(specs.Specs):Where(function(item)
-                return item.Type == specs.Type.Healer
-            end)
-
-            specOrdering = specOrdering:Concat(healers)
+        elseif item.Type == fsSpec.Type.Healer then
             roleLookup["HEALER"] = order
-        elseif type == "Casters" then
-            local casters = fsEnumerable:From(specs.Specs):Where(function(item)
-                return item.Type == specs.Type.Caster
-            end)
-
-            specOrdering = specOrdering:Concat(casters)
-        elseif type == "Hunters" then
-            local hunters = fsEnumerable:From(specs.Specs):Where(function(item)
-                return item.Type == specs.Type.Hunter
-            end)
-
-            specOrdering = specOrdering:Concat(hunters)
-        elseif type == "Melee" then
-            local melee = fsEnumerable:From(specs.Specs):Where(function(item)
-                return item.Type == specs.Type.Melee
-            end)
-
-            specOrdering = specOrdering:Concat(melee)
         end
     end
 
     local specLookup = specOrdering:ToLookup(function(item, _)
-        return item.SpecId
+        return item
     end, function(_, index)
         return index
     end)
@@ -460,6 +458,13 @@ local function EnemyCompare(leftToken, rightToken, groupSortMode, reverse, meta)
     end
 
     return leftToken < rightToken
+end
+
+function M:InvalidateCache()
+    cachedClassLookup = nil
+    cachedConfigSnapshot = nil
+    cachedRoleLookup = nil
+    cachedSpecLookup = nil
 end
 
 ---Returns a function that accepts two parameters of unit tokens and returns true if the left token should be ordered before the right.

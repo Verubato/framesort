@@ -88,12 +88,12 @@ function fsConfig:MultilineTextBlock(text, parent, anchor)
     return fsConfig:TextBlock(lines, parent, anchor)
 end
 
-function fsConfig:Dropdown(parent, items, getValue, setSelected)
+function fsConfig:Dropdown(parent, items, getValue, setSelected, getText)
     if wow.HasDropdown() then
         local dd = wow.CreateFrame("DropdownButton", nil, parent, "WowStyle1DropdownTemplate")
         dd:SetupMenu(function(_, rootDescription)
             for i, value in ipairs(items) do
-                rootDescription:CreateRadio(tostring(value), function(x)
+                rootDescription:CreateRadio(getText and getText(value) or tostring(value), function(x)
                     return x == getValue()
                 end, setSelected, i)
             end
@@ -113,7 +113,7 @@ function fsConfig:Dropdown(parent, items, getValue, setSelected)
         libDD:UIDropDownMenu_Initialize(dd, function()
             for _, value in ipairs(items) do
                 local info = libDD:UIDropDownMenu_CreateInfo()
-                info.text = tostring(value)
+                info.text = getText and getText(value) or tostring(value)
                 info.value = value
 
                 info.checked = function()
@@ -123,7 +123,7 @@ function fsConfig:Dropdown(parent, items, getValue, setSelected)
                 -- onclick handler
                 info.func = function()
                     libDD:UIDropDownMenu_SetSelectedID(dd, dd:GetID(info))
-                    libDD:UIDropDownMenu_SetText(dd, tostring(value))
+                    libDD:UIDropDownMenu_SetText(dd, getText and getText(value) or tostring(value))
                     setSelected(value)
                 end
 
@@ -137,7 +137,7 @@ function fsConfig:Dropdown(parent, items, getValue, setSelected)
         end)
 
         function dd:FrameSortRefresh()
-            libDD:UIDropDownMenu_SetText(dd, getValue())
+            libDD:UIDropDownMenu_SetText(dd, getText and getText(getValue()) or tostring(getValue()))
         end
 
         return dd
@@ -176,7 +176,8 @@ function fsConfig:Init()
     local panels = fsConfig.Panels
     panels.Sorting:Build(main)
 
-    local ordering = panels.Ordering:Build(panel)
+    local specOrdering = panels.SpecOrdering:Build(panel)
+    local specPriority = panels.SpecPriority:Build(panel)
     local sortingMethod = panels.SortingMethod:Build(panel)
     local autoLeader = wow.HasSoloShuffle() and panels.AutoLeader:Build(panel)
     local keybinding = panels.Keybinding:Build(panel)
@@ -189,7 +190,8 @@ function fsConfig:Init()
     local discord = panels.Discord:Build(panel)
     local log = panels.Log:Build(panel)
 
-    AddSubCategory(category, ordering)
+    AddSubCategory(category, specOrdering)
+    AddSubCategory(category, specPriority)
     AddSubCategory(category, sortingMethod)
 
     if wow.HasSoloShuffle() then

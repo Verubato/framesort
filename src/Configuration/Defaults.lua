@@ -11,8 +11,9 @@ fsConfig.Defaults = {
             Healers = 2,
             Casters = 3,
             Hunters = 4,
-            Melee = 5
+            Melee = 5,
         },
+        SpecPriority = {},
         Method = fsConfig.SortingMethod.Secure,
         Arena = {
             Twos = {
