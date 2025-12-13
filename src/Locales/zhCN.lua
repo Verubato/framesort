@@ -12,6 +12,7 @@ L["FrameSort - %s"] = "FrameSort - %s"
 L["There are some issuse that may prevent FrameSort from working correctly."] = "存在一些问题可能会阻止 FrameSort 正常工作。"
 L["Please go to the Health Check panel to view more details."] = "请前往“健康检查”面板查看详细信息。"
 L["Role"] = "职责"
+L["Spec"] = "专精"
 L["Group"] = "小组"
 L["Alphabetical"] = "按字母顺序"
 L["Arena - 2v2"] = "竞技场 - 2v2"
@@ -63,13 +64,29 @@ L["Please reload after changing these settings."] = "更改这些设置后请重
 L["Reload"] = "重新加载"
 
 -- # Ordering screen #
-L["Ordering"] = "顺序"
-L["Specify the ordering you wish to use when sorting by role."] = "指定按职责排序时要使用的顺序。"
+L["Ordering"] = "排序"
+L["Specify the ordering you wish to use when sorting by spec."] = "指定按专精排序时要使用的顺序。"
 L["Tanks"] = "坦克"
 L["Healers"] = "治疗"
 L["Casters"] = "施法者"
 L["Hunters"] = "猎人"
 L["Melee"] = "近战"
+
+-- # Spec Priority screen # --
+L["Spec Priority"] = "专精优先级"
+L["Spec Type"] = "专精类型"
+L["Choose a spec type, then drag and drop to control priority."] = "选择一个专精类型，然后通过拖拽来调整优先级。"
+L["Tank"] = "坦克"
+L["Healer"] = "治疗"
+L["Caster"] = "远程法系"
+L["Hunter"] = "猎人"
+L["Melee"] = "近战"
+L["Reset this type"] = "重置此类型"
+L["Spec query note"] = [[
+请注意，专精信息需要从服务器查询，每名玩家大约需要 1–2 秒。
+\n
+这意味着在我们能够准确排序之前，可能需要等待一小段时间。
+]]
 
 -- # Auto Leader screen #
 L["Auto Leader"] = "自动队长"

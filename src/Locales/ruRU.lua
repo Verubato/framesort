@@ -12,6 +12,7 @@ L["FrameSort - %s"] = "FrameSort — %s"
 L["There are some issuse that may prevent FrameSort from working correctly."] = "Есть проблемы, которые могут помешать корректной работе FrameSort."
 L["Please go to the Health Check panel to view more details."] = "Перейдите на панель «Проверка работоспособности», чтобы узнать подробности."
 L["Role"] = "Роль"
+L["Spec"] = "Спек"
 L["Group"] = "Группа"
 L["Alphabetical"] = "По алфавиту"
 L["Arena - 2v2"] = "Арена — 2 на 2"
@@ -64,12 +65,28 @@ L["Reload"] = "Перезагрузить"
 
 -- # Ordering screen #
 L["Ordering"] = "Порядок"
-L["Specify the ordering you wish to use when sorting by role."] = "Укажите порядок при сортировке по ролям."
+L["Specify the ordering you wish to use when sorting by spec."] = "Укажите порядок, который будет использоваться при сортировке по специализации."
 L["Tanks"] = "Танки"
 L["Healers"] = "Лекари"
 L["Casters"] = "Кастеры"
 L["Hunters"] = "Охотники"
 L["Melee"] = "Ближний бой"
+
+-- # Spec Priority screen # --
+L["Spec Priority"] = "Приоритет специализаций"
+L["Spec Type"] = "Тип специализации"
+L["Choose a spec type, then drag and drop to control priority."] = "Выберите тип специализации и измените приоритет с помощью перетаскивания."
+L["Tank"] = "Танк"
+L["Healer"] = "Лекарь"
+L["Caster"] = "Заклинатель"
+L["Hunter"] = "Охотник"
+L["Melee"] = "Ближний бой"
+L["Reset this type"] = "Сбросить этот тип"
+L["Spec query note"] = [[
+Обратите внимание, что информация о специализации запрашивается с сервера и занимает 1–2 секунды на игрока.
+\n
+Это означает, что точная сортировка может быть доступна не сразу.
+]]
 
 -- # Auto Leader screen #
 L["Auto Leader"] = "Автолидер"

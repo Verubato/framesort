@@ -2,6 +2,7 @@
 local _, addon = ...
 local wow = addon.WoW.Api
 local fsEnumerable = addon.Collections.Enumerable
+local fsLog = addon.Logging.Log
 ---@class Specs
 local M = {}
 
@@ -130,6 +131,27 @@ end
 ---@return SpecInfo|nil
 function M:GetSpecInfo(specId)
     return M.SpecIdLookup[specId]
+end
+
+function M:SpecTypeKey(specType)
+    if specType == M.Type.Tank then
+        return "Tanks"
+    end
+    if specType == M.Type.Healer then
+        return "Healers"
+    end
+    if specType == M.Type.Hunter then
+        return "Hunters"
+    end
+    if specType == M.Type.Caster then
+        return "Casters"
+    end
+    if specType == M.Type.Melee then
+        return "Melee"
+    end
+
+    fsLog:Bug("Unknown spec type %d", specType)
+    return nil
 end
 
 function M:Init()

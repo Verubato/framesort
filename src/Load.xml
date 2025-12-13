@@ -85,6 +85,7 @@
     <Script file="Configuration\Defaults.lua"/>
     <Script file="Configuration\Upgrader.lua"/>
     <Script file="Configuration\Panels\Ordering.lua"/>
+    <Script file="Configuration\Panels\SpecPriority.lua"/>
     <Script file="Configuration\Panels\AutoLeader.lua"/>
     <Script file="Configuration\Panels\Sorting.lua"/>
     <Script file="Configuration\Panels\Spacing.lua"/>

@@ -7,6 +7,7 @@ L["FrameSort - %s"] = nil
 L["There are some issuse that may prevent FrameSort from working correctly."] = nil
 L["Please go to the Health Check panel to view more details."] = nil
 L["Role"] = nil
+L["Spec"] = nil
 L["Group"] = nil
 L["Alphabetical"] = nil
 L["Arena - 2v2"] = nil
@@ -59,12 +60,28 @@ L["Reload"] = nil
 
 -- # Ordering screen #
 L["Ordering"] = nil
-L["Specify the ordering you wish to use when sorting by role."] = nil
+L["Specify the ordering you wish to use when sorting by spec."] = nil
 L["Tanks"] = nil
 L["Healers"] = nil
 L["Casters"] = nil
 L["Hunters"] = nil
 L["Melee"] = nil
+
+-- # Spec Priority screen # --
+L["Spec Priority"] = nil
+L["Spec Type"] = nil
+L["Choose a spec type, then drag and drop to control priority."] = nil
+L["Tank"] = nil
+L["Healer"] = nil
+L["Caster"] = nil
+L["Hunter"] = nil
+L["Melee"] = nil
+L["Reset this type"] = nil
+L["Spec query note"] = [[
+Please note spec information is queried from the server which takes 1-2 seconds per player.
+\n
+This means it may take a short while before we can sort accurately.
+]]
 
 -- # Auto Leader screen #
 L["Auto Leader"] = nil

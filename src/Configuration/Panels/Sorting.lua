@@ -159,20 +159,20 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
     group.Text:SetText(L["Group"])
     group:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Group)
 
-    local role = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-    role:SetPoint("LEFT", group, "RIGHT", horizontalSpacing, 0)
-    role.Text:SetText(L["Role"])
-    role:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Role)
+    local spec = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
+    spec:SetPoint("LEFT", group, "RIGHT", horizontalSpacing, 0)
+    spec.Text:SetText(L["Spec"])
+    spec:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Role)
 
     local alpha = nil
     local modes = {
         [group] = fsConfig.GroupSortMode.Group,
-        [role] = fsConfig.GroupSortMode.Role,
+        [spec] = fsConfig.GroupSortMode.Role,
     }
 
     if hasAlpha then
         alpha = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-        alpha:SetPoint("LEFT", role, "RIGHT", horizontalSpacing, 0)
+        alpha:SetPoint("LEFT", spec, "RIGHT", horizontalSpacing, 0)
         alpha.Text:SetText(L["Alphabetical"])
         alpha:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Alphabetical)
 
@@ -180,7 +180,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
     end
 
     local reverse = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-    reverse:SetPoint("LEFT", alpha or role, "RIGHT", horizontalSpacing, 0)
+    reverse:SetPoint("LEFT", alpha or spec, "RIGHT", horizontalSpacing, 0)
     reverse.Text:SetText(L["Reverse"])
     reverse:SetChecked(options.Reverse)
 
@@ -219,7 +219,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         end
 
         group:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Group)
-        role:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Role)
+        spec:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Role)
 
         if hasAlpha then
             assert(alpha):SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Alphabetical)
@@ -239,7 +239,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         hidden,
         modeLabel,
         group,
-        role,
+        spec,
         alpha,
         reverse,
     }

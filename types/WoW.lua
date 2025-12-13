@@ -19,6 +19,8 @@
 ---@field CompactRaidFrameContainer_SetFlowSortFunction fun(container: table, sortFunction: fun(unit1: string, unit2: string): boolean)
 ---@field CompactRaidFrameManager_GetSetting fun(name: string): boolean
 ---@field EditModeManagerFrame table
+-- mouse
+---@field GetCursorPosition fun(): x: number, y: number
 -- settings
 ---@field SlashCmdList table
 ---@field SettingsPanel table

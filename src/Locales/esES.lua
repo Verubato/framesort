@@ -12,6 +12,7 @@ L["FrameSort - %s"] = "FrameSort - %s"
 L["There are some issuse that may prevent FrameSort from working correctly."] = "Hay algunos problemas que pueden impedir que FrameSort funcione correctamente."
 L["Please go to the Health Check panel to view more details."] = "Ve al panel de Comprobación de estado para ver más detalles."
 L["Role"] = "Rol"
+L["Spec"] = "Spec"
 L["Group"] = "Grupo"
 L["Alphabetical"] = "Alfabético"
 L["Arena - 2v2"] = "Arena: 2c2"
@@ -64,17 +65,34 @@ L["Reload"] = "Recargar"
 
 -- # Ordering screen #
 L["Ordering"] = "Orden"
-L["Specify the ordering you wish to use when sorting by role."] = "Especifica el orden que deseas usar al ordenar por rol."
+L["Specify the ordering you wish to use when sorting by spec."] = "Especifica el orden que deseas usar al ordenar por especialización."
 L["Tanks"] = "Tanques"
 L["Healers"] = "Sanadores"
 L["Casters"] = "Lanzadores"
 L["Hunters"] = "Cazadores"
 L["Melee"] = "Cuerpo a cuerpo"
 
+-- # Spec Priority screen # --
+L["Spec Priority"] = "Prioridad de especialización"
+L["Spec Type"] = "Tipo de especialización"
+L["Choose a spec type, then drag and drop to control priority."] = "Elige un tipo de especialización y usa arrastrar y soltar para controlar la prioridad."
+L["Tank"] = "Tanque"
+L["Healer"] = "Sanador"
+L["Caster"] = "Lanzador"
+L["Hunter"] = "Cazador"
+L["Melee"] = "Cuerpo a cuerpo"
+L["Reset this type"] = "Restablecer este tipo"
+L["Spec query note"] = [[
+Ten en cuenta que la información de especialización se consulta desde el servidor, lo que tarda entre 1 y 2 segundos por jugador.
+\n
+Esto significa que puede tardar un poco antes de que podamos ordenar correctamente.
+]]
+
 -- # Auto Leader screen #
 L["Auto Leader"] = "Líder automático"
 L["Auto promote healers to leader in solo shuffle."] = "Ascender automáticamente a líder a los sanadores en Solo Shuffle."
-L["Why? So healers can configure target marker icons and re-order party1/2 to their preference."] = "¿Por qué? Para que los sanadores puedan configurar los iconos de marcadores de objetivo y reordenar party1/2 a su gusto."
+L["Why? So healers can configure target marker icons and re-order party1/2 to their preference."] =
+    "¿Por qué? Para que los sanadores puedan configurar los iconos de marcadores de objetivo y reordenar party1/2 a su gusto."
 L["Enabled"] = "Activado"
 
 -- # Blizzard Keybindings screen (FrameSort's section) #
@@ -135,7 +153,8 @@ Así, apuntar a 'Marco 1' seleccionará al tanque, 'Marco 2' al sanador, 'Marco 
 L["Macros"] = "Macros"
 -- "|4macro:macros;" is a special command to pluralise the word "macro" to "macros" when %d is greater than 1
 L["FrameSort has found %d |4macro:macros; to manage."] = "FrameSort ha encontrado %d |4macro:macros; para gestionar."
-L['FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.'] = 'FrameSort actualizará dinámicamente las variables dentro de las macros que contengan la cabecera "#FrameSort".'
+L['FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.'] =
+    'FrameSort actualizará dinámicamente las variables dentro de las macros que contengan la cabecera "#FrameSort".'
 L["Below are some examples on how to use this."] = "A continuación tienes algunos ejemplos de cómo usarlo."
 
 L["Macro_Example1"] = [[#showtooltip
@@ -164,7 +183,8 @@ Simplemente menciona a '@Macro Bot' con tu pregunta en el canal #macro-bot-chann
 L["Macro Variables"] = "Variables de macro"
 L["The first DPS that's not you."] = "El primer DPS que no seas tú."
 L["Add a number to choose the Nth target, e.g., DPS2 selects the 2nd DPS."] = "Añade un número para elegir el enésimo objetivo; p. ej., DPS2 selecciona al segundo DPS."
-L["Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work."] = "Las variables no distinguen entre mayúsculas y minúsculas; 'fRaMe1', 'Dps', 'enemyhealer', etc., funcionarán igual."
+L["Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work."] =
+    "Las variables no distinguen entre mayúsculas y minúsculas; 'fRaMe1', 'Dps', 'enemyhealer', etc., funcionarán igual."
 L["Need to save on macro characters? Use abbreviations to shorten them:"] = "¿Necesitas ahorrar caracteres en la macro? Usa abreviaturas para acortarlas:"
 L['Use "X" to tell FrameSort to ignore an @unit selector:'] = 'Usa "X" para indicarle a FrameSort que ignore un selector @unit:'
 L["Skip_Example"] = [[
@@ -247,7 +267,8 @@ L["Disable the 'Keep Groups Together' raid profile setting."] = "Desactiva el aj
 L["Only using Blizzard frames with Traditional mode"] = "Usando solo marcos de Blizzard con el modo Tradicional"
 L["Traditional mode can't sort your other frame addons: '%s'"] = "El modo Tradicional no puede ordenar tus otros addons de marcos: '%s'"
 L["Using Secure sorting mode when spacing is being used"] = "Usando el modo de ordenación Seguro cuando se está usando espaciado"
-L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method"] = "El modo Tradicional no puede aplicar espaciado; plantéate quitar el espaciado o usar el método de ordenación Seguro"
+L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method"] =
+    "El modo Tradicional no puede aplicar espaciado; plantéate quitar el espaciado o usar el método de ordenación Seguro"
 L["Blizzard sorting functions not tampered with"] = "Funciones de ordenación de Blizzard sin modificar"
 L['"%s" may cause conflicts, consider disabling it'] = '"%s" puede causar conflictos; plantéate desactivarlo'
 L["No conflicting addons"] = "No hay addons en conflicto"

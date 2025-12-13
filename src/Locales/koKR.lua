@@ -12,6 +12,7 @@ L["FrameSort - %s"] = "FrameSort - %s"
 L["There are some issuse that may prevent FrameSort from working correctly."] = "FrameSort가 제대로 작동하지 못하게 할 수 있는 몇 가지 문제가 있습니다."
 L["Please go to the Health Check panel to view more details."] = "자세한 내용은 상태 점검 패널에서 확인하세요."
 L["Role"] = "역할"
+L["Spec"] = "전문화"
 L["Group"] = "그룹"
 L["Alphabetical"] = "알파벳순"
 L["Arena - 2v2"] = "투기장 - 2대2"
@@ -63,13 +64,29 @@ L["Please reload after changing these settings."] = "이 설정을 변경한 후
 L["Reload"] = "리로드"
 
 -- # Ordering screen #
-L["Ordering"] = "정렬 순서"
-L["Specify the ordering you wish to use when sorting by role."] = "역할 기준으로 정렬할 때 사용할 순서를 지정하세요."
+L["Ordering"] = "정렬"
+L["Specify the ordering you wish to use when sorting by spec."] = "전문화 기준으로 정렬할 때 사용할 순서를 지정하세요."
 L["Tanks"] = "탱커"
 L["Healers"] = "힐러"
 L["Casters"] = "원거리 캐스터"
 L["Hunters"] = "사냥꾼"
 L["Melee"] = "근접"
+
+-- # Spec Priority screen # --
+L["Spec Priority"] = "전문화 우선순위"
+L["Spec Type"] = "전문화 유형"
+L["Choose a spec type, then drag and drop to control priority."] = "전문화 유형을 선택한 후 드래그 앤 드롭으로 우선순위를 조정하세요."
+L["Tank"] = "방어 전담"
+L["Healer"] = "치유 전담"
+L["Caster"] = "원거리 주문"
+L["Hunter"] = "사냥꾼"
+L["Melee"] = "근접 전투"
+L["Reset this type"] = "이 유형 초기화"
+L["Spec query note"] = [[
+전문화 정보는 서버에서 조회되며, 플레이어 한 명당 1~2초가 소요됩니다.
+\n
+이로 인해 정확한 정렬이 가능해지기까지 잠시 시간이 걸릴 수 있습니다.
+]]
 
 -- # Auto Leader screen #
 L["Auto Leader"] = "자동 파티장"
