@@ -270,7 +270,7 @@ local function CompareAlphabetical(leftToken, rightToken, meta)
     return CompareGroup(leftToken, rightToken, meta)
 end
 
-local function CompareRole(leftToken, rightToken, meta)
+local function CompareSpec(leftToken, rightToken, meta)
     local leftMeta, rightMeta = meta[leftToken], meta[rightToken]
     local leftRole, rightRole = nil, nil
     local leftSpec, rightSpec = nil, nil
@@ -405,7 +405,7 @@ local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, rev
     if groupSortMode == fsConfig.GroupSortMode.Group then
         return CompareGroup(leftToken, rightToken, meta)
     elseif groupSortMode == fsConfig.GroupSortMode.Role then
-        return CompareRole(leftToken, rightToken, meta)
+        return CompareSpec(leftToken, rightToken, meta)
     elseif groupSortMode == fsConfig.GroupSortMode.Alphabetical then
         return CompareAlphabetical(leftToken, rightToken, meta)
     end
@@ -454,7 +454,7 @@ local function EnemyCompare(leftToken, rightToken, groupSortMode, reverse, meta)
     if groupSortMode == fsConfig.GroupSortMode.Group then
         return CompareGroup(leftToken, rightToken, meta)
     elseif groupSortMode == fsConfig.GroupSortMode.Role then
-        return CompareRole(leftToken, rightToken, meta)
+        return CompareSpec(leftToken, rightToken, meta)
     end
 
     return leftToken < rightToken
