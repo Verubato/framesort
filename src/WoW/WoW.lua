@@ -6,6 +6,7 @@ local wow = {
     -- fields
     C_PvP = C_PvP,
     C_Map = C_Map,
+    RAID_CLASS_COLORS = RAID_CLASS_COLORS,
 
     -- constants
     MAX_RAID_MEMBERS = MAX_RAID_MEMBERS or 40,
