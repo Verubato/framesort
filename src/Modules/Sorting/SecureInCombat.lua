@@ -967,6 +967,7 @@ secureMethods["TrySortContainerGroups"] = [[
     if not run:RunAttribute("ExtractUnitFrames", "UngroupedChildren", "UngroupedFrames", container.VisibleOnly) then
         UngroupedChildren = nil
         UngroupedFrames = nil
+        GroupSpacing = nil
         return false
     end
 

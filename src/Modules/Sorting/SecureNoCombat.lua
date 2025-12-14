@@ -121,6 +121,9 @@ local function ApplySpacing(frames, spacing, pointsByFrame)
         end)
         :ToTable()
 
+    local horizontalSpacing = spacing.Horizontal or 0
+    local verticalSpacing = spacing.Vertical or 0
+
     local yDelta = 0
     for i = 2, #orderedTopLeft do
         local frame = orderedTopLeft[i]
@@ -130,7 +133,7 @@ local function ApplySpacing(frames, spacing, pointsByFrame)
 
         if sameColumn then
             local existingSpace = previous:GetBottom() - frame:GetTop()
-            yDelta = yDelta - (existingSpace - spacing.Vertical)
+            yDelta = yDelta - (existingSpace - verticalSpacing)
             point.Top = point.Top - yDelta
         end
     end
@@ -151,7 +154,7 @@ local function ApplySpacing(frames, spacing, pointsByFrame)
 
         if sameRow then
             local existingSpace = previous:GetRight() - frame:GetLeft()
-            xDelta = xDelta + (existingSpace + spacing.Horizontal)
+            xDelta = xDelta + (existingSpace + horizontalSpacing)
             point.Left = point.Left + xDelta
         end
     end
@@ -529,7 +532,7 @@ local function TrySortContainerGroups(container)
     local sorted = false
     local groups = fsFrame:ExtractGroups(container.Frame, container.VisibleOnly)
 
-    if #groups <= 1 then
+    if #groups == 0 then
         return false
     end
 
@@ -636,7 +639,7 @@ local function ClearSorting(providers, friendlyEnabled, enemyEnabled)
         fsLog:Debug("Cleared sorting on container %s.", container.Frame:GetName() or "")
     end
 
-    return #nameListContainers >  0
+    return #nameListContainers > 0
 end
 
 ---@param provider FrameProvider?
