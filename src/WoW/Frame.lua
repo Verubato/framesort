@@ -93,6 +93,10 @@ function M:ToFrameChain(frames)
         end
     end
 
+    if not root then
+        return invalid
+    end
+
     -- assert we have a complete chain
     local count = 0
     local current = root
@@ -105,8 +109,6 @@ function M:ToFrameChain(frames)
     if count ~= #frames then
         return invalid
     end
-
-    assert(root ~= nil)
 
     root.Valid = true
     return root
