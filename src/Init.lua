@@ -8,6 +8,7 @@ function addon:InitLocale()
     local function DefaultIndex(_, key)
         -- if there is no translation specified, then use the the key itself
         local locale = wow.GetLocale()
+
         if locale ~= "enUS" then
             fsLog:Warning("Missing translation for key '%s' and locale '%s'", key, locale)
         end
@@ -23,8 +24,16 @@ function addon:InitDB()
     FrameSortDB = FrameSortDB or {}
     FrameSortDB.Options = FrameSortDB.Options or wow.CopyTable(addon.Configuration.Defaults)
 
+    local success = addon.Configuration.Upgrader:UpgradeOptions(FrameSortDB.Options)
+
+    if not success then
+        fsLog:Critical("Saved variables are corrupt, resetting to default settings.")
+
+        FrameSortDB = {}
+        FrameSortDB.Options = wow.CopyTable(addon.Configuration.Defaults)
+    end
+
     addon.DB = FrameSortDB
-    addon.Configuration.Upgrader:UpgradeOptions(addon.DB.Options)
 end
 
 ---Initialises the addon.
