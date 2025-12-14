@@ -30,21 +30,31 @@ local function IsSafeAddon(name)
         or name == "CompactRaidFrame"
 end
 
-local function SortingFunctionsTampered()
+local function CheckSortingFunctionsTampered()
     local functions = {
         "CRFSort_Group",
         "CRFSort_Role",
         "CRFSort_Alphabetical",
     }
 
+    local isTampered, tamperedAddonName = nil, nil
+
     for _, f in ipairs(functions) do
         local issecure, taintedAddon = wow.issecurevariable(f)
+
         if not issecure and not IsSafeAddon(taintedAddon) then
-            return AddonFriendlyName(taintedAddon)
+            isTampered = true
+            tamperedAddonName = AddonFriendlyName(taintedAddon)
+            break
         end
     end
 
-    return nil
+    return {
+        Applicable = addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Traditional,
+        Passed = not isTampered,
+        Description = L["Blizzard sorting functions not tampered with"],
+        Help = string.format(L['"%s" may cause conflicts, consider disabling it'], tamperedAddonName or L["(unknown)"]),
+    }
 end
 
 local function ConflictingAddons()
@@ -82,6 +92,17 @@ local function ConflictingAddons()
     end
 
     return nil
+end
+
+local function CheckConflictingAddons()
+    local conflictingAddon = ConflictingAddons()
+
+    return {
+        Applicable = true,
+        Passed = conflictingAddon == nil,
+        Description = L["No conflicting addons"],
+        Help = string.format(L['"%s" may cause conflicts, consider disabling it'], conflictingAddon or L["(unknown)"]),
+    }
 end
 
 local function CanSeeFrames()
@@ -124,17 +145,55 @@ local function CanSeeFrames()
     return false
 end
 
-local function OnlyUsingBlizzard()
+local function CheckCanSeeFrames()
+    local allProviderNames = fsEnumerable
+        :From(fsProviders.All)
+        :Map(function(provider)
+            return provider:Name()
+        end)
+        :ToTable()
+
+    local allProvidersString = wow.strjoin(", ", allProviderNames)
+
+    return {
+        Applicable = wow.IsInGroup(),
+        Passed = CanSeeFrames(),
+        Description = L["Can detect frames"],
+        Help = string.format(L["FrameSort currently supports frames from these addons: %s"], allProvidersString),
+    }
+end
+
+local function CheckOnlyUsingBlizzard()
+    local anyOtherProviderEnabled = false
+
     for _, provider in pairs(fsProviders.All) do
         if provider ~= fsProviders.Blizzard and provider:Enabled() then
-            return false
+            anyOtherProviderEnabled = true
+            break
         end
     end
 
-    return fsProviders.Blizzard:Enabled()
+    local enabledNonBlizzardNames = fsEnumerable
+        :From(fsProviders:Enabled())
+        :Where(function(p)
+            return p ~= fsProviders.Blizzard
+        end)
+        :Map(function(provider)
+            return provider:Name()
+        end)
+        :ToTable()
+
+    local enabledNonBlizzardString = wow.strjoin(", ", enabledNonBlizzardNames)
+
+    return {
+        Applicable = addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Traditional,
+        Passed = not anyOtherProviderEnabled and fsProviders.Blizzard:Enabled(),
+        Description = L["Only using Blizzard frames with Traditional mode"],
+        Help = string.format(L["Traditional mode can't sort your other frame addons: '%s'"], enabledNonBlizzardString),
+    }
 end
 
-local function UsingSpacing()
+local function CheckUsingSpacing()
     local options = addon.DB.Options
     local spacings = {}
 
@@ -150,32 +209,55 @@ local function UsingSpacing()
         spacings[#spacings + 1] = options.Spacing.EnemyArena
     end
 
-    return fsEnumerable:From(spacings):Any(function(spacing)
+    local usingSpacing = fsEnumerable:From(spacings):Any(function(spacing)
         return spacing.Vertical ~= 0 or spacing.Horizontal ~= 0
     end)
+
+    return {
+        Applicable = true,
+        Passed = not usingSpacing or addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Secure,
+        Description = L["Using Secure sorting mode when spacing is being used"],
+        Help = L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method"],
+    }
 end
 
-local function IsUsingRaidStyleFrames()
+local function CheckUsingRaidStyleFrames()
+    local usingRaidStyle = false
+
     if wow.HasEditMode() then
-        return wow.EditModeManagerFrame:UseRaidStylePartyFrames()
+        usingRaidStyle = wow.EditModeManagerFrame:UseRaidStylePartyFrames()
+    elseif CUF_CVar and CUF_CVar.GetCVarBool then
+        -- for wotlk private
+        usingRaidStyle = CUF_CVar:GetCVarBool("useCompactPartyFrames") or false
+    else
+        usingRaidStyle = wow.GetCVarBool("useCompactPartyFrames") or false
     end
 
-    -- for wotlk private
-    if CUF_CVar and CUF_CVar.GetCVarBool then
-        return CUF_CVar:GetCVarBool("useCompactPartyFrames")
-    end
-
-    return wow.GetCVarBool("useCompactPartyFrames")
+    return {
+        Applicable = true,
+        Passed = usingRaidStyle,
+        Description = L["Using Raid-Style Party Frames"],
+        Help = L["Please enable 'Use Raid-Style Party Frames' in the Blizzard settings"],
+    }
 end
 
-local function IsRaidGrouped()
+local function CheckKeepGroupTogether()
+    local keepGroupTogether = false
+
     if wow.HasEditMode() then
         local raidGroupDisplayType =
             wow.EditModeManagerFrame:GetSettingValue(wow.Enum.EditModeSystem.UnitFrame, wow.Enum.EditModeUnitFrameSystemIndices.Raid, wow.Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
-        return raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsVertical or raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsHorizontal
+        keepGroupTogether = raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsVertical or raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsHorizontal
+    else
+        keepGroupTogether = wow.CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
     end
 
-    return wow.CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
+    return {
+        Applicable = addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Traditional,
+        Passed = not keepGroupTogether,
+        Description = L["Keep Groups Together setting disabled"],
+        Help = wow.HasEditMode() and L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"] or L["Disable the 'Keep Groups Together' raid profile setting"],
+    }
 end
 
 local function CheckMainTankAssist()
@@ -215,76 +297,14 @@ end
 ---@return boolean healthy,HealthCheckResult[] results
 function M:IsHealthy()
     local results = {}
-    local allProviderNames = fsEnumerable
-        :From(fsProviders.All)
-        :Map(function(provider)
-            return provider:Name()
-        end)
-        :ToTable()
-    local enabledNonBlizzardNames = fsEnumerable
-        :From(fsProviders:Enabled())
-        :Where(function(p)
-            return p ~= fsProviders.Blizzard
-        end)
-        :Map(function(provider)
-            return provider:Name()
-        end)
-        :ToTable()
 
-    local allProvidersString = wow.strjoin(", ", allProviderNames)
-    local enabledNonBlizzardString = wow.strjoin(", ", enabledNonBlizzardNames)
-
-    results[#results + 1] = {
-        Applicable = true,
-        Passed = CanSeeFrames(),
-        Description = L["Can detect frames"],
-        Help = string.format(L["FrameSort currently supports frames from these addons: %s"], allProvidersString),
-    }
-
-    results[#results + 1] = {
-        Applicable = true,
-        Passed = IsUsingRaidStyleFrames(),
-        Description = L["Using Raid-Style Party Frames"],
-        Help = L["Please enable 'Use Raid-Style Party Frames' in the Blizzard settings"],
-    }
-
-    results[#results + 1] = {
-        Applicable = addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Traditional,
-        Passed = not IsRaidGrouped(),
-        Description = L["Keep Groups Together setting disabled"],
-        Help = wow.HasEditMode() and L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"] or L["Disable the 'Keep Groups Together' raid profile setting"],
-    }
-
-    results[#results + 1] = {
-        Applicable = addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Traditional,
-        Passed = OnlyUsingBlizzard(),
-        Description = L["Only using Blizzard frames with Traditional mode"],
-        Help = string.format(L["Traditional mode can't sort your other frame addons: '%s'"], enabledNonBlizzardString),
-    }
-
-    results[#results + 1] = {
-        Applicable = true,
-        Passed = not UsingSpacing() or addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Secure,
-        Description = L["Using Secure sorting mode when spacing is being used"],
-        Help = L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method"],
-    }
-
-    local conflictingSorter = SortingFunctionsTampered()
-    results[#results + 1] = {
-        Applicable = addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Traditional,
-        Passed = conflictingSorter == nil,
-        Description = L["Blizzard sorting functions not tampered with"],
-        Help = string.format(L['"%s" may cause conflicts, consider disabling it'], conflictingSorter or L["(unknown)"]),
-    }
-
-    local conflictingAddon = ConflictingAddons()
-    results[#results + 1] = {
-        Applicable = true,
-        Passed = conflictingAddon == nil,
-        Description = L["No conflicting addons"],
-        Help = string.format(L['"%s" may cause conflicts, consider disabling it'], conflictingAddon or L["(unknown)"]),
-    }
-
+    results[#results + 1] = CheckCanSeeFrames()
+    results[#results + 1] = CheckUsingRaidStyleFrames()
+    results[#results + 1] = CheckKeepGroupTogether()
+    results[#results + 1] = CheckOnlyUsingBlizzard()
+    results[#results + 1] = CheckUsingSpacing()
+    results[#results + 1] = CheckSortingFunctionsTampered()
+    results[#results + 1] = CheckConflictingAddons()
     results[#results + 1] = CheckMainTankAssist()
     results[#results + 1] = CheckCell()
 
