@@ -33,7 +33,9 @@ function M:test_upgrade_options_version2()
         Version = 2,
     }
 
-    upgrader:UpgradeToVersion2(options)
+    local success = upgrader:UpgradeToVersion2(options)
+
+    assertEquals(success, true)
     assertEquals(options, expected)
 end
 
@@ -73,7 +75,9 @@ function M:test_upgrade_options_version3()
         Version = 3,
     }
 
-    upgrader:UpgradeToVersion3(options)
+    local success = upgrader:UpgradeToVersion3(options)
+
+    assertEquals(success, true)
     assertEquals(options, expected)
 end
 
@@ -118,7 +122,9 @@ function M:test_upgrade_options_version4()
         Version = 4,
     }
 
-    upgrader:UpgradeToVersion4(options)
+    local success = upgrader:UpgradeToVersion4(options)
+
+    assertEquals(success, true)
     assertEquals(options, expected)
 end
 
@@ -177,7 +183,9 @@ function M:test_upgrade_options_version5()
         Version = 5,
     }
 
-    upgrader:UpgradeToVersion5(options)
+    local success = upgrader:UpgradeToVersion5(options)
+
+    assertEquals(success, true)
     assertEquals(options, expected)
 end
 
@@ -254,7 +262,9 @@ function M:test_upgrade_options_version6()
         Version = 6,
     }
 
-    upgrader:UpgradeToVersion6(options)
+    local success = upgrader:UpgradeToVersion6(options)
+
+    assertEquals(success, true)
     assertEquals(options, expected)
 end
 
@@ -345,7 +355,9 @@ function M:test_upgrade_options_version7()
         Version = 7,
     }
 
-    upgrader:UpgradeToVersion7(options)
+    local success = upgrader:UpgradeToVersion7(options)
+
+    assertEquals(success, true)
     assertEquals(options, expected)
 end
 
@@ -440,7 +452,9 @@ function M:test_upgrade_options_version8()
         Version = 8,
     }
 
-    upgrader:UpgradeToVersion8(options)
+    local success = upgrader:UpgradeToVersion8(options)
+
+    assertEquals(success, true)
     assertEquals(options, expected)
 end
 
@@ -541,7 +555,9 @@ function M:test_upgrade_options_version9()
         Version = 9,
     }
 
-    upgrader:UpgradeToVersion9(options)
+    local success = upgrader:UpgradeToVersion9(options)
+
+    assertEquals(success, true)
     assertEquals(options, expected)
 end
 
@@ -653,7 +669,9 @@ function M:test_upgrade_options_version10()
         Version = 10,
     }
 
-    upgrader:UpgradeToVersion10(options)
+    local success = upgrader:UpgradeToVersion10(options)
+
+    assertEquals(success, true)
     assertEquals(options, expected)
 end
 
@@ -762,7 +780,9 @@ function M:test_upgrade_options_version11()
         Version = 11,
     }
 
-    upgrader:UpgradeToVersion11(options)
+    local success = upgrader:UpgradeToVersion11(options)
+
+    assertEquals(success, true)
     assertEquals(options, expected)
 end
 
@@ -882,7 +902,9 @@ function M:test_upgrade_options_version12()
         Version = 12,
     }
 
-    upgrader:UpgradeToVersion12(options)
+    local success = upgrader:UpgradeToVersion12(options)
+
+    assertEquals(success, true)
     assertEquals(options, expected)
 end
 
@@ -1004,7 +1026,9 @@ function M:test_upgrade_options_version13()
         Version = 13,
     }
 
-    upgrader:UpgradeToVersion13(options)
+    local success = upgrader:UpgradeToVersion13(options)
+
+    assertEquals(success, true)
     assertEquals(options, expected)
 end
 
@@ -1123,7 +1147,9 @@ function M:test_upgrade_options_version14()
         Version = 14,
     }
 
-    upgrader:UpgradeToVersion14(options)
+    local success = upgrader:UpgradeToVersion14(options)
+
+    assertEquals(success, true)
     assertEquals(options, expected)
 end
 
@@ -1242,7 +1268,9 @@ function M:test_upgrade_options_version15()
         Version = 15,
     }
 
-    upgrader:UpgradeToVersion15(options)
+    local success = upgrader:UpgradeToVersion15(options)
+
+    assertEquals(success, true)
     assertEquals(options, expected)
 end
 
@@ -1364,7 +1392,9 @@ function M:test_upgrade_options_version16()
         Version = 16,
     }
 
-    upgrader:UpgradeToVersion16(options)
+    local success = upgrader:UpgradeToVersion16(options)
+
+    assertEquals(success, true)
     assertEquals(options, expected)
 end
 
@@ -1483,7 +1513,9 @@ function M:test_upgrade_options_version17()
         Version = 17,
     }
 
-    upgrader:UpgradeToVersion17(options)
+    local success = upgrader:UpgradeToVersion17(options)
+
+    assertEquals(success, true)
     assertEquals(options, expected)
 end
 
@@ -1597,7 +1629,9 @@ function M:test_upgrade_options_version18()
         Version = 18,
     }
 
-    upgrader:UpgradeToVersion18(options)
+    local success = upgrader:UpgradeToVersion18(options)
+
+    assertEquals(success, true)
     assertEquals(options, expected)
 end
 
@@ -1718,7 +1752,9 @@ function M:test_upgrade_options_version19()
         Version = 19,
     }
 
-    upgrader:UpgradeToVersion19(options)
+    local success = upgrader:UpgradeToVersion19(options)
+
+    assertEquals(success, true)
     assertEquals(options, expected)
 end
 
@@ -1850,7 +1886,9 @@ function M:test_upgrade_options_version20()
         Version = 20,
     }
 
-    upgrader:UpgradeToVersion20(options)
+    local success = upgrader:UpgradeToVersion20(options)
+
+    assertEquals(success, true)
     assertEquals(options, expected)
 end
 
@@ -1985,7 +2023,9 @@ function M:test_upgrade_options_version21()
         Version = 21,
     }
 
-    upgrader:UpgradeToVersion21(options)
+    local success = upgrader:UpgradeToVersion21(options)
+
+    assertEquals(success, true)
     assertEquals(options, expected)
 end
 
@@ -2123,9 +2163,12 @@ function M:test_upgrade_options_version22()
         Version = 22,
     }
 
-    upgrader:UpgradeToVersion22(options)
+    local success = upgrader:UpgradeToVersion22(options)
+
+    assertEquals(success, true)
     assertEquals(options, expected)
 end
+
 function M:test_upgrade_options_version1_to_latest()
     local options = {
         PlayerSortMode = "Top",
@@ -2203,8 +2246,161 @@ function M:test_upgrade_options_version1_to_latest()
         Version = 22,
     }
 
-    upgrader:UpgradeOptions(options)
+    local success = upgrader:UpgradeOptions(options)
+
+    assertEquals(success, true)
     assertEquals(options, expected)
+end
+
+function M:test_upgrade_options_latest_to_latest_passes()
+    local options = {
+        Sorting = {
+            Ordering = {
+                Tanks = 1,
+                Healers = 2,
+                Casters = 3,
+                Hunters = 4,
+                Melee = 5,
+            },
+            SpecPriority = {
+                Tanks = { 1, 2, 3 },
+            },
+            Method = "Secure",
+            Arena = {
+                Twos = {
+                    Enabled = true,
+                    PlayerSortMode = "Top",
+                    GroupSortMode = "Group",
+                    Reverse = false,
+                },
+                Default = {
+                    Enabled = true,
+                    PlayerSortMode = "Top",
+                    GroupSortMode = "Group",
+                    Reverse = false,
+                },
+            },
+            EnemyArena = {
+                Enabled = false,
+                GroupSortMode = "Group",
+                Reverse = false,
+            },
+            Dungeon = {
+                Enabled = true,
+                PlayerSortMode = "Top",
+                GroupSortMode = "Group",
+                Reverse = false,
+            },
+            World = {
+                Enabled = true,
+                PlayerSortMode = "Top",
+                GroupSortMode = "Group",
+                Reverse = false,
+            },
+            Raid = {
+                Enabled = false,
+                PlayerSortMode = "Top",
+                GroupSortMode = "Role",
+                Reverse = false,
+            },
+        },
+        AutoLeader = {
+            Enabled = true,
+        },
+        Spacing = {
+            Party = {
+                Horizontal = 0,
+                Vertical = 0,
+            },
+            Raid = {
+                Horizontal = 0,
+                Vertical = 0,
+            },
+            EnemyArena = {
+                Horizontal = 0,
+                Vertical = 0,
+            },
+        },
+        Version = 22,
+    }
+
+    local success = upgrader:UpgradeOptions(options)
+
+    assertEquals(success, true)
+end
+
+function M:test_upgrade_options_higher_than_current_fails()
+    local options = {
+        Sorting = {
+            Ordering = {
+                Tanks = 1,
+                Healers = 2,
+                Casters = 3,
+                Hunters = 4,
+                Melee = 5,
+            },
+            Method = "Secure",
+            Arena = {
+                Twos = {
+                    Enabled = true,
+                    PlayerSortMode = "Top",
+                    GroupSortMode = "Group",
+                    Reverse = false,
+                },
+                Default = {
+                    Enabled = true,
+                    PlayerSortMode = "Top",
+                    GroupSortMode = "Group",
+                    Reverse = false,
+                },
+            },
+            EnemyArena = {
+                Enabled = false,
+                GroupSortMode = "Group",
+                Reverse = false,
+            },
+            Dungeon = {
+                Enabled = true,
+                PlayerSortMode = "Top",
+                GroupSortMode = "Group",
+                Reverse = false,
+            },
+            World = {
+                Enabled = true,
+                PlayerSortMode = "Top",
+                GroupSortMode = "Group",
+                Reverse = false,
+            },
+            Raid = {
+                Enabled = false,
+                PlayerSortMode = "Top",
+                GroupSortMode = "Role",
+                Reverse = false,
+            },
+        },
+        AutoLeader = {
+            Enabled = true,
+        },
+        Spacing = {
+            Party = {
+                Horizontal = 0,
+                Vertical = 0,
+            },
+            Raid = {
+                Horizontal = 0,
+                Vertical = 0,
+            },
+            EnemyArena = {
+                Horizontal = 0,
+                Vertical = 0,
+            },
+        },
+        Version = 99,
+    }
+
+    local success = upgrader:UpgradeOptions(options)
+
+    assertEquals(success, false)
 end
 
 return M
