@@ -155,10 +155,13 @@ function M:SpecTypeKey(specType)
 end
 
 function M:Init()
-    if not wow.GetClassInfo or not wow.GetNumSpecializationsForClassID or not wow.GetSpecializationInfoForClassID then
-        -- can happen in unit tests
+    if not wow.GetClassInfo or not wow.GetSpecializationInfoForClassID then
+        -- can happen in older wow clients and unit tests
         return
     end
+
+    -- the reason we build this at runtime instead of pre-computing is because GetSpecializationInfoForClassID returns localised spec names
+    -- and so does GetBattlefieldScore() so we need the localised spec name for lookup
 
     -- currently evokers
     local maxClass = 13
@@ -169,7 +172,8 @@ function M:Init()
         if classToken then
             M.SpecNameLookup[classToken] = M.SpecNameLookup[classToken] or {}
 
-            local numSpecs = wow.GetNumSpecializationsForClassID(classID) or 0
+            -- GetNumSpecializationsForClassIDdoesn't exist in TBC, so just use 5 as a fallback
+            local numSpecs = wow.GetNumSpecializationsForClassID and wow.GetNumSpecializationsForClassID(classID) or 5
 
             for index = 1, numSpecs do
                 local specID, specName = wow.GetSpecializationInfoForClassID(classID, index)

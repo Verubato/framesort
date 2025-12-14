@@ -211,6 +211,10 @@ local wow = {
 
         return false
     end,
+    HasSpecializations = function()
+        -- specs were introduced in MoP, and prior expansions used a talent system
+        return LE_EXPANSION_LEVEL_CURRENT >= LE_EXPANSION_MISTS_OF_PANDARIA
+    end,
 
     ---@class WowEvents
     Events = {
