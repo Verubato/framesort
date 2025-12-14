@@ -616,25 +616,27 @@ local function ClearSorting(providers, friendlyEnabled, enemyEnabled)
 
             -- after exiting an arena, elvui retains the nameList property
             -- so we want to clear it if they've disabled sorting in the world
-            return container.LayoutType == fsFrame.LayoutType.NameList
+            if container.LayoutType ~= fsFrame.LayoutType.NameList then
+                return false
+            end
+
+            local hasTouched = container.Frame:GetAttribute("FrameSortHasSorted") or false
+            return hasTouched
         end)
         :ToTable()
 
     for _, container in ipairs(nameListContainers) do
+        local previousSortMethod = container.Frame:GetAttribute("FrameSortPreviousSortMethod") or "INDEX"
+        local previousGroupFilter = container.Frame:GetAttribute("FrameSortPreviousGroupFilter")
+
         container.Frame:SetAttribute("nameList", nil)
+        container.Frame:SetAttribute("sortMethod", previousSortMethod)
+        container.Frame:SetAttribute("groupFilter", previousGroupFilter)
 
-        local hasTouched = container.Frame:GetAttribute("FrameSortHasSorted") or false
-
-        if hasTouched then
-            local previousSortMethod = container.Frame:GetAttribute("FrameSortPreviousSortMethod") or "INDEX"
-            local previousGroupFilter = container.Frame:GetAttribute("FrameSortPreviousGroupFilter")
-
-            container.Frame:SetAttribute("sortMethod", previousSortMethod)
-            container.Frame:SetAttribute("groupFilter", previousGroupFilter)
-        end
+        fsLog:Debug("Cleared sorting on container %s.", container.Frame:GetName() or "")
     end
 
-    return #nameListContainers > 0
+    return #nameListContainers >  0
 end
 
 ---@param provider FrameProvider?
