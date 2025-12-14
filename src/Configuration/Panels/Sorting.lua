@@ -4,6 +4,7 @@ local wow = addon.WoW.Api
 local fsHealth = addon.Health.HealthCheck
 local fsConfig = addon.Configuration
 local fsModules = addon.Modules
+local fsInspector = addon.Modules.Inspector
 local L = addon.Locale
 local verticalSpacing = fsConfig.VerticalSpacing
 local horizontalSpacing = fsConfig.HorizontalSpacing * 1.5
@@ -161,7 +162,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
 
     local spec = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     spec:SetPoint("LEFT", group, "RIGHT", horizontalSpacing, 0)
-    spec.Text:SetText(L["Spec"])
+    spec.Text:SetText(fsInspector:CanInspect() and L["Spec"] or L["Role"])
     spec:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Role)
 
     local alpha = nil

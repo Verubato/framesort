@@ -113,6 +113,7 @@
 ---@field HasEditMode fun(): boolean
 ---@field IsInstanceBattleground fun(): boolean
 ---@field CanOpenOptionsDuringCombat fun(): boolean
+---@field HasSpecializations fun(): boolean
 
 ---@class C_PvP
 ---@field IsSoloShuffle fun(): boolean

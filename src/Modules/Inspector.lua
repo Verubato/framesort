@@ -320,10 +320,12 @@ function M:RegisterCallback(callback)
     callbacks[#callbacks + 1] = callback
 end
 
-function M:Init()
-    local canRun = (wow.CanInspect and wow.NotifyInspect and wow.ClearInspectPlayer and wow.GetInspectSpecialization) ~= nil
+function M:CanInspect()
+    return (wow.CanInspect and wow.NotifyInspect and wow.ClearInspectPlayer and wow.GetInspectSpecialization) ~= nil and wow.HasSpecializations()
+end
 
-    if not canRun then
+function M:Init()
+    if not M:CanInspect() then
         fsLog:Warning("Inspector module unable to run, spec sorting won't work.")
         return
     end

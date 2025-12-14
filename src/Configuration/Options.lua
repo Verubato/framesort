@@ -2,6 +2,7 @@
 local _, addon = ...
 local fsConfig = addon.Configuration
 local fsLog = addon.Logging.Log
+local fsInspector = addon.Modules.Inspector
 local wow = addon.WoW.Api
 local callbacks = {}
 local dropDownId = 1
@@ -191,7 +192,11 @@ function fsConfig:Init()
     local log = panels.Log:Build(panel)
 
     AddSubCategory(category, specOrdering)
-    AddSubCategory(category, specPriority)
+
+    if fsInspector:CanInspect() then
+        AddSubCategory(category, specPriority)
+    end
+
     AddSubCategory(category, sortingMethod)
 
     if wow.HasSoloShuffle() then
