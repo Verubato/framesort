@@ -267,8 +267,8 @@ L["Traditional mode can't apply spacing, consider removing spacing or using the 
 L["Blizzard sorting functions not tampered with"] = "暴雪的排序函式未被更動"
 L['"%s" may cause conflicts, consider disabling it'] = '「%s」可能導致衝突，建議停用'
 L["No conflicting addons"] = "沒有衝突的插件"
-L["Main tank and assist setting disabled"] = "主坦與助攻設定已停用"
-L["Please disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] = "請在 選項 -> 介面 -> 團隊框架 中停用「顯示主坦與助攻」選項"
+L["Main tank and assist setting disabled when spacing used"] = "使用間距時將停用主坦克與助理坦克設定"
+L["Please turn off raid spacing or disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] = "請關閉團隊間距，或在 選項 → 介面 → 團隊框架 中停用「顯示主坦克與助理坦克」選項"
 
 -- # Log Screen -- #
 L["Log"] = "日誌"

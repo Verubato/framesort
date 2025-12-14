@@ -267,8 +267,8 @@ L["Traditional mode can't apply spacing, consider removing spacing or using the 
 L["Blizzard sorting functions not tampered with"] = "Функции сортировки Blizzard не изменены"
 L['"%s" may cause conflicts, consider disabling it'] = '"%s" может вызывать конфликты, рассмотрите возможность его отключения'
 L["No conflicting addons"] = "Конфликтующих аддонов нет"
-L["Main tank and assist setting disabled"] = "Настройка «Главный танк и помощник» отключена"
-L["Please disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] = "Отключите опцию 'Display Main Tank and Assist' в Опции -> Интерфейс -> Рамки рейда"
+L["Main tank and assist setting disabled when spacing used"] = "Настройки главного танка и помощника отключаются при использовании интервалов"
+L["Please turn off raid spacing or disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] = "Пожалуйста, отключите интервалы рейда или отключите параметр «Отображать главного танка и помощника» в меню Настройки → Интерфейс → Рейдовые фреймы"
 
 -- # Log Screen -- #
 L["Log"] = "Журнал"
