@@ -19,7 +19,6 @@ function M:setup()
         return left == right
     end
     addon.WoW.Api.IsInInstance = function()
-        assert("wtf")
         return true, "arena"
     end
 end
