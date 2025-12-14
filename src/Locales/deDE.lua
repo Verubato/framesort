@@ -269,8 +269,8 @@ L["Traditional mode can't apply spacing, consider removing spacing or using the 
 L["Blizzard sorting functions not tampered with"] = "Blizzard-Sortierfunktionen wurden nicht verändert"
 L['"%s" may cause conflicts, consider disabling it'] = '"%s" kann Konflikte verursachen; deaktiviere es ggf.'
 L["No conflicting addons"] = "Keine in Konflikt stehenden Addons"
-L["Main tank and assist setting disabled"] = "Einstellung 'Main Tank and Assist' deaktiviert"
-L["Please disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] = "Bitte deaktiviere die Option 'Display Main Tank and Assist' unter Optionen -> Interface -> Schlachtzugsframes"
+L["Main tank and assist setting disabled when spacing used"] = "Haupttank- und Assistenzanzeige wird deaktiviert, wenn Abstände verwendet werden"
+L["Please turn off raid spacing or disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] = "Bitte deaktiviere den Schlachtzugsabstand oder schalte die Option „Haupttank und Assistent anzeigen“ unter Optionen → Interface → Schlachtzugsfenster aus"
 
 -- # Log Screen -- #
 L["Log"] = "Protokoll"

@@ -178,8 +178,17 @@ local function IsRaidGrouped()
     return wow.CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
 end
 
-local function IsMainTankAssistEnabled()
-    return wow.GetCVarBool("raidOptionDisplayMainTankAndAssist")
+local function CheckMainTankAssist()
+    local raidSpacing = addon.DB.Options.Spacing.Raid
+    local mainTankAndAssist = wow.GetCVarBool("raidOptionDisplayMainTankAndAssist")
+    local usingRaidSpacing = raidSpacing and ((raidSpacing.Vertical and raidSpacing.Vertical > 0) or (raidSpacing.Horizontal and raidSpacing.Horizontal > 0))
+
+    return {
+        Applicable = usingRaidSpacing and mainTankAndAssist,
+        Passed = not usingRaidSpacing or not mainTankAndAssist,
+        Description = L["Main tank and assist setting disabled when spacing used"],
+        Help = L["Please turn off raid spacing or disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"],
+    }
 end
 
 local function CheckCell()
@@ -276,14 +285,7 @@ function M:IsHealthy()
         Help = string.format(L['"%s" may cause conflicts, consider disabling it'], conflictingAddon or L["(unknown)"]),
     }
 
-    local mainTankAndAssist = IsMainTankAssistEnabled()
-    results[#results + 1] = {
-        Applicable = wow.IsInRaid(),
-        Passed = not mainTankAndAssist,
-        Description = L["Main tank and assist setting disabled"],
-        Help = L["Please disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"],
-    }
-
+    results[#results + 1] = CheckMainTankAssist()
     results[#results + 1] = CheckCell()
 
     local healthy = fsEnumerable:From(results):All(function(x)

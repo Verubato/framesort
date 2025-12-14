@@ -264,8 +264,8 @@ L["Traditional mode can't apply spacing, consider removing spacing or using the 
 L["Blizzard sorting functions not tampered with"] = nil
 L['"%s" may cause conflicts, consider disabling it'] = nil
 L["No conflicting addons"] = nil
-L["Main tank and assist setting disabled"] = nil
-L["Please disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] = nil
+L["Main tank and assist setting disabled when spacing used"] = nil
+L["Please turn off raid spacing or disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] = nil
 
 -- # Log Screen -- #
 L["Log"] = nil
