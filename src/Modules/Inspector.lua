@@ -308,6 +308,20 @@ function M:ArenaUnitSpec(unit)
     return nil
 end
 
+---Manually adds a spec id entry.
+---@param unit string
+---@param specId number
+function M:Add(unit, specId)
+    local cacheEntry = EnsureCacheEntry(unit)
+
+    if not cacheEntry then
+        return
+    end
+
+    cacheEntry.SpecId = specId
+    cacheEntry.LastSeen = wow.GetTimePreciseSec()
+end
+
 function M:PurgeCache()
     local db = addon.DB
     db.SpecCache = {}
