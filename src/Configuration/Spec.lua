@@ -108,7 +108,7 @@ M.Specs = {
 M.SpecNameLookup = {}
 
 ---@type { [number]: SpecInfo }
-M.SpecIdLookup = fsEnumerable:From(M.Specs):ToLookup(function(item)
+M.SpecIdLookup = fsEnumerable:From(M.Specs):ToDictionary(function(item)
     return item.SpecId
 end, function(item)
     return item

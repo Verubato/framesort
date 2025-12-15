@@ -30,7 +30,7 @@ end
 
 ---@return { [string]: number } roleOrderLookup
 ---@return { [number]: number } specOrderLookup
----@return { [number]: number } classOrderLookup
+---@return { [number]: number } classTypeOrderLookup
 local function Ordering()
     local config = addon.DB.Options.Sorting.Ordering
     local currentSnapshot = SnapshotOrderingConfig(config)
@@ -84,28 +84,34 @@ local function Ordering()
         end
     end
 
-    local specLookup = specOrdering:ToLookup(function(item, _)
+    local specLookup = specOrdering:ToDictionary(function(item, _)
         return item
     end, function(_, index)
         return index
     end)
 
-    local classLookup = fsEnumerable:From(specs.Specs):ToLookup(function(item)
+    local classLookup = fsEnumerable:From(specs.Specs):ToDictionary(function(item)
         return item.ClassId
-    end, function(item)
+    end, function(item, existingValue)
+        local newValue = 0
+
         if item.Type == specs.Type.Tank then
-            return config.Tanks
+            newValue = config.Tanks
         elseif item.Type == specs.Type.Healer then
-            return config.Healers
+            newValue = config.Healers
         elseif item.Type == specs.Type.Hunter then
-            return config.Hunters
+            newValue = config.Hunters
         elseif item.Type == specs.Type.Caster then
-            return config.Casters
+            newValue = config.Casters
         elseif item.Type == specs.Type.Melee then
-            return config.Melee
+            newValue = config.Melee
         else
-            return 99
+            newValue = 99
         end
+
+        -- if there's an existing value then use the minimum of the two
+        -- e.g. if they have tanks set to 1, and we're looking at a druid which can be tank/healer/dps, then prefer the tank value
+        return math.min(newValue, existingValue or 99)
     end)
 
     cachedConfigSnapshot = currentSnapshot
@@ -119,13 +125,13 @@ end
 local function PrecomputeGlobalMetadata()
     local meta = {}
     local start = wow.GetTimePreciseSec()
-    local roleOrderLookup, specOrderLookup, classOrderLookup = Ordering()
+    local roleOrderLookup, specOrderLookup, classTypeOrderLookup = Ordering()
 
     meta.InRaid = wow.IsInRaid()
     meta.UnitNumberIndex = meta.InRaid and 5 or 6
     meta.RoleOrderLookup = roleOrderLookup
     meta.SpecOrderLookup = specOrderLookup
-    meta.ClassOrderLookup = classOrderLookup
+    meta.ClassTypeOrderLookup = classTypeOrderLookup
 
     if not wow.GetArenaOpponentSpec and not warnedAbout["GetArenaOpponentSpec"] then
         fsLog:Error("Your wow client is missing the GetArenaOpponentSpec API.")
@@ -220,7 +226,7 @@ local function PrecomputeMetadata(units)
     return meta
 end
 
-local function RoleAndClassValue(role, class, meta)
+local function RoleAndClassTypeOrder(role, class, meta)
     local roleOrder = meta.RoleOrderLookup[role]
 
     if roleOrder then
@@ -228,8 +234,8 @@ local function RoleAndClassValue(role, class, meta)
     end
 
     if class then
-        local classOrder = meta.ClassOrderLookup[class]
-        return classOrder
+        local order = meta.ClassTypeOrderLookup[class]
+        return order
     end
 
     return nil
@@ -301,8 +307,8 @@ local function CompareSpec(leftToken, rightToken, meta)
 
     -- check their role + class combination
     if leftRole and rightRole then
-        local leftRoleOrder = RoleAndClassValue(leftRole, leftClass, meta)
-        local rightRoleOrder = RoleAndClassValue(rightRole, rightClass, meta)
+        local leftRoleOrder = RoleAndClassTypeOrder(leftRole, leftClass, meta)
+        local rightRoleOrder = RoleAndClassTypeOrder(rightRole, rightClass, meta)
 
         if leftRoleOrder and rightRoleOrder and leftRoleOrder ~= rightRoleOrder then
             return leftRoleOrder < rightRoleOrder

@@ -66,7 +66,7 @@ function M:ToFrameChain(frames)
         return invalid
     end
 
-    local nodesByFrame = fsEnumerable:From(frames):ToLookup(function(frame)
+    local nodesByFrame = fsEnumerable:From(frames):ToDictionary(function(frame)
         return frame
     end, function(frame)
         return {
