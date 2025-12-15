@@ -5,6 +5,8 @@ local config
 local fsCompare
 ---@type Configuration
 local fsConfig
+---@type InspectorModule
+local fsInspector
 local M = {}
 
 local function GenerateUnits(count, isRaid)
@@ -29,9 +31,12 @@ end
 function M:setup()
     local addonFactory = require("TestHarness\\AddonFactory")
     addon = addonFactory:Create()
+    fsConfig = addon.Configuration
     config = addon.DB.Options.Sorting.World
     fsCompare = addon.Modules.Sorting.Comparer
-    fsConfig = addon.Configuration
+    fsInspector = addon.Modules.Inspector
+
+    fsInspector:Init()
 
     addon.DB.Options.Sorting.World.Enabled = true
 
@@ -233,6 +238,175 @@ function M:test_sort_role_melee_caster_hunter_healer_tank()
     table.sort(subject, sortFunction)
 
     assertEquals(subject, { "party1", "party4", "party3", "player", "party2" })
+end
+
+function M:test_sort_druids_of_all_roles()
+    config.PlayerSortMode = nil
+    config.GroupSortMode = fsConfig.GroupSortMode.Role
+
+    local unitToRole = {
+        ["player"] = "HEALER",
+        ["party1"] = "DAMAGER",
+        ["party2"] = "TANK",
+        ["party3"] = "DAMAGER",
+        ["party4"] = "DAMAGER",
+    }
+
+    addon.WoW.Api.UnitGroupRolesAssigned = function(unit)
+        return unitToRole[unit]
+    end
+    addon.WoW.Api.UnitClass = function(unit)
+        -- all druids
+        return "", "", 11
+    end
+    addon.WoW.Api.UnitGUID = function(unit)
+        return unit .. unit
+    end
+
+    local ordering = addon.DB.Options.Sorting.Ordering
+    ordering.Tanks = 1
+    ordering.Healers = 2
+    ordering.Hunters = 3
+    ordering.Casters = 4
+    ordering.Melee = 5
+
+    -- resto
+    fsInspector:Add("player", 105)
+
+    -- boomkin
+    fsInspector:Add("party1", 102)
+
+    -- guardian
+    fsInspector:Add("party2", 104)
+
+    -- feral
+    fsInspector:Add("party3", 103)
+
+    -- feral
+    fsInspector:Add("party4", 103)
+
+    local subject = { "player", "party1", "party2", "party3", "party4" }
+    local sortFunction = fsCompare:SortFunction(subject)
+
+    table.sort(subject, sortFunction)
+
+    assertEquals(subject, { "party2", "player", "party1", "party3", "party4" })
+end
+
+function M:test_sort_shamans_of_all_roles()
+    config.PlayerSortMode = nil
+    config.GroupSortMode = fsConfig.GroupSortMode.Role
+
+    local unitToRole = {
+        ["player"] = "HEALER",
+        ["party1"] = "DAMAGER",
+        ["party2"] = "HEALER",
+        ["party3"] = "DAMAGER",
+        ["party4"] = "DAMAGER",
+    }
+
+    addon.WoW.Api.UnitGroupRolesAssigned = function(unit)
+        return unitToRole[unit]
+    end
+    addon.WoW.Api.UnitClass = function(unit)
+        -- all shamans
+        return "", "", 7
+    end
+    addon.WoW.Api.UnitGUID = function(unit)
+        return unit .. unit
+    end
+
+    local ordering = addon.DB.Options.Sorting.Ordering
+    ordering.Tanks = 1
+    ordering.Healers = 2
+    ordering.Hunters = 3
+    ordering.Casters = 4
+    ordering.Melee = 5
+
+    -- resto
+    fsInspector:Add("player", 264)
+
+    -- ele
+    fsInspector:Add("party1", 262)
+
+    -- resto
+    fsInspector:Add("party2", 264)
+
+    -- enhance
+    fsInspector:Add("party3", 263)
+
+    -- ele
+    fsInspector:Add("party4", 262)
+
+    local subject = { "player", "party1", "party2", "party3", "party4" }
+    local sortFunction = fsCompare:SortFunction(subject)
+
+    table.sort(subject, sortFunction)
+
+    assertEquals(subject, { "party2", "player", "party1", "party4", "party3" })
+end
+
+function M:test_sort_druids_and_shamans()
+    config.PlayerSortMode = nil
+    config.GroupSortMode = fsConfig.GroupSortMode.Role
+
+    local unitToRole = {
+        ["player"] = "HEALER",
+        ["party1"] = "DAMAGER",
+        ["party2"] = "TANK",
+        ["party3"] = "HEALER",
+        ["party4"] = "DAMANGER",
+    }
+
+    local unitToClass = {
+        -- druids
+        ["player"] = 11,
+        ["party1"] = 11,
+        ["party2"] = 11,
+        -- shamans
+        ["party3"] = 7,
+        ["party4"] = 7,
+    }
+
+    addon.WoW.Api.UnitGroupRolesAssigned = function(unit)
+        return unitToRole[unit]
+    end
+    addon.WoW.Api.UnitClass = function(unit)
+        -- all shamans
+        return "", "", unitToClass[unit]
+    end
+    addon.WoW.Api.UnitGUID = function(unit)
+        return unit .. unit
+    end
+
+    local ordering = addon.DB.Options.Sorting.Ordering
+    ordering.Tanks = 1
+    ordering.Healers = 2
+    ordering.Hunters = 3
+    ordering.Casters = 4
+    ordering.Melee = 5
+
+    -- rdruid
+    fsInspector:Add("player", 105)
+
+    -- feral
+    fsInspector:Add("party1", 103)
+
+    -- guardian
+    fsInspector:Add("party2", 104)
+
+    -- rsham
+    fsInspector:Add("party3", 264)
+
+    -- enhance
+    fsInspector:Add("party4", 263)
+
+    local subject = { "player", "party1", "party2", "party3", "party4" }
+    local sortFunction = fsCompare:SortFunction(subject)
+
+    table.sort(subject, sortFunction)
+
+    assertEquals(subject, { "party2", "player", "party3", "party1", "party4" })
 end
 
 return M
