@@ -184,14 +184,14 @@ function M:test_last_indexof()
     assertEquals(fsEnumerable:From({ "a", "b", "c" }):LastIndexOf("d"), nil)
 end
 
-function M:test_tolookup()
+function M:test_todictionary()
     local array = fsEnumerable:From({
         { letter = "a", word = "apple" },
         { letter = "b", word = "banana" },
         { letter = "c", word = "carrot" },
     })
 
-    local dict = array:ToLookup(function(x)
+    local dict = array:ToDictionary(function(x)
         return x.letter
     end, function(x)
         return x.word
@@ -201,6 +201,29 @@ function M:test_tolookup()
         ["a"] = "apple",
         ["b"] = "banana",
         ["c"] = "carrot",
+    })
+end
+
+function M:test_todictionary_with_duplicates()
+    local array = fsEnumerable:From({
+        { letter = "a", word = "apple" },
+        { letter = "a", word = "artichoke" },
+        { letter = "b", word = "banana" },
+        { letter = "c", word = "carrot" },
+        { letter = "c", word = "chives" },
+        { letter = "c", word = "cinnamon" },
+    })
+
+    local dict = array:ToDictionary(function(x)
+        return x.letter
+    end, function(x)
+        return x.word
+    end)
+
+    assertEquals(dict, {
+        ["a"] = "artichoke",
+        ["b"] = "banana",
+        ["c"] = "cinnamon",
     })
 end
 

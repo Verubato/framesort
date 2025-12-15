@@ -182,7 +182,7 @@ local function SpaceGroups(frames, spacing)
             }
         end)
         :ToTable()
-    local pointsByFrame = fsEnumerable:From(points):ToLookup(function(x)
+    local pointsByFrame = fsEnumerable:From(points):ToDictionary(function(x)
         return x.Frame
     end, function(x)
         return x
@@ -230,7 +230,7 @@ local function SoftArrange(frames, spacing)
         :ToTable()
 
     if spacing then
-        local pointsByFrame = fsEnumerable:From(points):ToLookup(function(x)
+        local pointsByFrame = fsEnumerable:From(points):ToDictionary(function(x)
             return x.Frame
         end, function(x)
             return x

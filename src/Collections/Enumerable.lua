@@ -346,17 +346,18 @@ function M:Take(count)
     return M:From(iterator)
 end
 
----Evaluates the iterator function to return the results as a lookup table.
----@param valueSelector function(item: any, index: number): any
+---Evaluates the iterator function to return the results as a dictionary.
 ---@param keySelector function(item: any, index: number): any
+---@param valueSelector function(item: any, index: number, existingItem: any?): any
 ---@return table items
-function M:ToLookup(keySelector, valueSelector)
+function M:ToDictionary(keySelector, valueSelector)
     local items = self:ToTable()
     local dict = {}
 
     for index, item in ipairs(items) do
         local key = keySelector(item, index)
-        local value = valueSelector(item, index)
+        local existingItem = dict[key]
+        local value = valueSelector(item, index, existingItem)
 
         dict[key] = value
     end
