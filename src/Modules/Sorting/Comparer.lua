@@ -295,7 +295,20 @@ local function CompareSpec(leftToken, rightToken, meta)
     leftClass = leftMeta.ClassId
     rightClass = rightMeta.ClassId
 
-    -- prioritise their spec information if we have it
+    -- check their role first
+    -- we do this before checking their spec, because in some expansions spec doesn't map to role 1:1
+    -- e.g. in retail a guardian druid is always a tank, but in classic a feral druid can be tank or dps
+    -- also in SoD demo warlocks can tank, and mages can heal
+    if leftRole and rightRole then
+        local leftOrder = RoleAndClassTypeOrder(leftRole, leftClass, meta)
+        local rightOrder = RoleAndClassTypeOrder(rightRole, rightClass, meta)
+
+        if leftOrder and rightOrder and leftOrder ~= rightOrder then
+            return leftOrder < rightOrder
+        end
+    end
+
+    -- next check their spec
     if leftSpec and leftSpec > 0 and rightSpec and rightSpec > 0 and leftSpec ~= rightSpec then
         local leftSpecOrder = meta.SpecOrderLookup[leftSpec]
         local rightSpecOrder = meta.SpecOrderLookup[rightSpec]
@@ -305,17 +318,7 @@ local function CompareSpec(leftToken, rightToken, meta)
         end
     end
 
-    -- check their role + class combination
-    if leftRole and rightRole then
-        local leftRoleOrder = RoleAndClassTypeOrder(leftRole, leftClass, meta)
-        local rightRoleOrder = RoleAndClassTypeOrder(rightRole, rightClass, meta)
-
-        if leftRoleOrder and rightRoleOrder and leftRoleOrder ~= rightRoleOrder then
-            return leftRoleOrder < rightRoleOrder
-        end
-    end
-
-    -- check the class on its own
+    -- if their role and spec are the same (or we don't have spec info), fallback to class
     if leftClass and rightClass and leftClass ~= rightClass then
         return leftClass < rightClass
     end
