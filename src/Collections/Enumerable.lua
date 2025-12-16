@@ -91,6 +91,10 @@ function M:Flatten()
                 return nil
             end
 
+            if type(next) ~= "table" then
+                return nil
+            end
+
             item = next[index]
             index = index + 1
         end
