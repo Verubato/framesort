@@ -78,6 +78,11 @@ local function OnPvpStateChanged()
 end
 
 local function OnCvarUpdate(_, _, name)
+    if not name then
+        fsLog:Error("OnCvarUpdate was called with a nil name.")
+        return
+    end
+
     for _, cvar in ipairs(cvarsToUpdateContainer) do
         if name == cvar then
             fsLog:Debug("Detected cvar update for %s, requesting container update.", name)
