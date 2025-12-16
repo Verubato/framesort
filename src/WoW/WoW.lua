@@ -86,7 +86,8 @@ addon.WoW.Api = {
 
     -- group size functions
     GetNumGroupMembers = GetNumGroupMembers,
-    GetNumArenaOpponentSpecs = GetNumArenaOpponentSpecs or GetNumArenaOpponents,
+    GetNumArenaOpponentSpecs = GetNumArenaOpponentSpecs,
+    GetNumArenaOpponents = GetNumArenaOpponents,
     GetNumBattlefieldScores = GetNumBattlefieldScores,
 
     -- utility

@@ -1,6 +1,7 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
+local wowEx = addon.WoW.WowEx
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsCompare = addon.Modules.Sorting.Comparer
@@ -44,7 +45,7 @@ function M:Containers()
             GladdyButtonFrame5,
         }
 
-        local count = isArena and wow.GetNumArenaOpponentSpecs() or 5
+        local count = isArena and wowEx.ArenaOpponentsCount() or #frames
         return fsEnumerable:From(frames):Take(count):ToTable()
     end
 
