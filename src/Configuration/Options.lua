@@ -98,7 +98,9 @@ function fsConfig:Dropdown(parent, items, getValue, setSelected, getText)
             for i, value in ipairs(items) do
                 rootDescription:CreateRadio(getText and getText(value) or tostring(value), function(x)
                     return x == getValue()
-                end, setSelected, i)
+                end, function()
+                    setSelected(value)
+                end, value)
             end
         end)
 
