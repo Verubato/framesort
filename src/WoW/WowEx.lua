@@ -56,4 +56,38 @@ addon.WoW.WowEx = {
 
         return 0
     end,
+
+    ---Wraps GetArenaOpponentSpec() and returns nil instead of 0
+    ---@param id number
+    ---@return number|nil
+    GetArenaOpponentSpecSafe = function(id)
+        if not wow.GetArenaOpponentSpec then
+            return nil
+        end
+
+        local spec = wow.GetArenaOpponentSpec(id)
+
+        if not spec or spec == 0 then
+            return nil
+        end
+
+        return spec
+    end,
+
+    ---Wraps GetInspectSpecialization() and returns nil instead of 0
+    ---@param unit string
+    ---@return number|nil
+    GetInspectSpecializationSafe = function(unit)
+        if not wow.GetInspectSpecialization then
+            return nil
+        end
+
+        local spec = wow.GetInspectSpecialization(unit)
+
+        if not spec or spec == 0 then
+            return nil
+        end
+
+        return spec
+    end,
 }

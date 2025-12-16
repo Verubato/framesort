@@ -1,6 +1,7 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
+local wowEx = addon.WoW.WowEx
 local capabilities = addon.WoW.Capabilities
 local fsEnumerable = addon.Collections.Enumerable
 local fsUnit = addon.WoW.Unit
@@ -196,7 +197,7 @@ local function UnitForSelector(selector, friendlyUnits, enemyUnits)
                 return false
             end
 
-            local specId = wow.GetArenaOpponentSpec(id)
+            local specId = wowEx.GetArenaOpponentSpecSafe(id)
 
             if not specId then
                 return false
