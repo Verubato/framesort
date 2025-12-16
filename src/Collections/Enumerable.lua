@@ -20,23 +20,28 @@ function M:From(auto)
 
     if t == "function" then
         enumerable.Next = auto
-    elseif t == "table" and auto.Next and type(auto.Next) == "function" then
-        enumerable.Next = auto.Next
     elseif t == "table" then
-        local iterator, elements, index = ipairs(auto)
-        enumerable.State = {
-            Iterator = iterator,
-            Elements = elements,
-            Index = index,
-        }
-        enumerable.Next = function()
-            if #enumerable.State.Elements == 0 then
-                return nil
+        if auto.Next and type(auto.Next) == "function" then
+            -- wrap it to preserve 'self'
+            enumerable.Next = function()
+                return auto.Next(auto)
             end
+        else
+            local iterator, elements, index = ipairs(auto)
+            enumerable.State = {
+                Iterator = iterator,
+                Elements = elements,
+                Index = index,
+            }
+            enumerable.Next = function()
+                if #enumerable.State.Elements == 0 then
+                    return nil
+                end
 
-            local nextIndex, next = iterator(enumerable.State.Elements, enumerable.State.Index)
-            enumerable.State.Index = nextIndex
-            return next
+                local nextIndex, next = iterator(enumerable.State.Elements, enumerable.State.Index)
+                enumerable.State.Index = nextIndex
+                return next
+            end
         end
     else
         error(string.format("Invalid type %s", t))
@@ -338,8 +343,11 @@ function M:Take(count)
         end
 
         local next = self.Next()
-        taken = taken + 1
+        if next == nil then
+            return nil
+        end
 
+        taken = taken + 1
         return next
     end
 
