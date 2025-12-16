@@ -4,6 +4,7 @@
 ---@field C_PvP C_PvP
 ---@field C_Map C_Map
 ---@field C_Timer C_Timer
+---@field C_AddOns C_AddOns
 -- constants
 ---@field MAX_RAID_MEMBERS number
 ---@field MAX_PARTY_MEMBERS number
@@ -88,7 +89,7 @@
 ---@field RegisterUnitWatch fun(frame: table)
 ---@field UnregisterUnitWatch fun(frame: table)
 -- addon related
----@field GetAddOnEnableState fun(character: string?, addon: string): number
+---@field GetAddOnEnableState fun(addon: string, character: string?): number
 ---@field GetAddOnMetadata fun(nameOrIndex: string, field: string): string
 -- time related
 ---@field GetTimePreciseSec fun(): number
@@ -129,3 +130,6 @@
 ---@field OpenToCategory fun(category: string)
 ---@field RegisterCanvasLayoutCategory fun(frame: table, name: string)
 ---@field RegisterCanvasLayoutSubcategory fun(parentCategory: string, frame:table, name: string)
+
+---@class C_AddOns
+---@field GetAddOnEnableState fun(name: string, character: string?): number

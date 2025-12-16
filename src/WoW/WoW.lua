@@ -7,6 +7,7 @@ addon.WoW.Api = {
     C_PvP = C_PvP,
     C_Map = C_Map,
     C_Timer = C_Timer,
+    C_AddOns = C_AddOns,
 
     -- constants
     MAX_RAID_MEMBERS = MAX_RAID_MEMBERS or 40,
@@ -75,29 +76,8 @@ addon.WoW.Api = {
 
     -- state functions
     IsInInstance = IsInInstance,
-    IsInGroup = IsInGroup or function()
-        if GetNumGroupMembers then
-            return GetNumGroupMembers() > 0
-        end
-
-        if GetNumRaidMembers and GetNumRaidMembers() > 0 then
-            return true
-        end
-
-        if GetNumPartyMembers and GetNumPartyMembers() > 0 then
-            return true
-        end
-
-        return false
-    end,
-
-    IsInRaid = IsInRaid or function()
-        if GetNumRaidMembers and GetNumRaidMembers() > 0 then
-            return true
-        end
-
-        return false
-    end,
+    IsInGroup = IsInGroup,
+    IsInRaid = IsInRaid,
     InCombatLockdown = InCombatLockdown,
 
     -- group size functions
@@ -141,40 +121,19 @@ addon.WoW.Api = {
     GetRealZoneText = GetRealZoneText,
 
     -- addon related
-    GetAddOnEnableState = function(character, name)
-        -- in wotlk private 3.4.3 C_AddOns exists but C_AddOns.GetAddOnEnableState doesn't
-        if C_AddOns and C_AddOns.GetAddOnEnableState then
-            -- argument order is reversed
-            return C_AddOns.GetAddOnEnableState(name, character)
-        end
-
+    GetAddOnEnableState = C_AddOns and C_AddOns.GetAddOnEnableState or function(name, character)
         if GetAddOnEnableState then
+            -- argument order is reversed
             return GetAddOnEnableState(character, name)
         end
 
-        local getAddonInfo = C_AddOns and C_AddOns.GetAddOnInfo or GetAddOnInfo
-
-        if not getAddonInfo then
-            return 0
-        end
-
-        local _, _, _, loadable, reason, _, _ = getAddonInfo(name)
-
-        if loadable and not reason then
-            return 1
-        else
-            return 0
-        end
+        return nil
     end,
     GetAddOnMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata,
 
     -- time related
-    GetTimePreciseSec = GetTimePreciseSec or function()
-        return debugprofilestop() / 1000
-    end,
+    GetTimePreciseSec = GetTimePreciseSec,
 
     -- secrets
-    issecretvalue = issecretvalue or function()
-        return false
-    end,
+    issecretvalue = issecretvalue,
 }

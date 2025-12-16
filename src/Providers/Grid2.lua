@@ -15,7 +15,7 @@ function M:Name()
 end
 
 function M:Enabled()
-    return wow.GetAddOnEnableState(nil, "Grid2") ~= 0
+    return wow.GetAddOnEnableState("Grid2") ~= 0
 end
 
 function M:Init() end

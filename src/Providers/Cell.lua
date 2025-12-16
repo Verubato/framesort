@@ -15,7 +15,7 @@ function M:Name()
 end
 
 function M:Enabled()
-    return wow.GetAddOnEnableState(nil, "Cell") ~= 0 and Cell ~= nil
+    return wow.GetAddOnEnableState("Cell") ~= 0 and Cell ~= nil
 end
 
 function M:Init() end
