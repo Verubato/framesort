@@ -382,6 +382,14 @@ local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, rev
         local leftOwner = fsUnit:PetOwner(leftToken)
         local rightOwner = fsUnit:PetOwner(rightToken)
 
+        if not leftOwner or leftOwner == "none" then
+            return false
+        end
+
+        if not rightOwner or rightOwner == "none" then
+            return true
+        end
+
         return Compare(leftOwner, rightOwner, playerSortMode, groupSortMode, reverse, meta)
     end
 
