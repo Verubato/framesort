@@ -116,7 +116,7 @@ function M:Create()
             return false
         end,
         UnitIsPlayer = function(unit)
-            return unit == "player"
+            return not string.find(unit, "pet")
         end,
         UnitIsFriend = function(of, to)
             return not to:match("arena")
@@ -233,10 +233,6 @@ function M:Create()
 
     wow.InCombatLockdown = function()
         return wow.State.MockInCombat
-    end
-
-    wow.UnitIsPlayer = function(unit)
-        return not string.match(unit, "*pet*")
     end
 
     wow.CreateFrame = function(type, name, parent, template)
