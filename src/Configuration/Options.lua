@@ -183,6 +183,11 @@ function fsConfig:Init()
     panel:SetScrollChild(main)
 
     local category = AddCategory(panel)
+
+    if not category then
+        return
+    end
+
     local panels = fsConfig.Panels
     panels.Sorting:Build(main)
 
