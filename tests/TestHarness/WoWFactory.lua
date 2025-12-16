@@ -23,14 +23,7 @@ function M:Create()
     ---@class WowApiMock: WowApi
     local wow = {
         -- fields
-        C_PvP = {
-            IsSoloShuffle = function()
-                return false
-            end,
-            GetActiveMatchState = function()
-                return nil
-            end,
-        },
+        C_PvP = nil,
 
         -- mock fields
         State = {

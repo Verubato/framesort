@@ -167,7 +167,11 @@ local function UnitForSelector(selector, friendlyUnits, enemyUnits)
     end
 
     -- other dps
-    if type == "otherdps" or type == "od" then
+    if (type == "otherdps" or type == "od") then
+        if not capabilities.HasRoleAssignments() then
+            return "none"
+        end
+
         return fsEnumerable:From(friendlyUnits):Nth(number or 1, function(x)
             return wow.UnitGroupRolesAssigned(x) == WowRole.DPS and not wow.UnitIsUnit(x, "player")
         end) or "none"
@@ -209,6 +213,10 @@ local function UnitForSelector(selector, friendlyUnits, enemyUnits)
     local dps = type == "dps" or type == "d"
 
     if tank or healer or dps then
+        if not capabilities.HasRoleAssignments() then
+            return "none"
+        end
+    
         return fsEnumerable:From(friendlyUnits):Nth(number or 1, function(x)
             local role = wow.UnitGroupRolesAssigned(x)
             return (tank and role == WowRole.Tank) or (healer and role == WowRole.Healer) or (dps and role == WowRole.DPS)

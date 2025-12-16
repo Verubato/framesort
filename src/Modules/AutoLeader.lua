@@ -61,8 +61,16 @@ local function OnStateChanged()
     end
 end
 
-function M:Init()
+local function CanRun()
     if not capabilities.HasSoloShuffle() then
+        return false
+    end
+
+    return (wow.UnitGroupRolesAssigned and wow.UnitIsGroupLeader and wow.UnitIsUnit and wow.PromoteToLeader) ~= nil
+end
+
+function M:Init()
+    if not CanRun() then
         fsLog:Debug("Not loading AutoLeader module because this wow client doesn't have solo shuffle.")
         return
     end
@@ -78,7 +86,7 @@ function M:Run()
         return
     end
 
-    if not capabilities.HasSoloShuffle() then
+    if not CanRun() then
         return
     end
 

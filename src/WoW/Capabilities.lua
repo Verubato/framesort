@@ -57,6 +57,10 @@ function M.HasEditMode()
     return wow.EditModeManagerFrame ~= nil and wow.EditModeManagerFrame.UseRaidStylePartyFrames ~= nil and wow.EditModeManagerFrame.GetSettingValue ~= nil and wow.EventRegistry ~= nil
 end
 
+function M.HasRoleAssignments()
+    return type(wow.UnitGroupRolesAssigned) == "function"
+end
+
 function M.HasSpecializations()
     -- specs were introduced in MoP, and prior expansions used a talent system
     return LE_EXPANSION_LEVEL_CURRENT ~= nil and LE_EXPANSION_MISTS_OF_PANDARIA ~= nil and LE_EXPANSION_LEVEL_CURRENT >= LE_EXPANSION_MISTS_OF_PANDARIA
