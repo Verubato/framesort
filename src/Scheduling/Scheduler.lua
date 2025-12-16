@@ -2,6 +2,8 @@
 local _, addon = ...
 local wow = addon.WoW.Api
 local events = addon.WoW.Events
+local capabilities = addon.WoW.Capabilities
+local fsLog = addon.Logging.Log
 ---@class Scheduler: IInitialise
 local M = {}
 addon.Scheduling.Scheduler = M
@@ -43,17 +45,27 @@ local function OnEvent(_, event)
     end
 end
 
+local function After(seconds, callback)
+    if not capabilities.HasC_Timer() then
+        fsLog:Critical("WoW client missing C_Timer.")
+        callback()
+        return
+    end
+
+    wow.C_Timer.After(seconds, callback)
+end
+
 ---Invokes the callback on the next frame.
 ---@param callback fun()
 function M:RunNextFrame(callback)
-    wow.C_Timer.After(0, callback)
+    After(0, callback)
 end
 
 --- Invokes the callback after the specified number of seconds.
 ---@param callback fun()
 ---@param seconds number
 function M:RunAfter(seconds, callback)
-    wow.C_Timer.After(seconds, callback)
+    After(seconds, callback)
 end
 
 ---Invokes the callback once combat ends.

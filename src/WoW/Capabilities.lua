@@ -37,6 +37,10 @@ function M.HasC_Map()
     return type(wow.C_Map) == "table" and type(wow.C_Map.GetBestMapForUnit) == "function"
 end
 
+function M.HasC_Timer()
+    return type(wow.C_Timer) == "table" and type(wow.C_Timer.After) == "function"
+end
+
 function M.HasSoloShuffle()
     return M.HasC_PvP() and type(wow.C_PvP.IsSoloShuffle) == "function" and type(wow.Enum) == "table" and wow.Enum.PvPMatchState ~= nil
 end
