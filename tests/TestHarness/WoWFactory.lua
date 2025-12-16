@@ -226,38 +226,6 @@ function M:Create()
         GetNumBattlefieldScores = function()
             return 0
         end,
-
-        -- non-blizzard
-        HasArena = function()
-            return true
-        end,
-        HasEnemySpecSupport = function()
-            return true
-        end,
-        Has5v5 = function()
-            return false
-        end,
-        HasSoloShuffle = function()
-            return true
-        end,
-        HasDropdown = function()
-            return true
-        end,
-        HasEditMode = function()
-            return true
-        end,
-
-        Events = {
-            PLAYER_REGEN_ENABLED = "PLAYER_REGEN_ENABLED",
-            PLAYER_REGEN_DISABLED = "PLAYER_REGEN_DISABLED",
-            PLAYER_ENTERING_WORLD = "PLAYER_ENTERING_WORLD",
-            GROUP_ROSTER_UPDATE = "GROUP_ROSTER_UPDATE",
-            PLAYER_ROLES_ASSIGNED = "PLAYER_ROLES_ASSIGNED",
-            UNIT_PET = "UNIT_PET",
-            ARENA_PREP_OPPONENT_SPECIALIZATIONS = "ARENA_PREP_OPPONENT_SPECIALIZATIONS",
-            ARENA_OPPONENT_UPDATE = "ARENA_OPPONENT_UPDATE",
-            EditModeExit = "EditMode.Exit",
-        },
     }
 
     wow.EditModeManagerFrame.editModeActive = false
@@ -381,5 +349,8 @@ function M:Create()
 
     return wow
 end
+
+-- so that capabilities.HasDropdown() returns true
+WowStyle1DropdownTemplate = "asdf"
 
 return M

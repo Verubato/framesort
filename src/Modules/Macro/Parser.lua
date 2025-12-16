@@ -1,6 +1,7 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
+local capabilities = addon.WoW.Capabilities
 local fsEnumerable = addon.Collections.Enumerable
 local fsUnit = addon.WoW.Unit
 ---@class MacroParser
@@ -169,7 +170,7 @@ local function UnitForSelector(selector, friendlyUnits, enemyUnits)
 
     -- enemy arena
     if enemyTank or enemyHealer or enemyDps then
-        if not wow.HasEnemySpecSupport() then
+        if not capabilities.HasEnemySpecSupport() then
             return "none"
         end
 

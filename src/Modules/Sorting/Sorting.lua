@@ -1,6 +1,7 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
+local capabilities = addon.WoW.Capabilities
 local fsLog = addon.Logging.Log
 local fsConfig = addon.Configuration
 local callbacks = {}
@@ -28,7 +29,7 @@ function M:Run(provider)
         return
     end
 
-    if wow.HasEditMode() and wow.EditModeManagerFrame.editModeActive then
+    if capabilities.HasEditMode() and wow.EditModeManagerFrame and wow.EditModeManagerFrame.editModeActive then
         fsLog:Debug("Not sorting while edit mode active.")
         return
     end

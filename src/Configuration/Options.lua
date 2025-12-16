@@ -4,8 +4,10 @@ local fsConfig = addon.Configuration
 local fsLog = addon.Logging.Log
 local fsInspector = addon.Modules.Inspector
 local wow = addon.WoW.Api
+local capabilities = addon.WoW.Capabilities
 local callbacks = {}
 local dropDownId = 1
+local LibStub = LibStub
 
 fsConfig.VerticalSpacing = 12
 fsConfig.HorizontalSpacing = 50
@@ -90,7 +92,7 @@ function fsConfig:MultilineTextBlock(text, parent, anchor)
 end
 
 function fsConfig:Dropdown(parent, items, getValue, setSelected, getText)
-    if wow.HasDropdown() then
+    if capabilities.HasDropdown() then
         local dd = wow.CreateFrame("DropdownButton", nil, parent, "WowStyle1DropdownTemplate")
         dd:SetupMenu(function(_, rootDescription)
             for i, value in ipairs(items) do
@@ -105,7 +107,7 @@ function fsConfig:Dropdown(parent, items, getValue, setSelected, getText)
         end
 
         return dd
-    else
+    elseif LibStub then
         local libDD = LibStub:GetLibrary("LibUIDropDownMenu-4.0")
         -- needs a name to not bug out
         local dd = libDD:Create_UIDropDownMenu("FrameSortDropDown" .. dropDownId, parent)
@@ -142,6 +144,8 @@ function fsConfig:Dropdown(parent, items, getValue, setSelected, getText)
         end
 
         return dd
+    else
+        error("Failed to create dropdown menu.")
     end
 end
 
@@ -178,9 +182,9 @@ function fsConfig:Init()
     panels.Sorting:Build(main)
 
     local specOrdering = panels.SpecOrdering:Build(panel)
-    local specPriority = panels.SpecPriority:Build(panel)
+    local specPriority = fsInspector:CanInspect() and panels.SpecPriority:Build(panel)
     local sortingMethod = panels.SortingMethod:Build(panel)
-    local autoLeader = wow.HasSoloShuffle() and panels.AutoLeader:Build(panel)
+    local autoLeader = capabilities.HasSoloShuffle() and panels.AutoLeader:Build(panel)
     local keybinding = panels.Keybinding:Build(panel)
     local macro = panels.Macro:Build(panel)
     local variables = panels.MacroVariables:Build(panel)
@@ -193,13 +197,13 @@ function fsConfig:Init()
 
     AddSubCategory(category, specOrdering)
 
-    if fsInspector:CanInspect() then
+    if specPriority then
         AddSubCategory(category, specPriority)
     end
 
     AddSubCategory(category, sortingMethod)
 
-    if wow.HasSoloShuffle() then
+    if autoLeader then
         AddSubCategory(category, autoLeader)
     end
 
@@ -220,7 +224,7 @@ function fsConfig:Init()
         if wow.Settings then
             assert(category)
 
-            if wow.CanOpenOptionsDuringCombat() then
+            if capabilities.CanOpenOptionsDuringCombat() then
                 wow.Settings.OpenToCategory(category:GetID())
             else
                 fsLog:Notify("Can't do that during combat.")

@@ -1,6 +1,7 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
+local capabilities = addon.WoW.Capabilities
 local fsHealth = addon.Health.HealthCheck
 local fsConfig = addon.Configuration
 local fsModules = addon.Modules
@@ -282,14 +283,14 @@ function M:Build(panel)
     local anchor = BuiltTitle(panel)
     local config = addon.DB.Options.Sorting
 
-    if wow.HasArena() then
+    if capabilities.HasArena() then
         anchor = BuildSortModeCheckboxes(panel, anchor, L["Arena - 2v2"], config.Arena.Twos)
 
-        local otherArenaSizes = wow.Has5v5() and "3v3 & 5v5" or "3v3"
+        local otherArenaSizes = capabilities.Has5v5() and "3v3 & 5v5" or "3v3"
         anchor = BuildSortModeCheckboxes(panel, anchor, L["Arena - " .. otherArenaSizes], config.Arena.Default)
     end
 
-    if wow.HasEnemySpecSupport() then
+    if capabilities.HasEnemySpecSupport() then
         anchor = BuildSortModeCheckboxes(panel, anchor, L["Enemy Arena (see addons panel for supported addons)"], config.EnemyArena, false, false)
     end
 

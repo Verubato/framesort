@@ -3,6 +3,8 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
+local events = addon.WoW.Events
+local capabilities = addon.WoW.Capabilities
 local fsUnit = addon.WoW.Unit
 local fsEnumerable = addon.Collections.Enumerable
 local fsLog = addon.Logging.Log
@@ -179,13 +181,13 @@ local function InvalidateEntry(unit)
 end
 
 local function OnEvent(_, event, arg1)
-    if event == wow.Events.INSPECT_READY then
+    if event == events.INSPECT_READY then
         if unitInspecting then
             Inspect(unitInspecting)
         end
-    elseif event == wow.Events.GROUP_ROSTER_UPDATE then
+    elseif event == events.GROUP_ROSTER_UPDATE then
         needUpdate = true
-    elseif event == wow.Events.PLAYER_SPECIALIZATION_CHANGED then
+    elseif event == events.PLAYER_SPECIALIZATION_CHANGED then
         InvalidateEntry(arg1)
     end
 end
@@ -335,7 +337,7 @@ function M:RegisterCallback(callback)
 end
 
 function M:CanInspect()
-    return (wow.CanInspect and wow.NotifyInspect and wow.ClearInspectPlayer and wow.GetInspectSpecialization) ~= nil and wow.HasSpecializations()
+    return (wow.CanInspect and wow.NotifyInspect and wow.ClearInspectPlayer and wow.GetInspectSpecialization) ~= nil and capabilities.HasSpecializations()
 end
 
 function M:Init()
@@ -354,9 +356,9 @@ function M:Init()
     local frame = wow.CreateFrame("Frame")
     frame:HookScript("OnEvent", OnEvent)
     frame:HookScript("OnUpdate", OnUpdate)
-    frame:RegisterEvent(wow.Events.INSPECT_READY)
-    frame:RegisterEvent(wow.Events.GROUP_ROSTER_UPDATE)
-    frame:RegisterEvent(wow.Events.PLAYER_SPECIALIZATION_CHANGED)
+    frame:RegisterEvent(events.INSPECT_READY)
+    frame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
+    frame:RegisterEvent(events.PLAYER_SPECIALIZATION_CHANGED)
 
     -- hook it so we gain the benefit inspection results from other callers
     wow.hooksecurefunc("NotifyInspect", OnNotifyInspect)

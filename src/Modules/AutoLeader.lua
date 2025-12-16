@@ -1,6 +1,7 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
+local capabilities = addon.WoW.Capabilities
 local fsUnit = addon.WoW.Unit
 local fsEnumerable = addon.Collections.Enumerable
 local fsLog = addon.Logging.Log
@@ -47,11 +48,7 @@ local function Run()
 end
 
 local function OnStateChanged()
-    if not wow.HasSoloShuffle() then
-        return
-    end
-
-    if not (wow.C_PvP and wow.C_PvP.GetActiveMatchState and wow.C_PvP.IsSoloShuffle) or not (wow.Enum and wow.Enum.PvPMatchState) then
+    if not capabilities.HasSoloShuffle() then
         return
     end
 
@@ -64,7 +61,7 @@ local function OnStateChanged()
 end
 
 function M:Init()
-    if not wow.HasSoloShuffle() then
+    if not capabilities.HasSoloShuffle() then
         fsLog:Debug("Not loading AutoLeader module because this wow client doesn't have solo shuffle.")
         return
     end
@@ -80,11 +77,7 @@ function M:Run()
         return
     end
 
-    if not wow.HasSoloShuffle() then
-        return
-    end
-
-    if not wow.C_PvP or not wow.C_PvP.IsSoloShuffle or not wow.C_PvP.IsSoloShuffle() then
+    if not capabilities.HasSoloShuffle() then
         return
     end
 

@@ -1,6 +1,7 @@
 ---@type string, Addon
 local addonName, addon = ...
 local wow = addon.WoW.Api
+local capabilities = addon.WoW.Capabilities
 local fsEnumerable = addon.Collections.Enumerable
 local fsProviders = addon.Providers
 local fsConfig = addon.Configuration
@@ -224,7 +225,7 @@ end
 local function CheckUsingRaidStyleFrames()
     local usingRaidStyle = false
 
-    if wow.HasEditMode() then
+    if capabilities.HasEditMode() then
         usingRaidStyle = wow.EditModeManagerFrame:UseRaidStylePartyFrames()
     elseif CUF_CVar and CUF_CVar.GetCVarBool then
         -- for wotlk private
@@ -244,7 +245,7 @@ end
 local function CheckKeepGroupTogether()
     local keepGroupTogether = false
 
-    if wow.HasEditMode() then
+    if capabilities.HasEditMode() then
         local raidGroupDisplayType =
             wow.EditModeManagerFrame:GetSettingValue(wow.Enum.EditModeSystem.UnitFrame, wow.Enum.EditModeUnitFrameSystemIndices.Raid, wow.Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
         keepGroupTogether = raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsVertical or raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsHorizontal
@@ -256,7 +257,7 @@ local function CheckKeepGroupTogether()
         Applicable = addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Traditional,
         Passed = not keepGroupTogether,
         Description = L["Keep Groups Together setting disabled"],
-        Help = wow.HasEditMode() and L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"] or L["Disable the 'Keep Groups Together' raid profile setting"],
+        Help = capabilities.HasEditMode() and L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"] or L["Disable the 'Keep Groups Together' raid profile setting"],
     }
 end
 

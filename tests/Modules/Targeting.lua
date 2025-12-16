@@ -1,6 +1,7 @@
 ---@type Addon
 local addon
 local wow
+local events
 local M = {}
 
 function M:setup()
@@ -9,6 +10,7 @@ function M:setup()
 
     addon = addonFactory:Create()
     wow = addon.WoW.Api
+    events = addon.WoW.Events
 
     addon:InitDB()
     addon.Providers:Init()
@@ -194,7 +196,7 @@ function M:test_targets_update_after_combat()
     end
 
     wow.State.MockInCombat = false
-    wow:FireEvent(wow.Events.PLAYER_REGEN_ENABLED)
+    wow:FireEvent(events.PLAYER_REGEN_ENABLED)
 
     assertEquals(friendlyButtons[1]:GetAttribute("unit"), "player")
     assertEquals(friendlyButtons[2]:GetAttribute("unit"), "party2")

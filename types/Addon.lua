@@ -55,6 +55,9 @@
 
 ---@class WoW
 ---@field Api WowApi
+---@field Events WowEvents
+---@field Capabilities ClientCapabilities
+---@field WowEx WowEx
 ---@field Frame FrameUtil
 ---@field Unit UnitUtil
 

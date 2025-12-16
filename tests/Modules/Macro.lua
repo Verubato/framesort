@@ -2,6 +2,8 @@
 local addon
 ---@type WowApiMock
 local wow
+---@type WowEvents
+local events
 local M = {}
 
 function M:setup()
@@ -19,6 +21,7 @@ function M:setup()
 
     fsFrame = addon.WoW.Frame
     wow = addon.WoW.Api
+    events = addon.WoW.Events
 
     addon:InitDB()
     addon.Providers:Init()
@@ -101,7 +104,7 @@ function M:test_macro_updates_for_provider_after_combat()
     assertEquals(macro, wow.State.Macros[1].Body)
 
     wow.State.MockInCombat = false
-    wow:FireEvent(wow.Events.PLAYER_REGEN_ENABLED)
+    wow:FireEvent(events.PLAYER_REGEN_ENABLED)
 
     -- should have changed now that combat dropped
     assertEquals(
@@ -127,7 +130,7 @@ function M:test_macro_updates_for_hook_after_combat()
     assertEquals(macro, wow.State.Macros[1].Body)
 
     wow.State.MockInCombat = false
-    wow:FireEvent(wow.Events.PLAYER_REGEN_ENABLED)
+    wow:FireEvent(events.PLAYER_REGEN_ENABLED)
 
     -- should have changed now that combat dropped
     assertEquals(
