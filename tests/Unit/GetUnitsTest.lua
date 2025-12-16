@@ -195,12 +195,12 @@ end
 
 function M:test_owner_for()
     ---@diagnostic disable-next-line: param-type-mismatch
-    assertEquals(fsUnit:PetParent(nil), "none")
-    assertEquals(fsUnit:PetParent(""), "none")
-    assertEquals(fsUnit:PetParent("pet"), "player")
-    assertEquals(fsUnit:PetParent("partypet1"), "party1")
-    assertEquals(fsUnit:PetParent("raidpet1"), "raid1")
-    assertEquals(fsUnit:PetParent("nameplatepet1"), "nameplate1")
+    assertEquals(fsUnit:PetOwner(nil), "none")
+    assertEquals(fsUnit:PetOwner(""), "none")
+    assertEquals(fsUnit:PetOwner("pet"), "player")
+    assertEquals(fsUnit:PetOwner("partypet1"), "party1")
+    assertEquals(fsUnit:PetOwner("raidpet1"), "raid1")
+    assertEquals(fsUnit:PetOwner("nameplatepet1"), "nameplate1")
 end
 
 function M:test_is_player_when_secret()

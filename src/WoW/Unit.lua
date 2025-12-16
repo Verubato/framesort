@@ -131,7 +131,7 @@ end
 ---Returns the parent token of a given pet unit, e.g. arenapet3 becomes arena3
 ---@param petUnit any
 ---@return string
-function M:PetParent(petUnit)
+function M:PetOwner(petUnit)
     if not petUnit or petUnit == "" or petUnit == "none" then
         return "none"
     end
