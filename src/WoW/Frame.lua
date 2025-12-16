@@ -78,17 +78,20 @@ function M:ToFrameChain(frames)
     local root = nil
     for _, child in pairs(nodesByFrame) do
         local _, relativeTo, _, _, _ = child.Value:GetPoint()
-        local parent = nodesByFrame[relativeTo]
 
-        if parent then
-            if parent.Next then
-                return invalid
+        if relativeTo then
+            local parent = nodesByFrame[relativeTo]
+
+            if parent then
+                if parent.Next then
+                    return invalid
+                end
+
+                parent.Next = child
+                child.Previous = parent
+            else
+                root = child
             end
-
-            parent.Next = child
-            child.Previous = parent
-        else
-            root = child
         end
     end
 

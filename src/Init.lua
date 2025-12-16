@@ -2,7 +2,6 @@
 local addonName, addon = ...
 local wow = addon.WoW.Api
 local fsLog = addon.Logging.Log
-local loader = nil
 
 function addon:InitLocale()
     local function DefaultIndex(_, key)
@@ -60,14 +59,12 @@ local function OnLoadAddon(_, _, name)
         return
     end
 
-    assert(loader)
-
     addon:Init()
-    loader:UnregisterEvent("ADDON_LOADED")
+    addon.Loader:UnregisterEvent("ADDON_LOADED")
 end
 
-loader = wow.CreateFrame("Frame")
-loader:HookScript("OnEvent", OnLoadAddon)
-loader:RegisterEvent("ADDON_LOADED")
+addon.Loader = wow.CreateFrame("Frame")
+addon.Loader:HookScript("OnEvent", OnLoadAddon)
+addon.Loader:RegisterEvent("ADDON_LOADED")
 
 FrameSort = addon
