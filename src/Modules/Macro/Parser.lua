@@ -69,11 +69,16 @@ local function ReplaceSelector(body, unit, occurrence)
     local endPos = nil
 
     startPos, endPos = NthSelector(body, occurrence)
+
     if not startPos or not endPos then
         return nil
     end
 
-    local newBody = string.sub(body, 0, startPos)
+    if startPos < 1 or endPos > #body then
+        return nil
+    end
+
+    local newBody = string.sub(body, 1, startPos)
     newBody = newBody .. unit
     newBody = newBody .. string.sub(body, endPos + 1)
     return newBody
