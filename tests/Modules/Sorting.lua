@@ -4,7 +4,7 @@ local addon
 local fsSort
 ---@type FrameUtil
 local fsFrame
----@type WoWApi
+---@type WowApi
 local wow
 
 local M = {}
@@ -28,6 +28,9 @@ function M:setup()
     addon.Providers.All[#addon.Providers.All + 1] = provider
 
     local party = fsFrame:GetContainer(provider, fsFrame.ContainerType.Party)
+
+    assert(party)
+
     local partyContainer = party.Frame
 
     p2 = frameMock:New("Frame", nil, partyContainer)

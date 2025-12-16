@@ -15,9 +15,10 @@ local function CopyTable(table)
     return new
 end
 
----@class WowApiFactory : IFactory<WowApiMock>
+---@class WowApiFactory
 local M = {}
 
+---@return WowApiMock
 function M:Create()
     ---@class WowApiMock: WowApi
     local wow = {

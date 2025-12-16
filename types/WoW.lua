@@ -65,7 +65,7 @@
 ---@field GetNumGroupMembers fun(): number
 ---@field GetNumArenaOpponentSpecs fun(): number
 -- state functions
----@field IsInInstance fun(): boolean
+---@field IsInInstance fun(): inInstance: boolean, instanceType: string
 ---@field IsInGroup fun(): boolean
 ---@field IsInRaid fun(): boolean
 ---@field InCombatLockdown fun(): boolean

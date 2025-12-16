@@ -1,7 +1,8 @@
 local frameMock = require("TestHarness\\Frame")
----@class ProviderFactory : IFactory<FrameProvider>
+---@class ProviderFactory
 local M = {}
 
+---@return FrameProvider
 function M:Create()
     ---@type FrameProvider
     local provider = {
