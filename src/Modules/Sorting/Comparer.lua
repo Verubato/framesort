@@ -1,6 +1,7 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
+local capabilities = addon.WoW.Capabilities
 local fsUnit = addon.WoW.Unit
 local fsMath = addon.Numerics.Math
 local fsEnumerable = addon.Collections.Enumerable
@@ -171,7 +172,11 @@ local function PrecomputeUnitMetadata(unit, meta)
 
         if not data.IsPet then
             data.UnitNumber = tonumber(string.sub(unit, meta.UnitNumberIndex))
-            data.Role = wow.UnitGroupRolesAssigned and wow.UnitGroupRolesAssigned(unit)
+
+            if capabilities.HasRoleAssignments() then
+                data.Role = wow.UnitGroupRolesAssigned(unit)
+            end
+
             data.Guid = wow.UnitGUID and wow.UnitGUID(unit)
             data.ClassId = wow.UnitClass and select(3, wow.UnitClass(unit))
 
