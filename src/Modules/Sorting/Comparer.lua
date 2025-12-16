@@ -378,11 +378,11 @@ local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, rev
             return false
         end
 
-        -- both are pets, compare their parent
-        local leftTokenParent = fsUnit:PetParent(leftToken)
-        local rightTokenParent = fsUnit:PetParent(rightToken)
+        -- both are pets, compare their owner's
+        local leftOwner = fsUnit:PetOwner(leftToken)
+        local rightOwner = fsUnit:PetOwner(rightToken)
 
-        return Compare(leftTokenParent, rightTokenParent, playerSortMode, groupSortMode, reverse, meta)
+        return Compare(leftOwner, rightOwner, playerSortMode, groupSortMode, reverse, meta)
     end
 
     if playerSortMode and playerSortMode ~= "" then
@@ -449,11 +449,11 @@ local function EnemyCompare(leftToken, rightToken, groupSortMode, reverse, meta)
             return false
         end
 
-        -- both are pets, compare their parent
-        local leftTokenParent = fsUnit:PetParent(leftToken)
-        local rightTokenParent = fsUnit:PetParent(rightToken)
+        -- both are pets, compare their owner's
+        local leftOwner = fsUnit:PetOwner(leftToken)
+        local rightOwner = fsUnit:PetOwner(rightToken)
 
-        return EnemyCompare(leftTokenParent, rightTokenParent, groupSortMode, reverse, meta)
+        return EnemyCompare(leftOwner, rightOwner, groupSortMode, reverse, meta)
     end
 
     if reverse then
