@@ -9,7 +9,7 @@ end
 -- # Main Options screen #
 -- used in FrameSort - 1.2.3 version header, %s is the version number
 L["FrameSort - %s"] = "FrameSort - %s"
-L["There are some issuse that may prevent FrameSort from working correctly."] = "Hay algunos problemas que pueden impedir que FrameSort funcione correctamente."
+L["There are some issues that may prevent FrameSort from working correctly."] = "Hay algunos problemas que pueden impedir que FrameSort funcione correctamente."
 L["Please go to the Health Check panel to view more details."] = "Ve al panel de Comprobación de estado para ver más detalles."
 L["Role"] = "Rol"
 L["Spec"] = "Spec"
