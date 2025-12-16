@@ -267,7 +267,10 @@ local function InitAdjacentTargeting()
 end
 
 function M:Run()
-    assert(not wow.InCombatLockdown())
+    if wow.InCombatLockdown() then
+        fsLog:Error("Cannot run targeting module during combat.")
+        return
+    end
 
     UpdateTargets()
 end

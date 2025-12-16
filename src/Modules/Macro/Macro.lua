@@ -118,7 +118,10 @@ local function OnUpdateMacros()
 end
 
 function M:Run()
-    assert(not wow.InCombatLockdown())
+    if wow.InCombatLockdown() then
+        fsLog:Error("Cannot run macro module during combat.")
+        return
+    end
 
     ScanMacros()
 end

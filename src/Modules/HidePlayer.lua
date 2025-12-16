@@ -35,7 +35,10 @@ local function ShowHide(show)
 end
 
 function M:Run()
-    assert(not wow.InCombatLockdown())
+    if wow.InCombatLockdown() then
+        fsLog:Error("Cannot run hide player module during combat.")
+        return
+    end
 
     local blizzard = fsProviders.Blizzard
     local enabled, mode, _, _ = fsCompare:FriendlySortMode()

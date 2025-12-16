@@ -23,7 +23,10 @@ end
 ---@return boolean sorted true if sorted, otherwise false.
 ---@param provider FrameProvider? optionally specify the provider to sort, otherwise sorts all providers.
 function M:Run(provider)
-    assert(not wow.InCombatLockdown())
+    if wow.InCombatLockdown() then
+        fsLog:Error("Cannot run non-combat sorting module during combat.")
+        return
+    end
 
     if wow.HasEditMode() and wow.EditModeManagerFrame.editModeActive then
         fsLog:Debug("Not sorting while edit mode active.")
