@@ -10,6 +10,7 @@ local wow = {
 
     -- constants
     MAX_RAID_MEMBERS = MAX_RAID_MEMBERS or 40,
+    MAX_PARTY_MEMBERS = MAX_PARTY_MEMBERS or 4,
     MEMBERS_PER_RAID_GROUP = MEMBERS_PER_RAID_GROUP or 5,
 
     -- frames
