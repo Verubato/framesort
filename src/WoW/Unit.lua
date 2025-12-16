@@ -117,6 +117,10 @@ function M:PetFor(unit, isEnemy)
         return "none"
     end
 
+    if M:IsPet(unit) then
+        return unit
+    end
+
     -- isEnemy used here as UnitIsUnit returns a secret value for enemy units (e.g. arena123)
     local isPlayer = not isEnemy and M:IsPlayer(unit)
 
