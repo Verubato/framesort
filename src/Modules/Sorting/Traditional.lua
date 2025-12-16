@@ -27,7 +27,7 @@ function M:TrySort()
 
     if wow.CompactPartyFrame and not fsFrame:IsForbidden(wow.CompactPartyFrame) and wow.CompactPartyFrame:IsVisible() and wow.CompactPartyFrame.SetFlowSortFunction then
         wow.CompactPartyFrame:SetFlowSortFunction(sortFunction)
-        sorted = sorted or true
+        sorted = true
     end
 
     if wow.CompactRaidFrameContainer and not fsFrame:IsForbidden(wow.CompactRaidFrameContainer) and wow.CompactRaidFrameContainer:IsVisible() and wow.CompactRaidFrameContainer_SetFlowSortFunction then
