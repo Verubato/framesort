@@ -56,6 +56,10 @@ local function NthSelector(str, occurrence)
         end
     end
 
+    if n ~= occurrence then
+        return nil, nil
+    end
+
     return startPos, endPos
 end
 
