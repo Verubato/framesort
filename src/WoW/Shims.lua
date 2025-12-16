@@ -86,11 +86,14 @@ wow.UnregisterAttributeDriver = wow.UnregisterAttributeDriver
 
 -- for unit tests
 wow.CopyTable = wow.CopyTable or function(t)
-    local new = {}
-
-    for k, v in pairs(t) do
-        new[k] = v
+    if type(t) ~= "table" then
+        return t
     end
 
-    return new
+    local out = {}
+    for k, v in pairs(t) do
+        out[k] = wow.CopyTable(v)
+    end
+
+    return out
 end
