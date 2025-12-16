@@ -187,6 +187,10 @@ secureMethods["FrameChain"] = [[
         end
     end
 
+    if not root then
+        return false
+    end
+
     -- assert we have a complete chain
     local count = 0
     local current = root
