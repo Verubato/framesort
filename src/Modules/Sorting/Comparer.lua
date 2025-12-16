@@ -14,7 +14,6 @@ local fuzzyDecimalPlaces = 0
 local M = {}
 addon.Modules.Sorting.Comparer = M
 
-local warnedAbout = {}
 local cachedRoleLookup, cachedSpecLookup, cachedClassLookup
 local cachedConfigSnapshot
 
@@ -133,19 +132,16 @@ local function PrecomputeGlobalMetadata()
     meta.SpecOrderLookup = specOrderLookup
     meta.ClassTypeOrderLookup = classTypeOrderLookup
 
-    if not wow.GetArenaOpponentSpec and not warnedAbout["GetArenaOpponentSpec"] then
-        fsLog:Error("Your wow client is missing the GetArenaOpponentSpec API.")
-        warnedAbout["GetArenaOpponentSpec"] = true
+    if not wow.GetArenaOpponentSpec then
+        fsLog:WarnOnce("Your wow client is missing the GetArenaOpponentSpec API.")
     end
 
-    if not wow.GetSpecializationInfoByID and not warnedAbout["GetSpecializationInfoByID"] then
-        fsLog:Error("Your wow client is missing the GetSpecializationInfoByID API.")
-        warnedAbout["GetSpecializationInfoByID"] = true
+    if not wow.GetSpecializationInfoByID then
+        fsLog:WarnOnce("Your wow client is missing the GetSpecializationInfoByID API.")
     end
 
-    if not wow.UnitGroupRolesAssigned and not warnedAbout["UnitGroupRolesAssigned"] then
-        fsLog:Error("Your wow client is missing the UnitGroupRolesAssigned API.")
-        warnedAbout["UnitGroupRolesAssigned"] = true
+    if not wow.UnitGroupRolesAssigned then
+        fsLog:WarnOnce("Your wow client is missing the UnitGroupRolesAssigned API.")
     end
 
     return meta

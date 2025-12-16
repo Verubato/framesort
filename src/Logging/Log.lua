@@ -19,6 +19,7 @@ local started = wow.GetTimePreciseSec()
 local cache = {}
 local enableCache = true
 local maxCacheSize = 100
+local warned = {}
 local callbacks = {}
 
 local function NotifyCallbacks(msg, level, timestamp)
@@ -98,6 +99,20 @@ end
 ---@param msg string
 function M:Warning(msg, ...)
     local formatted = string.format(msg, ...)
+    Write(formatted, M.Level.Warning)
+end
+
+---Logs a warning message if one hasn't already been logged with the same message.
+---@param msg string
+function M:WarnOnce(msg, ...)
+    local formatted = string.format(msg, ...)
+
+    if warned[formatted] then
+        return
+    end
+
+    warned[formatted] = true
+
     Write(formatted, M.Level.Warning)
 end
 
