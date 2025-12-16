@@ -92,23 +92,6 @@ addon.WoW.Api = {
     -- utility
     wipe = wipe,
     CopyTable = CopyTable,
-    strjoin = function(delimiter, ...)
-        if strjoin then
-            return strjoin(delimiter, unpack(...))
-        end
-
-        local joined = ""
-
-        for i, str in ipairs(...) do
-            if i > 1 then
-                joined = joined .. delimiter .. str
-            else
-                joined = str
-            end
-        end
-
-        return joined
-    end,
 
     -- secure functions
     issecurevariable = issecurevariable,

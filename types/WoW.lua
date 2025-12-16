@@ -72,7 +72,6 @@
 -- utility
 ---@field wipe fun(table: table): table
 ---@field CopyTable fun(table: table): table
----@field strjoin fun(delimiter: string, ...): string
 -- secure functions
 ---@field issecurevariable fun(tableOrName: table|string, name: string?): isSecure: boolean, taint: string?
 ---@field hooksecurefunc fun(...)
