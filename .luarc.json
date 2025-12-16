@@ -32,6 +32,8 @@
         "BattleGroundEnemiesDB",
         "GladdyFrame",
         "CompactUnitFrame_SetUnit",
+        "CompactArenaFrameTitle",
+        "CompactArenaFrameMember1",
     ],
     "diagnostics.disable": [
         "inject-field",

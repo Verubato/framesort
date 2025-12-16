@@ -1,6 +1,8 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
+local wowEx = addon.WoW.WowEx
+local events = addon.WoW.Events
 local fsSorting = addon.Modules.Sorting
 local fsCompare = addon.Modules.Sorting.Comparer
 local fsProviders = addon.Providers
@@ -1446,19 +1448,19 @@ local function ResubscribeEvents()
     assert(memberHeader ~= nil)
     assert(petHeader ~= nil)
 
-    memberHeader:UnregisterEvent(wow.Events.GROUP_ROSTER_UPDATE)
-    memberHeader:UnregisterEvent(wow.Events.UNIT_NAME_UPDATE)
+    memberHeader:UnregisterEvent(events.GROUP_ROSTER_UPDATE)
+    memberHeader:UnregisterEvent(events.UNIT_NAME_UPDATE)
 
-    memberHeader:RegisterEvent(wow.Events.GROUP_ROSTER_UPDATE)
-    memberHeader:RegisterEvent(wow.Events.UNIT_NAME_UPDATE)
+    memberHeader:RegisterEvent(events.GROUP_ROSTER_UPDATE)
+    memberHeader:RegisterEvent(events.UNIT_NAME_UPDATE)
 
-    petHeader:UnregisterEvent(wow.Events.GROUP_ROSTER_UPDATE)
-    petHeader:UnregisterEvent(wow.Events.UNIT_PET)
-    petHeader:UnregisterEvent(wow.Events.UNIT_NAME_UPDATE)
+    petHeader:UnregisterEvent(events.GROUP_ROSTER_UPDATE)
+    petHeader:UnregisterEvent(events.UNIT_PET)
+    petHeader:UnregisterEvent(events.UNIT_NAME_UPDATE)
 
-    petHeader:RegisterEvent(wow.Events.GROUP_ROSTER_UPDATE)
-    petHeader:RegisterEvent(wow.Events.UNIT_PET)
-    petHeader:RegisterEvent(wow.Events.UNIT_NAME_UPDATE)
+    petHeader:RegisterEvent(events.GROUP_ROSTER_UPDATE)
+    petHeader:RegisterEvent(events.UNIT_PET)
+    petHeader:RegisterEvent(events.UNIT_NAME_UPDATE)
 end
 
 ---@param container FrameContainer
@@ -1516,7 +1518,7 @@ end
 local function LoadInstanceType()
     assert(manager)
 
-    manager:SetAttribute("IsBattleground", wow.IsInstanceBattleground())
+    manager:SetAttribute("IsBattleground", wowEx.IsInstanceBattleground())
 end
 
 local function OnCombatStarting()
@@ -1729,5 +1731,5 @@ function M:Init()
 
     local combatStartingFrame = wow.CreateFrame("Frame", nil, wow.UIParent)
     combatStartingFrame:HookScript("OnEvent", OnCombatStarting)
-    combatStartingFrame:RegisterEvent(wow.Events.PLAYER_REGEN_DISABLED)
+    combatStartingFrame:RegisterEvent(events.PLAYER_REGEN_DISABLED)
 end

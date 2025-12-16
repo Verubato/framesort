@@ -7,7 +7,8 @@ local fsUnit = addon.WoW.Unit
 local fsLog = addon.Logging.Log
 local fsEnumerable = addon.Collections.Enumerable
 local wow = addon.WoW.Api
-local events = wow.Events
+local events = addon.WoW.Events
+local capabilities = addon.WoW.Capabilities
 local M = addon.Modules
 local timerFrame = nil
 local eventFrame = nil
@@ -199,7 +200,7 @@ function M:Init()
         timerFrame = wow.CreateFrame("Frame")
         timerFrame:HookScript("OnEvent", OnTimer)
         timerFrame:HookScript("OnUpdate", OnUpdate)
-        timerFrame:RegisterEvent(wow.Events.START_TIMER)
+        timerFrame:RegisterEvent(events.START_TIMER)
 
         eventFrame = wow.CreateFrame("Frame")
         eventFrame:HookScript("OnEvent", OnEvent)
@@ -210,14 +211,14 @@ function M:Init()
         -- so trigger a sort once we know their role
         eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
 
-        if wow.HasEnemySpecSupport() then
+        if capabilities.HasEnemySpecSupport() then
             eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
             eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
         end
 
         combatFrame = wow.CreateFrame("Frame")
         combatFrame:HookScript("OnEvent", OnCombat)
-        combatFrame:RegisterEvent(wow.Events.PLAYER_REGEN_DISABLED)
+        combatFrame:RegisterEvent(events.PLAYER_REGEN_DISABLED)
 
         -- perform the initial run
         fsLog:Debug("First run.")

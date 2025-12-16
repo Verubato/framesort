@@ -4,11 +4,11 @@
 ---@field C_PvP C_PvP
 ---@field C_Map C_Map
 ---@field C_Timer C_Timer
----@field RAID_CLASS_COLORS table
 -- constants
 ---@field MAX_RAID_MEMBERS number
 ---@field MAX_PARTY_MEMBERS number
 ---@field MEMBERS_PER_RAID_GROUP number
+---@field RAID_CLASS_COLORS table
 -- frames
 ---@field CreateFrame fun(frameType: string, name: string?, parent: table?, template: string?, id: number?): frame: table
 ---@field UIParent table
@@ -16,8 +16,6 @@
 ---@field PartyFrame table
 ---@field CompactRaidFrameContainer table
 ---@field CompactArenaFrame table
----@field CompactArenaFrameTitle table
----@field CompactArenaFrameMember1 table
 ---@field CompactRaidFrameContainer_SetFlowSortFunction fun(container: table, sortFunction: fun(unit1: string, unit2: string): boolean)
 ---@field CompactRaidFrameManager_GetSetting fun(name: string): boolean
 ---@field EditModeManagerFrame table
@@ -80,6 +78,8 @@
 ---@field hooksecurefunc fun(...)
 ---@field RegisterAttributeDriver fun(frame: table, attribute: string, conditional: string)
 ---@field UnregisterAttributeDriver fun(frame: table, attribute: string)
+---@field RegisterStateDriver fun(frame: table, state: string, conditional: string)
+---@field UnregisterStateDriver fun(frame: table, state: string)
 ---@field SecureHandlerWrapScript fun(frame: table, script: string, header: table, preBody: string?, postBody: string?)
 ---@field SecureHandlerSetFrameRef fun(frame: table, label: string, refFrame: table)
 ---@field SecureHandlerExecute fun(frame: table, body: string)
@@ -104,17 +104,6 @@
 ---@field GetRealZoneText fun(): string
 -- secrets
 ---@field issecretvalue fun(value: any): boolean
--- non-blizzard
----@field Events WowEvents
----@field HasDropdown fun(): boolean
----@field HasArena fun(): boolean
----@field HasEnemySpecSupport fun(): boolean
----@field Has5v5 fun(): boolean
----@field HasSoloShuffle fun(): boolean
----@field HasEditMode fun(): boolean
----@field IsInstanceBattleground fun(): boolean
----@field CanOpenOptionsDuringCombat fun(): boolean
----@field HasSpecializations fun(): boolean
 
 ---@class C_PvP
 ---@field IsSoloShuffle fun(): boolean

@@ -1,6 +1,8 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
+local wowEx = addon.WoW.WowEx
+local capabilities = addon.WoW.Capabilities
 local fsEnumerable = addon.Collections.Enumerable
 ---@class UnitUtil
 local M = {}
@@ -56,7 +58,7 @@ function M:ArenaUnitProbablyExists(unit)
     local groupCount = wow.GetNumGroupMembers() or 0
     local bgCount = 0
 
-    if wow.IsInstanceBattleground() or (wow.C_PvP and wow.C_PvP.IsInBrawl and wow.C_PvP.IsInBrawl()) then
+    if wowEx.IsInstanceBattleground() or (capabilities.HasBrawl() and wow.C_PvP.IsInBrawl()) then
         -- in 15v15 brawl, GetNumArenaOpponentSpecs returns 0 so we use GetNumBattlefieldScores instead
         bgCount = wow.GetNumBattlefieldScores() or 0
     end

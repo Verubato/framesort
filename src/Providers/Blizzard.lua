@@ -1,10 +1,11 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
+local capabilites = addon.WoW.Capabilities
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsScheduler = addon.Scheduling.Scheduler
-local events = addon.WoW.Api.Events
+local events = addon.WoW.Events
 local fsMath = addon.Numerics.Math
 local fsLog = addon.Logging.Log
 ---@class BlizzardFrameProvider: FrameProvider
@@ -154,7 +155,7 @@ function M:Init()
         return
     end
 
-    if wow.HasEditMode() then
+    if capabilites.HasEditMode() then
         wow.EventRegistry:RegisterCallback(events.EditModeExit, OnEditModeExited)
 
         fsScheduler:RunWhenEnteringWorldOnce(function()
@@ -223,7 +224,7 @@ function M:Containers()
                 return false
             end,
             IsHorizontalLayout = function()
-                if wow.HasEditMode() then
+                if capabilites.HasEditMode() then
                     return wow.EditModeManagerFrame:GetSettingValueBool(
                         wow.Enum.EditModeSystem.UnitFrame,
                         wow.Enum.EditModeUnitFrameSystemIndices.Party,
@@ -251,7 +252,7 @@ function M:Containers()
             SupportsSpacing = true,
             InCombatSortingRequired = true,
             IsGrouped = function()
-                if wow.HasEditMode() then
+                if capabilites.HasEditMode() then
                     local raidGroupDisplayType = wow.EditModeManagerFrame:GetSettingValue(
                         wow.Enum.EditModeSystem.UnitFrame,
                         wow.Enum.EditModeUnitFrameSystemIndices.Raid,
@@ -263,7 +264,7 @@ function M:Containers()
                 return wow.CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
             end,
             IsHorizontalLayout = function()
-                if wow.HasEditMode() then
+                if capabilites.HasEditMode() then
                     local displayType = wow.EditModeManagerFrame:GetSettingValue(
                         wow.Enum.EditModeSystem.UnitFrame,
                         wow.Enum.EditModeUnitFrameSystemIndices.Raid,
@@ -361,8 +362,8 @@ function M:Containers()
             SubscribeToVisibility = true,
             FramesOffset = function()
                 -- not sure when, but it seems GetWidth() and GetHeight() are sometimes returning secret values
-                local ccRemoverWidth = wow.CompactArenaFrameMember1 and wow.CompactArenaFrameMember1.CcRemoverFrame and wow.CompactArenaFrameMember1.CcRemoverFrame:GetWidth()
-                local titleHeight = wow.CompactArenaFrameTitle and wow.CompactArenaFrameTitle:GetHeight()
+                local ccRemoverWidth = CompactArenaFrameMember1 and CompactArenaFrameMember1.CcRemoverFrame and CompactArenaFrameMember1.CcRemoverFrame:GetWidth()
+                local titleHeight = CompactArenaFrameTitle and CompactArenaFrameTitle:GetHeight()
 
                 if not ccRemoverWidth or wow.issecretvalue(ccRemoverWidth) then
                     ccRemoverWidth = 27
@@ -381,11 +382,11 @@ function M:Containers()
             PostSort = function()
                 -- this is anchored to CompactArenaFrameMember1 by default which can move around
                 -- so just hide the title
-                if not wow.CompactArenaFrameTitle or not wow.CompactArenaFrameTitle.Hide then
+                if not CompactArenaFrameTitle or not CompactArenaFrameTitle.Hide then
                     return
                 end
 
-                wow.CompactArenaFrameTitle:Hide()
+                CompactArenaFrameTitle:Hide()
             end,
         }
 

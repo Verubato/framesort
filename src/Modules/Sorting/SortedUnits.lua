@@ -8,7 +8,8 @@ local fsInspector = addon.Modules.Inspector
 local fsConfig = addon.Configuration
 local fsSortedFrames = addon.Modules.Sorting.SortedFrames
 local wow = addon.WoW.Api
-local events = wow.Events
+local events = addon.WoW.Events
+local capabilities = addon.WoW.Capabilities
 local fsLog = addon.Logging.Log
 
 ---@class SortedUnits
@@ -272,7 +273,7 @@ function M:Init()
     petEventsFrame:HookScript("OnEvent", OnPetEvent)
     petEventsFrame:RegisterEvent(events.UNIT_PET)
 
-    if wow.HasEnemySpecSupport() then
+    if capabilities.HasEnemySpecSupport() then
         enemyEventsFrame = wow.CreateFrame("Frame")
         enemyEventsFrame:HookScript("OnEvent", OnEnemyEvent)
         enemyEventsFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)

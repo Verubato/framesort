@@ -1,6 +1,7 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
+local events = addon.WoW.Events
 local fsScheduler = addon.Scheduling.Scheduler
 local fsMacroParser = addon.Modules.Macro.Parser
 local fsLog = addon.Logging.Log
@@ -135,7 +136,7 @@ function M:Init()
 
     eventFrame = wow.CreateFrame("Frame")
     eventFrame:HookScript("OnEvent", OnUpdateMacros)
-    eventFrame:RegisterEvent(wow.Events.UPDATE_MACROS)
+    eventFrame:RegisterEvent(events.UPDATE_MACROS)
 
     fsLog:Debug("Initialised the macro module.")
 end

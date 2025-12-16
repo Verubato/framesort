@@ -9,6 +9,7 @@ local fsEnumerable = addon.Collections.Enumerable
 local fsMath = addon.Numerics.Math
 local fsLog = addon.Logging.Log
 local wow = addon.WoW.Api
+local wowEx = addon.WoW.WowEx
 local M = {}
 addon.Modules.Sorting.Secure.NoCombat = M
 
@@ -684,7 +685,7 @@ function M:TrySort(provider)
                     return false
                 end
 
-                if container.EnableInBattlegrounds ~= nil and not container.EnableInBattlegrounds and wow.IsInstanceBattleground() then
+                if container.EnableInBattlegrounds ~= nil and not container.EnableInBattlegrounds and wowEx.IsInstanceBattleground() then
                     return false
                 end
 

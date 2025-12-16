@@ -1,6 +1,7 @@
 ---@type string, Addon
 local addonName, addon = ...
 local wow = addon.WoW.Api
+local events = addon.WoW.Events
 ---@class Log
 local M = {
     Level = {
@@ -139,6 +140,6 @@ end
 function M:Init()
     local frame = wow.CreateFrame("Frame")
     frame:HookScript("OnEvent", OnAddonError)
-    frame:RegisterEvent(wow.Events.ADDON_ACTION_BLOCKED)
-    frame:RegisterEvent(wow.Events.ADDON_ACTION_FORBIDDEN)
+    frame:RegisterEvent(events.ADDON_ACTION_BLOCKED)
+    frame:RegisterEvent(events.ADDON_ACTION_FORBIDDEN)
 end
