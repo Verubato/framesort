@@ -18,6 +18,7 @@ addon.Logging.Log = M
 local started = wow.GetTimePreciseSec()
 local cache = {}
 local enableCache = true
+local maxCacheSize = 100
 local callbacks = {}
 
 local function NotifyCallbacks(msg, level, timestamp)
@@ -30,6 +31,10 @@ local function Write(msg, level)
     NotifyCallbacks(msg, level, wow.GetTimePreciseSec() - started)
 
     if enableCache then
+        if #cache >= maxCacheSize then
+            table.remove(cache, 1)
+        end
+
         cache[#cache + 1] = {
             Message = msg,
             Level = level,
