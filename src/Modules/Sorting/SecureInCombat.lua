@@ -1558,7 +1558,7 @@ end
 local function LoadInstanceType()
     assert(manager)
 
-    manager:SetAttribute("IsBattleground", wowEx.IsInstanceBattleground())
+    manager:SetAttributeNoHandler("IsBattleground", wowEx.IsInstanceBattleground())
 end
 
 local function OnCombatStarting()
