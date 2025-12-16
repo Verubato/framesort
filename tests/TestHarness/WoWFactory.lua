@@ -46,9 +46,6 @@ function M:Create()
         CompactRaidFrameContainer = frameMock:New("Frame", "CompactRaidFrameContainer"),
         CompactArenaFrame = frameMock:New("Frame", "CompactArenaFrame"),
         CompactRaidFrameContainer_SetFlowSortFunction = function() end,
-        CompactRaidFrameManager_GetSetting = function()
-            return nil
-        end,
         EditModeManagerFrame = void,
         Settings = void,
 

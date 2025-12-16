@@ -232,7 +232,7 @@ function M:Containers()
                     )
                 end
 
-                return wow.CompactRaidFrameManager_GetSetting("HorizontalGroups")
+                return wow.CompactRaidFrameManager_GetSetting ~= nil and wow.CompactRaidFrameManager_GetSetting("HorizontalGroups")
             end,
             FramesOffset = function()
                 return GetOffset(wow.CompactPartyFrame)
@@ -261,7 +261,7 @@ function M:Containers()
                     return raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsVertical or raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsHorizontal
                 end
 
-                return wow.CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
+                return wow.CompactRaidFrameManager_GetSetting ~= nil and wow.CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
             end,
             IsHorizontalLayout = function()
                 if capabilites.HasEditMode() then
@@ -273,7 +273,7 @@ function M:Containers()
                     return displayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsHorizontal or displayType == wow.Enum.RaidGroupDisplayType.CombineGroupsHorizontal
                 end
 
-                return wow.CompactRaidFrameManager_GetSetting("HorizontalGroups")
+                return wow.CompactRaidFrameManager_GetSetting ~= nil and wow.CompactRaidFrameManager_GetSetting("HorizontalGroups")
             end,
             FramesOffset = function()
                 return GetOffset(wow.CompactRaidFrameContainer)
