@@ -43,7 +43,10 @@ local callbacks = {}
 
 local function OnNewSpecInformation()
     for _, callback in ipairs(callbacks) do
-        pcall(callback)
+        local ok, err = pcall(callback)
+        if not ok then
+            fsLog:Error("OnNewSpecInformation callback failed: %s", tostring(err))
+        end
     end
 end
 

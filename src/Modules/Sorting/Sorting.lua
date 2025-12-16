@@ -10,7 +10,10 @@ local M = addon.Modules.Sorting
 ---Calls the post sorting callbacks.
 function M:NotifySorted()
     for _, callback in ipairs(callbacks) do
-        pcall(callback)
+        local ok, err = pcall(callback)
+        if not ok then
+            fsLog:Error("NotifySorted callback failed: %s", tostring(err))
+        end
     end
 end
 
