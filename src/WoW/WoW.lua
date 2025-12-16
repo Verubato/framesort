@@ -98,7 +98,6 @@ addon.WoW.Api = {
     GetNumGroupMembers = GetNumGroupMembers,
     GetNumArenaOpponentSpecs = GetNumArenaOpponentSpecs,
     GetNumArenaOpponents = GetNumArenaOpponents,
-    GetNumBattlefieldScores = GetNumBattlefieldScores,
 
     -- utility
     wipe = wipe,
@@ -124,6 +123,7 @@ addon.WoW.Api = {
     GetSpecializationInfoForClassID = C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfoForClassID or GetSpecializationInfoForClassID,
 
     -- bg related
+    GetNumBattlefieldScores = GetNumBattlefieldScores,
     GetBattlefieldScore = GetBattlefieldScore,
 
     -- other
