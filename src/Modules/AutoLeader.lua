@@ -62,11 +62,11 @@ local function OnStateChanged()
 end
 
 local function CanRun()
-    if not capabilities.HasSoloShuffle() then
+    if not capabilities.HasSoloShuffle() or not capabilities.HasRoleAssignments() then
         return false
     end
 
-    return (wow.UnitGroupRolesAssigned and wow.UnitIsGroupLeader and wow.UnitIsUnit and wow.PromoteToLeader) ~= nil
+    return (wow.UnitIsGroupLeader and wow.UnitIsUnit and wow.PromoteToLeader) ~= nil
 end
 
 function M:Init()
