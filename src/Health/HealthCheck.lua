@@ -283,7 +283,7 @@ local function CheckCell()
 
         local selectedLayout = fsLuaEx:SafeGet(Cell, { "vars", "currentLayout" }) or "default"
         -- when using combined layout, the group filter will show all groups
-        passed = fsLuaEx:SafeGet(CellDB, { "layouts", selectedLayout, "main", "combineGroups" })
+        passed = fsLuaEx:SafeGet(CellDB, { "layouts", selectedLayout, "main", "combineGroups" }) == true
     end
 
     return {
