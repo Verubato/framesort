@@ -415,6 +415,9 @@ local function SetNameList(container)
         :Map(function(unit)
             return wow.GetUnitName(unit, true)
         end)
+        :Where(function(name)
+            return name and name ~= ""
+        end)
         :ToTable()
 
     local names = table.concat(unitNames, ",")
