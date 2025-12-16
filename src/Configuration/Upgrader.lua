@@ -235,7 +235,7 @@ function M:UpgradeToVersion7(options)
     end
 
     if not options.Debug then
-        return false
+        options.Debug = {}
     end
 
     options.Debug.Enabled = false
