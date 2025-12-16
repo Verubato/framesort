@@ -1,6 +1,7 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
+local events = addon.WoW.Events
 local capabilities = addon.WoW.Capabilities
 local fsUnit = addon.WoW.Unit
 local fsEnumerable = addon.Collections.Enumerable
@@ -68,7 +69,7 @@ function M:Init()
 
     local frame = wow.CreateFrame("Frame")
     frame:HookScript("OnEvent", OnStateChanged)
-    frame:RegisterEvent("PVP_MATCH_STATE_CHANGED")
+    frame:RegisterEvent(events.PVP_MATCH_STATE_CHANGED)
     fsLog:Debug("Initialised the auto leader module.")
 end
 
