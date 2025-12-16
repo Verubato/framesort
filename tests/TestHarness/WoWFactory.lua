@@ -1,20 +1,6 @@
 local void = require("TestHarness\\Void")
 local frameMock = require("TestHarness\\Frame")
 
-local function CopyTable(table)
-    local new = {}
-
-    for key, value in pairs(table) do
-        if type(value) == "table" then
-            new[key] = CopyTable(value)
-        else
-            new[key] = value
-        end
-    end
-
-    return new
-end
-
 ---@class WowApiFactory
 local M = {}
 
@@ -22,9 +8,6 @@ local M = {}
 function M:Create()
     ---@class WowApiMock: WowApi
     local wow = {
-        -- fields
-        C_PvP = nil,
-
         -- mock fields
         State = {
             Frames = {},
@@ -45,8 +28,9 @@ function M:Create()
         PartyFrame = frameMock:New("Frame", "PartyFrame"),
         CompactRaidFrameContainer = frameMock:New("Frame", "CompactRaidFrameContainer"),
         CompactArenaFrame = frameMock:New("Frame", "CompactArenaFrame"),
-        CompactRaidFrameContainer_SetFlowSortFunction = function() end,
-        EditModeManagerFrame = void,
+        EditModeManagerFrame = {
+            editModeActive = false,
+        },
         Settings = void,
 
         -- settings
@@ -128,14 +112,6 @@ function M:Create()
 
             return name, rank, subgroup, level, class, fileName, zone, online, isDead, role, isML, combatRole
         end,
-        GetNumArenaOpponentSpecs = function()
-            return 0
-        end,
-        GetArenaOpponentSpec = function()
-            local specId = 0
-            local gender = 0
-            return specId, gender
-        end,
         GetSpecializationInfoByID = function()
             local id = 0
             local name = "Test"
@@ -151,7 +127,6 @@ function M:Create()
         UnitIsGroupLeader = function()
             return false
         end,
-        PromoteToLeader = function() end,
 
         -- state functions
         IsInInstance = function()
@@ -163,9 +138,6 @@ function M:Create()
         IsInRaid = function()
             return false
         end,
-        IsInstanceBattleground = function()
-            return false
-        end,
 
         -- utility
         ReloadUI = function() end,
@@ -175,23 +147,11 @@ function M:Create()
                 callback()
             end,
         },
-        wipe = function(table)
-            for key, _ in pairs(table) do
-                table[key] = nil
-            end
-
-            return table
-        end,
-        CopyTable = CopyTable,
         GetLocale = function()
             return "enUS"
         end,
 
         -- secure functions
-        issecurevariable = function()
-            return false
-        end,
-
         SecureHandlerWrapScript = function() end,
         SecureHandlerSetFrameRef = function() end,
         SecureHandlerExecute = function() end,
@@ -208,18 +168,7 @@ function M:Create()
         GetTimePreciseSec = function()
             return os.time()
         end,
-
-        issecretvalue = function()
-            return false
-        end,
-
-        -- bg related
-        GetNumBattlefieldScores = function()
-            return 0
-        end,
     }
-
-    wow.EditModeManagerFrame.editModeActive = false
 
     wow.InCombatLockdown = function()
         return wow.State.MockInCombat
