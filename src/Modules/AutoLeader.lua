@@ -47,6 +47,14 @@ local function Run()
 end
 
 local function OnStateChanged()
+    if not wow.HasSoloShuffle() then
+        return
+    end
+
+    if not (wow.C_PvP and wow.C_PvP.GetActiveMatchState and wow.C_PvP.IsSoloShuffle) or not (wow.Enum and wow.Enum.PvPMatchState) then
+        return
+    end
+
     local state = wow.C_PvP.GetActiveMatchState()
 
     if state == wow.Enum.PvPMatchState.PostRound or state == wow.Enum.PvPMatchState.Complete then
@@ -68,13 +76,15 @@ function M:Init()
 end
 
 function M:Run()
-    if not wow.HasSoloShuffle() then
-        return
-    end
     if not addon.DB.Options.AutoLeader.Enabled then
         return
     end
-    if not wow.C_PvP.IsSoloShuffle() then
+
+    if not wow.HasSoloShuffle() then
+        return
+    end
+
+    if not wow.C_PvP or not wow.C_PvP.IsSoloShuffle or not wow.C_PvP.IsSoloShuffle() then
         return
     end
 
