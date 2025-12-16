@@ -36,8 +36,6 @@ local function OnEnteringWorld()
 end
 
 local function OnEvent(_, event)
-    assert(event ~= nil)
-
     if event == events.PLAYER_ENTERING_WORLD then
         OnEnteringWorld()
     elseif event == events.PLAYER_REGEN_ENABLED then
