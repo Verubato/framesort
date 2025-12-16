@@ -133,6 +133,7 @@ function M:GetSpecInfo(specId)
     return M.SpecIdLookup[specId]
 end
 
+---@return string|nil
 function M:SpecTypeKey(specType)
     if specType == M.Type.Tank then
         return "Tanks"
