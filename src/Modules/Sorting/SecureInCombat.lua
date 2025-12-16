@@ -259,7 +259,7 @@ secureMethods["CompareFrameTopLeft"] = [[
     end
 
     local leftFuzzy = math.floor(left * mult + 0.5) / mult
-    local nextLeftFuzzy = math.floor(nextLeftFuzzy * mult + 0.5) / mult
+    local nextLeftFuzzy = math.floor(nextLeft * mult + 0.5) / mult
 
     return leftFuzzy < nextLeftFuzzy
 ]]
@@ -303,7 +303,7 @@ secureMethods["CompareFrameBottomLeft"] = [[
     end
 
     local leftFuzzy = math.floor(left * mult + 0.5) / mult
-    local nextLeftFuzzy = math.floor(nextLeftFuzzy * mult + 0.5) / mult
+    local nextLeftFuzzy = math.floor(nextLeft * mult + 0.5) / mult
 
     return leftFuzzy < nextLeftFuzzy
 ]]
