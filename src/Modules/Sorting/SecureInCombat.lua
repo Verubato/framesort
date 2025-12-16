@@ -250,6 +250,14 @@ secureMethods["CompareFrameTopLeft"] = [[
     local left, bottom, width, height = x:GetRect()
     local nextLeft, nextBottom, nextWidth, nextHeight = y:GetRect()
 
+    if not left or not bottom or not height or not width then
+        return false
+    end
+
+    if not nextLeft or not nextBottom or not nextHeight or not nextWidth then
+        return true
+    end
+
     local mult = 10 ^ DecimalSanity
     local topFuzzy = math.floor((bottom + height) * mult + 0.5) / mult
     local nextTopFuzzy = math.floor((nextBottom + nextHeight) * mult + 0.5) / mult
@@ -271,6 +279,14 @@ secureMethods["CompareFrameTopRight"] = [[
 
     local left, bottom, width, height = x:GetRect()
     local nextLeft, nextBottom, nextWidth, nextHeight = y:GetRect()
+
+    if not left or not bottom or not height or not width then
+        return false
+    end
+
+    if not nextLeft or not nextBottom or not nextHeight or not nextWidth then
+        return true
+    end
 
     local mult = 10 ^ DecimalSanity
     local topFuzzy = math.floor((bottom + height) * mult + 0.5) / mult
@@ -294,6 +310,14 @@ secureMethods["CompareFrameBottomLeft"] = [[
     local left, bottom, width, height = x:GetRect()
     local nextLeft, nextBottom, nextWidth, nextHeight = y:GetRect()
 
+    if not left or not bottom or not height or not width then
+        return false
+    end
+
+    if not nextLeft or not nextBottom or not nextHeight or not nextWidth then
+        return true
+    end
+
     local mult = 10 ^ DecimalSanity
     local bottomFuzzy = math.floor(bottom * mult + 0.5) / mult
     local nextBottomFuzzy = math.floor(nextBottom * mult + 0.5) / mult
@@ -313,6 +337,14 @@ secureMethods["ComparePointTopLeft"] = [[
     local leftVariable, rightVariable = ...
     local x, y = _G[leftVariable], _G[rightVariable]
 
+    if not x.Bottom or not x.Height or not x.Left then
+        return false
+    end
+
+    if not y.Bottom or not y.Height or not y.Left then
+        return true
+    end
+
     local mult = 10 ^ DecimalSanity
     local topFuzzy = math.floor((x.Bottom + x.Height) * mult + 0.5) / mult
     local nextTopFuzzy = math.floor((y.Bottom + y.Height) * mult + 0.5) / mult
@@ -331,6 +363,14 @@ secureMethods["ComparePointLeftTop"] = [[
     local run = control or self
     local leftVariable, rightVariable = ...
     local x, y = _G[leftVariable], _G[rightVariable]
+
+    if not x.Bottom or not x.Height or not x.Left then
+        return false
+    end
+
+    if not y.Bottom or not y.Height or not y.Left then
+        return true
+    end
 
     local mult = 10 ^ DecimalSanity
     local topFuzzy = math.floor((x.Bottom + x.Height) * mult + 0.5) / mult
