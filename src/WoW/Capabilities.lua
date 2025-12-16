@@ -26,7 +26,11 @@ function M.Has5v5()
 end
 
 function M.CanOpenOptionsDuringCombat()
-    return (LE_EXPANSION_LEVEL_CURRENT ~= nil and LE_EXPANSION_MIDNIGHT == nil) or (LE_EXPANSION_LEVEL_CURRENT < LE_EXPANSION_MIDNIGHT)
+    if LE_EXPANSION_LEVEL_CURRENT == nil or LE_EXPANSION_MIDNIGHT == nil then
+        return true
+    end
+
+    return LE_EXPANSION_LEVEL_CURRENT < LE_EXPANSION_MIDNIGHT
 end
 
 function M.HasC_PvP()
