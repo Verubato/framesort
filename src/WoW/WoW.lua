@@ -91,7 +91,13 @@ addon.WoW.Api = {
         return false
     end,
 
-    IsInRaid = IsInRaid,
+    IsInRaid = IsInRaid or function()
+        if GetNumRaidMembers and GetNumRaidMembers() > 0 then
+            return true
+        end
+
+        return false
+    end,
     InCombatLockdown = InCombatLockdown,
 
     -- group size functions

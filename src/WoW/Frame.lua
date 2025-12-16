@@ -1,4 +1,3 @@
--- TODO: move this to a better namespace
 ---@type string, Addon
 local _, addon = ...
 local fsEnumerable = addon.Collections.Enumerable
