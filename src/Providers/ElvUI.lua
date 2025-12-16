@@ -27,7 +27,7 @@ local function IntegrationEnabled()
 end
 
 local function ElvUiEnabled()
-    return wow.GetAddOnEnableState(nil, "ElvUI") ~= 0 and ElvUI ~= nil
+    return wow.GetAddOnEnableState("ElvUI") ~= 0 and ElvUI ~= nil
 end
 
 local function RequestUpdateContainers()

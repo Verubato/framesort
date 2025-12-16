@@ -25,7 +25,7 @@ function M:Name()
 end
 
 function M:Enabled()
-    return wow.GetAddOnEnableState(nil, "Gladius") ~= 0
+    return wow.GetAddOnEnableState("Gladius") ~= 0
 end
 
 function M:Init()

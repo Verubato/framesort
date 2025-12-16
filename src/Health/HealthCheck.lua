@@ -88,7 +88,7 @@ local function ConflictingAddons()
     end
 
     -- running both at the same time would cause issues
-    if wow.GetAddOnEnableState(nil, "SortGroup") ~= 0 then
+    if wow.GetAddOnEnableState("SortGroup") ~= 0 then
         return "SortGroup"
     end
 
