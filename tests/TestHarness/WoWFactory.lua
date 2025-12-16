@@ -42,6 +42,7 @@ function M:Create()
 
         -- constants
         MAX_RAID_MEMBERS = 40,
+        MAX_PARTY_MEMBERS = 4,
         MEMBERS_PER_RAID_GROUP = 5,
 
         -- frames

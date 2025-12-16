@@ -7,6 +7,7 @@
 ---@field RAID_CLASS_COLORS table
 -- constants
 ---@field MAX_RAID_MEMBERS number
+---@field MAX_PARTY_MEMBERS number
 ---@field MEMBERS_PER_RAID_GROUP number
 -- frames
 ---@field CreateFrame fun(frameType: string, name: string?, parent: table?, template: string?, id: number?): frame: table

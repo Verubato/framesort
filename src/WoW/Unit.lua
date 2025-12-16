@@ -12,11 +12,11 @@ local allPartyUnitsIds = {
 local allRaidUnitsIds = {}
 local allEnemyUnitsIds = {}
 
-for i = 1, wow.MEMBERS_PER_RAID_GROUP do
+for i = 1, wow.MAX_PARTY_MEMBERS do
     allPartyUnitsIds[#allPartyUnitsIds + 1] = "party" .. i
 end
 
-for i = 1, wow.MEMBERS_PER_RAID_GROUP do
+for i = 1, wow.MAX_PARTY_MEMBERS do
     allPartyUnitsIds[#allPartyUnitsIds + 1] = "partypet" .. i
 end
 
