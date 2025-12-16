@@ -1,4 +1,3 @@
----@diagnostic disable: undefined-global
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
@@ -68,5 +67,3 @@ addon.WoW.Events = {
     -- Fires when an AddOn tries use actions that are always forbidden (movement, targeting, etc.).
     ADDON_ACTION_FORBIDDEN = "ADDON_ACTION_FORBIDDEN",
 }
-
-return events

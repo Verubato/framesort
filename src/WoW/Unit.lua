@@ -60,7 +60,7 @@ function M:ArenaUnitProbablyExists(unit)
 
     if wowEx.IsInstanceBattleground() or (capabilities.HasBrawl() and wow.C_PvP.IsInBrawl()) then
         -- in 15v15 brawl, GetNumArenaOpponentSpecs returns 0 so we use GetNumBattlefieldScores instead
-        bgCount = wow.GetNumBattlefieldScores() or 0
+        bgCount = wow.GetNumBattlefieldScores and wow.GetNumBattlefieldScores() or 0
     end
 
     local instanceSize = math.max(arenaCount, groupCount, bgCount)

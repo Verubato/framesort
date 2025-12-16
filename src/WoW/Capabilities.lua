@@ -8,7 +8,7 @@ local M = {}
 
 addon.WoW.Capabilities = M
 
-function M.HasDropdown()
+function M.HasModernDropdown()
     return WowStyle1DropdownTemplate ~= nil
 end
 

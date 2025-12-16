@@ -97,7 +97,7 @@ function fsConfig:MultilineTextBlock(text, parent, anchor)
 end
 
 function fsConfig:Dropdown(parent, items, getValue, setSelected, getText)
-    if capabilities.HasDropdown() then
+    if capabilities.HasModernDropdown() then
         local dd = wow.CreateFrame("DropdownButton", nil, parent, "WowStyle1DropdownTemplate")
         dd:SetupMenu(function(_, rootDescription)
             for i, value in ipairs(items) do
