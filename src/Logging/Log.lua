@@ -49,6 +49,10 @@ local function OnAddonError(_, eventName, errorAddon, error)
         return
     end
 
+    if not error then
+        return
+    end
+
     Write(error, M.Level.Error)
 end
 
