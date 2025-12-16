@@ -124,7 +124,7 @@ function M:PetFor(unit, isEnemy)
         return "pet"
     end
 
-    local pet, _ = string.gsub(unit, "%a+", "%1pet")
+    local pet, _ = string.gsub(unit, "^(%a+)", "%1pet")
     return pet
 end
 
