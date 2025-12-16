@@ -42,7 +42,7 @@ function M:GetFrameForUnit(unit)
     elseif cachedFrame then
         local frameUnit = fsFrame:GetFrameUnit(cachedFrame)
         local isUnitOrSecret = frameUnit ~= nil and wow.UnitIsUnit(frameUnit, unit)
-        local matchesUnit = wow.issecretvalue(isUnitOrSecret) and isUnitOrSecret
+        local matchesUnit = frameUnit == unit or (not wow.issecretvalue(isUnitOrSecret) and isUnitOrSecret)
 
         -- check the visibility of the frame, as blizzard frames may have been hidden by an addon
         -- in which case we don't want to use it
