@@ -18,15 +18,15 @@ function M.HasEnemySpecSupport()
 end
 
 function M.HasArena()
-    return LE_EXPANSION_BURNING_CRUSADE and LE_EXPANSION_LEVEL_CURRENT >= LE_EXPANSION_BURNING_CRUSADE
+    return LE_EXPANSION_LEVEL_CURRENT ~= nil and LE_EXPANSION_BURNING_CRUSADE ~= nil and LE_EXPANSION_LEVEL_CURRENT >= LE_EXPANSION_BURNING_CRUSADE
 end
 
 function M.Has5v5()
-    return LE_EXPANSION_BURNING_CRUSADE and LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_BURNING_CRUSADE
+    return LE_EXPANSION_LEVEL_CURRENT ~= nil and LE_EXPANSION_BURNING_CRUSADE ~= nil and LE_EXPANSION_LEVEL_CURRENT == LE_EXPANSION_BURNING_CRUSADE
 end
 
 function M.CanOpenOptionsDuringCombat()
-    return not LE_EXPANSION_MIDNIGHT or LE_EXPANSION_LEVEL_CURRENT < LE_EXPANSION_MIDNIGHT
+    return (LE_EXPANSION_LEVEL_CURRENT ~= nil and LE_EXPANSION_MIDNIGHT == nil) or (LE_EXPANSION_LEVEL_CURRENT < LE_EXPANSION_MIDNIGHT)
 end
 
 function M.HasC_PvP()
@@ -38,11 +38,11 @@ function M.HasC_Map()
 end
 
 function M.HasSoloShuffle()
-    return M.HasC_PvP() and wow.C_PvP.IsSoloShuffle ~= nil and type(wow.C_PvP.IsSoloShuffle) == "function" and wow.Enum and type(wow.Enum) == "table" and wow.Enum.PvPMatchState ~= nil
+    return M.HasC_PvP() and type(wow.C_PvP.IsSoloShuffle) == "function" and type(wow.Enum) == "table" and wow.Enum.PvPMatchState ~= nil
 end
 
 function M.HasBrawl()
-    return M.HasC_PvP() and wow.C_PvP.IsInBrawl ~= nil and type(wow.C_PvP.IsInBrawl) == "function"
+    return M.HasC_PvP() and type(wow.C_PvP.IsInBrawl) == "function"
 end
 
 function M.HasEditMode()
@@ -51,5 +51,5 @@ end
 
 function M.HasSpecializations()
     -- specs were introduced in MoP, and prior expansions used a talent system
-    return LE_EXPANSION_LEVEL_CURRENT >= LE_EXPANSION_MISTS_OF_PANDARIA
+    return LE_EXPANSION_LEVEL_CURRENT ~= nil and LE_EXPANSION_MISTS_OF_PANDARIA ~= nil and LE_EXPANSION_LEVEL_CURRENT >= LE_EXPANSION_MISTS_OF_PANDARIA
 end
