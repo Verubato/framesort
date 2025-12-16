@@ -121,14 +121,8 @@ addon.WoW.Api = {
     GetRealZoneText = GetRealZoneText,
 
     -- addon related
-    GetAddOnEnableState = C_AddOns and C_AddOns.GetAddOnEnableState or function(name, character)
-        if GetAddOnEnableState then
-            -- argument order is reversed
-            return GetAddOnEnableState(character, name)
-        end
-
-        return nil
-    end,
+    -- don't fallback to GetAddOnEnableState as we let our shim handle that
+    GetAddOnEnableState = C_AddOns and C_AddOns.GetAddOnEnableState,
     GetAddOnMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata,
 
     -- time related
