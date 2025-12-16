@@ -16,16 +16,19 @@ local function FrameShims(frame)
 
     -- wotlk private
     if not frame.Text then
-        frame.Text = {
-            SetFontObject = function(_, fontName)
-                local textFrame = _G[frame:GetName() .. "Text"]
-                return textFrame:SetFontObject(fontName)
-            end,
-            SetText = function(_, text)
-                local textFrame = _G[frame:GetName() .. "Text"]
-                textFrame:SetText(text)
-            end,
-        }
+        local name = frame.GetName and frame:GetName()
+        local textFrame = name and _G[name .. "Text"]
+
+        if textFrame then
+            frame.Text = {
+                SetFontObject = function(_, fontName)
+                    return textFrame:SetFontObject(fontName)
+                end,
+                SetText = function(_, text)
+                    textFrame:SetText(text)
+                end,
+            }
+        end
 
         local originalCreateFontString = frame.CreateFontString
         frame.CreateFontString = function(...)
