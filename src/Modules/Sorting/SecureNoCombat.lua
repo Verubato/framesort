@@ -645,7 +645,10 @@ end
 ---@param provider FrameProvider?
 ---@return boolean
 function M:TrySort(provider)
-    assert(not wow.InCombatLockdown())
+    if wow.InCombatLockdown() then
+        fsLog:Error("Cannot run non-combat sorting module during combat.")
+        return false
+    end
 
     local sorted = false
     local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
