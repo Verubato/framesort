@@ -22,11 +22,19 @@ addon.WoW.WowEx = {
     ---@return number
     ArenaOpponentsCount = function()
         if wow.GetNumArenaOpponents then
-            return wow.GetNumArenaOpponents()
+            local count = wow.GetNumArenaOpponents()
+
+            if count and count > 0 then
+                return count
+            end
         end
 
         if wow.GetNumArenaOpponentSpecs then
-            return wow.GetNumArenaOpponentSpecs()
+            local count = wow.GetNumArenaOpponentSpecs()
+
+            if count and count > 0 then
+                return count
+            end
         end
 
         return 0
