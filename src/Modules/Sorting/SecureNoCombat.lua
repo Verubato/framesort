@@ -260,12 +260,17 @@ local function SoftArrange(frames, spacing)
     for _, source in ipairs(enumerationOrder) do
         local desiredIndex = fsEnumerable:From(frames):IndexOf(source)
         local destination = points[desiredIndex]
-        local xDelta = destination.Left - source:GetLeft()
-        local yDelta = destination.Top - source:GetTop()
 
-        if xDelta ~= 0 or yDelta ~= 0 then
-            source:AdjustPointsOffset(xDelta, yDelta)
-            movedAny = true
+        if destination then
+            local xDelta = destination.Left - source:GetLeft()
+            local yDelta = destination.Top - source:GetTop()
+
+            if xDelta ~= 0 or yDelta ~= 0 then
+                source:AdjustPointsOffset(xDelta, yDelta)
+                movedAny = true
+            end
+        else
+            fsLog:Debug("Unable to determine frame's desired index (non-combat).", source:GetName() or "nil")
         end
     end
 
