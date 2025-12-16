@@ -3,6 +3,7 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
+local wowEx = addon.WoW.WowEx
 local events = addon.WoW.Events
 local capabilities = addon.WoW.Capabilities
 local fsUnit = addon.WoW.Unit
@@ -74,12 +75,12 @@ local function Inspect(unit)
         return
     end
 
-    local specId = wow.GetInspectSpecialization(unit)
+    local specId = wowEx.GetInspectSpecializationSafe(unit)
     local cacheEntry = EnsureCacheEntry(unit)
 
     -- the spec id may be 0, in which case we'll use the previous value (if one exists)
     local before = cacheEntry.SpecId
-    cacheEntry.SpecId = specId ~= 0 and specId or cacheEntry.SpecId
+    cacheEntry.SpecId = specId or cacheEntry.SpecId
     cacheEntry.LastSeen = wow.GetTimePreciseSec()
     local after = cacheEntry.SpecId
 
@@ -293,7 +294,7 @@ function M:ArenaUnitSpec(unit)
         return nil
     end
 
-    local specId = wow.GetArenaOpponentSpec and wow.GetArenaOpponentSpec(unitNumber)
+    local specId = wowEx.GetArenaOpponentSpecSafe(unitNumber)
 
     if specId then
         return specId
