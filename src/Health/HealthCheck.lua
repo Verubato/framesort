@@ -154,7 +154,7 @@ local function CheckCanSeeFrames()
         end)
         :ToTable()
 
-    local allProvidersString = wow.strjoin(", ", allProviderNames)
+    local allProvidersString = table.concat(allProviderNames, ", ")
 
     return {
         Applicable = wow.IsInGroup(),
@@ -184,7 +184,7 @@ local function CheckOnlyUsingBlizzard()
         end)
         :ToTable()
 
-    local enabledNonBlizzardString = wow.strjoin(", ", enabledNonBlizzardNames)
+    local enabledNonBlizzardString = table.concat(enabledNonBlizzardNames, ", ")
 
     return {
         Applicable = addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Traditional,

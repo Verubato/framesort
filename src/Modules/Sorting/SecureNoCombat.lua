@@ -417,7 +417,7 @@ local function SetNameList(container)
         end)
         :ToTable()
 
-    local names = wow.strjoin(",", unitNames)
+    local names = table.concat(unitNames, ",")
     local existingNameList = container.Frame:GetAttribute("nameList")
 
     if existingNameList == names then
