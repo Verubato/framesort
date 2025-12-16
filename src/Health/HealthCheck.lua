@@ -249,7 +249,7 @@ local function CheckKeepGroupTogether()
         local raidGroupDisplayType =
             wow.EditModeManagerFrame:GetSettingValue(wow.Enum.EditModeSystem.UnitFrame, wow.Enum.EditModeUnitFrameSystemIndices.Raid, wow.Enum.EditModeUnitFrameSetting.RaidGroupDisplayType)
         keepGroupTogether = raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsVertical or raidGroupDisplayType == wow.Enum.RaidGroupDisplayType.SeparateGroupsHorizontal
-    else
+    elseif wow.CompactRaidFrameManager_GetSetting then
         keepGroupTogether = wow.CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
     end
 
