@@ -22,6 +22,8 @@ local function AddCategory(panel)
         return category
     elseif wow.InterfaceOptions_AddCategory then
         wow.InterfaceOptions_AddCategory(panel)
+
+        return panel
     else
         fsLog:Critical("Unable to add options category.")
     end
