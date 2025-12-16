@@ -1,6 +1,7 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
+local wowEx = addon.WoW.WowEx
 local capabilities = addon.WoW.Capabilities
 local fsUnit = addon.WoW.Unit
 local fsMath = addon.Numerics.Math
@@ -566,7 +567,7 @@ function M:FriendlySortMode()
     local config = addon.DB.Options.Sorting
 
     if inInstance and instanceType == "arena" then
-        local instanceSize = wow.GetNumGroupMembers()
+        local instanceSize = wowEx.GroupMembersCount()
         local arena = instanceSize == 2 and config.Arena.Twos or config.Arena.Default
 
         return arena.Enabled, arena.PlayerSortMode, arena.GroupSortMode, arena.Reverse

@@ -3,7 +3,7 @@ local _, addon = ...
 local wow = addon.WoW.Api
 ---@class WowEx
 addon.WoW.WowEx = {
-    -- non-blizzard related
+    ---@return boolean
     IsInstanceBattleground = function()
         local inInstance, instanceType = wow.IsInInstance()
         local isBg = inInstance and instanceType == "pvp"
@@ -19,6 +19,7 @@ addon.WoW.WowEx = {
         return false
     end,
 
+    ---@return number
     ArenaOpponentsCount = function()
         if wow.GetNumArenaOpponents then
             return wow.GetNumArenaOpponents()
@@ -26,6 +27,31 @@ addon.WoW.WowEx = {
 
         if wow.GetNumArenaOpponentSpecs then
             return wow.GetNumArenaOpponentSpecs()
+        end
+
+        return 0
+    end,
+
+    ---@return number
+    GroupMembersCount = function()
+        if wow.GetNumGroupMembers then
+            return wow.GetNumGroupMembers()
+        end
+
+        if wow.GetNumRaidMembers then
+            local count = wow.GetNumRaidMembers()
+
+            if count > 0 then
+                return count
+            end
+        end
+
+        if wow.GetNumPartyMembers then
+            local count = wow.GetNumPartyMembers()
+
+            if count > 0 then
+                return count
+            end
         end
 
         return 0

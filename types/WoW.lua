@@ -63,6 +63,8 @@
 ---@field ClearInspectPlayer fun()
 -- group size functions
 ---@field GetNumGroupMembers fun(): number
+---@field GetNumRaidMembers fun(): number
+---@field GetNumPartyMembers fun(): number
 ---@field GetNumArenaOpponentSpecs fun(): number
 ---@field GetNumArenaOpponents fun(): number
 -- state functions

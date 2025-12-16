@@ -98,6 +98,8 @@ addon.WoW.Api = {
     GetNumGroupMembers = GetNumGroupMembers,
     GetNumArenaOpponentSpecs = GetNumArenaOpponentSpecs,
     GetNumArenaOpponents = GetNumArenaOpponents,
+    GetNumRaidMembers = GetNumRaidMembers,
+    GetNumPartyMembers = GetNumPartyMembers,
 
     -- utility
     wipe = wipe,
