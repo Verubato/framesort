@@ -55,6 +55,16 @@ local function SortFramesByUnits(frames, sortedUnits)
             return leftIndex < rightIndex
         end
 
+        if not leftIndex or not rightIndex then
+            fsLog:Debug(
+                "Unable to map units to indices during SortFramesByUnits: left = %s %s, right = %s %s",
+                leftFrame:GetName() or "nil",
+                leftUnit or "nil",
+                rightFrame:GetName() or "nil",
+                rightUnit or "nil"
+            )
+        end
+
         -- from here on out, pretty much only happens in test/edit mode
         if leftFrame:IsVisible() and not rightFrame:IsVisible() then
             return true
