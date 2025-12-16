@@ -78,7 +78,7 @@ addon.WoW.Api = {
     -- state functions
     IsInInstance = IsInInstance,
     IsInGroup = IsInGroup or function()
-        return (GetNumPartyMembers and GetNumPartyMembers() > 0) or (GetNumRaidMembers and GetNumRaidMembers() > 0) or error("Unable to determine if in group.")
+        return (GetNumPartyMembers and GetNumPartyMembers() > 0) or (GetNumRaidMembers and GetNumRaidMembers() > 0) or false
     end,
 
     IsInRaid = IsInRaid,
