@@ -21,16 +21,16 @@ end
 
 function addon:InitDB()
     fsLog:Debug("Loading saved variables.")
-    FrameSortDB = FrameSortDB or {}
-    FrameSortDB.Options = FrameSortDB.Options or wow.CopyTable(addon.Configuration.Defaults)
 
-    local success = addon.Configuration.Upgrader:UpgradeOptions(FrameSortDB.Options)
+    FrameSortDB = FrameSortDB or wow.CopyTable(addon.Configuration.DbDefaults)
+    FrameSortDB.Options = FrameSortDB.Options or wow.CopyTable(addon.Configuration.DbDefaults)
+
+    local success = addon.Configuration.Upgrader:UpgradeDb(FrameSortDB)
 
     if not success then
         fsLog:Critical("Saved variables are corrupt, resetting to default settings.")
 
-        FrameSortDB = {}
-        FrameSortDB.Options = wow.CopyTable(addon.Configuration.Defaults)
+        FrameSortDB = wow.CopyTable(addon.Configuration.DbDefaults)
     end
 
     addon.DB = FrameSortDB

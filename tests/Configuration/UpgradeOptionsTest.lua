@@ -2180,6 +2180,13 @@ function M:test_upgrade_options_version1_to_latest()
 
     local expected = {
         Sorting = {
+            SpecPriority = {
+                Tanks = {},
+                Healers = {},
+                Hunters = {},
+                Melee = {},
+                Casters = {},
+            },
             Ordering = {
                 Tanks = 1,
                 Healers = 2,
@@ -2246,7 +2253,10 @@ function M:test_upgrade_options_version1_to_latest()
         Version = 22,
     }
 
-    local success = upgrader:UpgradeOptions(options)
+    local db = {
+        Options = options,
+    }
+    local success = upgrader:UpgradeDb(db)
 
     assertEquals(success, true)
     assertEquals(options, expected)
@@ -2324,7 +2334,10 @@ function M:test_upgrade_options_latest_to_latest_passes()
         Version = 22,
     }
 
-    local success = upgrader:UpgradeOptions(options)
+    local db = {
+        Options = options,
+    }
+    local success = upgrader:UpgradeDb(db)
 
     assertEquals(success, true)
 end
@@ -2398,7 +2411,10 @@ function M:test_upgrade_options_higher_than_current_fails()
         Version = 99,
     }
 
-    local success = upgrader:UpgradeOptions(options)
+    local db = {
+        Options = options,
+    }
+    local success = upgrader:UpgradeDb(db)
 
     assertEquals(success, false)
 end

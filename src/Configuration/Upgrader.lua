@@ -8,6 +8,7 @@ local M = {}
 
 addon.Configuration.Upgrader = M
 
+---Returns a clone of an existing table.
 local function DeepCopy(t)
     if type(t) ~= "table" then
         return t
@@ -19,55 +20,73 @@ local function DeepCopy(t)
     return out
 end
 
-local function CleanTable(options, defaults)
+---Removes any erronous values from the options table.
+---@param target table the target table to clean
+---@param template table what the table should look like
+---@param cleanValues any whether or not to clean non-table values, e.g. numbers and strings
+---@param recurse any whether to recursively clean the table
+local function CleanTable(target, template, cleanValues, recurse)
     -- remove values that aren't ours
-    if type(options) ~= "table" or type(defaults) ~= "table" then
+    if type(target) ~= "table" or type(template) ~= "table" then
         return
     end
 
-    for k, v in pairs(options) do
-        local d = defaults[k]
-        if d == nil then
-            options[k] = nil
-        elseif type(v) == "table" and type(d) == "table" then
-            CleanTable(v, d)
-        elseif type(v) == "table" and type(d) ~= "table" then
-            -- type mismatch: reset this key to default
-            options[k] = DeepCopy(d)
+    for key, value in pairs(target) do
+        local templateValue = template[key]
+
+        -- only clean non-table values if told to do so
+        if cleanValues and templateValue == nil then
+            target[key] = nil
+            fsLog:Warning("Removed erroneous db value %s", key)
+        end
+
+        if recurse then
+            if type(value) == "table" and type(templateValue) == "table" then
+                CleanTable(value, templateValue)
+            elseif type(value) == "table" and type(templateValue) ~= "table" then
+                -- type mismatch: reset this key to default
+                target[key] = DeepCopy(templateValue)
+                fsLog:Warning("Replaced existing key %s with defaults.", key)
+            end
         end
     end
 end
 
----Adds any missing keys to options.
-local function AddMissing(options, defaults)
-    if type(options) ~= "table" or type(defaults) ~= "table" then
+---Recursively adds any missing keys to the target.
+---@param target table the target table to clean
+---@param template table what the table should look like
+local function AddMissing(target, template)
+    if type(target) ~= "table" or type(template) ~= "table" then
         return
     end
 
-    for k, v in pairs(defaults) do
-        if options[k] == nil then
-            options[k] = DeepCopy(v)
-        elseif type(v) == "table" and type(options[k]) == "table" then
-            AddMissing(options[k], v)
-        elseif type(v) == "table" and type(options[k]) ~= "table" then
-            options[k] = DeepCopy(v)
+    for key, value in pairs(template) do
+        if target[key] == nil then
+            target[key] = DeepCopy(value)
+            fsLog:Warning("Added missing key %s to options table.", key)
+        elseif type(value) == "table" and type(target[key]) == "table" then
+            AddMissing(target[key], value)
+        elseif type(value) == "table" and type(target[key]) ~= "table" then
+            target[key] = DeepCopy(value)
+            fsLog:Warning("Replaced existing key %s with defaults.", key)
         end
     end
 end
 
----Returns true if options has the same set of keys as defaults, however options may also have more keys than defaults.
-local function HasSameKeys(options, defaults)
-    for k, v in pairs(defaults) do
-        if options[k] == nil then
+---Returns true if the target has the same set of keys as the template.
+---However the target may also have more keys than template.
+local function HasSameKeys(target, template)
+    for key, value in pairs(template) do
+        if target[key] == nil then
             return false
         end
 
-        if type(v) == "table" then
-            if type(options[k]) ~= "table" then
+        if type(value) == "table" then
+            if type(target[key]) ~= "table" then
                 return false
             end
 
-            if not HasSameKeys(options[k], v) then
+            if not HasSameKeys(target[key], value) then
                 return false
             end
         end
@@ -321,7 +340,7 @@ function M:UpgradeToVersion10(options)
     }
 
     -- remove clashing values
-    CleanTable(options, v10Defaults)
+    CleanTable(options, v10Defaults, true)
 
     -- add any missing values back
     AddMissing(options, v10Defaults)
@@ -605,16 +624,18 @@ function M:UpgradeToVersion22(options)
     return true
 end
 
----Upgrades saved options to the current version.
-function M:UpgradeOptions(options)
-    if options.Version and options.Version > fsConfig.Defaults.Version then
+---Upgrades saved variables database to the current version.
+function M:UpgradeDb(db)
+    local options = db.Options
+
+    if options.Version and options.Version > fsConfig.DbDefaults.Options.Version then
         -- they are running a version ahead of us
         return false
     end
 
     local isCorrupt = false
 
-    while (options.Version or 1) < fsConfig.Defaults.Version do
+    while (options.Version or 1) < fsConfig.DbDefaults.Options.Version do
         local currentVersion = options.Version or 1
         local nextVersion = currentVersion + 1
         local next = M["UpgradeToVersion" .. nextVersion]
@@ -637,8 +658,14 @@ function M:UpgradeOptions(options)
         return false
     end
 
+    -- clean any unknown values from our db
+    CleanTable(db, fsConfig.DbDefaults, true, false)
+
+    -- add any missing defaults
+    AddMissing(db, fsConfig.DbDefaults)
+
     -- make sure the tables match in terms of their keys
-    isCorrupt = not HasSameKeys(options, fsConfig.Defaults)
+    isCorrupt = not HasSameKeys(options, fsConfig.DbDefaults.Options)
 
     return not isCorrupt
 end
