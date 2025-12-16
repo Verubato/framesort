@@ -8,18 +8,6 @@ local M = {}
 
 addon.Configuration.Upgrader = M
 
----Returns a clone of an existing table.
-local function DeepCopy(t)
-    if type(t) ~= "table" then
-        return t
-    end
-    local out = {}
-    for k, v in pairs(t) do
-        out[k] = DeepCopy(v)
-    end
-    return out
-end
-
 ---Removes any erronous values from the options table.
 ---@param target table the target table to clean
 ---@param template table what the table should look like
@@ -45,7 +33,7 @@ local function CleanTable(target, template, cleanValues, recurse)
                 CleanTable(value, templateValue)
             elseif type(value) == "table" and type(templateValue) ~= "table" then
                 -- type mismatch: reset this key to default
-                target[key] = DeepCopy(templateValue)
+                target[key] = templateValue
                 fsLog:Warning("Replaced existing key %s with defaults.", key)
             end
         end
@@ -62,12 +50,17 @@ local function AddMissing(target, template)
 
     for key, value in pairs(template) do
         if target[key] == nil then
-            target[key] = DeepCopy(value)
+            if type(value) == "table" then
+                target[key] = wow.CopyTable(value)
+            else
+                target[key] = value
+            end
+
             fsLog:Warning("Added missing key %s to options table.", key)
         elseif type(value) == "table" and type(target[key]) == "table" then
             AddMissing(target[key], value)
         elseif type(value) == "table" and type(target[key]) ~= "table" then
-            target[key] = DeepCopy(value)
+            target[key] = wow.CopyTable(value)
             fsLog:Warning("Replaced existing key %s with defaults.", key)
         end
     end
