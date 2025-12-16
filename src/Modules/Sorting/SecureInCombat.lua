@@ -634,6 +634,9 @@ secureMethods["ApplySpacing"] = [[
         end
     end
 
+    OrderedTopLeft = nil
+    OrderedLeftTop = nil
+
     return changed
 ]]
 
