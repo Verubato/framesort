@@ -10,22 +10,37 @@ addon.Configuration.Upgrader = M
 
 local function CleanTable(options, defaults)
     -- remove values that aren't ours
+    if type(options) ~= "table" or type(defaults) ~= "table" then
+        return
+    end
+
     for k, v in pairs(options) do
-        if defaults[k] == nil then
+        local d = defaults[k]
+        if d == nil then
             options[k] = nil
-        elseif v ~= nil and type(v) == "table" then
-            CleanTable(options[k], defaults[k])
+        elseif type(v) == "table" and type(d) == "table" then
+            CleanTable(v, d)
+        elseif type(v) == "table" and type(d) ~= "table" then
+            -- type mismatch: reset this key to default
+            options[k] = d
         end
     end
 end
 
 local function AddMissing(options, defaults)
     -- add defaults for any missing values
+    if type(options) ~= "table" or type(defaults) ~= "table" then
+        return
+    end
+
     for k, v in pairs(defaults) do
         if options[k] == nil then
             options[k] = v
-        elseif type(v) == "table" then
-            AddMissing(options[k], defaults[k])
+        elseif type(v) == "table" and type(options[k]) == "table" then
+            AddMissing(options[k], v)
+        elseif type(v) == "table" and type(options[k]) ~= "table" then
+            -- type mismatch: reset this key to default
+            options[k] = v
         end
     end
 end
