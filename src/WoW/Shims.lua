@@ -4,8 +4,9 @@ local _, addon = ...
 local wow = addon.WoW.Api
 
 -- shims for older clients
-local nextFrameId = 1
 local version = GetBuildInfo and GetBuildInfo()
+local nextFrameId = 1
+local isWotlkPrivate = version == "3.3.5"
 
 local function FrameShims(frame)
     -- classic
@@ -55,8 +56,6 @@ end
 local createFrame = wow.CreateFrame
 
 wow.CreateFrame = function(frameType, name, parent, template, id)
-    local isWotlkPrivate = version == "3.3.5"
-
     if not name and isWotlkPrivate then
         -- wotlk private requires name to not be nil
         name = "FSDummyName" .. nextFrameId
