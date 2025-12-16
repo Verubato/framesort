@@ -24,7 +24,7 @@ local function BuiltTitle(panel)
 
     local unhealthy = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
     unhealthy:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -verticalSpacing)
-    unhealthy:SetText(L["There are some issuse that may prevent FrameSort from working correctly."])
+    unhealthy:SetText(L["There are some issues that may prevent FrameSort from working correctly."])
 
     local unhealthyGoto = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
     unhealthyGoto:SetPoint("TOPLEFT", unhealthy, "BOTTOMLEFT", 0, -verticalSpacing)

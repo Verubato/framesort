@@ -4,7 +4,7 @@ local L = addon.Locale
 -- # Main Options screen #
 -- used in FrameSort - 1.2.3 version header, %s is the version number
 L["FrameSort - %s"] = nil
-L["There are some issuse that may prevent FrameSort from working correctly."] = nil
+L["There are some issues that may prevent FrameSort from working correctly."] = nil
 L["Please go to the Health Check panel to view more details."] = nil
 L["Role"] = nil
 L["Spec"] = nil
