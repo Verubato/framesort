@@ -494,6 +494,11 @@ local function TrySortContainer(container)
     local sortedUnits = nil
     local frames = (container.Frames and container:Frames()) or fsFrame:ExtractUnitFrames(container.Frame, true, container.VisibleOnly)
 
+    if #frames == 0 then
+        fsLog:Debug("Container %s has no frames to sort.", container.Frame:GetName() or "nil")
+        return false
+    end
+
     if #frames <= 1 then
         return false
     end

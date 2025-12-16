@@ -56,7 +56,17 @@ local function Run(forceRunAll)
     M:Run(providers)
 end
 
-local function OnCombat()
+local function OnCombatStateChanged(_, event)
+    if event == events.PLAYER_REGEN_ENABLED then
+        fsLog:Debug("Leaving combat.")
+
+        -- this is just here for logging purposes
+        -- let the scheduler handle running when combat ends
+        return
+    elseif event == events.PLAYER_REGEN_DISABLED then
+        fsLog:Debug("Entering combat.")
+    end
+
     if not run then
         return
     end
@@ -217,8 +227,9 @@ function M:Init()
         end
 
         combatFrame = wow.CreateFrame("Frame")
-        combatFrame:HookScript("OnEvent", OnCombat)
+        combatFrame:HookScript("OnEvent", OnCombatStateChanged)
         combatFrame:RegisterEvent(events.PLAYER_REGEN_DISABLED)
+        combatFrame:RegisterEvent(events.PLAYER_REGEN_ENABLED)
 
         -- perform the initial run
         fsLog:Debug("First run.")
