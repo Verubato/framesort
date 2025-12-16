@@ -541,8 +541,22 @@ secureMethods["AdjustPointsOffset"] = [[
 
     local newOffsetX = (offsetX or 0) + xDelta
     local newOffsetY = (offsetY or 0) + yDelta
-    local isProtected, explicitly = (relativeTo and relativeTo:IsProtected()) or false, false
-    local newRelativeTo = (isProtected and explicitly) and relativeTo or "$parent"
+
+    local newRelativeTo = relativeTo
+
+    if not newRelativeTo then
+        newRelativeTo = "$parent"
+    else
+        local isProtected, explicitly = false, false
+
+        if type(newRelativeTo) == "table" and newRelativeTo.IsProtected then
+            isProtected, explicitly = newRelativeTo:IsProtected()
+        end
+
+        if not isProtected or not explicitly then
+            newRelativeTo = "$parent"
+        end
+    end
 
     frame:SetPoint(point, newRelativeTo, relativePoint, newOffsetX, newOffsetY)
     return true
@@ -866,10 +880,23 @@ secureMethods["HardArrange"] = [[
         local to = pointsByFrame[frame]
         -- since 10.2.7 this broke where to.RelativeTo must be a protected frame
         -- thankfully we can use a magic string to default it to the parent even if it's not protected
-        local isProtected, explicitly = (to.RelativeTo and to.RelativeTo:IsProtected()) or false, false
-        local relativeTo = (isProtected and explicitly) and to.RelativeTo or "$parent"
+        local newRelativeTo = to.RelativeTo
 
-        frame:SetPoint(to.Point, relativeTo, to.RelativePoint, to.XOffset, to.YOffset)
+        if not newRelativeTo then
+            newRelativeTo = "$parent"
+        else
+            local isProtected, explicitly = false, false
+
+            if type(newRelativeTo) == "table" and newRelativeTo.IsProtected then
+                isProtected, explicitly = newRelativeTo:IsProtected()
+            end
+
+            if not isProtected or not explicitly then
+                newRelativeTo = "$parent"
+            end
+        end
+
+        frame:SetPoint(to.Point, newRelativeTo, to.RelativePoint, to.XOffset, to.YOffset)
     end
 
     return #framesToMove > 0
