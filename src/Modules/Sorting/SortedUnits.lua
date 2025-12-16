@@ -146,7 +146,7 @@ local function EnemyUnits()
     return units
 end
 
-function LogStatsTick()
+local function LogStatsTick()
     currentStatsTick = currentStatsTick + 1
 
     if currentStatsTick < logStatsInterval then
