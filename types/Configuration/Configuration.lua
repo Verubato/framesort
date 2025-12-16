@@ -4,7 +4,7 @@
 ---@field Panels Panels
 ---@field HorizontalSpacing number
 ---@field VerticalSpacing number
----@field Defaults Options
+---@field DbDefaults DbDefaults
 ---@field PlayerSortMode PlayerSortModeEnum
 ---@field GroupSortMode GroupSortModeEnum
 ---@field SortingMethod SortingMethodEnum

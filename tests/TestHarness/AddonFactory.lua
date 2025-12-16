@@ -66,7 +66,7 @@ function factory:Create()
     local dependencies = DependenciesFromXml()
     LoadDependencies(addon, dependencies)
 
-    addon.DB.Options = addon.WoW.Api.CopyTable(addon.Configuration.Defaults)
+    addon.DB = addon.WoW.Api.CopyTable(addon.Configuration.DbDefaults)
 
     return addon
 end
