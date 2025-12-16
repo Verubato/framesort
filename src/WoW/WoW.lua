@@ -122,7 +122,6 @@ addon.WoW.Api = {
     GetRealZoneText = GetRealZoneText,
 
     -- addon related
-    GetAddonInfo = C_AddOns and C_AddOns.GetAddonInfo or GetAddonInfo,
     GetAddOnEnableState = function(character, name)
         -- in wotlk private 3.4.3 C_AddOns exists but C_AddOns.GetAddOnEnableState doesn't
         if C_AddOns and C_AddOns.GetAddOnEnableState then
@@ -134,7 +133,12 @@ addon.WoW.Api = {
             return GetAddOnEnableState(character, name)
         end
 
-        local getAddonInfo = C_AddOns and C_AddOns.GetAddonInfo or GetAddonInfo
+        local getAddonInfo = C_AddOns and C_AddOns.GetAddOnInfo or GetAddOnInfo
+
+        if not getAddonInfo then
+            return 0
+        end
+
         local _, _, _, loadable, reason, _, _ = getAddonInfo(name)
 
         if loadable and not reason then
