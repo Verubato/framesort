@@ -64,6 +64,7 @@
 -- group size functions
 ---@field GetNumGroupMembers fun(): number
 ---@field GetNumArenaOpponentSpecs fun(): number
+---@field GetNumArenaOpponents fun(): number
 -- state functions
 ---@field IsInInstance fun(): inInstance: boolean, instanceType: string
 ---@field IsInGroup fun(): boolean

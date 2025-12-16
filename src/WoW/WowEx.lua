@@ -18,4 +18,16 @@ addon.WoW.WowEx = {
 
         return false
     end,
+
+    ArenaOpponentsCount = function()
+        if wow.GetNumArenaOpponents then
+            return wow.GetNumArenaOpponents()
+        end
+
+        if wow.GetNumArenaOpponentSpecs then
+            return wow.GetNumArenaOpponentSpecs()
+        end
+
+        return 0
+    end,
 }

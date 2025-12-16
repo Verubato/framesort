@@ -1,6 +1,7 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
+local wowEx = addon.WoW.WowEx
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsCompare = addon.Modules.Sorting.Comparer
@@ -54,7 +55,7 @@ function M:Containers()
         -- in test mode, get the number of frames shown
         local isTest = fsLuaEx:SafeGet(Gladius, { "test" })
         local testCount = fsLuaEx:SafeGet(Gladius, { "testCount" })
-        local count = isTest and testCount or wow.GetNumArenaOpponentSpecs()
+        local count = isTest and testCount or wowEx.ArenaOpponentsCount()
 
         return fsEnumerable
             :From({

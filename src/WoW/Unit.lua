@@ -54,7 +54,7 @@ function M:ArenaUnitProbablyExists(unit)
 
     -- if only 2 members load in a 3v3, then not all information is available
     -- e.g. in a 2v2, 2v3, or 3v2 inside a 3v3 environment GetNumArenaOpponentSpecs() doesn't return the right value
-    local arenaCount = wow.GetNumArenaOpponentSpecs() or 0
+    local arenaCount = wowEx.ArenaOpponentsCount()
     local groupCount = wow.GetNumGroupMembers() or 0
     local bgCount = 0
 
