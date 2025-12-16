@@ -8,6 +8,17 @@ local M = {}
 
 addon.Configuration.Upgrader = M
 
+local function DeepCopy(t)
+    if type(t) ~= "table" then
+        return t
+    end
+    local out = {}
+    for k, v in pairs(t) do
+        out[k] = DeepCopy(v)
+    end
+    return out
+end
+
 local function CleanTable(options, defaults)
     -- remove values that aren't ours
     if type(options) ~= "table" or type(defaults) ~= "table" then
@@ -22,29 +33,29 @@ local function CleanTable(options, defaults)
             CleanTable(v, d)
         elseif type(v) == "table" and type(d) ~= "table" then
             -- type mismatch: reset this key to default
-            options[k] = d
+            options[k] = DeepCopy(d)
         end
     end
 end
 
+---Adds any missing keys to options.
 local function AddMissing(options, defaults)
-    -- add defaults for any missing values
     if type(options) ~= "table" or type(defaults) ~= "table" then
         return
     end
 
     for k, v in pairs(defaults) do
         if options[k] == nil then
-            options[k] = v
+            options[k] = DeepCopy(v)
         elseif type(v) == "table" and type(options[k]) == "table" then
             AddMissing(options[k], v)
         elseif type(v) == "table" and type(options[k]) ~= "table" then
-            -- type mismatch: reset this key to default
-            options[k] = v
+            options[k] = DeepCopy(v)
         end
     end
 end
 
+---Returns true if options has the same set of keys as defaults, however options may also have more keys than defaults.
 local function HasSameKeys(options, defaults)
     for k, v in pairs(defaults) do
         if options[k] == nil then
