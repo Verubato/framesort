@@ -47,6 +47,10 @@ function M:Containers()
                     return true
                 end
 
+                if not wow.C_Map or not wow.C_Map.GetBestMapForUnit then
+                    return true
+                end
+
                 local instanceId = wow.C_Map.GetBestMapForUnit("player")
                 local unitInstanceId = wow.C_Map.GetBestMapForUnit(unitId)
 
