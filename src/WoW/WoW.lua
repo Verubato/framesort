@@ -22,9 +22,7 @@ addon.WoW.Api = {
     CompactRaidFrameContainer = CompactRaidFrameContainer,
     CompactArenaFrame = CompactArenaFrame,
     CompactRaidFrameContainer_SetFlowSortFunction = CompactRaidFrameContainer_SetFlowSortFunction,
-    CompactRaidFrameManager_GetSetting = CompactRaidFrameManager_GetSetting or function(_)
-        return false
-    end,
+    CompactRaidFrameManager_GetSetting = CompactRaidFrameManager_GetSetting,
     EditModeManagerFrame = EditModeManagerFrame,
 
     -- mouse
