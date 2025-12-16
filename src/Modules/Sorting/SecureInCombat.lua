@@ -715,7 +715,7 @@ secureMethods["SoftArrange"] = [[
                 Frame = nil
             end
         else
-            run:CallMethod("Log", "Unable to determine frame's desired index", LogLevel.Warning)
+            run:CallMethod("Log", "Unable to determine frame's desired index (in-combat).", LogLevel.Warning)
         end
     end
 
