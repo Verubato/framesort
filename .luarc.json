@@ -38,5 +38,8 @@
     "diagnostics.disable": [
         "inject-field",
         "unused-local"
+    ],
+    "workspace.ignoreDir": [
+        "src/Libs/*"
     ]
 }

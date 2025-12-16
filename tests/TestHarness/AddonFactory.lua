@@ -30,9 +30,10 @@ local function LoadDependencies(addonTable, dependencies)
     end
 end
 
----@class AddonFactory : IFactory<Addon>
+---@class AddonFactory
 local factory = {}
 
+---@return Addon
 function factory:Create()
     local addon = {
         Api = {},
@@ -59,7 +60,7 @@ function factory:Create()
             Api = wowFactory:Create(),
         },
         DB = {},
-        Locale = {}
+        Locale = {},
     }
 
     local dependencies = DependenciesFromXml()
