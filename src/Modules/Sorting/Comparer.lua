@@ -18,29 +18,16 @@ local M = {
 addon.Modules.Sorting.Comparer = M
 
 local cachedRoleLookup, cachedSpecLookup, cachedClassLookup
-local cachedConfigSnapshot
-
-local function SnapshotOrderingConfig(config)
-    return table.concat({
-        config.Tanks,
-        config.Healers,
-        config.Casters,
-        config.Hunters,
-        config.Melee,
-    }, ":")
-end
 
 ---@return { [string]: number } roleOrderLookup
 ---@return { [number]: number } specOrderLookup
 ---@return { [number]: number } classTypeOrderLookup
 local function Ordering()
-    local config = addon.DB.Options.Sorting.Ordering
-    local currentSnapshot = SnapshotOrderingConfig(config)
-
-    if cachedConfigSnapshot == currentSnapshot and cachedRoleLookup then
+    if cachedRoleLookup and cachedSpecLookup and cachedClassLookup then
         return cachedRoleLookup, cachedSpecLookup, cachedClassLookup
     end
 
+    local config = addon.DB.Options.Sorting.Ordering
     local specs = fsConfig.Specs
     local specOrdering = fsEnumerable:New()
     local roleLookup = {}
@@ -116,7 +103,6 @@ local function Ordering()
         return math.min(newValue, existingValue or 99)
     end)
 
-    cachedConfigSnapshot = currentSnapshot
     cachedRoleLookup = roleLookup
     cachedSpecLookup = specLookup
     cachedClassLookup = classLookup
@@ -487,7 +473,6 @@ end
 
 function M:InvalidateCache()
     cachedClassLookup = nil
-    cachedConfigSnapshot = nil
     cachedRoleLookup = nil
     cachedSpecLookup = nil
 end
