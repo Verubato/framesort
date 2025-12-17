@@ -169,13 +169,14 @@ local function PrecomputeUnitMetadata(unit, meta)
         end
     else
         data.Exists = wow.UnitExists(unit)
-        data.Name = wow.UnitName and wow.UnitName(unit)
 
         if not data.IsPet then
             data.UnitNumber = tonumber(string.sub(unit, meta.UnitNumberIndex))
         end
 
         if data.Exists then
+            data.Name = wow.UnitName and wow.UnitName(unit)
+
             if capabilities.HasRoleAssignments() then
                 data.Role = wow.UnitGroupRolesAssigned(unit)
             end
