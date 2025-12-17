@@ -34,6 +34,11 @@ local function FindUnitFrame(frames, unit)
 end
 
 function M:GetFrameForUnit(unit)
+    if not unit then
+        fsLog:Error("UnitTracker:GetFrameForUnit() - unit must not be nil.")
+        return nil
+    end
+
     local cachedFrame = frameByUnit[unit]
 
     if cachedFrame and fsFrame:IsForbidden(cachedFrame) then

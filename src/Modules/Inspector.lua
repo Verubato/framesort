@@ -279,7 +279,7 @@ end
 ---@return number|nil
 function M:FriendlyUnitSpec(unitGuid)
     if not unitGuid then
-        fsLog:Error("Inspector:FriendlyUnitSpec() received nil unitGuid.")
+        fsLog:Error("Inspector:FriendlyUnitSpec() - unitGuid must not be nil.")
         return nil
     end
 
@@ -303,7 +303,7 @@ end
 ---@return number|nil
 function M:ArenaUnitSpec(unit)
     if not unit then
-        fsLog:Error("Inspector:ArenaUnitSpec() received nil unit.")
+        fsLog:Error("Inspector:ArenaUnitSpec() - unit must not be nil.")
         return nil
     end
 
@@ -338,12 +338,12 @@ end
 ---@param specId number
 function M:Add(unit, specId)
     if not unit then
-        fsLog:Error("Inspector:Add() received nil unit.")
+        fsLog:Error("Inspector:Add() - unit must not be nil.")
         return
     end
 
     if not specId then
-        fsLog:Error("Inspector:Add() received nil specId.")
+        fsLog:Error("Inspector:Add() - specId must not be nil.")
         return
     end
 

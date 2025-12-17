@@ -28,6 +28,15 @@ addon.WoW.Frame = M
 ---@param type number
 ---@param visibleOnly boolean? override the default container visibility filter
 function M:GetFrames(provider, type, visibleOnly)
+    if not provider then
+        fsLog:Error("Frame:GetFrames() - provider must not be nil.")
+        return {}
+    end
+    if not type then
+        fsLog:Error("Frame:GetFrames() - type must not be nil.")
+        return {}
+    end
+
     local target = M:GetContainer(provider, type)
 
     if not target then
@@ -60,6 +69,11 @@ end
 ---@return FrameChain root in order of parent -> child -> child -> child
 function M:ToFrameChain(frames)
     local invalid = { Valid = false }
+
+    if not frames then
+        fsLog:Error("Frame:ToFrameChain() - frames must not be nil.")
+        return invalid
+    end
 
     if #frames == 0 then
         return invalid
@@ -119,6 +133,11 @@ end
 ---Returns an ordered set of frames from the given chain
 ---@param chain FrameChain root
 function M:FramesFromChain(chain)
+    if not chain then
+        fsLog:Error("Frame:FramesFromChain() - chain must not be nil.")
+        return {}
+    end
+
     local frames = {}
     local next = chain
 
@@ -136,6 +155,11 @@ end
 ---@param frames table[] frames in any particular order
 ---@return boolean
 function M:IsFlat(frames)
+    if not frames then
+        fsLog:Error("Frame:IsFlat() - frames must not be nil.")
+        return false
+    end
+
     if #frames == 0 then
         return false
     end
@@ -156,6 +180,11 @@ end
 ---@param frame table
 ---@return string|nil
 function M:GetFrameUnit(frame)
+    if not frame then
+        fsLog:Error("Frame:GetFrameUnit() - frame must not be nil.")
+        return nil
+    end
+
     if M:IsForbidden(frame) then
         return nil
     end
@@ -185,6 +214,11 @@ end
 ---@param visibleOnly boolean?
 ---@return table
 function M:ExtractUnitFrames(container, containerVisible, visibleOnly, hasUnit)
+    if not container then
+        fsLog:Error("Frame:ExtractUnitFrames() - container must not be nil.")
+        return {}
+    end
+
     if hasUnit == nil then
         hasUnit = true
     end
@@ -247,7 +281,12 @@ end
 ---@param visibleOnly boolean?
 ---@return table
 function M:ExtractGroups(container, visibleOnly)
-    if not container or M:IsForbidden(container) or not container:IsVisible() then
+    if not container then
+        fsLog:Error("Frame:ExtractGroups() - container must not be nil.")
+        return {}
+    end
+
+    if M:IsForbidden(container) or not container:IsVisible() then
         return {}
     end
 
@@ -289,6 +328,16 @@ end
 ---@param type number
 ---@return FrameContainer?
 function M:GetContainer(provider, type)
+    if not provider then
+        fsLog:Error("Frame:GetContainer() - provider must not be nil.")
+        return nil
+    end
+
+    if not type then
+        fsLog:Error("Frame:GetContainer() - type must not be nil.")
+        return nil
+    end
+
     local containers = provider:Containers()
 
     for _, container in ipairs(containers) do
@@ -322,6 +371,11 @@ function M:ArenaFrames(provider, visibleOnly)
 end
 
 function M:IsForbidden(frame)
+    if not frame then
+        fsLog:Error("Frame:IsForbidden() - frame must not be nil.")
+        return nil
+    end
+
     -- wotlk 3.3.5 doesn't have this function
     if not frame.IsForbidden then
         return false

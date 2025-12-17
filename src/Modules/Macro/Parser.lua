@@ -5,6 +5,7 @@ local wowEx = addon.WoW.WowEx
 local capabilities = addon.WoW.Capabilities
 local fsEnumerable = addon.Collections.Enumerable
 local fsUnit = addon.WoW.Unit
+local fsLog = addon.Logging.Log
 ---@class MacroParser
 local M = {}
 addon.Modules.Macro.Parser = M
@@ -237,6 +238,21 @@ end
 ---@param enemyUnits string[] sorted enemy unit ids.
 ---@return string? the new macro body, or nil if invalid
 function M:GetNewBody(body, friendlyUnits, enemyUnits)
+    if not body then
+        fsLog:Error("Parser:GetNewBody() - body must not be nil.")
+        return nil
+    end
+
+    if not friendlyUnits then
+        fsLog:Error("Parser:GetNewBody() - friendlyUnits must not be nil.")
+        return body
+    end
+
+    if not enemyUnits then
+        fsLog:Error("Parser:GetNewBody() - enemyUnits must not be nil.")
+        return body
+    end
+
     local newBody = body
     local selectors = GetSelectors(body)
 
