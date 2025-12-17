@@ -29,6 +29,7 @@ local cvarsPatternsToRunSort = {
     "activeCUFProfile",
 }
 local combatStatusFrame = nil
+local taintWorkaround = nil
 
 fsProviders.Blizzard = M
 table.insert(fsProviders.All, M)
@@ -197,6 +198,8 @@ function M:Init()
         pvpStateFrame:HookScript("OnEvent", OnPvpStateChanged)
         pvpStateFrame:RegisterEvent(events.PVP_MATCH_STATE_CHANGED)
     end
+
+    taintWorkaround = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureHandlerStateTemplate")
 end
 
 function M:RegisterRequestSortCallback(callback)
@@ -316,7 +319,7 @@ function M:Containers()
             -- where calling GetWidth() or GetHeight() on CompactRaidFrameContainer taints raid frames
             -- see https://github.com/Stanzilla/WoWUIBugs/issues/596 and https://github.com/Verubato/framesort/issues/38
             -- other expansions don't have this problem
-            local taintWorkaround = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureHandlerStateTemplate")
+            assert(taintWorkaround)
 
             function taintWorkaround:Configure(width, height)
                 lineSize = horizontal and width or height
