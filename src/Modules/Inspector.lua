@@ -278,7 +278,10 @@ end
 ---@param unitGuid string
 ---@return number|nil
 function M:FriendlyUnitSpec(unitGuid)
-    assert(unitGuid)
+    if not unitGuid then
+        fsLog:Error("Inspector:FriendlyUnitSpec() received nil unitGuid.")
+        return nil
+    end
 
     if unitGuid == wow.UnitGUID("player") and wow.GetSpecialization and wow.GetSpecializationInfo then
         local index = wow.GetSpecialization()
@@ -299,7 +302,10 @@ end
 ---@param unit string
 ---@return number|nil
 function M:ArenaUnitSpec(unit)
-    assert(unit)
+    if not unit then
+        fsLog:Error("Inspector:ArenaUnitSpec() received nil unit.")
+        return nil
+    end
 
     local unitNumber = tonumber(string.sub(unit, 6))
 
@@ -331,6 +337,16 @@ end
 ---@param unit string
 ---@param specId number
 function M:Add(unit, specId)
+    if not unit then
+        fsLog:Error("Inspector:Add() received nil unit.")
+        return
+    end
+
+    if not specId then
+        fsLog:Error("Inspector:Add() received nil specId.")
+        return
+    end
+
     local cacheEntry = EnsureCacheEntry(unit)
 
     if not cacheEntry then
