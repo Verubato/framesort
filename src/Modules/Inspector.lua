@@ -244,6 +244,12 @@ local function OnUpdate()
     needUpdate = InspectNext()
 end
 
+local function OnClearInspect()
+    -- someone finished with their inspection
+    -- set unitInspecting to nil so we can queue ours up next
+    unitInspecting = nil
+end
+
 local function OnNotifyInspect(unit)
     if unitWeRequested and unit ~= unitWeRequested then
         fsLog:Debug("Someone else has overridden our inspect player request.")
@@ -395,5 +401,6 @@ function M:Init()
 
     -- hook it so we gain the benefit inspection results from other callers
     wow.hooksecurefunc("NotifyInspect", OnNotifyInspect)
+    wow.hooksecurefunc("ClearInspectPlayer", OnClearInspect)
     fsLog:Debug("Initialised the spec inspector module.")
 end
