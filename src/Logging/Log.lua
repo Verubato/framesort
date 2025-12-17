@@ -20,6 +20,7 @@ local cache = {}
 local enableCache = true
 local maxCacheSize = 100
 local warned = {}
+local errorWarned = {}
 local callbacks = {}
 
 local function NotifyCallbacks(msg, level, timestamp)
@@ -114,6 +115,20 @@ function M:WarnOnce(msg, ...)
     warned[formatted] = true
 
     Write(formatted, M.Level.Warning)
+end
+
+---Logs an error message if one hasn't already been logged with the same message.
+---@param msg string
+function M:ErrorOnce(msg, ...)
+    local formatted = string.format(msg, ...)
+
+    if errorWarned[formatted] then
+        return
+    end
+
+    errorWarned[formatted] = true
+
+    Write(formatted, M.Level.Error)
 end
 
 ---Logs an error message.

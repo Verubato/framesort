@@ -313,6 +313,16 @@ end
 ---@param meta table
 ---@return boolean
 local function CompareMiddle(token, meta)
+    if not meta.IndexLookup then
+        fsLog:ErrorOnce("Comparer:CompareMiddle() - IndexLookup must not be nil.")
+        return false
+    end
+
+    if not meta.Mid then
+        fsLog:ErrorOnce("Comparer:CompareMiddle() - Mid must not be nil.")
+        return false
+    end
+
     local index = meta.IndexLookup[token]
 
     if not index then
