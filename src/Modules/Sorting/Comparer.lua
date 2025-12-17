@@ -10,10 +10,11 @@ local fsConfig = addon.Configuration
 local fsInspector = addon.Modules.Inspector
 local fsSpec = addon.Configuration.Specs
 local fsLog = addon.Logging.Log
-local fuzzyDecimalPlaces = 0
 
 ---@class Comparer
-local M = {}
+local M = {
+    DecimalSanity = 0
+}
 addon.Modules.Sorting.Comparer = M
 
 local cachedRoleLookup, cachedSpecLookup, cachedClassLookup
@@ -618,8 +619,8 @@ function M:CompareTopLeftFuzzy(leftFrame, rightFrame)
         return true
     end
 
-    leftY = fsMath:Round(leftY, fuzzyDecimalPlaces)
-    rightY = fsMath:Round(rightY, fuzzyDecimalPlaces)
+    leftY = fsMath:Round(leftY, M.DecimalSanity)
+    rightY = fsMath:Round(rightY, M.DecimalSanity)
 
     if leftY ~= rightY then
         return leftY > rightY
@@ -635,8 +636,8 @@ function M:CompareTopLeftFuzzy(leftFrame, rightFrame)
         return true
     end
 
-    leftX = fsMath:Round(leftX, fuzzyDecimalPlaces)
-    rightX = fsMath:Round(rightX, fuzzyDecimalPlaces)
+    leftX = fsMath:Round(leftX, M.DecimalSanity)
+    rightX = fsMath:Round(rightX, M.DecimalSanity)
 
     return leftX < rightX
 end
@@ -665,8 +666,8 @@ function M:CompareLeftTopFuzzy(leftFrame, rightFrame)
         return true
     end
 
-    leftX = fsMath:Round(leftX, fuzzyDecimalPlaces)
-    rightX = fsMath:Round(rightX, fuzzyDecimalPlaces)
+    leftX = fsMath:Round(leftX, M.DecimalSanity)
+    rightX = fsMath:Round(rightX, M.DecimalSanity)
 
     if leftX ~= rightX then
         return leftX < rightX
@@ -682,8 +683,8 @@ function M:CompareLeftTopFuzzy(leftFrame, rightFrame)
         return true
     end
 
-    leftY = fsMath:Round(leftY, fuzzyDecimalPlaces)
-    rightY = fsMath:Round(rightY, fuzzyDecimalPlaces)
+    leftY = fsMath:Round(leftY, M.DecimalSanity)
+    rightY = fsMath:Round(rightY, M.DecimalSanity)
 
     return leftY > rightY
 end
@@ -712,8 +713,8 @@ function M:CompareTopRightFuzzy(leftFrame, rightFrame)
         return true
     end
 
-    leftY = fsMath:Round(leftY, fuzzyDecimalPlaces)
-    rightY = fsMath:Round(rightY, fuzzyDecimalPlaces)
+    leftY = fsMath:Round(leftY, M.DecimalSanity)
+    rightY = fsMath:Round(rightY, M.DecimalSanity)
 
     if leftY ~= rightY then
         return leftY > rightY
@@ -729,8 +730,8 @@ function M:CompareTopRightFuzzy(leftFrame, rightFrame)
         return true
     end
 
-    leftX = fsMath:Round(leftX, fuzzyDecimalPlaces)
-    rightX = fsMath:Round(rightX, fuzzyDecimalPlaces)
+    leftX = fsMath:Round(leftX, M.DecimalSanity)
+    rightX = fsMath:Round(rightX, M.DecimalSanity)
 
     return leftX > rightX
 end
@@ -759,8 +760,8 @@ function M:CompareBottomLeftFuzzy(leftFrame, rightFrame)
         return true
     end
 
-    leftY = fsMath:Round(leftY, fuzzyDecimalPlaces)
-    rightY = fsMath:Round(rightY, fuzzyDecimalPlaces)
+    leftY = fsMath:Round(leftY, M.DecimalSanity)
+    rightY = fsMath:Round(rightY, M.DecimalSanity)
 
     if leftY ~= rightY then
         return leftY < rightY
@@ -776,8 +777,8 @@ function M:CompareBottomLeftFuzzy(leftFrame, rightFrame)
         return true
     end
 
-    leftX = fsMath:Round(leftX, fuzzyDecimalPlaces)
-    rightX = fsMath:Round(rightX, fuzzyDecimalPlaces)
+    leftX = fsMath:Round(leftX, M.DecimalSanity)
+    rightX = fsMath:Round(rightX, M.DecimalSanity)
 
     return leftX < rightX
 end

@@ -1380,10 +1380,7 @@ secureMethods["LoadUnits"] = [[
 secureMethods["Init"] = [[
     Providers = newtable()
 
-    -- don't move frames if they are have minuscule position differences
-    -- it's just a rounding error and makes no visual impact
-    -- this helps preventing spam on our callbacks
-    DecimalSanity = 2
+    DecimalSanity = 0
 
     -- must match the enums specified in Frame.lua
     ContainerType = newtable()
