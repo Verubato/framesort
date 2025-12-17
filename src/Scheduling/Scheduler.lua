@@ -47,7 +47,7 @@ end
 
 local function After(seconds, callback)
     if not callback then
-        fsLog:Error("Scheduler:After() - callback must not be niil.")
+        fsLog:Error("Scheduler:After() - callback must not be nil.")
         return
     end
 
