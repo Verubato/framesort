@@ -13,7 +13,7 @@ local fsLog = addon.Logging.Log
 
 ---@class Comparer
 local M = {
-    DecimalSanity = 0
+    DecimalSanity = 0,
 }
 addon.Modules.Sorting.Comparer = M
 
@@ -460,6 +460,14 @@ local function EnemyCompare(leftToken, rightToken, groupSortMode, reverse, meta)
         -- both are pets, compare their owner's
         local leftOwner = fsUnit:PetOwner(leftToken)
         local rightOwner = fsUnit:PetOwner(rightToken)
+
+        if not leftOwner or leftOwner == "none" then
+            return false
+        end
+
+        if not rightOwner or rightOwner == "none" then
+            return true
+        end
 
         return EnemyCompare(leftOwner, rightOwner, groupSortMode, reverse, meta)
     end
