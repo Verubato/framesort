@@ -12,7 +12,7 @@ function M:NotifySorted()
     for _, callback in ipairs(callbacks) do
         local ok, err = pcall(callback)
         if not ok then
-            fsLog:Error("NotifySorted callback failed: %s", tostring(err))
+            fsLog:Error("NotifySorted callback failed: %s.", tostring(err))
         end
     end
 end
@@ -20,6 +20,11 @@ end
 ---Register a callback to invoke after sorting has been performed.
 ---@param callback function
 function M:RegisterPostSortCallback(callback)
+    if not callback then
+        fsLog:Error("Sorting:RegisterPostSortCallback() - callback must not be nil.")
+        return
+    end
+
     callbacks[#callbacks + 1] = callback
 end
 

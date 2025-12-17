@@ -100,6 +100,11 @@ end
 function M:RegisterRequestSortCallback() end
 
 function M:RegisterContainersChangedCallback(callback)
+    if not callback then
+        fsLog:Error("ElvUI:RegisterContainersChangedCallback() - callback must not be nil.")
+        return
+    end
+
     containersChangedCallbacks[#containersChangedCallbacks + 1] = callback
 end
 

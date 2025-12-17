@@ -46,6 +46,11 @@ local function OnEvent(_, event)
 end
 
 local function After(seconds, callback)
+    if not callback then
+        fsLog:Error("Scheduler:After() - callback must not be niil.")
+        return
+    end
+
     if not capabilities.HasC_Timer() then
         fsLog:Critical("WoW client missing C_Timer.")
         callback()
@@ -72,6 +77,11 @@ end
 ---@param key string? an optional key which will ensure only the latest callback provided with the same key will be executed.
 ---@param callback fun()
 function M:RunWhenCombatEnds(callback, key)
+    if not callback then
+        fsLog:Error("Scheduler:RunWhenCombatEnds() - callback must not be nil.")
+        return
+    end
+
     if not wow.InCombatLockdown() then
         callback()
         return
@@ -85,6 +95,11 @@ function M:RunWhenCombatEnds(callback, key)
 end
 
 function M:RunWhenEnteringWorldOnce(callback)
+    if not callback then
+        fsLog:Error("Scheduler:RunWhenEnteringWorldOnce() - callback must not be nil.")
+        return
+    end
+
     enteringWorldOnceCallbacks[#enteringWorldOnceCallbacks + 1] = callback
 end
 

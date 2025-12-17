@@ -4,6 +4,7 @@ local wow = addon.WoW.Api
 local wowEx = addon.WoW.WowEx
 local capabilities = addon.WoW.Capabilities
 local fsEnumerable = addon.Collections.Enumerable
+local fsLog = addon.Logging.Log
 ---@class UnitUtil
 local M = {}
 addon.WoW.Unit = M
@@ -42,8 +43,15 @@ for i = 1, maxArena do
 end
 
 function M:ArenaUnitProbablyExists(unit)
+    if not unit then
+        fsLog:Error("Unit:ArenaUnitProbablyExists() - unit must not be nil.")
+        return false
+    end
+
     -- after the gates open UnitExists will start working
-    if wow.UnitExists(unit) then
+    local exists = wow.UnitExists(unit)
+
+    if not wow.issecretvalue(exists) and exists then
         return true
     end
 
@@ -158,6 +166,11 @@ end
 ---A safe check wrapper that returns true if the unit is "player"
 ---@param unit string
 function M:IsPlayer(unit)
+    if not unit then
+        fsLog:Error("Unit:IsPlayer() - unit must not be nil.")
+        return false
+    end
+
     local isPlayerMaybeSecret = wow.UnitIsUnit(unit, "player")
 
     if wow.issecretvalue(isPlayerMaybeSecret) then
@@ -170,11 +183,21 @@ end
 ---Returns true if the unit is friendly to the current player.
 ---@param unit string
 function M:IsFriendlyUnit(unit)
+    if not unit then
+        fsLog:Error("Unit:IsFriendlyUnit() - unit must not be nil.")
+        return false
+    end
+
     return wow.UnitIsFriend("player", unit)
 end
 
 ---Returns true if the unit is an enemy of the current player.
 ---@param unit string
 function M:IsEnemyUnit(unit)
+    if not unit then
+        fsLog:Error("Unit:IsEnemyUnit() - unit must not be nil.")
+        return false
+    end
+
     return wow.UnitIsEnemy("player", unit)
 end

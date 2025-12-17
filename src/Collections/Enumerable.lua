@@ -15,6 +15,8 @@ addon.Collections.Enumerable = M
 ---@param auto table|function
 ---@return Enumerable
 function M:From(auto)
+    assert(auto ~= nil)
+
     local t = type(auto)
     local enumerable = {}
 
@@ -60,6 +62,8 @@ end
 ---@param apply fun(item: any): any
 ---@return Enumerable
 function M:Map(apply)
+    assert(apply ~= nil)
+
     local iterator = function()
         local next = self.Next()
         if next == nil then
@@ -109,6 +113,8 @@ end
 ---@param predicate fun(item: any): boolean?
 ---@return Enumerable
 function M:Where(predicate)
+    assert(predicate ~= nil)
+
     local iterator = function()
         local next = self.Next()
 
@@ -127,6 +133,8 @@ end
 ---@param predicate fun(item: any): boolean
 ---@return any? item, number? index
 function M:Nth(n, predicate)
+    assert(predicate ~= nil)
+
     local found = 0
 
     while n > found do
@@ -198,6 +206,8 @@ end
 ---@param predicate fun(item: any): boolean
 ---@return boolean
 function M:All(predicate)
+    assert(predicate ~= nil)
+
     local next = self.Next()
 
     if next == nil then
@@ -219,6 +229,8 @@ end
 ---@param item any
 ---@return any? number? index
 function M:IndexOf(item)
+    assert(item ~= nil)
+
     local _, index = self:First(function(x)
         return x == item
     end)
@@ -230,6 +242,8 @@ end
 ---@param item any
 ---@return any? number? index
 function M:LastIndexOf(item)
+    assert(item ~= nil)
+
     local _, index = self:Last(function(x)
         return x == item
     end)
@@ -340,6 +354,10 @@ end
 ---@param count number
 ---@return Enumerable
 function M:Take(count)
+    if count == 0 then
+        return M:From({})
+    end
+
     local taken = 0
     local iterator = function()
         if taken == count then
@@ -363,6 +381,9 @@ end
 ---@param valueSelector function(item: any, index: number, existingItem: any?): any
 ---@return table items
 function M:ToDictionary(keySelector, valueSelector)
+    assert(keySelector ~= nil)
+    assert(valueSelector ~= nil)
+
     local items = self:ToTable()
     local dict = {}
 
@@ -381,6 +402,8 @@ end
 ---@generic T
 ---@param compare? fun(a: T, b: T):boolean
 function M:OrderBy(compare)
+    assert(compare ~= nil)
+
     local items = self:ToTable()
     table.sort(items, compare)
 
@@ -390,6 +413,8 @@ end
 ---Combines two sequences together.
 ---@param other table|function
 function M:Concat(other)
+    assert(other ~= nil)
+
     local enumerable = M:From(other)
     local finishedFirst = false
     local iterator = function()

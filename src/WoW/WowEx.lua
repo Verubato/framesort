@@ -1,6 +1,8 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
+local fsLog = addon.Logging.Log
+
 ---@class WowEx
 addon.WoW.WowEx = {
     ---@return boolean
@@ -69,6 +71,11 @@ addon.WoW.WowEx = {
     ---@param id number
     ---@return number|nil
     GetArenaOpponentSpecSafe = function(id)
+        if not type then
+            fsLog:Error("WowEx:GetArenaOpponentSpecSafe() - id must not be nil.")
+            return nil
+        end
+
         if not wow.GetArenaOpponentSpec then
             return nil
         end
@@ -86,6 +93,11 @@ addon.WoW.WowEx = {
     ---@param unit string
     ---@return number|nil
     GetInspectSpecializationSafe = function(unit)
+        if not unit then
+            fsLog:Error("WowEx:GetInspectSpecializationSafe() - unit must not be nil.")
+            return nil
+        end
+
         if not wow.GetInspectSpecialization then
             return nil
         end

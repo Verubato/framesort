@@ -200,10 +200,20 @@ function M:Init()
 end
 
 function M:RegisterRequestSortCallback(callback)
+    if not callback then
+        fsLog:Error("Blizzard:RegisterRequestSortCallback() - callback must not be nil.")
+        return
+    end
+
     sortCallbacks[#sortCallbacks + 1] = callback
 end
 
 function M:RegisterContainersChangedCallback(callback)
+    if not callback then
+        fsLog:Error("Blizzard:RegisterContainersChangedCallback() - callback must not be nil.")
+        return
+    end
+
     containersChangedCallbacks[#containersChangedCallbacks + 1] = callback
 end
 

@@ -39,10 +39,15 @@ function M:Init()
 end
 
 function M:RegisterRequestSortCallback(callback)
+    if not callback then
+        fsLog:Error("Gladius:RegisterRequestSortCallback() - callback must not be nil.")
+        return
+    end
+
     sortCallbacks[#sortCallbacks + 1] = callback
 end
 
-function M:RegisterContainersChangedCallback(_) end
+function M:RegisterContainersChangedCallback() end
 
 function M:Containers()
     local containers = {}
