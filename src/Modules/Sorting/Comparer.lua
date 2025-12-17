@@ -173,7 +173,9 @@ local function PrecomputeUnitMetadata(unit, meta)
 
         if not data.IsPet then
             data.UnitNumber = tonumber(string.sub(unit, meta.UnitNumberIndex))
+        end
 
+        if data.Exists then
             if capabilities.HasRoleAssignments() then
                 data.Role = wow.UnitGroupRolesAssigned(unit)
             end
@@ -197,7 +199,7 @@ local function PrecomputeUnitMetadata(unit, meta)
         data.UnitNumber = tonumber(string.match(unit, "%d+"))
     end
 
-    if not data.IsPet then
+    if not data.IsPet and data.Exists then
         if not data.Role then
             fsLog:Warning("Failed to determine role for unit %s.", unit)
         end
