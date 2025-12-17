@@ -11,7 +11,7 @@ addon.WoW.Unit = M
 
 local allPartyUnitsIds = {
     "player",
-    "pet"
+    "pet",
 }
 local allRaidUnitsIds = {}
 local allEnemyUnitsIds = {}
@@ -42,9 +42,9 @@ for i = 1, maxArena do
     allEnemyUnitsIds[#allEnemyUnitsIds + 1] = "arenapet" .. i
 end
 
-function M:ArenaUnitProbablyExists(unit)
+function M:ArenaUnitExists(unit)
     if not unit then
-        fsLog:Error("Unit:ArenaUnitProbablyExists() - unit must not be nil.")
+        fsLog:Error("Unit:ArenaUnitExists() - unit must not be nil.")
         return false
     end
 
@@ -57,25 +57,25 @@ function M:ArenaUnitProbablyExists(unit)
 
     -- get the number from the token, e.g. "2" from "arena2"
     local idStr = string.match(unit, "%d+")
+
     if not idStr then
         return false
     end
 
-    -- if only 2 members load in a 3v3, then not all information is available
-    -- e.g. in a 2v2, 2v3, or 3v2 inside a 3v3 environment GetNumArenaOpponentSpecs() doesn't return the right value
+    local count = 0
     local arenaCount = wowEx.ArenaOpponentsCount()
-    local groupCount = wowEx.GroupMembersCount()
-    local bgCount = 0
+
+    if arenaCount and arenaCount > 0 then
+        count = arenaCount
+    end
 
     if wowEx.IsInstanceBattleground() or (capabilities.HasBrawl() and wow.C_PvP.IsInBrawl()) then
         -- in 15v15 brawl, GetNumArenaOpponentSpecs returns 0 so we use GetNumBattlefieldScores instead
-        bgCount = wow.GetNumBattlefieldScores and wow.GetNumBattlefieldScores() or 0
+        count = wow.GetNumBattlefieldScores and wow.GetNumBattlefieldScores() or 0
     end
 
-    local instanceSize = math.max(arenaCount, groupCount, bgCount)
-
     local id = tonumber(idStr)
-    return id <= instanceSize
+    return count > 0 and id <= count
 end
 
 ---Returns a table of group member unit tokens where the unit exists.
@@ -108,7 +108,7 @@ function M:EnemyUnits()
     return fsEnumerable
         :From(allEnemyUnitsIds)
         :Where(function(unit)
-            return M:ArenaUnitProbablyExists(unit)
+            return M:ArenaUnitExists(unit)
         end)
         :ToTable()
 end

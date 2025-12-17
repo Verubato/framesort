@@ -28,7 +28,7 @@ function M:test_casters_before_melee()
     config.Enabled = true
     config.GroupSortMode = fsConfig.GroupSortMode.Role
 
-    addon.WoW.Api.GetNumGroupMembers = function()
+    addon.WoW.Api.GetNumArenaOpponentSpecs = function()
         return 3
     end
     addon.WoW.Api.GetArenaOpponentSpec = function(id)
@@ -71,7 +71,7 @@ function M:test_hunters_between_casters_and_melee()
     config.Enabled = true
     config.GroupSortMode = fsConfig.GroupSortMode.Role
 
-    addon.WoW.Api.GetNumGroupMembers = function()
+    addon.WoW.Api.GetNumArenaOpponentSpecs = function()
         return 3
     end
     addon.WoW.Api.GetArenaOpponentSpec = function(id)

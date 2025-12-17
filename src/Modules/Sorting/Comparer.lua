@@ -128,8 +128,6 @@ local function PrecomputeGlobalMetadata()
     local start = wow.GetTimePreciseSec()
     local roleOrderLookup, specOrderLookup, classTypeOrderLookup = Ordering()
 
-    meta.InRaid = wow.IsInRaid()
-    meta.UnitNumberIndex = meta.InRaid and 5 or 6
     meta.RoleOrderLookup = roleOrderLookup
     meta.SpecOrderLookup = specOrderLookup
     meta.ClassTypeOrderLookup = classTypeOrderLookup
@@ -155,12 +153,12 @@ local function PrecomputeUnitMetadata(unit, meta)
     data.IsPet = fsUnit:IsPet(unit)
     data.IsArena = unit:sub(1, 5) == "arena"
     data.IsPlayer = not data.IsPet and fsUnit:IsPlayer(unit)
+    data.UnitNumber = tonumber(string.match(unit, "%d+"))
 
     if data.IsArena then
-        data.Exists = fsUnit:ArenaUnitProbablyExists(unit)
+        data.Exists = fsUnit:ArenaUnitExists(unit)
 
-        if not data.IsPet then
-            data.UnitNumber = tonumber(string.sub(unit, 6))
+        if not data.IsPet and data.Exists then
             data.SpecId = fsInspector:ArenaUnitSpec(unit)
             data.Role = wow.GetSpecializationInfoByID and data.SpecId and select(5, wow.GetSpecializationInfoByID(data.SpecId))
 
@@ -169,10 +167,6 @@ local function PrecomputeUnitMetadata(unit, meta)
         end
     else
         data.Exists = wow.UnitExists(unit)
-
-        if not data.IsPet then
-            data.UnitNumber = tonumber(string.sub(unit, meta.UnitNumberIndex))
-        end
 
         if data.Exists then
             data.Name = wow.UnitName and wow.UnitName(unit)
@@ -192,12 +186,6 @@ local function PrecomputeUnitMetadata(unit, meta)
                 data.SpecId = fsInspector:FriendlyUnitSpec(data.Guid)
             end
         end
-    end
-
-    if not data.UnitNumber then
-        -- fallback to a slower but more reliable method
-        -- mostly for pets
-        data.UnitNumber = tonumber(string.match(unit, "%d+"))
     end
 
     if not data.IsPet and data.Exists then
@@ -447,6 +435,12 @@ local function EnemyCompare(leftToken, rightToken, groupSortMode, reverse, meta)
 
     if not leftMeta or not rightMeta then
         return leftToken < rightToken
+    end
+
+    if leftMeta.Exists and not rightMeta.Exists then
+        return true
+    elseif not leftMeta.Exists and rightMeta.Exists then
+        return false
     end
 
     -- used to have UnitExists() checks here
