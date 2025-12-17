@@ -78,11 +78,6 @@ end
 ---@param points table<table, Point>
 local function Move(frames, points)
     local framesToMove = {}
-    -- don't move frames if they are have minuscule position differences
-    -- it's just a rounding error and makes no visual impact
-    -- this helps preventing spam on our callbacks
-    local decimalSanity = 2
-
     -- first clear their existing point
     for _, frame in ipairs(frames) do
         local to = points[frame]
@@ -91,8 +86,11 @@ local function Move(frames, points)
             local different = point ~= to.Point
                 or relativeTo ~= to.RelativeTo
                 or relativePoint ~= to.RelativePoint
-                or fsMath:Round(xOffset or 0, decimalSanity) ~= fsMath:Round(to.XOffset or 0, decimalSanity)
-                or fsMath:Round(yOffset or 0, decimalSanity) ~= fsMath:Round(to.YOffset or 0, decimalSanity)
+                -- don't move frames if they are have minuscule position differences
+                -- it's just a rounding error and makes no visual impact
+                -- this helps preventing spam on our callbacks
+                or fsMath:Round(xOffset or 0, fsCompare.DecimalSanity) ~= fsMath:Round(to.XOffset or 0, fsCompare.DecimalSanity)
+                or fsMath:Round(yOffset or 0, fsCompare.DecimalSanity) ~= fsMath:Round(to.YOffset or 0, fsCompare.DecimalSanity)
 
             if different then
                 framesToMove[#framesToMove + 1] = frame
