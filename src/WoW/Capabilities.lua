@@ -57,11 +57,19 @@ function M.HasEditMode()
     return wow.EditModeManagerFrame ~= nil and wow.EditModeManagerFrame.UseRaidStylePartyFrames ~= nil and wow.EditModeManagerFrame.GetSettingValue ~= nil and wow.EventRegistry ~= nil
 end
 
+---Whether or not UnitGroupRolesAssigned is available.
 function M.HasRoleAssignments()
     return type(wow.UnitGroupRolesAssigned) == "function"
 end
 
+---Specs were introduced in MoP, and prior expansions used a talent system.
+---@return boolean
 function M.HasSpecializations()
-    -- specs were introduced in MoP, and prior expansions used a talent system
     return LE_EXPANSION_LEVEL_CURRENT ~= nil and LE_EXPANSION_MISTS_OF_PANDARIA ~= nil and LE_EXPANSION_LEVEL_CURRENT >= LE_EXPANSION_MISTS_OF_PANDARIA
+end
+
+---MoP for some reason ignores the raidOptionDisplayMainTankAndAssist cvar.
+---@return boolean
+function M.HasMainTankAndAssistFrames()
+    return LE_EXPANSION_LEVEL_CURRENT ~= nil and (LE_EXPANSION_MISTS_OF_PANDARIA == nil or LE_EXPANSION_LEVEL_CURRENT ~= LE_EXPANSION_MISTS_OF_PANDARIA)
 end
