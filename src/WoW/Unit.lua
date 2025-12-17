@@ -10,6 +10,7 @@ addon.WoW.Unit = M
 
 local allPartyUnitsIds = {
     "player",
+    "pet"
 }
 local allRaidUnitsIds = {}
 local allEnemyUnitsIds = {}
