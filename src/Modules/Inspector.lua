@@ -79,17 +79,22 @@ local function Inspect(unit)
     end
 
     local specId = wowEx.GetInspectSpecializationSafe(unit)
-    local cacheEntry = EnsureCacheEntry(unit)
 
-    -- the spec id may be 0, in which case we'll use the previous value (if one exists)
-    local before = cacheEntry.SpecId
-    cacheEntry.SpecId = specId or cacheEntry.SpecId
-    cacheEntry.LastSeen = wow.GetTimePreciseSec()
-    local after = cacheEntry.SpecId
+    if specId then
+        local cacheEntry = EnsureCacheEntry(unit)
 
-    if before ~= after then
-        fsLog:Debug("Found spec information for unit '%s' spec id %s.", unit, specId)
-        OnNewSpecInformation()
+        -- the spec id may be 0, in which case we'll use the previous value (if one exists)
+        local before = cacheEntry.SpecId
+        cacheEntry.SpecId = specId
+        cacheEntry.LastSeen = wow.GetTimePreciseSec()
+        local after = cacheEntry.SpecId
+
+        if before ~= after then
+            fsLog:Debug("Found spec information for unit '%s' spec id %s.", unit, specId)
+            OnNewSpecInformation()
+        end
+    else
+        fsLog:Debug("Failed to determine spec for unit '%s'.", unit)
     end
 
     if weRequestedInspect then
