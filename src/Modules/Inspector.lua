@@ -19,6 +19,9 @@ addon.Modules.Inspector = M
 local unitGuidToSpec = {}
 
 -- the latest/current unit we've requested an inspection for
+local unitWeRequested
+
+-- the latest/current an inspection is happening for
 local unitInspecting
 
 --- true if we requested this inspection
@@ -85,11 +88,13 @@ local function Inspect(unit)
     local after = cacheEntry.SpecId
 
     if before ~= after then
-        fsLog:Debug("Found spec information for unit %s spec id %s.", unit, specId)
+        fsLog:Debug("Found spec information for unit '%s' spec id %s.", unit, specId)
         OnNewSpecInformation()
     end
 
     if weRequestedInspect then
+        unitWeRequested = nil
+        unitInspecting = nil
         wow.ClearInspectPlayer()
     end
 end
@@ -102,7 +107,7 @@ local function GetNextTarget()
         local guid = wow.UnitGUID(unit)
 
         if not guid then
-            fsLog:Warning("Unable to request spec information for unit %s because their GUID is nil.", unit)
+            fsLog:Warning("Unable to request spec information for unit '%s' because their GUID is nil.", unit)
         -- this shouldn't be possible, but it does happen for some reason
         elseif not wow.issecretvalue(guid) then
             local cacheEntry = unitGuidToSpec[guid]
@@ -111,7 +116,7 @@ local function GetNextTarget()
                 return unit
             end
         else
-            fsLog:Warning("Unable to request spec information for unit %s because their GUID is a secret.", unit)
+            fsLog:Warning("Unable to request spec information for unit '%s' because their GUID is a secret.", unit)
         end
     end
 
@@ -120,7 +125,7 @@ local function GetNextTarget()
         local guid = wow.UnitGUID(unit)
 
         if not guid then
-            fsLog:Warning("Unable to request spec information for unit %s because their GUID is nil.", unit)
+            fsLog:Warning("Unable to request spec information for unit '%s' because their GUID is nil.", unit)
         -- this shouldn't be possible, but it does happen for some reason
         elseif not wow.issecretvalue(guid) then
             local cacheEntry = unitGuidToSpec[guid]
@@ -148,6 +153,7 @@ local function InspectNext()
     if not unit then
         inspectStarted = nil
         unitInspecting = nil
+        unitWeRequested = nil
         return false
     end
 
@@ -157,12 +163,13 @@ local function InspectNext()
 
     inspectStarted = wow.GetTimePreciseSec()
     unitInspecting = unit
+    unitWeRequested = unit
 
     -- create a cache entry for this unit so we don't attempt this unit again in the next iteration
     local cacheEntry = EnsureCacheEntry(unit)
     cacheEntry.LastAttempt = wow.GetTimePreciseSec()
 
-    fsLog:Debug("Requesting inspection for unit: " .. unit)
+    fsLog:Debug("Requesting inspection for unit '%s'.", unit)
 
     return true
 end
@@ -233,8 +240,9 @@ local function OnUpdate()
 end
 
 local function OnNotifyInspect(unit)
-    if unit ~= unitInspecting and unitInspecting then
+    if unitWeRequested and unit ~= unitWeRequested then
         fsLog:Debug("Someone else has overridden our inspect player request.")
+        unitWeRequested = nil
     end
 
     -- override the inspected unit so we get it's information
@@ -256,7 +264,7 @@ local function PurgeOldEntries()
     end
 
     for _, guid in ipairs(toRemove) do
-        fsLog:Debug("Purging expired cache entry for unit: " .. guid)
+        fsLog:Debug("Purging expired cache entry for unit: %s", guid)
         unitGuidToSpec[guid] = nil
     end
 end
