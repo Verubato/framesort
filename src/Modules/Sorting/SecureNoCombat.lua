@@ -13,6 +13,10 @@ local wowEx = addon.WoW.WowEx
 local M = {}
 addon.Modules.Sorting.Secure.NoCombat = M
 
+--- Sorts frames in-place by matching their units to the sorted units list.
+--- @param frames table[] Array of frames to sort (modified in-place)
+--- @param sortedUnits string[] Ordered list of unit tokens
+--- @return nil
 local function SortFramesByUnits(frames, sortedUnits)
     local unitsToIndex = {}
     for index, unit in ipairs(sortedUnits) do
