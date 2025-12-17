@@ -4,6 +4,7 @@ local fsConfig = addon.Configuration
 local wow = addon.WoW.Api
 local fsLog = addon.Logging.Log
 local modules = addon.Modules
+local fsCompare = addon.Modules.Sorting.Comparer
 local L = addon.Locale
 local M = {}
 fsConfig.Panels.SpecOrdering = M
@@ -48,6 +49,7 @@ function M:Build(parent)
         config[type] = value
         config[toSwap] = currentValue
         fsConfig:NotifyChanged()
+        fsCompare:InvalidateCache()
 
         for _, ddl in ipairs(all) do
             ddl:FrameSortRefresh()
