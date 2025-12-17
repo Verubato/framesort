@@ -22,7 +22,7 @@ function addon:InitDB()
     fsLog:Debug("Loading saved variables.")
 
     FrameSortDB = FrameSortDB or wow.CopyTable(addon.Configuration.DbDefaults)
-    FrameSortDB.Options = FrameSortDB.Options or wow.CopyTable(addon.Configuration.DbDefaults)
+    FrameSortDB.Options = FrameSortDB.Options or wow.CopyTable(addon.Configuration.DbDefaults.Options)
 
     local success = addon.Configuration.Upgrader:UpgradeDb(FrameSortDB)
 
