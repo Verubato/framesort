@@ -127,18 +127,6 @@ function M.Options:SetSpacing(area, horizontal, vertical)
     return v2.Options:SetSpacing(area, horizontal, vertical)
 end
 
----Returns the class specialization id of the specified unit guid, or 0/nil if unknown.
----@param unitGuid string
----@return number|nil
-function M.Inspector:GetSpecId(unitGuid)
-    if not unitGuid then
-        error("Unit guid must not be nil.")
-        return
-    end
-
-    return fsInspector:FriendlyUnitSpec(unitGuid)
-end
-
 ---Returns the class specialization id of the specified unit, or 0/nil if unknown.
 ---@param unit string
 ---@return number|nil
@@ -152,17 +140,7 @@ function M.Inspector:GetUnitSpecId(unit)
         return fsInspector:EnemyUnitSpec(unit)
     end
 
-    local guid = wow.UnitGUID(unit)
-
-    if not guid then
-        return nil
-    end
-
-    if wow.issecretvalue(guid) then
-        return nil
-    end
-
-    return fsInspector:FriendlyUnitSpec(guid)
+    return fsInspector:FriendlyUnitSpec(unit)
 end
 
 ---Returns the unit token from the given frame.

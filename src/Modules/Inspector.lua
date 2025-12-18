@@ -292,21 +292,33 @@ local function PurgeOldEntries()
 end
 
 ---Returns the spec id of a friendly player unit.
----@param unitGuid string
+---@param unit string
 ---@return number|nil
-function M:FriendlyUnitSpec(unitGuid)
-    if not unitGuid then
-        fsLog:Error("Inspector:FriendlyUnitSpec() - unitGuid must not be nil.")
+function M:FriendlyUnitSpec(unit)
+    if not unit then
+        fsLog:Error("Inspector:FriendlyUnitSpec() - unit must not be nil.")
         return nil
     end
 
-    if unitGuid == wow.UnitGUID("player") and wow.GetSpecialization and wow.GetSpecializationInfo then
+    if (unit == "player" or wow.UnitIsUnit("player", unit)) and wow.GetSpecialization and wow.GetSpecializationInfo then
         local index = wow.GetSpecialization()
         local id = wow.GetSpecializationInfo(index)
         return id
     end
 
-    local cacheEntry = unitGuidToSpec[unitGuid]
+    local guid = wow.UnitGUID(unit)
+
+    if not guid then
+        fsLog:Warning("Encountered nil guid for unit '%s'.", unit)
+        return nil
+    end
+
+    if wow.issecretvalue(guid) then
+        fsLog:Warning("Encountered secret guid for unit '%s'.", unit)
+        return nil
+    end
+
+    local cacheEntry = unitGuidToSpec[guid]
 
     if not cacheEntry then
         return nil
@@ -339,7 +351,13 @@ function M:EnemyUnitSpec(unit)
 
     local guid = wow.UnitGUID(unit)
 
-    if not guid or wow.issecretvalue(guid) then
+    if not guid then
+        fsLog:Warning("Encountered nil guid for unit '%s'.", unit)
+        return nil
+    end
+
+    if wow.issecretvalue(guid) then
+        fsLog:Warning("Encountered secret guid for unit '%s'.", unit)
         return nil
     end
 

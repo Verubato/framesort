@@ -121,14 +121,10 @@ local function OnInspectorInfo()
 
     for i = 1, #nonPets do
         local unit = nonPets[i]
-        local guid = wow.UnitGUID(unit)
+        local spec = fsInspector:FriendlyUnitSpec(unit)
 
-        if guid and not wow.issecretvalue(guid) then
-            local spec = fsInspector:FriendlyUnitSpec(guid)
-
-            if spec then
-                knownSpecs = knownSpecs + 1
-            end
+        if spec then
+            knownSpecs = knownSpecs + 1
         end
     end
 

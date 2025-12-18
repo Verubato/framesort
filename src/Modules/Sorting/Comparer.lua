@@ -163,16 +163,8 @@ local function PrecomputeUnitMetadata(unit, meta)
                 data.Role = wow.UnitGroupRolesAssigned(unit)
             end
 
-            data.Guid = wow.UnitGUID and wow.UnitGUID(unit)
             data.ClassId = wow.UnitClass and select(3, wow.UnitClass(unit))
-
-            if not data.Guid then
-                fsLog:Warning("Unable to determine unit spec for '%s' as it's guid is nil.", unit)
-            elseif wow.issecretvalue(data.Guid) then
-                fsLog:Warning("Unable to determine unit spec for '%s' as it's guid is a secret value.", unit)
-            else
-                data.SpecId = fsInspector:FriendlyUnitSpec(data.Guid)
-            end
+            data.SpecId = fsInspector:FriendlyUnitSpec(unit)
         end
     end
 
