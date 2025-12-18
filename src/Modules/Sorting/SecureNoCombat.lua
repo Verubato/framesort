@@ -543,7 +543,7 @@ local function TrySortContainer(container)
     elseif container.LayoutType == fsFrame.LayoutType.Hard then
         sorted = HardArrange(container, frames, spacing)
     else
-        fsLog:Bug("Unknown layout type: %s.", container.Type or "nil")
+        fsLog:Bug("Unknown layout type: %s.", container.LayoutType or "nil")
         return false
     end
 
