@@ -93,7 +93,7 @@ end
 
 function M:GetPoint()
     local pos = self.State.Point
-    return pos.Point, pos.RelativeTo, pos.RelativePoint, pos.Left, pos.Top
+    return pos.Point, pos.RelativeTo, pos.RelativePoint, pos.XOffset, pos.YOffset
 end
 
 function M:SetPoint(point, relativeTo, relativePoint, xOffset, yOffset)
