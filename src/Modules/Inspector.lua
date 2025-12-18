@@ -18,14 +18,14 @@ addon.Modules.Inspector = M
 -- key = unit, value = { SpecId: number, LastAttempt: number, LastSeen: number }
 local unitGuidToSpec = {}
 
--- the latest/current unit we've requested an inspection for
-local unitWeRequested
-
 -- the latest/current an inspection is happening for
-local unitInspecting
+local requestedUnit
+
+-- the latest/current unit we've requested an inspection for
+local currentInspectUnit
 
 --- true if we requested this inspection
-local weRequestedInspect
+local isOurInspect
 
 -- true if we need to run and update spec information
 local needUpdate = true
@@ -97,10 +97,10 @@ local function Inspect(unit)
         fsLog:Debug("Failed to determine spec for unit '%s'.", unit)
     end
 
-    if weRequestedInspect then
-        unitWeRequested = nil
-        unitInspecting = nil
-        weRequestedInspect = false
+    if isOurInspect then
+        currentInspectUnit = nil
+        requestedUnit = nil
+        isOurInspect = false
         wow.ClearInspectPlayer()
     end
 end
@@ -158,18 +158,18 @@ local function InspectNext()
 
     if not unit then
         inspectStarted = nil
-        unitInspecting = nil
-        unitWeRequested = nil
+        requestedUnit = nil
+        currentInspectUnit = nil
         return false
     end
 
     wow.ClearInspectPlayer()
     wow.NotifyInspect(unit)
-    weRequestedInspect = true
+    isOurInspect = true
 
     inspectStarted = wow.GetTimePreciseSec()
-    unitInspecting = unit
-    unitWeRequested = unit
+    requestedUnit = unit
+    currentInspectUnit = unit
 
     -- create a cache entry for this unit so we don't attempt this unit again in the next iteration
     local cacheEntry = EnsureCacheEntry(unit)
@@ -199,8 +199,8 @@ end
 
 local function OnEvent(_, event, arg1)
     if event == events.INSPECT_READY then
-        if unitInspecting then
-            Inspect(unitInspecting)
+        if requestedUnit then
+            Inspect(requestedUnit)
         end
     elseif event == events.GROUP_ROSTER_UPDATE then
         needUpdate = true
@@ -234,17 +234,17 @@ local function OnUpdate()
     local timeSinceLastInspect = inspectStarted and (wow.GetTimePreciseSec() - inspectStarted)
 
     -- if we've requested an inspection and we're still within the timeout period
-    if unitInspecting ~= nil and timeSinceLastInspect < inspectTimeout then
+    if requestedUnit ~= nil and timeSinceLastInspect < inspectTimeout then
         return
     end
 
     -- Timeout occurred - reset state
-    if unitInspecting ~= nil and timeSinceLastInspect >= inspectTimeout then
-        fsLog:Debug("Inspect timeout for unit '%s'.", unitInspecting)
+    if requestedUnit ~= nil and timeSinceLastInspect >= inspectTimeout then
+        fsLog:Debug("Inspect timeout for unit '%s'.", requestedUnit)
 
-        unitInspecting = nil
-        unitWeRequested = nil
-        weRequestedInspect = false
+        requestedUnit = nil
+        currentInspectUnit = nil
+        isOurInspect = false
         wow.ClearInspectPlayer()
     end
 
@@ -258,19 +258,19 @@ end
 local function OnClearInspect()
     -- someone finished with their inspection
     -- set unitInspecting to nil so we can queue ours up next
-    unitInspecting = nil
+    requestedUnit = nil
 end
 
 local function OnNotifyInspect(unit)
-    if unitWeRequested and unit ~= unitWeRequested then
+    if currentInspectUnit and unit ~= currentInspectUnit then
         fsLog:Debug("Someone else has overridden our inspect player request.")
-        unitWeRequested = nil
+        currentInspectUnit = nil
     end
 
     -- override the inspected unit so we get it's information
-    unitInspecting = unit
+    requestedUnit = unit
     inspectStarted = wow.GetTimePreciseSec()
-    weRequestedInspect = false
+    isOurInspect = false
 end
 
 local function PurgeOldEntries()
