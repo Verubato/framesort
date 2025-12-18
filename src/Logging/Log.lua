@@ -19,8 +19,9 @@ local started = wow.GetTimePreciseSec()
 local cache = {}
 local enableCache = true
 local maxCacheSize = 100
-local warned = {}
-local errorWarned = {}
+local warningsNotified = {}
+local errorsNotified = {}
+local bugsNotified = {}
 local callbacks = {}
 
 local function NotifyCallbacks(msg, level, timestamp)
@@ -108,11 +109,11 @@ end
 function M:WarnOnce(msg, ...)
     local formatted = string.format(msg, ...)
 
-    if warned[formatted] then
+    if warningsNotified[formatted] then
         return
     end
 
-    warned[formatted] = true
+    warningsNotified[formatted] = true
 
     Write(formatted, M.Level.Warning)
 end
@@ -122,11 +123,11 @@ end
 function M:ErrorOnce(msg, ...)
     local formatted = string.format(msg, ...)
 
-    if errorWarned[formatted] then
+    if errorsNotified[formatted] then
         return
     end
 
-    errorWarned[formatted] = true
+    errorsNotified[formatted] = true
 
     Write(formatted, M.Level.Error)
 end
@@ -149,6 +150,13 @@ end
 ---@param msg string
 function M:Bug(msg, ...)
     local formatted = string.format(msg, ...) .. " Please notify the developer about this."
+
+    if bugsNotified[formatted] then
+        return
+    end
+
+    bugsNotified[formatted] = true
+
     Write(formatted, M.Level.Bug)
 end
 
