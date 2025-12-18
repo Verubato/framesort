@@ -659,7 +659,8 @@ local function TrySortContainer(container)
     frames = frames or {}
 
     if #frames == 0 then
-        fsLog:Debug("Container %s has no frames to sort.", container.Frame:GetName() or "nil")
+        local containerName = (container.Frame and container.Frame.GetName and container.Frame:GetName()) or "nil"
+        fsLog:Debug("Container %s has no frames to sort.", containerName)
         return false, frames
     end
 
@@ -814,6 +815,10 @@ local function ClearSorting(providers, friendlyEnabled, enemyEnabled)
             -- after exiting an arena, elvui retains the nameList property
             -- so we want to clear it if they've disabled sorting in the world
             if container.LayoutType ~= fsFrame.LayoutType.NameList then
+                return false
+            end
+
+            if not container.Frame then
                 return false
             end
 
