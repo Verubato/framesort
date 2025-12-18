@@ -43,7 +43,10 @@ local function Run(forceRunAll)
     run = false
     local providers = nil
 
-    if not all then
+    if all then
+        -- clear stale requests
+        runProviders = {}
+    else
         providers = {}
 
         for provider, _ in pairs(runProviders) do
@@ -130,7 +133,7 @@ local function OnInspectorInfo()
 
     -- re-sort every 5th spec known
     local everyNth = 5
-    local shouldSort = knownSpecs == #nonPets or knownSpecs % everyNth == 0
+    local shouldSort = knownSpecs > 0 and knownSpecs == #nonPets or knownSpecs % everyNth == 0
 
     if not shouldSort then
         return
