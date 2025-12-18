@@ -55,7 +55,13 @@ local function SortFramesByUnits(frames, sortedUnits)
         local leftIndex = unitsToIndex[leftUnit]
         local rightIndex = unitsToIndex[rightUnit]
 
-        if leftIndex and rightIndex and leftIndex ~= rightIndex then
+        if leftIndex ~= rightIndex then
+            if leftIndex == nil then
+                return false
+            end
+            if rightIndex == nil then
+                return true
+            end
             return leftIndex < rightIndex
         end
 
@@ -78,14 +84,16 @@ local function SortFramesByUnits(frames, sortedUnits)
 end
 
 ---@return boolean sorted
+---@return number countMoved
 ---@param frames table[]
 ---@param points table<table, Point>
 local function Move(frames, points)
     local framesToMove = {}
     -- first clear their existing point
     for _, frame in ipairs(frames) do
-        local to = points[frame]
-        if to then
+        local to = frame and points[frame]
+
+        if to and frame and frame.GetPoint then
             local point, relativeTo, relativePoint, xOffset, yOffset = frame:GetPoint()
             local different = point ~= to.Point
                 or relativeTo ~= to.RelativeTo
@@ -106,10 +114,13 @@ local function Move(frames, points)
     -- now move them
     for _, frame in ipairs(framesToMove) do
         local to = points[frame]
-        frame:SetPoint(to.Point, to.RelativeTo, to.RelativePoint, to.XOffset, to.YOffset)
+
+        if frame and to and frame.SetPoint then
+            frame:SetPoint(to.Point, to.RelativeTo, to.RelativePoint, to.XOffset, to.YOffset)
+        end
     end
 
-    return #framesToMove > 0
+    return #framesToMove > 0, #framesToMove
 end
 
 ---Applies spacing on a set of points.
@@ -132,12 +143,26 @@ local function ApplySpacing(frames, spacing, pointsByFrame)
         local frame = orderedTopLeft[i]
         local previous = orderedTopLeft[i - 1]
         local point = pointsByFrame[frame]
-        local sameColumn = fsMath:Round(frame:GetLeft()) == fsMath:Round(previous:GetLeft())
 
-        if sameColumn then
-            local existingSpace = previous:GetBottom() - frame:GetTop()
-            yDelta = yDelta - (existingSpace - verticalSpacing)
-            point.Top = point.Top - yDelta
+        if point then
+            local left = frame:GetLeft()
+            local top = frame:GetTop()
+            local previousLeft = previous:GetLeft()
+            local previousBottom = previous:GetBottom()
+
+            if left and top and previousLeft and previousBottom then
+                local sameColumn = fsMath:Round(left) == fsMath:Round(previousLeft)
+
+                if sameColumn then
+                    local existingSpace = previousBottom - top
+                    yDelta = yDelta - (existingSpace - verticalSpacing)
+                    point.Top = point.Top - yDelta
+                end
+            else
+                fsLog:Error("Cannot apply spacing to frame '%s' that has no geometry.", frame.GetName and frame:GetName() or "nil")
+            end
+        else
+            fsLog:Error("Missing point for frame '%s'.", frame.GetName and frame:GetName() or "nil")
         end
     end
 
@@ -153,12 +178,26 @@ local function ApplySpacing(frames, spacing, pointsByFrame)
         local frame = orderedLeftTop[i]
         local previous = orderedLeftTop[i - 1]
         local point = pointsByFrame[frame]
-        local sameRow = fsMath:Round(frame:GetTop()) == fsMath:Round(previous:GetTop())
 
-        if sameRow then
-            local existingSpace = previous:GetRight() - frame:GetLeft()
-            xDelta = xDelta + (existingSpace + horizontalSpacing)
-            point.Left = point.Left + xDelta
+        if point then
+            local top = frame:GetTop()
+            local left = frame:GetLeft()
+            local previousTop = previous:GetTop()
+            local previousRight = previous:GetRight()
+
+            if top and previousTop and left and previousRight then
+                local sameRow = fsMath:Round(top) == fsMath:Round(previousTop)
+
+                if sameRow then
+                    local existingSpace = previousRight - left
+                    xDelta = xDelta + (existingSpace + horizontalSpacing)
+                    point.Left = point.Left + xDelta
+                end
+            else
+                fsLog:Error("Cannot apply spacing to frame '%s' that has no geometry.", frame.GetName and frame:GetName() or "nil")
+            end
+        else
+            fsLog:Error("Missing point for frame '%s'.", frame.GetName and frame:GetName() or "nil")
         end
     end
 end
@@ -203,12 +242,24 @@ local function SpaceGroups(frames, spacing)
     for _, source in ipairs(frames) do
         local desiredIndex = indexOf[source]
         local destination = points[desiredIndex]
-        local xDelta = destination.Left - source:GetLeft()
-        local yDelta = destination.Top - source:GetTop()
 
-        if xDelta ~= 0 or yDelta ~= 0 then
-            source:AdjustPointsOffset(xDelta, yDelta)
-            movedAny = true
+        if destination then
+            local left = source:GetLeft()
+            local top = source:GetTop()
+
+            if left and top and destination.Left and destination.Top then
+                local xDelta = destination.Left - left
+                local yDelta = destination.Top - top
+
+                if xDelta ~= 0 or yDelta ~= 0 then
+                    source:AdjustPointsOffset(xDelta, yDelta)
+                    movedAny = true
+                end
+            else
+                fsLog:Error("Cannot apply spacing to group '%s' that has no geometry.", source.GetName and source:GetName() or "nil")
+            end
+        else
+            fsLog:Error("Failed to determine destination of frame '%s' using desired index %d.", source.GetName and source:GetName() or "nil", desiredIndex)
         end
     end
 
@@ -264,10 +315,12 @@ local function SoftArrange(frames, spacing)
     for _, source in ipairs(enumerationOrder) do
         local desiredIndex = indexOf[source]
         local destination = desiredIndex and points[desiredIndex]
+        local left = source:GetLeft()
+        local top = source:GetTop()
 
-        if destination then
-            local xDelta = destination.Left - source:GetLeft()
-            local yDelta = destination.Top - source:GetTop()
+        if destination and destination.Left and destination.Top and left and top then
+            local xDelta = destination.Left - left
+            local yDelta = destination.Top - top
 
             if xDelta ~= 0 or yDelta ~= 0 then
                 source:AdjustPointsOffset(xDelta, yDelta)
@@ -281,6 +334,20 @@ local function SoftArrange(frames, spacing)
     return movedAny
 end
 
+local function FirstValidFrame(frames)
+    for _, frame in ipairs(frames) do
+        if frame and frame.GetHeight and frame.GetWidth then
+            local height, width = frame:GetHeight(), frame:GetWidth()
+
+            if height and height > 0 and width and width > 0 then
+                return frame
+            end
+        end
+    end
+
+    return nil
+end
+
 ---Rearranges frames by modifying their entire anchor point.
 ---@param container FrameContainer
 ---@param frames table[]
@@ -289,25 +356,44 @@ end
 ---@param blockHeight number?
 ---@return boolean sorted
 local function HardArrange(container, frames, spacing, offset, blockHeight)
-    if #frames == 0 then
+    if not frames or #frames == 0 then
         return false
     end
 
     local start = wow.GetTimePreciseSec()
     local relativeTo = container.Anchor or container.Frame
+
+    if not relativeTo then
+        fsLog:Error("HardArrange: missing anchor.")
+        return false
+    end
+
     local isHorizontalLayout = container.IsHorizontalLayout and container:IsHorizontalLayout() or false
-    local blocksPerLine = container.FramesPerLine and container:FramesPerLine()
+    local blocksPerLine = type(container.FramesPerLine) == "function" and container:FramesPerLine()
     local anchorPoint = container.AnchorPoint or "TOPLEFT"
 
-    offset = offset or (container.FramesOffset and container:FramesOffset())
+    if blocksPerLine and blocksPerLine <= 0 then
+        blocksPerLine = nil
+    end
+
+    if not offset and type(container.FramesOffset) == "function" then
+        offset = container:FramesOffset()
+    end
+
+    local firstValid = FirstValidFrame(frames)
+
+    if not firstValid then
+        fsLog:Error("HardArrange: no valid frames with size.")
+        return false
+    end
 
     -- the block size is the largest height and width combination
     -- this is only useful when we have frames of different sizes
     -- which is the case of pet frames, where 2 pet frames can fit into 1 player frame
     -- we could find max height/width, but this should almost certaintly be equal to the first frame in the array
-    -- so save the cpu cycles and just use the first frame
-    blockHeight = blockHeight or frames[1]:GetHeight()
-    local blockWidth = frames[1]:GetWidth()
+    -- so save the cpu cycles and just use the first valid frame
+    local blockWidth = firstValid:GetWidth()
+    blockHeight = blockHeight or firstValid:GetHeight()
 
     offset = offset or {
         X = 0,
@@ -327,55 +413,61 @@ local function HardArrange(container, frames, spacing, offset, blockHeight)
     local currentBlockHeight = 0
 
     for _, frame in ipairs(frames) do
-        local isNewBlock = currentBlockHeight > 0
-            -- add/subtract 1 for a bit of breathing room for rounding errors
-            and (currentBlockHeight >= (blockHeight - 1) or (currentBlockHeight + frame:GetHeight()) >= (blockHeight + 1))
+        local height = frame and frame.GetHeight and frame:GetHeight() or 0
 
-        if isNewBlock then
-            currentBlockHeight = 0
+        if height > 0 then
+            local isNewBlock = currentBlockHeight > 0
+                -- add/subtract 1 for a bit of breathing room for rounding errors
+                and (currentBlockHeight >= (blockHeight - 1) or (currentBlockHeight + height) >= (blockHeight + 1))
 
-            if isHorizontalLayout then
-                col = col + 1
-            else
-                row = row + 1
+            if isNewBlock then
+                currentBlockHeight = 0
+
+                if isHorizontalLayout then
+                    col = col + 1
+                else
+                    row = row + 1
+                end
+
+                xOffset = col * (blockWidth + spacing.Horizontal) + offset.X
+                yOffset = -row * (blockHeight + spacing.Vertical) + offset.Y
             end
 
-            xOffset = col * (blockWidth + spacing.Horizontal) + offset.X
-            yOffset = -row * (blockHeight + spacing.Vertical) + offset.Y
+            -- if we've reached the end then wrap around
+            if isHorizontalLayout and blocksPerLine and col >= blocksPerLine then
+                col = 0
+                row = row + 1
+
+                xOffset = offset.X
+                yOffset = -row * (blockHeight + spacing.Vertical) + offset.Y
+                currentBlockHeight = 0
+            elseif not isHorizontalLayout and blocksPerLine and row >= blocksPerLine then
+                row = 0
+                col = col + 1
+
+                yOffset = offset.Y
+                xOffset = col * (blockWidth + spacing.Horizontal) + offset.X
+                currentBlockHeight = 0
+            end
+
+            pointsByFrame[frame] = {
+                Point = anchorPoint,
+                RelativeTo = relativeTo,
+                RelativePoint = anchorPoint,
+                XOffset = xOffset,
+                YOffset = yOffset,
+            }
+
+            currentBlockHeight = currentBlockHeight + height
+            yOffset = yOffset - height
+        else
+            fsLog:Error("Skipping frame '%s' that has no height.", frame and frame.GetName and frame:GetName() or "nil")
         end
-
-        -- if we've reached the end then wrap around
-        if isHorizontalLayout and blocksPerLine and col >= blocksPerLine then
-            col = 0
-            row = row + 1
-
-            xOffset = offset.X
-            yOffset = -row * (blockHeight + spacing.Vertical) + offset.Y
-            currentBlockHeight = 0
-        elseif not isHorizontalLayout and blocksPerLine and row >= blocksPerLine then
-            row = 0
-            col = col + 1
-
-            yOffset = offset.Y
-            xOffset = col * (blockWidth + spacing.Horizontal) + offset.X
-            currentBlockHeight = 0
-        end
-
-        pointsByFrame[frame] = {
-            Point = anchorPoint,
-            RelativeTo = relativeTo,
-            RelativePoint = anchorPoint,
-            XOffset = xOffset,
-            YOffset = yOffset,
-        }
-
-        currentBlockHeight = currentBlockHeight + frame:GetHeight()
-        yOffset = yOffset - frame:GetHeight()
     end
 
-    local moved = Move(frames, pointsByFrame)
+    local moved, framesMoved = Move(frames, pointsByFrame)
     local stop = wow.GetTimePreciseSec()
-    fsLog:Debug("Moving %d frames for container %s took %fms.", #frames, container.Frame:GetName() or "nil", (stop - start) * 1000)
+    fsLog:Debug("Moving %d/%d frames for container %s took %fms.", framesMoved, #frames, container.Frame:GetName() or "nil", (stop - start) * 1000)
 
     return moved
 end
@@ -460,7 +552,7 @@ local function UngroupedOffset(container, spacing)
         return offset
     end
 
-    local frames = fsFrame:ExtractUnitFrames(lastGroup, container.VisibleOnly, container.ExistsOnly)
+    local frames = fsFrame:ExtractUnitFrames(lastGroup, true, container.VisibleOnly, container.ExistsOnly)
 
     if #frames == 0 then
         return offset
@@ -474,8 +566,17 @@ local function UngroupedOffset(container, spacing)
             end)
             :First()
 
-        offset.Y = -(container.Frame:GetTop() - bottomLeftFrame:GetBottom() + spacing.Vertical)
-        offset.X = -(container.Frame:GetLeft() - bottomLeftFrame:GetLeft())
+        if bottomLeftFrame then
+            local containerTop = container.Frame:GetTop()
+            local containerLeft = container.Frame:GetLeft()
+            local bottom = bottomLeftFrame:GetBottom()
+            local left = bottomLeftFrame:GetLeft()
+
+            if containerTop and containerLeft and bottom and left then
+                offset.Y = -(containerTop - bottom + spacing.Vertical)
+                offset.X = -(containerLeft - left)
+            end
+        end
     else
         local topRightFrame = fsEnumerable
             :From(frames)
@@ -484,30 +585,39 @@ local function UngroupedOffset(container, spacing)
             end)
             :First()
 
-        offset.X = -(container.Frame:GetLeft() - topRightFrame:GetRight() - spacing.Horizontal)
-        offset.Y = -(container.Frame:GetTop() - topRightFrame:GetTop())
+        if topRightFrame then
+            local containerLeft = container.Frame:GetLeft()
+            local containerTop = container.Frame:GetTop()
+            local right = topRightFrame:GetRight()
+            local top = topRightFrame:GetTop()
+
+            if containerLeft and containerTop and right and top then
+                offset.X = -(containerLeft - right - spacing.Horizontal)
+                offset.Y = -(containerTop - top)
+            end
+        end
     end
 
     return offset
 end
 
 ---@param container FrameContainer
----@return boolean
+---@return boolean sorted, table[] frames the sorted frames
 local function TrySortContainer(container)
     if container.LayoutType == fsFrame.LayoutType.NameList then
-        return SetNameList(container)
+        return SetNameList(container), {}
     end
 
     local sortedUnits = nil
-    local frames = (container.Frames and container:Frames()) or fsFrame:ExtractUnitFrames(container.Frame, true, container.VisibleOnly)
+    local frames = (container.Frames and container:Frames()) or fsFrame:ExtractUnitFrames(container.Frame, true, container.VisibleOnly, container.ExistsOnly)
 
     if #frames == 0 then
         fsLog:Debug("Container %s has no frames to sort.", container.Frame:GetName() or "nil")
-        return false
+        return false, frames
     end
 
     if #frames <= 1 then
-        return false
+        return false, frames
     end
 
     if container.Type == fsFrame.ContainerType.Party or container.Type == fsFrame.ContainerType.Raid then
@@ -516,7 +626,7 @@ local function TrySortContainer(container)
         sortedUnits = fsSortedUnits:EnemyUnits()
     else
         fsLog:Bug("Unknown container type: %s.", container.Type or "nil")
-        return false
+        return false, frames
     end
 
     SortFramesByUnits(frames, sortedUnits)
@@ -544,14 +654,14 @@ local function TrySortContainer(container)
         sorted = HardArrange(container, frames, spacing)
     else
         fsLog:Bug("Unknown layout type: %s.", container.LayoutType or "nil")
-        return false
+        return false, frames
     end
 
     if sorted and container.PostSort then
         container:PostSort()
     end
 
-    return sorted
+    return sorted, frames
 end
 
 ---@param container FrameContainer
@@ -565,6 +675,7 @@ local function TrySortContainerGroups(container)
     end
 
     local isHorizontalLayout = container.IsHorizontalLayout and container:IsHorizontalLayout() or false
+    local blockHeight = nil
 
     for _, group in ipairs(groups) do
         ---@type FrameContainer
@@ -585,7 +696,18 @@ local function TrySortContainerGroups(container)
             end,
         }
 
-        sorted = TrySortContainer(groupContainer) or sorted
+        local containerSorted, frames = TrySortContainer(groupContainer)
+
+        -- calculate the block height of the player frames to use later for ungrouped frames
+        if not blockHeight and frames and #frames > 0 then
+            local firstValid = FirstValidFrame(frames)
+
+            if firstValid then
+                blockHeight = firstValid:GetHeight()
+            end
+        end
+
+        sorted = sorted or containerSorted
     end
 
     if not container.SupportsSpacing then
@@ -611,17 +733,13 @@ local function TrySortContainerGroups(container)
     sorted = SpaceGroups(groups, spacing) or sorted
 
     -- ungrouped frames include pets, vehicles, and main tank/assist frames
-    local ungroupedFrames = fsFrame:ExtractUnitFrames(container.Frame, true, container.VisibleOnly)
+    local ungroupedFrames = fsFrame:ExtractUnitFrames(container.Frame, true, container.VisibleOnly, container.ExistsOnly)
 
     if #ungroupedFrames == 0 then
         return sorted
     end
 
     local ungroupedOffset = UngroupedOffset(container, spacing)
-    -- pet frames are half the height of a member frame
-    -- it'd be technically better to get the height of a member frame
-    -- but want a way to do that efficiently, e.g. get the frames back from TrySortContainer or something
-    local blockHeight = ungroupedFrames[1]:GetHeight() * 2
 
     sorted = HardArrange(container, ungroupedFrames, spacing, ungroupedOffset, blockHeight)
 
