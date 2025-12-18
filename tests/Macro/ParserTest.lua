@@ -197,7 +197,7 @@ function M:test_frame_123456_pet()
     local expected = [[
         #showtooltip
         #FrameSort Frame1Pet Frame2Pet Frame3Pet Frame4Pet Frame5Pet Frame6Pet
-        /cast [mod:ctrl,@partypet2][mod:shift,@partypet1][nomod,@pet][something,@raidpet17][test,@raidpet4][@asdfpet1] Spell
+        /cast [mod:ctrl,@partypet2][mod:shift,@partypet1][nomod,@pet][something,@raidpet17][test,@raidpet4][@none] Spell
     ]]
 
     assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
@@ -213,7 +213,7 @@ function M:test_frame_123456_pet_abbreviated()
     local expected = [[
         #showtooltip
         #FS F1P F2P F3P F4P f5p F6P
-        /cast [mod:ctrl,@partypet2][mod:shift,@partypet1][nomod,@pet][something,@raidpet17][test,@raidpet4][@asdfpet1] Spell
+        /cast [mod:ctrl,@partypet2][mod:shift,@partypet1][nomod,@pet][something,@raidpet17][test,@raidpet4][@none] Spell
     ]]
 
     assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)

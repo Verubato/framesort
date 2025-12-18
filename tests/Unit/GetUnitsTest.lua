@@ -177,7 +177,6 @@ function M:test_is_pet()
     assertEquals(fsUnit:IsPet("party1pet"), true)
     assertEquals(fsUnit:IsPet("arena1pet"), true)
     assertEquals(fsUnit:IsPet("raid1pet"), true)
-    assertEquals(fsUnit:IsPet("nameplate1pet"), true)
 end
 
 function M:test_pet_for()
@@ -187,10 +186,12 @@ function M:test_pet_for()
     assertEquals(fsUnit:PetFor("player"), "pet")
     assertEquals(fsUnit:PetFor("party1"), "partypet1")
     assertEquals(fsUnit:PetFor("raid1"), "raidpet1")
-    assertEquals(fsUnit:PetFor("nameplate1"), "nameplatepet1")
+
+    -- nameplate pets aren't valid
+    assertEquals(fsUnit:PetFor("nameplate1"), "none")
+    assertEquals(fsUnit:PetFor("asdf1"), "none")
 
     assertEquals(fsUnit:PetFor("arena1", true), "arenapet1")
-    assertEquals(fsUnit:PetFor("nameplate1", true), "nameplatepet1")
 end
 
 function M:test_owner_for()
@@ -200,7 +201,6 @@ function M:test_owner_for()
     assertEquals(fsUnit:PetOwner("pet"), "player")
     assertEquals(fsUnit:PetOwner("partypet1"), "party1")
     assertEquals(fsUnit:PetOwner("raidpet1"), "raid1")
-    assertEquals(fsUnit:PetOwner("nameplatepet1"), "nameplate1")
 end
 
 function M:test_is_player_when_secret()
