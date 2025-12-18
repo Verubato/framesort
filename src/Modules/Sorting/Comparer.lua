@@ -57,6 +57,7 @@ local function Ordering()
                 :Map(function(item)
                     return item.SpecId
                 end)
+                :ToTable()
         end
 
         return priority
