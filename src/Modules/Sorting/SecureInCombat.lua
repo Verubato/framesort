@@ -164,8 +164,7 @@ secureMethods["ExtractUnitFrames"] = [[
         Frame = nil
 
         -- in some rare cases frames can have no position, so exclude them
-        local left, bottom, width, height = child:GetRect()
-
+        local left, bottom, width, height = child.GetRect and child:GetRect()
         local hasSize = left and bottom and width and height
 
         if not hasSize then
