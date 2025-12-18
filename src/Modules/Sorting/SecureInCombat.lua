@@ -2211,14 +2211,7 @@ local function ConfigureHeader(header)
 
         self:SetAttribute("refreshUnitChange", RefreshUnitChange)
 
-        if Header.CallMethod then
-            Header:CallMethod("UnitButtonCreated", UnitButtonsCount)
-        else
-            local run = control or self
-            run:RunFor(Header, [[
-                control:CallMethod("UnitButtonCreated", UnitButtonsCount)
-            ]])
-        end
+        Header:CallMethod("UnitButtonCreated", UnitButtonsCount)
     ]=]
     )
 
