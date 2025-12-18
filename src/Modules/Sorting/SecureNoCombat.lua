@@ -162,7 +162,7 @@ local function ApplySpacing(frames, spacing, pointsByFrame)
                 fsLog:Error("Cannot apply spacing to frame '%s' that has no geometry.", frame.GetName and frame:GetName() or "nil")
             end
         else
-            fsLog:Error("Missing point for frame '%s'.", frame.GetName and frame:GetName() or "nil")
+            -- this can happen for a frame without a point from SoftArrange
         end
     end
 
@@ -197,7 +197,7 @@ local function ApplySpacing(frames, spacing, pointsByFrame)
                 fsLog:Error("Cannot apply spacing to frame '%s' that has no geometry.", frame.GetName and frame:GetName() or "nil")
             end
         else
-            fsLog:Error("Missing point for frame '%s'.", frame.GetName and frame:GetName() or "nil")
+            -- this can happen for a frame without a point from SoftArrange
         end
     end
 end
@@ -206,10 +206,11 @@ end
 ---@param frames table[]
 ---@return boolean sorted
 local function SpaceGroups(frames, spacing)
-    if #frames == 0 then
+    if not frames or #frames <= 1 then
         return false
     end
 
+    -- Destination slot order = current layout (TopLeft), but only keep valid geometry
     local points = fsEnumerable
         :From(frames)
         :OrderBy(function(x, y)
@@ -218,107 +219,125 @@ local function SpaceGroups(frames, spacing)
         :Map(function(frame)
             return {
                 Frame = frame,
-                -- keep a copy of the frame positions before they are moved
                 Top = frame:GetTop(),
                 Left = frame:GetLeft(),
             }
         end)
+        :Where(function(item)
+            return item.Top ~= nil and item.Left ~= nil
+        end)
         :ToTable()
+
+    local slotsCount = #points
+    if slotsCount <= 1 then
+        return false
+    end
+
     local pointsByFrame = fsEnumerable:From(points):ToDictionary(function(x)
         return x.Frame
     end, function(x)
         return x
     end)
 
+    -- Mutates points in-place
     ApplySpacing(frames, spacing, pointsByFrame)
 
-    -- key = frame, value = index
-    local indexOf = {}
-    for i = 1, #frames do
-        indexOf[frames[i]] = i
-    end
-
     local movedAny = false
+    local slotIndex = 0
+
     for _, source in ipairs(frames) do
-        local desiredIndex = indexOf[source]
-        local destination = points[desiredIndex]
+        local left, top = source:GetLeft(), source:GetTop()
 
-        if destination then
-            local left = source:GetLeft()
-            local top = source:GetTop()
+        if left ~= nil and top ~= nil then
+            slotIndex = slotIndex + 1
+            if slotIndex > slotsCount then
+                break
+            end
 
-            if left and top and destination.Left and destination.Top then
-                local xDelta = destination.Left - left
-                local yDelta = destination.Top - top
+            local destination = points[slotIndex]
+            local destLeft, destTop = destination.Left, destination.Top
+
+            if destLeft and destTop then
+                local xDelta = destLeft - left
+                local yDelta = destTop - top
 
                 if xDelta ~= 0 or yDelta ~= 0 then
                     source:AdjustPointsOffset(xDelta, yDelta)
                     movedAny = true
                 end
             else
-                fsLog:Error("Cannot apply spacing to group '%s' that has no geometry.", source.GetName and source:GetName() or "nil")
+                fsLog:Error("Cannot apply spacing to group '%s' that has no destination geometry.", source.GetName and source:GetName() or "nil")
             end
-        else
-            fsLog:Error("Failed to determine destination of frame '%s' using desired index %d.", source.GetName and source:GetName() or "nil", desiredIndex)
         end
     end
 
     return movedAny
 end
 
----Rearranges frames by only modifying the X/Y offsets and not changing any point anchors.
+---Rearranges frames by only modifying X/Y offsets (keeps anchors).
 ---@param frames table[]
----@return boolean sorted
+---@param spacing table? -- your spacing object
+---@return boolean movedAny
 local function SoftArrange(frames, spacing)
-    if #frames == 0 then
+    if #frames <= 1 then
         return false
     end
 
-    local points = fsEnumerable
+    -- Destination slots (screen positions), ordered by current TopLeft
+    local orderedByTopLeft = fsEnumerable
         :From(frames)
-        :OrderBy(function(x, y)
-            return fsCompare:CompareTopLeftFuzzy(x, y)
-        end)
-        :Map(function(frame)
-            return {
-                Frame = frame,
-                -- keep a copy of the frame positions before they are moved
-                Top = frame:GetTop(),
-                Left = frame:GetLeft(),
-            }
+        :OrderBy(function(a, b)
+            return fsCompare:CompareTopLeftFuzzy(a, b)
         end)
         :ToTable()
 
+    local slots = {}
+    for _, f in ipairs(orderedByTopLeft) do
+        local top, left = f:GetTop(), f:GetLeft()
+        if top ~= nil and left ~= nil then
+            slots[#slots + 1] = { Top = top, Left = left, Frame = f }
+        end
+    end
+
+    local slotsCount = #slots
+    if slotsCount <= 1 then
+        return false
+    end
+
+    -- Apply spacing by mutating slot coordinates (if your ApplySpacing does that)
     if spacing then
-        local pointsByFrame = fsEnumerable:From(points):ToDictionary(function(x)
-            return x.Frame
-        end, function(x)
-            return x
-        end)
+        local pointsByFrame = {}
+
+        for i = 1, slotsCount do
+            pointsByFrame[slots[i].Frame] = slots[i]
+        end
 
         ApplySpacing(frames, spacing, pointsByFrame)
     end
 
+    -- Enumerate in chain order if available (movement order)
     local enumerationOrder = frames
     local chain = fsFrame:ToFrameChain(frames)
+
     if chain.Valid then
         enumerationOrder = fsFrame:FramesFromChain(chain)
     end
 
-    -- key = frame, value = index
-    local indexOf = {}
-    for i = 1, #frames do
-        indexOf[frames[i]] = i
-    end
-
+    -- Move the i-th *valid* frame (in desired order) to slot i
     local movedAny = false
-    for _, source in ipairs(enumerationOrder) do
-        local desiredIndex = indexOf[source]
-        local destination = desiredIndex and points[desiredIndex]
-        local left = source:GetLeft()
-        local top = source:GetTop()
+    local slot = 0
 
-        if destination and destination.Left and destination.Top and left and top then
+    for _, source in ipairs(enumerationOrder) do
+        local top, left = source:GetTop(), source:GetLeft()
+
+        if top ~= nil and left ~= nil then
+            slot = slot + 1
+
+            if slot > slotsCount then
+                break
+            end
+
+            local destination = slots[slot]
             local xDelta = destination.Left - left
             local yDelta = destination.Top - top
 
@@ -326,8 +345,6 @@ local function SoftArrange(frames, spacing)
                 source:AdjustPointsOffset(xDelta, yDelta)
                 movedAny = true
             end
-        else
-            fsLog:Debug("Unable to determine frame's desired index (non-combat).", source:GetName() or "nil")
         end
     end
 
