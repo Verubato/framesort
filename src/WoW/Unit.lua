@@ -96,7 +96,8 @@ function M:FriendlyUnits()
     return fsEnumerable
         :From(units)
         :Where(function(unit)
-            return wow.UnitExists(unit)
+            local exists = wow.UnitExists(unit)
+            return not wow.issecretvalue(exists) and exists
         end)
         :ToTable()
 end
