@@ -163,18 +163,20 @@ secureMethods["ExtractUnitFrames"] = [[
         local unit = run:RunAttribute("GetUnit", "Frame")
         Frame = nil
 
-        -- in some rare cases frames can have no position, so exclude them
-        local left, bottom, width, height = child.GetRect and child:GetRect()
-        local hasSize = left and bottom and width and height
+        if child.GetRect then
+            local left, bottom, width, height = child:GetRect()
+            local hasSize = left and bottom and width and height
 
-        if not hasSize then
-            run:CallMethod("Log", format("Frame '%s' has no size.", child:GetName() or "nil"), LogLevel.Warning)
-        end
+            if not hasSize then
+                -- in some rare cases frames can have no position, so exclude them
+                run:CallMethod("Log", format("Frame '%s' has no geometry.", child:GetName() or "nil"), LogLevel.Warning)
+            end
 
-        if unit and
-            (child:IsVisible() or not visibleOnly) and
-            (hasSize) then
-            unitFrames[#unitFrames + 1] = child
+            if unit and
+                (child:IsVisible() or not visibleOnly) and
+                (hasSize) then
+                unitFrames[#unitFrames + 1] = child
+            end
         end
     end
 
