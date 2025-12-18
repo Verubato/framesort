@@ -255,17 +255,19 @@ function M:GetFrameUnit(frame)
 end
 
 ---Returns a collection of unit frames from the specified container.
----@param container table
----@param visibleOnly boolean?
+---@param container table the container frame
+---@param containerVisible boolean?: if true, skip if container isn't visible
+---@param visibleOnly boolean?: if true, only include visible child frames
+---@param requireUnit boolean?: if true, require GetFrameUnit(frame) ~= nil
 ---@return table
-function M:ExtractUnitFrames(container, containerVisible, visibleOnly, hasUnit)
+function M:ExtractUnitFrames(container, containerVisible, visibleOnly, requireUnit)
     if not container then
         fsLog:Error("Frame:ExtractUnitFrames() - container must not be nil.")
         return {}
     end
 
-    if hasUnit == nil then
-        hasUnit = true
+    if requireUnit == nil then
+        requireUnit = true
     end
 
     if visibleOnly == nil then
@@ -293,7 +295,7 @@ function M:ExtractUnitFrames(container, containerVisible, visibleOnly, hasUnit)
                 return false
             end
 
-            if hasUnit then
+            if requireUnit then
                 local unit = M:GetFrameUnit(frame)
                 if not unit then
                     return false

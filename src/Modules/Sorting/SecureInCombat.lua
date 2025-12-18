@@ -112,7 +112,7 @@ secureMethods["ExtractUnitFrames"] = [[
         -- in some rare cases frames can have no position, so exclude them
         local left, bottom, width, height = child:GetRect()
 
-        local hasSize =  left and bottom and width and height
+        local hasSize = left and bottom and width and height
 
         if not hasSize then
             run:CallMethod("Log", format("Frame '%s' has no size.", child:GetName() or "nil"), LogLevel.Warning)
@@ -576,6 +576,7 @@ secureMethods["SortFramesByUnits"] = [[
 
 -- adjusts the x and y offsets of a frame
 secureMethods["AdjustPointsOffset"] = [[
+    local run = control or self
     local framesVariable, xDelta, yDelta = ...
     local frame = _G[framesVariable]
 
@@ -860,10 +861,29 @@ secureMethods["HardArrange"] = [[
     local horizontalSpacing = spacing and spacing.Horizontal or 0
     local isHorizontalLayout = container.IsHorizontalLayout
     local blocksPerLine = container.FramesPerLine
-    local _, _, firstFrameWidth, firstFrameHeight = frames[1]:GetRect()
+
+    local firstValid = nil
+
+    for _, frame in ipairs(frames) do
+        if frame and frame.GetHeight and frame.GetWidth then
+            local height, width = frame:GetHeight(), frame:GetWidth()
+
+            if height and height > 0 and width and width > 0 then
+                firstValid = frame
+                break
+            end
+        end
+    end
+
+    if not firstValid then
+        run:CallMethod("Log", "HardArrange (in-combat): no valid frames with size.", LogLevel.Error)
+        return false
+    end
+
+    local _, _, firstValidFrameWidth, firstValidFrameHeight = firstValid:GetRect()
     local offset = container.Offset or newtable()
-    local blockWidth = firstFrameWidth
-    blockHeight = blockHeight or firstFrameHeight
+    local blockWidth = firstValidFrameWidth
+    blockHeight = blockHeight or firstValidFrameHeight
 
     offset.X = offset.X or 0
     offset.Y = offset.Y or 0
@@ -1051,11 +1071,12 @@ secureMethods["UngroupedOffset"] = [[
 
 secureMethods["TrySortContainerGroups"] = [[
     local run = control or self
-    local containerVariable, providerVariable = ...
+    local containerVariable, providerVariable, destinationFramesVariable = ...
     local container = _G[containerVariable]
     local provider = _G[providerVariable]
-
+    local blockHeight = nil
     local sorted = false
+
     Groups = nil
 
     if not run:RunAttribute("ExtractGroups", containerVariable, "Groups") then
@@ -1076,8 +1097,18 @@ secureMethods["TrySortContainerGroups"] = [[
             GroupContainer.Offset.Y = container.GroupOffset.Y
         end
 
-        sorted = run:RunAttribute("TrySortContainer", "GroupContainer", providerVariable) or sorted
+        ContainerFrames = nil
+        sorted = run:RunAttribute("TrySortContainer", "GroupContainer", providerVariable, "ContainerFrames") or sorted
 
+        if not blockHeight and ContainerFrames and #ContainerFrames > 0 then
+            local firstValid = ContainerFrames[1]
+
+            if firstValid then
+                blockHeight = firstValid:GetHeight()
+            end
+        end
+
+        ContainerFrames = nil
         GroupContainer = nil
     end
 
@@ -1124,9 +1155,6 @@ secureMethods["TrySortContainerGroups"] = [[
     UngroupedContainer.Offset.X = offsetX
     UngroupedContainer.Offset.Y = offsetY
 
-    -- use the block height of a member frame as pet frames are smaller
-    local blockHeight = UngroupedFrames[1]:GetHeight() * 2
-
     sorted = run:RunAttribute("HardArrange", "UngroupedFrames", "UngroupedContainer", "GroupSpacing", blockHeight)
 
     UngroupedContainer = nil
@@ -1146,7 +1174,7 @@ secureMethods["TrySortContainer"] = [=[
     local friendlyPlayerMode = self:GetAttribute("FriendlyPlayerSortMode")
     local friendlyGroupMode = self:GetAttribute("FriendlyGroupSortMode")
     local enemyGroupMode = self:GetAttribute("EnemyGroupSortMode")
-    local containerVariable, providerVariable = ...
+    local containerVariable, providerVariable, destinationFramesVariable = ...
     local container = _G[containerVariable]
     local provider = _G[providerVariable]
     local units = nil
@@ -1187,9 +1215,14 @@ secureMethods["TrySortContainer"] = [=[
     end
 
     if #Frames <= 1 then
+        if destinationFramesVariable then
+            _G[destinationFramesVariable] = Frames
+        end
+
         -- nothing to do
         Children, Frames = nil, nil
-        return true
+
+        return false
     end
 
     Units = units or newtable()
@@ -1232,6 +1265,10 @@ secureMethods["TrySortContainer"] = [=[
         sorted = run:RunAttribute("HardArrange", "SortedFrames", containerVariable, Spacing and "Spacing")
     elseif container.LayoutType == LayoutType.Soft then
         sorted = run:RunAttribute("SoftArrange", "SortedFrames", Spacing and "Spacing")
+    end
+
+    if destinationFramesVariable then
+        _G[destinationFramesVariable] = SortedFrames
     end
 
     SortedFrames = nil
