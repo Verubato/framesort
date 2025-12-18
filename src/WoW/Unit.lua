@@ -120,7 +120,18 @@ end
 ---Returns true if the unit token is a pet.
 ---@param unit string
 function M:IsPet(unit)
-    return unit ~= nil and string.find(unit, "pet", nil, true) ~= nil
+    if not unit then
+        return false
+    end
+
+    return unit == "pet"
+        or unit == "playerpet"
+        or unit:match("^party%d+pet$") ~= nil
+        or unit:match("^partypet%d+$") ~= nil
+        or unit:match("^raid%d+pet$") ~= nil
+        or unit:match("^raidpet%d+$") ~= nil
+        or unit:match("^arena%d+pet$") ~= nil
+        or unit:match("^arenapet%d+$") ~= nil
 end
 
 ---Returns the pet unit for the specified unit.
@@ -143,8 +154,25 @@ function M:PetFor(unit, isEnemy)
         return "pet"
     end
 
-    local pet, _ = string.gsub(unit, "^(%a+)", "%1pet")
-    return pet
+    -- party1 -> partypet1
+    local n = unit:match("^party(%d+)$")
+    if n then
+        return "partypet" .. n
+    end
+
+    -- raid1 -> raidpet1
+    n = unit:match("^raid(%d+)$")
+    if n then
+        return "raidpet" .. n
+    end
+
+    -- arena1 -> arenapet1
+    n = unit:match("^arena(%d+)$")
+    if n then
+        return "arenapet" .. n
+    end
+
+    return "none"
 end
 
 ---Returns the parent token of a given pet unit, e.g. arenapet3 becomes arena3
