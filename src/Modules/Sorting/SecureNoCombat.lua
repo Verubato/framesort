@@ -123,150 +123,148 @@ local function Move(frames, points)
     return #framesToMove > 0, #framesToMove
 end
 
----Applies spacing on a set of points.
----@param frames table[]
+---Applies spacing on a set of points (slots) in-place.
+---@param points table[]
 ---@param spacing Spacing
----@param pointsByFrame table<table, Point>
-local function ApplySpacing(frames, spacing, pointsByFrame)
-    local orderedTopLeft = fsEnumerable
-        :From(frames)
-        :OrderBy(function(x, y)
-            return fsCompare:CompareTopLeftFuzzy(x, y)
-        end)
-        :ToTable()
+local function ApplySpacing(points, spacing)
+    if not points or #points <= 1 or not spacing then
+        return
+    end
 
     local horizontalSpacing = spacing.Horizontal or 0
     local verticalSpacing = spacing.Vertical or 0
+    local sanity = fsCompare.DecimalSanity or 0
 
-    local yDelta = 0
-    for i = 2, #orderedTopLeft do
-        local frame = orderedTopLeft[i]
-        local previous = orderedTopLeft[i - 1]
-        local point = pointsByFrame[frame]
+    -- Snapshot coords for stable row/column grouping + stable sorting
+    for i = 1, #points do
+        local p = points[i]
+        p.OrigLeft = p.Left
+        p.OrigTop = p.Top
+    end
 
-        if point then
-            local left = frame:GetLeft()
-            local top = frame:GetTop()
-            local previousLeft = previous:GetLeft()
-            local previousBottom = previous:GetBottom()
+    local function Round(n)
+        return fsMath:Round(n or 0, sanity)
+    end
 
-            if left and top and previousLeft and previousBottom then
-                local sameColumn = fsMath:Round(left) == fsMath:Round(previousLeft)
+    -- Pass 1: horizontal spacing within a row (sort by OrigTop desc, OrigLeft asc)
+    table.sort(points, function(a, b)
+        local aTop, bTop = Round(a.OrigTop), Round(b.OrigTop)
 
-                if sameColumn then
-                    local existingSpace = previousBottom - top
-                    yDelta = yDelta - (existingSpace - verticalSpacing)
-                    point.Top = point.Top - yDelta
-                end
-            else
-                fsLog:Error("Cannot apply spacing to frame '%s' that has no geometry.", frame.GetName and frame:GetName() or "nil")
+        if aTop ~= bTop then
+            return aTop > bTop
+        end
+
+        return Round(a.OrigLeft) < Round(b.OrigLeft)
+    end)
+
+    for i = 2, #points do
+        local p = points[i]
+        local prev = points[i - 1]
+
+        local sameRow = Round(p.OrigTop) == Round(prev.OrigTop)
+        if sameRow then
+            local prevRight = prev.Left + (prev.Width or 0)
+            local existingSpace = p.Left - prevRight
+            local xDelta = horizontalSpacing - existingSpace
+
+            if xDelta ~= 0 then
+                p.Left = p.Left + xDelta
             end
-        else
-            -- this can happen for a frame without a point from SoftArrange
         end
     end
 
-    local orderedLeftTop = fsEnumerable
-        :From(frames)
-        :OrderBy(function(x, y)
-            return fsCompare:CompareLeftTopFuzzy(x, y)
-        end)
-        :ToTable()
+    -- Pass 2: vertical spacing within a column (sort by OrigLeft asc, OrigTop desc)
+    table.sort(points, function(a, b)
+        local aLeft, bLeft = Round(a.OrigLeft), Round(b.OrigLeft)
 
-    local xDelta = 0
-    for i = 2, #orderedLeftTop do
-        local frame = orderedLeftTop[i]
-        local previous = orderedLeftTop[i - 1]
-        local point = pointsByFrame[frame]
-
-        if point then
-            local top = frame:GetTop()
-            local left = frame:GetLeft()
-            local previousTop = previous:GetTop()
-            local previousRight = previous:GetRight()
-
-            if top and previousTop and left and previousRight then
-                local sameRow = fsMath:Round(top) == fsMath:Round(previousTop)
-
-                if sameRow then
-                    local existingSpace = previousRight - left
-                    xDelta = xDelta + (existingSpace + horizontalSpacing)
-                    point.Left = point.Left + xDelta
-                end
-            else
-                fsLog:Error("Cannot apply spacing to frame '%s' that has no geometry.", frame.GetName and frame:GetName() or "nil")
-            end
-        else
-            -- this can happen for a frame without a point from SoftArrange
+        if aLeft ~= bLeft then
+            return aLeft < bLeft
         end
+
+        return Round(a.OrigTop) > Round(b.OrigTop)
+    end)
+
+    for i = 2, #points do
+        local p = points[i]
+        local prev = points[i - 1]
+
+        local sameColumn = Round(p.OrigLeft) == Round(prev.OrigLeft)
+        if sameColumn then
+            local prevBottom = prev.Top - (prev.Height or 0)
+            local existingSpace = prevBottom - p.Top
+            local yDelta = verticalSpacing - existingSpace
+
+            if yDelta ~= 0 then
+                p.Top = p.Top - yDelta
+            end
+        end
+    end
+
+    -- Cleanup snapshot fields
+    for i = 1, #points do
+        local p = points[i]
+        p.OrigLeft = nil
+        p.OrigTop = nil
     end
 end
 
 ---Applies spacing to a set of groups that contain frames.
----@param frames table[]
----@return boolean sorted
+---@param frames table[]  -- group frames
+---@param spacing Spacing
+---@return boolean movedAny
 local function SpaceGroups(frames, spacing)
-    if not frames or #frames <= 1 then
+    if not frames or #frames <= 1 or not spacing then
         return false
     end
 
-    -- Destination slot order = current layout (TopLeft), but only keep valid geometry
-    local points = fsEnumerable
-        :From(frames)
-        :OrderBy(function(x, y)
-            return fsCompare:CompareTopLeftFuzzy(x, y)
-        end)
-        :Map(function(frame)
-            return {
-                Frame = frame,
-                Top = frame:GetTop(),
-                Left = frame:GetLeft(),
-            }
-        end)
-        :Where(function(item)
-            return item.Top ~= nil and item.Left ~= nil
-        end)
-        :ToTable()
+    -- Build slots from groups with valid geometry
+    local points = {}
+    for _, frame in ipairs(frames) do
+        if frame and frame.GetRect then
+            local left, bottom, width, height = frame:GetRect()
 
-    local slotsCount = #points
-    if slotsCount <= 1 then
+            if left and bottom and width and height then
+                points[#points + 1] = {
+                    Frame = frame,
+                    Left = left,
+                    Top = bottom + height,
+                    Width = width,
+                    Height = height,
+                }
+            end
+        end
+    end
+
+    if #points <= 1 then
         return false
     end
 
-    local pointsByFrame = fsEnumerable:From(points):ToDictionary(function(x)
-        return x.Frame
-    end, function(x)
-        return x
-    end)
+    -- Mutate slot coords in-place
+    ApplySpacing(points, spacing)
 
-    -- Mutates points in-place
-    ApplySpacing(frames, spacing, pointsByFrame)
+    -- Destination map by group frame (prevents ordering mismatches)
+    local destByGroup = {}
+    for i = 1, #points do
+        local p = points[i]
+        destByGroup[p.Frame] = p
+    end
 
     local movedAny = false
-    local slotIndex = 0
 
-    for _, source in ipairs(frames) do
-        local left, top = source:GetLeft(), source:GetTop()
+    for _, group in ipairs(frames) do
+        local dest = group and destByGroup[group]
 
-        if left ~= nil and top ~= nil then
-            slotIndex = slotIndex + 1
-            if slotIndex > slotsCount then
-                break
-            end
+        if dest and group and group.GetLeft and group.GetTop then
+            local left, top = group:GetLeft(), group:GetTop()
 
-            local destination = points[slotIndex]
-            local destLeft, destTop = destination.Left, destination.Top
-
-            if destLeft and destTop then
-                local xDelta = destLeft - left
-                local yDelta = destTop - top
+            if left ~= nil and top ~= nil then
+                local xDelta = dest.Left - left
+                local yDelta = dest.Top - top
 
                 if xDelta ~= 0 or yDelta ~= 0 then
-                    source:AdjustPointsOffset(xDelta, yDelta)
+                    group:AdjustPointsOffset(xDelta, yDelta)
                     movedAny = true
                 end
-            else
-                fsLog:Error("Cannot apply spacing to group '%s' that has no destination geometry.", source.GetName and source:GetName() or "nil")
             end
         end
     end
@@ -276,14 +274,14 @@ end
 
 ---Rearranges frames by only modifying X/Y offsets (keeps anchors).
 ---@param frames table[]
----@param spacing table? -- your spacing object
+---@param spacing Spacing? -- spacing object
 ---@return boolean movedAny
 local function SoftArrange(frames, spacing)
-    if #frames <= 1 then
+    if not frames or #frames <= 1 then
         return false
     end
 
-    -- Destination slots (screen positions), ordered by current TopLeft
+    -- Destination slots ordered by current TopLeft, but only keep frames with valid geometry
     local orderedByTopLeft = fsEnumerable
         :From(frames)
         :OrderBy(function(a, b)
@@ -292,10 +290,19 @@ local function SoftArrange(frames, spacing)
         :ToTable()
 
     local slots = {}
-    for _, f in ipairs(orderedByTopLeft) do
-        local top, left = f:GetTop(), f:GetLeft()
-        if top ~= nil and left ~= nil then
-            slots[#slots + 1] = { Top = top, Left = left, Frame = f }
+    for _, frame in ipairs(orderedByTopLeft) do
+        if frame and frame.GetRect then
+            local left, bottom, width, height = frame:GetRect()
+
+            if left and bottom and width and height then
+                slots[#slots + 1] = {
+                    Frame = frame,
+                    Left = left,
+                    Top = bottom + height,
+                    Width = width,
+                    Height = height,
+                }
+            end
         end
     end
 
@@ -304,15 +311,8 @@ local function SoftArrange(frames, spacing)
         return false
     end
 
-    -- Apply spacing by mutating slot coordinates (if your ApplySpacing does that)
     if spacing then
-        local pointsByFrame = {}
-
-        for i = 1, slotsCount do
-            pointsByFrame[slots[i].Frame] = slots[i]
-        end
-
-        ApplySpacing(frames, spacing, pointsByFrame)
+        ApplySpacing(slots, spacing)
     end
 
     -- Enumerate in chain order if available (movement order)
@@ -323,27 +323,29 @@ local function SoftArrange(frames, spacing)
         enumerationOrder = fsFrame:FramesFromChain(chain)
     end
 
-    -- Move the i-th *valid* frame (in desired order) to slot i
+    -- Destination map by frame (avoids any mismatch)
+    local destByFrame = {}
+    for i = 1, slotsCount do
+        local s = slots[i]
+        destByFrame[s.Frame] = s
+    end
+
     local movedAny = false
-    local slot = 0
 
     for _, source in ipairs(enumerationOrder) do
-        local top, left = source:GetTop(), source:GetLeft()
+        local dest = source and destByFrame[source]
 
-        if top ~= nil and left ~= nil then
-            slot = slot + 1
+        if dest and source and source.GetLeft and source.GetTop then
+            local left, top = source:GetLeft(), source:GetTop()
 
-            if slot > slotsCount then
-                break
-            end
+            if left ~= nil and top ~= nil then
+                local xDelta = dest.Left - left
+                local yDelta = dest.Top - top
 
-            local destination = slots[slot]
-            local xDelta = destination.Left - left
-            local yDelta = destination.Top - top
-
-            if xDelta ~= 0 or yDelta ~= 0 then
-                source:AdjustPointsOffset(xDelta, yDelta)
-                movedAny = true
+                if xDelta ~= 0 or yDelta ~= 0 then
+                    source:AdjustPointsOffset(xDelta, yDelta)
+                    movedAny = true
+                end
             end
         end
     end

@@ -813,7 +813,6 @@ secureMethods["ApplySpacing"] = [[
         return nil
     end
 
-
     local points = _G[pointsVariable]
     local spacing = _G[spacingVariable]
 
@@ -824,6 +823,17 @@ secureMethods["ApplySpacing"] = [[
 
     local horizontal = spacing.Horizontal or 0
     local vertical = spacing.Vertical or 0
+
+    -- Snapshot original coords so the second pass doesn't "drift" after the first mutates Left/Bottom.
+    for i = 1, #points do
+        local p = points[i]
+        if not p or p.Left == nil or p.Bottom == nil or p.Width == nil or p.Height == nil then
+            run:CallMethod("Log", "ApplySpacing was passed a point missing Left/Bottom/Width/Height.", LogLevel.Critical)
+            return nil
+        end
+        p.OrigLeft = p.Left
+        p.OrigBottom = p.Bottom
+    end
 
     OrderedTopLeft = newtable()
     OrderedLeftTop = newtable()
@@ -837,11 +847,13 @@ secureMethods["ApplySpacing"] = [[
     local changed = false
     local mult = 10 ^ DecimalSanity
 
+    -- Pass 1: horizontal spacing within a row (row grouping based on ORIGINAL coords)
     for i = 2, #OrderedLeftTop do
         local point = OrderedLeftTop[i]
         local previous = OrderedLeftTop[i - 1]
-        local pointTopFuzzy = math.floor((point.Bottom + point.Height) * mult + 0.5) / mult
-        local previousTopFuzzy = math.floor((previous.Bottom + previous.Height) * mult + 0.5) / mult
+
+        local pointTopFuzzy = math.floor((point.OrigBottom + point.Height) * mult + 0.5) / mult
+        local previousTopFuzzy = math.floor((previous.OrigBottom + previous.Height) * mult + 0.5) / mult
         local sameRow = pointTopFuzzy == previousTopFuzzy
 
         if sameRow then
@@ -852,11 +864,13 @@ secureMethods["ApplySpacing"] = [[
         end
     end
 
+    -- Pass 2: vertical spacing within a column (column grouping based on ORIGINAL coords)
     for i = 2, #OrderedTopLeft do
         local point = OrderedTopLeft[i]
         local previous = OrderedTopLeft[i - 1]
-        local leftFuzzy = math.floor(point.Left * mult + 0.5) / mult
-        local previousLeftFuzzy = math.floor(previous.Left * mult + 0.5) / mult
+
+        local leftFuzzy = math.floor(point.OrigLeft * mult + 0.5) / mult
+        local previousLeftFuzzy = math.floor(previous.OrigLeft * mult + 0.5) / mult
         local sameColumn = leftFuzzy == previousLeftFuzzy
 
         if sameColumn then
@@ -865,6 +879,13 @@ secureMethods["ApplySpacing"] = [[
             point.Bottom = point.Bottom - yDelta
             changed = changed or yDelta ~= 0
         end
+    end
+
+    -- Cleanup snapshot fields (keeps point tables lean)
+    for i = 1, #points do
+        local p = points[i]
+        p.OrigLeft = nil
+        p.OrigBottom = nil
     end
 
     OrderedTopLeft = nil
@@ -929,41 +950,53 @@ secureMethods["SpaceGroups"] = [[
     end
 
     local changed = run:RunAttribute("ApplySpacing", "Slots", spacingVariable)
-        if changed == nil then
+
+    if changed == nil then
         Slots = nil
         return false
     end
 
+    -- assign destinations by group so ordering can't mismatch.
+    DestByGroup = newtable()
+    for i = 1, #Slots do
+        local slot = Slots[i]
+
+        if slot and slot.Group then
+            DestByGroup[slot.Group] = slot
+        end
+    end
+
     local movedAny = false
     local mult = 10 ^ DecimalSanity
-    local slotIndex = 0
 
     for _, group in ipairs(groups) do
         if group and group.GetRect then
             local left, bottom, width, height = group:GetRect()
 
             if left and bottom and width and height then
-                slotIndex = slotIndex + 1
-                if slotIndex > slotsCount then break end
+                local destination = DestByGroup[group]
 
-                local destination = Slots[slotIndex]
-                local xDelta = destination.Left - left
-                local yDelta = destination.Bottom - bottom
+                if destination then
+                    local xDelta = destination.Left - left
+                    local yDelta = destination.Bottom - bottom
 
-                local xDeltaRounded = math.floor(xDelta * mult + 0.5) / mult
-                local yDeltaRounded = math.floor(yDelta * mult + 0.5) / mult
+                    local xDeltaRounded = math.floor(xDelta * mult + 0.5) / mult
+                    local yDeltaRounded = math.floor(yDelta * mult + 0.5) / mult
 
-                if xDeltaRounded ~= 0 or yDeltaRounded ~= 0 then
-                    Group = group
-                    local moved = run:RunAttribute("AdjustPointsOffset", "Group", xDelta, yDelta)
-                    movedAny = movedAny or moved
-                    Group = nil
+                    if xDeltaRounded ~= 0 or yDeltaRounded ~= 0 then
+                        Group = group
+                        local moved = run:RunAttribute("AdjustPointsOffset", "Group", xDelta, yDelta)
+                        movedAny = movedAny or moved
+                        Group = nil
+                    end
                 end
             end
         end
     end
 
+    DestByGroup = nil
     Slots = nil
+
     return movedAny
 ]]
 
@@ -1017,11 +1050,23 @@ secureMethods["SoftArrange"] = [[
         return false
     end
 
-    -- Apply spacing by mutating Points in-place
-    if spacingVariable then
-        local spacing = _G[spacingVariable]
-        if spacing then
-            run:RunAttribute("ApplySpacing", "Slots", spacingVariable)
+    local spacing = spacingVariable and _G[spacingVariable]
+
+    if spacing then
+        local changed = run:RunAttribute("ApplySpacing", "Slots", spacingVariable)
+        if changed == nil then
+            OrderedByTopLeft = nil
+            Slots = nil
+            return false
+        end
+    end
+
+    -- Build destination map by frame so enumeration order can't mismatch.
+    DestByFrame = newtable()
+    for i = 1, #Slots do
+        local slot = Slots[i]
+        if slot and slot.Frame then
+            DestByFrame[slot.Frame] = slot
         end
     end
 
@@ -1047,33 +1092,33 @@ secureMethods["SoftArrange"] = [[
 
     local movedAny = false
     local mult = 10 ^ DecimalSanity
-    local slotIndex = 0
 
     for _, source in ipairs(enumerationOrder) do
         if source and source.GetRect then
             local left, bottom, width, height = source:GetRect()
 
             if left and bottom and width and height then
-                slotIndex = slotIndex + 1
-                if slotIndex > slotsCount then break end
+                local destination = DestByFrame[source]
 
-                local destination = Slots[slotIndex]
-                local xDelta = destination.Left - left
-                local yDelta = destination.Bottom - bottom
+                if destination then
+                    local xDelta = destination.Left - left
+                    local yDelta = destination.Bottom - bottom
 
-                local xDeltaRounded = math.floor(xDelta * mult + 0.5) / mult
-                local yDeltaRounded = math.floor(yDelta * mult + 0.5) / mult
+                    local xDeltaRounded = math.floor(xDelta * mult + 0.5) / mult
+                    local yDeltaRounded = math.floor(yDelta * mult + 0.5) / mult
 
-                if xDeltaRounded ~= 0 or yDeltaRounded ~= 0 then
-                    Frame = source
-                    local moved = run:RunAttribute("AdjustPointsOffset", "Frame", xDelta, yDelta)
-                    movedAny = movedAny or moved
-                    Frame = nil
+                    if xDeltaRounded ~= 0 or yDeltaRounded ~= 0 then
+                        Frame = source
+                        local moved = run:RunAttribute("AdjustPointsOffset", "Frame", xDelta, yDelta)
+                        movedAny = movedAny or moved
+                        Frame = nil
+                    end
                 end
             end
         end
     end
 
+    DestByFrame = nil
     Slots = nil
     enumerationOrder = nil
     return movedAny
