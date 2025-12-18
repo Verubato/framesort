@@ -90,10 +90,19 @@ function M:ToFrameChain(frames)
     end)
 
     local root = nil
-    for _, child in pairs(nodesByFrame) do
-        local _, relativeTo, _, _, _ = child.Value:GetPoint()
 
-        if relativeTo then
+    for i = 1, #frames do
+        local frame = frames[i]
+        local node = nodesByFrame[frame]
+        local _, relativeTo = node.Value:GetPoint()
+
+        if not relativeTo then
+            if root then
+                return invalid
+            end
+
+            root = node
+        else
             local parent = nodesByFrame[relativeTo]
 
             if parent then
@@ -101,10 +110,14 @@ function M:ToFrameChain(frames)
                     return invalid
                 end
 
-                parent.Next = child
-                child.Previous = parent
+                parent.Next = node
+                node.Previous = parent
             else
-                root = child
+                if root then
+                    return invalid
+                end
+
+                root = node
             end
         end
     end
@@ -380,7 +393,7 @@ end
 function M:IsForbidden(frame)
     if not frame then
         fsLog:Error("Frame:IsForbidden() - frame must not be nil.")
-        return nil
+        return false
     end
 
     -- wotlk 3.3.5 doesn't have this function
