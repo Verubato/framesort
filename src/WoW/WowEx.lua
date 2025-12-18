@@ -14,8 +14,27 @@ addon.WoW.WowEx = {
             return true
         end
 
-        if wow.C_PvP and type(wow.C_PvP) == "table" and wow.C_PvP.IsBattleground and type(wow.C_PvP.IsBattleground) == "function" then
+        if type(wow.C_PvP) == "table" and type(wow.C_PvP.IsBattleground) == "function" then
             return wow.C_PvP.IsBattleground()
+        end
+
+        return false
+    end,
+
+    ---@return boolean
+    IsInstanceArenaOrBrawl = function()
+        local inInstance, instanceType = wow.IsInInstance()
+
+        if not inInstance then
+            return false
+        end
+
+        if instanceType == "arena" then
+            return true
+        end
+
+        if type(wow.C_PvP) == "table" and type(wow.C_PvP.IsInBrawl) == "function" then
+            return wow.C_PvP.IsInBrawl()
         end
 
         return false

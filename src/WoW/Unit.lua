@@ -14,7 +14,7 @@ local allPartyUnitsIds = {
     "pet",
 }
 local allRaidUnitsIds = {}
-local allEnemyUnitsIds = {}
+local allArenaUnitsIds = {}
 
 for i = 1, wow.MAX_PARTY_MEMBERS do
     allPartyUnitsIds[#allPartyUnitsIds + 1] = "party" .. i
@@ -35,11 +35,11 @@ end
 -- brawl can have 15 people in arena
 local maxArena = 15
 for i = 1, maxArena do
-    allEnemyUnitsIds[#allEnemyUnitsIds + 1] = "arena" .. i
+    allArenaUnitsIds[#allArenaUnitsIds + 1] = "arena" .. i
 end
 
 for i = 1, maxArena do
-    allEnemyUnitsIds[#allEnemyUnitsIds + 1] = "arenapet" .. i
+    allArenaUnitsIds[#allArenaUnitsIds + 1] = "arenapet" .. i
 end
 
 function M:EnemyUnitExists(unit)
@@ -101,17 +101,15 @@ function M:FriendlyUnits()
         :ToTable()
 end
 
----Returns a table of enemy unit tokens where the unit exists.
+---Returns a table of arena unit tokens where the unit exists.
 ---@return string[]
-function M:EnemyUnits()
-    local inInstance, instanceType = wow.IsInInstance()
-
-    if not inInstance or (instanceType ~= "arena" and instanceType ~= "pvp") then
+function M:ArenaUnits()
+    if not wowEx.IsInstanceArenaOrBrawl() then
         return {}
     end
 
     return fsEnumerable
-        :From(allEnemyUnitsIds)
+        :From(allArenaUnitsIds)
         :Where(function(unit)
             return M:EnemyUnitExists(unit)
         end)
