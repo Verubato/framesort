@@ -21,7 +21,7 @@ local function SafeAdjustPointsOffset(frame, xDelta, yDelta)
         return false
     end
 
-    if fsFrame.IsForbidden and fsFrame:IsForbidden(frame) then
+    if fsFrame:IsForbidden(frame) then
         return false
     end
 
