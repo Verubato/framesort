@@ -1748,12 +1748,17 @@ end
 local function ConfigureHeader(header)
     InjectSecureHelpers(header)
 
-    function header:UnitButtonCreated(index)
-        local children = { header:GetChildren() }
-        local frame = children[index]
+    function header:UnitButtonCreated(id)
+        local frame
+        for _, child in ipairs({ header:GetChildren() }) do
+            if child and child.GetID and child:GetID() == id then
+                frame = child
+                break
+            end
+        end
 
         if not frame then
-            fsLog:Bug("Failed to find unit button %s", index)
+            fsLog:Bug("Failed to find unit button %s.", id)
             return
         end
 
