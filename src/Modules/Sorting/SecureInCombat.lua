@@ -984,6 +984,7 @@ secureMethods["UngroupedOffset"] = [[
     lastGroup:GetChildList(OffsetGroupChildren)
 
     if not run:RunAttribute("ExtractUnitFrames", "OffsetGroupChildren", "OffsetGroupFrames", container.VisibleOnly) then
+        OffsetGroups = nil
         OffsetGroupFrames = nil
         OffsetGroupChildren = nil
         return 0, 0
@@ -1387,6 +1388,7 @@ secureMethods["LoadUnits"] = [[
 secureMethods["Init"] = [[
     Providers = newtable()
 
+    -- Must match Comparer.DecimalSanity for consistency
     DecimalSanity = 0
 
     -- must match the enums specified in Frame.lua
