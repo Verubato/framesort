@@ -1682,7 +1682,7 @@ local function WatchChildrenVisibility(container)
                 "OnShow",
                 manager,
                 [[
-                    local manager = self:GetFrameRef("Manager")
+                    local manager = control
                     manager:SetAttribute("state-framesort-run", "ignore")
                 ]]
             )
@@ -1691,7 +1691,7 @@ local function WatchChildrenVisibility(container)
                 "OnHide",
                 manager,
                 [[
-                    local manager = self:GetFrameRef("Manager")
+                    local manager = control
                     manager:SetAttribute("state-framesort-run", "ignore")
                 ]]
             )
