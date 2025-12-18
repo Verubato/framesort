@@ -143,6 +143,10 @@ function M:PetFor(unit, isEnemy)
         return "none"
     end
 
+    if unit == "playerpet" then
+        return "pet"
+    end
+
     if M:IsPet(unit) then
         return unit
     end
