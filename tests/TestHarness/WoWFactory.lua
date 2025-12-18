@@ -95,6 +95,9 @@ function M:Create()
         UnitIsFriend = function(of, to)
             return not to:match("arena")
         end,
+        UnitIsEnemy = function(of, to)
+            return to:match("arena")
+        end,
 
         GetRaidRosterInfo = function()
             local name = "Test"
