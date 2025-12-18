@@ -13,7 +13,6 @@ local M = addon.Modules
 local timerFrame = nil
 local eventFrame = nil
 local combatFrame = nil
-local pvpTimerType = 1
 local run = false
 local runAll = false
 ---@type { [FrameProvider]: boolean }
@@ -89,14 +88,8 @@ local function OnCombatStateChanged(_, event)
 end
 
 local function OnTimer(_, _, timerType, timeSeconds)
-    if timerType ~= pvpTimerType then
-        return
-    end
-
-    -- TODO: I don't think this is required anymore
-    -- it was added to workaround a bug where enemy macros weren't being updated
-    -- but that bug was macro cache related and not a timing issue, so this workaround didn't do anything AFAIK
-    -- would need to do more testing before feeling comfortable to remove this
+    -- this is currently needed for TBC classic as sometimes frames aren't sorted in the prep room for some reason
+    -- TODO: why aren't frames sorted in the prep room
     fsScheduler:RunAfter(timeSeconds + 1, function()
         fsLog:Debug("Timer requested sort.")
         ScheduleSort()
