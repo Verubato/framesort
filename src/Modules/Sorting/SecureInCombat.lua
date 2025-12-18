@@ -494,27 +494,42 @@ secureMethods["SortFramesByUnits"] = [[
         local frame = frames[i]
 
         Frame = frame
-        local unit = run:RunAttribute("GetUnit", "Frame")
+        local unit, token = run:RunAttribute("GetUnit", "Frame") -- token is the original (may include "pet")
         Frame = nil
 
         if unit then
-            local existingFrame = framesByUnit[unit]
+            local existing = framesByUnit[unit]
 
-            if existingFrame then
-                -- this happens when the unit is in a vehicle
-                -- in which case they will have 2 frames; their player frame which becomesvehicle frame, and a pet frame
-                -- we want the player frame first, so sort by frame height
-
-                if frame:GetHeight() > existingFrame:GetHeight() then
-                    -- unsort the existing frame and it'll just go to the end
-                    frameWasSorted[existingFrame] = false
-
-                    -- insert the new frame
-                    framesByUnit[unit] = frame
-                    frameWasSorted[frame] = true
-                end
-            else
+            if not existing then
                 framesByUnit[unit] = frame
+            else
+                -- Decide which one to keep:
+                -- Prefer the one whose token is NOT a pet token (more stable than height).
+                Frame = existing
+                local _, existingToken = run:RunAttribute("GetUnit", "Frame")
+                Frame = nil
+
+                local isPet = token and strfind(token, "pet") ~= nil
+                local existingIsPet = existingToken and strfind(existingToken, "pet") ~= nil
+
+                local keepNew = false
+
+                if existingIsPet and not isPet then
+                    -- new is better (non-pet beats pet)
+                    keepNew = true
+                elseif isPet and not existingIsPet then
+                    -- existing is better
+                    keepNew = false
+                else
+                    -- tie-breaker: prefer taller (your old heuristic)
+                    local newH = frame.GetHeight and frame:GetHeight() or 0
+                    local oldH = existing.GetHeight and existing:GetHeight() or 0
+                    keepNew = newH > oldH
+                end
+
+                if keepNew then
+                    framesByUnit[unit] = frame
+                end
             end
         else
             run:CallMethod("Log", format("Failed to determine unit of frame: %s.", frame:GetName() or "nil"), LogLevel.Warning)
@@ -1109,11 +1124,10 @@ secureMethods["TrySortContainerGroups"] = [[
         ContainerFrames = nil
         sorted = run:RunAttribute("TrySortContainer", "GroupContainer", providerVariable, "ContainerFrames") or sorted
 
-        if not blockHeight and ContainerFrames and #ContainerFrames > 0 then
-            local firstValid = ContainerFrames[1]
-
-            if firstValid then
-                blockHeight = firstValid:GetHeight()
+        if not blockHeight and ContainerFrames then
+            for _, f in ipairs(ContainerFrames) do
+                local h = f and f.GetHeight and f:GetHeight()
+                if h and h > 0 then blockHeight = h; break end
             end
         end
 
