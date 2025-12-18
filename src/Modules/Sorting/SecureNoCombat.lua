@@ -760,7 +760,7 @@ local function TrySortContainerGroups(container)
 
     local ungroupedOffset = UngroupedOffset(container, spacing)
 
-    sorted = HardArrange(container, ungroupedFrames, spacing, ungroupedOffset, blockHeight)
+    sorted = HardArrange(container, ungroupedFrames, spacing, ungroupedOffset, blockHeight) or sorted
 
     return sorted
 end
