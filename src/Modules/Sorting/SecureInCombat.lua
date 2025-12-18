@@ -424,17 +424,17 @@ secureMethods["ComparePointLeftTop"] = [[
     end
 
     local mult = 10 ^ DecimalSanity
-    local topFuzzy = math.floor((x.Bottom + x.Height) * mult + 0.5) / mult
-    local nextTopFuzzy = math.floor((y.Bottom + y.Height) * mult + 0.5) / mult
-
-    if topFuzzy ~= nextTopFuzzy then
-        return topFuzzy > nextTopFuzzy
-    end
-
     local leftFuzzy = math.floor(x.Left * mult + 0.5) / mult
     local nextLeftFuzzy = math.floor(y.Left * mult + 0.5) / mult
 
-    return leftFuzzy < nextLeftFuzzy
+    if leftFuzzy ~= nextLeftFuzzy then
+        return leftFuzzy < nextLeftFuzzy
+    end
+
+    local topFuzzy = math.floor((x.Bottom + x.Height) * mult + 0.5) / mult
+    local nextTopFuzzy = math.floor((y.Bottom + y.Height) * mult + 0.5) / mult
+
+    return topFuzzy > nextTopFuzzy
 ]]
 
 secureMethods["CompareFrameGroup"] = [[
@@ -1472,300 +1472,294 @@ secureMethods["Init"] = [[
 ]]
 
 local function ResetWarnings()
-	assert(manager)
+    assert(manager)
 
-	manager:SetAttributeNoHandler("WarnedAboutUnsorted", false)
+    manager:SetAttributeNoHandler("WarnedAboutUnsorted", false)
 end
 
 local function LoadUnits()
-	assert(manager)
+    assert(manager)
 
-	local friendlyUnits = fsSortedUnits:FriendlyUnits()
-	local enemyUnits = fsSortedUnits:EnemyUnits()
+    local friendlyUnits = fsSortedUnits:FriendlyUnits()
+    local enemyUnits = fsSortedUnits:EnemyUnits()
 
-	for i, unit in ipairs(friendlyUnits) do
-		manager:SetAttributeNoHandler("FriendlyUnit" .. i, unit)
-	end
+    for i, unit in ipairs(friendlyUnits) do
+        manager:SetAttributeNoHandler("FriendlyUnit" .. i, unit)
+    end
 
-	for i, unit in ipairs(enemyUnits) do
-		manager:SetAttributeNoHandler("EnemyUnit" .. i, unit)
-	end
+    for i, unit in ipairs(enemyUnits) do
+        manager:SetAttributeNoHandler("EnemyUnit" .. i, unit)
+    end
 
-	manager:SetAttributeNoHandler("FriendlyUnitsCount", #friendlyUnits)
-	manager:SetAttributeNoHandler("EnemyUnitsCount", #enemyUnits)
+    manager:SetAttributeNoHandler("FriendlyUnitsCount", #friendlyUnits)
+    manager:SetAttributeNoHandler("EnemyUnitsCount", #enemyUnits)
 
-	-- flag that the units need to be reloaded
-	manager:SetAttributeNoHandler("LoadedUnits", false)
+    -- flag that the units need to be reloaded
+    manager:SetAttributeNoHandler("LoadedUnits", false)
 end
 
 local function LoadSortMode()
-	assert(manager)
+    assert(manager)
 
-	local friendlyEnabled, friendlyPlayerMode, friendlyGroupMode = fsCompare:FriendlySortMode()
-	local enemyEnabled, enemyGroupMode = fsCompare:EnemySortMode()
+    local friendlyEnabled, friendlyPlayerMode, friendlyGroupMode = fsCompare:FriendlySortMode()
+    local enemyEnabled, enemyGroupMode = fsCompare:EnemySortMode()
 
-	manager:SetAttributeNoHandler("FriendlySortEnabled", friendlyEnabled)
-	manager:SetAttributeNoHandler("FriendlyPlayerSortMode", friendlyPlayerMode)
-	manager:SetAttributeNoHandler("FriendlyGroupSortMode", friendlyGroupMode)
+    manager:SetAttributeNoHandler("FriendlySortEnabled", friendlyEnabled)
+    manager:SetAttributeNoHandler("FriendlyPlayerSortMode", friendlyPlayerMode)
+    manager:SetAttributeNoHandler("FriendlyGroupSortMode", friendlyGroupMode)
 
-	manager:SetAttributeNoHandler("EnemySortEnabled", enemyEnabled)
-	manager:SetAttributeNoHandler("EnemyGroupSortMode", enemyGroupMode)
+    manager:SetAttributeNoHandler("EnemySortEnabled", enemyEnabled)
+    manager:SetAttributeNoHandler("EnemyGroupSortMode", enemyGroupMode)
 
-	for _, provider in ipairs(fsProviders.All) do
-		manager:SetAttributeNoHandler("Provider" .. provider:Name() .. "Enabled", provider:Enabled())
-	end
+    for _, provider in ipairs(fsProviders.All) do
+        manager:SetAttributeNoHandler("Provider" .. provider:Name() .. "Enabled", provider:Enabled())
+    end
 end
 
 local function LoadSpacing()
-	assert(manager)
+    assert(manager)
 
-	for type, value in pairs(addon.DB.Options.Spacing) do
-		manager:SetAttributeNoHandler(type .. "SpacingHorizontal", value.Horizontal)
-		manager:SetAttributeNoHandler(type .. "SpacingVertical", value.Vertical)
-	end
+    for type, value in pairs(addon.DB.Options.Spacing) do
+        manager:SetAttributeNoHandler(type .. "SpacingHorizontal", value.Horizontal)
+        manager:SetAttributeNoHandler(type .. "SpacingVertical", value.Vertical)
+    end
 end
 
 ---@param provider FrameProvider
 local function LoadProvider(provider)
-	assert(manager)
+    assert(manager)
 
-	local containers = fsEnumerable
-		:From(provider:Containers())
-		:Where(function(c)
-			return c.InCombatSortingRequired
-		end)
-		:ToTable()
+    local containers = fsEnumerable
+        :From(provider:Containers())
+        :Where(function(c)
+            return c.InCombatSortingRequired
+        end)
+        :ToTable()
 
-	if #containers == 0 then
-		return
-	end
+    if #containers == 0 then
+        return
+    end
 
-	manager:SetAttributeNoHandler("ProviderName", provider:Name())
+    manager:SetAttributeNoHandler("ProviderName", provider:Name())
 
-	for i, container in ipairs(containers) do
-		local offset = container.FramesOffset and container:FramesOffset()
-		local groupOffset = container.GroupFramesOffset and container:GroupFramesOffset()
-		local containerPrefix = provider:Name() .. "Container" .. i
+    for i, container in ipairs(containers) do
+        local offset = container.FramesOffset and container:FramesOffset()
+        local groupOffset = container.GroupFramesOffset and container:GroupFramesOffset()
+        local containerPrefix = provider:Name() .. "Container" .. i
 
-		manager:SetFrameRef(containerPrefix .. "Frame", container.Frame)
-		manager:SetAttributeNoHandler(containerPrefix .. "Type", container.Type)
-		manager:SetAttributeNoHandler(containerPrefix .. "LayoutType", container.LayoutType)
-		manager:SetAttributeNoHandler(
-			containerPrefix .. "IsHorizontalLayout",
-			container.IsHorizontalLayout and container:IsHorizontalLayout()
-		)
-		manager:SetAttributeNoHandler(
-			containerPrefix .. "FramesPerLine",
-			container.FramesPerLine and container:FramesPerLine()
-		)
-		manager:SetAttributeNoHandler(containerPrefix .. "VisibleOnly", container.VisibleOnly or false)
-		manager:SetAttributeNoHandler(containerPrefix .. "AnchorPoint", container.AnchorPoint)
-		manager:SetAttributeNoHandler(containerPrefix .. "Anchor", container.Anchor)
-		manager:SetAttributeNoHandler(containerPrefix .. "SupportsSpacing", container.SupportsSpacing)
-		manager:SetAttributeNoHandler(containerPrefix .. "IsGrouped", container.IsGrouped and container:IsGrouped())
-		manager:SetAttributeNoHandler(containerPrefix .. "OffsetX", offset and offset.X)
-		manager:SetAttributeNoHandler(containerPrefix .. "OffsetY", offset and offset.Y)
-		manager:SetAttributeNoHandler(containerPrefix .. "GroupOffsetX", groupOffset and groupOffset.X)
-		manager:SetAttributeNoHandler(containerPrefix .. "GroupOffsetY", groupOffset and groupOffset.Y)
-		manager:SetAttributeNoHandler(containerPrefix .. "EnableInBattlegrounds", container.EnableInBattlegrounds)
+        manager:SetFrameRef(containerPrefix .. "Frame", container.Frame)
+        manager:SetAttributeNoHandler(containerPrefix .. "Type", container.Type)
+        manager:SetAttributeNoHandler(containerPrefix .. "LayoutType", container.LayoutType)
+        manager:SetAttributeNoHandler(containerPrefix .. "IsHorizontalLayout", container.IsHorizontalLayout and container:IsHorizontalLayout())
+        manager:SetAttributeNoHandler(containerPrefix .. "FramesPerLine", container.FramesPerLine and container:FramesPerLine())
+        manager:SetAttributeNoHandler(containerPrefix .. "VisibleOnly", container.VisibleOnly or false)
+        manager:SetAttributeNoHandler(containerPrefix .. "AnchorPoint", container.AnchorPoint)
+        manager:SetAttributeNoHandler(containerPrefix .. "Anchor", container.Anchor)
+        manager:SetAttributeNoHandler(containerPrefix .. "SupportsSpacing", container.SupportsSpacing)
+        manager:SetAttributeNoHandler(containerPrefix .. "IsGrouped", container.IsGrouped and container:IsGrouped())
+        manager:SetAttributeNoHandler(containerPrefix .. "OffsetX", offset and offset.X)
+        manager:SetAttributeNoHandler(containerPrefix .. "OffsetY", offset and offset.Y)
+        manager:SetAttributeNoHandler(containerPrefix .. "GroupOffsetX", groupOffset and groupOffset.X)
+        manager:SetAttributeNoHandler(containerPrefix .. "GroupOffsetY", groupOffset and groupOffset.Y)
+        manager:SetAttributeNoHandler(containerPrefix .. "EnableInBattlegrounds", container.EnableInBattlegrounds)
 
-		local spacing = container.Spacing and container:Spacing()
-		manager:SetAttributeNoHandler(containerPrefix .. "SpacingHorizontal", spacing and spacing.Horizontal)
-		manager:SetAttributeNoHandler(containerPrefix .. "SpacingVertical", spacing and spacing.Vertical)
+        local spacing = container.Spacing and container:Spacing()
+        manager:SetAttributeNoHandler(containerPrefix .. "SpacingHorizontal", spacing and spacing.Horizontal)
+        manager:SetAttributeNoHandler(containerPrefix .. "SpacingVertical", spacing and spacing.Vertical)
 
-		if container.Frames then
-			local frames = container.Frames()
-			manager:SetAttributeNoHandler(containerPrefix .. "FramesCount", #frames)
+        if container.Frames then
+            local frames = container.Frames()
+            manager:SetAttributeNoHandler(containerPrefix .. "FramesCount", #frames)
 
-			for j, frame in ipairs(frames) do
-				manager:SetFrameRef(containerPrefix .. "Frame" .. j, frame)
-			end
-		end
-	end
+            for j, frame in ipairs(frames) do
+                manager:SetFrameRef(containerPrefix .. "Frame" .. j, frame)
+            end
+        end
+    end
 
-	manager:SetAttributeNoHandler(provider:Name() .. "ContainersCount", #containers)
-	manager:Execute([[
+    manager:SetAttributeNoHandler(provider:Name() .. "ContainersCount", #containers)
+    manager:Execute([[
         local run = control or self
         run:RunAttribute("LoadProvider")
     ]])
 
-	for _, item in ipairs(containers) do
-		-- flag as imported
-		-- SetAttributeNoHandler may not exist on frames we didn't create
-		-- doesn't exist in wow 3.3.5
-		item.Frame:SetAttribute("FrameSortLoaded", true)
-	end
+    for _, item in ipairs(containers) do
+        -- flag as imported
+        -- SetAttributeNoHandler may not exist on frames we didn't create
+        -- doesn't exist in wow 3.3.5
+        item.Frame:SetAttribute("FrameSortLoaded", true)
+    end
 end
 
 local function InjectSecureHelpers(secureFrame)
-	if not secureFrame.Execute then
-		function secureFrame:Execute(body)
-			return wow.SecureHandlerExecute(self, body)
-		end
-	end
+    if not secureFrame.Execute then
+        function secureFrame:Execute(body)
+            return wow.SecureHandlerExecute(self, body)
+        end
+    end
 
-	if not secureFrame.WrapScript then
-		function secureFrame:WrapScript(frame, script, preBody, postBody)
-			return wow.SecureHandlerWrapScript(frame, script, self, preBody, postBody)
-		end
-	end
+    if not secureFrame.WrapScript then
+        function secureFrame:WrapScript(frame, script, preBody, postBody)
+            return wow.SecureHandlerWrapScript(frame, script, self, preBody, postBody)
+        end
+    end
 
-	if not secureFrame.SetFrameRef then
-		function secureFrame:SetFrameRef(label, refFrame)
-			return wow.SecureHandlerSetFrameRef(self, label, refFrame)
-		end
-	end
+    if not secureFrame.SetFrameRef then
+        function secureFrame:SetFrameRef(label, refFrame)
+            return wow.SecureHandlerSetFrameRef(self, label, refFrame)
+        end
+    end
 end
 
 -- TODO: I don't think this should make a difference anymore, but re-adding it for testing.
 local function ResubscribeEvents()
-	-- we want our sorting code to run after blizzard and other frame addons refresh their frames
-	-- i.e., we want to handle GROUP_ROSTER_UPDATE/UNT_PET after frame addons have performed their update handling
-	-- this is easily achieved in the insecure environment by using hooks, however in the restricted environment we have no such luxury
-	-- fortunately it seems blizzard invoke event handlers roughly in the order that they were registered
-	-- so if we register our events later, our code will run later
-	-- of course it's not good to rely on this and we should generally treat event ordering as undefined
-	-- perhaps in a future patch this implementation detail could change and our code will break
-	-- however until a better solution can be found, this is our only hope
+    -- we want our sorting code to run after blizzard and other frame addons refresh their frames
+    -- i.e., we want to handle GROUP_ROSTER_UPDATE/UNT_PET after frame addons have performed their update handling
+    -- this is easily achieved in the insecure environment by using hooks, however in the restricted environment we have no such luxury
+    -- fortunately it seems blizzard invoke event handlers roughly in the order that they were registered
+    -- so if we register our events later, our code will run later
+    -- of course it's not good to rely on this and we should generally treat event ordering as undefined
+    -- perhaps in a future patch this implementation detail could change and our code will break
+    -- however until a better solution can be found, this is our only hope
 
-	assert(memberHeader ~= nil)
-	assert(petHeader ~= nil)
+    assert(memberHeader ~= nil)
+    assert(petHeader ~= nil)
 
-	memberHeader:UnregisterEvent(events.GROUP_ROSTER_UPDATE)
-	memberHeader:UnregisterEvent(events.UNIT_NAME_UPDATE)
+    memberHeader:UnregisterEvent(events.GROUP_ROSTER_UPDATE)
+    memberHeader:UnregisterEvent(events.UNIT_NAME_UPDATE)
 
-	memberHeader:RegisterEvent(events.GROUP_ROSTER_UPDATE)
-	memberHeader:RegisterEvent(events.UNIT_NAME_UPDATE)
+    memberHeader:RegisterEvent(events.GROUP_ROSTER_UPDATE)
+    memberHeader:RegisterEvent(events.UNIT_NAME_UPDATE)
 
-	petHeader:UnregisterEvent(events.GROUP_ROSTER_UPDATE)
-	petHeader:UnregisterEvent(events.UNIT_PET)
-	petHeader:UnregisterEvent(events.UNIT_NAME_UPDATE)
+    petHeader:UnregisterEvent(events.GROUP_ROSTER_UPDATE)
+    petHeader:UnregisterEvent(events.UNIT_PET)
+    petHeader:UnregisterEvent(events.UNIT_NAME_UPDATE)
 
-	petHeader:RegisterEvent(events.GROUP_ROSTER_UPDATE)
-	petHeader:RegisterEvent(events.UNIT_PET)
-	petHeader:RegisterEvent(events.UNIT_NAME_UPDATE)
+    petHeader:RegisterEvent(events.GROUP_ROSTER_UPDATE)
+    petHeader:RegisterEvent(events.UNIT_PET)
+    petHeader:RegisterEvent(events.UNIT_NAME_UPDATE)
 end
 
 ---@param container FrameContainer
 local function WatchChildrenVisibility(container)
-	assert(manager)
+    assert(manager)
 
-	local children = fsFrame:ExtractUnitFrames(container.Frame, false, false, false)
+    local children = fsFrame:ExtractUnitFrames(container.Frame, false, false, false)
 
-	for _, child in ipairs(children) do
-		if not child:GetAttribute("framesort-watching-visibility") then
-			wow.SecureHandlerSetFrameRef(child, "Manager", manager)
+    for _, child in ipairs(children) do
+        if not child:GetAttribute("framesort-watching-visibility") then
+            wow.SecureHandlerSetFrameRef(child, "Manager", manager)
 
-			-- not sure why, but postBody scripts don't work for OnShow/OnHide
-			wow.SecureHandlerWrapScript(
-				child,
-				"OnShow",
-				manager,
-				[[
+            -- not sure why, but postBody scripts don't work for OnShow/OnHide
+            wow.SecureHandlerWrapScript(
+                child,
+                "OnShow",
+                manager,
+                [[
                     local manager = self:GetFrameRef("Manager")
                     manager:SetAttribute("state-framesort-run", "ignore")
                 ]]
-			)
-			wow.SecureHandlerWrapScript(
-				child,
-				"OnHide",
-				manager,
-				[[
+            )
+            wow.SecureHandlerWrapScript(
+                child,
+                "OnHide",
+                manager,
+                [[
                     local manager = self:GetFrameRef("Manager")
                     manager:SetAttribute("state-framesort-run", "ignore")
                 ]]
-			)
+            )
 
-			child:SetAttribute("framesort-watching-visibility", true)
-		end
-	end
+            child:SetAttribute("framesort-watching-visibility", true)
+        end
+    end
 end
 
 local function WatchVisibility()
-	local containersToSubscribe = fsEnumerable
-		:From(fsProviders.All)
-		:Map(function(provider)
-			return provider:Containers()
-		end)
-		:Flatten()
-		:Where(function(container)
-			return container.SubscribeToVisibility
-		end)
-		:ToTable()
+    local containersToSubscribe = fsEnumerable
+        :From(fsProviders.All)
+        :Map(function(provider)
+            return provider:Containers()
+        end)
+        :Flatten()
+        :Where(function(container)
+            return container.SubscribeToVisibility
+        end)
+        :ToTable()
 
-	for _, container in ipairs(containersToSubscribe) do
-		WatchChildrenVisibility(container)
-	end
+    for _, container in ipairs(containersToSubscribe) do
+        WatchChildrenVisibility(container)
+    end
 end
 
 local function LoadInstanceType()
-	assert(manager)
+    assert(manager)
 
-	manager:SetAttributeNoHandler("IsBattleground", wowEx.IsInstanceBattleground())
+    manager:SetAttributeNoHandler("IsBattleground", wowEx.IsInstanceBattleground())
 end
 
 local function OnCombatStarting()
-	LoadSortMode()
-	LoadUnits()
-	ResubscribeEvents()
-	WatchVisibility()
-	LoadInstanceType()
-	ResetWarnings()
+    LoadSortMode()
+    LoadUnits()
+    ResubscribeEvents()
+    WatchVisibility()
+    LoadInstanceType()
+    ResetWarnings()
 end
 
 local function OnProviderContainersChanged(provider)
-	fsScheduler:RunWhenCombatEnds(function()
-		LoadProvider(provider)
-	end, "LoadProvider" .. provider:Name())
+    fsScheduler:RunWhenCombatEnds(function()
+        LoadProvider(provider)
+    end, "LoadProvider" .. provider:Name())
 end
 
 local function OnConfigChanged()
-	fsScheduler:RunWhenCombatEnds(function()
-		LoadSpacing()
-	end, "SecureSortConfigChanged")
+    fsScheduler:RunWhenCombatEnds(function()
+        LoadSpacing()
+    end, "SecureSortConfigChanged")
 end
 
 local function ConfigureHeader(header)
-	InjectSecureHelpers(header)
+    InjectSecureHelpers(header)
 
-	function header:UnitButtonCreated(index)
-		local children = { header:GetChildren() }
-		local frame = children[index]
+    function header:UnitButtonCreated(index)
+        local children = { header:GetChildren() }
+        local frame = children[index]
 
-		if not frame then
-			fsLog:Bug("Failed to find unit button %s", index)
-			return
-		end
+        if not frame then
+            fsLog:Bug("Failed to find unit button %s", index)
+            return
+        end
 
-		fsScheduler:RunWhenCombatEnds(function()
-			-- the refreshUnitChange script doesn't capture when the unit is changed to nil
-			-- which can happen when someone leaves the group, or a pet ceases to exist
-			-- so we're really only interested in unit changing to nil here
-			frame:SetAttribute(
-				"_onattributechanged",
-				[[
+        fsScheduler:RunWhenCombatEnds(function()
+            -- the refreshUnitChange script doesn't capture when the unit is changed to nil
+            -- which can happen when someone leaves the group, or a pet ceases to exist
+            -- so we're really only interested in unit changing to nil here
+            frame:SetAttribute(
+                "_onattributechanged",
+                [[
                 local manager = self:GetAttribute("Manager")
                 manager:SetAttribute("state-framesort-run", "ignore")
                 ]]
-			)
+            )
 
-			frame:SetAttribute("HaveSetAttributeHandler", true)
-		end)
-	end
+            frame:SetAttribute("HaveSetAttributeHandler", true)
+        end)
+    end
 
-	-- show as much as possible
-	header:SetAttribute("showRaid", true)
-	header:SetAttribute("showParty", true)
-	header:SetAttribute("showPlayer", true)
-	header:SetAttribute("showSolo", true)
+    -- show as much as possible
+    header:SetAttribute("showRaid", true)
+    header:SetAttribute("showParty", true)
+    header:SetAttribute("showPlayer", true)
+    header:SetAttribute("showSolo", true)
 
-	-- unit buttons template type
-	header:SetAttribute("template", "SecureHandlerAttributeTemplate")
+    -- unit buttons template type
+    header:SetAttribute("template", "SecureHandlerAttributeTemplate")
 
-	-- fired when a new unit button is created
-	header:SetAttribute(
-		"initialConfigFunction",
-		[=[
+    -- fired when a new unit button is created
+    header:SetAttribute(
+        "initialConfigFunction",
+        [=[
         UnitButtonsCount = (UnitButtonsCount or 0) + 1
 
         -- self = the newly created unit button
@@ -1794,26 +1788,26 @@ local function ConfigureHeader(header)
             ]])
         end
     ]=]
-	)
+    )
 
-	header:SetFrameRef("Manager", manager)
+    header:SetFrameRef("Manager", manager)
 
-	header:Execute([[
+    header:Execute([[
         Header = self
         Manager = self:GetFrameRef("Manager")
     ]])
 
-	-- must be shown for it to work
-	header:SetPoint("TOPLEFT", wow.UIParent, "TOPLEFT")
-	header:Show()
+    -- must be shown for it to work
+    header:SetPoint("TOPLEFT", wow.UIParent, "TOPLEFT")
+    header:Show()
 end
 
 function M:RunOverheadTest()
-	if wow.InCombatLockdown() or not manager then
-		return
-	end
+    if wow.InCombatLockdown() or not manager then
+        return
+    end
 
-	manager:Execute([[
+    manager:Execute([[
         local run = control or self
 
         run:RunAttribute("OverheadTest")
@@ -1821,48 +1815,48 @@ function M:RunOverheadTest()
 end
 
 function M:Init()
-	manager = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureHandlerStateTemplate")
+    manager = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureHandlerStateTemplate")
 
-	InjectSecureHelpers(manager)
+    InjectSecureHelpers(manager)
 
-	function manager:StartTimer(name)
-		if not name then
-			fsLog:Bug("StartTimer called without a name.")
-			return
-		end
+    function manager:StartTimer(name)
+        if not name then
+            fsLog:Bug("StartTimer called without a name.")
+            return
+        end
 
-		manager[name .. "TimeStart"] = wow.GetTimePreciseSec()
-	end
+        manager[name .. "TimeStart"] = wow.GetTimePreciseSec()
+    end
 
-	function manager:StopTimer(name, message)
-		local start = manager[name .. "TimeStart"]
+    function manager:StopTimer(name, message)
+        local start = manager[name .. "TimeStart"]
 
-		if not start then
-			fsLog:Bug("StopTimer called without corresponding StartTimer for %s.", name)
-			return
-		end
+        if not start then
+            fsLog:Bug("StopTimer called without corresponding StartTimer for %s.", name)
+            return
+        end
 
-		local stop = wow.GetTimePreciseSec()
-		local ms = (stop - start) * 1000
+        local stop = wow.GetTimePreciseSec()
+        local ms = (stop - start) * 1000
 
-		fsLog:Debug(message, ms)
+        fsLog:Debug(message, ms)
 
-		manager[name .. "TimeStart"] = nil
-	end
+        manager[name .. "TimeStart"] = nil
+    end
 
-	function manager:NotifySorted()
-		fsSorting:NotifySorted()
-	end
+    function manager:NotifySorted()
+        fsSorting:NotifySorted()
+    end
 
-	function manager:Log(msg, level)
-		fsLog:Log(msg, level)
-	end
+    function manager:Log(msg, level)
+        fsLog:Log(msg, level)
+    end
 
-	for name, snippet in pairs(secureMethods) do
-		manager:SetAttributeNoHandler(name, snippet)
-	end
+    for name, snippet in pairs(secureMethods) do
+        manager:SetAttributeNoHandler(name, snippet)
+    end
 
-	manager:Execute([[
+    manager:Execute([[
         -- wotlk 3.3.5 doesn't have the control methods on self
         -- those methods exist on the "control" global
         local run = control or self
@@ -1870,49 +1864,49 @@ function M:Init()
         run:RunAttribute("Init")
     ]])
 
-	manager:SetAttribute(
-		"_onstate-framesort-run",
-		[[
+    manager:SetAttribute(
+        "_onstate-framesort-run",
+        [[
         if newstate == "ignore" then return end
 
         local run = control or self
         run:RunAttribute("TrySort")
         ]]
-	)
+    )
 
-	-- https://www.wowinterface.com/forums/showthread.php?t=58697
-	-- this attribute driver is used for delaying the sorting function
-	-- the actual conditional value doesn't really matter
-	-- we'll change the value of this to "ignore" from group header events
-	-- and then blizzard will later detect the value has changed from "pet" or "nopet" and invoke our attribute changed handler
-	wow.RegisterAttributeDriver(manager, "state-framesort-run", "[pet] pet; nopet;")
+    -- https://www.wowinterface.com/forums/showthread.php?t=58697
+    -- this attribute driver is used for delaying the sorting function
+    -- the actual conditional value doesn't really matter
+    -- we'll change the value of this to "ignore" from group header events
+    -- and then blizzard will later detect the value has changed from "pet" or "nopet" and invoke our attribute changed handler
+    wow.RegisterAttributeDriver(manager, "state-framesort-run", "[pet] pet; nopet;")
 
-	memberHeader = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureGroupHeaderTemplate")
-	petHeader = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureGroupPetHeaderTemplate")
+    memberHeader = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureGroupHeaderTemplate")
+    petHeader = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureGroupPetHeaderTemplate")
 
-	headers = { memberHeader, petHeader }
+    headers = { memberHeader, petHeader }
 
-	for _, header in ipairs(headers) do
-		ConfigureHeader(header)
-	end
+    for _, header in ipairs(headers) do
+        ConfigureHeader(header)
+    end
 
-	for _, provider in ipairs(fsProviders.All) do
-		provider:RegisterContainersChangedCallback(OnProviderContainersChanged)
-	end
+    for _, provider in ipairs(fsProviders.All) do
+        provider:RegisterContainersChangedCallback(OnProviderContainersChanged)
+    end
 
-	-- wait until the providers have created their frames
-	fsScheduler:RunWhenEnteringWorldOnce(function()
-		for _, provider in ipairs(fsProviders:Enabled()) do
-			LoadProvider(provider)
-		end
-	end)
+    -- wait until the providers have created their frames
+    fsScheduler:RunWhenEnteringWorldOnce(function()
+        for _, provider in ipairs(fsProviders:Enabled()) do
+            LoadProvider(provider)
+        end
+    end)
 
-	LoadSortMode()
-	LoadSpacing()
+    LoadSortMode()
+    LoadSpacing()
 
-	fsConfig:RegisterConfigurationChangedCallback(OnConfigChanged)
+    fsConfig:RegisterConfigurationChangedCallback(OnConfigChanged)
 
-	local combatStartingFrame = wow.CreateFrame("Frame", nil, wow.UIParent)
-	combatStartingFrame:HookScript("OnEvent", OnCombatStarting)
-	combatStartingFrame:RegisterEvent(events.PLAYER_REGEN_DISABLED)
+    local combatStartingFrame = wow.CreateFrame("Frame", nil, wow.UIParent)
+    combatStartingFrame:HookScript("OnEvent", OnCombatStarting)
+    combatStartingFrame:RegisterEvent(events.PLAYER_REGEN_DISABLED)
 end
