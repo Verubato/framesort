@@ -592,7 +592,7 @@ function M:EnemySortMode()
     local inInstance, instanceType = wow.IsInInstance()
     local config = addon.DB.Options.Sorting.EnemyArena
 
-    if inInstance and instanceType == "arena" then
+    if inInstance and (instanceType == "arena" or instanceType == "pvp") then
         return config.Enabled, config.GroupSortMode, config.Reverse
     end
 
