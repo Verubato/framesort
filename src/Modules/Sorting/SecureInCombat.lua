@@ -1305,10 +1305,10 @@ secureMethods["TrySortContainer"] = [=[
 
     local sorted = false
 
-    if container.Spacing then
+    if (container.SpacingHorizontal and container.SpacingHorizontal ~= 0) or (container.SpacingVertical and container.SpacingVertical ~= 0) then
         Spacing = newtable()
-        Spacing.Horizontal = container.SpacingHorizontal
-        Spacing.Vertical = container.SpacingVertical
+        Spacing.Horizontal = container.SpacingHorizontal or 0
+        Spacing.Vertical = container.SpacingVertical or 0
     elseif container.SupportsSpacing then
         local horizontalSpacing, verticalSpacing = run:RunAttribute("SpacingForContainer", container.Type)
 
