@@ -163,7 +163,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
 
     local spec = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     spec:SetPoint("LEFT", group, "RIGHT", horizontalSpacing, 0)
-    spec.Text:SetText(fsInspector:CanInspect() and L["Spec"] or L["Role"])
+    spec.Text:SetText(fsInspector:CanRun() and L["Spec"] or L["Role"])
     spec:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Role)
 
     local alpha = nil

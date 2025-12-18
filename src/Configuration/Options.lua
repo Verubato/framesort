@@ -194,7 +194,7 @@ function fsConfig:Init()
     panels.Sorting:Build(main)
 
     local specOrdering = panels.SpecOrdering:Build(panel)
-    local specPriority = fsInspector:CanInspect() and panels.SpecPriority:Build(panel)
+    local specPriority = fsInspector:CanRun() and panels.SpecPriority:Build(panel)
     local sortingMethod = panels.SortingMethod:Build(panel)
     local autoLeader = capabilities.HasSoloShuffle() and panels.AutoLeader:Build(panel)
     local keybinding = panels.Keybinding:Build(panel)
