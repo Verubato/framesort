@@ -546,6 +546,7 @@ local function SetNameList(container)
         :Where(function(name)
             return name and name ~= ""
         end)
+        :Distinct()
         :ToTable()
 
     local names = table.concat(unitNames, ",")

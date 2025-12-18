@@ -433,3 +433,16 @@ function M:Concat(other)
 
     return M:From(iterator)
 end
+
+---Produces a distinct set of results.
+function M:Distinct()
+    local seen = {}
+    return self:Where(function(item)
+        if seen[item] then
+            return false
+        end
+
+        seen[item] = true
+        return true
+    end)
+end

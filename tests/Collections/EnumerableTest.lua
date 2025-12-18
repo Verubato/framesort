@@ -149,7 +149,12 @@ function M:test_any()
 end
 
 function M:test_all()
-    assertEquals(fsEnumerable:From({}):All(function() return true end), false)
+    assertEquals(
+        fsEnumerable:From({}):All(function()
+            return true
+        end),
+        false
+    )
     assertEquals(
         fsEnumerable:From({ 1, 3, 5 }):All(function(x)
             return x % 2 == 1
@@ -321,6 +326,12 @@ end
 function M:test_flatten()
     assertEquals(fsEnumerable:From({ { 1 }, { 2, 3 }, { 4, 5, 6 } }):Flatten():ToTable(), { 1, 2, 3, 4, 5, 6 })
     assertEquals(fsEnumerable:From({ {}, { 1, 2 }, {}, { 3, 4, 5 }, {}, { 6 } }):Flatten():ToTable(), { 1, 2, 3, 4, 5, 6 })
+end
+
+function M:test_distinct()
+    assertEquals(fsEnumerable:From({ 1, 2, 3 }):Distinct():ToTable(), { 1, 2, 3 })
+    assertEquals(fsEnumerable:From({ 1, 2, 2, 3, 3, 3 }):Distinct():ToTable(), { 1, 2, 3 })
+    assertEquals(fsEnumerable:From({ "a", "a", "a", "b", "c", "d", "e", "e" }):Distinct():ToTable(), { "a", "b", "c", "d", "e" })
 end
 
 return M
