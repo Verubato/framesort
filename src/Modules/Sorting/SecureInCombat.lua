@@ -871,8 +871,8 @@ secureMethods["ApplySpacing"] = [[
             run:CallMethod("Log", "ApplySpacing was passed a point missing Left/Bottom/Width/Height.", LogLevel.Critical)
             return nil
         end
-        p.OrigLeft = p.Left
-        p.OrigBottom = p.Bottom
+        p.OriginalLeft = p.Left
+        p.OriginalBottom = p.Bottom
     end
 
     OrderedTopLeft = newtable()
@@ -892,8 +892,8 @@ secureMethods["ApplySpacing"] = [[
         local point = OrderedLeftTop[i]
         local previous = OrderedLeftTop[i - 1]
 
-        local pointTopFuzzy = math.floor((point.OrigBottom + point.Height) * mult + 0.5) / mult
-        local previousTopFuzzy = math.floor((previous.OrigBottom + previous.Height) * mult + 0.5) / mult
+        local pointTopFuzzy = math.floor((point.OriginalBottom + point.Height) * mult + 0.5) / mult
+        local previousTopFuzzy = math.floor((previous.OriginalBottom + previous.Height) * mult + 0.5) / mult
         local sameRow = pointTopFuzzy == previousTopFuzzy
 
         if sameRow then
@@ -909,8 +909,8 @@ secureMethods["ApplySpacing"] = [[
         local point = OrderedTopLeft[i]
         local previous = OrderedTopLeft[i - 1]
 
-        local leftFuzzy = math.floor(point.OrigLeft * mult + 0.5) / mult
-        local previousLeftFuzzy = math.floor(previous.OrigLeft * mult + 0.5) / mult
+        local leftFuzzy = math.floor(point.OriginalLeft * mult + 0.5) / mult
+        local previousLeftFuzzy = math.floor(previous.OriginalLeft * mult + 0.5) / mult
         local sameColumn = leftFuzzy == previousLeftFuzzy
 
         if sameColumn then
@@ -924,8 +924,8 @@ secureMethods["ApplySpacing"] = [[
     -- Cleanup snapshot fields (keeps point tables lean)
     for i = 1, #points do
         local p = points[i]
-        p.OrigLeft = nil
-        p.OrigBottom = nil
+        p.OriginalLeft = nil
+        p.OriginalBottom = nil
     end
 
     OrderedTopLeft = nil
