@@ -36,6 +36,8 @@ local function SetFrameMapping(frame, unit)
         return
     end
 
+    unit = fsUnit:NormaliseUnit(unit) or unit
+
     -- If this frame was previously mapped to another unit, clear that old mapping.
     ClearFrameMapping(frame)
 
@@ -95,6 +97,8 @@ function M:GetFrameForUnit(unit)
         fsLog:Error("UnitTracker:GetFrameForUnit() - unit must not be nil.")
         return nil
     end
+
+    unit = fsUnit:NormaliseUnit(unit) or unit
 
     local cachedFrame = frameByUnit[unit]
 
