@@ -625,7 +625,7 @@ local function TrySortContainerGroups(container)
 
     sorted = HardArrange(container, ungroupedFrames, spacing, ungroupedOffset, blockHeight)
 
-    return true
+    return sorted
 end
 
 local function ClearSorting(providers, friendlyEnabled, enemyEnabled)
