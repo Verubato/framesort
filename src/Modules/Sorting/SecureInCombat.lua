@@ -79,7 +79,9 @@ secureMethods["GetUnit"] = [[
 
     if not unit then
         local name = frame:GetName()
-        return name and strmatch(name, "arena%d")
+        local arena = name and strmatch(name, "arena%d")
+
+        return arena, arena
     end
 
     local underlyingUnit = gsub(unit, "pet", "")
@@ -445,18 +447,17 @@ secureMethods["CompareFrameGroup"] = [[
 
     -- Get their units
     Frame = leftFrame
-    local leftUnit = run:RunAttribute("GetUnit", "Frame")
+    local leftUnit, leftToken = run:RunAttribute("GetUnit", "Frame")
     Frame = rightFrame
-    local rightUnit = run:RunAttribute("GetUnit", "Frame")
+    local rightUnit, rightToken = run:RunAttribute("GetUnit", "Frame")
     Frame = nil
 
     if not leftUnit or not rightUnit then
-        -- if we don't know, keep existing order
         return false
     end
 
-    local isLeftPet = strfind(leftUnit, "pet") ~= nil
-    local isRightPet = strfind(rightUnit, "pet") ~= nil
+    local isLeftPet  = leftToken and strfind(leftToken, "pet") ~= nil
+    local isRightPet = rightToken and strfind(rightToken, "pet") ~= nil
 
     if isLeftPet and not isRightPet then
         return false
@@ -521,7 +522,7 @@ secureMethods["SortFramesByUnits"] = [[
                     -- existing is better
                     keepNew = false
                 else
-                    -- tie-breaker: prefer taller (your old heuristic)
+                    -- tie-breaker: prefer taller
                     local newH = frame.GetHeight and frame:GetHeight() or 0
                     local oldH = existing.GetHeight and existing:GetHeight() or 0
                     keepNew = newH > oldH
@@ -556,10 +557,10 @@ secureMethods["SortFramesByUnits"] = [[
 
         if not frameWasSorted[frame] and frame:IsVisible() then
             Frame = frame
-            local unit, maybePet = run:RunAttribute("GetUnit", "Frame")
+            local unit, token = run:RunAttribute("GetUnit", "Frame")
             Frame = nil
 
-            local isPet = maybePet and strfind(maybePet, "pet") ~= nil
+            local isPet = token and strfind(token, "pet") ~= nil
 
             -- don't care if it's an unsorted pet, as we'll just place them at the end
             if not isPet then
