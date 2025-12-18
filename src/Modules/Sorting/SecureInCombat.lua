@@ -181,27 +181,44 @@ secureMethods["FrameChain"] = [[
     local frames = _G[framesVariable]
     local nodesByFrame = newtable()
 
-    for _, frame in pairs(frames) do
+    for _, frame in ipairs(frames) do
         local node = newtable()
         node.Value = frame
+        node.Next = nil
+        node.Previous = nil
 
         nodesByFrame[frame] = node
     end
 
     local root = nil
-    for _, child in pairs(nodesByFrame) do
-        local _, relativeTo, _, _, _ = child.Value:GetPoint()
-        local parent = nodesByFrame[relativeTo]
+    for i = 1, #frames do
+        local frame = frames[i]
+        local node = nodesByFrame[frame]
+        local _, relativeTo = node.Value:GetPoint()
 
-        if parent then
-            if parent.Next then
-                return false, nil
+        if not relativeTo then
+            if root then
+                return false
             end
 
-            parent.Next = child
-            child.Previous = parent
+            root = node
         else
-            root = child
+            local parent = nodesByFrame[relativeTo]
+
+            if parent then
+                if parent.Next then
+                    return false
+                end
+
+                parent.Next = node
+                node.Previous = parent
+            else
+                if root then
+                    return false
+                end
+
+                root = node
+            end
         end
     end
 

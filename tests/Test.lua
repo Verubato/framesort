@@ -19,4 +19,6 @@ TestSorting = require("Modules\\Sorting")
 TestSpacing = require("Modules\\Spacing")
 TestAddon = require("Modules\\Addon")
 
+TestFrameChain = require("Frame\\FrameChain")
+
 os.exit(luaunit:run())
