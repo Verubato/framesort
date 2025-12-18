@@ -86,7 +86,7 @@ secureMethods["GetUnit"] = [[
 
     local underlyingUnit = gsub(unit, "pet", "")
 
-    if UnitHasVehicleUI(underlyingUnit) then
+    if underlyingUnit ~= "" and UnitHasVehicleUI(underlyingUnit) then
         return underlyingUnit, unit
     end
 
@@ -136,6 +136,10 @@ secureMethods["ExtractGroups"] = [[
     local containerTableName, destinationTableName = ...
     local container = _G[containerTableName]
     local children = newtable()
+
+    if not container or not container.Frame then
+        return false
+    end
 
     container.Frame:GetChildList(children)
     if #children == 0 then return false end
@@ -791,12 +795,15 @@ secureMethods["SoftArrange"] = [[
         local point = newtable()
         local left, bottom, width, height = frame:GetRect()
 
-        point.Left = left
-        point.Bottom = bottom
-        point.Width = width
-        point.Height = height
+        if left and bottom and width and height then
 
-        points[#points + 1] = point
+            point.Left = left
+            point.Bottom = bottom
+            point.Width = width
+            point.Height = height
+
+            points[#points + 1] = point
+        end
     end
 
     if spacingVariable then
@@ -1391,7 +1398,7 @@ secureMethods["LoadProvider"] = [[
     -- replace existing containers (if any)
     provider.Containers = newtable()
 
-    local containersCount = self:GetAttribute(name .. "ContainersCount")
+    local containersCount = self:GetAttribute(name .. "ContainersCount") or 0
 
     for i = 1, containersCount do
         local prefix = name .. "Container" .. i
