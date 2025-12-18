@@ -13,6 +13,26 @@ local wowEx = addon.WoW.WowEx
 local M = {}
 addon.Modules.Sorting.Secure.NoCombat = M
 
+local function SafeAdjustPointsOffset(frame, xDelta, yDelta)
+    xDelta = xDelta or 0
+    yDelta = yDelta or 0
+
+    if not frame or (xDelta == 0 and yDelta == 0) then
+        return false
+    end
+
+    if fsFrame.IsForbidden and fsFrame:IsForbidden(frame) then
+        return false
+    end
+
+    if not frame.AdjustPointsOffset then
+        return false
+    end
+
+    frame:AdjustPointsOffset(xDelta, yDelta)
+    return true
+end
+
 --- Sorts frames in-place by matching their units to the sorted units list.
 --- @param frames table[] Array of frames to sort (modified in-place)
 --- @param sortedUnits string[] Ordered list of unit tokens
@@ -261,10 +281,7 @@ local function SpaceGroups(frames, spacing)
                 local xDelta = dest.Left - left
                 local yDelta = dest.Top - top
 
-                if xDelta ~= 0 or yDelta ~= 0 then
-                    group:AdjustPointsOffset(xDelta, yDelta)
-                    movedAny = true
-                end
+                movedAny = SafeAdjustPointsOffset(group, xDelta, yDelta) or movedAny
             end
         end
     end
@@ -342,10 +359,7 @@ local function SoftArrange(frames, spacing)
                 local xDelta = dest.Left - left
                 local yDelta = dest.Top - top
 
-                if xDelta ~= 0 or yDelta ~= 0 then
-                    source:AdjustPointsOffset(xDelta, yDelta)
-                    movedAny = true
-                end
+                movedAny = SafeAdjustPointsOffset(source, xDelta, yDelta) or movedAny
             end
         end
     end
@@ -504,14 +518,12 @@ local function SetNameList(container)
     end
 
     if container.ShowUnit then
-        local filtered = fsEnumerable
+        units = fsEnumerable
             :From(units)
             :Where(function(unit)
                 return container:ShowUnit(unit)
             end)
             :ToTable()
-
-        units = filtered
     end
 
     local previousSortMethod = container.Frame:GetAttribute("sortMethod")
@@ -627,7 +639,6 @@ local function TrySortContainer(container)
         return SetNameList(container), {}
     end
 
-    local sortedUnits = nil
     local frames = (container.Frames and container:Frames()) or fsFrame:ExtractUnitFrames(container.Frame, true, container.VisibleOnly, container.ExistsOnly)
 
     if #frames == 0 then
@@ -639,6 +650,7 @@ local function TrySortContainer(container)
         return false, frames
     end
 
+    local sortedUnits = nil
     if container.Type == fsFrame.ContainerType.Party or container.Type == fsFrame.ContainerType.Raid then
         sortedUnits = fsSortedUnits:FriendlyUnits()
     elseif container.Type == fsFrame.ContainerType.EnemyArena then
@@ -830,8 +842,12 @@ function M:TrySort(provider)
 
     for _, p in ipairs(providers) do
         local start = wow.GetTimePreciseSec()
+
+        local providerContainers = p.Containers and p:Containers() or nil
+        providerContainers = providerContainers or {}
+
         local containers = fsEnumerable
-            :From(p:Containers())
+            :From(providerContainers)
             :Where(function(container)
                 if not container.Frame then
                     return false
@@ -875,7 +891,6 @@ function M:TrySort(provider)
         sorted = sorted or providerSorted
 
         local stop = wow.GetTimePreciseSec()
-
         if #containers > 0 then
             fsLog:Debug("Sort for %s took %fms, result: %s.", p:Name(), (stop - start) * 1000, providerSorted and "sorted" or "not sorted")
         end
