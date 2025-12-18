@@ -156,7 +156,7 @@ local function PrecomputeUnitMetadata(unit, meta)
     else
         data.Exists = wow.UnitExists(unit)
 
-        if data.Exists then
+        if not data.IsPet and data.Exists then
             data.Name = wow.UnitName and wow.UnitName(unit)
 
             if capabilities.HasRoleAssignments() then
