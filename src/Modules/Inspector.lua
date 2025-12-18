@@ -324,7 +324,12 @@ function M:ArenaUnitSpec(unit)
         return nil
     end
 
-    local unitNumber = tonumber(string.sub(unit, 6))
+    if not unit:match("^arena%d+") then
+        fsLog:Warning("Inspector:ArenaUnitSpec() - unit '%s' is not an arena unit.", unit)
+        return nil
+    end
+
+    local unitNumber = tonumber(string.match(unit, "%d+"))
 
     if not unitNumber then
         return nil
