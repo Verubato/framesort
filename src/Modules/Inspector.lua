@@ -100,6 +100,7 @@ local function Inspect(unit)
     if weRequestedInspect then
         unitWeRequested = nil
         unitInspecting = nil
+        weRequestedInspect = false
         wow.ClearInspectPlayer()
     end
 end
@@ -235,6 +236,16 @@ local function OnUpdate()
     -- if we've requested an inspection and we're still within the timeout period
     if unitInspecting ~= nil and timeSinceLastInspect < inspectTimeout then
         return
+    end
+
+    -- Timeout occurred - reset state
+    if unitInspecting ~= nil and timeSinceLastInspect >= inspectTimeout then
+        fsLog:Debug("Inspect timeout for unit '%s'.", unitInspecting)
+
+        unitInspecting = nil
+        unitWeRequested = nil
+        weRequestedInspect = false
+        wow.ClearInspectPlayer()
     end
 
     if not needUpdate then
