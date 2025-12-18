@@ -138,7 +138,7 @@ local function GetNextTarget()
 
             if
                 cacheEntry
-                and cacheEntry.SpecId == 0
+                and (not cacheEntry.SpecId or cacheEntry.SpecId == 0)
                 and wow.CanInspect(unit)
                 and wow.UnitIsConnected(unit)
                 and (not cacheEntry.LastAttempt or (wow.GetTimePreciseSec() - cacheEntry.LastAttempt > cacheTimeout))
