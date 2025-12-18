@@ -22,8 +22,8 @@ local function OnCombatEnded()
         callback()
     end
 
-    combatEndCallbacks = wow.wipe(combatEndCallbacks)
-    combatEndKeyedCallbacks = wow.wipe(combatEndKeyedCallbacks)
+    wow.wipe(combatEndCallbacks)
+    wow.wipe(combatEndKeyedCallbacks)
 end
 
 local function OnEnteringWorld()
