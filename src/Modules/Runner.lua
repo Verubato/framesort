@@ -209,6 +209,9 @@ function M:Init()
         eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
         eventFrame:RegisterEvent(events.UNIT_PET)
 
+        -- testing to see if this fixes the issue in TBC classic of frames not being sorted in the prep room
+        eventFrame:RegisterEvent(events.PLAYER_ENTERING_WORLD)
+
         -- sometimes there is a delay from when a person joins group until their role is assigned
         -- so trigger a sort once we know their role
         eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
