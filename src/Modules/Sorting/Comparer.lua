@@ -543,7 +543,7 @@ function M:EnemySortFunction(units)
         return EmptyCompare
     end
 
-    units = units or fsUnit:EnemyUnits()
+    units = units or fsUnit:ArenaUnits()
 
     local meta = PrecomputeMetadata(units)
     return function(x, y)
@@ -581,10 +581,8 @@ end
 ---@return string? groupMode the group sort mode.
 ---@return boolean? reverse whether the sorting is reversed.
 function M:EnemySortMode()
-    local inInstance, instanceType = wow.IsInInstance()
-    local config = addon.DB.Options.Sorting.EnemyArena
-
-    if inInstance and (instanceType == "arena" or instanceType == "pvp") then
+    if wowEx.IsInstanceArenaOrBrawl() then
+        local config = addon.DB.Options.Sorting.EnemyArena
         return config.Enabled, config.GroupSortMode, config.Reverse
     end
 

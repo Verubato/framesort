@@ -133,7 +133,7 @@ local function FriendlyUnits()
 end
 
 local function EnemyUnits()
-    local units = fsUnit:EnemyUnits()
+    local units = fsUnit:ArenaUnits()
 
     if #units == 0 then
         return units
