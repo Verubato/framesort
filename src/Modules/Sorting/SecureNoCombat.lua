@@ -167,30 +167,30 @@ local function ApplySpacing(points, spacing)
     -- Snapshot coords for stable row/column grouping + stable sorting
     for i = 1, #points do
         local p = points[i]
-        p.OrigLeft = p.Left
-        p.OrigTop = p.Top
+        p.OriginalLeft = p.Left
+        p.OriginalTop = p.Top
     end
 
     local function Round(n)
         return fsMath:Round(n or 0, sanity)
     end
 
-    -- Pass 1: horizontal spacing within a row (sort by OrigTop desc, OrigLeft asc)
+    -- Pass 1: horizontal spacing within a row (sort by OriginalTop desc, OriginalLeft asc)
     table.sort(points, function(a, b)
-        local aTop, bTop = Round(a.OrigTop), Round(b.OrigTop)
+        local aTop, bTop = Round(a.OriginalTop), Round(b.OriginalTop)
 
         if aTop ~= bTop then
             return aTop > bTop
         end
 
-        return Round(a.OrigLeft) < Round(b.OrigLeft)
+        return Round(a.OriginalLeft) < Round(b.OriginalLeft)
     end)
 
     for i = 2, #points do
         local p = points[i]
         local prev = points[i - 1]
 
-        local sameRow = Round(p.OrigTop) == Round(prev.OrigTop)
+        local sameRow = Round(p.OriginalTop) == Round(prev.OriginalTop)
         if sameRow then
             local prevRight = prev.Left + (prev.Width or 0)
             local existingSpace = p.Left - prevRight
@@ -202,22 +202,22 @@ local function ApplySpacing(points, spacing)
         end
     end
 
-    -- Pass 2: vertical spacing within a column (sort by OrigLeft asc, OrigTop desc)
+    -- Pass 2: vertical spacing within a column (sort by OriginalLeft asc, OriginalTop desc)
     table.sort(points, function(a, b)
-        local aLeft, bLeft = Round(a.OrigLeft), Round(b.OrigLeft)
+        local aLeft, bLeft = Round(a.OriginalLeft), Round(b.OriginalLeft)
 
         if aLeft ~= bLeft then
             return aLeft < bLeft
         end
 
-        return Round(a.OrigTop) > Round(b.OrigTop)
+        return Round(a.OriginalTop) > Round(b.OriginalTop)
     end)
 
     for i = 2, #points do
         local p = points[i]
         local prev = points[i - 1]
 
-        local sameColumn = Round(p.OrigLeft) == Round(prev.OrigLeft)
+        local sameColumn = Round(p.OriginalLeft) == Round(prev.OriginalLeft)
         if sameColumn then
             local prevBottom = prev.Top - (prev.Height or 0)
             local existingSpace = prevBottom - p.Top
@@ -232,8 +232,8 @@ local function ApplySpacing(points, spacing)
     -- Cleanup snapshot fields
     for i = 1, #points do
         local p = points[i]
-        p.OrigLeft = nil
-        p.OrigTop = nil
+        p.OriginalLeft = nil
+        p.OriginalTop = nil
     end
 end
 
