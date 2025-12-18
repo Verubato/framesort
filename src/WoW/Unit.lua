@@ -42,6 +42,44 @@ for i = 1, maxArena do
     allArenaUnitsIds[#allArenaUnitsIds + 1] = "arenapet" .. i
 end
 
+---Normalises unit tokens, such that party1pet becomes partypet1.
+---@param unit string
+---@return string|nil
+function M:NormaliseUnit(unit)
+    if type(unit) ~= "string" or unit == "" then
+        return nil
+    end
+
+    unit = string.lower(unit)
+
+    -- already canonical (party1, partypet1, raidpet13, arena3, arenapet2, etc)
+    if unit:match("^partypet%d+$") or unit:match("^raidpet%d+$") or unit:match("^arenapet%d+$") then
+        return unit
+    end
+
+    local n
+
+    n = unit:match("^party(%d+)pet$")
+
+    if n then
+        return "partypet" .. n
+    end
+
+    n = unit:match("^raid(%d+)pet$")
+
+    if n then
+        return "raidpet" .. n
+    end
+
+    n = unit:match("^arena(%d+)pet$")
+
+    if n then
+        return "arenapet" .. n
+    end
+
+    return unit
+end
+
 function M:EnemyUnitExists(unit)
     if not unit then
         fsLog:Error("Unit:EnemyUnitExists() - unit must not be nil.")

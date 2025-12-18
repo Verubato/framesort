@@ -219,7 +219,7 @@ function M:IsFlat(frames)
     return true
 end
 
---- Returns the unit token from a frame.
+--- Returns the normalised/canonical unit token from a frame.
 ---@param frame table
 ---@return string|nil
 function M:GetFrameUnit(frame)
@@ -239,19 +239,20 @@ function M:GetFrameUnit(frame)
     -- frame:GetAttribute("unit") = "raid13pet"
     -- where possible we want the underlying unit
     if frame.unit then
-        return frame.unit
+        return fsUnit:NormaliseUnit(frame.unit) or frame.unit
     end
 
     if frame.GetAttribute then
         local unit = frame:GetAttribute("unit")
 
         if unit then
-            return unit
+            return fsUnit:NormaliseUnit(unit) or unit
         end
     end
 
     local name = frame.GetName and frame:GetName() or ""
-    return string.match(name, "arena%d")
+    local arena = string.match(name, "arena%d")
+    return arena and (fsUnit:NormaliseUnit(arena) or arena) or nil
 end
 
 ---Returns a collection of unit frames from the specified container.

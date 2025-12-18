@@ -66,7 +66,7 @@ secureMethods["InCombat"] = [[
     return SecureCmdOptionParse("[combat] true; false") == "true"
 ]]
 
--- gets the unit token from a frame
+-- gets the canonical unit token from a frame
 secureMethods["GetUnit"] = [[
     local run = control or self
     local framesVariable = ...
@@ -80,7 +80,7 @@ secureMethods["GetUnit"] = [[
 
     if not frame then
         run:CallMethod("Log", "GetUnit was passed a nil frame.", LogLevel.Bug)
-        return nil
+        return nil, nil
     end
 
     local unit = frame:GetAttribute("unit")
@@ -89,16 +89,56 @@ secureMethods["GetUnit"] = [[
         local name = frame:GetName()
         local arena = name and strmatch(name, "arena%d")
 
+        if arena then
+            arena = strlower(arena)
+        end
+
         return arena, arena
     end
 
-    local underlyingUnit = gsub(unit, "pet", "")
+    unit = strlower(unit)
 
-    if underlyingUnit ~= "" and UnitHasVehicleUI(underlyingUnit) then
-        return underlyingUnit, unit
+    -- normalise display unit (keeps pets distinct): party1pet -> partypet1, raid1pet -> raidpet1, arena1pet -> arenapet1
+    local displayUnit = unit
+    local n = strmatch(displayUnit, "^party(%d+)pet$")
+    if n then
+        displayUnit = "partypet" .. n
+    else
+        n = strmatch(displayUnit, "^raid(%d+)pet$")
+        if n then
+            displayUnit = "raidpet" .. n
+        else
+            n = strmatch(displayUnit, "^arena(%d+)pet$")
+            if n then
+                displayUnit = "arenapet" .. n
+            end
+        end
     end
 
-    return unit, unit
+    -- base unit for vehicle detection (strip "pet")
+    local underlyingUnit = gsub(unit, "pet", "")
+
+    -- optional: normalise underlying as well (mostly harmless)
+    n = strmatch(underlyingUnit, "^party(%d+)$")
+    if n then
+        underlyingUnit = "party" .. n
+    else
+        n = strmatch(underlyingUnit, "^raid(%d+)$")
+        if n then
+            underlyingUnit = "raid" .. n
+        else
+            n = strmatch(underlyingUnit, "^arena(%d+)$")
+            if n then
+                underlyingUnit = "arena" .. n
+            end
+        end
+    end
+
+    if underlyingUnit ~= "" and UnitHasVehicleUI(underlyingUnit) then
+        return underlyingUnit, displayUnit
+    end
+
+    return displayUnit, displayUnit
 ]]
 
 -- filters a set of frames to only unit frames

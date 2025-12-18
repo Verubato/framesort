@@ -40,7 +40,9 @@ end
 local function SortFramesByUnits(frames, sortedUnits)
     local unitsToIndex = {}
     for index, unit in ipairs(sortedUnits) do
-        unitsToIndex[unit] = index
+        local normalised = fsUnit:NormaliseUnit(unit) or unit
+
+        unitsToIndex[normalised] = index
     end
 
     table.sort(frames, function(leftFrame, rightFrame)
@@ -79,9 +81,11 @@ local function SortFramesByUnits(frames, sortedUnits)
             if leftIndex == nil then
                 return false
             end
+
             if rightIndex == nil then
                 return true
             end
+
             return leftIndex < rightIndex
         end
 
