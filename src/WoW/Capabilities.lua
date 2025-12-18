@@ -34,7 +34,7 @@ function M.CanOpenOptionsDuringCombat()
 end
 
 function M.HasC_PvP()
-    return type(wow.C_PvP) == "table" and type(wow.C_PvP.GetActiveMatchState) == "function"
+    return type(wow.C_PvP) == "table"
 end
 
 function M.HasC_Map()
@@ -46,7 +46,7 @@ function M.HasC_Timer()
 end
 
 function M.HasSoloShuffle()
-    return M.HasC_PvP() and type(wow.C_PvP.IsSoloShuffle) == "function" and type(wow.Enum) == "table" and wow.Enum.PvPMatchState ~= nil
+    return M.HasC_PvP() and type(wow.C_PvP.IsSoloShuffle) == "function" and type(wow.Enum) == "table" and wow.Enum.PvPMatchState ~= nil and type(wow.C_PvP.GetActiveMatchState) == "function"
 end
 
 function M.HasBrawl()

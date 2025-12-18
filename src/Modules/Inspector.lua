@@ -315,34 +315,21 @@ function M:FriendlyUnitSpec(unitGuid)
     return cacheEntry.SpecId
 end
 
----Returns the spec id of an arena unit
+---Returns the spec id of an enemy unit.
 ---@param unit string
 ---@return number|nil
-function M:ArenaUnitSpec(unit)
+function M:EnemyUnitSpec(unit)
     if not unit then
-        fsLog:Error("Inspector:ArenaUnitSpec() - unit must not be nil.")
+        fsLog:Error("Inspector:EnemyUnitSpec() - unit must not be nil.")
         return nil
     end
 
-    if not unit:match("^arena%d+$") then
-        fsLog:Warning("Inspector:ArenaUnitSpec() - unit '%s' is not an arena unit.", unit)
-        return nil
-    end
-
+    local isArena = unit:match("^arena%d+$")
     local unitNumber = tonumber(string.match(unit, "%d+"))
-
-    if not unitNumber then
-        return nil
-    end
-
-    local specId = wowEx.GetArenaOpponentSpecSafe(unitNumber)
+    local specId = isArena and unitNumber and wowEx.GetArenaOpponentSpecSafe(unitNumber)
 
     if specId then
         return specId
-    end
-
-    if not capabilities.HasC_PvP() or not wow.C_PvP or not wow.C_PvP.GetScoreInfoByPlayerGuid then
-        return nil
     end
 
     local guid = wow.UnitGUID(unit)
@@ -355,6 +342,10 @@ function M:ArenaUnitSpec(unit)
 
     if specId then
         return specId
+    end
+
+    if not capabilities.HasC_PvP() or not wow.C_PvP or not wow.C_PvP.GetScoreInfoByPlayerGuid then
+        return nil
     end
 
     -- fallback: query the scoreboard by GUID (works in BGs/brawls/arena when the scoreboard is shown)
@@ -409,6 +400,11 @@ end
 ---Registers a callback to be invoked when new spec information has been found.
 ---@param callback function
 function M:RegisterCallback(callback)
+    if not callback then
+        fsLog:ErrorOnce("Inspector:RegisterCallback() - callback must not be nil.")
+        return
+    end
+
     callbacks[#callbacks + 1] = callback
 end
 

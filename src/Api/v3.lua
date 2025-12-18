@@ -149,7 +149,7 @@ function M.Inspector:GetUnitSpecId(unit)
     end
 
     if fsUnit:IsEnemyUnit(unit) then
-        return fsInspector:ArenaUnitSpec(unit)
+        return fsInspector:EnemyUnitSpec(unit)
     end
 
     local guid = wow.UnitGUID(unit)

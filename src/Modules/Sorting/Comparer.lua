@@ -139,15 +139,15 @@ local function PrecomputeUnitMetadata(unit, meta)
     local data = {}
 
     data.IsPet = fsUnit:IsPet(unit)
-    data.IsArena = unit:sub(1, 5) == "arena"
+    data.IsEnemy = unit:sub(1, 5) == "arena" or fsUnit:IsEnemyUnit(unit)
     data.IsPlayer = not data.IsPet and fsUnit:IsPlayer(unit)
     data.UnitNumber = tonumber(string.match(unit, "%d+"))
 
-    if data.IsArena then
-        data.Exists = fsUnit:ArenaUnitExists(unit)
+    if data.IsEnemy then
+        data.Exists = fsUnit:EnemyUnitExists(unit)
 
         if not data.IsPet and data.Exists then
-            data.SpecId = fsInspector:ArenaUnitSpec(unit)
+            data.SpecId = fsInspector:EnemyUnitSpec(unit)
             data.Role = wow.GetSpecializationInfoByID and data.SpecId and select(5, wow.GetSpecializationInfoByID(data.SpecId))
 
             local specInfo = data.SpecId and fsSpec:GetSpecInfo(data.SpecId)
