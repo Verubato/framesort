@@ -269,29 +269,24 @@ secureMethods["Sort"] = [[
         local currentValue = array[i]
         local insertPos = i - 1
 
-        -- Shift larger elements to the right
         while insertPos >= 1 do
-            Left  = array[insertPos]
-            Right = currentValue
+            Left  = currentValue
+            Right = array[insertPos]
 
-            -- true means left should come before right
-            local leftBeforeRight = run:RunAttribute(compareName, "Left", "Right", extraArg1)
+            -- true means Left should come before Right
+            local currentBeforePrev = run:RunAttribute(compareName, "Left", "Right", extraArg1)
 
-            if leftBeforeRight then
-                -- we've found the correct spot, bail out
-                break
-            else
-                -- shift one step to the right
+            if currentBeforePrev then
                 array[insertPos + 1] = array[insertPos]
                 insertPos = insertPos - 1
+            else
+                break
             end
         end
 
-        -- Insert the saved element into its final position
         array[insertPos + 1] = currentValue
     end
 
-    -- Cleanup
     Left, Right = nil, nil
 ]]
 
