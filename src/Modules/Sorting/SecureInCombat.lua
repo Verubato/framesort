@@ -928,7 +928,8 @@ secureMethods["SpaceGroups"] = [[
         return false
     end
 
-    if not run:RunAttribute("ApplySpacing", "Slots", spacingVariable) then
+    local changed = run:RunAttribute("ApplySpacing", "Slots", spacingVariable)
+        if changed == nil then
         Slots = nil
         return false
     end
