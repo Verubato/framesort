@@ -39,11 +39,11 @@ local function Ordering()
     local huntersKey = fsSpec:SpecTypeKey(fsSpec.Type.Hunter)
     local meleeKey = fsSpec:SpecTypeKey(fsSpec.Type.Melee)
 
-    ordering[config.Tanks] = { Key = tankKey, Type = fsSpec.Type.Tank }
-    ordering[config.Healers] = { Key = healerKey, Type = fsSpec.Type.Healer }
-    ordering[config.Casters] = { Key = castersKey, Type = fsSpec.Type.Caster }
-    ordering[config.Hunters] = { Key = huntersKey, Type = fsSpec.Type.Hunter }
-    ordering[config.Melee] = { Key = meleeKey, Type = fsSpec.Type.Melee }
+    ordering[#ordering + 1] = { Key = tankKey, Order = config.Tanks, Type = fsSpec.Type.Tank }
+    ordering[#ordering + 1] = { Key = healerKey, Order = config.Healers, Type = fsSpec.Type.Healer }
+    ordering[#ordering + 1] = { Key = castersKey, Order = config.Casters, Type = fsSpec.Type.Caster }
+    ordering[#ordering + 1] = { Key = huntersKey, Order = config.Hunters, Type = fsSpec.Type.Hunter }
+    ordering[#ordering + 1] = { Key = meleeKey, Order = config.Melee, Type = fsSpec.Type.Melee }
 
     local function Priority(type, key)
         local priority = addon.DB.Options.Sorting.SpecPriority and addon.DB.Options.Sorting.SpecPriority[key]
@@ -63,14 +63,14 @@ local function Ordering()
         return priority
     end
 
-    for order, item in pairs(ordering) do
+    for _, item in ipairs(ordering) do
         local priority = Priority(item.Type, item.Key)
         specOrdering = specOrdering:Concat(priority)
 
         if item.Type == fsSpec.Type.Tank then
-            roleLookup["TANK"] = order
+            roleLookup["TANK"] = item.Order
         elseif item.Type == fsSpec.Type.Healer then
-            roleLookup["HEALER"] = order
+            roleLookup["HEALER"] = item.Order
         end
     end
 
