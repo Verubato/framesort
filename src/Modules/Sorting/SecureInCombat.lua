@@ -610,8 +610,7 @@ secureMethods["AdjustPointsOffset"] = [[
 
     local point, relativeTo, relativePoint, offsetX, offsetY = frame:GetPoint()
 
-    if not point or not relativeTo or not relativePoint then
-        -- something weird going on with this frame
+    if not point or not relativePoint then
         return false
     end
 
