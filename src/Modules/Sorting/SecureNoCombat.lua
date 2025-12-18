@@ -647,7 +647,7 @@ local function TrySortContainer(container)
 
     local frames = container.Frames and container:Frames()
 
-    if not frames or not container.Frame then
+    if not frames and container.Frame then
         frames = fsFrame:ExtractUnitFrames(container.Frame, true, container.VisibleOnly, container.ExistsOnly)
     end
 
