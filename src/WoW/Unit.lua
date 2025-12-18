@@ -69,7 +69,7 @@ function M:EnemyUnitExists(unit)
         count = arenaCount
     end
 
-    if wowEx.IsInstanceBattleground() or (capabilities.HasBrawl() and wow.C_PvP and wow.C_PvP.IsInBrawl()) then
+    if wowEx.IsInstanceBattleground() or (capabilities.HasBrawl() and wow.C_PvP and wow.C_PvP.IsInBrawl and wow.C_PvP.IsInBrawl()) then
         -- in 15v15 brawl, GetNumArenaOpponentSpecs returns 0 so we use GetNumBattlefieldScores instead
         count = wow.GetNumBattlefieldScores and wow.GetNumBattlefieldScores() or 0
     end

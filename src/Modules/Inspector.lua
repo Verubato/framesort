@@ -324,6 +324,11 @@ function M:EnemyUnitSpec(unit)
         return nil
     end
 
+    if unit:match("^arenapet%d+$") then
+        -- pets don't have a spec
+        return nil
+    end
+
     local isArena = unit:match("^arena%d+$")
     local unitNumber = tonumber(string.match(unit, "%d+"))
     local specId = isArena and unitNumber and wowEx.GetArenaOpponentSpecSafe(unitNumber)
