@@ -389,7 +389,7 @@ end
 ---@param blockHeight number?
 ---@return boolean sorted
 local function HardArrange(container, frames, spacing, offset, blockHeight)
-    if not frames or #frames == 0 then
+    if #frames == 0 then
         return false
     end
 
@@ -500,7 +500,8 @@ local function HardArrange(container, frames, spacing, offset, blockHeight)
 
     local moved, framesMoved = Move(frames, pointsByFrame)
     local stop = wow.GetTimePreciseSec()
-    fsLog:Debug("Moving %d/%d frames for container %s took %fms.", framesMoved, #frames, container.Frame:GetName() or "nil", (stop - start) * 1000)
+    local containerName = (container.Frame and container.Frame.GetName and container.Frame:GetName()) or "nil"
+    fsLog:Debug("Moving %d/%d frames for container %s took %fms.", framesMoved, #frames, containerName, (stop - start) * 1000)
 
     return moved
 end
@@ -567,7 +568,7 @@ local function UngroupedOffset(container, spacing)
         Y = 0,
     }
 
-    local groups = fsFrame:ExtractGroups(container.Frame)
+    local groups = fsFrame:ExtractGroups(container.Frame) or {}
     local horizontal = container.IsHorizontalLayout and container:IsHorizontalLayout()
 
     spacing = spacing or {
@@ -583,7 +584,7 @@ local function UngroupedOffset(container, spacing)
         return offset
     end
 
-    local frames = fsFrame:ExtractUnitFrames(lastGroup, true, container.VisibleOnly, container.ExistsOnly)
+    local frames = fsFrame:ExtractUnitFrames(lastGroup, true, container.VisibleOnly, container.ExistsOnly) or {}
 
     if #frames == 0 then
         return offset
@@ -639,7 +640,13 @@ local function TrySortContainer(container)
         return SetNameList(container), {}
     end
 
-    local frames = (container.Frames and container:Frames()) or fsFrame:ExtractUnitFrames(container.Frame, true, container.VisibleOnly, container.ExistsOnly)
+    local frames = container.Frames and container:Frames()
+
+    if not frames or not container.Frame then
+        frames = fsFrame:ExtractUnitFrames(container.Frame, true, container.VisibleOnly, container.ExistsOnly)
+    end
+
+    frames = frames or {}
 
     if #frames == 0 then
         fsLog:Debug("Container %s has no frames to sort.", container.Frame:GetName() or "nil")
@@ -699,7 +706,7 @@ end
 ---@return boolean
 local function TrySortContainerGroups(container)
     local sorted = false
-    local groups = fsFrame:ExtractGroups(container.Frame, container.VisibleOnly)
+    local groups = fsFrame:ExtractGroups(container.Frame, container.VisibleOnly) or {}
 
     if #groups == 0 then
         return false
@@ -764,7 +771,7 @@ local function TrySortContainerGroups(container)
     sorted = SpaceGroups(groups, spacing) or sorted
 
     -- ungrouped frames include pets, vehicles, and main tank/assist frames
-    local ungroupedFrames = fsFrame:ExtractUnitFrames(container.Frame, true, container.VisibleOnly, container.ExistsOnly)
+    local ungroupedFrames = fsFrame:ExtractUnitFrames(container.Frame, true, container.VisibleOnly, container.ExistsOnly) or {}
 
     if #ungroupedFrames == 0 then
         return sorted
@@ -782,7 +789,7 @@ local function ClearSorting(providers, friendlyEnabled, enemyEnabled)
     local nameListContainers = fsEnumerable
         :From(providers)
         :Map(function(provider)
-            return provider:Containers()
+            return (provider.Containers and provider:Containers()) or {}
         end)
         :Flatten()
         :Where(function(container)
@@ -806,14 +813,16 @@ local function ClearSorting(providers, friendlyEnabled, enemyEnabled)
         :ToTable()
 
     for _, container in ipairs(nameListContainers) do
-        local previousSortMethod = container.Frame:GetAttribute("FrameSortPreviousSortMethod") or "INDEX"
-        local previousGroupFilter = container.Frame:GetAttribute("FrameSortPreviousGroupFilter")
+        if container.Frame then
+            local previousSortMethod = container.Frame:GetAttribute("FrameSortPreviousSortMethod") or "INDEX"
+            local previousGroupFilter = container.Frame:GetAttribute("FrameSortPreviousGroupFilter")
 
-        container.Frame:SetAttribute("nameList", nil)
-        container.Frame:SetAttribute("sortMethod", previousSortMethod)
-        container.Frame:SetAttribute("groupFilter", previousGroupFilter)
+            container.Frame:SetAttribute("nameList", nil)
+            container.Frame:SetAttribute("sortMethod", previousSortMethod)
+            container.Frame:SetAttribute("groupFilter", previousGroupFilter)
 
-        fsLog:Debug("Cleared sorting on container %s.", container.Frame:GetName() or "")
+            fsLog:Debug("Cleared sorting on container %s.", container.Frame:GetName() or "")
+        end
     end
 
     return #nameListContainers > 0
@@ -830,7 +839,7 @@ function M:TrySort(provider)
     local sorted = false
     local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
     local enemyEnabled, _, _ = fsCompare:EnemySortMode()
-    local providers = provider and { provider } or fsProviders:Enabled()
+    local providers = (provider and { provider }) or fsProviders:Enabled() or {}
 
     if not friendlyEnabled or not enemyEnabled then
         sorted = ClearSorting(providers, friendlyEnabled, enemyEnabled)
