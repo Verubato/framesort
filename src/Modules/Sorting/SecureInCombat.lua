@@ -212,8 +212,15 @@ secureMethods["FrameChain"] = [[
     -- assert we have a complete chain
     local count = 0
     local current = root
+    local visited = newtable()
 
     while current do
+        if visited[current] then
+            -- protect against circular references
+            return false
+        end
+
+        visited[current] = true
         count = count + 1
         current = current.Next
     end

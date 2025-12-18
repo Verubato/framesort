@@ -116,8 +116,15 @@ function M:ToFrameChain(frames)
     -- assert we have a complete chain
     local count = 0
     local current = root
+    local visited = {}
 
     while current do
+        if visited[current] then
+            -- protect against circular references
+            return invalid
+        end
+
+        visited[current] = true
         count = count + 1
         current = current.Next
     end
