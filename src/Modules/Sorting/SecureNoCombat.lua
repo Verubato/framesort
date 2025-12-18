@@ -193,9 +193,15 @@ local function SpaceGroups(frames, spacing)
 
     ApplySpacing(frames, spacing, pointsByFrame)
 
+    -- key = frame, value = index
+    local indexOf = {}
+    for i = 1, #frames do
+        indexOf[frames[i]] = i
+    end
+
     local movedAny = false
     for _, source in ipairs(frames) do
-        local desiredIndex = fsEnumerable:From(frames):IndexOf(source)
+        local desiredIndex = indexOf[source]
         local destination = points[desiredIndex]
         local xDelta = destination.Left - source:GetLeft()
         local yDelta = destination.Top - source:GetTop()
@@ -248,10 +254,16 @@ local function SoftArrange(frames, spacing)
         enumerationOrder = fsFrame:FramesFromChain(chain)
     end
 
+    -- key = frame, value = index
+    local indexOf = {}
+    for i = 1, #frames do
+        indexOf[frames[i]] = i
+    end
+
     local movedAny = false
     for _, source in ipairs(enumerationOrder) do
-        local desiredIndex = fsEnumerable:From(frames):IndexOf(source)
-        local destination = points[desiredIndex]
+        local desiredIndex = indexOf[source]
+        local destination = desiredIndex and points[desiredIndex]
 
         if destination then
             local xDelta = destination.Left - source:GetLeft()

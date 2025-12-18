@@ -795,14 +795,15 @@ secureMethods["SoftArrange"] = [[
     local movedAny = false
     local mult = 10 ^ DecimalSanity
 
+    -- key = frame, value = index
+    local indexOf = newtable()
+    for i = 1, #frames do
+        local frame = frames[i]
+        indexOf[frame] = i
+    end
+
     for i, source in ipairs(enumerationOrder) do
-        local desiredIndex = -1
-        for j = 1, #frames do
-            if source == frames[j] then
-                desiredIndex = j
-                break
-            end
-        end
+        local desiredIndex = indexOf[source]
 
         if desiredIndex > 0 and desiredIndex <= #points then
             local left, bottom, width, height = source:GetRect()
