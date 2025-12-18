@@ -896,100 +896,109 @@ secureMethods["HardArrange"] = [[
     local mult = 10 ^ DecimalSanity
 
     for _, frame in ipairs(frames) do
-        local isNewBlock = currentBlockHeight > 0
-            -- add/subtract 1 for a bit of breathing room for rounding errors
-            and (
-                currentBlockHeight >= (blockHeight - 1)
-                or (currentBlockHeight + frame:GetHeight()) >= (blockHeight + 1)
-            )
+        local height = frame and frame.GetHeight and frame:GetHeight()
 
-        if isNewBlock then
-            currentBlockHeight = 0
+        if height then
+            local isNewBlock = currentBlockHeight > 0
+                -- add/subtract 1 for a bit of breathing room for rounding errors
+                and (
+                    currentBlockHeight >= (blockHeight - 1)
+                    or (currentBlockHeight + height) >= (blockHeight + 1)
+                )
 
-            if isHorizontalLayout then
-                col = col + 1
-            else
-                row = row + 1
+            if isNewBlock then
+                currentBlockHeight = 0
+
+                if isHorizontalLayout then
+                    col = col + 1
+                else
+                    row = row + 1
+                end
+
+                xOffset = col * (blockWidth + horizontalSpacing) + offset.X
+                yOffset = -row * (blockHeight + verticalSpacing) + offset.Y
             end
 
-            xOffset = col * (blockWidth + horizontalSpacing) + offset.X
-            yOffset = -row * (blockHeight + verticalSpacing) + offset.Y
+            -- if we've reached the end then wrap around
+            if isHorizontalLayout and blocksPerLine and col >= blocksPerLine then
+                col = 0
+                row = row + 1
+
+                xOffset = offset.X
+                yOffset = -row * (blockHeight + verticalSpacing) + offset.Y
+                currentBlockHeight = 0
+            elseif not isHorizontalLayout and blocksPerLine and row >= blocksPerLine then
+                row = 0
+                col = col + 1
+
+                yOffset = offset.Y
+                xOffset = col * (blockWidth + horizontalSpacing) + offset.X
+                currentBlockHeight = 0
+            end
+
+            local framePoint = newtable()
+            framePoint.Point = container.AnchorPoint or "TOPLEFT"
+            framePoint.RelativeTo = container.Anchor or container.Frame
+            framePoint.RelativePoint = container.AnchorPoint or "TOPLEFT"
+            framePoint.XOffset = xOffset
+            framePoint.YOffset = yOffset
+            pointsByFrame[frame] = framePoint
+
+            currentBlockHeight = currentBlockHeight + height
+            yOffset = yOffset - height
         end
-
-        -- if we've reached the end then wrap around
-        if isHorizontalLayout and blocksPerLine and col >= blocksPerLine then
-            col = 0
-            row = row + 1
-
-            xOffset = offset.X
-            yOffset = -row * (blockHeight + verticalSpacing) + offset.Y
-            currentBlockHeight = 0
-        elseif not isHorizontalLayout and blocksPerLine and row >= blocksPerLine then
-            row = 0
-            col = col + 1
-
-            yOffset = offset.Y
-            xOffset = col * (blockWidth + horizontalSpacing) + offset.X
-            currentBlockHeight = 0
-        end
-
-        local framePoint = newtable()
-        framePoint.Point = container.AnchorPoint or "TOPLEFT"
-        framePoint.RelativeTo = container.Anchor or container.Frame
-        framePoint.RelativePoint = container.AnchorPoint or "TOPLEFT"
-        framePoint.XOffset = xOffset
-        framePoint.YOffset = yOffset
-        pointsByFrame[frame] = framePoint
-
-        currentBlockHeight = currentBlockHeight + frame:GetHeight()
-        yOffset = yOffset - frame:GetHeight()
     end
 
     local framesToMove = newtable()
 
     for _, frame in ipairs(frames) do
-        local to = pointsByFrame[frame]
-        local point, relativeTo, relativePoint, xOffset, yOffset = frame:GetPoint()
-        local xOffsetRounded = math.floor((xOffset or 0) * mult + 0.5) / mult
-        local yOffsetRounded = math.floor((yOffset or 0) * mult + 0.5) / mult
-        local toXOffsetRounded = math.floor((to.XOffset or 0) * mult + 0.5) / mult
-        local toYOffsetRounded = math.floor((to.YOffset or 0) * mult + 0.5) / mult
+        local to = frame and pointsByFrame[frame]
 
-        local different =
-            point ~= to.Point or
-            relativeTo ~= to.RelativeTo or
-            relativePoint ~= to.RelativePoint or
-            xOffsetRounded ~= toXOffsetRounded or
-            yOffsetRounded ~= toYOffsetRounded
+        if frame and to and frame.GetPoint and frame.ClearAllPoints then
+            local point, relativeTo, relativePoint, xOffset, yOffset = frame:GetPoint()
+            local xOffsetRounded = math.floor((xOffset or 0) * mult + 0.5) / mult
+            local yOffsetRounded = math.floor((yOffset or 0) * mult + 0.5) / mult
+            local toXOffsetRounded = math.floor((to.XOffset or 0) * mult + 0.5) / mult
+            local toYOffsetRounded = math.floor((to.YOffset or 0) * mult + 0.5) / mult
 
-        if different then
-            framesToMove[#framesToMove + 1] = frame
-            frame:ClearAllPoints()
+            local different =
+                point ~= to.Point or
+                relativeTo ~= to.RelativeTo or
+                relativePoint ~= to.RelativePoint or
+                xOffsetRounded ~= toXOffsetRounded or
+                yOffsetRounded ~= toYOffsetRounded
+
+            if different then
+                framesToMove[#framesToMove + 1] = frame
+                frame:ClearAllPoints()
+            end
         end
     end
 
     -- now move them
     for _, frame in ipairs(framesToMove) do
-        local to = pointsByFrame[frame]
+        local to = frame and pointsByFrame[frame]
         -- since 10.2.7 this broke where to.RelativeTo must be a protected frame
         -- thankfully we can use a magic string to default it to the parent even if it's not protected
-        local newRelativeTo = to.RelativeTo
-
-        if not newRelativeTo then
-            newRelativeTo = "$parent"
-        else
-            local isProtected, explicitly = false, false
-
-            if type(newRelativeTo) == "table" and newRelativeTo.IsProtected then
-                isProtected, explicitly = newRelativeTo:IsProtected()
-            end
-
-            if not isProtected or not explicitly then
+        local newRelativeTo = to and to.RelativeTo
+        
+        if to and frame and frame.SetPoint then
+            if not newRelativeTo then
                 newRelativeTo = "$parent"
-            end
-        end
+            else
+                local isProtected, explicitly = false, false
 
-        frame:SetPoint(to.Point, newRelativeTo, to.RelativePoint, to.XOffset, to.YOffset)
+                if type(newRelativeTo) == "table" and newRelativeTo.IsProtected then
+                    isProtected, explicitly = newRelativeTo:IsProtected()
+                end
+
+                if not isProtected or not explicitly then
+                    newRelativeTo = "$parent"
+                end
+            end
+
+            frame:SetPoint(to.Point, newRelativeTo, to.RelativePoint, to.XOffset, to.YOffset)
+        end
     end
 
     return #framesToMove > 0
