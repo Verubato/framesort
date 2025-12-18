@@ -71,8 +71,8 @@ addon.WoW.WowEx = {
     ---@param id number
     ---@return number|nil
     GetArenaOpponentSpecSafe = function(id)
-        if not type then
-            fsLog:Error("WowEx:GetArenaOpponentSpecSafe() - id must not be nil.")
+        if type(id) ~= "number" then
+            fsLog:Error("WowEx:GetArenaOpponentSpecSafe() - id must be a number, instead received %s.", type(id))
             return nil
         end
 
@@ -93,8 +93,8 @@ addon.WoW.WowEx = {
     ---@param unit string
     ---@return number|nil
     GetInspectSpecializationSafe = function(unit)
-        if not unit then
-            fsLog:Error("WowEx:GetInspectSpecializationSafe() - unit must not be nil.")
+        if type(unit) ~= "string" then
+            fsLog:Error("WowEx:GetInspectSpecializationSafe() - unit must be a string, instead received %s.", type(unit))
             return nil
         end
 

@@ -324,7 +324,7 @@ function M:ArenaUnitSpec(unit)
         return nil
     end
 
-    if not unit:match("^arena%d+") then
+    if not unit:match("^arena%d+$") then
         fsLog:Warning("Inspector:ArenaUnitSpec() - unit '%s' is not an arena unit.", unit)
         return nil
     end
@@ -341,15 +341,36 @@ function M:ArenaUnitSpec(unit)
         return specId
     end
 
-    if not wow.GetBattlefieldScore then
+    if not capabilities.HasC_PvP() or not wow.C_PvP or not wow.C_PvP.GetScoreInfoByPlayerGuid then
         return nil
     end
 
-    -- we might be in a bg or a 15v15 brawl in which case we need to use GetBattlefieldScore
-    local _, _, _, _, _, _, _, _, classToken, _, _, _, _, _, _, talentSpec = wow.GetBattlefieldScore(unitNumber)
+    local guid = wow.UnitGUID(unit)
 
-    if classToken and talentSpec then
-        return fsSpec:SpecIdFromName(classToken, talentSpec)
+    if not guid or wow.issecretvalue(guid) then
+        return nil
+    end
+
+    specId = unitGuidToSpec[guid]
+
+    if specId then
+        return specId
+    end
+
+    -- fallback: query the scoreboard by GUID (works in BGs/brawls/arena when the scoreboard is shown)
+    local info = wow.C_PvP.GetScoreInfoByPlayerGuid(guid)
+
+    if not info then
+        return nil
+    end
+
+    if info.classToken and info.talentSpec then
+        specId = fsSpec:SpecIdFromName(info.classToken, info.talentSpec)
+
+        if specId then
+            unitGuidToSpec[guid] = specId
+            return specId
+        end
     end
 
     return nil

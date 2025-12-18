@@ -114,6 +114,7 @@
 ---@field GetActiveMatchState fun(): number
 ---@field IsBattleground fun(): boolean
 ---@field IsInBrawl fun(): boolean
+---@field GetScoreInfoByPlayerGuid fun(unitGuid: string): info: PVPScoreInfo
 
 ---@class C_Map
 ---@field GetBestMapForUnit fun(unitId: string): number
@@ -133,3 +134,25 @@
 
 ---@class C_AddOns
 ---@field GetAddOnEnableState fun(name: string, character: string?): number
+
+---@class PVPScoreInfo
+---@field name string
+---@field guid string
+---@field killingBlows number
+---@field honorableKills number
+---@field death number
+---@field honorGained number
+---@field faction  number
+---@field raceName string
+---@field className string
+---@field classToken string
+---@field damageDone number
+---@field healingDone number
+---@field rating number
+---@field ratingChange number
+---@field prematchMMR number
+---@field mmrChange number
+---@field postmatchMMR number
+---@field talentSpec string
+---@field honorLevel number
+---@field roleAssigned number
