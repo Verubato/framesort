@@ -99,9 +99,13 @@ secureMethods["ExtractUnitFrames"] = [[
     local framesVariable, destinationVariable, visibleOnly = ...
     local children = _G[framesVariable]
 
-    if not children then
+    if not children or not destinationVariable then
         run:CallMethod("Log", format("ExtractUnitFrames was passed a nil value, framesVariable: %s, destinationVariable: %s.", framesVariable or "nil", destinationVariable or "nil"), LogLevel.Critical)
         return false
+    end
+
+    if visibleOnly == nil then
+        visibleOnly = true
     end
 
     local unitFrames = newtable()
