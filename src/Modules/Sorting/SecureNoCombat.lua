@@ -238,28 +238,31 @@ local function ApplySpacing(points, spacing)
 end
 
 ---Applies spacing to a set of groups that contain frames.
----@param frames table[]  -- group frames
+---@param groups table[]  -- group frames
 ---@param spacing Spacing
 ---@return boolean movedAny
-local function SpaceGroups(frames, spacing)
-    if not frames or #frames <= 1 or not spacing then
+local function SpaceGroups(groups, spacing)
+    if not groups or #groups <= 1 or not spacing then
         return false
     end
 
     -- Build slots from groups with valid geometry
     local points = {}
-    for _, frame in ipairs(frames) do
-        if frame and frame.GetRect then
-            local left, bottom, width, height = frame:GetRect()
+    local validGroups = {}
+
+    for _, group in ipairs(groups) do
+        if group and group.GetRect then
+            local left, bottom, width, height = group:GetRect()
 
             if left and bottom and width and height then
                 points[#points + 1] = {
-                    Frame = frame,
                     Left = left,
                     Top = bottom + height,
                     Width = width,
                     Height = height,
                 }
+
+                validGroups[#validGroups + 1] = group
             end
         end
     end
@@ -271,16 +274,17 @@ local function SpaceGroups(frames, spacing)
     -- Mutate slot coords in-place
     ApplySpacing(points, spacing)
 
-    -- Destination map by group frame (prevents ordering mismatches)
     local destByGroup = {}
     for i = 1, #points do
-        local p = points[i]
-        destByGroup[p.Frame] = p
+        local point = points[i]
+        local group = validGroups[i]
+
+        destByGroup[group] = point
     end
 
     local movedAny = false
 
-    for _, group in ipairs(frames) do
+    for _, group in ipairs(validGroups) do
         local dest = group and destByGroup[group]
 
         if dest and group and group.GetLeft and group.GetTop then
@@ -290,7 +294,13 @@ local function SpaceGroups(frames, spacing)
                 local xDelta = dest.Left - left
                 local yDelta = dest.Top - top
 
-                movedAny = SafeAdjustPointsOffset(group, xDelta, yDelta) or movedAny
+                local xDeltaRounded = fsMath:Round(xDelta, fsCompare.DecimalSanity)
+                local yDeltaRounded = fsMath:Round(yDelta, fsCompare.DecimalSanity)
+
+                -- ignore noise in point differences
+                if xDeltaRounded ~= 0 or yDeltaRounded ~= 0 then
+                    movedAny = SafeAdjustPointsOffset(group, xDelta, yDelta) or movedAny
+                end
             end
         end
     end
@@ -307,22 +317,32 @@ local function SoftArrange(frames, spacing)
         return false
     end
 
-    -- Destination slots ordered by current TopLeft, but only keep frames with valid geometry
+    local slots = {}
+    local validFrames = {}
+
+    for _, frame in ipairs(frames) do
+        if frame and frame.GetRect then
+            local left, bottom, width, height = frame:GetRect()
+
+            if left and bottom and width and height then
+                validFrames[#validFrames + 1] = frame
+            end
+        end
+    end
+
     local orderedByTopLeft = fsEnumerable
-        :From(frames)
+        :From(validFrames)
         :OrderBy(function(a, b)
             return fsCompare:CompareTopLeftFuzzy(a, b)
         end)
         :ToTable()
 
-    local slots = {}
     for _, frame in ipairs(orderedByTopLeft) do
         if frame and frame.GetRect then
             local left, bottom, width, height = frame:GetRect()
 
             if left and bottom and width and height then
                 slots[#slots + 1] = {
-                    Frame = frame,
                     Left = left,
                     Top = bottom + height,
                     Width = width,
@@ -349,11 +369,14 @@ local function SoftArrange(frames, spacing)
         enumerationOrder = fsFrame:FramesFromChain(chain)
     end
 
-    -- Destination map by frame (avoids any mismatch)
+    -- assign each frame a slot
     local destByFrame = {}
+
     for i = 1, slotsCount do
-        local s = slots[i]
-        destByFrame[s.Frame] = s
+        local slot = slots[i]
+        local frame = validFrames[i]
+
+        destByFrame[frame] = slot
     end
 
     local movedAny = false
@@ -368,7 +391,12 @@ local function SoftArrange(frames, spacing)
                 local xDelta = dest.Left - left
                 local yDelta = dest.Top - top
 
-                movedAny = SafeAdjustPointsOffset(source, xDelta, yDelta) or movedAny
+                local xDeltaRounded = fsMath:Round(xDelta, fsCompare.DecimalSanity)
+                local yDeltaRounded = fsMath:Round(yDelta, fsCompare.DecimalSanity)
+
+                if xDeltaRounded ~= 0 or yDeltaRounded ~= 0 then
+                    movedAny = SafeAdjustPointsOffset(source, xDelta, yDelta) or movedAny
+                end
             end
         end
     end

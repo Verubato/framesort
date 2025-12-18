@@ -964,6 +964,7 @@ secureMethods["SpaceGroups"] = [[
 
     -- Build destination slots from groups that have valid rect
     Slots = newtable()
+    local validGroups = newtable()
 
     for _, group in ipairs(groups) do
         if group and group.GetRect then
@@ -971,12 +972,13 @@ secureMethods["SpaceGroups"] = [[
 
             if left and bottom and width and height then
                 local point = newtable()
-                point.Group = group
                 point.Left = left
                 point.Bottom = bottom
                 point.Width = width
                 point.Height = height
+
                 Slots[#Slots + 1] = point
+                validGroups[#validGroups + 1] = group
             else
                 run:CallMethod("Log", format("Group frame %s has no position.", group:GetName() or "nil"), LogLevel.Warning)
             end
@@ -986,6 +988,7 @@ secureMethods["SpaceGroups"] = [[
     local slotsCount = #Slots
     if slotsCount <= 1 then
         Slots = nil
+        validGroups = nil
         return false
     end
 
@@ -993,23 +996,21 @@ secureMethods["SpaceGroups"] = [[
 
     if changed == nil then
         Slots = nil
+        validGroups = nil
         return false
     end
 
-    -- assign destinations by group so ordering can't mismatch.
     DestByGroup = newtable()
-    for i = 1, #Slots do
+    for i = 1, slotsCount do
         local slot = Slots[i]
-
-        if slot and slot.Group then
-            DestByGroup[slot.Group] = slot
-        end
+        local group = validGroups[i]
+        DestByGroup[group] = slot
     end
 
     local movedAny = false
     local mult = 10 ^ DecimalSanity
 
-    for _, group in ipairs(groups) do
+    for _, group in ipairs(validGroups) do
         if group and group.GetRect then
             local left, bottom, width, height = group:GetRect()
 
@@ -1036,6 +1037,7 @@ secureMethods["SpaceGroups"] = [[
 
     DestByGroup = nil
     Slots = nil
+    validGroups = nil
 
     return movedAny
 ]]
@@ -1061,23 +1063,33 @@ secureMethods["SoftArrange"] = [[
         return false
     end
 
-    -- Destination slot order = current layout (TopLeft)
+    Slots = newtable()
+    ValidFrames = newtable()
+
+    for _, frame in ipairs(frames) do
+        if frame and frame.GetRect then
+            local left, bottom, width, height = frame:GetRect()
+
+            if left and bottom and width and height then
+                ValidFrames[#ValidFrames + 1] = frame
+            end
+        end
+    end
+
     OrderedByTopLeft = newtable()
-    run:RunAttribute("CopyTable", framesVariable, "OrderedByTopLeft")
+    run:RunAttribute("CopyTable", "ValidFrames", "OrderedByTopLeft")
     run:RunAttribute("Sort", "OrderedByTopLeft", "CompareFrameTopLeft")
 
-    -- Build slots (only frames with valid rect)
-    Slots = newtable()
     for _, frame in ipairs(OrderedByTopLeft) do
         if frame and frame.GetRect then
             local left, bottom, width, height = frame:GetRect()
             if left and bottom and width and height then
                 local point = newtable()
-                point.Frame = frame
                 point.Left = left
                 point.Bottom = bottom
                 point.Width = width
                 point.Height = height
+
                 Slots[#Slots + 1] = point
             end
         end
@@ -1087,6 +1099,7 @@ secureMethods["SoftArrange"] = [[
     if slotsCount <= 1 then
         OrderedByTopLeft = nil
         Slots = nil
+        ValidFrames = nil
         return false
     end
 
@@ -1097,17 +1110,17 @@ secureMethods["SoftArrange"] = [[
         if changed == nil then
             OrderedByTopLeft = nil
             Slots = nil
+            ValidFrames = nil
             return false
         end
     end
 
-    -- Build destination map by frame so enumeration order can't mismatch.
     DestByFrame = newtable()
     for i = 1, #Slots do
         local slot = Slots[i]
-        if slot and slot.Frame then
-            DestByFrame[slot.Frame] = slot
-        end
+        local frame = ValidFrames[i]
+
+        DestByFrame[frame] = slot
     end
 
     -- Enumerate in chain order if available (movement order)
@@ -1160,6 +1173,7 @@ secureMethods["SoftArrange"] = [[
 
     DestByFrame = nil
     Slots = nil
+    ValidFrames = nil
     enumerationOrder = nil
     return movedAny
 ]]
