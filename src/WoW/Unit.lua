@@ -62,20 +62,25 @@ function M:EnemyUnitExists(unit)
         return false
     end
 
-    local count = 0
     local arenaCount = wowEx.ArenaOpponentsCount()
 
     if arenaCount and arenaCount > 0 then
-        count = arenaCount
+        local id = tonumber(idStr)
+        return id and id <= arenaCount or false
     end
 
-    if wowEx.IsInstanceBattleground() or (capabilities.HasBrawl() and wow.C_PvP and wow.C_PvP.IsInBrawl and wow.C_PvP.IsInBrawl()) then
-        -- in 15v15 brawl, GetNumArenaOpponentSpecs returns 0 so we use GetNumBattlefieldScores instead
-        count = wow.GetNumBattlefieldScores and wow.GetNumBattlefieldScores() or 0
+    if not capabilities.HasC_PvP() or not wow.C_PvP or not wow.C_PvP.GetScoreInfoByPlayerGuid then
+        return false
     end
 
-    local id = tonumber(idStr)
-    return count > 0 and id <= count
+    local guid = wow.UnitGUID and wow.UnitGUID(unit)
+
+    if not guid or wow.issecretvalue(guid) then
+        return false
+    end
+
+    local info = wow.C_PvP.GetScoreInfoByPlayerGuid(guid)
+    return info ~= nil and info.name ~= nil
 end
 
 ---Returns a table of group member unit tokens where the unit exists.
