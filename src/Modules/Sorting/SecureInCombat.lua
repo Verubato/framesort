@@ -194,6 +194,11 @@ secureMethods["FrameChain"] = [[
     for i = 1, #frames do
         local frame = frames[i]
         local node = nodesByFrame[frame]
+
+        if not node or not node.Value or not node.Value.GetPoint then
+            return false
+        end
+
         local _, relativeTo = node.Value:GetPoint()
 
         if not relativeTo then

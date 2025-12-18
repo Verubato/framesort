@@ -25,19 +25,19 @@ local M = {
 addon.WoW.Frame = M
 
 ---@param provider FrameProvider
----@param type number
+---@param containerType number
 ---@param visibleOnly boolean? override the default container visibility filter
-function M:GetFrames(provider, type, visibleOnly)
+function M:GetFrames(provider, containerType, visibleOnly)
     if not provider then
         fsLog:Error("Frame:GetFrames() - provider must not be nil.")
         return {}
     end
-    if not type then
+    if not containerType then
         fsLog:Error("Frame:GetFrames() - type must not be nil.")
         return {}
     end
 
-    local target = M:GetContainer(provider, type)
+    local target = M:GetContainer(provider, containerType)
 
     if not target then
         return {}
@@ -47,7 +47,7 @@ function M:GetFrames(provider, type, visibleOnly)
         visibleOnly = target.VisibleOnly
     end
 
-    local frames = (target.Frames and target:Frames()) or M:ExtractUnitFrames(target.Frame, true, visibleOnly)
+    local frames = (type(target.Frames) == "function" and target:Frames()) or M:ExtractUnitFrames(target.Frame, true, visibleOnly)
 
     if not target.IsGrouped or not target:IsGrouped() then
         return frames
@@ -57,7 +57,7 @@ function M:GetFrames(provider, type, visibleOnly)
     local ungrouped = fsEnumerable
         :From(groups)
         :Map(function(group)
-            return M:ExtractUnitFrames(group)
+            return M:ExtractUnitFrames(group, true, visibleOnly)
         end)
         :Flatten()
 
@@ -94,6 +94,11 @@ function M:ToFrameChain(frames)
     for i = 1, #frames do
         local frame = frames[i]
         local node = nodesByFrame[frame]
+
+        if not node or not node.Value or not node.Value.GetPoint then
+            return invalid
+        end
+
         local _, relativeTo = node.Value:GetPoint()
 
         if not relativeTo then
@@ -158,6 +163,11 @@ function M:FramesFromChain(chain)
         return {}
     end
 
+    if not chain.Valid then
+        fsLog:Error("Frame:FramesFromChain() - chain must be valid.")
+        return {}
+    end
+
     local frames = {}
     local next = chain
 
@@ -184,8 +194,21 @@ function M:IsFlat(frames)
         return false
     end
 
+    if not frames[1] or not frames[1].GetPoint then
+        return false
+    end
+
     local _, anchor, _, _, _ = frames[1]:GetPoint()
+
+    if anchor == nil then
+        return false
+    end
+
     for i = 2, #frames do
+        if not frames[i].GetPoint then
+            return false
+        end
+
         local _, relativeTo, _, _, _ = frames[i]:GetPoint()
 
         if relativeTo ~= anchor then
@@ -219,13 +242,15 @@ function M:GetFrameUnit(frame)
         return frame.unit
     end
 
-    local unit = frame:GetAttribute("unit")
+    if frame.GetAttribute then
+        local unit = frame:GetAttribute("unit")
 
-    if unit then
-        return unit
+        if unit then
+            return unit
+        end
     end
 
-    local name = frame:GetName() or ""
+    local name = frame.GetName and frame:GetName() or ""
     return string.match(name, "arena%d")
 end
 
@@ -251,7 +276,13 @@ function M:ExtractUnitFrames(container, containerVisible, visibleOnly, hasUnit)
         containerVisible = true
     end
 
-    if not container or M:IsForbidden(container) or (containerVisible and not container:IsVisible()) then
+    if containerVisible then
+        if type(container.IsVisible) ~= "function" or not container:IsVisible() then
+            return {}
+        end
+    end
+
+    if type(container.GetChildren) ~= "function" then
         return {}
     end
 
@@ -268,7 +299,7 @@ function M:ExtractUnitFrames(container, containerVisible, visibleOnly, hasUnit)
                     return false
                 end
             else
-                local name = frame:GetName()
+                local name = frame.GetName and frame:GetName()
 
                 if not name then
                     return false
@@ -281,13 +312,16 @@ function M:ExtractUnitFrames(container, containerVisible, visibleOnly, hasUnit)
                 end
             end
 
-            if frame:GetTop() == nil or frame:GetLeft() == nil then
-                -- TODO: does this still happen?
-                fsLog:Warning("Frame '%s' has no position.", frame:GetName() or "nil")
+            if not frame.GetTop or not frame.GetLeft then
                 return false
             end
 
-            if visibleOnly and not frame:IsVisible() then
+            if frame:GetTop() == nil or frame:GetLeft() == nil then
+                fsLog:Warning("Frame '%s' has no position.", frame.GetName and frame:GetName() or "nil")
+                return false
+            end
+
+            if visibleOnly and (not frame.IsVisible or not frame:IsVisible()) then
                 return false
             end
 
@@ -306,7 +340,15 @@ function M:ExtractGroups(container, visibleOnly)
         return {}
     end
 
-    if M:IsForbidden(container) or not container:IsVisible() then
+    if M:IsForbidden(container) then
+        return {}
+    end
+
+    if type(container.GetChildren) ~= "function" or type(container.IsVisible) ~= "function" then
+        return {}
+    end
+
+    if not container:IsVisible() then
         return {}
     end
 
@@ -317,7 +359,7 @@ function M:ExtractGroups(container, visibleOnly)
                 return false
             end
 
-            local name = frame:GetName()
+            local name = frame.GetName and frame:GetName()
 
             if not name then
                 return false
@@ -329,13 +371,16 @@ function M:ExtractGroups(container, visibleOnly)
                 return false
             end
 
-            if frame:GetTop() == nil or frame:GetLeft() == nil then
-                -- TODO: does this still happen?
-                fsLog:Warning("Frame '%s' has no position.", frame:GetName() or "nil")
+            if not frame.GetTop or not frame.GetLeft then
                 return false
             end
 
-            if visibleOnly and not frame:IsVisible() then
+            if frame:GetTop() == nil or frame:GetLeft() == nil then
+                fsLog:Warning("Group frame '%s' has no position.", name or "nil")
+                return false
+            end
+
+            if visibleOnly and (not frame.IsVisible or not frame:IsVisible()) then
                 return false
             end
 
@@ -345,23 +390,27 @@ function M:ExtractGroups(container, visibleOnly)
 end
 
 ---@param provider FrameProvider
----@param type number
+---@param containerType number
 ---@return FrameContainer?
-function M:GetContainer(provider, type)
+function M:GetContainer(provider, containerType)
     if not provider then
         fsLog:Error("Frame:GetContainer() - provider must not be nil.")
         return nil
     end
 
-    if not type then
+    if not containerType then
         fsLog:Error("Frame:GetContainer() - type must not be nil.")
         return nil
     end
 
-    local containers = provider:Containers()
+    local containers = type(provider.Containers) == "function" and provider:Containers()
+
+    if type(containers) ~= "table" then
+        return nil
+    end
 
     for _, container in ipairs(containers) do
-        if container.Type == type then
+        if container.Type == containerType then
             return container
         end
     end
