@@ -42,7 +42,7 @@ for i = 1, maxArena do
     allEnemyUnitsIds[#allEnemyUnitsIds + 1] = "arenapet" .. i
 end
 
-function M:ArenaUnitExists(unit)
+function M:EnemyUnitExists(unit)
     if not unit then
         fsLog:Error("Unit:ArenaUnitExists() - unit must not be nil.")
         return false
@@ -108,7 +108,7 @@ function M:EnemyUnits()
     return fsEnumerable
         :From(allEnemyUnitsIds)
         :Where(function(unit)
-            return M:ArenaUnitExists(unit)
+            return M:EnemyUnitExists(unit)
         end)
         :ToTable()
 end
