@@ -2176,7 +2176,7 @@ local function ConfigureHeader(header)
         else
             local run = control or self
             run:RunFor(Header, [[
-                control:CallMethod("UnitButtonCreated")
+                control:CallMethod("UnitButtonCreated", UnitButtonsCount)
             ]])
         end
     ]=]
