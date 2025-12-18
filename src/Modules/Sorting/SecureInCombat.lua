@@ -1990,7 +1990,7 @@ local function LoadProvider(provider)
         manager:SetAttributeNoHandler(containerPrefix .. "SpacingVertical", spacing and spacing.Vertical)
 
         if container.Frames then
-            local frames = container.Frames()
+            local frames = container:Frames()
             manager:SetAttributeNoHandler(containerPrefix .. "FramesCount", #frames)
 
             for j, frame in ipairs(frames) do
