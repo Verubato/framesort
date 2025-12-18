@@ -53,7 +53,9 @@ secureMethods["OverheadTest"] = [[
 secureMethods["Round"] = [[
     local number, decimalPlaces = ...
 
-    if number == nil then return nil end
+    if number == nil then 
+        return nil 
+    end
 
     local mult = 10 ^ (decimalPlaces or 0)
     return math.floor(number * mult + 0.5) / mult
@@ -68,10 +70,16 @@ secureMethods["InCombat"] = [[
 secureMethods["GetUnit"] = [[
     local run = control or self
     local framesVariable = ...
+
+    if not framesVariable then
+        run:CallMethod("Log", format("GetUnit was passed a nil parameter, framesVariable: %s.", framesVariable or "nil"), LogLevel.Bug)
+        return nil, nil
+    end
+
     local frame = _G[framesVariable]
 
     if not frame then
-        run:CallMethod("Log", "GetUnit was passed a nil frame.", LogLevel.Critical)
+        run:CallMethod("Log", "GetUnit was passed a nil frame.", LogLevel.Bug)
         return nil
     end
 
@@ -100,7 +108,7 @@ secureMethods["ExtractUnitFrames"] = [[
     local children = _G[framesVariable]
 
     if not children or not destinationVariable then
-        run:CallMethod("Log", format("ExtractUnitFrames was passed a nil value, framesVariable: %s, destinationVariable: %s.", framesVariable or "nil", destinationVariable or "nil"), LogLevel.Critical)
+        run:CallMethod("Log", format("ExtractUnitFrames was passed a nil parameter, framesVariable: %s, destinationVariable: %s.", framesVariable or "nil", destinationVariable or "nil"), LogLevel.Bug)
         return false
     end
 
@@ -137,14 +145,28 @@ secureMethods["ExtractUnitFrames"] = [[
 
 -- extracts a set of groups from a container
 secureMethods["ExtractGroups"] = [[
+    local run = control or self
     local containerTableName, destinationTableName = ...
-    local container = _G[containerTableName]
-    local children = newtable()
 
-    if not container or not container.Frame then
+    if not containerTableName or not destinationTableName then
+        run:CallMethod("Log", format(
+            "ExtractGroups was passed a nil parameter, containerTableName: %s, destinationTableName: %s.",
+            containerTableName or "nil", destinationTableName or "nil"
+        ), LogLevel.Bug)
         return false
     end
 
+    local container = _G[containerTableName]
+
+    if not container or not container.Frame then
+        run:CallMethod("Log", format(
+            "ExtractGroups was passed a nil container/frame, containerTableName: %s.",
+            containerTableName or "nil"
+        ), LogLevel.Bug)
+        return false
+    end
+
+    local children = newtable()
     container.Frame:GetChildList(children)
     if #children == 0 then return false end
 
@@ -154,7 +176,7 @@ secureMethods["ExtractGroups"] = [[
         local name = child:GetName()
         local left, bottom, width, height = child:GetRect()
 
-        if child:IsVisible() and name and (left and bottom and width and height) then
+        if child:IsVisible() and name and left and bottom and width and height then
             if strmatch(name, "CompactRaidGroup") or strmatch(name, "CompactPartyFrame") then
                 groups[#groups + 1] = child
             end
@@ -173,7 +195,7 @@ secureMethods["CopyTable"] = [[
     local to = _G[toName]
 
     if not from or not to then
-        run:CallMethod("Log", format("CopyTable was passed a nil value, from: %s to: %s.", fromName or "nil", toName or "nil"), LogLevel.Critical)
+        run:CallMethod("Log", format("CopyTable was passed a nil value, from: %s to: %s.", fromName or "nil", toName or "nil"), LogLevel.Bug)
         return
     end
 
@@ -187,8 +209,27 @@ secureMethods["CopyTable"] = [[
 -- and each subsequent node depends on the one before it
 -- i.e. root -> frame1 -> frame2 -> frame3
 secureMethods["FrameChain"] = [[
+    local run = control or self
     local framesVariable, destinationVariable = ...
+
+    if not framesVariable or not destinationVariable then
+        run:CallMethod("Log", format(
+            "FrameChain was passed a nil parameter, framesVariable: %s, destinationVariable: %s.",
+            framesVariable or "nil", destinationVariable or "nil"
+        ), LogLevel.Bug)
+        return false
+    end
+
     local frames = _G[framesVariable]
+
+    if not frames then
+        run:CallMethod("Log", format(
+            "FrameChain was passed a nil frame array, framesVariable: %s.",
+            framesVariable or "nil"
+        ), LogLevel.Bug)
+        return false
+    end
+
     local nodesByFrame = newtable()
 
     for _, frame in ipairs(frames) do
@@ -196,11 +237,11 @@ secureMethods["FrameChain"] = [[
         node.Value = frame
         node.Next = nil
         node.Previous = nil
-
         nodesByFrame[frame] = node
     end
 
     local root = nil
+
     for i = 1, #frames do
         local frame = frames[i]
         local node = nodesByFrame[frame]
@@ -211,29 +252,20 @@ secureMethods["FrameChain"] = [[
 
         local _, relativeTo = node.Value:GetPoint()
 
-        if not relativeTo then
+        -- only treat relativeTo as a parent if it's a frame we know about
+        local parent = (type(relativeTo) == "table") and nodesByFrame[relativeTo] or nil
+
+        if not parent then
             if root then
                 return false
             end
-
             root = node
         else
-            local parent = nodesByFrame[relativeTo]
-
-            if parent then
-                if parent.Next then
-                    return false
-                end
-
-                parent.Next = node
-                node.Previous = parent
-            else
-                if root then
-                    return false
-                end
-
-                root = node
+            if parent.Next then
+                return false
             end
+            parent.Next = node
+            node.Previous = parent
         end
     end
 
@@ -251,7 +283,6 @@ secureMethods["FrameChain"] = [[
             -- protect against circular references
             return false
         end
-
         visited[current] = true
         count = count + 1
         current = current.Next
@@ -262,7 +293,6 @@ secureMethods["FrameChain"] = [[
     end
 
     _G[destinationVariable] = root
-
     return true
 ]]
 
@@ -271,7 +301,22 @@ secureMethods["FrameChain"] = [[
 secureMethods["Sort"] = [[
     local run = control or self
     local arrayName, compareName, extraArg1 = ...
+
+    if not arrayName or not compareName then
+        run:CallMethod("Log", format("Sort was passed a nil parameter, arrayName: %s, compareName: %s.", arrayName or "nil", compareName or "nil"), LogLevel.Bug)
+        return
+    end
+
     local array = _G[arrayName]
+
+    if not array then
+        run:CallMethod("Log", format("Sort was passed a nil array, arrayName: %s, compareName: %s.", arrayName or "nil", compareName or "nil"), LogLevel.Bug)
+        return
+    end
+
+    if #array <= 1 then
+        return
+    end
 
     for i = 2, #array do
         local currentValue = array[i]
@@ -301,7 +346,18 @@ secureMethods["Sort"] = [[
 secureMethods["CompareFrameTopLeft"] = [[
     local run = control or self
     local leftVariable, rightVariable = ...
+
+    if not leftVariable or not rightVariable then
+        run:CallMethod("Log", format("CompareFrameTopLeft was passed a nil parameter, leftVariable: %s, rightVariable: %s.", leftVariable or "nil", rightVariable or "nil"), LogLevel.Bug)
+        return false
+    end
+
     local x, y = _G[leftVariable], _G[rightVariable]
+
+    if not x or not y then
+        run:CallMethod("Log", format("CompareFrameTopLeft was passed a nil value, leftVariable: %s, rightVariable: %s.", leftVariable or "nil", rightVariable or "nil"), LogLevel.Bug)
+        return false
+    end
 
     local left, bottom, width, height = x:GetRect()
     local nextLeft, nextBottom, nextWidth, nextHeight = y:GetRect()
@@ -331,7 +387,18 @@ secureMethods["CompareFrameTopLeft"] = [[
 secureMethods["CompareFrameTopRight"] = [[
     local run = control or self
     local leftVariable, rightVariable = ...
+
+    if not leftVariable or not rightVariable then
+        run:CallMethod("Log", format("CompareFrameTopRight was passed a nil parameter, leftVariable: %s, rightVariable: %s.", leftVariable or "nil", rightVariable or "nil"), LogLevel.Bug)
+        return false
+    end
+
     local x, y = _G[leftVariable], _G[rightVariable]
+
+    if not x or not y then
+        run:CallMethod("Log", format("CompareFrameTopRight was passed a nil value, leftVariable: %s, rightVariable: %s.", leftVariable or "nil", rightVariable or "nil"), LogLevel.Bug)
+        return false
+    end
 
     local left, bottom, width, height = x:GetRect()
     local nextLeft, nextBottom, nextWidth, nextHeight = y:GetRect()
@@ -361,7 +428,18 @@ secureMethods["CompareFrameTopRight"] = [[
 secureMethods["CompareFrameBottomLeft"] = [[
     local run = control or self
     local leftVariable, rightVariable = ...
+
+    if not leftVariable or not rightVariable then
+        run:CallMethod("Log", format("CompareFrameBottomLeft was passed a nil parameter, leftVariable: %s, rightVariable: %s.", leftVariable or "nil", rightVariable or "nil"), LogLevel.Bug)
+        return false
+    end
+
     local x, y = _G[leftVariable], _G[rightVariable]
+
+    if not x or not y then
+        run:CallMethod("Log", format("CompareFrameBottomLeft was passed a nil value, leftVariable: %s, rightVariable: %s.", leftVariable or "nil", rightVariable or "nil"), LogLevel.Bug)
+        return false
+    end
 
     local left, bottom, width, height = x:GetRect()
     local nextLeft, nextBottom, nextWidth, nextHeight = y:GetRect()
@@ -391,7 +469,18 @@ secureMethods["CompareFrameBottomLeft"] = [[
 secureMethods["ComparePointTopLeft"] = [[
     local run = control or self
     local leftVariable, rightVariable = ...
+
+    if not leftVariable or not rightVariable then
+        run:CallMethod("Log", format("ComparePointTopLeft was passed a nil parameter, leftVariable: %s, rightVariable: %s.", leftVariable or "nil", rightVariable or "nil"), LogLevel.Bug)
+        return false
+    end
+
     local x, y = _G[leftVariable], _G[rightVariable]
+
+    if not x or not y then
+        run:CallMethod("Log", format("ComparePointTopLeft was passed a nil value, leftVariable: %s, rightVariable: %s.", leftVariable or "nil", rightVariable or "nil"), LogLevel.Bug)
+        return false
+    end
 
     if not x.Bottom or not x.Height or not x.Left then
         return false
@@ -418,7 +507,18 @@ secureMethods["ComparePointTopLeft"] = [[
 secureMethods["ComparePointLeftTop"] = [[
     local run = control or self
     local leftVariable, rightVariable = ...
+
+    if not leftVariable or not rightVariable then
+        run:CallMethod("Log", format("ComparePointLeftTop was passed a nil parameter, leftVariable: %s, rightVariable: %s.", leftVariable or "nil", rightVariable or "nil"), LogLevel.Bug)
+        return false
+    end
+
     local x, y = _G[leftVariable], _G[rightVariable]
+
+    if not x or not y then
+        run:CallMethod("Log", format("ComparePointLeftTop was passed a nil value, leftVariable: %s, rightVariable: %s.", leftVariable or "nil", rightVariable or "nil"), LogLevel.Bug)
+        return false
+    end
 
     if not x.Bottom or not x.Height or not x.Left then
         return false
@@ -445,8 +545,19 @@ secureMethods["ComparePointLeftTop"] = [[
 secureMethods["CompareFrameGroup"] = [[
     local run = control or self
     local leftVariable, rightVariable, playerSortMode = ...
+
+    if not leftVariable or not rightVariable then
+        run:CallMethod("Log", format("CompareFrameGroup was passed a nil parameter, leftVariable: %s, rightVariable: %s.", leftVariable or "nil", rightVariable or "nil"), LogLevel.Bug)
+        return false
+    end
+
     local leftFrame = _G[leftVariable]
     local rightFrame = _G[rightVariable]
+
+    if not leftFrame or not rightFrame then
+        run:CallMethod("Log", format("CompareFrameGroup was passed a nil value, leftVariable: %s, rightVariable: %s.", leftVariable or "nil", rightVariable or "nil"), LogLevel.Bug)
+        return false
+    end
 
     -- Get their units
     Frame = leftFrame
@@ -488,8 +599,29 @@ secureMethods["CompareFrameGroup"] = [[
 secureMethods["SortFramesByUnits"] = [[
     local run = control or self
     local framesVariable, unitsVariable, destinationVariable = ...
+
+    if not framesVariable or not unitsVariable or not destinationVariable then
+        run:CallMethod("Log", format(
+            "SortFramesByUnits was passed a nil parameter, framesVariable: %s, unitsVariable: %s, destinationVariable: %s.",
+            framesVariable or "nil", unitsVariable or "nil", destinationVariable or "nil"
+        ), LogLevel.Bug)
+        return false
+    end
+
     local frames = _G[framesVariable]
+
+    if not frames then
+        run:CallMethod("Log", format("SortFramesByUnits was passed a nil frames value, framesVariable: %s, unitsVariable: %s, destinationVariable: %s.", framesVariable or "nil", unitsVariable or "nil", destinationVariable or "nil"), LogLevel.Bug)
+        return false
+    end
+
     local units = _G[unitsVariable]
+
+    if not units then
+        run:CallMethod("Log", format("SortFramesByUnits was passed a nil units value, framesVariable: %s, unitsVariable: %s, destinationVariable: %s.", framesVariable or "nil", unitsVariable or "nil", destinationVariable or "nil"), LogLevel.Bug)
+        return false
+    end
+
     local index = 1
     local framesByUnit = newtable()
     local frameWasSorted = newtable()
@@ -597,6 +729,12 @@ secureMethods["SortFramesByUnits"] = [[
 secureMethods["AdjustPointsOffset"] = [[
     local run = control or self
     local framesVariable, xDelta, yDelta = ...
+
+    if not framesVariable or xDelta == nil or yDelta == nil then
+        run:CallMethod("Log", format("AdjustPointsOffset was passed a nil parameter, framesVariable: %s, xDelta: %s, yDelta: %s.", framesVariable or "nil", xDelta or "nil", yDelta or "nil"), LogLevel.Bug)
+        return false
+    end
+
     local frame = _G[framesVariable]
 
     if not frame then
@@ -639,8 +777,14 @@ secureMethods["AdjustPointsOffset"] = [[
 
 -- returns the spacing configuration for the specified container type
 secureMethods["SpacingForContainer"] = [[
+    local run = control or self
     local containerType = ...
     local spacingType = nil
+
+    if not containerType then
+        run:CallMethod("Log", format("SpacingForContainer was passed a nil parameter, containerType: %s.", containerType or "nil"), LogLevel.Bug)
+        return nil, nil
+    end
 
     if containerType == ContainerType.Party then
         spacingType = "Party"
@@ -649,6 +793,7 @@ secureMethods["SpacingForContainer"] = [[
     elseif containerType == ContainerType.EnemyArena then
         spacingType = "EnemyArena"
     else
+        run:CallMethod("Log", format("SpacingForContainer was passed an invalid parameter, containerType: %s.", containerType or "nil"), LogLevel.Bug)
         return nil, nil
     end
 
@@ -662,6 +807,13 @@ secureMethods["SpacingForContainer"] = [[
 secureMethods["ApplySpacing"] = [[
     local run = control or self
     local pointsVariable, spacingVariable = ...
+
+    if not pointsVariable or not spacingVariable then
+        run:CallMethod("Log", format("ApplySpacing was passed a nil parameter, pointsVariable: %s, spacingVariable: %s.", pointsVariable or "nil", spacingVariable or "nil"), LogLevel.Bug)
+        return nil
+    end
+
+
     local points = _G[pointsVariable]
     local spacing = _G[spacingVariable]
 
@@ -725,10 +877,27 @@ secureMethods["ApplySpacing"] = [[
 secureMethods["SpaceGroups"] = [[
     local run = control or self
     local groupsVariable, spacingVariable = ...
+
+    if not groupsVariable or not spacingVariable then
+        run:CallMethod("Log", format(
+            "SpaceGroups was passed a nil parameter, groupsVariable: %s, spacingVariable: %s.",
+            groupsVariable or "nil", spacingVariable or "nil"
+        ), LogLevel.Bug)
+        return false
+    end
+
     local groups = _G[groupsVariable]
     local spacing = _G[spacingVariable]
 
-    if not groups or #groups <= 1 then
+    if not groups or not spacing then
+        run:CallMethod("Log", format(
+            "SpaceGroups was passed a nil value, groupsVariable: %s, spacingVariable: %s.",
+            groupsVariable or "nil", spacingVariable or "nil"
+        ), LogLevel.Bug)
+        return false
+    end
+
+    if #groups <= 1 then
         return false
     end
 
@@ -736,18 +905,20 @@ secureMethods["SpaceGroups"] = [[
     Slots = newtable()
 
     for _, group in ipairs(groups) do
-        local left, bottom, width, height = group:GetRect()
+        if group and group.GetRect then
+            local left, bottom, width, height = group:GetRect()
 
-        if left and bottom and width and height then
-            local point = newtable()
-            point.Group = group
-            point.Left = left
-            point.Bottom = bottom
-            point.Width = width
-            point.Height = height
-            Slots[#Slots + 1] = point
-        else
-            run:CallMethod("Log", format("Group frame %s has no position.", group:GetName() or "nil"), LogLevel.Warning)
+            if left and bottom and width and height then
+                local point = newtable()
+                point.Group = group
+                point.Left = left
+                point.Bottom = bottom
+                point.Width = width
+                point.Height = height
+                Slots[#Slots + 1] = point
+            else
+                run:CallMethod("Log", format("Group frame %s has no position.", group:GetName() or "nil"), LogLevel.Warning)
+            end
         end
     end
 
@@ -757,7 +928,6 @@ secureMethods["SpaceGroups"] = [[
         return false
     end
 
-    -- Apply spacing to Slots in-place
     if not run:RunAttribute("ApplySpacing", "Slots", spacingVariable) then
         Slots = nil
         return false
@@ -765,31 +935,29 @@ secureMethods["SpaceGroups"] = [[
 
     local movedAny = false
     local mult = 10 ^ DecimalSanity
-
-    -- Move i-th valid group to slot i (prevents index mismatch)
     local slotIndex = 0
 
     for _, group in ipairs(groups) do
-        local left, bottom, width, height = group:GetRect()
+        if group and group.GetRect then
+            local left, bottom, width, height = group:GetRect()
 
-        if left and bottom and width and height then
-            slotIndex = slotIndex + 1
-            if slotIndex > slotsCount then
-                break
-            end
+            if left and bottom and width and height then
+                slotIndex = slotIndex + 1
+                if slotIndex > slotsCount then break end
 
-            local destination = Slots[slotIndex]
-            local xDelta = destination.Left - left
-            local yDelta = destination.Bottom - bottom
+                local destination = Slots[slotIndex]
+                local xDelta = destination.Left - left
+                local yDelta = destination.Bottom - bottom
 
-            local xDeltaRounded = math.floor(xDelta * mult + 0.5) / mult
-            local yDeltaRounded = math.floor(yDelta * mult + 0.5) / mult
+                local xDeltaRounded = math.floor(xDelta * mult + 0.5) / mult
+                local yDeltaRounded = math.floor(yDelta * mult + 0.5) / mult
 
-            if xDeltaRounded ~= 0 or yDeltaRounded ~= 0 then
-                Group = group
-                local moved = run:RunAttribute("AdjustPointsOffset", "Group", xDelta, yDelta)
-                movedAny = movedAny or moved
-                Group = nil
+                if xDeltaRounded ~= 0 or yDeltaRounded ~= 0 then
+                    Group = group
+                    local moved = run:RunAttribute("AdjustPointsOffset", "Group", xDelta, yDelta)
+                    movedAny = movedAny or moved
+                    Group = nil
+                end
             end
         end
     end
@@ -802,9 +970,20 @@ secureMethods["SpaceGroups"] = [[
 secureMethods["SoftArrange"] = [[
     local run = control or self
     local framesVariable, spacingVariable = ...
+
+    if not framesVariable then
+        run:CallMethod("Log", format("SoftArrange was passed a nil parameter, framesVariable: %s.", framesVariable or "nil"), LogLevel.Bug)
+        return false
+    end
+
     local frames = _G[framesVariable]
 
-    if not frames or #frames <= 1 then
+    if not frames then
+        run:CallMethod("Log", format("SoftArrange was passed a nil frames value, framesVariable: %s.", framesVariable or "nil"), LogLevel.Bug)
+        return false
+    end
+
+    if #frames <= 1 then
         return false
     end
 
@@ -816,22 +995,21 @@ secureMethods["SoftArrange"] = [[
     -- Build slots (only frames with valid rect)
     Slots = newtable()
     for _, frame in ipairs(OrderedByTopLeft) do
-        local left, bottom, width, height = frame:GetRect()
-
-        if left and bottom and width and height then
-            local point = newtable()
-            point.Frame = frame
-            point.Left = left
-            point.Bottom = bottom
-            point.Width = width
-            point.Height = height
-
-            Slots[#Slots + 1] = point
+        if frame and frame.GetRect then
+            local left, bottom, width, height = frame:GetRect()
+            if left and bottom and width and height then
+                local point = newtable()
+                point.Frame = frame
+                point.Left = left
+                point.Bottom = bottom
+                point.Width = width
+                point.Height = height
+                Slots[#Slots + 1] = point
+            end
         end
     end
 
     local slotsCount = #Slots
-
     if slotsCount <= 1 then
         OrderedByTopLeft = nil
         Slots = nil
@@ -840,7 +1018,10 @@ secureMethods["SoftArrange"] = [[
 
     -- Apply spacing by mutating Points in-place
     if spacingVariable then
-        run:RunAttribute("ApplySpacing", "Slots", spacingVariable)
+        local spacing = _G[spacingVariable]
+        if spacing then
+            run:RunAttribute("ApplySpacing", "Slots", spacingVariable)
+        end
     end
 
     -- Enumerate in chain order if available (movement order)
@@ -865,32 +1046,29 @@ secureMethods["SoftArrange"] = [[
 
     local movedAny = false
     local mult = 10 ^ DecimalSanity
-
-    -- Move the i-th *valid* frame (in desired order) to slot i
     local slotIndex = 0
 
     for _, source in ipairs(enumerationOrder) do
-        local left, bottom, width, height = source:GetRect()
+        if source and source.GetRect then
+            local left, bottom, width, height = source:GetRect()
 
-        if left and bottom and width and height then
-            slotIndex = slotIndex + 1
+            if left and bottom and width and height then
+                slotIndex = slotIndex + 1
+                if slotIndex > slotsCount then break end
 
-            if slotIndex > slotsCount then
-                break
-            end
+                local destination = Slots[slotIndex]
+                local xDelta = destination.Left - left
+                local yDelta = destination.Bottom - bottom
 
-            local destination = Slots[slotIndex]
-            local xDelta = destination.Left - left
-            local yDelta = destination.Bottom - bottom
+                local xDeltaRounded = math.floor(xDelta * mult + 0.5) / mult
+                local yDeltaRounded = math.floor(yDelta * mult + 0.5) / mult
 
-            local xDeltaRounded = math.floor(xDelta * mult + 0.5) / mult
-            local yDeltaRounded = math.floor(yDelta * mult + 0.5) / mult
-
-            if xDeltaRounded ~= 0 or yDeltaRounded ~= 0 then
-                Frame = source
-                local moved = run:RunAttribute("AdjustPointsOffset", "Frame", xDelta, yDelta)
-                movedAny = movedAny or moved
-                Frame = nil
+                if xDeltaRounded ~= 0 or yDeltaRounded ~= 0 then
+                    Frame = source
+                    local moved = run:RunAttribute("AdjustPointsOffset", "Frame", xDelta, yDelta)
+                    movedAny = movedAny or moved
+                    Frame = nil
+                end
             end
         end
     end
@@ -904,21 +1082,38 @@ secureMethods["SoftArrange"] = [[
 secureMethods["HardArrange"] = [[
     local run = control or self
     local framesVariable, containerVariable, spacingVariable, blockHeight = ...
+
+    if not framesVariable or not containerVariable then
+        run:CallMethod("Log", format(
+            "HardArrange was passed a nil parameter, framesVariable: %s, containerVariable: %s.",
+            framesVariable or "nil", containerVariable or "nil"
+        ), LogLevel.Bug)
+        return false
+    end
+
     local frames = _G[framesVariable]
     local container = _G[containerVariable]
+
+    if not frames or not container then
+        run:CallMethod("Log", format(
+            "HardArrange was passed a nil value, framesVariable: %s, containerVariable: %s.",
+            framesVariable or "nil", containerVariable or "nil"
+        ), LogLevel.Bug)
+        return false
+    end
+
     local spacing = spacingVariable and _G[spacingVariable]
     local verticalSpacing = spacing and spacing.Vertical or 0
     local horizontalSpacing = spacing and spacing.Horizontal or 0
-    local isHorizontalLayout = container.IsHorizontalLayout
+    local isHorizontalLayout = container.IsHorizontalLayout == true
     local blocksPerLine = container.FramesPerLine
 
     local firstValid = nil
 
     for _, frame in ipairs(frames) do
         if frame and frame.GetHeight and frame.GetWidth then
-            local height, width = frame:GetHeight(), frame:GetWidth()
-
-            if height and height > 0 and width and width > 0 then
+            local h, w = frame:GetHeight(), frame:GetWidth()
+            if h and h > 0 and w and w > 0 then
                 firstValid = frame
                 break
             end
@@ -930,11 +1125,15 @@ secureMethods["HardArrange"] = [[
         return false
     end
 
-    local _, _, firstValidFrameWidth, firstValidFrameHeight = firstValid:GetRect()
-    local offset = container.Offset or newtable()
-    local blockWidth = firstValidFrameWidth
-    blockHeight = blockHeight or firstValidFrameHeight
+    local blockWidth = firstValid:GetWidth()
+    blockHeight = blockHeight or firstValid:GetHeight()
 
+    if not blockWidth or blockWidth <= 0 or not blockHeight or blockHeight <= 0 then
+        run:CallMethod("Log", "HardArrange (in-combat): invalid block dimensions.", LogLevel.Error)
+        return false
+    end
+
+    local offset = container.Offset or newtable()
     offset.X = offset.X or 0
     offset.Y = offset.Y or 0
 
@@ -948,9 +1147,8 @@ secureMethods["HardArrange"] = [[
     for _, frame in ipairs(frames) do
         local height = frame and frame.GetHeight and frame:GetHeight()
 
-        if height then
+        if height and height > 0 then
             local isNewBlock = currentBlockHeight > 0
-                -- add/subtract 1 for a bit of breathing room for rounding errors
                 and (
                     currentBlockHeight >= (blockHeight - 1)
                     or (currentBlockHeight + height) >= (blockHeight + 1)
@@ -969,18 +1167,15 @@ secureMethods["HardArrange"] = [[
                 yOffset = -row * (blockHeight + verticalSpacing) + offset.Y
             end
 
-            -- if we've reached the end then wrap around
             if isHorizontalLayout and blocksPerLine and col >= blocksPerLine then
                 col = 0
                 row = row + 1
-
                 xOffset = offset.X
                 yOffset = -row * (blockHeight + verticalSpacing) + offset.Y
                 currentBlockHeight = 0
-            elseif not isHorizontalLayout and blocksPerLine and row >= blocksPerLine then
+            elseif (not isHorizontalLayout) and blocksPerLine and row >= blocksPerLine then
                 row = 0
                 col = col + 1
-
                 yOffset = offset.Y
                 xOffset = col * (blockWidth + horizontalSpacing) + offset.X
                 currentBlockHeight = 0
@@ -1025,23 +1220,20 @@ secureMethods["HardArrange"] = [[
         end
     end
 
-    -- now move them
     for _, frame in ipairs(framesToMove) do
         local to = frame and pointsByFrame[frame]
         -- since 10.2.7 this broke where to.RelativeTo must be a protected frame
         -- thankfully we can use a magic string to default it to the parent even if it's not protected
         local newRelativeTo = to and to.RelativeTo
-        
+
         if to and frame and frame.SetPoint then
             if not newRelativeTo then
                 newRelativeTo = "$parent"
             else
                 local isProtected, explicitly = false, false
-
                 if type(newRelativeTo) == "table" and newRelativeTo.IsProtected then
                     isProtected, explicitly = newRelativeTo:IsProtected()
                 end
-
                 if not isProtected or not explicitly then
                     newRelativeTo = "$parent"
                 end
@@ -1058,19 +1250,28 @@ secureMethods["HardArrange"] = [[
 secureMethods["UngroupedOffset"] = [[
     local run = control or self
     local containerVariable, spacingVariable = ...
+
+    if not containerVariable then
+        run:CallMethod("Log", format("UngroupedOffset was passed a nil parameter, containerVariable: %s.", containerVariable or "nil"), LogLevel.Bug)
+        return 0, 0
+    end
+
     local container = _G[containerVariable]
-    local spacing = _G[spacingVariable]
+    local spacing = spacingVariable and _G[spacingVariable]
+
+    if not container or not container.Frame then
+        run:CallMethod("Log", format("UngroupedOffset was passed a nil container/frame, containerVariable: %s.", containerVariable or "nil"), LogLevel.Bug)
+        return 0, 0
+    end
 
     if not run:RunAttribute("ExtractGroups", containerVariable, "OffsetGroups") then
         return 0, 0
     end
 
     local lastGroup = nil
-
     for i = #OffsetGroups, 1, -1 do
         local group = OffsetGroups[i]
-
-        if group:IsVisible() then
+        if group and group.IsVisible and group:IsVisible() then
             lastGroup = group
             break
         end
@@ -1082,8 +1283,9 @@ secureMethods["UngroupedOffset"] = [[
     end
 
     OffsetGroupChildren = newtable()
-
-    lastGroup:GetChildList(OffsetGroupChildren)
+    if lastGroup.GetChildList then
+        lastGroup:GetChildList(OffsetGroupChildren)
+    end
 
     if not run:RunAttribute("ExtractUnitFrames", "OffsetGroupChildren", "OffsetGroupFrames", container.VisibleOnly) then
         OffsetGroups = nil
@@ -1092,7 +1294,7 @@ secureMethods["UngroupedOffset"] = [[
         return 0, 0
     end
 
-    local horizontal = container.IsHorizontalLayout
+    local horizontal = container.IsHorizontalLayout == true
 
     if not spacing then
         spacing = newtable()
@@ -1102,23 +1304,35 @@ secureMethods["UngroupedOffset"] = [[
 
     local x, y = 0, 0
     local left, bottom, width, height = container.Frame:GetRect()
+    if not left or not bottom or not width or not height then
+        OffsetGroupChildren = nil
+        OffsetGroupFrames = nil
+        OffsetGroups = nil
+        return 0, 0
+    end
 
     if horizontal then
         run:RunAttribute("Sort", "OffsetGroupFrames", "CompareFrameBottomLeft")
 
         local bottomLeftFrame = OffsetGroupFrames[1]
-        local bottomFrameLeft, bottomFrameBottom, _, _ = bottomLeftFrame:GetRect()
-
-        x = -(left - bottomFrameLeft)
-        y = -((bottom + height) - bottomFrameBottom + spacing.Vertical)
+        if bottomLeftFrame and bottomLeftFrame.GetRect then
+            local bottomFrameLeft, bottomFrameBottom = bottomLeftFrame:GetRect()
+            if bottomFrameLeft and bottomFrameBottom then
+                x = -(left - bottomFrameLeft)
+                y = -((bottom + height) - bottomFrameBottom + (spacing.Vertical or 0))
+            end
+        end
     else
         run:RunAttribute("Sort", "OffsetGroupFrames", "CompareFrameTopRight")
 
         local topRightFrame = OffsetGroupFrames[1]
-        local topFrameLeft, topFrameBottom, topFrameWidth, topFrameHeight = topRightFrame:GetRect()
-
-        x = -(left - (topFrameLeft + topFrameWidth) - spacing.Horizontal)
-        y = -((bottom + height) - (topFrameBottom + topFrameHeight))
+        if topRightFrame and topRightFrame.GetRect then
+            local topFrameLeft, topFrameBottom, topFrameWidth, topFrameHeight = topRightFrame:GetRect()
+            if topFrameLeft and topFrameBottom and topFrameWidth and topFrameHeight then
+                x = -(left - (topFrameLeft + topFrameWidth) - (spacing.Horizontal or 0))
+                y = -((bottom + height) - (topFrameBottom + topFrameHeight))
+            end
+        end
     end
 
     OffsetGroupChildren = nil
@@ -1131,13 +1345,30 @@ secureMethods["UngroupedOffset"] = [[
 secureMethods["TrySortContainerGroups"] = [[
     local run = control or self
     local containerVariable, providerVariable, destinationFramesVariable = ...
+
+    if not containerVariable or not providerVariable then
+        run:CallMethod("Log", format(
+            "TrySortContainerGroups was passed a nil parameter, containerVariable: %s, providerVariable: %s.",
+            containerVariable or "nil", providerVariable or "nil"
+        ), LogLevel.Bug)
+        return false
+    end
+
     local container = _G[containerVariable]
     local provider = _G[providerVariable]
+
+    if not container or not provider then
+        run:CallMethod("Log", format(
+            "TrySortContainerGroups was passed a nil value, containerVariable: %s, providerVariable: %s.",
+            containerVariable or "nil", providerVariable or "nil"
+        ), LogLevel.Bug)
+        return false
+    end
+
     local blockHeight = nil
     local sorted = false
 
     Groups = nil
-
     if not run:RunAttribute("ExtractGroups", containerVariable, "Groups") then
         return false
     end
@@ -1177,7 +1408,7 @@ secureMethods["TrySortContainerGroups"] = [[
 
     local horizontalSpacing, verticalSpacing = run:RunAttribute("SpacingForContainer", container.Type)
 
-    if not horizontalSpacing and not verticalSpacing or (horizontalSpacing == 0 and verticalSpacing == 0) then
+    if (not horizontalSpacing and not verticalSpacing) or ((horizontalSpacing or 0) == 0 and (verticalSpacing or 0) == 0) then
         Groups = nil
         return sorted
     end
@@ -1193,27 +1424,26 @@ secureMethods["TrySortContainerGroups"] = [[
     UngroupedChildren = newtable()
     UngroupedFrames = newtable()
 
-    -- import into the global table for filtering
-    container.Frame:GetChildList(UngroupedChildren)
+    if container.Frame and container.Frame.GetChildList then
+        container.Frame:GetChildList(UngroupedChildren)
+    end
 
     if not run:RunAttribute("ExtractUnitFrames", "UngroupedChildren", "UngroupedFrames", container.VisibleOnly) then
         UngroupedChildren = nil
         UngroupedFrames = nil
         GroupSpacing = nil
+        Groups = nil
         return false
     end
 
     UngroupedContainer = newtable()
-
-    -- just copy over all the attributes to make code simpler
     run:RunAttribute("CopyTable", containerVariable, "UngroupedContainer")
 
-    -- now re-write over the top
     UngroupedContainer.Offset = newtable()
     UngroupedContainer.Offset.X = offsetX
     UngroupedContainer.Offset.Y = offsetY
 
-    sorted = run:RunAttribute("HardArrange", "UngroupedFrames", "UngroupedContainer", "GroupSpacing", blockHeight)
+    sorted = run:RunAttribute("HardArrange", "UngroupedFrames", "UngroupedContainer", "GroupSpacing", blockHeight) or sorted
 
     UngroupedContainer = nil
     UngroupedChildren = nil
@@ -1232,9 +1462,27 @@ secureMethods["TrySortContainer"] = [=[
     local friendlyPlayerMode = self:GetAttribute("FriendlyPlayerSortMode")
     local friendlyGroupMode = self:GetAttribute("FriendlyGroupSortMode")
     local enemyGroupMode = self:GetAttribute("EnemyGroupSortMode")
+
     local containerVariable, providerVariable, destinationFramesVariable = ...
+    if not containerVariable or not providerVariable then
+        run:CallMethod("Log", format(
+            "TrySortContainer was passed a nil parameter, containerVariable: %s, providerVariable: %s.",
+            containerVariable or "nil", providerVariable or "nil"
+        ), LogLevel.Bug)
+        return false
+    end
+
     local container = _G[containerVariable]
     local provider = _G[providerVariable]
+
+    if not container or not container.Frame or not provider then
+        run:CallMethod("Log", format(
+            "TrySortContainer was passed a nil value, containerVariable: %s, providerVariable: %s.",
+            containerVariable or "nil", providerVariable or "nil"
+        ), LogLevel.Bug)
+        return false
+    end
+
     local units = nil
     local sortMode = nil
     local playerSortMode = nil
@@ -1263,7 +1511,6 @@ secureMethods["TrySortContainer"] = [=[
     if container.Frames then
         Frames = container.Frames
     else
-        -- import into the global table for filtering
         container.Frame:GetChildList(Children)
 
         if not run:RunAttribute("ExtractUnitFrames", "Children", "Frames", container.VisibleOnly) then
@@ -1272,14 +1519,12 @@ secureMethods["TrySortContainer"] = [=[
         end
     end
 
-    if #Frames <= 1 then
+    if not Frames or #Frames <= 1 then
         if destinationFramesVariable then
             _G[destinationFramesVariable] = Frames
         end
-
         -- nothing to do
         Children, Frames = nil, nil
-
         return false
     end
 
@@ -1354,32 +1599,45 @@ secureMethods["TrySort"] = [[
         self:SetAttribute("LoadedUnits", true)
     end
 
+    if not Providers then
+        run:CallMethod("Log", "TrySort: Providers was nil (Init not run?).", LogLevel.Bug)
+        return false
+    end
+
     local toSort = newtable()
 
     for _, provider in pairs(Providers) do
-        local providerEnabled = self:GetAttribute("Provider" .. provider.Name .. "Enabled")
+        if provider and provider.Name then
+            local providerEnabled = self:GetAttribute("Provider" .. provider.Name .. "Enabled")
 
-        if providerEnabled then
-            for _, container in ipairs(provider.Containers) do
-                if not container.Frame:IsProtected() then
-                    run:CallMethod("Log", format("Container for %s must be protected.", provider.Name), LogLevel.Error)
-                elseif container.Frame:IsVisible() then
-                    local shouldAdd = false
+            if providerEnabled then
+                local containers = provider.Containers
+                if not containers then
+                    run:CallMethod("Log", format("Provider %s had nil Containers.", provider.Name), LogLevel.Bug)
+                else
+                    for _, container in ipairs(containers) do
+                        if container and container.Frame then
+                            if not container.Frame:IsProtected() then
+                                run:CallMethod("Log", format("Container for %s must be protected.", provider.Name), LogLevel.Error)
+                            elseif container.Frame:IsVisible() then
+                                local shouldAdd = false
 
-                    if container.EnableInBattlegrounds ~= nil and not container.EnableInBattlegrounds and self:GetAttribute("IsBattleground") then
-                        shouldAdd = false
-                    elseif (container.Type == ContainerType.Party or container.Type == ContainerType.Raid) and friendlyEnabled then
-                        shouldAdd = true
-                    elseif container.Type == ContainerType.EnemyArena and enemyEnabled then
-                        shouldAdd = true
-                    end
+                                if container.EnableInBattlegrounds ~= nil and not container.EnableInBattlegrounds and self:GetAttribute("IsBattleground") then
+                                    shouldAdd = false
+                                elseif (container.Type == ContainerType.Party or container.Type == ContainerType.Raid) and friendlyEnabled then
+                                    shouldAdd = true
+                                elseif container.Type == ContainerType.EnemyArena and enemyEnabled then
+                                    shouldAdd = true
+                                end
 
-                    if shouldAdd then
-                        local add = newtable()
-                        add.Provider = provider
-                        add.Container = container
-
-                        toSort[#toSort + 1] = add
+                                if shouldAdd then
+                                    local add = newtable()
+                                    add.Provider = provider
+                                    add.Container = container
+                                    toSort[#toSort + 1] = add
+                                end
+                            end
+                        end
                     end
                 end
             end
@@ -1396,13 +1654,13 @@ secureMethods["TrySort"] = [[
 
         local providerSorted = false
 
-        if Container.IsGrouped then
+        if Container and Container.IsGrouped then
             providerSorted = run:RunAttribute("TrySortContainerGroups", "Container", "Provider") or providerSorted
         else
             providerSorted = run:RunAttribute("TrySortContainer", "Container", "Provider") or providerSorted
         end
 
-        local message = format("In-combat sort for %s took %sms, result: %s.", Provider.Name, "%f", providerSorted and "sorted" or "not sorted")
+        local message = format("In-combat sort for %s took %sms, result: %s.", Provider and Provider.Name or "nil", "%f", providerSorted and "sorted" or "not sorted")
         run:CallMethod("StopTimer", "TrySort", message)
         Provider = nil
         Container = nil
@@ -1418,19 +1676,29 @@ secureMethods["TrySort"] = [[
 ]]
 
 secureMethods["LoadProvider"] = [[
+    local run = control or self
     local name = self:GetAttribute("ProviderName")
-    local provider = Providers[name]
 
+    if not name then
+        run:CallMethod("Log", "LoadProvider: ProviderName was nil.", LogLevel.Bug)
+        return
+    end
+
+    Providers = Providers or newtable()
+
+    local provider = Providers[name]
     if not provider then
         provider = newtable()
         provider.Name = name
         Providers[name] = provider
     end
 
-    -- replace existing containers (if any)
     provider.Containers = newtable()
 
     local containersCount = self:GetAttribute(name .. "ContainersCount") or 0
+    if containersCount <= 0 then
+        return
+    end
 
     for i = 1, containersCount do
         local prefix = name .. "Container" .. i
@@ -1450,9 +1718,12 @@ secureMethods["LoadProvider"] = [[
         container.FramesPerLine = self:GetAttribute(prefix .. "FramesPerLine")
         container.EnableInBattlegrounds = self:GetAttribute(prefix .. "EnableInBattlegrounds")
 
+        if not container.Frame then
+            run:CallMethod("Log", format("LoadProvider: missing FrameRef for %s.", prefix), LogLevel.Bug)
+        end
+
         local offsetX = self:GetAttribute(prefix .. "OffsetX")
         local offsetY = self:GetAttribute(prefix .. "OffsetY")
-
         if offsetX or offsetY then
             container.Offset = newtable()
             container.Offset.X = offsetX or 0
@@ -1461,7 +1732,6 @@ secureMethods["LoadProvider"] = [[
 
         local groupOffsetX = self:GetAttribute(prefix .. "GroupOffsetX")
         local groupOffsetY = self:GetAttribute(prefix .. "GroupOffsetY")
-
         if groupOffsetX or groupOffsetY then
             container.GroupOffset = newtable()
             container.GroupOffset.X = groupOffsetX or 0
@@ -1469,15 +1739,14 @@ secureMethods["LoadProvider"] = [[
         end
 
         local framesCount = self:GetAttribute(prefix .. "FramesCount")
-
-        if framesCount then
+        if framesCount and framesCount > 0 then
             local frames = newtable()
-
             for j = 1, framesCount do
                 local frame = self:GetFrameRef(prefix .. "Frame" .. j)
-                frames[#frames + 1] = frame
+                if frame then
+                    frames[#frames + 1] = frame
+                end
             end
-
             container.Frames = frames
         end
 
@@ -1486,20 +1755,29 @@ secureMethods["LoadProvider"] = [[
 ]]
 
 secureMethods["LoadUnits"] = [[
+    local run = control or self
+
     FriendlyUnits = newtable()
     EnemyUnits = newtable()
 
     local friendlyUnitsCount = self:GetAttribute("FriendlyUnitsCount") or 0
     local enemyUnitsCount = self:GetAttribute("EnemyUnitsCount") or 0
 
+    if friendlyUnitsCount < 0 then friendlyUnitsCount = 0 end
+    if enemyUnitsCount < 0 then enemyUnitsCount = 0 end
+
     for i = 1, friendlyUnitsCount do
         local unit = self:GetAttribute("FriendlyUnit" .. i)
-        FriendlyUnits[#FriendlyUnits + 1] = unit
+        if unit then
+            FriendlyUnits[#FriendlyUnits + 1] = unit
+        end
     end
 
     for i = 1, enemyUnitsCount do
         local unit = self:GetAttribute("EnemyUnit" .. i)
-        EnemyUnits[#EnemyUnits + 1] = unit
+        if unit then
+            EnemyUnits[#EnemyUnits + 1] = unit
+        end
     end
 ]]
 
@@ -1781,6 +2059,11 @@ local function ConfigureHeader(header)
     InjectSecureHelpers(header)
 
     function header:UnitButtonCreated(id)
+        if not id then
+            fsLog:Bug("UnitButtonCreated called without an id.")
+            return
+        end
+
         local frame
         for _, child in ipairs({ header:GetChildren() }) do
             if child and child.GetID and child:GetID() == id then
@@ -1878,6 +2161,10 @@ function M:RunOverheadTest()
 end
 
 function M:Init()
+    if manager then
+        return
+    end
+
     manager = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureHandlerStateTemplate")
 
     InjectSecureHelpers(manager)
