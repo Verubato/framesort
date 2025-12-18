@@ -725,45 +725,60 @@ secureMethods["SpaceGroups"] = [[
     local groups = _G[groupsVariable]
     local spacing = _G[spacingVariable]
 
-    local points = newtable()
-    local pointsByGroup = newtable()
+    if not groups or #groups <= 1 then
+        return false
+    end
+
+    -- Build destination slots from groups that have valid rect
+    Slots = newtable()
 
     for _, group in ipairs(groups) do
-        local point = newtable()
         local left, bottom, width, height = group:GetRect()
 
-        if not left or not bottom or not width or  not height then
-            run:CallMethod("Log", format("Group frame %s has no position.", group:GetName() or "nil"), LogLevel.Critical)
-        else
+        if left and bottom and width and height then
+            local point = newtable()
+            point.Group = group
             point.Left = left
             point.Bottom = bottom
             point.Width = width
             point.Height = height
-
-            points[#points + 1] = point
-            pointsByGroup[group] = point
+            Slots[#Slots + 1] = point
+        else
+            run:CallMethod("Log", format("Group frame %s has no position.", group:GetName() or "nil"), LogLevel.Warning)
         end
     end
 
-    GroupPoints = points
-
-    if not run:RunAttribute("ApplySpacing", "GroupPoints", spacingVariable) then
-        GroupPoints = nil
+    local slotsCount = #Slots
+    if slotsCount <= 1 then
+        Slots = nil
         return false
     end
 
-    GroupPoints = nil
+    -- Apply spacing to Slots in-place
+    if not run:RunAttribute("ApplySpacing", "Slots", spacingVariable) then
+        Slots = nil
+        return false
+    end
 
     local movedAny = false
     local mult = 10 ^ DecimalSanity
 
-    for _, group in ipairs(groups) do
-        local point = pointsByGroup[group]
+    -- Move i-th valid group to slot i (prevents index mismatch)
+    local slotIndex = 0
 
-        if point then
-            local left, bottom, _, _ = group:GetRect()
-            local xDelta = point.Left - left
-            local yDelta = point.Bottom - bottom
+    for _, group in ipairs(groups) do
+        local left, bottom, width, height = group:GetRect()
+
+        if left and bottom and width and height then
+            slotIndex = slotIndex + 1
+            if slotIndex > slotsCount then
+                break
+            end
+
+            local destination = Slots[slotIndex]
+            local xDelta = destination.Left - left
+            local yDelta = destination.Bottom - bottom
+
             local xDeltaRounded = math.floor(xDelta * mult + 0.5) / mult
             local yDeltaRounded = math.floor(yDelta * mult + 0.5) / mult
 
@@ -776,6 +791,7 @@ secureMethods["SpaceGroups"] = [[
         end
     end
 
+    Slots = nil
     return movedAny
 ]]
 
@@ -785,43 +801,54 @@ secureMethods["SoftArrange"] = [[
     local framesVariable, spacingVariable = ...
     local frames = _G[framesVariable]
 
-    OrderedByTopLeft = newtable()
+    if not frames or #frames <= 1 then
+        return false
+    end
 
+    -- Destination slot order = current layout (TopLeft)
+    OrderedByTopLeft = newtable()
     run:RunAttribute("CopyTable", framesVariable, "OrderedByTopLeft")
     run:RunAttribute("Sort", "OrderedByTopLeft", "CompareFrameTopLeft")
 
-    local points = newtable()
+    -- Build slots (only frames with valid rect)
+    Slots = newtable()
     for _, frame in ipairs(OrderedByTopLeft) do
-        local point = newtable()
         local left, bottom, width, height = frame:GetRect()
 
         if left and bottom and width and height then
-
+            local point = newtable()
+            point.Frame = frame
             point.Left = left
             point.Bottom = bottom
             point.Width = width
             point.Height = height
 
-            points[#points + 1] = point
+            Slots[#Slots + 1] = point
         end
     end
 
-    if spacingVariable then
-        Points = points
-        run:RunAttribute("ApplySpacing", "Points", spacingVariable)
-        Points = nil
+    local slotsCount = #Slots
+
+    if slotsCount <= 1 then
+        OrderedByTopLeft = nil
+        Slots = nil
+        return false
     end
 
+    -- Apply spacing by mutating Points in-place
+    if spacingVariable then
+        run:RunAttribute("ApplySpacing", "Slots", spacingVariable)
+    end
+
+    -- Enumerate in chain order if available (movement order)
     Root = nil
-    local isChain = run:RunAttribute("FrameChain", framesVariable, "Root")
+    local isChain = run:RunAttribute("FrameChain", "OrderedByTopLeft", "Root")
     local root = Root
     Root = nil
 
-    local enumerationOrder = nil
-
-    if isChain then
+    local enumerationOrder
+    if isChain and root then
         enumerationOrder = newtable()
-
         local next = root
         while next do
             enumerationOrder[#enumerationOrder + 1] = next.Value
@@ -836,21 +863,23 @@ secureMethods["SoftArrange"] = [[
     local movedAny = false
     local mult = 10 ^ DecimalSanity
 
-    -- key = frame, value = index
-    local indexOf = newtable()
-    for i = 1, #frames do
-        local frame = frames[i]
-        indexOf[frame] = i
-    end
+    -- Move the i-th *valid* frame (in desired order) to slot i
+    local slotIndex = 0
 
-    for i, source in ipairs(enumerationOrder) do
-        local desiredIndex = indexOf[source]
+    for _, source in ipairs(enumerationOrder) do
+        local left, bottom, width, height = source:GetRect()
 
-        if desiredIndex > 0 and desiredIndex <= #points then
-            local left, bottom, width, height = source:GetRect()
-            local destination = points[desiredIndex]
+        if left and bottom and width and height then
+            slotIndex = slotIndex + 1
+
+            if slotIndex > slotsCount then
+                break
+            end
+
+            local destination = Slots[slotIndex]
             local xDelta = destination.Left - left
             local yDelta = destination.Bottom - bottom
+
             local xDeltaRounded = math.floor(xDelta * mult + 0.5) / mult
             local yDeltaRounded = math.floor(yDelta * mult + 0.5) / mult
 
@@ -860,11 +889,11 @@ secureMethods["SoftArrange"] = [[
                 movedAny = movedAny or moved
                 Frame = nil
             end
-        else
-            run:CallMethod("Log", "Unable to determine frame's desired index (in-combat).", LogLevel.Warning)
         end
     end
 
+    Slots = nil
+    enumerationOrder = nil
     return movedAny
 ]]
 
