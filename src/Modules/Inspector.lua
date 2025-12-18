@@ -361,10 +361,10 @@ function M:EnemyUnitSpec(unit)
         return nil
     end
 
-    specId = unitGuidToSpec[guid]
+    local cacheEntry = unitGuidToSpec[guid]
 
-    if specId then
-        return specId
+    if cacheEntry and cacheEntry.SpecId and cacheEntry.SpecId > 0 then
+        return cacheEntry.SpecId
     end
 
     if not capabilities.HasC_PvP() or not wow.C_PvP or not wow.C_PvP.GetScoreInfoByPlayerGuid then
@@ -381,10 +381,20 @@ function M:EnemyUnitSpec(unit)
     if info.classToken and info.talentSpec then
         specId = fsSpec:SpecIdFromName(info.classToken, info.talentSpec)
 
-        if specId then
-            unitGuidToSpec[guid] = specId
+        if not specId then
+            return nil
+        end
+
+        cacheEntry = EnsureCacheEntry(unit)
+
+        if not cacheEntry then
             return specId
         end
+
+        cacheEntry.SpecId = specId
+        cacheEntry.LastSeen = wow.GetTimePreciseSec()
+
+        return specId
     end
 
     return nil
