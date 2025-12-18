@@ -93,7 +93,7 @@ local function Move(frames, points)
     for _, frame in ipairs(frames) do
         local to = frame and points[frame]
 
-        if to and frame and frame.GetPoint then
+        if to and frame and frame.GetPoint and frame.ClearAllPoints then
             local point, relativeTo, relativePoint, xOffset, yOffset = frame:GetPoint()
             local different = point ~= to.Point
                 or relativeTo ~= to.RelativeTo
