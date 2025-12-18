@@ -240,7 +240,9 @@ local function OnUpdate()
 
     -- Timeout occurred - reset state
     if requestedUnit ~= nil and timeSinceLastInspect >= inspectTimeout then
-        fsLog:Debug("Inspect timeout for unit '%s'.", requestedUnit)
+        if isOurInspect then
+            fsLog:Debug("Inspect timeout for unit '%s'.", requestedUnit)
+        end
 
         requestedUnit = nil
         currentInspectUnit = nil
