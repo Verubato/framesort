@@ -33,6 +33,32 @@ local function SafeAdjustPointsOffset(frame, xDelta, yDelta)
     return true
 end
 
+local function FrameSortKey(frame, unitsToIndex)
+    -- not sure why sometimes we get null arguments here, but it does happen on very rare occasions
+    -- https://github.com/Verubato/framesort/issues/33
+    if not frame then
+        return 1e9, nil
+    end
+
+    if fsFrame:IsForbidden(frame) then
+        return 1e9 - 1, nil
+    end
+
+    local unit = fsFrame:GetFrameUnit(frame)
+
+    if not unit then
+        return 1e9 - 2, nil
+    end
+
+    local idx = unitsToIndex[unit]
+
+    if idx == nil then
+        return 1e9 - 3, unit
+    end
+
+    return idx, unit
+end
+
 --- Sorts frames in-place by matching their units to the sorted units list.
 --- @param frames table[] Array of frames to sort (modified in-place)
 --- @param sortedUnits string[] Ordered list of unit tokens
@@ -41,69 +67,48 @@ local function SortFramesByUnits(frames, sortedUnits)
     local unitsToIndex = {}
     for index, unit in ipairs(sortedUnits) do
         local normalised = fsUnit:NormaliseUnit(unit) or unit
-
         unitsToIndex[normalised] = index
     end
 
     table.sort(frames, function(leftFrame, rightFrame)
-        -- not sure why sometimes we get null arguments here, but it does happen on very rare occasions
-        -- https://github.com/Verubato/framesort/issues/33
-        if not leftFrame then
-            return false
+        local leftKey, leftUnit = FrameSortKey(leftFrame, unitsToIndex)
+        local rightKey, rightUnit = FrameSortKey(rightFrame, unitsToIndex)
+
+        if leftKey ~= rightKey then
+            return leftKey < rightKey
         end
-        if not rightFrame then
+
+        -- if one of the unit exists, prefer it
+        if leftUnit ~= nil and rightUnit == nil then
             return true
-        end
-
-        if fsFrame:IsForbidden(leftFrame) then
-            return false
-        end
-
-        if fsFrame:IsForbidden(rightFrame) then
-            return true
-        end
-
-        local leftUnit = fsFrame:GetFrameUnit(leftFrame)
-        local rightUnit = fsFrame:GetFrameUnit(rightFrame)
-
-        if not leftUnit then
+        elseif leftUnit == nil and rightUnit ~= nil then
             return false
         end
 
-        if not rightUnit then
-            return true
+        -- if both exist, sort by alphabetical
+        if leftUnit and rightUnit and leftUnit ~= rightUnit then
+            return leftUnit < rightUnit
         end
 
-        local leftIndex = unitsToIndex[leftUnit]
-        local rightIndex = unitsToIndex[rightUnit]
-
-        if leftIndex ~= rightIndex then
-            if leftIndex == nil then
-                return false
+        -- if both frames exist and are safe, use visibility + name as further tie-breakers
+        if leftFrame and rightFrame and not fsFrame:IsForbidden(leftFrame) and not fsFrame:IsForbidden(rightFrame) then
+            if leftFrame.IsVisible and rightFrame.IsVisible then
+                local lv, rv = leftFrame:IsVisible(), rightFrame:IsVisible()
+                if lv ~= rv then
+                    return lv and not rv
+                end
             end
 
-            if rightIndex == nil then
-                return true
+            if leftFrame.GetName and rightFrame.GetName then
+                local ln, rn = leftFrame:GetName(), rightFrame:GetName()
+                if ln and rn and ln ~= rn then
+                    return ln < rn
+                end
             end
-
-            return leftIndex < rightIndex
         end
 
-        -- from here on out, pretty much only happens in test/edit mode
-        if leftFrame:IsVisible() and not rightFrame:IsVisible() then
-            return true
-        elseif not leftFrame:IsVisible() and rightFrame:IsVisible() then
-            return false
-        end
-
-        local leftName = leftFrame:GetName()
-        local rightName = rightFrame:GetName()
-
-        if leftName and rightName then
-            return leftName < rightName
-        end
-
-        return leftUnit < rightUnit
+        -- final deterministic fallback
+        return tostring(leftFrame) < tostring(rightFrame)
     end)
 end
 
