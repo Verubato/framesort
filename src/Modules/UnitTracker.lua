@@ -23,10 +23,18 @@ end
 local function FindUnitFrame(frames, unit)
     for _, frame in ipairs(frames) do
         local frameUnit = fsFrame:GetFrameUnit(frame)
-        local isUnitOrSecret = frameUnit ~= nil and wow.UnitIsUnit(frameUnit, unit)
 
-        if frameUnit == unit or (not wow.issecretvalue(isUnitOrSecret) and isUnitOrSecret) then
-            return frame
+        if frameUnit then
+            if frameUnit == unit then
+                return frame
+            end
+
+            local isUnitOrSecret = wow.UnitIsUnit(frameUnit, unit)
+            local matchesUnit = (not wow.issecretvalue(isUnitOrSecret) and isUnitOrSecret)
+
+            if matchesUnit then
+                return frame
+            end
         end
     end
 
@@ -46,16 +54,23 @@ function M:GetFrameForUnit(unit)
         frameByUnit[unit] = nil
     elseif cachedFrame then
         local frameUnit = fsFrame:GetFrameUnit(cachedFrame)
-        local isUnitOrSecret = frameUnit ~= nil and wow.UnitIsUnit(frameUnit, unit)
-        local matchesUnit = frameUnit == unit or (not wow.issecretvalue(isUnitOrSecret) and isUnitOrSecret)
 
-        -- check the visibility of the frame, as blizzard frames may have been hidden by an addon
-        -- in which case we don't want to use it
-        if matchesUnit and cachedFrame:IsVisible() then
-            return cachedFrame
-        elseif not matchesUnit then
-            cachedFrame = nil
-            frameByUnit[unit] = nil
+        if frameUnit then
+            local matchesUnit = frameUnit == unit
+
+            if not matchesUnit then
+                local isUnitOrSecret = wow.UnitIsUnit(frameUnit, unit)
+                matchesUnit = not wow.issecretvalue(isUnitOrSecret) and isUnitOrSecret
+            end
+
+            -- check the visibility of the frame, as blizzard frames may have been hidden by an addon
+            -- in which case we don't want to use it
+            if matchesUnit and cachedFrame:IsVisible() then
+                return cachedFrame
+            elseif not matchesUnit then
+                cachedFrame = nil
+                frameByUnit[unit] = nil
+            end
         end
     end
 
