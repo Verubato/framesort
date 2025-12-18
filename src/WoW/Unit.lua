@@ -220,7 +220,8 @@ function M:IsFriendlyUnit(unit)
         return false
     end
 
-    return wow.UnitIsFriend("player", unit)
+    local isFriendOrSecret = wow.UnitIsFriend("player", unit)
+    return not wow.issecretvalue(isFriendOrSecret) and isFriendOrSecret
 end
 
 ---Returns true if the unit is an enemy of the current player.
@@ -231,5 +232,6 @@ function M:IsEnemyUnit(unit)
         return false
     end
 
-    return wow.UnitIsEnemy("player", unit)
+    local isEnemyOrSecret = wow.UnitIsEnemy("player", unit)
+    return not wow.issecretvalue(isEnemyOrSecret) and isEnemyOrSecret
 end
