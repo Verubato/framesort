@@ -44,7 +44,7 @@ end
 
 function M:EnemyUnitExists(unit)
     if not unit then
-        fsLog:Error("Unit:ArenaUnitExists() - unit must not be nil.")
+        fsLog:Error("Unit:EnemyUnitExists() - unit must not be nil.")
         return false
     end
 
