@@ -10,29 +10,78 @@ local fsUnit = addon.WoW.Unit
 local M = {}
 addon.Modules.UnitTracker = M
 
+-- Cache: unitToken -> frame
 local frameByUnit = {}
+-- Reverse cache: frame -> unitToken (so we can clean up stale unit entries when frames get reassigned)
+local unitByFrame = {}
 
-local function OnSetUnit(frame, unit)
-    if not frame or not unit or fsFrame:IsForbidden(frame) then
+local function ClearFrameMapping(frame)
+    local oldUnit = unitByFrame[frame]
+
+    if oldUnit then
+        if frameByUnit[oldUnit] == frame then
+            frameByUnit[oldUnit] = nil
+        end
+
+        unitByFrame[frame] = nil
+    end
+end
+
+local function SetFrameMapping(frame, unit)
+    if not frame or not unit then
         return
     end
 
+    if fsFrame:IsForbidden(frame) then
+        return
+    end
+
+    -- If this frame was previously mapped to another unit, clear that old mapping.
+    ClearFrameMapping(frame)
+
     frameByUnit[unit] = frame
+    unitByFrame[frame] = unit
+end
+
+local function OnSetUnit(frame, unit)
+    SetFrameMapping(frame, unit)
+end
+
+local function FrameIsUsable(frame)
+    if not frame or fsFrame:IsForbidden(frame) then
+        return false
+    end
+
+    if frame.IsVisible and frame:IsVisible() then
+        return true
+    end
+
+    return false
+end
+
+local function MatchesUnit(frameUnit, unit)
+    if not frameUnit or not unit then
+        return false
+    end
+
+    if frameUnit == unit then
+        return true
+    end
+
+    local isUnitOrSecret = wow.UnitIsUnit(frameUnit, unit)
+    if wow.issecretvalue(isUnitOrSecret) then
+        return false
+    end
+
+    return isUnitOrSecret == true
 end
 
 local function FindUnitFrame(frames, unit)
     for _, frame in ipairs(frames) do
-        local frameUnit = fsFrame:GetFrameUnit(frame)
+        if frame and not fsFrame:IsForbidden(frame) then
+            local frameUnit = fsFrame:GetFrameUnit(frame)
 
-        if frameUnit then
-            if frameUnit == unit then
-                return frame
-            end
-
-            local isUnitOrSecret = wow.UnitIsUnit(frameUnit, unit)
-            local matchesUnit = (not wow.issecretvalue(isUnitOrSecret) and isUnitOrSecret)
-
-            if matchesUnit then
+            if MatchesUnit(frameUnit, unit) then
                 return frame
             end
         end
@@ -49,28 +98,32 @@ function M:GetFrameForUnit(unit)
 
     local cachedFrame = frameByUnit[unit]
 
+    -- Purge forbidden cached frames immediately
     if cachedFrame and fsFrame:IsForbidden(cachedFrame) then
+        ClearFrameMapping(cachedFrame)
         cachedFrame = nil
-        frameByUnit[unit] = nil
-    elseif cachedFrame then
+    end
+
+    -- Validate cached frame still matches the unit
+    if cachedFrame then
         local frameUnit = fsFrame:GetFrameUnit(cachedFrame)
 
-        if frameUnit then
-            local matchesUnit = frameUnit == unit
-
-            if not matchesUnit then
-                local isUnitOrSecret = wow.UnitIsUnit(frameUnit, unit)
-                matchesUnit = not wow.issecretvalue(isUnitOrSecret) and isUnitOrSecret
+        if frameUnit and MatchesUnit(frameUnit, unit) then
+            -- Only return immediately if visible/usable; otherwise we'll try to find a better visible frame.
+            if FrameIsUsable(cachedFrame) then
+                return cachedFrame
+            end
+        else
+            -- Frame no longer represents this unit; clear stale mapping.
+            if unitByFrame[cachedFrame] == unit then
+                unitByFrame[cachedFrame] = nil
             end
 
-            -- check the visibility of the frame, as blizzard frames may have been hidden by an addon
-            -- in which case we don't want to use it
-            if matchesUnit and cachedFrame:IsVisible() then
-                return cachedFrame
-            elseif not matchesUnit then
-                cachedFrame = nil
+            if frameByUnit[unit] == cachedFrame then
                 frameByUnit[unit] = nil
             end
+
+            cachedFrame = nil
         end
     end
 
@@ -82,10 +135,10 @@ function M:GetFrameForUnit(unit)
             local partyFound = FindUnitFrame(party, unit)
 
             if partyFound then
-                frameByUnit[unit] = partyFound
                 cachedFrame = partyFound
+                SetFrameMapping(partyFound, unit)
 
-                if cachedFrame:IsVisible() then
+                if FrameIsUsable(cachedFrame) then
                     return cachedFrame
                 end
             end
@@ -94,10 +147,10 @@ function M:GetFrameForUnit(unit)
             local raidFound = FindUnitFrame(raid, unit)
 
             if raidFound then
-                frameByUnit[unit] = raidFound
                 cachedFrame = raidFound
+                SetFrameMapping(raidFound, unit)
 
-                if cachedFrame:IsVisible() then
+                if FrameIsUsable(cachedFrame) then
                     return cachedFrame
                 end
             end
@@ -106,22 +159,26 @@ function M:GetFrameForUnit(unit)
             local arenaFound = FindUnitFrame(arena, unit)
 
             if arenaFound then
-                frameByUnit[unit] = arenaFound
                 cachedFrame = arenaFound
+                SetFrameMapping(arenaFound, unit)
 
-                if cachedFrame:IsVisible() then
+                if FrameIsUsable(cachedFrame) then
                     return cachedFrame
                 end
             end
         end
     end
 
-    -- fallback to whatever we found that's not visible
-    return cachedFrame
+    -- Fallback to whatever we found (may be hidden).
+    if cachedFrame and not fsFrame:IsForbidden(cachedFrame) then
+        return cachedFrame
+    end
+
+    return nil
 end
 
 function M:Init()
-    if CompactUnitFrame_SetUnit then
+    if type(CompactUnitFrame_SetUnit) == "function" then
         wow.hooksecurefunc("CompactUnitFrame_SetUnit", OnSetUnit)
     else
         fsLog:Warning("CompactUnitFrame_SetUnit API not available for the unit tracker module.")
