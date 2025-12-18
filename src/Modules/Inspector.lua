@@ -280,7 +280,7 @@ local function PurgeOldEntries()
     -- to keep the saved variable size down
     -- remove any old entries we don't care about anymore
     for guid, entry in pairs(unitGuidToSpec) do
-        if not entry.LastSeen or (now - entry.LastSeen) > cacheExpiry then
+        if not entry or type(entry) ~= "table" or not entry.LastSeen or (now - entry.LastSeen) > cacheExpiry then
             toRemove[#toRemove + 1] = guid
         end
     end
