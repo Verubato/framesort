@@ -18,6 +18,7 @@ local M = {
 addon.Modules.Sorting.Comparer = M
 
 local cachedRoleLookup, cachedSpecLookup, cachedClassLookup
+local mockInInstance, mockInstanceType
 
 ---@return { [string]: number } roleOrderLookup
 ---@return { [number]: number } specOrderLookup
@@ -557,7 +558,15 @@ end
 ---@return string? groupMode the group sort mode.
 ---@return boolean? reverse whether the sorting is reversed.
 function M:FriendlySortMode()
-    local inInstance, instanceType = wow.IsInInstance()
+    local inInstance, instanceType = nil, nil
+
+    if mockInInstance and mockInstanceType then
+        inInstance = mockInInstance
+        instanceType = mockInstanceType
+    else
+        inInstance, instanceType = wow.IsInInstance()
+    end
+
     local config = addon.DB.Options.Sorting
 
     if inInstance and instanceType == "arena" then
@@ -581,12 +590,24 @@ end
 ---@return string? groupMode the group sort mode.
 ---@return boolean? reverse whether the sorting is reversed.
 function M:EnemySortMode()
-    if wowEx.IsInstanceArenaOrBrawl() then
+    if wowEx.IsInstanceArenaOrBrawl() or (mockInInstance and mockInstanceType == "arena") then
         local config = addon.DB.Options.Sorting.EnemyArena
         return config.Enabled, config.GroupSortMode, config.Reverse
     end
 
     return false, nil, false
+end
+
+---Pretend we're in an instance for testing purposes.
+function M:MockInstance(inInstance, instanceType)
+    mockInInstance = inInstance
+    mockInstanceType = instanceType
+end
+
+---Clears the current mocked instance.
+function M:ClearMockInstance()
+    mockInInstance = nil
+    mockInstanceType = nil
 end
 
 ---Returns true if the left frame is "earlier" than the right frame.
