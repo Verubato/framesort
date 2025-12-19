@@ -2,6 +2,7 @@
 local addon
 local M = {}
 local partyUnitsCount = 3
+local raidUnitsCount = 6
 local arenaUnitsCount = 3
 
 function M:setup()
@@ -20,6 +21,9 @@ function M:setup()
     addon.Providers.All[#addon.Providers.All + 1] = provider
 
     local party = fsFrame:GetContainer(provider, fsFrame.ContainerType.Party)
+
+    assert(party)
+
     local partyContainer = party.Frame
 
     for i = 1, partyUnitsCount do
@@ -27,7 +31,21 @@ function M:setup()
         unit.unit = "party" .. i
     end
 
+    local raid = fsFrame:GetContainer(provider, fsFrame.ContainerType.Raid)
+
+    assert(raid)
+
+    local raidContainer = raid.Frame
+
+    for i = 1, raidUnitsCount do
+        local unit = frameMock:New("Frame", nil, raidContainer, nil)
+        unit.unit = "raid" .. i
+    end
+
     local arena = fsFrame:GetContainer(provider, fsFrame.ContainerType.EnemyArena)
+
+    assert(arena)
+
     local arenaContainer = arena.Frame
 
     for i = 1, arenaUnitsCount do
@@ -75,6 +93,123 @@ function M:test_frame_number_for_unit()
 
     assertEquals(v3.Frame:FrameNumberForUnit(""), nil)
     assertEquals(v3.Frame:FrameNumberForUnit("party99"), nil)
+end
+
+function M:test_error_doesnt_propagate()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+    local v2 = FrameSortApi.v2
+
+    -- corrupt some stuff to cause an error
+    ---@diagnostic disable-next-line: duplicate-set-field
+    v2.Sorting.RegisterPostSortCallback = function()
+        assert(false, "Swallowed error")
+    end
+
+    local result = v3.Sorting:RegisterPostSortCallback(function() end)
+
+    assertEquals(result, false)
+end
+
+function M:test_get_party_frames()
+    local data = FrameSortApi.v3.Sorting:GetPartyFrames()
+    local frames = data["Test"]
+
+    assertEquals(#frames, partyUnitsCount)
+end
+
+function M:test_get_raid_frames()
+    local data = FrameSortApi.v3.Sorting:GetRaidFrames()
+    local frames = data["Test"]
+
+    assertEquals(#frames, raidUnitsCount)
+end
+
+function M:test_get_arena_frames()
+    local data = FrameSortApi.v3.Sorting:GetArenaFrames()
+    local frames = data["Test"]
+
+    assertEquals(#frames, arenaUnitsCount)
+end
+
+function M:test_get_friendly_units()
+    local units = FrameSortApi.v3.Sorting:GetFriendlyUnits()
+
+    assertEquals(#units, partyUnitsCount)
+end
+
+function M:test_get_enemy_units()
+    local units = FrameSortApi.v3.Sorting:GetEnemyUnits()
+
+    assertEquals(#units, arenaUnitsCount)
+end
+
+function M:test_get_sort_mode()
+    local config = addon.DB.Options.Sorting
+    config.Arena.Twos.PlayerSortMode = "ArenaTestPlayer"
+    config.Arena.Default.PlayerSortMode = "ArenaTestPlayer"
+    config.Dungeon.PlayerSortMode = "DungeonTestPlayer"
+    config.Raid.PlayerSortMode = "PlayerTestPlayer"
+    config.World.PlayerSortMode = "WorldTestPlayer"
+
+    config.Arena.GroupSortMode = "ArenaTestGroup"
+    config.Dungeon.GroupSortMode = "DungeonTestGroup"
+    config.Raid.GroupSortMode = "RaidTestGroup"
+    config.World.GroupSortMode = "WorldTestGroup"
+
+    assertEquals(FrameSortApi.v3.Options:GetPlayerSortMode("Arena - 2v2"), config.Arena.Twos.PlayerSortMode)
+    assertEquals(FrameSortApi.v3.Options:GetPlayerSortMode("Arena - Default"), config.Arena.Default.PlayerSortMode)
+    assertEquals(FrameSortApi.v3.Options:GetPlayerSortMode("Dungeon"), config.Dungeon.PlayerSortMode)
+    assertEquals(FrameSortApi.v3.Options:GetPlayerSortMode("Raid"), config.Raid.PlayerSortMode)
+    assertEquals(FrameSortApi.v3.Options:GetPlayerSortMode("World"), config.World.PlayerSortMode)
+
+    assertEquals(FrameSortApi.v3.Options:GetGroupSortMode("Arena - 2v2"), config.Arena.Twos.GroupSortMode)
+    assertEquals(FrameSortApi.v3.Options:GetGroupSortMode("Arena - Default"), config.Arena.Default.GroupSortMode)
+    assertEquals(FrameSortApi.v3.Options:GetGroupSortMode("Dungeon"), config.Dungeon.GroupSortMode)
+    assertEquals(FrameSortApi.v3.Options:GetGroupSortMode("Raid"), config.Raid.GroupSortMode)
+    assertEquals(FrameSortApi.v3.Options:GetGroupSortMode("World"), config.World.GroupSortMode)
+
+    ---@diagnostic disable-next-line: param-type-mismatch
+    assertEquals(FrameSortApi.v3.Options:GetPlayerSortMode(nil), nil)
+    ---@diagnostic disable-next-line: param-type-mismatch
+    assertEquals(FrameSortApi.v3.Options:GetPlayerSortMode("invalid"), nil)
+
+    ---@diagnostic disable-next-line: param-type-mismatch
+    assertEquals(FrameSortApi.v3.Options:GetGroupSortMode(nil), nil)
+    ---@diagnostic disable-next-line: param-type-mismatch
+    assertEquals(FrameSortApi.v3.Options:GetGroupSortMode("invalid"), nil)
+end
+
+function M:test_set_sort_mode()
+    assertEquals(FrameSortApi.v3.Options:SetPlayerSortMode("Arena - 2v2", "Bottom"), true)
+    assertEquals(FrameSortApi.v3.Options:SetPlayerSortMode("Arena - Default", "Bottom"), true)
+    assertEquals(FrameSortApi.v3.Options:SetPlayerSortMode("Dungeon", "Bottom"), true)
+    assertEquals(FrameSortApi.v3.Options:SetPlayerSortMode("Raid", "Bottom"), true)
+    assertEquals(FrameSortApi.v3.Options:SetPlayerSortMode("World", "Bottom"), true)
+
+    assertEquals(FrameSortApi.v3.Options:SetGroupSortMode("Arena - 2v2", "Role"), true)
+    assertEquals(FrameSortApi.v3.Options:SetGroupSortMode("Arena - Default", "Role"), true)
+    assertEquals(FrameSortApi.v3.Options:SetGroupSortMode("Dungeon", "Role"), true)
+    assertEquals(FrameSortApi.v3.Options:SetGroupSortMode("Raid", "Role"), true)
+    assertEquals(FrameSortApi.v3.Options:SetGroupSortMode("World", "Role"), true)
+
+    ---@diagnostic disable-next-line: param-type-mismatch
+    assertEquals(FrameSortApi.v3.Options:SetPlayerSortMode("Invalid", "Bottom"), false)
+    ---@diagnostic disable-next-line: param-type-mismatch
+    assertEquals(FrameSortApi.v3.Options:SetGroupSortMode("Invalid", "Role"), false)
+
+    local config = addon.DB.Options.Sorting
+    assertEquals(config.Arena.Twos.PlayerSortMode, "Bottom")
+    assertEquals(config.Arena.Default.PlayerSortMode, "Bottom")
+    assertEquals(config.Dungeon.PlayerSortMode, "Bottom")
+    assertEquals(config.Raid.PlayerSortMode, "Bottom")
+    assertEquals(config.World.PlayerSortMode, "Bottom")
+
+    assertEquals(config.Arena.Twos.GroupSortMode, "Role")
+    assertEquals(config.Arena.Default.GroupSortMode, "Role")
+    assertEquals(config.Dungeon.GroupSortMode, "Role")
+    assertEquals(config.Raid.GroupSortMode, "Role")
+    assertEquals(config.World.GroupSortMode, "Role")
 end
 
 return M
