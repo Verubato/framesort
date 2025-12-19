@@ -302,7 +302,7 @@ function M.Options:SetGroupSortMode(area, mode)
         local options = AreaOptions(area)
 
         if not options then
-            return
+            return false
         end
 
         options.GroupSortMode = mode
