@@ -6,6 +6,7 @@ local fsInspector = addon.Modules.Inspector
 local fsUnit = addon.WoW.Unit
 local fsUnitTracker = addon.Modules.UnitTracker
 local fsSortedUnits = addon.Modules.Sorting.SortedUnits
+local fsLog = addon.Logging.Log
 local wow = addon.WoW.Api
 local v2 = addon.Api.v2
 
@@ -19,104 +20,340 @@ local M = {
 }
 addon.Api.v3 = M
 
+local playerSortModes = {
+    Top = true,
+    Middle = true,
+    Bottom = true,
+    Hidden = true,
+}
+
+local groupSortModes = {
+    Role = true,
+    Group = true,
+    Alphabetical = true,
+}
+
+local areas = {
+    ["Arena - 2v2"] = true,
+    ["Arena - 3v3"] = true,
+    ["Arena - 5v5"] = true,
+    ["Arena - Default"] = true,
+    EnemyArena = true,
+    Dungeon = true,
+    Raid = true,
+    World = true,
+}
+
+local spacingAreas = {
+    EnemyArena = true,
+    Party = true,
+    Raid = true,
+}
+
+---@param mode PlayerSortMode
+local function ValidPlayerSortMode(mode)
+    return type(mode) == "string" and playerSortModes[mode] == true
+end
+
+---@param mode GroupSortMode
+local function ValidGroupSortMode(mode)
+    return type(mode) == "string" and groupSortModes[mode] == true
+end
+
+---@param area Area
+local function ValidArea(area)
+    return type(area) == "string" and areas[area] == true
+end
+
+---@param area SpacingArea
+local function ValidSpacingArea(area)
+    return type(area) == "string" and spacingAreas[area] == true
+end
+
+---Protect our callers against internal errors/bugs.
+---@param fn function the function to run
+---@param name string name of the function for logging purposes
+---@return any result this is technically not true as it can return multiple values, but doing this to ignore intellisense issues.
+local function SafeCall(fn, name)
+    local results = { pcall(fn) }
+
+    if not results[1] then
+        fsLog:Error("Api.v3.%s - error: %s.", name or "nil", tostring(results[2]))
+        return nil
+    end
+
+    ---@diagnostic disable-next-line: redundant-return-value
+    return unpack(results, 2)
+end
+
 ---Register a callback to invoke after sorting has been performed.
 ---@param callback function
 function M.Sorting:RegisterPostSortCallback(callback)
-    v2.Sorting:RegisterPostSortCallback(callback)
+    if not callback then
+        fsLog:Error("Api.v3.Sorting:RegisterPostSortCallback was passed a nil parameter: callback.")
+        return false
+    end
+
+    return SafeCall(function()
+        v2.Sorting:RegisterPostSortCallback(callback)
+        return true
+    end, "Sorting:RegisterPostSortCallback") or false
 end
 
 ---Returns a collection of party frames ordered by their visual representation.
 function M.Sorting:GetPartyFrames()
-    return v2.Sorting:GetPartyFrames()
+    return SafeCall(function()
+        return v2.Sorting:GetPartyFrames()
+    end, "Sorting:GetPartyFrames") or {}
 end
 
 ---Returns a collection of raid frames ordered by their visual representation.
 function M.Sorting:GetRaidFrames()
-    return v2.Sorting:GetRaidFrames()
+    return SafeCall(function()
+        return v2.Sorting:GetRaidFrames()
+    end, "Sorting:GetRaidFrames") or {}
 end
 
 ---Returns a collection of enemy arena frames ordered by their visual representation.
 function M.Sorting:GetArenaFrames()
-    return v2.Sorting:GetArenaFrames()
+    return SafeCall(function()
+        return v2.Sorting:GetArenaFrames()
+    end, "Sorting:GetArenaFrames") or {}
 end
 
 ---Returns party frames if there are any, otherwise raid frames.
 function M.Sorting:GetFrames()
-    return v2.Sorting:GetFrames()
+    return SafeCall(function()
+        return v2.Sorting:GetFrames()
+    end, "Sorting:GetFrames") or {}
 end
 
 ---Returns a sorted array of friendly unit tokens.
 function M.Sorting:GetFriendlyUnits()
-    return fsSortedUnits:FriendlyUnits()
+    return SafeCall(function()
+        return fsSortedUnits:FriendlyUnits()
+    end, "Sorting:GetFriendlyUnits") or {}
 end
 
 ---Returns a sorted array of enemy unit tokens.
 function M.Sorting:GetEnemyUnits()
-    return fsSortedUnits:EnemyUnits()
+    return SafeCall(function()
+        return fsSortedUnits:EnemyUnits()
+    end, "Sorting:GetEnemyUnits") or {}
 end
 
 ---Gets the player sort mode.
 ---@param area Area
 function M.Options:GetPlayerSortMode(area)
-    return v2.Options:GetPlayerSortMode(area)
+    if not area then
+        fsLog:Error("Api.v3.Options:GetPlayerSortMode was passed a nil parameter: area.")
+        return nil
+    end
+
+    if not ValidArea(area) then
+        fsLog:Error("Api.v3.Options:GetPlayerSortMode was passed an invalid parameter: area = %s.", tostring(area))
+        return nil
+    end
+
+    return SafeCall(function()
+        return v2.Options:GetPlayerSortMode(area)
+    end, "Options:GetPlayerSortMode")
 end
 
 ---Sets the player sort mode.
 ---@param area Area
 ---@param mode PlayerSortMode
 function M.Options:SetPlayerSortMode(area, mode)
-    return v2.Options:SetPlayerSortMode(area, mode)
+    if not area then
+        fsLog:Error("Api.v3.Options:SetPlayerSortMode was passed a nil parameter: area.")
+        return false
+    end
+
+    if not mode then
+        fsLog:Error("Api.v3.Options:SetPlayerSortMode was passed a nil parameter: mode.")
+        return false
+    end
+
+    if not ValidArea(area) then
+        fsLog:Error("Api.v3.Options:SetPlayerSortMode was passed an invalid parameter: area = %s.", tostring(area))
+        return false
+    end
+
+    if not ValidPlayerSortMode(mode) then
+        fsLog:Error("Api.v3.Options:SetPlayerSortMode was passed an invalid parameter: mode = %s.", tostring(mode))
+        return false
+    end
+
+    return SafeCall(function()
+        v2.Options:SetPlayerSortMode(area, mode)
+        return true
+    end, "Options:SetPlayerSortMode") or false
 end
 
 ---Sets the group sort mode.
 ---@param area Area
 ---@param mode GroupSortMode
 function M.Options:SetGroupSortMode(area, mode)
-    return v2.Options:SetGroupSortMode(area, mode)
+    if not area then
+        fsLog:Error("Api.v3.Options:SetGroupSortMode was passed a nil parameter: area.")
+        return false
+    end
+
+    if not mode then
+        fsLog:Error("Api.v3.Options:SetGroupSortMode was passed a nil parameter: mode.")
+        return false
+    end
+
+    if not ValidArea(area) then
+        fsLog:Error("Api.v3.Options:SetGroupSortMode was passed an invalid parameter: area = %s.", tostring(area))
+        return false
+    end
+
+    if not ValidGroupSortMode(mode) then
+        fsLog:Error("Api.v3.Options:SetGroupSortMode was passed an invalid parameter: mode = %s.", tostring(mode))
+        return false
+    end
+
+    return SafeCall(function()
+        v2.Options:SetGroupSortMode(area, mode)
+        return true
+    end, "Options:SetGroupSortMode") or false
 end
 
 ---Gets the group sort mode.
 ---@param area Area
 function M.Options:GetGroupSortMode(area)
-    return v2.Options:GetGroupSortMode(area)
+    if not area then
+        fsLog:Error("Api.v3.Options:GetGroupSortMode was passed a nil parameter: area.")
+        return nil
+    end
+
+    if not ValidArea(area) then
+        fsLog:Error("Api.v3.Options:GetGroupSortMode was passed an invalid parameter: area = %s.", tostring(area))
+        return nil
+    end
+
+    return SafeCall(function()
+        return v2.Options:GetGroupSortMode(area)
+    end, "Options:GetGroupSortMode")
 end
 
 ---Gets the Enabled flag.
 ---@param area Area
 function M.Options:GetEnabled(area)
-    return v2.Options:GetEnabled(area)
+    if not area then
+        fsLog:Error("Api.v3.Options:GetEnabled was passed a nil parameter: area.")
+        return nil
+    end
+
+    if not ValidArea(area) then
+        fsLog:Error("Api.v3.Options:GetEnabled was passed an invalid parameter: area = %s.", tostring(area))
+        return nil
+    end
+
+    return SafeCall(function()
+        return v2.Options:GetEnabled(area)
+    end, "Options:GetEnabled")
 end
 
 ---Enables/disables sorting.
 ---@param area Area
 ---@param enabled boolean
 function M.Options:SetEnabled(area, enabled)
-    return v2.Options:SetEnabled(area, enabled)
+    if not area then
+        fsLog:Error("Api.v3.Options:SetEnabled was passed a nil parameter: area.")
+        return false
+    end
+
+    if type(enabled) ~= "boolean" then
+        fsLog:Error("Api.v3.Options:SetEnabled was passed an invalid parameter: enabled = %s.", tostring(enabled))
+        return false
+    end
+
+    if not ValidArea(area) then
+        fsLog:Error("Api.v3.Options:SetEnabled was passed an invalid parameter: area = %s.", tostring(area))
+        return false
+    end
+
+    return SafeCall(function()
+        v2.Options:SetEnabled(area, enabled)
+        return true
+    end, "Options:SetEnabled") or false
 end
 
 ---Enables/disables reverse sorting.
 ---@param area Area
 function M.Options:GetReverse(area)
-    return v2.Options:GetReverse(area)
+    if not area then
+        fsLog:Error("Api.v3.Options:GetReverse was passed a nil parameter: area.")
+        return nil
+    end
+
+    if not ValidArea(area) then
+        fsLog:Error("Api.v3.Options:GetReverse was passed an invalid parameter: area = %s.", tostring(area))
+        return nil
+    end
+
+    return SafeCall(function()
+        return v2.Options:GetReverse(area)
+    end, "Options:GetReverse")
 end
 
 ---Enables/disables reverse sorting.
 ---@param area Area
 ---@param reverse boolean
 function M.Options:SetReverse(area, reverse)
-    return v2.Options:SetReverse(area, reverse)
+    if not area then
+        fsLog:Error("Api.v3.Options:SetReverse was passed a nil parameter: area.")
+        return false
+    end
+
+    if type(reverse) ~= "boolean" then
+        fsLog:Error("Api.v3.Options:SetReverse was passed an invalid parameter: reverse = %s.", tostring(reverse))
+        return false
+    end
+
+    if not ValidArea(area) then
+        fsLog:Error("Api.v3.Options:SetReverse was passed an invalid parameter: area = %s.", tostring(area))
+        return false
+    end
+
+    return SafeCall(function()
+        v2.Options:SetReverse(area, reverse)
+        return true
+    end, "Options:SetReverse") or false
 end
 
 ---Gets the current spacing values.
 ---@param area SpacingArea
 function M.Options:GetSpacing(area)
-    return v2.Options:GetSpacing(area)
+    if not area then
+        fsLog:Error("Api.v3.Options:GetSpacing was passed a nil parameter: area.")
+        return nil
+    end
+
+    if not ValidSpacingArea(area) then
+        fsLog:Error("Api.v3.Options:GetSpacing was passed an invalid parameter: area = %s.", tostring(area))
+        return nil
+    end
+
+    return SafeCall(function()
+        return v2.Options:GetSpacing(area)
+    end, "Options:GetSpacing")
 end
 
 ---Registers a callback to invoke when configuration changes.
 ---@param callback function
 function M.Options:RegisterConfigurationChangedCallback(callback)
-    fsConfig:RegisterConfigurationChangedCallback(callback)
+    if type(callback) ~= "function" then
+        fsLog:Error("Api.v3.Options:RegisterConfigurationChangedCallback was passed an invalid parameter: callback = %s.", tostring(callback))
+        return false
+    end
+
+    return SafeCall(function()
+        fsConfig:RegisterConfigurationChangedCallback(callback)
+        return true
+    end, "Options:RegisterConfigurationChangedCallback") or false
 end
 
 ---Adds/removes spacing.
@@ -124,7 +361,30 @@ end
 ---@param horizontal number
 ---@param vertical number
 function M.Options:SetSpacing(area, horizontal, vertical)
-    return v2.Options:SetSpacing(area, horizontal, vertical)
+    if not area then
+        fsLog:Error("Api.v3.Options:SetSpacing was passed a nil parameter: area.")
+        return false
+    end
+
+    if type(horizontal) ~= "number" then
+        fsLog:Error("Api.v3.Options:SetSpacing was passed an invalid parameter: horizontal = %s.", tostring(horizontal))
+        return false
+    end
+
+    if type(vertical) ~= "number" then
+        fsLog:Error("Api.v3.Options:SetSpacing was passed an invalid parameter: vertical = %s.", tostring(vertical))
+        return false
+    end
+
+    if not ValidSpacingArea(area) then
+        fsLog:Error("Api.v3.Options:SetSpacing was passed an invalid parameter: area = %s.", tostring(area))
+        return false
+    end
+
+    return SafeCall(function()
+        v2.Options:SetSpacing(area, horizontal, vertical)
+        return true
+    end, "Options:SetSpacing") or false
 end
 
 ---Returns the class specialization id of the specified unit, or 0/nil if unknown.
@@ -132,26 +392,40 @@ end
 ---@return number|nil
 function M.Inspector:GetUnitSpecId(unit)
     if not unit then
-        error("Unit must not be nil.")
-        return
+        fsLog:Error("Api.v3.Inspector:GetUnitSpecId was passed a nil parameter: unit.")
+        return nil
     end
 
-    if fsUnit:IsEnemyUnit(unit) then
-        return fsInspector:EnemyUnitSpec(unit)
+    if type(unit) ~= "string" then
+        fsLog:Error("Api.v3.Inspector:GetUnitSpecId was passed an invalid parameter: unit = %s.", tostring(unit))
+        return nil
     end
 
-    return fsInspector:FriendlyUnitSpec(unit)
+    return SafeCall(function()
+        if fsUnit:IsEnemyUnit(unit) then
+            return fsInspector:EnemyUnitSpec(unit)
+        end
+
+        return fsInspector:FriendlyUnitSpec(unit)
+    end, "Inspector:GetUnitSpecId")
 end
 
 ---Returns the unit token from the given frame.
 ---@param frame table
 function M.Frame:UnitFromFrame(frame)
     if not frame then
-        error("Frame must not be nil.")
-        return
+        fsLog:Error("Api.v3.Frame:UnitFromFrame was passed a nil parameter: frame.")
+        return nil
     end
 
-    return fsFrame:GetFrameUnit(frame)
+    if type(frame) ~= "table" and type(frame) ~= "userdata" then
+        fsLog:Error("Api.v3.Frame:UnitFromFrame was passed an invalid parameter: frame = %s.", tostring(frame))
+        return nil
+    end
+
+    return SafeCall(function()
+        return fsFrame:GetFrameUnit(frame)
+    end, "Frame:UnitFromFrame")
 end
 
 ---Returns the ordered frame number for the specified unit.
@@ -159,41 +433,58 @@ end
 ---@return number|nil
 function M.Frame:FrameNumberForUnit(unit)
     if not unit then
-        error("Unit must not be nil.")
-        return
+        fsLog:Error("Api.v3.Frame:FrameNumberForUnit was passed a nil parameter: unit.")
+        return nil
     end
 
-    local isFriendly = fsUnit:IsFriendlyUnit(unit)
-    local units = isFriendly and M.Sorting:GetFriendlyUnits() or M.Sorting:GetEnemyUnits()
-
-    for index, u in ipairs(units) do
-        if u == unit then
-            return index
-        end
-
-        local isUnitOrSecret = wow.UnitIsUnit(u, unit)
-
-        if not wow.issecretvalue(isUnitOrSecret) and isUnitOrSecret then
-            return index
-        end
+    if type(unit) ~= "string" then
+        fsLog:Error("Api.v3.Frame:FrameNumberForUnit was passed an invalid parameter: unit = %s.", tostring(unit))
+        return nil
     end
 
-    return nil
+    return SafeCall(function()
+        local isFriendly = fsUnit:IsFriendlyUnit(unit)
+        local units = isFriendly and fsSortedUnits:FriendlyUnits() or fsSortedUnits:EnemyUnits()
+
+        for index, u in ipairs(units) do
+            if u == unit then
+                return index
+            end
+
+            local isUnitOrSecret = wow.UnitIsUnit(u, unit)
+
+            if not wow.issecretvalue(isUnitOrSecret) and isUnitOrSecret then
+                return index
+            end
+        end
+
+        return nil
+    end, "Frame:FrameNumberForUnit")
 end
 
 ---Returns the party/raid/arena frame for the given unit.
 ---@param unit string
----@returns frame table
+---@return table|nil
 function M.Frame:FrameForUnit(unit)
     if not unit then
-        error("Unit must not be nil.")
-        return
+        fsLog:Error("Api.v3.Frame:FrameForUnit was passed a nil parameter: unit.")
+        return nil
     end
 
-    return fsUnitTracker:GetFrameForUnit(unit)
+    if type(unit) ~= "string" then
+        fsLog:Error("Api.v3.Frame:FrameForUnit was passed an invalid parameter: unit = %s.", tostring(unit))
+        return nil
+    end
+
+    return SafeCall(function()
+        return fsUnitTracker:GetFrameForUnit(unit)
+    end, "Frame:FrameForUnit")
 end
 
 ---Invalidates the unit cache.
 function M.Caching:Invalidate()
-    fsSortedUnits:InvalidateCache()
+    return SafeCall(function()
+        fsSortedUnits:InvalidateCache()
+        return true
+    end, "Caching:Invalidate") or false
 end

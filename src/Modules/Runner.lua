@@ -34,28 +34,34 @@ local function OnProviderRequiresSort(provider)
 end
 
 local function Run(forceRunAll)
-    local all = runAll or forceRunAll
+    local ok, result = pcall(function()
+        local all = runAll or forceRunAll
 
-    -- swap the flags before attempting to run
-    -- as this is happening in OnUpdate, if we for some reason encounter an error then we don't want to retry the run
-    runAll = false
-    run = false
-    local providers = nil
+        -- swap the flags before attempting to run
+        -- as this is happening in OnUpdate, if we for some reason encounter an error then we don't want to retry the run
+        runAll = false
+        run = false
+        local providers = nil
 
-    if all then
-        -- clear stale requests
-        runProviders = {}
-    else
-        providers = {}
+        if all then
+            -- clear stale requests
+            runProviders = {}
+        else
+            providers = {}
 
-        for provider, _ in pairs(runProviders) do
-            providers[#providers + 1] = provider
+            for provider, _ in pairs(runProviders) do
+                providers[#providers + 1] = provider
+            end
+
+            runProviders = {}
         end
 
-        runProviders = {}
-    end
+        M:Run(providers)
+    end)
 
-    M:Run(providers)
+    if not ok then
+        fsLog:Error("Runner - error: %s.", tostring(result))
+    end
 end
 
 local function OnCombatStateChanged(_, event)
