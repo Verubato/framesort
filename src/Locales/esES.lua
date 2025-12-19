@@ -279,3 +279,6 @@ L["Please turn off raid spacing or disable the 'Display Main Tank and Assist' op
 L["Log"] = "Registro"
 L["FrameSort log to help with diagnosing issues."] = "Registro de FrameSort para ayudar a diagnosticar problemas."
 L["Copy Log"] = "Copiar registro"
+
+-- # Notifications -- #
+L["Can't do that during combat."] = "No puedes hacer eso durante el combate."

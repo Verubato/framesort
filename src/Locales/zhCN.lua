@@ -276,3 +276,6 @@ L["Please turn off raid spacing or disable the 'Display Main Tank and Assist' op
 L["Log"] = "日志"
 L["FrameSort log to help with diagnosing issues."] = "FrameSort 日志，用于帮助诊断问题。"
 L["Copy Log"] = "复制日志"
+
+-- # Notifications -- #
+L["Can't do that during combat."] = "战斗中无法执行该操作。"

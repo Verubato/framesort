@@ -8,6 +8,7 @@ local capabilities = addon.WoW.Capabilities
 local callbacks = {}
 local dropDownId = 1
 local LibStub = LibStub
+local L = addon.Locale
 
 fsConfig.VerticalSpacing = 12
 fsConfig.HorizontalSpacing = 50
@@ -236,10 +237,10 @@ function fsConfig:Init()
         if wow.Settings then
             assert(category)
 
-            if capabilities.CanOpenOptionsDuringCombat() then
+            if not wow.InCombatLockdown() or capabilities.CanOpenOptionsDuringCombat() then
                 wow.Settings.OpenToCategory(category:GetID())
             else
-                fsLog:Notify("Can't do that during combat.")
+                fsLog:Notify(L["Can't do that during combat."])
             end
         elseif wow.InterfaceOptionsFrame_OpenToCategory then
             -- workaround the classic bug where the first call opens the Game interface
