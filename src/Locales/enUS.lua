@@ -271,3 +271,6 @@ L["Please turn off raid spacing or disable the 'Display Main Tank and Assist' op
 L["Log"] = nil
 L["FrameSort log to help with diagnosing issues."] = nil
 L["Copy Log"] = nil
+
+-- # Notifications -- #
+L["Can't do that during combat."] = nil
