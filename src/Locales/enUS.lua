@@ -232,6 +232,7 @@ L["Retrieved an ordered array of arena unit tokens."] = nil
 L["Register a callback function to run after FrameSort sorts frames."] = nil
 L["Retrieve an ordered array of party frames."] = nil
 L["Change a FrameSort setting."] = nil
+L["Get the frame number of a unit."] = nil
 L["View a full listing of all API methods on GitHub."] = nil
 
 -- # Discord screen #

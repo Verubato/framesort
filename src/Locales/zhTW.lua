@@ -235,6 +235,7 @@ L["Retrieved an ordered array of arena unit tokens."] = "取得已排序的競�
 L["Register a callback function to run after FrameSort sorts frames."] = "註冊回呼函式，在 FrameSort 排序框架之後執行。"
 L["Retrieve an ordered array of party frames."] = "取得已排序的隊伍框架陣列。"
 L["Change a FrameSort setting."] = "變更一項 FrameSort 設定。"
+L["Get the frame number of a unit."] = "取得單位的框架編號。"
 L["View a full listing of all API methods on GitHub."] = "在 GitHub 檢視所有 API 方法的完整清單。"
 
 -- # Discord screen #

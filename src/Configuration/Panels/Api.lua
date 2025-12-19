@@ -55,6 +55,10 @@ function M:Build(parent)
             Text = [[/run FrameSortApi.v3.Options:SetPlayerSortMode("Arena - 2v2", "Top")]],
         },
         {
+            Description = L["Get the frame number of a unit."],
+            Text = [[/run FrameSortApi.v3.Frame:FrameNumberForUnit("arena1")]],
+        },
+        {
             Description = L["View a full listing of all API methods on GitHub."],
             Text = [[https://github.com/Verubato/framesort/tree/main/src/Api]],
         },

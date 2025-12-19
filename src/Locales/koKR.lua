@@ -237,6 +237,7 @@ L["Retrieved an ordered array of arena unit tokens."] = "투기장 유닛 토큰
 L["Register a callback function to run after FrameSort sorts frames."] = "FrameSort가 프레임을 정렬한 뒤 실행할 콜백 함수를 등록합니다."
 L["Retrieve an ordered array of party frames."] = "파티 프레임의 정렬된 배열을 가져옵니다."
 L["Change a FrameSort setting."] = "FrameSort 설정을 변경합니다."
+L["Get the frame number of a unit."] = "유닛의 프레임 번호를 가져옵니다."
 L["View a full listing of all API methods on GitHub."] = "모든 API 메서드 목록은 GitHub에서 확인하세요."
 
 -- # Discord screen #
