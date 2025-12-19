@@ -98,11 +98,12 @@ end
 function M:test_error_doesnt_propagate()
     ---@type ApiV3
     local v3 = FrameSortApi.v3
-    local v2 = FrameSortApi.v2
+
+    local fsSort = addon.Modules.Sorting
 
     -- corrupt some stuff to cause an error
     ---@diagnostic disable-next-line: duplicate-set-field
-    v2.Sorting.RegisterPostSortCallback = function()
+    fsSort.RegisterPostSortCallback = function()
         assert(false, "Swallowed error")
     end
 

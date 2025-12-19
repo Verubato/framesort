@@ -1,14 +1,18 @@
 ---@type string, Addon
 local _, addon = ...
+local fsSort = addon.Modules.Sorting
+local fsRun = addon.Modules
 local fsConfig = addon.Configuration
 local fsFrame = addon.WoW.Frame
 local fsInspector = addon.Modules.Inspector
 local fsUnit = addon.WoW.Unit
 local fsUnitTracker = addon.Modules.UnitTracker
 local fsSortedUnits = addon.Modules.Sorting.SortedUnits
+local fsProviders = addon.Providers
+local fsEnumerable = addon.Collections.Enumerable
+local fsCompare = addon.Modules.Sorting.Comparer
 local fsLog = addon.Logging.Log
 local wow = addon.WoW.Api
-local v2 = addon.Api.v2
 
 ---@class ApiV3
 local M = {
@@ -49,6 +53,68 @@ local spacingAreas = {
     Party = true,
     Raid = true,
 }
+
+---@param area Area
+local function AreaOptions(area)
+    local sorting = addon.DB.Options.Sorting
+
+    if area == "Arena - 2v2" then
+        return sorting.Arena.Twos
+    elseif area == "Arena - 3v3" then
+        return sorting.Arena.Default
+    elseif area == "Arena - 5v5" then
+        return sorting.Arena.Default
+    elseif area == "Arena - Default" then
+        return sorting.Arena.Default
+    elseif area == "EnemyArena" then
+        return sorting.EnemyArena
+    elseif area == "Dungeon" then
+        return sorting.Dungeon
+    elseif area == "Raid" then
+        return sorting.Raid
+    elseif area == "World" then
+        return sorting.World
+    end
+
+    return nil
+end
+
+local function SpacingAreaOptions(area)
+    local spacing = addon.DB.Options.Spacing
+
+    if area == "EnemyArena" then
+        return spacing.EnemyArena
+    elseif area == "Party" then
+        return spacing.Party
+    elseif area == "Raid" then
+        return spacing.Raid
+    end
+
+    return nil
+end
+
+local function VisualOrder(framesOrFunction)
+    return fsEnumerable
+        :From(framesOrFunction)
+        :Where(function(x)
+            return x:IsVisible()
+        end)
+        :OrderBy(function(x, y)
+            return fsCompare:CompareTopLeftFuzzy(x, y)
+        end)
+        :ToTable()
+end
+
+---@param type number
+local function GetFrames(type)
+    local frames = {}
+
+    for _, provider in ipairs(fsProviders:Enabled()) do
+        frames[provider:Name()] = VisualOrder(fsFrame:GetFrames(provider, type))
+    end
+
+    return frames
+end
 
 ---@param mode PlayerSortMode
 local function ValidPlayerSortMode(mode)
@@ -95,7 +161,7 @@ function M.Sorting:RegisterPostSortCallback(callback)
     end
 
     return SafeCall(function()
-        v2.Sorting:RegisterPostSortCallback(callback)
+        fsSort:RegisterPostSortCallback(callback)
         return true
     end, "Sorting:RegisterPostSortCallback") or false
 end
@@ -103,28 +169,36 @@ end
 ---Returns a collection of party frames ordered by their visual representation.
 function M.Sorting:GetPartyFrames()
     return SafeCall(function()
-        return v2.Sorting:GetPartyFrames()
+        return GetFrames(fsFrame.ContainerType.Party)
     end, "Sorting:GetPartyFrames") or {}
 end
 
 ---Returns a collection of raid frames ordered by their visual representation.
 function M.Sorting:GetRaidFrames()
     return SafeCall(function()
-        return v2.Sorting:GetRaidFrames()
+        return GetFrames(fsFrame.ContainerType.Raid)
     end, "Sorting:GetRaidFrames") or {}
 end
 
 ---Returns a collection of enemy arena frames ordered by their visual representation.
 function M.Sorting:GetArenaFrames()
     return SafeCall(function()
-        return v2.Sorting:GetArenaFrames()
+        return GetFrames(fsFrame.ContainerType.EnemyArena)
     end, "Sorting:GetArenaFrames") or {}
 end
 
 ---Returns party frames if there are any, otherwise raid frames.
 function M.Sorting:GetFrames()
     return SafeCall(function()
-        return v2.Sorting:GetFrames()
+        local party = GetFrames(fsFrame.ContainerType.Party)
+
+        for _, frames in pairs(party) do
+            if #frames > 0 then
+                return party
+            end
+        end
+
+        return GetFrames(fsFrame.ContainerType.Raid)
     end, "Sorting:GetFrames") or {}
 end
 
@@ -156,7 +230,8 @@ function M.Options:GetPlayerSortMode(area)
     end
 
     return SafeCall(function()
-        return v2.Options:GetPlayerSortMode(area)
+        local options = AreaOptions(area)
+        return options and options.PlayerSortMode
     end, "Options:GetPlayerSortMode")
 end
 
@@ -185,7 +260,16 @@ function M.Options:SetPlayerSortMode(area, mode)
     end
 
     return SafeCall(function()
-        v2.Options:SetPlayerSortMode(area, mode)
+        local options = AreaOptions(area)
+
+        if not options then
+            return false
+        end
+
+        options.PlayerSortMode = mode
+
+        fsConfig:NotifyChanged()
+        fsRun:Run()
         return true
     end, "Options:SetPlayerSortMode") or false
 end
@@ -215,7 +299,16 @@ function M.Options:SetGroupSortMode(area, mode)
     end
 
     return SafeCall(function()
-        v2.Options:SetGroupSortMode(area, mode)
+        local options = AreaOptions(area)
+
+        if not options then
+            return
+        end
+
+        options.GroupSortMode = mode
+
+        fsConfig:NotifyChanged()
+        fsRun:Run()
         return true
     end, "Options:SetGroupSortMode") or false
 end
@@ -234,7 +327,8 @@ function M.Options:GetGroupSortMode(area)
     end
 
     return SafeCall(function()
-        return v2.Options:GetGroupSortMode(area)
+        local options = AreaOptions(area)
+        return options and options.GroupSortMode
     end, "Options:GetGroupSortMode")
 end
 
@@ -252,7 +346,13 @@ function M.Options:GetEnabled(area)
     end
 
     return SafeCall(function()
-        return v2.Options:GetEnabled(area)
+        local options = AreaOptions(area)
+
+        if not options then
+            return nil
+        end
+
+        return options.Enabled
     end, "Options:GetEnabled")
 end
 
@@ -276,7 +376,19 @@ function M.Options:SetEnabled(area, enabled)
     end
 
     return SafeCall(function()
-        v2.Options:SetEnabled(area, enabled)
+        local options = AreaOptions(area)
+
+        if not options then
+            return false
+        end
+
+        options.Enabled = enabled
+
+        fsConfig:NotifyChanged()
+
+        if enabled then
+            fsRun:Run()
+        end
         return true
     end, "Options:SetEnabled") or false
 end
@@ -295,7 +407,8 @@ function M.Options:GetReverse(area)
     end
 
     return SafeCall(function()
-        return v2.Options:GetReverse(area)
+        local options = AreaOptions(area)
+        return options and options.Reverse
     end, "Options:GetReverse")
 end
 
@@ -319,7 +432,16 @@ function M.Options:SetReverse(area, reverse)
     end
 
     return SafeCall(function()
-        v2.Options:SetReverse(area, reverse)
+        local options = AreaOptions(area)
+
+        if not options then
+            return false
+        end
+
+        options.Reverse = reverse
+
+        fsConfig:NotifyChanged()
+        fsRun:Run()
         return true
     end, "Options:SetReverse") or false
 end
@@ -338,7 +460,7 @@ function M.Options:GetSpacing(area)
     end
 
     return SafeCall(function()
-        return v2.Options:GetSpacing(area)
+        return SpacingAreaOptions(area)
     end, "Options:GetSpacing")
 end
 
@@ -382,7 +504,17 @@ function M.Options:SetSpacing(area, horizontal, vertical)
     end
 
     return SafeCall(function()
-        v2.Options:SetSpacing(area, horizontal, vertical)
+        local options = SpacingAreaOptions(area)
+
+        if not options then
+            return false
+        end
+
+        options.Horizontal = horizontal
+        options.Vertical = vertical
+
+        fsConfig:NotifyChanged()
+        fsRun:Run()
         return true
     end, "Options:SetSpacing") or false
 end
