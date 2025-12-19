@@ -235,6 +235,7 @@ L["Retrieved an ordered array of arena unit tokens."] = "Получить упо
 L["Register a callback function to run after FrameSort sorts frames."] = "Зарегистрировать функцию обратного вызова, выполняемую после сортировки рамок FrameSort."
 L["Retrieve an ordered array of party frames."] = "Получить упорядоченный массив рамок группы."
 L["Change a FrameSort setting."] = "Изменить настройку FrameSort."
+L["Get the frame number of a unit."] = "Получает номер фрейма для юнита."
 L["View a full listing of all API methods on GitHub."] = "Полный список методов API доступен на GitHub."
 
 -- # Discord screen #
