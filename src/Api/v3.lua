@@ -57,47 +57,37 @@ local spacingAreas = {
 ---@param area Area
 local function AreaOptions(area)
     local sorting = addon.DB.Options.Sorting
+    local map = {
+        ["Arena - 2v2"] = sorting.Arena.Twos,
+        ["Arena - 3v3"] = sorting.Arena.Default,
+        ["Arena - 5v5"] = sorting.Arena.Default,
+        ["Arena - Default"] = sorting.Arena.Default,
+        EnemyArena = sorting.EnemyArena,
+        Dungeon = sorting.Dungeon,
+        Raid = sorting.Raid,
+        World = sorting.World,
+    }
 
-    if area == "Arena - 2v2" then
-        return sorting.Arena.Twos
-    elseif area == "Arena - 3v3" then
-        return sorting.Arena.Default
-    elseif area == "Arena - 5v5" then
-        return sorting.Arena.Default
-    elseif area == "Arena - Default" then
-        return sorting.Arena.Default
-    elseif area == "EnemyArena" then
-        return sorting.EnemyArena
-    elseif area == "Dungeon" then
-        return sorting.Dungeon
-    elseif area == "Raid" then
-        return sorting.Raid
-    elseif area == "World" then
-        return sorting.World
-    end
-
-    return nil
+    return map[area]
 end
 
 local function SpacingAreaOptions(area)
     local spacing = addon.DB.Options.Spacing
 
-    if area == "EnemyArena" then
-        return spacing.EnemyArena
-    elseif area == "Party" then
-        return spacing.Party
-    elseif area == "Raid" then
-        return spacing.Raid
-    end
+    local map = {
+        EnemyArena = spacing.EnemyArena,
+        Party = spacing.Party,
+        Raid = spacing.Raid,
+    }
 
-    return nil
+    return map[area]
 end
 
 local function VisualOrder(framesOrFunction)
     return fsEnumerable
         :From(framesOrFunction)
         :Where(function(x)
-            return x:IsVisible()
+            return x.IsVisible and x:IsVisible()
         end)
         :OrderBy(function(x, y)
             return fsCompare:CompareTopLeftFuzzy(x, y)
