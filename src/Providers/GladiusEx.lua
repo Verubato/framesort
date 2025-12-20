@@ -8,6 +8,7 @@ local fsCompare = addon.Modules.Sorting.Comparer
 local fsLuaEx = addon.Language.LuaEx
 local fsLog = addon.Logging.Log
 local M = {}
+local sortCallbacks = {}
 
 fsProviders.GladiusEx = M
 table.insert(fsProviders.All, M)
@@ -37,6 +38,16 @@ local function CalculateSpace(container)
     }
 end
 
+local function RequestSort()
+    for _, callback in ipairs(sortCallbacks) do
+        callback(M)
+    end
+end
+
+local function OnUpdateFrames()
+    RequestSort()
+end
+
 function M:Name()
     return "GladiusEx"
 end
@@ -45,8 +56,32 @@ function M:Enabled()
     return wow.GetAddOnEnableState("GladiusEx") ~= 0
 end
 
-function M:Init() end
-function M:RegisterRequestSortCallback() end
+function M:Init()
+    if not M:Enabled() then
+        return
+    end
+
+    if not GladiusEx then
+        fsLog:Error("GladiusEx table is missing.")
+    end
+
+    if not GladiusEx.UpdateFrames then
+        fsLog:Error("Unable to hook GladiusEx:UpdateFrames.")
+        return
+    end
+
+    wow.hooksecurefunc(GladiusEx, "UpdateFrames", OnUpdateFrames)
+end
+
+function M:RegisterRequestSortCallback(callback)
+    if not callback then
+        fsLog:Error("GladiusEx:RegisterRequestSortCallback() - callback must not be nil.")
+        return
+    end
+
+    sortCallbacks[#sortCallbacks + 1] = callback
+end
+
 function M:RegisterContainersChangedCallback() end
 
 function M:Containers()
