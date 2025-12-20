@@ -320,7 +320,8 @@ function M:ExtractUnitFrames(container, containerVisible, visibleOnly, requireUn
             end
 
             if frame:GetTop() == nil or frame:GetLeft() == nil then
-                fsLog:Warning("Frame '%s' has no position.", frame.GetName and frame:GetName() or "nil")
+                -- this can happen for example with ElvUI for frames without a unit
+                -- so don't log this as a warning to prevent spam
                 return false
             end
 
