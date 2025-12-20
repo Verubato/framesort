@@ -14,8 +14,8 @@ function M:setup()
 
     addon:InitDB()
     addon.Providers:Init()
-    addon.Scheduling.Scheduler:Init()
     addon.Modules:Init()
+    addon.Modules.EventDispatcher:Init()
 
     local fsFrame = addon.WoW.Frame
     local provider = providerFactory:Create()
@@ -24,6 +24,9 @@ function M:setup()
     addon.Providers.All[#addon.Providers.All + 1] = provider
 
     local party = fsFrame:GetContainer(provider, fsFrame.ContainerType.Party)
+
+    assert(party)
+
     local partyContainer = party.Frame
 
     local frameMock = require("TestHarness\\Frame")
@@ -40,6 +43,9 @@ function M:setup()
     p2.unit = "party2"
 
     local arena = fsFrame:GetContainer(provider, fsFrame.ContainerType.EnemyArena)
+
+    assert(arena)
+
     local arenaContainer = arena.Frame
 
     -- enemy arena units aren't retrieved from the frame position

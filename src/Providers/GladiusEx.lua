@@ -11,7 +11,7 @@ local wowEx = addon.WoW.WowEx
 local capabilities = addon.WoW.Capabilities
 local events = addon.WoW.Events
 local M = {}
-local eventFrame = nil
+local useEvents = false
 local sortCallbacks = {}
 
 fsProviders.GladiusEx = M
@@ -64,27 +64,6 @@ function M:Enabled()
     return wowEx.IsAddOnEnabled("GladiusEx")
 end
 
-function M:Init()
-    if not M:Enabled() then
-        return
-    end
-
-    if GladiusEx and GladiusEx.UpdateFrames then
-        wow.hooksecurefunc(GladiusEx, "UpdateFrames", OnUpdateFrames)
-    else
-        fsLog:Bug("GladiusEx:UpdateFrames is n il.")
-
-        -- fallback to using events
-        eventFrame = wow.CreateFrame("Frame")
-        eventFrame:HookScript("OnEvent", OnEvent)
-        eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
-
-        if capabilities.HasEnemySpecSupport() then
-            eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
-        end
-    end
-end
-
 function M:RegisterRequestSortCallback(callback)
     if not callback then
         fsLog:Bug("GladiusEx:RegisterRequestSortCallback() - callback must not be nil.")
@@ -95,6 +74,18 @@ function M:RegisterRequestSortCallback(callback)
 end
 
 function M:RegisterContainersChangedCallback() end
+
+function M:ProcessEvent(event)
+    if not useEvents then
+        return
+    end
+
+    if event == events.ARENA_OPPONENT_UPDATE then
+        RequestSort(event)
+    elseif event == events.ARENA_PREP_OPPONENT_SPECIALIZATIONS then
+        RequestSort(event)
+    end
+end
 
 function M:Containers()
     local containers = {}
@@ -132,4 +123,18 @@ function M:Containers()
     end
 
     return containers
+end
+
+function M:Init()
+    if not M:Enabled() then
+        return
+    end
+
+    if GladiusEx and GladiusEx.UpdateFrames then
+        wow.hooksecurefunc(GladiusEx, "UpdateFrames", OnUpdateFrames)
+    else
+        fsLog:Bug("GladiusEx:UpdateFrames is n il.")
+
+        useEvents = true
+    end
 end

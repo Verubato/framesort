@@ -8,6 +8,7 @@ local wow = addon.WoW.Api
 local wowEx = addon.WoW.WowEx
 local events = addon.WoW.Events
 local M = {}
+local useEvents = false
 local eventFrame = nil
 local sortCallbacks = {}
 
@@ -20,17 +21,8 @@ local function RequestSort(reason)
     end
 end
 
-local function OnEvent(_, event)
+local function OnHook(_, event)
     RequestSort(event)
-end
-
-local function EventsFallback()
-    eventFrame = wow.CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", OnEvent)
-    eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
-    eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
-    eventFrame:RegisterEvent(events.PLAYER_SPECIALIZATION_CHANGED)
-    eventFrame:RegisterEvent(events.UNIT_PET)
 end
 
 function M:Name()
@@ -39,22 +31,6 @@ end
 
 function M:Enabled()
     return wowEx.IsAddOnEnabled("Cell")
-end
-
-function M:Init()
-    if not M:Enabled() then
-        return
-    end
-
-    if CellPartyFrameHeader then
-        CellPartyFrameHeader:HookScript("OnEvent", OnEvent)
-    else
-        fsLog:Bug("CellPartyFrameHeader is nil.")
-        EventsFallback()
-    end
-
-    -- no need to hook CellRaidFrameHeader0 as it would just double up on the sort trigger
-    -- it can't hurt, but just introduces log noise
 end
 
 function M:RegisterRequestSortCallback(callback)
@@ -67,6 +43,22 @@ function M:RegisterRequestSortCallback(callback)
 end
 
 function M:RegisterContainersChangedCallback() end
+
+function M:ProcessEvent(event, ...)
+    if not useEvents then
+        return
+    end
+
+    if event == events.GROUP_ROSTER_UPDATE then
+        RequestSort(event)
+    elseif event == events.PLAYER_ROLES_ASSIGNED then
+        RequestSort(event)
+    elseif event == events.PLAYER_SPECIALIZATION_CHANGED then
+        RequestSort(event)
+    elseif event == events.UNIT_PET then
+        RequestSort(event)
+    end
+end
 
 function M:Containers()
     local containers = {}
@@ -136,4 +128,21 @@ function M:Containers()
     end
 
     return containers
+end
+
+function M:Init()
+    if not M:Enabled() then
+        return
+    end
+
+    if CellPartyFrameHeader then
+        CellPartyFrameHeader:HookScript("OnEvent", OnHook)
+    else
+        fsLog:Bug("CellPartyFrameHeader is nil.")
+
+        useEvents = true
+    end
+
+    -- no need to hook CellRaidFrameHeader0 as it would just double up on the sort trigger
+    -- it can't hurt, but just introduces log noise
 end

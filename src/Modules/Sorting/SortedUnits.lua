@@ -12,15 +12,12 @@ local events = addon.WoW.Events
 local capabilities = addon.WoW.Capabilities
 local fsLog = addon.Logging.Log
 
----@class SortedUnits
+---@class SortedUnits: IInitialise, IProcessEvents
 local M = {}
 addon.Modules.Sorting.SortedUnits = M
 
 -- setting a value of false disables this module
 local cacheEnabled = true
-local friendlyEventsFrame = nil
-local enemyEventsFrame = nil
-local petEventsFrame = nil
 
 -- true means cached values are up to date
 local friendlyCacheValid = false
@@ -49,21 +46,13 @@ local function InvalidateEnemyCache()
     enemyCacheValid = false
 end
 
-local function OnFriendlyEvent(_, event)
-    InvalidateFriendlyCache()
-end
-
-local function OnPetEvent(_, event, petOwner)
+local function OnPetEvent(event, petOwner)
     -- UNIT_PET fires for both allies and enemies
     if wow.UnitIsFriend("player", petOwner) then
         InvalidateFriendlyCache()
     else
         InvalidateEnemyCache()
     end
-end
-
-local function OnEnemyEvent(_, event)
-    InvalidateEnemyCache()
 end
 
 local function OnInspectorInfo()
@@ -259,26 +248,28 @@ function M:LogStats()
     fsLog:Debug("Friendly cache %d hits %d misses, enemy cache %d hits %d misses.", friendlyCacheHits, friendlyCacheMisses, enemyCacheHits, enemyCacheMisses)
 end
 
-function M:Init()
+function M:ProcessEvent(event, ...)
     if not cacheEnabled then
         return
     end
 
-    friendlyEventsFrame = wow.CreateFrame("Frame")
-    friendlyEventsFrame:HookScript("OnEvent", OnFriendlyEvent)
-    friendlyEventsFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
-    friendlyEventsFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
+    if event == events.GROUP_ROSTER_UPDATE then
+        InvalidateFriendlyCache()
+    elseif event == events.PLAYER_ROLES_ASSIGNED then
+        InvalidateFriendlyCache()
+    elseif event == events.ARENA_OPPONENT_UPDATE then
+        InvalidateEnemyCache()
+    elseif event == events.ARENA_PREP_OPPONENT_SPECIALIZATIONS then
+        InvalidateEnemyCache()
+    elseif event == events.UNIT_PET then
+        local unit = select(1, ...)
+        OnPetEvent(event, unit)
+    end
+end
 
-    petEventsFrame = wow.CreateFrame("Frame")
-    petEventsFrame:HookScript("OnEvent", OnPetEvent)
-    petEventsFrame:RegisterEvent(events.UNIT_PET)
-
-    enemyEventsFrame = wow.CreateFrame("Frame")
-    enemyEventsFrame:HookScript("OnEvent", OnEnemyEvent)
-    enemyEventsFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
-
-    if capabilities.HasEnemySpecSupport() then
-        enemyEventsFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
+function M:Init()
+    if not cacheEnabled then
+        return
     end
 
     fsInspector:RegisterCallback(OnInspectorInfo)

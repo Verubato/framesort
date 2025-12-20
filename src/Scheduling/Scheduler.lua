@@ -4,11 +4,10 @@ local wow = addon.WoW.Api
 local events = addon.WoW.Events
 local capabilities = addon.WoW.Capabilities
 local fsLog = addon.Logging.Log
----@class Scheduler: IInitialise
+---@class Scheduler: IProcessEvents
 local M = {}
 addon.Scheduling.Scheduler = M
 
-local eventFrame = nil
 local enteringWorldOnceCallbacks = {}
 local combatEndCallbacks = {}
 local combatEndKeyedCallbacks = {}
@@ -35,14 +34,6 @@ local function OnEnteringWorld()
     -- but we only want to invoke our callbacks the first time
     -- so run once and clear
     enteringWorldOnceCallbacks = {}
-end
-
-local function OnEvent(_, event)
-    if event == events.PLAYER_ENTERING_WORLD then
-        OnEnteringWorld()
-    elseif event == events.PLAYER_REGEN_ENABLED then
-        OnCombatEnded()
-    end
 end
 
 local function After(seconds, callback)
@@ -103,9 +94,10 @@ function M:RunWhenEnteringWorldOnce(callback)
     enteringWorldOnceCallbacks[#enteringWorldOnceCallbacks + 1] = callback
 end
 
-function M:Init()
-    eventFrame = wow.CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", OnEvent)
-    eventFrame:RegisterEvent(events.PLAYER_REGEN_ENABLED)
-    eventFrame:RegisterEvent(events.PLAYER_ENTERING_WORLD)
+function M:ProcessEvent(event)
+    if event == events.PLAYER_REGEN_ENABLED then
+        OnCombatEnded()
+    elseif event == events.PLAYER_ENTERING_WORLD then
+        OnEnteringWorld()
+    end
 end

@@ -7,7 +7,7 @@ local wow = addon.WoW.Api
 local wowEx = addon.WoW.WowEx
 local events = addon.WoW.Events
 local M = {}
-local eventFrame = nil
+local useEvents = false
 local containersChangedCallbacks = {}
 local sortCallbacks = {}
 local fsPlugin = nil
@@ -46,21 +46,12 @@ local function ElvUiEnabled()
     return wowEx.IsAddOnEnabled("ElvUI")
 end
 
-local function OnEvent(_, event)
+local function OnHook(_, event)
     if not IntegrationEnabled() then
         return
     end
 
     RequestSort(event)
-end
-
-local function EventsFallback()
-    eventFrame = wow.CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", OnEvent)
-    eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
-    eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
-    eventFrame:RegisterEvent(events.PLAYER_SPECIALIZATION_CHANGED)
-    eventFrame:RegisterEvent(events.UNIT_PET)
 end
 
 function M:Name()
@@ -69,6 +60,61 @@ end
 
 function M:Enabled()
     return ElvUiEnabled() and IntegrationEnabled()
+end
+
+function M:RegisterRequestSortCallback(callback)
+    if not callback then
+        fsLog:Bug("ElvUI:RegisterRequestSortCallback() - callback must not be nil.")
+        return
+    end
+
+    sortCallbacks[#sortCallbacks + 1] = callback
+end
+
+function M:RegisterContainersChangedCallback(callback)
+    if not callback then
+        fsLog:Bug("ElvUI:RegisterContainersChangedCallback() - callback must not be nil.")
+        return
+    end
+
+    containersChangedCallbacks[#containersChangedCallbacks + 1] = callback
+end
+
+function M:ProcessEvent(event)
+    if not useEvents then
+        return
+    end
+
+    if event == events.GROUP_ROSTER_UPDATE then
+        RequestSort(event)
+    elseif event == events.PLAYER_ROLES_ASSIGNED then
+        RequestSort(event)
+    elseif event == events.PLAYER_SPECIALIZATION_CHANGED then
+        RequestSort(event)
+    elseif event == events.UNIT_PET then
+        RequestSort(event)
+    end
+end
+
+function M:Containers()
+    local containers = {}
+
+    if not ElvUiEnabled() then
+        return containers
+    end
+
+    if ElvUF_PartyGroup1 then
+        ---@type FrameContainer
+        local party = {
+            Frame = ElvUF_PartyGroup1,
+            Type = fsFrame.ContainerType.Party,
+            LayoutType = fsFrame.LayoutType.NameList,
+        }
+
+        containers[#containers + 1] = party
+    end
+
+    return containers
 end
 
 function M:Init()
@@ -124,14 +170,15 @@ function M:Init()
         fsPlugin:SecureHook(UF, "LoadUnits", function()
             if not ElvUF_PartyGroup1 then
                 fsLog:Bug("Missing ElvUF_PartyGroup1.")
-                EventsFallback()
+
+                useEvents = true
                 return
             end
 
             fsLog:Debug("ElvUI loaded units, requesting container update.")
             RequestUpdateContainers()
 
-            ElvUF_PartyGroup1:HookScript("OnEvent", OnEvent)
+            ElvUF_PartyGroup1:HookScript("OnEvent", OnHook)
         end)
     end
 
@@ -158,43 +205,4 @@ function M:Init()
     end
 
     E:RegisterModule(pluginName)
-end
-
-function M:RegisterRequestSortCallback(callback)
-    if not callback then
-        fsLog:Bug("ElvUI:RegisterRequestSortCallback() - callback must not be nil.")
-        return
-    end
-
-    sortCallbacks[#sortCallbacks + 1] = callback
-end
-
-function M:RegisterContainersChangedCallback(callback)
-    if not callback then
-        fsLog:Bug("ElvUI:RegisterContainersChangedCallback() - callback must not be nil.")
-        return
-    end
-
-    containersChangedCallbacks[#containersChangedCallbacks + 1] = callback
-end
-
-function M:Containers()
-    local containers = {}
-
-    if not ElvUiEnabled() then
-        return containers
-    end
-
-    if ElvUF_PartyGroup1 then
-        ---@type FrameContainer
-        local party = {
-            Frame = ElvUF_PartyGroup1,
-            Type = fsFrame.ContainerType.Party,
-            LayoutType = fsFrame.LayoutType.NameList,
-        }
-
-        containers[#containers + 1] = party
-    end
-
-    return containers
 end
