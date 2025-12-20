@@ -7,8 +7,8 @@ local fsLog = addon.Logging.Log
 local wow = addon.WoW.Api
 local events = addon.WoW.Events
 local M = {}
-local sortCallbacks = {}
 local eventFrame = nil
+local sortCallbacks = {}
 
 fsProviders.Cell = M
 table.insert(fsProviders.All, M)
@@ -21,6 +21,15 @@ end
 
 local function OnEvent(_, event)
     RequestSort(event)
+end
+
+local function EventsFallback()
+    eventFrame = wow.CreateFrame("Frame")
+    eventFrame:HookScript("OnEvent", OnEvent)
+    eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
+    eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
+    eventFrame:RegisterEvent(events.PLAYER_SPECIALIZATION_CHANGED)
+    eventFrame:RegisterEvent(events.UNIT_PET)
 end
 
 function M:Name()
@@ -36,12 +45,15 @@ function M:Init()
         return
     end
 
-    eventFrame = wow.CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", OnEvent)
-    eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
-    eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
-    eventFrame:RegisterEvent(events.PLAYER_SPECIALIZATION_CHANGED)
-    eventFrame:RegisterEvent(events.UNIT_PET)
+    if CellPartyFrameHeader then
+        CellPartyFrameHeader:HookScript("OnEvent", OnEvent)
+    else
+        fsLog:Bug("Missing CellPartyFrameHeader.")
+        EventsFallback()
+    end
+
+    -- no need to hook CellRaidFrameHeader0 as it would just double up on the sort trigger
+    -- it can't hurt, but just introduces log noise
 end
 
 function M:RegisterRequestSortCallback(callback)
