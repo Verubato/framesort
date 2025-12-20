@@ -71,7 +71,7 @@ end
 
 function M:Init()
     if not CanRun() then
-        fsLog:Debug("Not loading AutoLeader module because this wow client doesn't have solo shuffle.")
+        fsLog:Debug("AutoLeader module not loading because this wow client doesn't have solo shuffle.")
         return
     end
 

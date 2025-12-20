@@ -449,7 +449,7 @@ end
 
 function M:Init()
     if not M:CanRun() then
-        fsLog:Warning("Inspector module unable to run, spec sorting won't work.")
+        fsLog:Debug("Inspector module not loading because this wow client doesn't have specializations.")
         return
     end
 
