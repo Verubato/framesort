@@ -1,6 +1,5 @@
 ---@type string, Addon
 local _, addon = ...
-local capabilites = addon.WoW.Capabilities
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsScheduler = addon.Scheduling.Scheduler
@@ -208,7 +207,7 @@ function M:Containers()
                 return false
             end,
             IsHorizontalLayout = function()
-                if capabilites.HasEditMode() then
+                if capabilities.HasEditMode() then
                     return wow.EditModeManagerFrame:GetSettingValueBool(
                         wow.Enum.EditModeSystem.UnitFrame,
                         wow.Enum.EditModeUnitFrameSystemIndices.Party,
@@ -236,7 +235,7 @@ function M:Containers()
             SupportsSpacing = true,
             InCombatSortingRequired = true,
             IsGrouped = function()
-                if capabilites.HasEditMode() then
+                if capabilities.HasEditMode() then
                     local raidGroupDisplayType = wow.EditModeManagerFrame:GetSettingValue(
                         wow.Enum.EditModeSystem.UnitFrame,
                         wow.Enum.EditModeUnitFrameSystemIndices.Raid,
@@ -248,7 +247,7 @@ function M:Containers()
                 return wow.CompactRaidFrameManager_GetSetting ~= nil and wow.CompactRaidFrameManager_GetSetting("KeepGroupsTogether")
             end,
             IsHorizontalLayout = function()
-                if capabilites.HasEditMode() then
+                if capabilities.HasEditMode() then
                     local displayType = wow.EditModeManagerFrame:GetSettingValue(
                         wow.Enum.EditModeSystem.UnitFrame,
                         wow.Enum.EditModeUnitFrameSystemIndices.Raid,
@@ -414,7 +413,7 @@ function M:Init()
         return
     end
 
-    if capabilites.HasEditMode() then
+    if capabilities.HasEditMode() then
         wow.EventRegistry:RegisterCallback(events.EditModeExit, OnEditModeExited)
 
         fsScheduler:RunWhenEnteringWorldOnce(function()
