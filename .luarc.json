@@ -36,6 +36,9 @@
         "CompactArenaFrameMember1",
         "GladiusEx",
         "Gladdy",
+        "ShadowUF",
+        "Grid2Frame",
+        "Grid2Layout",
     ],
     "diagnostics.disable": [
         "inject-field",

@@ -6,9 +6,9 @@ local fsLog = addon.Logging.Log
 local wow = addon.WoW.Api
 local events = addon.WoW.Events
 local M = {}
+local eventFrame = nil
 local containersChangedCallbacks = {}
 local sortCallbacks = {}
-local eventFrame = nil
 local fsPlugin = nil
 local pluginName = "FrameSort"
 
@@ -53,6 +53,15 @@ local function OnEvent(_, event)
     RequestSort(event)
 end
 
+local function EventsFallback()
+    eventFrame = wow.CreateFrame("Frame")
+    eventFrame:HookScript("OnEvent", OnEvent)
+    eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
+    eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
+    eventFrame:RegisterEvent(events.PLAYER_SPECIALIZATION_CHANGED)
+    eventFrame:RegisterEvent(events.UNIT_PET)
+end
+
 function M:Name()
     return "ElvUI"
 end
@@ -66,48 +75,41 @@ function M:Init()
         return
     end
 
-    eventFrame = wow.CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", OnEvent)
-    eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
-    eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
-    eventFrame:RegisterEvent(events.PLAYER_SPECIALIZATION_CHANGED)
-    eventFrame:RegisterEvent(events.UNIT_PET)
-
     if not ElvUI then
-        fsLog:Error("ElvUI is nil.")
+        fsLog:Bug("ElvUI is nil.")
         return
     end
 
     local E, _, _, P, _ = unpack(ElvUI)
 
     if not E then
-        fsLog:Error("ElvUI module handler is nil.")
+        fsLog:Bug("ElvUI module handler is nil.")
         return
     end
 
     if not P then
-        fsLog:Error("ElvUI plugin handler is nil.")
+        fsLog:Bug("ElvUI plugin handler is nil.")
         return
     end
 
-    local EP = LibStub("LibElvUIPlugin-1.0")
+    local EP = LibStub("LibElvUIPlugin-1.0", true)
 
     if not EP then
-        fsLog:Error("ElvUI plugin stub is nil.")
+        fsLog:Bug("ElvUI plugin stub is nil.")
         return
     end
 
     local UF = E:GetModule("UnitFrames")
 
     if not UF then
-        fsLog:Error("ElvUI unit frames is nil.")
+        fsLog:Bug("ElvUI unit frames is nil.")
         return
     end
 
     fsPlugin = E:NewModule(pluginName, "AceHook-3.0")
 
     if not fsPlugin then
-        fsLog:Error("Failed to create ElvUI plugin module.")
+        fsLog:Bug("Failed to create ElvUI plugin module.")
         return
     end
 
@@ -120,11 +122,15 @@ function M:Init()
 
         fsPlugin:SecureHook(UF, "LoadUnits", function()
             if not ElvUF_PartyGroup1 then
+                fsLog:Bug("Missing ElvUF_PartyGroup1.")
+                EventsFallback()
                 return
             end
 
             fsLog:Debug("ElvUI loaded units, requesting container update.")
             RequestUpdateContainers()
+
+            ElvUF_PartyGroup1:HookScript("OnEvent", OnEvent)
         end)
     end
 

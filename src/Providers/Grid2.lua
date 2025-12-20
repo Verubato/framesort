@@ -4,11 +4,12 @@ local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsLuaEx = addon.Language.LuaEx
 local fsLog = addon.Logging.Log
+local fsScheduler = addon.Scheduling.Scheduler
 local wow = addon.WoW.Api
 local events = addon.WoW.Events
 local M = {}
-local sortCallbacks = {}
 local eventFrame = nil
+local sortCallbacks = {}
 
 fsProviders.Grid2 = M
 table.insert(fsProviders.All, M)
@@ -21,6 +22,15 @@ end
 
 local function OnEvent(_, event)
     RequestSort(event)
+end
+
+local function EventsFallback()
+    eventFrame = wow.CreateFrame("Frame")
+    eventFrame:HookScript("OnEvent", OnEvent)
+    eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
+    eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
+    eventFrame:RegisterEvent(events.PLAYER_SPECIALIZATION_CHANGED)
+    eventFrame:RegisterEvent(events.UNIT_PET)
 end
 
 function M:Name()
@@ -36,12 +46,29 @@ function M:Init()
         return
     end
 
-    eventFrame = wow.CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", OnEvent)
-    eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
-    eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
-    eventFrame:RegisterEvent(events.PLAYER_SPECIALIZATION_CHANGED)
-    eventFrame:RegisterEvent(events.UNIT_PET)
+    local canHook = true
+
+    if not Grid2Layout then
+        fsLog:Bug("Grid2Layout is nil.")
+        canHook = false
+    end
+
+    if Grid2Layout and not Grid2Layout.LoadLayout then
+        fsLog:Bug("Grid2Layout.LoadLayout is nil.")
+        canHook = false
+    end
+
+    if canHook then
+        wow.hooksecurefunc(Grid2Layout, "LoadLayout", function()
+            if Grid2LayoutHeader1 then
+                Grid2LayoutHeader1:HookScript("OnEvent", OnEvent)
+            else
+                fsLog:Bug("Missing Grid2LayoutHeader1.")
+            end
+        end)
+    else
+        EventsFallback()
+    end
 end
 
 function M:RegisterRequestSortCallback(callback)
