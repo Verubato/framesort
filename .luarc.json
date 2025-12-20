@@ -39,6 +39,7 @@
         "ShadowUF",
         "Grid2Frame",
         "Grid2Layout",
+        "CompactRaidFrameContainer_LayoutFrames",
     ],
     "diagnostics.disable": [
         "inject-field",
