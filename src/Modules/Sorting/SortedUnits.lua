@@ -273,11 +273,12 @@ function M:Init()
     petEventsFrame:HookScript("OnEvent", OnPetEvent)
     petEventsFrame:RegisterEvent(events.UNIT_PET)
 
+    enemyEventsFrame = wow.CreateFrame("Frame")
+    enemyEventsFrame:HookScript("OnEvent", OnEnemyEvent)
+    enemyEventsFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
+
     if capabilities.HasEnemySpecSupport() then
-        enemyEventsFrame = wow.CreateFrame("Frame")
-        enemyEventsFrame:HookScript("OnEvent", OnEnemyEvent)
         enemyEventsFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
-        enemyEventsFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
     end
 
     fsInspector:RegisterCallback(OnInspectorInfo)
