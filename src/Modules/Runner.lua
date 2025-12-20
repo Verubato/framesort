@@ -28,7 +28,7 @@ local function ScheduleSort(provider)
     end
 end
 
-local function OnProviderRequiresSort(provider, reason)
+local function OnProviderRequestedSort(provider, reason)
     fsLog:Debug("Provider '%s' requested sort due to '%s'.", provider and provider:Name() or "nil", reason or "nil")
 
     ScheduleSort(provider)
@@ -189,7 +189,7 @@ function M:Init()
     addon.Modules.UnitTracker:Init()
 
     for _, provider in ipairs(fsProviders.All) do
-        provider:RegisterRequestSortCallback(OnProviderRequiresSort)
+        provider:RegisterRequestSortCallback(OnProviderRequestedSort)
     end
 
     timerFrame = wow.CreateFrame("Frame")
