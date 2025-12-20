@@ -49,7 +49,7 @@ function M:Init()
     if gladdy and gladdy.UpdateFrame then
         wow.hooksecurefunc(gladdy, "UpdateFrame", OnUpdateFrame)
     else
-        fsLog:Bug("Unable to hook Gladdy:UpdateFrame.")
+        fsLog:Bug("Gladdy:UpdateFrame is nil.")
 
         -- fallback to using events
         eventFrame = wow.CreateFrame("Frame")

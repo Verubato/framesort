@@ -48,7 +48,7 @@ function M:Init()
     if CellPartyFrameHeader then
         CellPartyFrameHeader:HookScript("OnEvent", OnEvent)
     else
-        fsLog:Bug("Missing CellPartyFrameHeader.")
+        fsLog:Bug("CellPartyFrameHeader is nil.")
         EventsFallback()
     end
 

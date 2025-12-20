@@ -54,7 +54,7 @@ function M:Init()
     end
 
     if Grid2Layout and not Grid2Layout.LoadLayout then
-        fsLog:Bug("Grid2Layout.LoadLayout is nil.")
+        fsLog:Bug("Grid2Layout:LoadLayout is nil.")
         canHook = false
     end
 
@@ -63,7 +63,7 @@ function M:Init()
             if Grid2LayoutHeader1 then
                 Grid2LayoutHeader1:HookScript("OnEvent", OnEvent)
             else
-                fsLog:Bug("Missing Grid2LayoutHeader1.")
+                fsLog:Bug("Grid2LayoutHeader1 is nil.")
             end
         end)
     else

@@ -47,7 +47,7 @@ function M:Init()
     if Gladius and Gladius.UpdateUnit then
         wow.hooksecurefunc(Gladius, "UpdateUnit", OnUpdateUnit)
     else
-        fsLog:Bug("Unable to hook Gladius:UpdateUnit.")
+        fsLog:Bug("Gladius:UpdateUnit is nil.")
 
         -- fallback to using events
         eventFrame = wow.CreateFrame("Frame")

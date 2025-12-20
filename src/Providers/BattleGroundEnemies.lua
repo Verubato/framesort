@@ -51,9 +51,8 @@ function M:Init()
     if BattleGroundEnemies and BattleGroundEnemies.UpdateArenaPlayers then
         wow.hooksecurefunc(BattleGroundEnemies, "UpdateArenaPlayers", OnUpdateArenaPlayers)
     else
-        fsLog:Bug("Unable to hook BattleGroundEnemies:UpdateArenaPlayers.")
+        fsLog:Bug("BattleGroundEnemies:UpdateArenaPlayers is nil.")
 
-        -- fallback to using events
         eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
 
         if capabilities.HasEnemySpecSupport() then
@@ -64,7 +63,7 @@ function M:Init()
     if BattleGroundEnemies and BattleGroundEnemies.GROUP_ROSTER_UPDATE then
         wow.hooksecurefunc(BattleGroundEnemies, "GROUP_ROSTER_UPDATE", OnGroupRosterUpdate)
     else
-        fsLog:Bug("Unable to hook BattleGroundEnemies:GROUP_ROSTER_UPDATE.")
+        fsLog:Bug("BattleGroundEnemies:GROUP_ROSTER_UPDATE is nil.")
 
         eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
     end
