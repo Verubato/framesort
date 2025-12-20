@@ -17,13 +17,13 @@ local runAll = false
 local runProviders = {}
 
 local function ScheduleSort(provider)
-    run = true
-
     if provider then
         runProviders[provider] = true
     else
         runAll = true
     end
+
+    run = true
 end
 
 local function OnProviderRequestedSort(provider, reason)
@@ -41,12 +41,9 @@ end
 local function Run(forceRunAll)
     local ok, result = pcall(function()
         local all = runAll or forceRunAll
-
-        -- swap the flags before attempting to run
-        -- as this is happening in OnUpdate, if we for some reason encounter an error then we don't want to retry the run
-        runAll = false
-        run = false
         local providers = nil
+
+        runAll = false
 
         if all then
             -- clear stale requests
@@ -73,6 +70,8 @@ local function OnEnteringCombat()
     if not run then
         return
     end
+
+    run = false
 
     -- we are entering combat, last chance to run a sort if one was scheduled
     -- there is a scenario with Gladius where an enemy stealthy comes out of stealth
@@ -133,10 +132,11 @@ local function OnUpdate()
         return
     end
 
+    run = false
     Run()
 end
 
-function M:ProcessEvent(event, ...)
+function M:ProcessEvent(event)
     if event == events.PLAYER_REGEN_DISABLED then
         OnEnteringCombat()
     elseif event == events.PLAYER_ENTERING_WORLD then
