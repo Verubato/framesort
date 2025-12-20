@@ -2357,6 +2357,6 @@ function M:Init()
     fsConfig:RegisterConfigurationChangedCallback(OnConfigChanged)
 
     local combatStartingFrame = wow.CreateFrame("Frame", nil, wow.UIParent)
-    combatStartingFrame:HookScript("OnEvent", OnCombatStarting)
+    combatStartingFrame:SetScript("OnEvent", OnCombatStarting)
     combatStartingFrame:RegisterEvent(events.PLAYER_REGEN_DISABLED)
 end

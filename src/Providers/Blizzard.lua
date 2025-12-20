@@ -421,7 +421,7 @@ function M:Init()
             -- and we don't care about the first one
             -- so to avoid running modules multiple times on first load, delay the event registration
             layoutEventFrame = wow.CreateFrame("Frame")
-            layoutEventFrame:HookScript("OnEvent", OnLayoutsApplied)
+            layoutEventFrame:SetScript("OnEvent", OnLayoutsApplied)
             layoutEventFrame:RegisterEvent(events.EDIT_MODE_LAYOUTS_UPDATED)
         end)
     end

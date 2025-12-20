@@ -186,7 +186,7 @@ end
 
 function M:Init()
     local frame = wow.CreateFrame("Frame")
-    frame:HookScript("OnEvent", OnAddonError)
+    frame:SetScript("OnEvent", OnAddonError)
     frame:RegisterEvent(events.ADDON_ACTION_BLOCKED)
     frame:RegisterEvent(events.ADDON_ACTION_FORBIDDEN)
 end

@@ -64,7 +64,7 @@ local function OnLoadAddon(_, _, name)
 end
 
 addon.Loader = wow.CreateFrame("Frame")
-addon.Loader:HookScript("OnEvent", OnLoadAddon)
+addon.Loader:SetScript("OnEvent", OnLoadAddon)
 addon.Loader:RegisterEvent("ADDON_LOADED")
 
 FrameSort = addon

@@ -197,7 +197,7 @@ function M:Build(parent)
     panel.name = L["Spacing"]
     panel.parent = parent.name
 
-    panel:HookScript("OnShow", RefreshValues)
+    panel:SetScript("OnShow", RefreshValues)
     fsConfig:RegisterConfigurationChangedCallback(RefreshValues)
 
     local spacingTitle = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")

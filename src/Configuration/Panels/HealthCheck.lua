@@ -27,7 +27,7 @@ function M:Build(parent)
     helpTitle:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
     helpTitle:SetText(L["Try this"])
 
-    panel:HookScript("OnShow", function()
+    panel:SetScript("OnShow", function()
         local healthy, results = fsHealth:IsHealthy()
 
         if not healthy then

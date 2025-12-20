@@ -29,7 +29,7 @@ function M:Build(parent)
         addon.DB.Options.AutoLeader.Enabled = box:GetChecked()
     end
 
-    enabled:HookScript("OnClick", OnClick)
+    enabled:SetScript("OnClick", OnClick)
 
     return panel
 end

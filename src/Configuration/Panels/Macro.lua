@@ -45,7 +45,7 @@ function M:Build(parent)
     countLine:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -verticalSpacing)
     countLine:SetText(string.format(countText, 0))
 
-    panel:HookScript("OnShow", function()
+    panel:SetScript("OnShow", function()
         local count = CountMacros()
         countLine:SetText(string.format(countText, count))
     end)

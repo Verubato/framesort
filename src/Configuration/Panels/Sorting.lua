@@ -46,10 +46,10 @@ local function BuiltTitle(panel)
         end
     end
 
-    panel:HookScript("OnShow", onShow)
+    panel:SetScript("OnShow", onShow)
 
     local loader = wow.CreateFrame("Frame", nil, panel)
-    loader:HookScript("OnEvent", onShow)
+    loader:SetScript("OnEvent", onShow)
     loader:RegisterEvent("PLAYER_ENTERING_WORLD")
 
     return dynamicAnchor
@@ -135,7 +135,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         end
 
         for chkbox, _ in pairs(playerModes) do
-            chkbox:HookScript("OnClick", onPlayerClick)
+            chkbox:SetScript("OnClick", onPlayerClick)
         end
     end
 
@@ -200,10 +200,10 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
     end
 
     for chkbox, _ in pairs(modes) do
-        chkbox:HookScript("OnClick", onModeClick)
+        chkbox:SetScript("OnClick", onModeClick)
     end
 
-    reverse:HookScript("OnClick", function()
+    reverse:SetScript("OnClick", function()
         options.Reverse = reverse:GetChecked()
         fsConfig:NotifyChanged()
         fsModules:Run()
@@ -230,7 +230,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         reverse:SetChecked(options.Reverse)
     end
 
-    parentPanel:HookScript("OnShow", refresh)
+    parentPanel:SetScript("OnShow", refresh)
     fsConfig:RegisterConfigurationChangedCallback(refresh)
 
     local controls = {
@@ -260,7 +260,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         end
     end
 
-    enabled:HookScript("OnClick", function()
+    enabled:SetScript("OnClick", function()
         local checked = enabled:GetChecked()
 
         options.Enabled = checked
