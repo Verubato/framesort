@@ -15,7 +15,7 @@ local function VisualOrder(frames)
     return fsEnumerable
         :From(frames)
         :Where(function(x)
-            return x:IsVisible()
+            return x.IsVisible and x:IsVisible()
         end)
         :OrderBy(function(x, y)
             return fsCompare:CompareTopLeftFuzzy(x, y)
@@ -76,7 +76,7 @@ function M:ArenaFrames()
 
     -- prefer Blizzard frames
     if fsProviders.Blizzard:Enabled() then
-        frames = fsFrame:ArenaFrames(fsProviders.Blizzard)
+        frames = fsFrame:ArenaFrames(fsProviders.Blizzard, true)
     end
 
     if not frames or #frames == 0 then
@@ -88,7 +88,7 @@ function M:ArenaFrames()
             :ToTable()
 
         for _, provider in ipairs(nonBlizzard) do
-            frames = fsFrame:ArenaFrames(provider)
+            frames = fsFrame:ArenaFrames(provider, true)
 
             if #frames > 0 then
                 break
