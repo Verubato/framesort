@@ -1,25 +1,84 @@
 ---@type string, Addon
 local _, addon = ...
-local wow = addon.WoW.Api
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsLuaEx = addon.Language.LuaEx
 local fsLog = addon.Logging.Log
+local wow = addon.WoW.Api
+local capabilities = addon.WoW.Capabilities
+local events = addon.WoW.Events
 local M = {}
+local eventFrame = nil
+local sortCallbacks = {}
 
 fsProviders.BattleGroundEnemies = M
 table.insert(fsProviders.All, M)
+
+local function RequestSort(reason)
+    for _, callback in ipairs(sortCallbacks) do
+        callback(M, reason)
+    end
+end
+
+local function OnEvent(_, event)
+    RequestSort(event)
+end
+
+local function OnUpdateArenaPlayers()
+    RequestSort("UpdateArenaPlayers hook")
+end
+
+local function OnGroupRosterUpdate()
+    RequestSort("GROUP_ROSTER_UPDATE hook")
+end
 
 function M:Name()
     return "BattleGroundEnemies"
 end
 
 function M:Enabled()
-    return BattleGroundEnemies and type(BattleGroundEnemies) == "table"
+    return wow.GetAddOnEnableState("BattleGroundEnemies") ~= 0
 end
 
-function M:Init() end
-function M:RegisterRequestSortCallback() end
+function M:Init()
+    if not M:Enabled() then
+        return
+    end
+
+    eventFrame = wow.CreateFrame("Frame")
+    eventFrame:HookScript("OnEvent", OnEvent)
+
+    if BattleGroundEnemies and BattleGroundEnemies.UpdateArenaPlayers then
+        wow.hooksecurefunc(BattleGroundEnemies, "UpdateArenaPlayers", OnUpdateArenaPlayers)
+    else
+        fsLog:Bug("Unable to hook BattleGroundEnemies:UpdateArenaPlayers.")
+
+        -- fallback to using events
+        eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
+
+        if capabilities.HasEnemySpecSupport() then
+            eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
+        end
+    end
+
+    if BattleGroundEnemies and BattleGroundEnemies.GROUP_ROSTER_UPDATE then
+        wow.hooksecurefunc(BattleGroundEnemies, "GROUP_ROSTER_UPDATE", OnGroupRosterUpdate)
+    else
+        fsLog:Bug("Unable to hook BattleGroundEnemies:GROUP_ROSTER_UPDATE.")
+
+        eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
+    end
+end
+
+function M:RegisterRequestSortCallback(callback)
+    if not callback then
+        fsLog:Bug("BattleGroundEnemies:RegisterRequestSortCallback() - callback must not be nil.")
+        return
+    end
+
+    sortCallbacks[#sortCallbacks + 1] = callback
+end
+
 function M:RegisterContainersChangedCallback() end
 
 function M:Containers()
@@ -51,7 +110,7 @@ function M:Containers()
                     Vertical = verticalSpacing or 40,
                 }
             end,
-            EnableInBattlegrounds = false
+            EnableInBattlegrounds = false,
         }
     end
 
@@ -71,7 +130,7 @@ function M:Containers()
                     Vertical = verticalSpacing or 40,
                 }
             end,
-            EnableInBattlegrounds = false
+            EnableInBattlegrounds = false,
         }
     end
 

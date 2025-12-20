@@ -1,15 +1,18 @@
 ---@type string, Addon
 local _, addon = ...
-local wow = addon.WoW.Api
 local capabilites = addon.WoW.Capabilities
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsScheduler = addon.Scheduling.Scheduler
-local events = addon.WoW.Events
 local fsMath = addon.Numerics.Math
 local fsLog = addon.Logging.Log
+local wow = addon.WoW.Api
+local events = addon.WoW.Events
+local capabilities = addon.WoW.Capabilities
 ---@class BlizzardFrameProvider: FrameProvider
 local M = {}
+local eventFrame = nil
+local timerFrame = nil
 local layoutEventFrame = nil
 local cvarEventFrame = nil
 local pvpStateFrame = nil
@@ -34,9 +37,9 @@ local taintWorkaround = nil
 fsProviders.Blizzard = M
 table.insert(fsProviders.All, M)
 
-local function RequestSort()
+local function RequestSort(reason)
     for _, callback in ipairs(sortCallbacks) do
-        callback(M)
+        callback(M, reason)
     end
 end
 
@@ -47,35 +50,26 @@ local function RequestUpdateContainers()
 end
 
 local function OnLayoutsApplied()
-    fsLog:Debug("Edit mode layout was applied, requesting container update.")
     -- user or system changed their layout
     RequestUpdateContainers()
 end
 
 local function OnEditModeExited()
-    fsLog:Debug("Edit mode was closed, requesting sort and container update.")
-
     RequestUpdateContainers()
-    RequestSort()
+    RequestSort("Edit mode exited")
 end
 
 local function OnRaidGroupLoaded()
-    fsLog:Debug("Raid group frame was loaded, requesting container update.")
-
     -- refresh group frame offsets once a group has been loaded
     RequestUpdateContainers()
 end
 
 local function OnRaidContainerSizeChanged()
-    fsLog:Debug("Raid container frame size changed, requesting container update.")
-
     RequestUpdateContainers()
 end
 
 local function OnPvpStateChanged()
-    fsLog:Debug("PvP match state changed, requesting sort.")
-
-    RequestSort()
+    RequestSort("PvP match state changed")
 end
 
 local function OnCvarUpdate(_, _, name)
@@ -86,7 +80,6 @@ local function OnCvarUpdate(_, _, name)
 
     for _, cvar in ipairs(cvarsToUpdateContainer) do
         if name == cvar then
-            fsLog:Debug("Detected cvar update for %s, requesting container update.", name)
             RequestUpdateContainers()
             break
         end
@@ -94,26 +87,16 @@ local function OnCvarUpdate(_, _, name)
 
     for _, pattern in ipairs(cvarsPatternsToRunSort) do
         if string.match(name, pattern) then
-            fsLog:Debug("Detected cvar update for %s, requesting sort.", name)
             -- run next frame to allow cvars to take effect
-            fsScheduler:RunNextFrame(RequestSort)
+            fsScheduler:RunNextFrame(function()
+                RequestSort(string.format("CVar %s changed", name))
+            end)
             break
         end
     end
 end
 
-local function GetOffset(container)
-    if container and container.title and type(container.title) == "table" and type(container.title.GetHeight) == "function" then
-        return {
-            X = 0,
-            Y = -container.title:GetHeight(),
-        }
-    end
-
-    return nil
-end
-
-local function CombatChanging(_, event)
+local function OnCombatChanging(_, event)
     if not wow.CompactArenaFrame then
         return
     end
@@ -133,6 +116,29 @@ local function CombatChanging(_, event)
             wow.CompactArenaFrame:RegisterEvent(ev)
         end
     end
+end
+
+local function OnTimer(_, _, timerType, timeSeconds)
+    -- this is currently needed for TBC classic as sometimes frames aren't sorted in the prep room for some reason
+    -- TODO: why aren't frames sorted in the prep room
+    fsScheduler:RunAfter(timeSeconds, function()
+        RequestSort("Timer trigger")
+    end)
+end
+
+local function OnEvent(_, event)
+    RequestSort(event)
+end
+
+local function GetOffset(container)
+    if container and container.title and type(container.title) == "table" and type(container.title.GetHeight) == "function" then
+        return {
+            X = 0,
+            Y = -container.title:GetHeight(),
+        }
+    end
+
+    return nil
 end
 
 function M:Name()
@@ -160,6 +166,25 @@ function M:Init()
     if not M:Enabled() then
         return
     end
+
+    eventFrame = wow.CreateFrame("Frame")
+    eventFrame:HookScript("OnEvent", OnEvent)
+    eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
+    eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
+    eventFrame:RegisterEvent(events.PLAYER_SPECIALIZATION_CHANGED)
+    eventFrame:RegisterEvent(events.UNIT_PET)
+    eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
+
+    -- testing to see if this fixes the issue in TBC classic of frames not being sorted in the prep room
+    eventFrame:RegisterEvent(events.PLAYER_ENTERING_WORLD)
+
+    if capabilities.HasEnemySpecSupport() then
+        eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
+    end
+
+    timerFrame = wow.CreateFrame("Frame")
+    timerFrame:HookScript("OnEvent", OnTimer)
+    timerFrame:RegisterEvent(events.START_TIMER)
 
     if capabilites.HasEditMode() then
         wow.EventRegistry:RegisterCallback(events.EditModeExit, OnEditModeExited)
@@ -191,7 +216,7 @@ function M:Init()
         combatStatusFrame = wow.CreateFrame("Frame")
         combatStatusFrame:RegisterEvent(events.PLAYER_REGEN_ENABLED)
         combatStatusFrame:RegisterEvent(events.PLAYER_REGEN_DISABLED)
-        combatStatusFrame:HookScript("OnEvent", CombatChanging)
+        combatStatusFrame:HookScript("OnEvent", OnCombatChanging)
 
         -- compact arena frame listens and refreshes it's members on this event
         pvpStateFrame = wow.CreateFrame("Frame")
@@ -204,7 +229,7 @@ end
 
 function M:RegisterRequestSortCallback(callback)
     if not callback then
-        fsLog:Error("Blizzard:RegisterRequestSortCallback() - callback must not be nil.")
+        fsLog:Bug("Blizzard:RegisterRequestSortCallback() - callback must not be nil.")
         return
     end
 
@@ -213,7 +238,7 @@ end
 
 function M:RegisterContainersChangedCallback(callback)
     if not callback then
-        fsLog:Error("Blizzard:RegisterContainersChangedCallback() - callback must not be nil.")
+        fsLog:Bug("Blizzard:RegisterContainersChangedCallback() - callback must not be nil.")
         return
     end
 
