@@ -10,6 +10,7 @@ local wow = addon.WoW.Api
 local events = addon.WoW.Events
 local capabilities = addon.WoW.Capabilities
 local M = addon.Modules
+local eventFrame = nil
 local timerFrame = nil
 local combatFrame = nil
 local run = false
@@ -31,6 +32,12 @@ local function OnProviderRequiresSort(provider, reason)
     fsLog:Debug("Provider '%s' requested sort due to '%s'.", provider and provider:Name() or "nil", reason or "nil")
 
     ScheduleSort(provider)
+end
+
+local function OnEnteringWorld()
+    fsLog:Debug("Scheduling sort after loading screen.")
+
+    ScheduleSort()
 end
 
 local function Run(forceRunAll)
@@ -167,7 +174,7 @@ function M:Run(providers)
         local stop = wow.GetTimePreciseSec()
         fsLog:Debug("Run time took %fms", (stop - start) * 1000)
     end, "Runner")
-        fsLog:Debug("--- Finished run. ---")
+    fsLog:Debug("--- Finished run. ---")
 end
 
 ---Initialises all modules.
@@ -192,6 +199,10 @@ function M:Init()
     combatFrame:HookScript("OnEvent", OnCombatStateChanged)
     combatFrame:RegisterEvent(events.PLAYER_REGEN_DISABLED)
     combatFrame:RegisterEvent(events.PLAYER_REGEN_ENABLED)
+
+    eventFrame = wow.CreateFrame("Frame")
+    eventFrame:RegisterEvent(events.PLAYER_ENTERING_WORLD)
+    eventFrame:HookScript("OnEvent", OnEnteringWorld)
 
     fsInspector:RegisterCallback(OnInspectorInfo)
 end
