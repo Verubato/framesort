@@ -44,7 +44,7 @@ end
 
 function M:RegisterContainersChangedCallback() end
 
-function M:ProcessEvent(event, ...)
+function M:ProcessEvent(event)
     if not useEvents then
         return
     end

@@ -22,10 +22,22 @@ local function RequestSort(reason)
 end
 
 local function OnUpdateArenaPlayers()
+    local target = BattleGroundEnemies and BattleGroundEnemies.Enemies
+
+    if not target or not target.IsVisible or not target:IsVisible() then
+        return
+    end
+
     RequestSort("UpdateArenaPlayers hook")
 end
 
 local function OnGroupRosterUpdate()
+    local target = BattleGroundEnemies and BattleGroundEnemies.Allies
+
+    if not target or not target.IsVisible or not target:IsVisible() then
+        return
+    end
+
     RequestSort("GROUP_ROSTER_UPDATE hook")
 end
 
