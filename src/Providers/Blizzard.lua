@@ -6,6 +6,7 @@ local fsProviders = addon.Providers
 local fsScheduler = addon.Scheduling.Scheduler
 local fsMath = addon.Numerics.Math
 local fsLog = addon.Logging.Log
+local fsConfig = addon.Configuration
 local wow = addon.WoW.Api
 local events = addon.WoW.Events
 local capabilities = addon.WoW.Capabilities
@@ -66,6 +67,18 @@ end
 
 local function OnRaidContainerSizeChanged()
     RequestUpdateContainers()
+
+    if addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Secure then
+        RequestSort("CompactRaidFrameContainer_OnSizeChanged hook")
+    end
+end
+
+local function OnRaidLayoutFrames()
+    if addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Secure then
+        -- only fire if we are using secure mode, otherwise we can end up in an infinite loop
+        -- i.e. in traditional: layout frames -> request sort -> setflowfunc -> layout frames -> repeat
+        RequestSort("CompactRaidFrameContainer_LayoutFrames hook")
+    end
 end
 
 local function OnPvpStateChanged()
@@ -201,12 +214,19 @@ function M:Init()
     cvarEventFrame:RegisterEvent(events.CVAR_UPDATE)
 
     if CompactRaidGroup_OnLoad then
+        -- TODO: I don't remember why this is here, is it needed?
         wow.hooksecurefunc("CompactRaidGroup_OnLoad", OnRaidGroupLoaded)
     end
 
     if CompactRaidFrameContainer_OnSizeChanged then
         -- classic uses the container size to determine frames per line
+        -- and MoP needs it to re-sort on changing size
         wow.hooksecurefunc("CompactRaidFrameContainer_OnSizeChanged", OnRaidContainerSizeChanged)
+    end
+
+    if CompactRaidFrameContainer_LayoutFrames then
+        -- MoP needs this to re-sort on layout frames
+        wow.hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", OnRaidLayoutFrames)
     end
 
     if wow.CompactArenaFrame then
@@ -215,7 +235,7 @@ function M:Init()
         combatStatusFrame:RegisterEvent(events.PLAYER_REGEN_DISABLED)
         combatStatusFrame:HookScript("OnEvent", OnCombatChanging)
 
-        -- compact arena frame listens and refreshes it's members on this event
+        -- CompactArenaFrame listens and refreshes it's members on this event
         pvpStateFrame = wow.CreateFrame("Frame")
         pvpStateFrame:HookScript("OnEvent", OnPvpStateChanged)
         pvpStateFrame:RegisterEvent(events.PVP_MATCH_STATE_CHANGED)
