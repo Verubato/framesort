@@ -80,6 +80,14 @@ function M:ProcessEvent(event)
         RequestSort(event)
     elseif event == events.ARENA_PREP_OPPONENT_SPECIALIZATIONS then
         RequestSort(event)
+    elseif event == events.GROUP_ROSTER_UPDATE then
+        RequestSort(event)
+    elseif event == events.PLAYER_ROLES_ASSIGNED then
+        RequestSort(event)
+    elseif event == events.PLAYER_SPECIALIZATION_CHANGED then
+        RequestSort(event)
+    elseif event == events.UNIT_PET then
+        RequestSort(event)
     end
 end
 
