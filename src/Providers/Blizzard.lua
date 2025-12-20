@@ -175,9 +175,6 @@ function M:Init()
     eventFrame:RegisterEvent(events.UNIT_PET)
     eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
 
-    -- testing to see if this fixes the issue in TBC classic of frames not being sorted in the prep room
-    eventFrame:RegisterEvent(events.PLAYER_ENTERING_WORLD)
-
     if capabilities.HasEnemySpecSupport() then
         eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
     end
