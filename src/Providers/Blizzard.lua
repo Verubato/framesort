@@ -225,7 +225,7 @@ function M:Init()
     end
 
     if CompactRaidFrameContainer_LayoutFrames then
-        -- MoP needs this to re-sort on layout frames
+        -- MoP needs this to re-sort on changing raid settings
         wow.hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", OnRaidLayoutFrames)
     end
 
