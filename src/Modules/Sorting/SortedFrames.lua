@@ -72,6 +72,14 @@ end
 ---Prefers blizzard frames over other providers.
 ---@return table
 function M:ArenaFrames()
+    local inInstance, instanceType = wow.IsInInstance()
+
+    -- in bgs we get rubbish unit ids like "raid4target" and "nameplate1" from some frame providers
+    -- so only get arena frames if we're actually in arena
+    if not inInstance or instanceType ~= "arena" then
+        return {}
+    end
+
     local frames = nil
 
     -- prefer Blizzard frames
