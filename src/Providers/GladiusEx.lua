@@ -52,10 +52,6 @@ local function OnUpdateFrames()
     RequestSort("UpdateFrames hook")
 end
 
-local function OnEvent(_, event)
-    RequestSort(event)
-end
-
 function M:Name()
     return "GladiusEx"
 end
