@@ -36,7 +36,7 @@ function M:Name()
 end
 
 function M:Enabled()
-    return wow.GetAddOnEnableState("Gladdy") ~= 0
+    return wowEx.IsAddOnEnabled("Gladdy")
 end
 
 function M:Init()

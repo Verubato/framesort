@@ -6,6 +6,7 @@ local fsLuaEx = addon.Language.LuaEx
 local fsLog = addon.Logging.Log
 local fsScheduler = addon.Scheduling.Scheduler
 local wow = addon.WoW.Api
+local wowEx = addon.WoW.WowEx
 local events = addon.WoW.Events
 local M = {}
 local eventFrame = nil
@@ -38,7 +39,7 @@ function M:Name()
 end
 
 function M:Enabled()
-    return wow.GetAddOnEnableState("Grid2") ~= 0
+    return wowEx.IsAddOnEnabled("Grid2")
 end
 
 function M:Init()

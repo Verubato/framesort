@@ -129,4 +129,8 @@ addon.WoW.WowEx = {
 
         return spec
     end,
+
+    IsAddOnEnabled = function(addonName)
+        return wow.GetAddOnEnableState(addonName, wow.UnitName("player")) == 2
+    end,
 }

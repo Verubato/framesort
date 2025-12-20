@@ -4,6 +4,7 @@ local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsLog = addon.Logging.Log
 local wow = addon.WoW.Api
+local wowEx = addon.WoW.WowEx
 local events = addon.WoW.Events
 local M = {}
 local eventFrame = nil
@@ -42,7 +43,7 @@ local function IntegrationEnabled()
 end
 
 local function ElvUiEnabled()
-    return wow.GetAddOnEnableState("ElvUI") ~= 0 and ElvUI ~= nil
+    return wowEx.IsAddOnEnabled("ElvUI")
 end
 
 local function OnEvent(_, event)
