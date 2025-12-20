@@ -71,7 +71,7 @@ function M:Init()
     if GladiusEx and GladiusEx.UpdateFrames then
         wow.hooksecurefunc(GladiusEx, "UpdateFrames", OnUpdateFrames)
     else
-        fsLog:Bug("Unable to hook GladiusEx:UpdateFrames.")
+        fsLog:Bug("GladiusEx:UpdateFrames is n il.")
 
         -- fallback to using events
         eventFrame = wow.CreateFrame("Frame")

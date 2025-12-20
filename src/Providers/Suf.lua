@@ -48,12 +48,12 @@ function M:Init()
     local canHook = true
 
     if not ShadowUF then
-        fsLog:Bug("Missing ShadowUF.")
+        fsLog:Bug("ShadowUF is nil.")
         canHook = false
     end
 
     if ShadowUF and not ShadowUF.OnInitialize then
-        fsLog:Bug("Missing  ShadowUF:OnInitialize.")
+        fsLog:Bug("ShadowUF:OnInitialize is nil.")
         canHook = false
     end
 
