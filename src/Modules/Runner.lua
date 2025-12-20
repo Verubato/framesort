@@ -11,7 +11,6 @@ local events = addon.WoW.Events
 local capabilities = addon.WoW.Capabilities
 local M = addon.Modules
 local timerFrame = nil
-local eventFrame = nil
 local combatFrame = nil
 local run = false
 local runAll = false
@@ -28,8 +27,9 @@ local function ScheduleSort(provider)
     end
 end
 
-local function OnProviderRequiresSort(provider)
-    fsLog:Debug("Provider %s requested sort.", provider:Name())
+local function OnProviderRequiresSort(provider, reason)
+    fsLog:Debug("Provider '%s' requested sort due to '%s'.", provider and provider:Name() or "nil", reason or "nil")
+
     ScheduleSort(provider)
 end
 
@@ -93,15 +93,6 @@ local function OnCombatStateChanged(_, event)
     Run(true)
 end
 
-local function OnTimer(_, _, timerType, timeSeconds)
-    -- this is currently needed for TBC classic as sometimes frames aren't sorted in the prep room for some reason
-    -- TODO: why aren't frames sorted in the prep room
-    fsScheduler:RunAfter(timeSeconds + 1, function()
-        fsLog:Debug("Timer requested sort.")
-        ScheduleSort()
-    end)
-end
-
 local function OnInspectorInfo()
     -- technically it's beneficial if we know at least 2 specs then perform a sort
     -- but from a practical standpoint it's probably better for performance to wait until we have quorum
@@ -150,18 +141,10 @@ local function OnUpdate()
     Run()
 end
 
-local function OnEvent(_, event)
-    fsLog:Debug("Event: %s", event)
-
-    -- flag that a run needs to occur
-    -- the reason we do this instead of just running straight away is because multiple events may have fired during a single frame
-    -- and for efficiency/performance sake we only want to run once
-    ScheduleSort()
-end
-
 function M:Run(providers)
     fsScheduler:RunWhenCombatEnds(function()
         local start = wow.GetTimePreciseSec()
+        fsLog:Debug("--- Starting run. ---")
 
         -- run auto promotion first
         addon.Modules.AutoLeader:Run()
@@ -182,8 +165,9 @@ function M:Run(providers)
         addon.Modules.Macro:Run()
 
         local stop = wow.GetTimePreciseSec()
-        fsLog:Debug("Overall run time took %fms", (stop - start) * 1000)
+        fsLog:Debug("Run time took %fms", (stop - start) * 1000)
     end, "Runner")
+        fsLog:Debug("--- Finished run. ---")
 end
 
 ---Initialises all modules.
@@ -198,44 +182,16 @@ function M:Init()
     addon.Modules.UnitTracker:Init()
 
     for _, provider in ipairs(fsProviders.All) do
-        -- for any special events that individual providers request a sort for
         provider:RegisterRequestSortCallback(OnProviderRequiresSort)
     end
 
-    -- delay the event subscriptions to hopefully help with being notified after other addons
-    -- probably not needed anymore now that we sort in OnUpdate
-    fsScheduler:RunWhenEnteringWorldOnce(function()
-        timerFrame = wow.CreateFrame("Frame")
-        timerFrame:HookScript("OnEvent", OnTimer)
-        timerFrame:HookScript("OnUpdate", OnUpdate)
-        timerFrame:RegisterEvent(events.START_TIMER)
+    timerFrame = wow.CreateFrame("Frame")
+    timerFrame:HookScript("OnUpdate", OnUpdate)
 
-        eventFrame = wow.CreateFrame("Frame")
-        eventFrame:HookScript("OnEvent", OnEvent)
-        eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
-        eventFrame:RegisterEvent(events.UNIT_PET)
-
-        -- testing to see if this fixes the issue in TBC classic of frames not being sorted in the prep room
-        eventFrame:RegisterEvent(events.PLAYER_ENTERING_WORLD)
-
-        -- sometimes there is a delay from when a person joins group until their role is assigned
-        -- so trigger a sort once we know their role
-        eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
-        eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
-
-        if capabilities.HasEnemySpecSupport() then
-            eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
-        end
-
-        combatFrame = wow.CreateFrame("Frame")
-        combatFrame:HookScript("OnEvent", OnCombatStateChanged)
-        combatFrame:RegisterEvent(events.PLAYER_REGEN_DISABLED)
-        combatFrame:RegisterEvent(events.PLAYER_REGEN_ENABLED)
-
-        -- perform the initial run
-        fsLog:Debug("First run.")
-        M:Run()
-    end)
+    combatFrame = wow.CreateFrame("Frame")
+    combatFrame:HookScript("OnEvent", OnCombatStateChanged)
+    combatFrame:RegisterEvent(events.PLAYER_REGEN_DISABLED)
+    combatFrame:RegisterEvent(events.PLAYER_REGEN_ENABLED)
 
     fsInspector:RegisterCallback(OnInspectorInfo)
 end

@@ -1,25 +1,58 @@
 ---@type string, Addon
 local _, addon = ...
-local wow = addon.WoW.Api
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsLuaEx = addon.Language.LuaEx
 local fsLog = addon.Logging.Log
+local wow = addon.WoW.Api
+local events = addon.WoW.Events
 local M = {}
+local sortCallbacks = {}
+local eventFrame = nil
 
 fsProviders.Cell = M
 table.insert(fsProviders.All, M)
+
+local function RequestSort(reason)
+    for _, callback in ipairs(sortCallbacks) do
+        callback(M, reason)
+    end
+end
+
+local function OnEvent(_, event)
+    RequestSort(event)
+end
 
 function M:Name()
     return "Cell"
 end
 
 function M:Enabled()
-    return wow.GetAddOnEnableState("Cell") ~= 0 and Cell ~= nil
+    return wow.GetAddOnEnableState("Cell") ~= 0
 end
 
-function M:Init() end
-function M:RegisterRequestSortCallback() end
+function M:Init()
+    if not M:Enabled() then
+        return
+    end
+
+    eventFrame = wow.CreateFrame("Frame")
+    eventFrame:HookScript("OnEvent", OnEvent)
+    eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
+    eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
+    eventFrame:RegisterEvent(events.PLAYER_SPECIALIZATION_CHANGED)
+    eventFrame:RegisterEvent(events.UNIT_PET)
+end
+
+function M:RegisterRequestSortCallback(callback)
+    if not callback then
+        fsLog:Bug("Cell:RegisterRequestSortCallback() - callback must not be nil.")
+        return
+    end
+
+    sortCallbacks[#sortCallbacks + 1] = callback
+end
+
 function M:RegisterContainersChangedCallback() end
 
 function M:Containers()

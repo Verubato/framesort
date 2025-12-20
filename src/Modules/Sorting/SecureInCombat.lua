@@ -1694,6 +1694,9 @@ secureMethods["TrySort"] = [[
 
     if not friendlyEnabled and not enemyEnabled then return false end
 
+    run:CallMethod("Log", "--- Starting in-combat run. ---", LogLevel.Debug)
+    run:CallMethod("StartTimer", "SecureRun")
+
     local loadedUnits = self:GetAttribute("LoadedUnits")
     if not loadedUnits then
         run:RunAttribute("LoadUnits")
@@ -1751,7 +1754,7 @@ secureMethods["TrySort"] = [[
         Container = item.Container
         Provider = item.Provider
 
-        run:CallMethod("StartTimer", "TrySort")
+        run:CallMethod("StartTimer", "TrySortContainer")
 
         local providerSorted = false
 
@@ -1762,7 +1765,7 @@ secureMethods["TrySort"] = [[
         end
 
         local message = format("In-combat sort for %s took %sms, result: %s.", Provider and Provider.Name or "nil", "%f", providerSorted and "sorted" or "not sorted")
-        run:CallMethod("StopTimer", "TrySort", message)
+        run:CallMethod("StopTimer", "TrySortContainer", message)
         Provider = nil
         Container = nil
 
@@ -1772,6 +1775,9 @@ secureMethods["TrySort"] = [[
     if sorted then
         run:CallMethod("NotifySorted")
     end
+
+    run:CallMethod("StopTimer", "SecureRun", "Combat run time took %fms.")
+    run:CallMethod("Log", "--- Finished in-combat run. ---", LogLevel.Debug)
 
     return sorted
 ]]

@@ -1,23 +1,34 @@
 ---@type string, Addon
 local _, addon = ...
-local wow = addon.WoW.Api
-local wowEx = addon.WoW.WowEx
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsCompare = addon.Modules.Sorting.Comparer
 local fsLuaEx = addon.Language.LuaEx
 local fsEnumerable = addon.Collections.Enumerable
 local fsLog = addon.Logging.Log
+local wow = addon.WoW.Api
+local wowEx = addon.WoW.WowEx
+local capabilities = addon.WoW.Capabilities
+local events = addon.WoW.Events
 local M = {}
+local eventFrame = nil
 local sortCallbacks = {}
 
 fsProviders.Gladius = M
 table.insert(fsProviders.All, M)
 
-local function RequestSort()
+local function RequestSort(reason)
     for _, callback in ipairs(sortCallbacks) do
-        callback(M)
+        callback(M, reason)
     end
+end
+
+local function OnUpdateUnit()
+    RequestSort("UpdateUnit hook")
+end
+
+local function OnEvent(_, event)
+    RequestSort(event)
 end
 
 function M:Name()
@@ -29,18 +40,29 @@ function M:Enabled()
 end
 
 function M:Init()
+    if not M:Enabled() then
+        return
+    end
+
     if Gladius and Gladius.UpdateUnit then
-        -- UpdateUnit moves the arena1 frame, so we need to resort
-        wow.hooksecurefunc(Gladius, "UpdateUnit", function()
-            fsLog:Debug("Gladius updated units, requesting sort.")
-            RequestSort()
-        end)
+        wow.hooksecurefunc(Gladius, "UpdateUnit", OnUpdateUnit)
+    else
+        fsLog:Bug("Unable to hook Gladius:UpdateUnit.")
+
+        -- fallback to using events
+        eventFrame = wow.CreateFrame("Frame")
+        eventFrame:HookScript("OnEvent", OnEvent)
+        eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
+
+        if capabilities.HasEnemySpecSupport() then
+            eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
+        end
     end
 end
 
 function M:RegisterRequestSortCallback(callback)
     if not callback then
-        fsLog:Error("Gladius:RegisterRequestSortCallback() - callback must not be nil.")
+        fsLog:Bug("Gladius:RegisterRequestSortCallback() - callback must not be nil.")
         return
     end
 

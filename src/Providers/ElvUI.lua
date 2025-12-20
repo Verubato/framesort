@@ -1,16 +1,31 @@
 ---@type string, Addon
 local _, addon = ...
-local wow = addon.WoW.Api
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsLog = addon.Logging.Log
+local wow = addon.WoW.Api
+local events = addon.WoW.Events
 local M = {}
 local containersChangedCallbacks = {}
+local sortCallbacks = {}
+local eventFrame = nil
 local fsPlugin = nil
 local pluginName = "FrameSort"
 
 fsProviders.ElvUI = M
 table.insert(fsProviders.All, M)
+
+local function RequestSort(reason)
+    for _, callback in ipairs(sortCallbacks) do
+        callback(M, reason)
+    end
+end
+
+local function RequestUpdateContainers()
+    for _, callback in ipairs(containersChangedCallbacks) do
+        callback(M)
+    end
+end
 
 local function IntegrationEnabled()
     if not ElvUI then
@@ -30,10 +45,12 @@ local function ElvUiEnabled()
     return wow.GetAddOnEnableState("ElvUI") ~= 0 and ElvUI ~= nil
 end
 
-local function RequestUpdateContainers()
-    for _, callback in ipairs(containersChangedCallbacks) do
-        callback(M)
+local function OnEvent(_, event)
+    if not IntegrationEnabled() then
+        return
     end
+
+    RequestSort(event)
 end
 
 function M:Name()
@@ -49,11 +66,50 @@ function M:Init()
         return
     end
 
+    eventFrame = wow.CreateFrame("Frame")
+    eventFrame:HookScript("OnEvent", OnEvent)
+    eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
+    eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
+    eventFrame:RegisterEvent(events.PLAYER_SPECIALIZATION_CHANGED)
+    eventFrame:RegisterEvent(events.UNIT_PET)
+
+    if not ElvUI then
+        fsLog:Error("ElvUI is nil.")
+        return
+    end
+
     local E, _, _, P, _ = unpack(ElvUI)
+
+    if not E then
+        fsLog:Error("ElvUI module handler is nil.")
+        return
+    end
+
+    if not P then
+        fsLog:Error("ElvUI plugin handler is nil.")
+        return
+    end
+
     local EP = LibStub("LibElvUIPlugin-1.0")
+
+    if not EP then
+        fsLog:Error("ElvUI plugin stub is nil.")
+        return
+    end
+
     local UF = E:GetModule("UnitFrames")
 
+    if not UF then
+        fsLog:Error("ElvUI unit frames is nil.")
+        return
+    end
+
     fsPlugin = E:NewModule(pluginName, "AceHook-3.0")
+
+    if not fsPlugin then
+        fsLog:Error("Failed to create ElvUI plugin module.")
+        return
+    end
 
     P[pluginName] = {
         ["Enabled"] = true,
@@ -97,11 +153,18 @@ function M:Init()
     E:RegisterModule(pluginName)
 end
 
-function M:RegisterRequestSortCallback() end
+function M:RegisterRequestSortCallback(callback)
+    if not callback then
+        fsLog:Bug("ElvUI:RegisterRequestSortCallback() - callback must not be nil.")
+        return
+    end
+
+    sortCallbacks[#sortCallbacks + 1] = callback
+end
 
 function M:RegisterContainersChangedCallback(callback)
     if not callback then
-        fsLog:Error("ElvUI:RegisterContainersChangedCallback() - callback must not be nil.")
+        fsLog:Bug("ElvUI:RegisterContainersChangedCallback() - callback must not be nil.")
         return
     end
 

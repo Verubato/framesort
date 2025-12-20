@@ -35,6 +35,7 @@
         "CompactArenaFrameTitle",
         "CompactArenaFrameMember1",
         "GladiusEx",
+        "Gladdy",
     ],
     "diagnostics.disable": [
         "inject-field",

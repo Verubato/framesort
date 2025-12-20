@@ -1,13 +1,16 @@
 ---@type string, Addon
 local _, addon = ...
-local wow = addon.WoW.Api
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsEnumerable = addon.Collections.Enumerable
 local fsCompare = addon.Modules.Sorting.Comparer
 local fsLuaEx = addon.Language.LuaEx
 local fsLog = addon.Logging.Log
+local wow = addon.WoW.Api
+local capabilities = addon.WoW.Capabilities
+local events = addon.WoW.Events
 local M = {}
+local eventFrame = nil
 local sortCallbacks = {}
 
 fsProviders.GladiusEx = M
@@ -38,14 +41,18 @@ local function CalculateSpace(container)
     }
 end
 
-local function RequestSort()
+local function RequestSort(reason)
     for _, callback in ipairs(sortCallbacks) do
-        callback(M)
+        callback(M, reason)
     end
 end
 
 local function OnUpdateFrames()
-    RequestSort()
+    RequestSort("UpdateFrames hook")
+end
+
+local function OnEvent(_, event)
+    RequestSort(event)
 end
 
 function M:Name()
@@ -61,21 +68,25 @@ function M:Init()
         return
     end
 
-    if not GladiusEx then
-        fsLog:Error("GladiusEx table is missing.")
-    end
+    if GladiusEx and GladiusEx.UpdateFrames then
+        wow.hooksecurefunc(GladiusEx, "UpdateFrames", OnUpdateFrames)
+    else
+        fsLog:Bug("Unable to hook GladiusEx:UpdateFrames.")
 
-    if not GladiusEx.UpdateFrames then
-        fsLog:Error("Unable to hook GladiusEx:UpdateFrames.")
-        return
-    end
+        -- fallback to using events
+        eventFrame = wow.CreateFrame("Frame")
+        eventFrame:HookScript("OnEvent", OnEvent)
+        eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
 
-    wow.hooksecurefunc(GladiusEx, "UpdateFrames", OnUpdateFrames)
+        if capabilities.HasEnemySpecSupport() then
+            eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
+        end
+    end
 end
 
 function M:RegisterRequestSortCallback(callback)
     if not callback then
-        fsLog:Error("GladiusEx:RegisterRequestSortCallback() - callback must not be nil.")
+        fsLog:Bug("GladiusEx:RegisterRequestSortCallback() - callback must not be nil.")
         return
     end
 

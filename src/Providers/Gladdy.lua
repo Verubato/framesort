@@ -1,18 +1,35 @@
 ---@type string, Addon
 local _, addon = ...
-local wow = addon.WoW.Api
-local wowEx = addon.WoW.WowEx
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsCompare = addon.Modules.Sorting.Comparer
 local fsLuaEx = addon.Language.LuaEx
 local fsEnumerable = addon.Collections.Enumerable
 local fsLog = addon.Logging.Log
+local wow = addon.WoW.Api
+local wowEx = addon.WoW.WowEx
+local capabilities = addon.WoW.Capabilities
+local events = addon.WoW.Events
 local M = {}
+local eventFrame = nil
 local sortCallbacks = {}
 
 fsProviders.Gladdy = M
 table.insert(fsProviders.All, M)
+
+local function RequestSort(reason)
+    for _, callback in ipairs(sortCallbacks) do
+        callback(M, reason)
+    end
+end
+
+local function OnEvent(_, event)
+    RequestSort(event)
+end
+
+local function OnUpdateFrame()
+    RequestSort("UpdateFrame hook")
+end
 
 function M:Name()
     return "Gladdy"
@@ -22,8 +39,38 @@ function M:Enabled()
     return wow.GetAddOnEnableState("Gladdy") ~= 0
 end
 
-function M:Init() end
-function M:RegisterRequestSortCallback() end
+function M:Init()
+    if not M:Enabled() then
+        return
+    end
+
+    local gladdy = LibStub and LibStub:GetLibrary("Gladdy", true)
+
+    if gladdy and gladdy.UpdateFrame then
+        wow.hooksecurefunc(gladdy, "UpdateFrame", OnUpdateFrame)
+    else
+        fsLog:Bug("Unable to hook Gladdy:UpdateFrame.")
+
+        -- fallback to using events
+        eventFrame = wow.CreateFrame("Frame")
+        eventFrame:HookScript("OnEvent", OnEvent)
+        eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
+
+        if capabilities.HasEnemySpecSupport() then
+            eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
+        end
+    end
+end
+
+function M:RegisterRequestSortCallback(callback)
+    if not callback then
+        fsLog:Bug("Gladdy:RegisterRequestSortCallback() - callback must not be nil.")
+        return
+    end
+
+    sortCallbacks[#sortCallbacks + 1] = callback
+end
+
 function M:RegisterContainersChangedCallback() end
 
 function M:Containers()
