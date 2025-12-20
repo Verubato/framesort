@@ -189,7 +189,7 @@ function M:Init()
     end
 
     timerFrame = wow.CreateFrame("Frame")
-    timerFrame:HookScript("OnUpdate", OnUpdate)
+    timerFrame:SetScript("OnUpdate", OnUpdate)
 
     fsInspector:RegisterCallback(OnInspectorInfo)
 end

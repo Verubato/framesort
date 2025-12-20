@@ -135,7 +135,7 @@ function M:Init()
     wow.hooksecurefunc("EditMacro", OnEditMacro)
 
     eventFrame = wow.CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", OnUpdateMacros)
+    eventFrame:SetScript("OnEvent", OnUpdateMacros)
     eventFrame:RegisterEvent(events.UPDATE_MACROS)
 
     fsLog:Debug("Initialised the macro module.")

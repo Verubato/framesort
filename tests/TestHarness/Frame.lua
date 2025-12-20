@@ -87,6 +87,13 @@ function M:HookScript(event, callback)
     }
 end
 
+function M:SetScript(event, callback)
+    self.State.ScriptHooks[#self.State.ScriptHooks + 1] = {
+        Event = event,
+        Callback = callback,
+    }
+end
+
 function M:RegisterEvent(event)
     self.State.EventRegistrations[#self.State.EventRegistrations + 1] = event
 end

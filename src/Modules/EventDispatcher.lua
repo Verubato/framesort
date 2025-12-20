@@ -60,7 +60,7 @@ end
 
 function M:Init()
     eventsFrame = wow.CreateFrame("Frame")
-    eventsFrame:HookScript("OnEvent", OnEvent)
+    eventsFrame:SetScript("OnEvent", OnEvent)
 
     -- loading screen
     eventsFrame:RegisterEvent(events.PLAYER_ENTERING_WORLD)
