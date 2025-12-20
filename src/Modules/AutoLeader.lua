@@ -6,7 +6,7 @@ local capabilities = addon.WoW.Capabilities
 local fsUnit = addon.WoW.Unit
 local fsEnumerable = addon.Collections.Enumerable
 local fsLog = addon.Logging.Log
----@class AutoLeaderModule : IInitialise, IRun
+---@class AutoLeaderModule : IInitialise, IProcessEvents, IRun
 local M = {}
 addon.Modules.AutoLeader = M
 
@@ -69,15 +69,18 @@ local function CanRun()
     return (wow.UnitIsGroupLeader and wow.UnitIsUnit and wow.PromoteToLeader) ~= nil
 end
 
+function M:ProcessEvent(event)
+    if event == events.PVP_MATCH_STATE_CHANGED then
+        OnStateChanged()
+    end
+end
+
 function M:Init()
     if not CanRun() then
         fsLog:Debug("AutoLeader module not loading because this wow client doesn't have solo shuffle.")
         return
     end
 
-    local frame = wow.CreateFrame("Frame")
-    frame:HookScript("OnEvent", OnStateChanged)
-    frame:RegisterEvent(events.PVP_MATCH_STATE_CHANGED)
     fsLog:Debug("Initialised the auto leader module.")
 end
 

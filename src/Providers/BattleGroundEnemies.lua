@@ -9,7 +9,7 @@ local wowEx = addon.WoW.WowEx
 local capabilities = addon.WoW.Capabilities
 local events = addon.WoW.Events
 local M = {}
-local eventFrame = nil
+local useEvents = false
 local sortCallbacks = {}
 
 fsProviders.BattleGroundEnemies = M
@@ -19,10 +19,6 @@ local function RequestSort(reason)
     for _, callback in ipairs(sortCallbacks) do
         callback(M, reason)
     end
-end
-
-local function OnEvent(_, event)
-    RequestSort(event)
 end
 
 local function OnUpdateArenaPlayers()
@@ -39,35 +35,6 @@ end
 
 function M:Enabled()
     return wowEx.IsAddOnEnabled("BattleGroundEnemies")
-end
-
-function M:Init()
-    if not M:Enabled() then
-        return
-    end
-
-    eventFrame = wow.CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", OnEvent)
-
-    if BattleGroundEnemies and BattleGroundEnemies.UpdateArenaPlayers then
-        wow.hooksecurefunc(BattleGroundEnemies, "UpdateArenaPlayers", OnUpdateArenaPlayers)
-    else
-        fsLog:Bug("BattleGroundEnemies:UpdateArenaPlayers is nil.")
-
-        eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
-
-        if capabilities.HasEnemySpecSupport() then
-            eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
-        end
-    end
-
-    if BattleGroundEnemies and BattleGroundEnemies.GROUP_ROSTER_UPDATE then
-        wow.hooksecurefunc(BattleGroundEnemies, "GROUP_ROSTER_UPDATE", OnGroupRosterUpdate)
-    else
-        fsLog:Bug("BattleGroundEnemies:GROUP_ROSTER_UPDATE is nil.")
-
-        eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
-    end
 end
 
 function M:RegisterRequestSortCallback(callback)
@@ -135,4 +102,40 @@ function M:Containers()
     end
 
     return containers
+end
+
+function M:ProcessEvent(event, ...)
+    if not useEvents then
+        return
+    end
+
+    if event == events.GROUP_ROSTER_UPDATE then
+        RequestSort(event)
+    elseif event == events.ARENA_OPPONENT_UPDATE then
+        RequestSort(event)
+    elseif event == events.ARENA_PREP_OPPONENT_SPECIALIZATIONS then
+        RequestSort(event)
+    end
+end
+
+function M:Init()
+    if not M:Enabled() then
+        return
+    end
+
+    if BattleGroundEnemies and BattleGroundEnemies.UpdateArenaPlayers then
+        wow.hooksecurefunc(BattleGroundEnemies, "UpdateArenaPlayers", OnUpdateArenaPlayers)
+    else
+        fsLog:Bug("BattleGroundEnemies:UpdateArenaPlayers is nil.")
+
+        useEvents = true
+    end
+
+    if BattleGroundEnemies and BattleGroundEnemies.GROUP_ROSTER_UPDATE then
+        wow.hooksecurefunc(BattleGroundEnemies, "GROUP_ROSTER_UPDATE", OnGroupRosterUpdate)
+    else
+        fsLog:Bug("BattleGroundEnemies:GROUP_ROSTER_UPDATE is nil.")
+
+        useEvents = true
+    end
 end

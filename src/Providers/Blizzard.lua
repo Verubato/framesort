@@ -10,13 +10,10 @@ local fsConfig = addon.Configuration
 local wow = addon.WoW.Api
 local events = addon.WoW.Events
 local capabilities = addon.WoW.Capabilities
----@class BlizzardFrameProvider: FrameProvider
+---@class BlizzardFrameProvider: FrameProvider, IProcessEvents
 local M = {}
-local eventFrame = nil
 local timerFrame = nil
 local layoutEventFrame = nil
-local cvarEventFrame = nil
-local pvpStateFrame = nil
 local sortCallbacks = {}
 local containersChangedCallbacks = {}
 local cvarsToUpdateContainer = {
@@ -85,7 +82,7 @@ local function OnPvpStateChanged()
     RequestSort("PvP match state changed")
 end
 
-local function OnCvarUpdate(_, _, name)
+local function OnCvarUpdate(name)
     if not name then
         fsLog:Error("OnCvarUpdate was called with a nil name.")
         return
@@ -109,7 +106,7 @@ local function OnCvarUpdate(_, _, name)
     end
 end
 
-local function OnCombatChanging(_, event)
+local function OnCombatChanging(event)
     if not wow.CompactArenaFrame then
         return
     end
@@ -131,16 +128,12 @@ local function OnCombatChanging(_, event)
     end
 end
 
-local function OnTimer(_, _, timerType, timeSeconds)
+local function OnTimer(timerType, timeSeconds)
     -- this is currently needed for TBC classic as sometimes frames aren't sorted in the prep room for some reason
     -- TODO: why aren't frames sorted in the prep room
     fsScheduler:RunAfter(timeSeconds, function()
         RequestSort("Timer trigger")
     end)
-end
-
-local function OnEvent(_, event)
-    RequestSort(event)
 end
 
 local function GetOffset(container)
@@ -173,75 +166,6 @@ function M:Enabled()
     end
 
     return false
-end
-
-function M:Init()
-    if not M:Enabled() then
-        return
-    end
-
-    eventFrame = wow.CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", OnEvent)
-    eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
-    eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
-    eventFrame:RegisterEvent(events.PLAYER_SPECIALIZATION_CHANGED)
-    eventFrame:RegisterEvent(events.UNIT_PET)
-    eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
-
-    if capabilities.HasEnemySpecSupport() then
-        eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
-    end
-
-    timerFrame = wow.CreateFrame("Frame")
-    timerFrame:HookScript("OnEvent", OnTimer)
-    timerFrame:RegisterEvent(events.START_TIMER)
-
-    if capabilites.HasEditMode() then
-        wow.EventRegistry:RegisterCallback(events.EditModeExit, OnEditModeExited)
-
-        fsScheduler:RunWhenEnteringWorldOnce(function()
-            -- this event always fires when loading
-            -- and we don't care about the first one
-            -- so to avoid running modules multiple times on first load, delay the event registration
-            layoutEventFrame = wow.CreateFrame("Frame")
-            layoutEventFrame:HookScript("OnEvent", OnLayoutsApplied)
-            layoutEventFrame:RegisterEvent(events.EDIT_MODE_LAYOUTS_UPDATED)
-        end)
-    end
-
-    cvarEventFrame = wow.CreateFrame("Frame")
-    cvarEventFrame:HookScript("OnEvent", OnCvarUpdate)
-    cvarEventFrame:RegisterEvent(events.CVAR_UPDATE)
-
-    if CompactRaidGroup_OnLoad then
-        -- TODO: I don't remember why this is here, is it needed?
-        wow.hooksecurefunc("CompactRaidGroup_OnLoad", OnRaidGroupLoaded)
-    end
-
-    if CompactRaidFrameContainer_OnSizeChanged then
-        -- classic uses the container size to determine frames per line
-        -- and MoP needs it to re-sort on changing size
-        wow.hooksecurefunc("CompactRaidFrameContainer_OnSizeChanged", OnRaidContainerSizeChanged)
-    end
-
-    if CompactRaidFrameContainer_LayoutFrames then
-        -- MoP needs this to re-sort on changing raid settings
-        wow.hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", OnRaidLayoutFrames)
-    end
-
-    if wow.CompactArenaFrame then
-        combatStatusFrame = wow.CreateFrame("Frame")
-        combatStatusFrame:RegisterEvent(events.PLAYER_REGEN_ENABLED)
-        combatStatusFrame:RegisterEvent(events.PLAYER_REGEN_DISABLED)
-        combatStatusFrame:HookScript("OnEvent", OnCombatChanging)
-
-        -- CompactArenaFrame listens and refreshes it's members on this event
-        pvpStateFrame = wow.CreateFrame("Frame")
-        pvpStateFrame:HookScript("OnEvent", OnPvpStateChanged)
-        pvpStateFrame:RegisterEvent(events.PVP_MATCH_STATE_CHANGED)
-    end
-
-    taintWorkaround = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureHandlerStateTemplate")
 end
 
 function M:RegisterRequestSortCallback(callback)
@@ -454,4 +378,70 @@ function M:Containers()
     end
 
     return containers
+end
+
+function M:ProcessEvent(event, ...)
+    if event == events.GROUP_ROSTER_UPDATE then
+        RequestSort(event)
+    elseif event == events.PLAYER_ROLES_ASSIGNED then
+        RequestSort(event)
+    elseif event == events.PLAYER_SPECIALIZATION_CHANGED then
+        RequestSort(event)
+    elseif event == events.UNIT_PET then
+        RequestSort(event)
+    elseif event == events.ARENA_OPPONENT_UPDATE then
+        RequestSort(event)
+    elseif event == events.ARENA_PREP_OPPONENT_SPECIALIZATIONS then
+        RequestSort(event)
+    elseif event == events.CVAR_UPDATE then
+        local name = select(1, ...)
+        OnCvarUpdate(name)
+    elseif event == events.START_TIMER then
+        local timerType, seconds = select(1, ...)
+        OnTimer(timerType, seconds)
+    elseif event == events.PVP_MATCH_STATE_CHANGED then
+        -- CompactArenaFrame listens and refreshes it's members on this event
+        OnPvpStateChanged()
+    elseif event == events.PLAYER_REGEN_ENABLED then
+        OnCombatChanging(event)
+    elseif event == events.PLAYER_REGEN_DISABLED then
+        OnCombatChanging(event)
+    end
+end
+
+function M:Init()
+    if not M:Enabled() then
+        return
+    end
+
+    if capabilites.HasEditMode() then
+        wow.EventRegistry:RegisterCallback(events.EditModeExit, OnEditModeExited)
+
+        fsScheduler:RunWhenEnteringWorldOnce(function()
+            -- this event always fires when loading
+            -- and we don't care about the first one
+            -- so to avoid running modules multiple times on first load, delay the event registration
+            layoutEventFrame = wow.CreateFrame("Frame")
+            layoutEventFrame:HookScript("OnEvent", OnLayoutsApplied)
+            layoutEventFrame:RegisterEvent(events.EDIT_MODE_LAYOUTS_UPDATED)
+        end)
+    end
+
+    if CompactRaidGroup_OnLoad then
+        -- TODO: I don't remember why this is here, is it needed?
+        wow.hooksecurefunc("CompactRaidGroup_OnLoad", OnRaidGroupLoaded)
+    end
+
+    if CompactRaidFrameContainer_OnSizeChanged then
+        -- classic uses the container size to determine frames per line
+        -- and MoP needs it to re-sort on changing size
+        wow.hooksecurefunc("CompactRaidFrameContainer_OnSizeChanged", OnRaidContainerSizeChanged)
+    end
+
+    if CompactRaidFrameContainer_LayoutFrames then
+        -- MoP needs this to re-sort on changing raid settings
+        wow.hooksecurefunc("CompactRaidFrameContainer_LayoutFrames", OnRaidLayoutFrames)
+    end
+
+    taintWorkaround = wow.CreateFrame("Frame", nil, wow.UIParent, "SecureHandlerStateTemplate")
 end

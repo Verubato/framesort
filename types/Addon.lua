@@ -41,7 +41,8 @@
 ---@class Numerics
 ---@field Math Math
 
----@class Modules : IInitialise, IRun
+---@class Modules : IInitialise, IRun, IProcessEvents
+---@field EventDispatcher EventDispatcher
 ---@field Sorting SortingModule
 ---@field HidePlayer HidePlayerModule
 ---@field Targeting TargetingModule
@@ -92,3 +93,6 @@
 
 ---@class IInitialise
 ---@field Init fun(self: table)
+
+---@class IProcessEvents
+---@field ProcessEvent fun(self: table, event: string, ...)

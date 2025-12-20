@@ -1,5 +1,5 @@
 ---@meta
----@class FrameProvider
+---@class FrameProvider: IProcessEvents
 ---@field Name fun(self: table): string Returns the display name for this provider.
 ---@field Init fun(self: table) Performs any initialisation logic the provider might have.
 ---@field Enabled fun(self: table): boolean Whether the provider is enabled.

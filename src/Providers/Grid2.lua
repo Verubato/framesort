@@ -9,7 +9,7 @@ local wow = addon.WoW.Api
 local wowEx = addon.WoW.WowEx
 local events = addon.WoW.Events
 local M = {}
-local eventFrame = nil
+local useEvents = false
 local sortCallbacks = {}
 
 fsProviders.Grid2 = M
@@ -25,51 +25,12 @@ local function OnEvent(_, event)
     RequestSort(event)
 end
 
-local function EventsFallback()
-    eventFrame = wow.CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", OnEvent)
-    eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
-    eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
-    eventFrame:RegisterEvent(events.PLAYER_SPECIALIZATION_CHANGED)
-    eventFrame:RegisterEvent(events.UNIT_PET)
-end
-
 function M:Name()
     return "Grid2"
 end
 
 function M:Enabled()
     return wowEx.IsAddOnEnabled("Grid2")
-end
-
-function M:Init()
-    if not M:Enabled() then
-        return
-    end
-
-    local canHook = true
-
-    if not Grid2Layout then
-        fsLog:Bug("Grid2Layout is nil.")
-        canHook = false
-    end
-
-    if Grid2Layout and not Grid2Layout.LoadLayout then
-        fsLog:Bug("Grid2Layout:LoadLayout is nil.")
-        canHook = false
-    end
-
-    if canHook then
-        wow.hooksecurefunc(Grid2Layout, "LoadLayout", function()
-            if Grid2LayoutHeader1 then
-                Grid2LayoutHeader1:HookScript("OnEvent", OnEvent)
-            else
-                fsLog:Bug("Grid2LayoutHeader1 is nil.")
-            end
-        end)
-    else
-        EventsFallback()
-    end
 end
 
 function M:RegisterRequestSortCallback(callback)
@@ -82,6 +43,22 @@ function M:RegisterRequestSortCallback(callback)
 end
 
 function M:RegisterContainersChangedCallback() end
+
+function M:ProcessEvent(event, ...)
+    if not useEvents then
+        return
+    end
+
+    if event == events.GROUP_ROSTER_UPDATE then
+        RequestSort(event)
+    elseif event == events.PLAYER_ROLES_ASSIGNED then
+        RequestSort(event)
+    elseif event == events.PLAYER_SPECIALIZATION_CHANGED then
+        RequestSort(event)
+    elseif event == events.UNIT_PET then
+        RequestSort(event)
+    end
+end
 
 function M:Containers()
     local containers = {}
@@ -123,4 +100,34 @@ function M:Containers()
     end
 
     return containers
+end
+
+function M:Init()
+    if not M:Enabled() then
+        return
+    end
+
+    local canHook = true
+
+    if not Grid2Layout then
+        fsLog:Bug("Grid2Layout is nil.")
+        canHook = false
+    end
+
+    if Grid2Layout and not Grid2Layout.LoadLayout then
+        fsLog:Bug("Grid2Layout:LoadLayout is nil.")
+        canHook = false
+    end
+
+    if canHook then
+        wow.hooksecurefunc(Grid2Layout, "LoadLayout", function()
+            if Grid2LayoutHeader1 then
+                Grid2LayoutHeader1:HookScript("OnEvent", OnEvent)
+            else
+                fsLog:Bug("Grid2LayoutHeader1 is nil.")
+            end
+        end)
+    else
+        useEvents = true
+    end
 end

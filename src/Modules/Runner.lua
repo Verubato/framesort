@@ -10,9 +10,7 @@ local wow = addon.WoW.Api
 local events = addon.WoW.Events
 local capabilities = addon.WoW.Capabilities
 local M = addon.Modules
-local eventFrame = nil
 local timerFrame = nil
-local combatFrame = nil
 local run = false
 local runAll = false
 ---@type { [FrameProvider]: boolean }
@@ -71,17 +69,7 @@ local function Run(forceRunAll)
     end
 end
 
-local function OnCombatStateChanged(_, event)
-    if event == events.PLAYER_REGEN_ENABLED then
-        fsLog:Debug("Leaving combat.")
-
-        -- this is just here for logging purposes
-        -- let the scheduler handle running when combat ends
-        return
-    elseif event == events.PLAYER_REGEN_DISABLED then
-        fsLog:Debug("Entering combat.")
-    end
-
+local function OnEnteringCombat()
     if not run then
         return
     end
@@ -148,6 +136,14 @@ local function OnUpdate()
     Run()
 end
 
+function M:ProcessEvent(event, ...)
+    if event == events.PLAYER_REGEN_DISABLED then
+        OnEnteringCombat()
+    elseif event == events.PLAYER_ENTERING_WORLD then
+        OnEnteringWorld()
+    end
+end
+
 function M:Run(providers)
     fsScheduler:RunWhenCombatEnds(function()
         local start = wow.GetTimePreciseSec()
@@ -194,15 +190,6 @@ function M:Init()
 
     timerFrame = wow.CreateFrame("Frame")
     timerFrame:HookScript("OnUpdate", OnUpdate)
-
-    combatFrame = wow.CreateFrame("Frame")
-    combatFrame:HookScript("OnEvent", OnCombatStateChanged)
-    combatFrame:RegisterEvent(events.PLAYER_REGEN_DISABLED)
-    combatFrame:RegisterEvent(events.PLAYER_REGEN_ENABLED)
-
-    eventFrame = wow.CreateFrame("Frame")
-    eventFrame:RegisterEvent(events.PLAYER_ENTERING_WORLD)
-    eventFrame:HookScript("OnEvent", OnEnteringWorld)
 
     fsInspector:RegisterCallback(OnInspectorInfo)
 end

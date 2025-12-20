@@ -11,7 +11,7 @@ local fsEnumerable = addon.Collections.Enumerable
 local fsLog = addon.Logging.Log
 local fsConfig = addon.Configuration
 local fsSpec = addon.Configuration.Specs
----@class InspectorModule : IInitialise
+---@class InspectorModule : IInitialise, IProcessEvents
 local M = {}
 addon.Modules.Inspector = M
 
@@ -197,18 +197,6 @@ local function InvalidateEntry(unit)
     needUpdate = true
 end
 
-local function OnEvent(_, event, arg1)
-    if event == events.INSPECT_READY then
-        if requestedUnit then
-            Inspect(requestedUnit)
-        end
-    elseif event == events.GROUP_ROSTER_UPDATE then
-        needUpdate = true
-    elseif event == events.PLAYER_SPECIALIZATION_CHANGED then
-        InvalidateEntry(arg1)
-    end
-end
-
 local function RoleSortingEnabled()
     local db = addon.DB
     local sorting = db.Options.Sorting
@@ -290,6 +278,19 @@ local function PurgeOldEntries()
     for _, guid in ipairs(toRemove) do
         fsLog:Debug("Purging expired cache entry for unit: %s", guid)
         unitGuidToSpec[guid] = nil
+    end
+end
+
+function M:ProcessEvent(event, ...)
+    if event == events.INSPECT_READY then
+        if requestedUnit then
+            Inspect(requestedUnit)
+        end
+    elseif event == events.GROUP_ROSTER_UPDATE then
+        needUpdate = true
+    elseif event == events.PLAYER_SPECIALIZATION_CHANGED then
+        local unit = select(1, ...)
+        InvalidateEntry(unit)
     end
 end
 
@@ -460,15 +461,12 @@ function M:Init()
 
     PurgeOldEntries()
 
-    local frame = wow.CreateFrame("Frame")
-    frame:HookScript("OnEvent", OnEvent)
-    frame:HookScript("OnUpdate", OnUpdate)
-    frame:RegisterEvent(events.INSPECT_READY)
-    frame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
-    frame:RegisterEvent(events.PLAYER_SPECIALIZATION_CHANGED)
-
     -- hook it so we gain the benefit inspection results from other callers
     wow.hooksecurefunc("NotifyInspect", OnNotifyInspect)
     wow.hooksecurefunc("ClearInspectPlayer", OnClearInspect)
+
+    local frame = wow.CreateFrame("Frame")
+    frame:HookScript("OnUpdate", OnUpdate)
+
     fsLog:Debug("Initialised the spec inspector module.")
 end

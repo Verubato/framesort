@@ -43,10 +43,10 @@ function addon:Init()
     addon:InitDB()
     addon.Configuration.Specs:Init()
     addon.Configuration:Init()
-    addon.Scheduling.Scheduler:Init()
     addon.Modules:Init()
     addon.Providers:Init()
     addon.Api:Init()
+    addon.Modules.EventDispatcher:Init()
 
     addon.Loaded = true
     fsLog:Debug("Initialisation finished.")

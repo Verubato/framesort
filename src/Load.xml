@@ -37,10 +37,10 @@
     <Script file="Locales\zhCN.lua"/>
     <Script file="Locales\zhTW.lua"/>
 
-    <!-- Scheduler requires core wow files -->
+    <!-- requires core wow files -->
     <Script file="Scheduling\Scheduler.lua"/>
 
-    <!-- Frame requires Comparer -->
+    <!-- requires Comparer -->
     <Script file="WoW\Frame.lua"/>
 
     <!-- Common Modules -->
@@ -50,7 +50,7 @@
     <Script file="Modules\Sorting\SortedFrames.lua"/>
     <Script file="Modules\Sorting\SortedUnits.lua"/>
 
-    <!-- Frame providers require core wow files -->
+    <!-- require core wow files -->
     <Script file="Providers\Provider.lua"/>
     <Script file="Providers\Blizzard.lua"/>
     <Script file="Providers\sArena.lua"/>
@@ -78,13 +78,16 @@
     <Script file="Modules\Macro\Macro.lua"/>
     <Script file="Modules\Runner.lua"/>
 
-    <!-- Api requires modules -->
+    <!-- requires modules and providers -->
+    <Script file="Modules\EventDispatcher.lua"/>
+
+    <!-- requires modules -->
     <Script file="Api\Api.lua"/>
     <Script file="Api\v1.lua"/>
     <Script file="Api\v2.lua"/>
     <Script file="Api\v3.lua"/>
 
-    <!-- Configuration requires modules -->
+    <!-- requires modules -->
     <Script file="Configuration\Options.lua"/>
     <Script file="Configuration\Defaults.lua"/>
     <Script file="Configuration\Upgrader.lua"/>

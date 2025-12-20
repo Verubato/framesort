@@ -11,7 +11,7 @@ local wowEx = addon.WoW.WowEx
 local capabilities = addon.WoW.Capabilities
 local events = addon.WoW.Events
 local M = {}
-local eventFrame = nil
+local useEvents = false
 local sortCallbacks = {}
 
 fsProviders.Gladdy = M
@@ -39,29 +39,6 @@ function M:Enabled()
     return wowEx.IsAddOnEnabled("Gladdy")
 end
 
-function M:Init()
-    if not M:Enabled() then
-        return
-    end
-
-    local gladdy = LibStub and LibStub:GetLibrary("Gladdy", true)
-
-    if gladdy and gladdy.UpdateFrame then
-        wow.hooksecurefunc(gladdy, "UpdateFrame", OnUpdateFrame)
-    else
-        fsLog:Bug("Gladdy:UpdateFrame is nil.")
-
-        -- fallback to using events
-        eventFrame = wow.CreateFrame("Frame")
-        eventFrame:HookScript("OnEvent", OnEvent)
-        eventFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
-
-        if capabilities.HasEnemySpecSupport() then
-            eventFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
-        end
-    end
-end
-
 function M:RegisterRequestSortCallback(callback)
     if not callback then
         fsLog:Bug("Gladdy:RegisterRequestSortCallback() - callback must not be nil.")
@@ -72,6 +49,18 @@ function M:RegisterRequestSortCallback(callback)
 end
 
 function M:RegisterContainersChangedCallback() end
+
+function M:ProcessEvent(event)
+    if not useEvents then
+        return
+    end
+
+    if event == events.ARENA_OPPONENT_UPDATE then
+        RequestSort(event)
+    elseif event == events.ARENA_PREP_OPPONENT_SPECIALIZATIONS then
+        RequestSort(event)
+    end
+end
 
 function M:Containers()
     local containers = {}
@@ -123,4 +112,20 @@ function M:Containers()
     end
 
     return containers
+end
+
+function M:Init()
+    if not M:Enabled() then
+        return
+    end
+
+    local gladdy = LibStub and LibStub:GetLibrary("Gladdy", true)
+
+    if gladdy and gladdy.UpdateFrame then
+        wow.hooksecurefunc(gladdy, "UpdateFrame", OnUpdateFrame)
+    else
+        fsLog:Bug("Gladdy:UpdateFrame is nil.")
+
+        useEvents = true
+    end
 end

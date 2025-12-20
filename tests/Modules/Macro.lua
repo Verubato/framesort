@@ -20,15 +20,19 @@ function M:setup()
     addon.Providers.All[#addon.Providers.All + 1] = provider
 
     fsFrame = addon.WoW.Frame
+---@diagnostic disable-next-line: cast-local-type
     wow = addon.WoW.Api
     events = addon.WoW.Events
 
     addon:InitDB()
     addon.Providers:Init()
-    addon.Scheduling.Scheduler:Init()
     addon.Modules:Init()
+    addon.Modules.EventDispatcher:Init()
 
     local party = fsFrame:GetContainer(provider, fsFrame.ContainerType.Party)
+
+    assert(party)
+
     local partyContainer = party.Frame
 
     local player = frameMock:New("Frame", nil, partyContainer, nil)

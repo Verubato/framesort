@@ -9,7 +9,7 @@ local events = addon.WoW.Events
 local M = {}
 local containersChangedCallbacks = {}
 local sortCallbacks = {}
-local eventFrame = nil
+local useEvents = false
 
 fsProviders.Suf = M
 table.insert(fsProviders.All, M)
@@ -24,21 +24,71 @@ local function OnEvent(_, event)
     RequestSort(event)
 end
 
-local function EventsFallback()
-    eventFrame = wow.CreateFrame("Frame")
-    eventFrame:HookScript("OnEvent", OnEvent)
-    eventFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
-    eventFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
-    eventFrame:RegisterEvent(events.PLAYER_SPECIALIZATION_CHANGED)
-    eventFrame:RegisterEvent(events.UNIT_PET)
-end
-
 function M:Name()
     return "Shadowed Unit Frames"
 end
 
 function M:Enabled()
     return wowEx.IsAddOnEnabled("ShadowedUnitFrames")
+end
+
+function M:RegisterRequestSortCallback(callback)
+    if not callback then
+        fsLog:Bug("SUF:RegisterRequestSortCallback() - callback must not be nil.")
+        return
+    end
+
+    sortCallbacks[#sortCallbacks + 1] = callback
+end
+
+function M:RegisterContainersChangedCallback() end
+
+function M:ProcessEvent(event)
+    if not useEvents then
+        return
+    end
+
+    if event == events.GROUP_ROSTER_UPDATE then
+        RequestSort(event)
+    elseif event == events.PLAYER_ROLES_ASSIGNED then
+        RequestSort(event)
+    elseif event == events.PLAYER_SPECIALIZATION_CHANGED then
+        RequestSort(event)
+    elseif event == events.UNIT_PET then
+        RequestSort(event)
+    end
+end
+
+function M:Containers()
+    local containers = {}
+
+    if not M:Enabled() then
+        return
+    end
+
+    if SUFHeaderparty then
+        ---@type FrameContainer
+        local party = {
+            Frame = SUFHeaderparty,
+            Type = fsFrame.ContainerType.Party,
+            LayoutType = fsFrame.LayoutType.NameList,
+        }
+
+        containers[#containers + 1] = party
+    end
+
+    if SUFHeaderarena then
+        ---@type FrameContainer
+        local arena = {
+            Frame = SUFHeaderarena,
+            Type = fsFrame.ContainerType.EnemyArena,
+            LayoutType = fsFrame.LayoutType.NameList,
+        }
+
+        containers[#containers + 1] = arena
+    end
+
+    return containers
 end
 
 function M:Init()
@@ -71,53 +121,10 @@ function M:Init()
             end
 
             if not SUFHeaderparty and not SUFHeaderarena then
-                EventsFallback()
+                useEvents = true
             end
         end)
     else
-        EventsFallback()
+        useEvents = true
     end
-end
-
-function M:RegisterRequestSortCallback(callback)
-    if not callback then
-        fsLog:Bug("SUF:RegisterRequestSortCallback() - callback must not be nil.")
-        return
-    end
-
-    sortCallbacks[#sortCallbacks + 1] = callback
-end
-
-function M:RegisterContainersChangedCallback() end
-
-function M:Containers()
-    local containers = {}
-
-    if not M:Enabled() then
-        return
-    end
-
-    if SUFHeaderparty then
-        ---@type FrameContainer
-        local party = {
-            Frame = SUFHeaderparty,
-            Type = fsFrame.ContainerType.Party,
-            LayoutType = fsFrame.LayoutType.NameList,
-        }
-
-        containers[#containers + 1] = party
-    end
-
-    if SUFHeaderarena then
-        ---@type FrameContainer
-        local arena = {
-            Frame = SUFHeaderarena,
-            Type = fsFrame.ContainerType.EnemyArena,
-            LayoutType = fsFrame.LayoutType.NameList,
-        }
-
-        containers[#containers + 1] = arena
-    end
-
-    return containers
 end
