@@ -11,9 +11,13 @@ local fsEnumerable = addon.Collections.Enumerable
 local fsLog = addon.Logging.Log
 local fsConfig = addon.Configuration
 local fsSpec = addon.Configuration.Specs
+local fsScheduler = addon.Scheduling.Scheduler
 ---@class InspectorModule : IInitialise, IProcessEvents
 local M = {}
 addon.Modules.Inspector = M
+
+-- how often in seconds to run our main loop
+local inspectInterval = 0.5
 
 -- key = unit, value = { SpecId: number, LastAttempt: number, LastSeen: number }
 local unitGuidToSpec = {}
@@ -214,37 +218,6 @@ local function RoleSortingEnabled()
     return false
 end
 
-local function OnUpdate()
-    if not RoleSortingEnabled() then
-        return
-    end
-
-    local timeSinceLastInspect = inspectStarted and (wow.GetTimePreciseSec() - inspectStarted)
-
-    -- if we've requested an inspection and we're still within the timeout period
-    if requestedUnit ~= nil and timeSinceLastInspect < inspectTimeout then
-        return
-    end
-
-    -- Timeout occurred - reset state
-    if requestedUnit ~= nil and timeSinceLastInspect >= inspectTimeout then
-        if isOurInspect then
-            fsLog:Debug("Inspect timeout for unit '%s'.", requestedUnit)
-        end
-
-        requestedUnit = nil
-        currentInspectUnit = nil
-        isOurInspect = false
-        wow.ClearInspectPlayer()
-    end
-
-    if not needUpdate then
-        return
-    end
-
-    needUpdate = InspectNext()
-end
-
 local function OnClearInspect()
     -- someone finished with their inspection
     -- set unitInspecting to nil so we can queue ours up next
@@ -279,6 +252,40 @@ local function PurgeOldEntries()
         fsLog:Debug("Purging expired cache entry for unit: %s", guid)
         unitGuidToSpec[guid] = nil
     end
+end
+
+local function RunLoop()
+    -- schedule the next run
+    fsScheduler:RunAfter(inspectInterval, RunLoop)
+
+    if not RoleSortingEnabled() then
+        return
+    end
+
+    local timeSinceLastInspect = inspectStarted and (wow.GetTimePreciseSec() - inspectStarted)
+
+    -- if we've requested an inspection and we're still within the timeout period
+    if requestedUnit ~= nil and timeSinceLastInspect < inspectTimeout then
+        return
+    end
+
+    -- Timeout occurred - reset state
+    if requestedUnit ~= nil and timeSinceLastInspect >= inspectTimeout then
+        if isOurInspect then
+            fsLog:Debug("Inspect timeout for unit '%s'.", requestedUnit)
+        end
+
+        requestedUnit = nil
+        currentInspectUnit = nil
+        isOurInspect = false
+        wow.ClearInspectPlayer()
+    end
+
+    if not needUpdate then
+        return
+    end
+
+    needUpdate = InspectNext()
 end
 
 function M:ProcessEvent(event, ...)
@@ -465,8 +472,7 @@ function M:Init()
     wow.hooksecurefunc("NotifyInspect", OnNotifyInspect)
     wow.hooksecurefunc("ClearInspectPlayer", OnClearInspect)
 
-    local frame = wow.CreateFrame("Frame")
-    frame:HookScript("OnUpdate", OnUpdate)
+    RunLoop()
 
     fsLog:Debug("Initialised the spec inspector module.")
 end
