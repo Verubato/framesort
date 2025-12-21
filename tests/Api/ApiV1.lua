@@ -16,11 +16,15 @@ function M:setup()
 
     addon.Providers.Test = provider
     addon.Providers.All[#addon.Providers.All + 1] = provider
+    ---@diagnostic disable-next-line: assign-type-mismatch
     addon.Providers.Blizzard = provider
 
     addon.Api:Init()
 
     local party = fsFrame:GetContainer(provider, fsFrame.ContainerType.Party)
+
+    assert(party)
+
     local partyContainer = party.Frame
 
     for i = 1, partyUnitsCount do
@@ -29,6 +33,9 @@ function M:setup()
     end
 
     local raid = fsFrame:GetContainer(provider, fsFrame.ContainerType.Raid)
+
+    assert(raid)
+
     local raidContainer = raid.Frame
 
     for i = 1, raidUnitsCount do
