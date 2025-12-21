@@ -346,12 +346,11 @@ local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, rev
         meta[rightToken] = rightMeta
     end
 
-    if leftMeta.Exists and not rightMeta.Exists then
-        return true
-    elseif not leftMeta.Exists and rightMeta.Exists then
-        return false
-    end
-
+    -- used to have UnitExists() checks here
+    -- but it sometimes returns false in the arena starting room
+    -- it also seemed to bring some problems when a new round starts in shuffle
+    -- so leaving it out for now
+    -- TODO: investigate this weirdness
     if leftMeta.IsPet or rightMeta.IsPet then
         -- place players before pets
         if not leftMeta.IsPet then
@@ -428,16 +427,11 @@ local function EnemyCompare(leftToken, rightToken, groupSortMode, reverse, meta)
         return leftToken < rightToken
     end
 
-    if leftMeta.Exists and not rightMeta.Exists then
-        return true
-    elseif not leftMeta.Exists and rightMeta.Exists then
-        return false
-    end
-
     -- used to have UnitExists() checks here
-    -- but it returns false in the starting room
+    -- but it sometimes returns false in the arena starting room
     -- it also seemed to bring some problems when a new round starts in shuffle
     -- so leaving it out for now
+    -- TODO: investigate this weirdness
     if leftMeta.IsPet or rightMeta.IsPet then
         -- place player before pets
         if not leftMeta.IsPet then
