@@ -140,9 +140,14 @@ function M:test_get_friendly_units()
 end
 
 function M:test_get_enemy_units()
+    local config = addon.DB.Options.Sorting.EnemyArena
+
+    config.Enabled = true
+
     local units = FrameSortApi.v3.Sorting:GetEnemyUnits()
 
-    assertEquals(#units, arenaUnitsCount)
+    -- times 2 for pets
+    assertEquals(#units, arenaUnitsCount * 2)
 end
 
 function M:test_get_sort_mode()
