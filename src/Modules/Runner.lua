@@ -16,28 +16,6 @@ local runAll = false
 ---@type { [FrameProvider]: boolean }
 local runProviders = {}
 
-local function ScheduleSort(provider)
-    if provider then
-        runProviders[provider] = true
-    else
-        runAll = true
-    end
-
-    run = true
-end
-
-local function OnProviderRequestedSort(provider, reason)
-    fsLog:Debug("Provider '%s' requested sort due to '%s'.", provider and provider:Name() or "nil", reason or "nil")
-
-    ScheduleSort(provider)
-end
-
-local function OnEnteringWorld()
-    fsLog:Debug("Scheduling sort after loading screen.")
-
-    ScheduleSort()
-end
-
 local function Run(forceRunAll)
     local ok, result = pcall(function()
         local all = runAll or forceRunAll
@@ -64,6 +42,42 @@ local function Run(forceRunAll)
     if not ok then
         fsLog:Error("Runner - error: %s.", tostring(result))
     end
+end
+
+local function OnUpdate()
+    if not run then
+        assert(timerFrame)
+        timerFrame:SetScript("OnUpdate", nil)
+        return
+    end
+
+    run = false
+    Run()
+end
+
+local function ScheduleSort(provider)
+    if provider then
+        runProviders[provider] = true
+    else
+        runAll = true
+    end
+
+    run = true
+
+    assert(timerFrame)
+    timerFrame:SetScript("OnUpdate", OnUpdate)
+end
+
+local function OnProviderRequestedSort(provider, reason)
+    fsLog:Debug("Provider '%s' requested sort due to '%s'.", provider and provider:Name() or "nil", reason or "nil")
+
+    ScheduleSort(provider)
+end
+
+local function OnEnteringWorld()
+    fsLog:Debug("Scheduling sort after loading screen.")
+
+    ScheduleSort()
 end
 
 local function OnEnteringCombat()
@@ -125,15 +139,6 @@ local function OnInspectorInfo()
 
     fsLog:Debug("Scheduling sort as we have spec quorum of %d/%d.", knownSpecs, #nonPets)
     ScheduleSort()
-end
-
-local function OnUpdate()
-    if not run then
-        return
-    end
-
-    run = false
-    Run()
 end
 
 function M:ProcessEvent(event)
