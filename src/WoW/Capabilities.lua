@@ -14,7 +14,7 @@ end
 
 function M.HasEnemySpecSupport()
     -- MoP onwards have these functions; early xpacs do not
-    return wow.GetArenaOpponentSpec ~= nil and wow.GetSpecializationInfoByID ~= nil and (wow.GetNumArenaOpponentSpecs or wow.GetNumArenaOpponents)
+    return wow.GetArenaOpponentSpec ~= nil and wow.GetSpecializationInfoByID ~= nil and (wow.GetNumArenaOpponentSpecs or wow.GetNumArenaOpponents) ~= nil
 end
 
 function M.HasArena()
