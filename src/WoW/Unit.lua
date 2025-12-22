@@ -102,23 +102,23 @@ function M:EnemyUnitExists(unit)
 
     local arenaCount = wowEx.ArenaOpponentsCount()
 
-    if arenaCount and arenaCount > 0 then
-        local id = tonumber(idStr)
-        return id and id <= arenaCount or false
-    end
+    local id = tonumber(idStr)
+    return id and id <= arenaCount or false
 
-    if not capabilities.HasC_PvP() or not wow.C_PvP or not wow.C_PvP.GetScoreInfoByPlayerGuid then
-        return false
-    end
-
-    local guid = wow.UnitGUID and wow.UnitGUID(unit)
-
-    if not guid or wow.issecretvalue(guid) then
-        return false
-    end
-
-    local info = wow.C_PvP.GetScoreInfoByPlayerGuid(guid)
-    return info ~= nil and info.name ~= nil
+    -- temporarily disabling this while I'm on holiday and can't test it
+    -- TODO: check if this is causing arena4 to show up in solo shuffles
+    -- if not capabilities.HasC_PvP() or not wow.C_PvP or not wow.C_PvP.GetScoreInfoByPlayerGuid then
+    --     return false
+    -- end
+    --
+    -- local guid = wow.UnitGUID and wow.UnitGUID(unit)
+    --
+    -- if not guid or wow.issecretvalue(guid) then
+    --     return false
+    -- end
+    --
+    -- local info = wow.C_PvP.GetScoreInfoByPlayerGuid(guid)
+    -- return info ~= nil and info.name ~= nil
 end
 
 ---Returns a table of group member unit tokens where the unit exists.

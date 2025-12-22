@@ -64,7 +64,7 @@ local function OnConfigChanged()
     InvalidateEnemyCache()
 end
 
-local function FriendlyUnitsFromFrames(sort)
+local function FriendlyUnitsFromFrames()
     local frames = fsSortedFrames:FriendlyFrames()
     local units = fsEnumerable
         :From(frames)
@@ -73,7 +73,13 @@ local function FriendlyUnitsFromFrames(sort)
         end)
         :ToTable()
 
-    if not sort or #units == 0 then
+    if #units == 0 then
+        return units
+    end
+
+    local sortEnabled = fsCompare:FriendlySortMode()
+
+    if not sortEnabled then
         return units
     end
 
@@ -85,31 +91,16 @@ local function FriendlyUnitsFromFrames(sort)
     return units
 end
 
-local function EnemyUnitsFromFrames(sort)
-    local frames = fsSortedFrames:ArenaFrames()
-    local units = fsEnumerable
-        :From(frames)
-        :Map(function(x)
-            return fsFrame:GetFrameUnit(x)
-        end)
-        :ToTable()
-
-    if not sort or #units == 0 then
-        return units
-    end
-
-    local start = wow.GetTimePreciseSec()
-    table.sort(units, fsCompare:EnemySortFunction(units))
-    local stop = wow.GetTimePreciseSec()
-    fsLog:Debug("Enemy units table.sort() took %fms.", (stop - start) * 1000)
-
-    return units
-end
-
 local function FriendlyUnits()
     local units = fsUnit:FriendlyUnits()
 
     if #units == 0 then
+        return units
+    end
+
+    local sortEnabled = fsCompare:FriendlySortMode()
+
+    if not sortEnabled then
         return units
     end
 
@@ -125,6 +116,12 @@ local function EnemyUnits()
     local units = fsUnit:ArenaUnits()
 
     if #units == 0 then
+        return units
+    end
+
+    local sortEnabled = fsCompare:EnemySortMode()
+
+    if not sortEnabled then
         return units
     end
 
@@ -149,29 +146,21 @@ end
 
 ---@return string[]
 function M:FriendlyUnits()
-    local sortEnabled = fsCompare:FriendlySortMode()
-
-    -- sorting disabled, fallback to frame order
-    if not sortEnabled then
-        return FriendlyUnitsFromFrames(sortEnabled)
-    end
-
     local hit = false
     local cache = true
     local units = nil
 
     if cacheEnabled and friendlyCacheValid then
-        -- don't want our stats to reflect empty cache hits and misses
-        hit = #cachedFriendlyUnits > 0
+        hit = true
         units = cachedFriendlyUnits
     else
         units = FriendlyUnits()
     end
 
-    -- try from frames, but don't cache the result
-    -- as frames can change without us knowing
     if not units or #units == 0 then
-        units = FriendlyUnitsFromFrames(true)
+        -- try from frames but don't cache the result
+        -- as frames can change without us knowing
+        units = FriendlyUnitsFromFrames()
         cache = false
     end
 
@@ -190,42 +179,26 @@ function M:FriendlyUnits()
         LogStatsTick()
     end
 
-    return units
+    return units or {}
 end
 
 ---@return string[]
 function M:EnemyUnits()
-    local sortEnabled = fsCompare:EnemySortMode()
-
-    -- sorting disabled, fallback to frame order
-    if not sortEnabled then
-        return EnemyUnitsFromFrames(sortEnabled)
-    end
-
     local hit = false
-    local cache = true
     local units = nil
 
     if cacheEnabled and enemyCacheValid then
-        -- don't want our stats to reflect empty cache hits and misses
-        hit = #cachedEnemyUnits > 0
+        hit = true
         units = cachedEnemyUnits
     else
         units = EnemyUnits()
     end
 
-    -- try from frames, but don't cache the result
-    -- as frames can change without us knowing
-    if not units or #units == 0 then
-        units = EnemyUnitsFromFrames(true)
-        cache = false
-    end
-
+    -- don't try fallback from arena frames as this seems to cause issues with things like arena4 popping up
+    -- so just retry EnemyUnits() on next attempt
     if cacheEnabled then
-        if cache then
-            cachedEnemyUnits = units
-            enemyCacheValid = #units > 0
-        end
+        cachedEnemyUnits = units
+        enemyCacheValid = #units > 0
 
         if hit then
             enemyCacheHits = enemyCacheHits + 1
@@ -236,7 +209,7 @@ function M:EnemyUnits()
         LogStatsTick()
     end
 
-    return units
+    return units or {}
 end
 
 function M:InvalidateCache()
