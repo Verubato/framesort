@@ -6,7 +6,7 @@ local player
 function M:setup()
     local addonFactory = require("TestHarness\\AddonFactory")
     local providerFactory = require("TestHarness\\ProviderFactory")
-    local frameMock = require("TestHarness\\Frame")
+    local frameMock = require("TestHarness\\FrameMock")
 
     addon = addonFactory:Create()
 
@@ -15,11 +15,15 @@ function M:setup()
 
     addon.Providers.Test = provider
     addon.Providers.All[#addon.Providers.All + 1] = provider
+    ---@diagnostic disable-next-line: assign-type-mismatch
     addon.Providers.Blizzard = provider
 
     addon.Modules:Init()
 
     local party = fsFrame:GetContainer(provider, fsFrame.ContainerType.Party)
+
+    assert(party)
+
     local partyContainer = party.Frame
 
     player = frameMock:New("Frame", nil, partyContainer, nil)
@@ -34,7 +38,7 @@ function M:setup()
     p2.State.Position.Top = 100
     p2.unit = "party2"
 
-    addon.WoW.Api.IsInGroup = function ()
+    addon.WoW.Api.IsInGroup = function()
         return true
     end
     addon.WoW.Api.UnitExists = function(unit)

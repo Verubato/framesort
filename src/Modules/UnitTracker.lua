@@ -79,17 +79,25 @@ local function MatchesUnit(frameUnit, unit)
 end
 
 local function FindUnitFrame(frames, unit)
+    local fallback = nil
+
     for _, frame in ipairs(frames) do
         if frame and not fsFrame:IsForbidden(frame) then
             local frameUnit = fsFrame:GetFrameUnit(frame)
 
             if MatchesUnit(frameUnit, unit) then
-                return frame
+                -- Prefer a usable/visible frame immediately
+                if frame.IsVisible and frame:IsVisible() then
+                    return frame
+                end
+
+                -- Otherwise remember a hidden match as fallback
+                fallback = fallback or frame
             end
         end
     end
 
-    return nil
+    return fallback
 end
 
 function M:GetFrameForUnit(unit)

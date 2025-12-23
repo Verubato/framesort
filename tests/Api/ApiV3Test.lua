@@ -7,7 +7,7 @@ local arenaUnitsCount = 3
 
 function M:setup()
     local addonFactory = require("TestHarness\\AddonFactory")
-    local frameMock = require("TestHarness\\Frame")
+    local frameMock = require("TestHarness\\FrameMock")
     local providerFactory = require("TestHarness\\ProviderFactory")
 
     addon = addonFactory:Create()

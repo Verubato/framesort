@@ -29,7 +29,7 @@ function M:setup()
 
     local partyContainer = party.Frame
 
-    local frameMock = require("TestHarness\\Frame")
+    local frameMock = require("TestHarness\\FrameMock")
     local player = frameMock:New("Frame", nil, partyContainer, nil)
     player.State.Position.Top = 300
     player.unit = "player"
