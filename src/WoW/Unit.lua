@@ -82,7 +82,17 @@ end
 
 function M:EnemyUnitExists(unit)
     if not unit then
-        fsLog:Error("Unit:EnemyUnitExists() - unit must not be nil.")
+        fsLog:Bug("Unit:EnemyUnitExists() - unit must not be nil.")
+        return false
+    end
+
+    local maxArenaCount = 3
+    -- get the number from the token, e.g. "2" from "arena2"
+    local idStr = string.match(unit, "%d+")
+    local id = tonumber(idStr)
+
+    if not id then
+        fsLog:Bug("Invalid arena unit %s.", unit)
         return false
     end
 
@@ -90,20 +100,20 @@ function M:EnemyUnitExists(unit)
     local exists = wow.UnitExists(unit)
 
     if not wow.issecretvalue(exists) and exists then
+        if id > maxArenaCount then
+            fsLog:Bug("Detected unit %s exists when it shouldn't.", unit)
+        end
+
         return true
-    end
-
-    -- get the number from the token, e.g. "2" from "arena2"
-    local idStr = string.match(unit, "%d+")
-
-    if not idStr then
-        return false
     end
 
     local arenaCount = wowEx.ArenaOpponentsCount()
 
-    local id = tonumber(idStr)
-    return id and id <= arenaCount or false
+    if arenaCount > maxArenaCount then
+        fsLog:Bug("Detected %d opponents when it should be 3.", arenaCount)
+    end
+
+    return id <= arenaCount
 
     -- temporarily disabling this while I'm on holiday and can't test it
     -- TODO: check if this is causing arena4 to show up in solo shuffles

@@ -1,5 +1,5 @@
 local void = require("TestHarness\\Void")
-local frameMock = require("TestHarness\\Frame")
+local frameMock = require("TestHarness\\FrameMock")
 
 ---@class WowApiFactory
 local M = {}
@@ -170,6 +170,11 @@ function M:Create()
         -- time related
         GetTimePreciseSec = function()
             return os.time()
+        end,
+
+        -- secret handling
+        issecretvalue = function(x)
+            return x == "SECRET"
         end,
     }
 

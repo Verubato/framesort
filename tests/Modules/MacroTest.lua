@@ -9,7 +9,7 @@ local M = {}
 function M:setup()
     local addonFactory = require("TestHarness\\AddonFactory")
     local providerFactory = require("TestHarness\\ProviderFactory")
-    local frameMock = require("TestHarness\\Frame")
+    local frameMock = require("TestHarness\\FrameMock")
 
     addon = addonFactory:Create()
 
@@ -20,7 +20,7 @@ function M:setup()
     addon.Providers.All[#addon.Providers.All + 1] = provider
 
     fsFrame = addon.WoW.Frame
----@diagnostic disable-next-line: cast-local-type
+    ---@diagnostic disable-next-line: cast-local-type
     wow = addon.WoW.Api
     events = addon.WoW.Events
 

@@ -215,10 +215,6 @@ local function RoleAndClassTypeOrder(role, class, meta)
     return nil
 end
 
-local function EmptyCompare(x, y)
-    return false
-end
-
 local function CompareGroup(leftToken, rightToken, meta)
     local leftMeta, rightMeta = meta[leftToken], meta[rightToken]
 
@@ -268,6 +264,15 @@ local function CompareSpec(leftToken, rightToken, meta)
 
     leftClass = leftMeta.ClassId
     rightClass = rightMeta.ClassId
+
+    local leftHasRole = leftRole ~= nil and leftRole ~= "NONE"
+    local rightHasRole = rightRole ~= nil and rightRole ~= "NONE"
+
+    if leftHasRole ~= rightHasRole then
+        -- prefer those with a role
+        -- true means left comes first
+        return leftHasRole
+    end
 
     -- check their role first
     -- we do this before checking their spec, because in some expansions spec doesn't map to role 1:1
@@ -478,12 +483,12 @@ end
 ---Returns a function that accepts two parameters of unit tokens and returns true if the left token should be ordered before the right.
 ---Sorting is based on the current instance and configured options.
 ---@param units string[]? optional unit tokens that will be sorted. providing this upfront improves performance.
----@return function sort
+---@return function|nil sort
 function M:SortFunction(units)
     local enabled, playerSortMode, groupSortMode, reverse = M:FriendlySortMode()
 
     if not enabled then
-        return EmptyCompare
+        return nil
     end
 
     units = units or fsUnit:FriendlyUnits()
@@ -530,12 +535,12 @@ end
 
 ---Returns a function that accepts two parameters of unit tokens and returns true if the left token should be ordered before the right.
 ---@param units string[] the unit tokens that will be sorted. required for performance reasons.
----@return function sort
+---@return function|nil sort
 function M:EnemySortFunction(units)
     local enabled, groupSortMode, reverse = M:EnemySortMode()
 
     if not enabled then
-        return EmptyCompare
+        return nil
     end
 
     units = units or fsUnit:ArenaUnits()

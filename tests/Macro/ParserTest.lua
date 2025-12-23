@@ -589,15 +589,16 @@ function M:test_tank_n()
         #showtooltip
         #framesort Tank5
         /cast [@party4] Spell;
-    ]]function M:UnitExists(unit, members)
-    for _, x in pairs(members) do
-        if x == unit then
-            return true
+    ]]
+    function M:UnitExists(unit, members)
+        for _, x in pairs(members) do
+            if x == unit then
+                return true
+            end
         end
-    end
 
-    return false
-end
+        return false
+    end
 
     assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
@@ -1278,6 +1279,49 @@ function M:test_bottom_frame_minus_x()
         #fs bfm1 bfm2
         /cast [mod:shift,@party2][@party1] Spell
     ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
+end
+
+function M:test_existing_unit_targets_are_unchanged()
+    local units = { "player", "party1" }
+
+    local macroText = [[
+        #showtooltip
+        #framesort Frame1 Frame2
+        /cast [@player,exists][@party1,exists] Spell
+    ]]
+    local expected = [[
+        #showtooltip
+        #framesort Frame1 Frame2
+        /cast [@player,exists][@party1,exists] Spell
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
+end
+
+function M:test_missing_units_fall_back_to_none()
+    local units = { "player", "party1" }
+
+    local macroText = [[
+        #showtooltip
+        #framesort Frame1 Frame2 Frame3 Frame4
+        /cast [@a][@b][@c][@d] Spell
+    ]]
+    local expected = [[
+        #showtooltip
+        #framesort Frame1 Frame2 Frame3 Frame4
+        /cast [@player][@party1][@none][@none] Spell
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
+end
+
+function M:test_crlf_input()
+    local units = { "player", "party1" }
+
+    local macroText = "#showtooltip\r\n#framesort Frame1 Frame2\r\n/cast [@a][@b] Spell\r\n"
+    local expected = "#showtooltip\r\n#framesort Frame1 Frame2\r\n/cast [@player][@party1] Spell\r\n"
 
     assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end

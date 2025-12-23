@@ -1,3 +1,11 @@
+local frameMock
+---@type Addon
+local addon
+---@type FrameUtil
+local fsFrame
+
+M = {}
+
 local function chainToNames(root)
     local out = {}
     local cur = root
@@ -8,18 +16,10 @@ local function chainToNames(root)
     return out
 end
 
-local frameMock
----@type Addon
-local addon
----@type FrameUtil
-local fsFrame
-
-M = {}
-
 function M:setup()
     local addonFactory = require("TestHarness\\AddonFactory")
     local providerFactory = require("TestHarness\\ProviderFactory")
-    frameMock = require("TestHarness\\Frame")
+    frameMock = require("TestHarness\\FrameMock")
 
     addon = addonFactory:Create()
     fsFrame = addon.WoW.Frame
