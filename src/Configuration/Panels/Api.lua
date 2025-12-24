@@ -56,7 +56,7 @@ function M:Build(parent)
         },
         {
             Description = L["Get the frame number of a unit."],
-            Text = [[/run FrameSortApi.v3.Frame:FrameNumberForUnit("arena1")]],
+            Text = [[/dump FrameSortApi.v3.Frame:FrameNumberForUnit("arena1")]],
         },
         {
             Description = L["View a full listing of all API methods on GitHub."],
