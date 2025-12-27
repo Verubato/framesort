@@ -11,7 +11,6 @@ local events = addon.WoW.Events
 local capabilities = addon.WoW.Capabilities
 ---@class BlizzardFrameProvider: FrameProvider, IProcessEvents
 local M = {}
-local timerFrame = nil
 local layoutEventFrame = nil
 local sortCallbacks = {}
 local containersChangedCallbacks = {}
@@ -28,7 +27,6 @@ local cvarsPatternsToRunSort = {
     "pvpFrames.*",
     "activeCUFProfile",
 }
-local combatStatusFrame = nil
 local taintWorkaround = nil
 
 fsProviders.Blizzard = M
@@ -286,7 +284,7 @@ function M:Containers()
             -- other expansions don't have this problem
             assert(taintWorkaround)
 
-            function taintWorkaround:Configure(width, height)
+            function taintWorkaround.Configure(_, width, height)
                 lineSize = horizontal and width or height
             end
 

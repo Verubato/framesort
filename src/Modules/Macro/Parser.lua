@@ -71,10 +71,7 @@ end
 ---@param occurrence number the nth selector to replace
 ---@return string? the new body text, or nil if invalid
 local function ReplaceSelector(body, unit, occurrence)
-    local startPos = nil
-    local endPos = nil
-
-    startPos, endPos = NthSelector(body, occurrence)
+    local startPos, endPos = NthSelector(body, occurrence)
 
     if not startPos or not endPos then
         return nil

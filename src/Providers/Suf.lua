@@ -7,7 +7,6 @@ local wow = addon.WoW.Api
 local wowEx = addon.WoW.WowEx
 local events = addon.WoW.Events
 local M = {}
-local containersChangedCallbacks = {}
 local sortCallbacks = {}
 local useEvents = false
 

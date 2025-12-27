@@ -8,7 +8,6 @@ local fsEnumerable = addon.Collections.Enumerable
 local fsLog = addon.Logging.Log
 local wow = addon.WoW.Api
 local wowEx = addon.WoW.WowEx
-local capabilities = addon.WoW.Capabilities
 local events = addon.WoW.Events
 local M = {}
 local useEvents = false
@@ -130,7 +129,7 @@ function M:Containers()
             end)
 
             local topFrame = frames[1]
-            local left, right = topFrame:GetHitRectInsets()
+            local left, _ = topFrame:GetHitRectInsets()
 
             -- refer to Gladius.lua:632
             local padding = fsLuaEx:SafeGet(Gladius, { "db", "backgroundPadding" }) or 0

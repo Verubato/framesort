@@ -7,7 +7,6 @@ local fsProviders = addon.Providers
 local fsConfig = addon.Configuration
 local fsFrame = addon.WoW.Frame
 local fsLuaEx = addon.Language.LuaEx
-local fsLog = addon.Logging.Log
 local L = addon.Locale
 ---@class HealthChecker
 local M = {}
@@ -223,7 +222,7 @@ local function CheckUsingSpacing()
 end
 
 local function CheckUsingRaidStyleFrames()
-    local usingRaidStyle = false
+    local usingRaidStyle
 
     if capabilities.HasEditMode() then
         usingRaidStyle = wow.EditModeManagerFrame:UseRaidStylePartyFrames()

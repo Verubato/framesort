@@ -696,7 +696,7 @@ local function TrySortContainer(container)
         return false, frames
     end
 
-    local sortedUnits = nil
+    local sortedUnits
     if container.Type == fsFrame.ContainerType.Party or container.Type == fsFrame.ContainerType.Raid then
         sortedUnits = fsSortedUnits:FriendlyUnits()
     elseif container.Type == fsFrame.ContainerType.EnemyArena then
@@ -723,7 +723,7 @@ local function TrySortContainer(container)
         end
     end
 
-    local sorted = false
+    local sorted
 
     if container.LayoutType == fsFrame.LayoutType.Soft then
         sorted = SoftArrange(frames, spacing)
@@ -927,7 +927,7 @@ function M:TrySort(provider)
 
         local providerSorted = false
         for _, container in ipairs(containers) do
-            local containerSorted = false
+            local containerSorted
 
             if container.IsGrouped and container:IsGrouped() then
                 containerSorted = TrySortContainerGroups(container)

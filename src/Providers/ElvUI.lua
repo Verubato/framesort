@@ -3,7 +3,6 @@ local _, addon = ...
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsLog = addon.Logging.Log
-local wow = addon.WoW.Api
 local wowEx = addon.WoW.WowEx
 local events = addon.WoW.Events
 local M = {}
@@ -164,7 +163,7 @@ function M:Init()
         ["Enabled"] = true,
     }
 
-    function fsPlugin:Initialize()
+    function fsPlugin.Initialize()
         EP:RegisterPlugin(pluginName, fsPlugin.InsertOptions)
 
         fsPlugin:SecureHook(UF, "LoadUnits", function()
@@ -182,7 +181,7 @@ function M:Init()
         end)
     end
 
-    function fsPlugin:InsertOptions()
+    function fsPlugin.InsertOptions()
         E.Options.args.FrameSort = {
             order = 100,
             type = "group",

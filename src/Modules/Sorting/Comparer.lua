@@ -88,7 +88,7 @@ local function Ordering()
     local classLookup = fsEnumerable:From(specs.Specs):ToDictionary(function(item)
         return item.ClassId
     end, function(item, existingValue)
-        local newValue = 0
+        local newValue
 
         if item.Type == specs.Type.Tank then
             newValue = config.Tanks
@@ -118,7 +118,6 @@ end
 
 local function PrecomputeGlobalMetadata()
     local meta = {}
-    local start = wow.GetTimePreciseSec()
     local roleOrderLookup, specOrderLookup, classTypeOrderLookup = Ordering()
 
     meta.RoleOrderLookup = roleOrderLookup
@@ -252,22 +251,19 @@ end
 
 local function CompareSpec(leftToken, rightToken, meta)
     local leftMeta, rightMeta = meta[leftToken], meta[rightToken]
-    local leftRole, rightRole = nil, nil
-    local leftSpec, rightSpec = nil, nil
-    local leftClass, rightClass = nil, nil
 
     if not leftMeta or not rightMeta then
         return leftToken < rightToken
     end
 
-    leftSpec = leftMeta.SpecId
-    rightSpec = rightMeta.SpecId
+    local leftSpec = leftMeta.SpecId
+    local rightSpec = rightMeta.SpecId
 
-    leftRole = leftMeta.Role
-    rightRole = rightMeta.Role
+    local leftRole = leftMeta.Role
+    local rightRole = rightMeta.Role
 
-    leftClass = leftMeta.ClassId
-    rightClass = rightMeta.ClassId
+    local leftClass = leftMeta.ClassId
+    local rightClass = rightMeta.ClassId
 
     local leftHasRole = leftRole ~= nil and leftRole ~= "NONE"
     local rightHasRole = rightRole ~= nil and rightRole ~= "NONE"
@@ -561,7 +557,7 @@ end
 ---@return string? groupMode the group sort mode.
 ---@return boolean? reverse whether the sorting is reversed.
 function M:FriendlySortMode()
-    local inInstance, instanceType = nil, nil
+    local inInstance, instanceType
 
     if mockInInstance and mockInstanceType then
         inInstance = mockInInstance

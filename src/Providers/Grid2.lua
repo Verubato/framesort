@@ -4,7 +4,6 @@ local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsLuaEx = addon.Language.LuaEx
 local fsLog = addon.Logging.Log
-local fsScheduler = addon.Scheduling.Scheduler
 local wow = addon.WoW.Api
 local wowEx = addon.WoW.WowEx
 local events = addon.WoW.Events
@@ -44,7 +43,7 @@ end
 
 function M:RegisterContainersChangedCallback() end
 
-function M:ProcessEvent(event, ...)
+function M:ProcessEvent(event)
     if not useEvents then
         return
     end

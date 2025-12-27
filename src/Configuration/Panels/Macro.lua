@@ -3,7 +3,6 @@ local _, addon = ...
 local wow = addon.WoW.Api
 local fsMacro = addon.Modules.Macro.Parser
 local fsConfig = addon.Configuration
-local fsLog = addon.Logging.Log
 local L = addon.Locale
 local M = {}
 fsConfig.Panels.Macro = M
@@ -102,7 +101,7 @@ function M:Build(parent)
     end
 
     local aiBlurb = L["Discord Bot Blurb"]
-    anchor = fsConfig:MultilineTextBlock(aiBlurb, panel, anchor)
+    fsConfig:MultilineTextBlock(aiBlurb, panel, anchor)
 
     return scroller
 end

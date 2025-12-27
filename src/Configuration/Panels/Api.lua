@@ -2,7 +2,6 @@
 local _, addon = ...
 local wow = addon.WoW.Api
 local fsConfig = addon.Configuration
-local fsLog = addon.Logging.Log
 local L = addon.Locale
 local M = {}
 fsConfig.Panels.Api = M
@@ -25,13 +24,12 @@ function M:Build(parent)
     title:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
     title:SetText(L["Api"])
 
-    local anchor = title
     local intro = {
         L["Want to integrate FrameSort into your addons, scripts, and Weak Auras?"],
         L["Here are some examples."],
     }
 
-    anchor = fsConfig:TextBlock(intro, panel, title)
+    local anchor = fsConfig:TextBlock(intro, panel, title)
 
     local examples = {
         {

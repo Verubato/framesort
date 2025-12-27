@@ -6,7 +6,6 @@ local events = addon.WoW.Events
 local fsSorting = addon.Modules.Sorting
 local fsCompare = addon.Modules.Sorting.Comparer
 local fsProviders = addon.Providers
-local fsUnit = addon.WoW.Unit
 local fsSortedUnits = addon.Modules.Sorting.SortedUnits
 local fsScheduler = addon.Scheduling.Scheduler
 local fsConfig = addon.Configuration
@@ -53,8 +52,8 @@ secureMethods["OverheadTest"] = [[
 secureMethods["Round"] = [[
     local number, decimalPlaces = ...
 
-    if number == nil then 
-        return nil 
+    if number == nil then
+        return nil
     end
 
     local mult = 10 ^ (decimalPlaces or 0)
@@ -2269,7 +2268,7 @@ function M:Init()
 
     InjectSecureHelpers(manager)
 
-    function manager:StartTimer(name)
+    function manager.StartTimer(_, name)
         if not name then
             fsLog:Bug("StartTimer called without a name.")
             return
@@ -2278,7 +2277,7 @@ function M:Init()
         manager[name .. "TimeStart"] = wow.GetTimePreciseSec()
     end
 
-    function manager:StopTimer(name, message)
+    function manager.StopTimer(_, name, message)
         local start = manager[name .. "TimeStart"]
 
         if not start then
@@ -2294,11 +2293,11 @@ function M:Init()
         manager[name .. "TimeStart"] = nil
     end
 
-    function manager:NotifySorted()
+    function manager.NotifySorted()
         fsSorting:NotifySorted()
     end
 
-    function manager:Log(msg, level)
+    function manager.Log(_, msg, level)
         fsLog:Log(msg, level)
     end
 

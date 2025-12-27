@@ -1,6 +1,5 @@
 ---@type string, Addon
 local _, addon = ...
-local wow = addon.WoW.Api
 
 ---@class WowEvents
 addon.WoW.Events = {
