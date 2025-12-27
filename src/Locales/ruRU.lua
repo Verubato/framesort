@@ -169,7 +169,7 @@ L["Macro_Example3"] = [[#FrameSort EnemyHealer, EnemyHealer
 -- %d is the number for example 1/2/3
 L["Example %d"] = "Пример %d"
 L["Discord Bot Blurb"] = [[
-Нужна помощь с созданием макроса? 
+Нужна помощь с созданием макроса?
 \n
 Зайдите на сервер Discord FrameSort и воспользуйтесь нашим ботом для макросов на базе ИИ!
 \n

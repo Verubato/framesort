@@ -6,7 +6,6 @@ local fsLuaEx = addon.Language.LuaEx
 local fsLog = addon.Logging.Log
 local wow = addon.WoW.Api
 local wowEx = addon.WoW.WowEx
-local capabilities = addon.WoW.Capabilities
 local events = addon.WoW.Events
 local M = {}
 local useEvents = false

@@ -1,5 +1,5 @@
 ---@type string, Addon
-local addonName, addon = ...
+local _, addon = ...
 local wow = addon.WoW.Api
 local fsRun = addon.Modules
 local fsConfig = addon.Configuration
@@ -414,7 +414,7 @@ function M:Build(parent)
     panel.name = L["Spec Priority"]
     panel.parent = parent.name
 
-    local width, height = fsConfig:SettingsSize()
+    local width, _ = fsConfig:SettingsSize()
 
     local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", fsConfig.VerticalSpacing, -fsConfig.VerticalSpacing)

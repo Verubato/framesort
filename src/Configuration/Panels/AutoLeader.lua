@@ -23,7 +23,7 @@ function M:Build(parent)
         L["Why? So healers can configure target marker icons and re-order party1/2 to their preference."],
     }
 
-    local anchor = fsConfig:TextBlock(lines, panel, enabled)
+    fsConfig:TextBlock(lines, panel, enabled)
 
     local function OnClick(box)
         addon.DB.Options.AutoLeader.Enabled = box:GetChecked()

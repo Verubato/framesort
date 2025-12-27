@@ -35,7 +35,7 @@ end
 local function AddSubCategory(parentCategory, panel)
     if wow.Settings then
         assert(parentCategory)
-        local subcategory = wow.Settings.RegisterCanvasLayoutSubcategory(parentCategory, panel, panel.name)
+        wow.Settings.RegisterCanvasLayoutSubcategory(parentCategory, panel, panel.name)
     elseif wow.InterfaceOptions_AddCategory then
         wow.InterfaceOptions_AddCategory(panel)
     else
@@ -101,7 +101,7 @@ function fsConfig:Dropdown(parent, items, getValue, setSelected, getText)
     if capabilities.HasModernDropdown() then
         local dd = wow.CreateFrame("DropdownButton", nil, parent, "WowStyle1DropdownTemplate")
         dd:SetupMenu(function(_, rootDescription)
-            for i, value in ipairs(items) do
+            for _, value in ipairs(items) do
                 rootDescription:CreateRadio(getText and getText(value) or tostring(value), function(x)
                     return x == getValue()
                 end, function()
@@ -110,8 +110,8 @@ function fsConfig:Dropdown(parent, items, getValue, setSelected, getText)
             end
         end)
 
-        function dd:FrameSortRefresh()
-            self:Update()
+        function dd.FrameSortRefresh(ddSelf)
+            ddSelf:Update()
         end
 
         return dd
@@ -147,7 +147,7 @@ function fsConfig:Dropdown(parent, items, getValue, setSelected, getText)
             end
         end)
 
-        function dd:FrameSortRefresh()
+        function dd.FrameSortRefresh()
             libDD:UIDropDownMenu_SetText(dd, getText and getText(getValue()) or tostring(getValue()))
         end
 

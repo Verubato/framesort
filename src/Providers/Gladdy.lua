@@ -2,13 +2,11 @@
 local _, addon = ...
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
-local fsCompare = addon.Modules.Sorting.Comparer
 local fsLuaEx = addon.Language.LuaEx
 local fsEnumerable = addon.Collections.Enumerable
 local fsLog = addon.Logging.Log
 local wow = addon.WoW.Api
 local wowEx = addon.WoW.WowEx
-local capabilities = addon.WoW.Capabilities
 local events = addon.WoW.Events
 local M = {}
 local useEvents = false
@@ -21,10 +19,6 @@ local function RequestSort(reason)
     for _, callback in ipairs(sortCallbacks) do
         callback(M, reason)
     end
-end
-
-local function OnEvent(_, event)
-    RequestSort(event)
 end
 
 local function OnUpdateFrame()

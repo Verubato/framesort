@@ -7,7 +7,6 @@ local wowEx = addon.WoW.WowEx
 local events = addon.WoW.Events
 local capabilities = addon.WoW.Capabilities
 local fsUnit = addon.WoW.Unit
-local fsEnumerable = addon.Collections.Enumerable
 local fsLog = addon.Logging.Log
 local fsConfig = addon.Configuration
 local fsSpec = addon.Configuration.Specs

@@ -2,7 +2,6 @@
 local _, addon = ...
 local wow = addon.WoW.Api
 local fsConfig = addon.Configuration
-local fsLog = addon.Logging.Log
 local L = addon.Locale
 local M = {}
 fsConfig.Panels.Addons = M

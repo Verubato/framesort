@@ -54,7 +54,5 @@ function M:Build(parent)
     })
     bg:SetAllPoints(box)
 
-    anchor = box
-
     return panel
 end

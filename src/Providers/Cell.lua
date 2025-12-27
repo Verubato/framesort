@@ -9,7 +9,6 @@ local wowEx = addon.WoW.WowEx
 local events = addon.WoW.Events
 local M = {}
 local useEvents = false
-local eventFrame = nil
 local sortCallbacks = {}
 
 fsProviders.Cell = M

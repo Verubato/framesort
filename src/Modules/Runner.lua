@@ -8,7 +8,6 @@ local fsLog = addon.Logging.Log
 local fsEnumerable = addon.Collections.Enumerable
 local wow = addon.WoW.Api
 local events = addon.WoW.Events
-local capabilities = addon.WoW.Capabilities
 local M = addon.Modules
 local timerFrame = nil
 local run = false

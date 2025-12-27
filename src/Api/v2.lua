@@ -7,10 +7,7 @@ local fsRun = addon.Modules
 local fsConfig = addon.Configuration
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
-local fsUnitTracker = addon.Modules.UnitTracker
 local fsSortedUnits = addon.Modules.Sorting.SortedUnits
-local fsSortedFrames = addon.Modules.Sorting.SortedFrames
-local wow = addon.WoW.Api
 
 ---@class ApiV2
 local M = {

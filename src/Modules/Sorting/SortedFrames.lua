@@ -1,11 +1,9 @@
 ---@type string, Addon
 local _, addon = ...
-local wow = addon.WoW.Api
 local fsProviders = addon.Providers
 local fsEnumerable = addon.Collections.Enumerable
 local fsCompare = addon.Modules.Sorting.Comparer
 local fsFrame = addon.WoW.Frame
-local fsLog = addon.Logging.Log
 
 ---@class SortedFrames
 local M = {}

@@ -9,7 +9,6 @@ local fsConfig = addon.Configuration
 local fsSortedFrames = addon.Modules.Sorting.SortedFrames
 local wow = addon.WoW.Api
 local events = addon.WoW.Events
-local capabilities = addon.WoW.Capabilities
 local fsLog = addon.Logging.Log
 
 ---@class SortedUnits: IInitialise, IProcessEvents
@@ -148,7 +147,7 @@ end
 function M:FriendlyUnits()
     local hit = false
     local cache = true
-    local units = nil
+    local units
 
     if cacheEnabled and friendlyCacheValid then
         hit = true
@@ -185,7 +184,7 @@ end
 ---@return string[]
 function M:EnemyUnits()
     local hit = false
-    local units = nil
+    local units
 
     if cacheEnabled and enemyCacheValid then
         hit = true

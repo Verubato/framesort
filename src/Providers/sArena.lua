@@ -4,10 +4,7 @@ local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsLuaEx = addon.Language.LuaEx
 local fsLog = addon.Logging.Log
-local fsScheduler = addon.Scheduling.Scheduler
-local wow = addon.WoW.Api
 local events = addon.WoW.Events
-local capabilities = addon.WoW.Capabilities
 local M = {}
 local sortCallbacks = {}
 

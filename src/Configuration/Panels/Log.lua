@@ -1,5 +1,5 @@
 ---@type string, Addon
-local addonName, addon = ...
+local _, addon = ...
 local wow = addon.WoW.Api
 local fsConfig = addon.Configuration
 local fsLog = addon.Logging.Log
@@ -145,13 +145,10 @@ function M:Build(parent)
     local anchor = fsConfig:TextBlock(intro, panel, title)
     logFrame = wow.CreateFrame("ScrollingMessageFrame", nil, panel)
 
-    local width = 800
-    local height = 800
-    local margin = 100
     local panelWidth, panelHeight = fsConfig:SettingsSize()
-
-    width = panelWidth - margin
-    height = panelHeight - margin
+    local margin = 100
+    local width = panelWidth - margin
+    local height = panelHeight - margin
 
     logFrame:SetSize(width, height)
     logFrame:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)

@@ -171,7 +171,7 @@ L["Macro_Example3"] = [[#FrameSort EnemyHealer, EnemyHealer
 -- %d is the number for example 1/2/3
 L["Example %d"] = "예제 %d"
 L["Discord Bot Blurb"] = [[
-매크로를 만드는 데 도움이 필요하신가요? 
+매크로를 만드는 데 도움이 필요하신가요?
 \n
 FrameSort 디스코드 서버로 오셔서 AI 기반 매크로 봇을 이용해 보세요!
 \n

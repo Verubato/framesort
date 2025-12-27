@@ -1,7 +1,6 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
-local fsProviders = addon.Providers
 local fsUnit = addon.WoW.Unit
 local fsSortedUnits = addon.Modules.Sorting.SortedUnits
 local fsSortedFrames = addon.Modules.Sorting.SortedFrames

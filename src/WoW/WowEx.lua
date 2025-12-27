@@ -50,7 +50,7 @@ addon.WoW.WowEx = {
 
     ---@return boolean
     IsInstanceBrawl = function()
-        local inInstance, instanceType = wow.IsInInstance()
+        local inInstance, _ = wow.IsInInstance()
 
         if not inInstance then
             return false

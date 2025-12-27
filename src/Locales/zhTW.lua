@@ -169,7 +169,7 @@ L["Macro_Example3"] = [[#FrameSort EnemyHealer, EnemyHealer
 -- %d is the number for example 1/2/3
 L["Example %d"] = "範例 %d"
 L["Discord Bot Blurb"] = [[
-需要建立巨集的協助嗎？ 
+需要建立巨集的協助嗎？
 \n
 前往 FrameSort 的 Discord 伺服器，使用我們的 AI 巨集機器人！
 \n
