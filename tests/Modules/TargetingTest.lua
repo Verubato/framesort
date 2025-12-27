@@ -77,6 +77,12 @@ function M:setup()
     wow.UnitExists = function(unit)
         return unit == "player" or unit == "party1" or unit == "party2"
     end
+    addon.WoW.Capabilities.HasEnemySpecSupport = function()
+        return true
+    end
+    addon.WoW.Capabilities.HasSpecializations = function()
+        return true
+    end
 
     local enemyConfig = addon.DB.Options.Sorting.EnemyArena
     enemyConfig.Enabled = true

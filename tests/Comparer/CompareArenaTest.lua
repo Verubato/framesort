@@ -20,6 +20,12 @@ function M:setup()
     addon.WoW.Api.IsInInstance = function()
         return true, "arena"
     end
+    addon.WoW.Capabilities.HasEnemySpecSupport = function()
+        return true
+    end
+    addon.WoW.Capabilities.HasSpecializations = function()
+        return true
+    end
 end
 
 function M:teardown()
