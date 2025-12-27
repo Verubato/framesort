@@ -68,11 +68,17 @@ function M:Init()
     --  friendly unit change events
     eventsFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
     eventsFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
-    eventsFrame:RegisterEvent(events.PLAYER_SPECIALIZATION_CHANGED)
+
+    if capabilities.HasSpecializations() then
+        eventsFrame:RegisterEvent(events.PLAYER_SPECIALIZATION_CHANGED)
+    end
 
     -- arena unit change events
     eventsFrame:RegisterEvent(events.ARENA_OPPONENT_UPDATE)
-    eventsFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
+
+    if capabilities.HasSpecializations() and capabilities.HasEnemySpecSupport() then
+        eventsFrame:RegisterEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
+    end
 
     -- friendly/enemy pet unit events
     eventsFrame:RegisterEvent(events.UNIT_PET)
@@ -90,5 +96,7 @@ function M:Init()
     end
 
     -- inspection
-    eventsFrame:RegisterEvent(events.INSPECT_READY)
+    if fsInspector:CanRun() then
+        eventsFrame:RegisterEvent(events.INSPECT_READY)
+    end
 end
