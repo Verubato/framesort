@@ -11,6 +11,24 @@ local logFrame
 local copyWindow
 local copyEditBox
 
+local function SanitizeForEditBox(s)
+    if not s or s == "" then
+        return ""
+    end
+
+    -- escape WoW inline markup
+    s = s:gsub("|", "||")
+
+    -- normalize newlines
+    s = s:gsub("\r\n", "\n"):gsub("\r", "\n")
+
+    -- remove control chars except \n and \t
+    -- removes: 0-8, 11-12, 14-31, and 127 (DEL)
+    s = s:gsub("[%z\1-\8\11\12\14-\31\127]", "")
+
+    return s
+end
+
 local function GetAllLogMessages()
     if not logFrame then
         return ""
@@ -76,6 +94,8 @@ end
 
 local function ShowCopyWindow()
     local text = GetAllLogMessages()
+    text = SanitizeForEditBox(text)
+
     copyEditBox:SetText(text or "")
     copyEditBox:HighlightText()
     copyEditBox:SetFocus()
