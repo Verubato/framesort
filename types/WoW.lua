@@ -107,6 +107,8 @@
 ---@field GetRealZoneText fun(): string
 -- secrets
 ---@field issecretvalue fun(value: any): boolean
+-- client info
+---@field GetBuildInfo fun(): buildVersion: string, buildNumber: number, buidlDate: string, interfaceVersion: number, localizedVersion: string, buildInfo: string, currentVersion: string
 
 ---@class C_PvP
 ---@field IsSoloShuffle fun(): boolean

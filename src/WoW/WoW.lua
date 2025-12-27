@@ -130,4 +130,7 @@ addon.WoW.Api = {
 
     -- secrets
     issecretvalue = issecretvalue,
+
+    -- client info
+    GetBuildInfo = GetBuildInfo,
 }

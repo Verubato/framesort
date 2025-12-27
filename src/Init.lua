@@ -1,6 +1,7 @@
 ---@type string, Addon
 local addonName, addon = ...
 local wow = addon.WoW.Api
+local wowEx = addon.WoW.WowEx
 local fsLog = addon.Logging.Log
 
 function addon:InitLocale()
@@ -39,6 +40,11 @@ end
 function addon:Init()
     fsLog:Init()
     fsLog:Debug("Initialising.")
+
+    local fsVersion = wow.GetAddOnMetadata(addonName, "Version")
+    local expansionName, buildVersion = wowEx.ExpansionAndBuildInfo()
+    fsLog:Debug("We are version %s running on %s build %s.", fsVersion, expansionName, buildVersion)
+
     addon:InitLocale()
     addon:InitDB()
     addon.Configuration.Specs:Init()
