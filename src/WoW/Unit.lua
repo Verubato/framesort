@@ -14,7 +14,6 @@ local allPartyUnitsIds = {
     "pet",
 }
 local allRaidUnitsIds = {}
-local allArenaUnitsIds = {}
 
 for i = 1, wow.MAX_PARTY_MEMBERS do
     allPartyUnitsIds[#allPartyUnitsIds + 1] = "party" .. i
@@ -30,16 +29,6 @@ end
 
 for i = 1, wow.MAX_RAID_MEMBERS do
     allRaidUnitsIds[#allRaidUnitsIds + 1] = "raidpet" .. i
-end
-
--- brawl can have 15 people in arena
-local maxArena = 15
-for i = 1, maxArena do
-    allArenaUnitsIds[#allArenaUnitsIds + 1] = "arena" .. i
-end
-
-for i = 1, maxArena do
-    allArenaUnitsIds[#allArenaUnitsIds + 1] = "arenapet" .. i
 end
 
 ---Normalises unit tokens, such that party1pet becomes partypet1.
@@ -80,55 +69,63 @@ function M:NormaliseUnit(unit)
     return unit
 end
 
-function M:EnemyUnitExists(unit)
+function M:BgEnemyUnitExists(unit)
     if not unit then
-        fsLog:Bug("Unit:EnemyUnitExists() - unit must not be nil.")
+        fsLog:Bug("Unit:BgEnemyUnitExists() - unit must not be nil.")
         return false
     end
 
-    local maxArenaCount = 3
+    local guid = wow.UnitGUID and wow.UnitGUID(unit)
+
+    if not guid or wow.issecretvalue(guid) then
+        return false
+    end
+
+    local info = wow.C_PvP.GetScoreInfoByPlayerGuid(guid)
+    return info ~= nil and info.name ~= nil
+end
+
+function M:ArenaUnitExists(unit)
+    if not unit then
+        fsLog:Bug("Unit:ArenaEnemyUnitExists() - unit must not be nil.")
+        return false
+    end
+
+    local arenaCount = wowEx.ArenaOpponentsCount()
+
+    if arenaCount <= 0 then
+        return false
+    end
+
     -- get the number from the token, e.g. "2" from "arena2"
     local idStr = string.match(unit, "%d+")
-    local id = tonumber(idStr)
+    local id = idStr and tonumber(idStr)
 
     if not id then
         fsLog:Bug("Invalid arena unit %s.", unit)
         return false
     end
 
-    -- after the gates open UnitExists will start working
-    local exists = wow.UnitExists(unit)
-
-    if not wow.issecretvalue(exists) and exists then
-        if id > maxArenaCount then
-            fsLog:Bug("Detected unit %s exists when it shouldn't.", unit)
-        end
-
-        return true
-    end
-
-    local arenaCount = wowEx.ArenaOpponentsCount()
-
-    if arenaCount > maxArenaCount then
-        fsLog:Bug("Detected %d opponents when it should be 3.", arenaCount)
-    end
-
+    -- don't use UnitExists because of a blizzard bug where arena4 and arenapet4 temporarily exist as enemies
+    -- but they are actually ally units that are classified as enemies for a split second
     return id <= arenaCount
+end
 
-    -- temporarily disabling this while I'm on holiday and can't test it
-    -- TODO: check if this is causing arena4 to show up in solo shuffles
-    -- if not capabilities.HasC_PvP() or not wow.C_PvP or not wow.C_PvP.GetScoreInfoByPlayerGuid then
-    --     return false
-    -- end
-    --
-    -- local guid = wow.UnitGUID and wow.UnitGUID(unit)
-    --
-    -- if not guid or wow.issecretvalue(guid) then
-    --     return false
-    -- end
-    --
-    -- local info = wow.C_PvP.GetScoreInfoByPlayerGuid(guid)
-    -- return info ~= nil and info.name ~= nil
+function M:EnemyUnitExists(unit)
+    if not unit then
+        fsLog:Bug("Unit:EnemyUnitExists() - unit must not be nil.")
+        return false
+    end
+
+    if wowEx.IsInstanceArena() then
+        return M:ArenaUnitExists(unit)
+    end
+
+    if wowEx.IsInstanceBattleground() or wowEx.IsInstanceBrawl() then
+        return M:BgEnemyUnitExists(unit)
+    end
+
+    return false
 end
 
 ---Returns a table of group member unit tokens where the unit exists.
@@ -153,16 +150,23 @@ end
 ---Returns a table of arena unit tokens where the unit exists.
 ---@return string[]
 function M:ArenaUnits()
-    if not wowEx.IsInstanceArenaOrBrawl() then
+    local count = wowEx.ArenaOpponentsCount()
+
+    if count == 0 then
         return {}
     end
 
-    return fsEnumerable
-        :From(allArenaUnitsIds)
-        :Where(function(unit)
-            return M:EnemyUnitExists(unit)
-        end)
-        :ToTable()
+    local units = {}
+
+    for i = 1, count do
+        units[#units + 1] = "arena" .. i
+    end
+
+    for i = 1, count do
+        units[#units + 1] = "arenapet" .. i
+    end
+
+    return units
 end
 
 ---Returns true if the unit token is a pet.
