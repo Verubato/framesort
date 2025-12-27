@@ -62,6 +62,12 @@ function M:setup()
     addon.WoW.Api.GetNumArenaOpponentSpecs = function()
         return arenaUnitsCount
     end
+    addon.WoW.Capabilities.HasEnemySpecSupport = function()
+        return true
+    end
+    addon.WoW.Capabilities.HasSpecializations = function()
+        return true
+    end
 
     -- disable sorting on config changes
     local config = addon.DB.Options.Sorting

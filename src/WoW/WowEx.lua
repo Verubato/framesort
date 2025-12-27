@@ -1,6 +1,7 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
+local capabilities = addon.WoW.Capabilities
 local fsLog = addon.Logging.Log
 
 ---@class WowEx
@@ -50,15 +51,15 @@ addon.WoW.WowEx = {
     ---@return number
     ArenaOpponentsCount = function()
         -- prefer GetNumArenaOpponentSpecs as it seems reliable
-        if wow.GetNumArenaOpponentSpecs then
+        if capabilities.HasSpecializations() and capabilities.HasEnemySpecSupport() and wow.GetNumArenaOpponentSpecs then
             -- event if 0 is returned, still use it without fallback as it means spec information isn't available anyway
             return wow.GetNumArenaOpponentSpecs()
         end
 
         if wow.GetNumArenaOpponents then
-            -- GetNumArenaOpponents lies and sometimes returns a greater number than actually exist
-            -- it quite often reports 4 enemies in 3v3
-            -- seems to be related to pet classes like hunters, where ally pets are classified as enemies for a split second
+            -- GetNumArenaOpponents sometimes lies and returns a greater number
+            -- e.g. reports 4 enemies in 3v3
+            -- seems to be related to pet classes where ally pets are classified as enemies for a split second
             local enemyCount = wow.GetNumArenaOpponents()
 
             -- compare our friendly group size to get a somewhat reasonable guestimate
