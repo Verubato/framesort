@@ -1,5 +1,5 @@
 ---@type string, Addon
-local _, addon = ...
+local addonName, addon = ...
 local wow = addon.WoW.Api
 local capabilities = addon.WoW.Capabilities
 local fsHealth = addon.Health.HealthCheck
@@ -17,7 +17,7 @@ fsConfig.Panels.Sorting = M
 ---@param panel table the parent UI panel.
 ---@return table The bottom left most control to use for anchoring subsequent UI components.
 local function BuiltTitle(panel)
-    local version = wow.GetAddOnMetadata("FrameSort", "Version")
+    local version = wow.GetAddOnMetadata(addonName, "Version")
     local title = panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     title:SetPoint("TOPLEFT", verticalSpacing, -verticalSpacing)
     title:SetText(string.format(L["FrameSort - %s"], version))

@@ -4,6 +4,21 @@ local wow = addon.WoW.Api
 local capabilities = addon.WoW.Capabilities
 local fsLog = addon.Logging.Log
 
+local expansionNames = {
+    [0] = "Classic",
+    [1] = "The Burning Crusade",
+    [2] = "Wrath of the Lich King",
+    [3] = "Cataclysm",
+    [4] = "Mists of Pandaria",
+    [5] = "Warlords of Draenor",
+    [6] = "Legion",
+    [7] = "Battle for Azeroth",
+    [8] = "Shadowlands",
+    [9] = "Dragonflight",
+    [10] = "The War Within",
+    [11] = "Midnight",
+}
+
 ---@class WowEx
 addon.WoW.WowEx = {
     ---@return boolean
@@ -142,5 +157,24 @@ addon.WoW.WowEx = {
 
     IsAddOnEnabled = function(addonName)
         return wow.GetAddOnEnableState(addonName, wow.UnitName("player")) == 2
+    end,
+
+    ---Returns the current expansion name and build version.
+    ---@return string expansionName
+    ---@return string buildVersion
+    ExpansionAndBuildInfo = function()
+        local buildVersion = "Unknown"
+
+        if wow.GetBuildInfo then
+            local version, _, _, _ = wow.GetBuildInfo()
+            buildVersion = version or buildVersion
+        end
+
+        if LE_EXPANSION_LEVEL_CURRENT == nil then
+            return "Unknown", buildVersion
+        end
+
+        local expansionName = expansionNames[LE_EXPANSION_LEVEL_CURRENT] or "Unknown"
+        return expansionName, buildVersion
     end,
 }
