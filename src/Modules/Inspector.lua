@@ -60,19 +60,8 @@ end
 
 local function EnsureCacheEntry(unit)
     local guid = wow.UnitGUID(unit)
-    local cacheEntry = unitGuidToSpec[guid] or {}
-    unitGuidToSpec[guid] = cacheEntry
 
-    return cacheEntry
-end
-
-local function Inspect(unit)
-    -- it's entirely possible someone else requested an inspection for a different unit
-    -- in which case our request is stale and we won't get any data returned
-    -- this is fine and we'll just retry later
-    local guid = wow.UnitGUID(unit)
-
-    -- this can happen if the unit is "mouseover"
+    -- this can happen sometimes if the unit is "mouseover"
     if not guid then
         return
     end
@@ -82,10 +71,21 @@ local function Inspect(unit)
         return
     end
 
+    local cacheEntry = unitGuidToSpec[guid] or {}
+    unitGuidToSpec[guid] = cacheEntry
+
+    return cacheEntry
+end
+
+local function Inspect(unit)
     local specId = wowEx.GetInspectSpecializationSafe(unit)
 
     if specId then
         local cacheEntry = EnsureCacheEntry(unit)
+
+        if not cacheEntry then
+            return
+        end
 
         -- the spec id may be 0, in which case we'll use the previous value (if one exists)
         local before = cacheEntry.SpecId
@@ -177,6 +177,11 @@ local function InspectNext()
 
     -- create a cache entry for this unit so we don't attempt this unit again in the next iteration
     local cacheEntry = EnsureCacheEntry(unit)
+
+    if not cacheEntry then
+        return
+    end
+
     cacheEntry.LastAttempt = wow.GetTimePreciseSec()
 
     fsLog:Debug("Requesting inspection for unit '%s'.", unit)
