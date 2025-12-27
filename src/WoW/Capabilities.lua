@@ -73,3 +73,7 @@ end
 function M.HasMainTankAndAssistFrames()
     return LE_EXPANSION_LEVEL_CURRENT ~= nil and (LE_EXPANSION_MISTS_OF_PANDARIA == nil or LE_EXPANSION_LEVEL_CURRENT ~= LE_EXPANSION_MISTS_OF_PANDARIA)
 end
+
+function M.HasPvPMatchState()
+    return M.HasC_PvP() and type(wow.Enum) == "table" and wow.Enum.PvPMatchState ~= nil and type(wow.C_PvP.GetActiveMatchState) == "function"
+end
