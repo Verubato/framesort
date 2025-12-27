@@ -85,7 +85,9 @@ function M:Init()
     eventsFrame:RegisterEvent(events.PLAYER_REGEN_DISABLED)
 
     -- arena events
-    eventsFrame:RegisterEvent(events.PVP_MATCH_STATE_CHANGED)
+    if capabilities.HasPvPMatchState() then
+        eventsFrame:RegisterEvent(events.PVP_MATCH_STATE_CHANGED)
+    end
 
     -- inspection
     eventsFrame:RegisterEvent(events.INSPECT_READY)
