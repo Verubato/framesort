@@ -64,6 +64,10 @@ local function Ordering()
         return priority
     end
 
+    table.sort(ordering, function(a, b)
+        return a.Order < b.Order
+    end)
+
     for _, item in ipairs(ordering) do
         local priority = Priority(item.Type, item.Key)
         specOrdering = specOrdering:Concat(priority)
@@ -200,7 +204,7 @@ local function PrecomputeMetadata(units)
     return meta
 end
 
-local function RoleAndClassTypeOrder(role, class, meta)
+local function RoleOrClassTypeOrder(role, class, meta)
     local roleOrder = meta.RoleOrderLookup[role]
 
     if roleOrder then
@@ -279,8 +283,8 @@ local function CompareSpec(leftToken, rightToken, meta)
     -- e.g. in retail a guardian druid is always a tank, but in classic a feral druid can be tank or dps
     -- also in SoD demo warlocks can tank, and mages can heal
     if leftRole and rightRole then
-        local leftOrder = RoleAndClassTypeOrder(leftRole, leftClass, meta)
-        local rightOrder = RoleAndClassTypeOrder(rightRole, rightClass, meta)
+        local leftOrder = RoleOrClassTypeOrder(leftRole, leftClass, meta)
+        local rightOrder = RoleOrClassTypeOrder(rightRole, rightClass, meta)
 
         if leftOrder and rightOrder and leftOrder ~= rightOrder then
             return leftOrder < rightOrder
