@@ -65,7 +65,7 @@ function M:Init()
     -- loading screen
     eventsFrame:RegisterEvent(events.PLAYER_ENTERING_WORLD)
 
-    --  friendly unit change events
+    -- friendly unit change events
     eventsFrame:RegisterEvent(events.GROUP_ROSTER_UPDATE)
     eventsFrame:RegisterEvent(events.PLAYER_ROLES_ASSIGNED)
 

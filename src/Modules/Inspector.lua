@@ -179,7 +179,8 @@ local function InspectNext()
     local cacheEntry = EnsureCacheEntry(unit)
 
     if not cacheEntry then
-        return
+        -- return true to try another unit next run
+        return true
     end
 
     cacheEntry.LastAttempt = wow.GetTimePreciseSec()
