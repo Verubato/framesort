@@ -6,6 +6,17 @@ local fsLog = addon.Logging.Log
 ---@class WowEx
 addon.WoW.WowEx = {
     ---@return boolean
+    IsInstanceArena = function()
+        local inInstance, instanceType = wow.IsInInstance()
+
+        if not inInstance then
+            return false
+        end
+
+        return instanceType == "arena"
+    end,
+
+    ---@return boolean
     IsInstanceBattleground = function()
         local inInstance, instanceType = wow.IsInInstance()
         local isBg = inInstance and instanceType == "pvp"
@@ -22,15 +33,11 @@ addon.WoW.WowEx = {
     end,
 
     ---@return boolean
-    IsInstanceArenaOrBrawl = function()
+    IsInstanceBrawl = function()
         local inInstance, instanceType = wow.IsInInstance()
 
         if not inInstance then
             return false
-        end
-
-        if instanceType == "arena" then
-            return true
         end
 
         if type(wow.C_PvP) == "table" and type(wow.C_PvP.IsInBrawl) == "function" then
@@ -42,20 +49,22 @@ addon.WoW.WowEx = {
 
     ---@return number
     ArenaOpponentsCount = function()
-        if wow.GetNumArenaOpponents then
-            local count = wow.GetNumArenaOpponents()
-
-            if count and count > 0 then
-                return count
-            end
+        -- prefer GetNumArenaOpponentSpecs as it seems reliable
+        if wow.GetNumArenaOpponentSpecs then
+            -- event if 0 is returned, still use it without fallback as it means spec information isn't available anyway
+            return wow.GetNumArenaOpponentSpecs()
         end
 
-        if wow.GetNumArenaOpponentSpecs then
-            local count = wow.GetNumArenaOpponentSpecs()
+        if wow.GetNumArenaOpponents then
+            -- GetNumArenaOpponents lies and sometimes returns a greater number than actually exist
+            -- it quite often reports 4 enemies in 3v3
+            -- seems to be related to pet classes like hunters, where ally pets are classified as enemies for a split second
+            local enemyCount = wow.GetNumArenaOpponents()
 
-            if count and count > 0 then
-                return count
-            end
+            -- compare our friendly group size to get a somewhat reasonable guestimate
+            local allyCount = addon.WoW.WowEx.GroupMembersCount()
+
+            return math.min(allyCount, enemyCount)
         end
 
         return 0

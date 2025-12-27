@@ -589,7 +589,7 @@ end
 ---@return string? groupMode the group sort mode.
 ---@return boolean? reverse whether the sorting is reversed.
 function M:EnemySortMode()
-    if wowEx.IsInstanceArenaOrBrawl() or (mockInInstance and mockInstanceType == "arena") then
+    if wowEx.IsInstanceArena() or wowEx.IsInstanceBrawl() or (mockInInstance and mockInstanceType == "arena") then
         local config = addon.DB.Options.Sorting.EnemyArena
         return config.Enabled, config.GroupSortMode, config.Reverse
     end
