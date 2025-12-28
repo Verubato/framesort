@@ -24,7 +24,6 @@
 
     <!-- Load core wow files that other files need -->
     <Script file="WoW\Unit.lua"/>
-    <Script file="Modules\Macro\Parser.lua"/>
 
     <!-- Language files -->
     <Script file="Locales\enUS.lua"/>
@@ -45,6 +44,7 @@
 
     <!-- Common Modules -->
     <Script file="Modules\Inspector.lua"/>
+    <Script file="Modules\Macro\Parser.lua"/>
     <Script file="Modules\UnitTracker.lua"/>
     <Script file="Modules\Sorting\Comparer.lua"/>
     <Script file="Modules\Sorting\SortedFrames.lua"/>

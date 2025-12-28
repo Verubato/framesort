@@ -5,6 +5,7 @@ local wowEx = addon.WoW.WowEx
 local capabilities = addon.WoW.Capabilities
 local fsEnumerable = addon.Collections.Enumerable
 local fsUnit = addon.WoW.Unit
+local fsInspector = addon.Modules.Inspector
 local fsLog = addon.Logging.Log
 ---@class MacroParser
 local M = {}
@@ -16,9 +17,9 @@ local shortHeaderPattern = "#[Ff][Ss]"
 local longHeaderPattern = "#[Ff][Rr][Aa][Mm][Ee][Ss][Oo][Rr][Tt]"
 local shortSyntax = "@"
 local longSyntax = "target="
-local alphanumericWord = "([%w]+)"
-local shortPattern = shortSyntax .. alphanumericWord
-local longPattern = longSyntax .. alphanumericWord
+local unitToken = "([^%s,%]]+)"
+local shortPattern = shortSyntax .. unitToken
+local longPattern = longSyntax .. unitToken
 
 local WowRole = {
     Tank = "TANK",
@@ -26,65 +27,54 @@ local WowRole = {
     DPS = "DAMAGER",
 }
 
----Returns the start and end index of the nth target selector, e.g. @raid1, @player, @placeholder, target=player
+---Returns the start and end index of the nth target selector, e.g. raid1, player, placeholder, target=player
 ---@param str string
 ---@param occurrence number? the nth occurrence to find
 ---@return number? start, number? end
 local function NthSelector(str, occurrence)
-    local startPos = nil
-    local endPos = nil
+    local unitStart, unitEnd
+    local searchFrom = 1
     local n = 0
 
-    -- find the nth "@"
     while n < occurrence do
         n = n + 1
 
-        local shortStartPos, shortEndPos = string.find(str, shortPattern, endPos and endPos + 1 or nil)
-        local longStartPos, longEndPos = string.find(str, longPattern, endPos and endPos + 1 or nil)
+        local s1, e1 = string.find(str, shortPattern, searchFrom)
+        local s2, e2 = string.find(str, longPattern, searchFrom)
 
-        -- check to see which selector comes first in the macro
-        -- return the earliest
-        if shortStartPos and shortStartPos <= (longStartPos or shortStartPos) then
-            startPos = shortStartPos
-            endPos = shortEndPos
-        elseif longStartPos and longStartPos <= (shortStartPos or longStartPos) then
-            -- skip past the "target=" to the unit
-            longStartPos = longStartPos + string.len(longSyntax) - 1
-
-            startPos = longStartPos
-            endPos = longEndPos
+        if s1 and (not s2 or s1 <= s2) then
+            -- unit starts after '@'
+            unitStart = s1 + 1
+            unitEnd = e1
+            searchFrom = e1 + 1
+        elseif s2 then
+            -- unit starts after 'target='
+            unitStart = s2 + #longSyntax
+            unitEnd = e2
+            searchFrom = e2 + 1
         else
             return nil, nil
         end
     end
 
-    if n ~= occurrence then
-        return nil, nil
-    end
-
-    return startPos, endPos
+    return unitStart, unitEnd
 end
 
----Replaces all, or the nth occurrence of an "@unit" instance with the specified unit
+---Replaces the nth occurrence of an unit token with the specified unit
 ---@param body string
 ---@param unit string
 ---@param occurrence number the nth selector to replace
 ---@return string? the new body text, or nil if invalid
 local function ReplaceSelector(body, unit, occurrence)
     local startPos, endPos = NthSelector(body, occurrence)
-
     if not startPos or not endPos then
         return nil
     end
-
     if startPos < 1 or endPos > #body then
         return nil
     end
 
-    local newBody = string.sub(body, 1, startPos)
-    newBody = newBody .. unit
-    newBody = newBody .. string.sub(body, endPos + 1)
-    return newBody
+    return string.sub(body, 1, startPos - 1) .. unit .. string.sub(body, endPos + 1)
 end
 
 local function GetSelectors(body)
@@ -182,20 +172,21 @@ local function UnitForSelector(selector, friendlyUnits, enemyUnits)
 
     -- enemy arena
     if enemyTank or enemyHealer or enemyDps then
-        if not capabilities.HasEnemySpecSupport() then
+        if not capabilities.HasSpecializations() then
             return "none"
         end
 
-        assert(enemyUnits)
+        if not enemyUnits then
+            fsLog:Bug("EnemyUnits must not be nil.")
+            return "none"
+        end
+
+        if #enemyUnits == 0 then
+            return "none"
+        end
 
         return fsEnumerable:From(enemyUnits):Nth(number or 1, function(x)
-            local id = tonumber(string.match(x, "%d+"))
-
-            if not id then
-                return false
-            end
-
-            local specId = wowEx.GetArenaOpponentSpecSafe(id)
+            local specId = fsInspector:EnemyUnitSpec(x)
 
             if not specId then
                 return false

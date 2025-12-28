@@ -64,7 +64,7 @@ function M:Containers()
     end
 
     local function getFrames()
-        local inInstance, instanceType = wow.IsInInstance()
+        local inInstance, instanceType = wowEx.IsInInstance()
         local isArena = inInstance and instanceType == "arena"
         local frames = {
             ---@diagnostic disable: undefined-global

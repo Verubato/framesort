@@ -62,6 +62,7 @@ addon.WoW.Api = {
     UnitIsConnected = UnitIsConnected,
     UnitIsGroupLeader = UnitIsGroupLeader,
     UnitGroupRolesAssigned = UnitGroupRolesAssigned,
+    UnitFactionGroup = UnitFactionGroup,
     GetRaidRosterInfo = GetRaidRosterInfo,
     GetArenaOpponentSpec = GetArenaOpponentSpec,
     GetSpecializationInfoByID = GetSpecializationInfoByID,
