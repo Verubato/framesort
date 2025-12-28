@@ -151,7 +151,7 @@ FrameSort 的按鍵綁定會依視覺框架位置而非隊伍編號來選取。
 L["Macros"] = "巨集"
 -- "|4macro:macros;" is a special command to pluralise the word "macro" to "macros" when %d is greater than 1
 L["FrameSort has found %d |4macro:macros; to manage."] = "FrameSort 找到 %d 個要管理的巨集。"
-L['FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.'] = '包含「#FrameSort」標頭的巨集，其內的變數會由 FrameSort 動態更新。'
+L['FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.'] = "包含「#FrameSort」標頭的巨集，其內的變數會由 FrameSort 動態更新。"
 L["Below are some examples on how to use this."] = "以下是一些使用範例。"
 
 L["Macro_Example1"] = [[#showtooltip
@@ -182,7 +182,7 @@ L["The first DPS that's not you."] = "不是你自己的第一位 DPS。"
 L["Add a number to choose the Nth target, e.g., DPS2 selects the 2nd DPS."] = "可加上數字來選擇第 N 個目標，例如：DPS2 會選到第 2 位 DPS。"
 L["Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work."] = "變數不分大小寫，因此「fRaMe1」、「Dps」、「enemyhealer」等都能使用。"
 L["Need to save on macro characters? Use abbreviations to shorten them:"] = "想節省巨集字數嗎？可使用縮寫來簡化："
-L['Use "X" to tell FrameSort to ignore an @unit selector:'] = '使用「X」告訴 FrameSort 忽略一個 @單位 的選擇器：'
+L['Use "X" to tell FrameSort to ignore an @unit selector:'] = "使用「X」告訴 FrameSort 忽略一個 @單位 的選擇器："
 L["Skip_Example"] = [[
 #FS X X EnemyHealer
 /cast [mod:shift,@focus][@mouseover,harm][@enemyhealer,exists][] Spell;]]
@@ -266,10 +266,11 @@ L["Traditional mode can't sort your other frame addons: '%s'"] = "傳統模式�
 L["Using Secure sorting mode when spacing is being used"] = "在使用間距時已使用安全排序模式"
 L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method"] = "傳統模式無法套用間距，請考慮移除間距或改用安全排序方式"
 L["Blizzard sorting functions not tampered with"] = "暴雪的排序函式未被更動"
-L['"%s" may cause conflicts, consider disabling it'] = '「%s」可能導致衝突，建議停用'
+L['"%s" may cause conflicts, consider disabling it'] = "「%s」可能導致衝突，建議停用"
 L["No conflicting addons"] = "沒有衝突的插件"
 L["Main tank and assist setting disabled when spacing used"] = "使用間距時將停用主坦克與助理坦克設定"
-L["Please turn off raid spacing or disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] = "請關閉團隊間距，或在 選項 → 介面 → 團隊框架 中停用「顯示主坦克與助理坦克」選項"
+L["Please turn off raid spacing or disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] =
+    "請關閉團隊間距，或在 選項 → 介面 → 團隊框架 中停用「顯示主坦克與助理坦克」選項"
 
 -- # Log Screen -- #
 L["Log"] = "日誌"
@@ -278,3 +279,22 @@ L["Copy Log"] = "複製日誌"
 
 -- # Notifications -- #
 L["Can't do that during combat."] = "戰鬥中無法執行此操作。"
+
+-- # Nameplates screen #
+L["Nameplates"] = "名條"
+L["Friendly Nameplates"] = "友方名條"
+L["Enemy Nameplates"] = "敵方名條"
+L["NameplatesBlurb"] = [[
+使用 FrameSort 變數取代暴雪名條文字。
+\n
+支援的變數：
+  - $framenumber
+  - $name
+  - $unit
+  - $spec
+\n
+範例：
+  - Frame - $framenumber
+  - $framenumber - $spec
+  - $name - $spec
+]]

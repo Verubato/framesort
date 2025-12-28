@@ -275,3 +275,22 @@ L["Copy Log"] = nil
 
 -- # Notifications -- #
 L["Can't do that during combat."] = nil
+
+-- # Nameplates screen #
+L["Nameplates"] = "Nameplates"
+L["Friendly Nameplates"] = "Friendly Nameplates"
+L["Enemy Nameplates"] = "Enemy Nameplates"
+L["NameplatesBlurb"] = [[
+Replace blizzard nameplate text with FrameSort variables.
+\n
+Supported variables:
+  - $framenumber
+  - $name
+  - $unit
+  - $spec
+\n
+Examples:
+  - Frame - $framenumber
+  - $framenumber - $spec
+  - $name - $spec
+]]

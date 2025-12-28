@@ -31,6 +31,7 @@
 ---@field SpecPriority OptionsPanel
 ---@field AutoLeader OptionsPanel
 ---@field SortingMethod OptionsPanel
+---@field Nameplates OptionsPanel
 ---@field Api OptionsPanel
 ---@field Discord OptionsPanel
 ---@field Log OptionsPanel

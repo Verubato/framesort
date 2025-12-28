@@ -50,6 +50,7 @@
 ---@field AutoLeader AutoLeaderModule
 ---@field Inspector InspectorModule
 ---@field UnitTracker UnitTrackerModule
+---@field Nameplates NameplatesModule
 
 ---@class Scheduling
 ---@field Scheduler Scheduler

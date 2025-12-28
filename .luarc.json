@@ -41,6 +41,7 @@
         "Grid2Layout",
         "CompactRaidFrameContainer_LayoutFrames",
         "LE_EXPANSION_LEVEL_CURRENT",
+        "CompactUnitFrame_UpdateName",
     ],
     "diagnostics.disable": [
         "inject-field",

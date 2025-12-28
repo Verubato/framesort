@@ -8,7 +8,7 @@ fsConfig.DbDefaults = {
 
     ---@class Options
     Options = {
-        Version = 22,
+        Version = 23,
         Sorting = {
             Ordering = {
                 Tanks = 1,
@@ -79,6 +79,12 @@ fsConfig.DbDefaults = {
                 Horizontal = 0,
                 Vertical = 0,
             },
+        },
+        Nameplates = {
+            FriendlyEnabled = false,
+            EnemyEnabled = false,
+            FriendlyFormat = "$framenumber",
+            EnemyFormat = "$framenumber",
         },
     },
 }

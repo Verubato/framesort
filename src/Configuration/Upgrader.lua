@@ -617,6 +617,22 @@ function M:UpgradeToVersion22(options)
     return true
 end
 
+function M:UpgradeToVersion23(options)
+    if options.Version ~= 22 then
+        return false
+    end
+
+    options.Nameplates = {
+        FriendlyEnabled = false,
+        EnemyEnabled = false,
+        FriendlyFormat = "$framenumber",
+        EnemyFormat = "$framenumber",
+    }
+    options.Version = 23
+
+    return true
+end
+
 ---Upgrades saved variables database to the current version.
 function M:UpgradeDb(db)
     local options = db.Options
