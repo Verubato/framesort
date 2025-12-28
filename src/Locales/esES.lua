@@ -274,7 +274,8 @@ L["Blizzard sorting functions not tampered with"] = "Funciones de ordenación de
 L['"%s" may cause conflicts, consider disabling it'] = '"%s" puede causar conflictos; plantéate desactivarlo'
 L["No conflicting addons"] = "No hay addons en conflicto"
 L["Main tank and assist setting disabled when spacing used"] = "La opción de tanque principal y asistente se desactiva cuando se usa el espaciado"
-L["Please turn off raid spacing or disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] = "Desactiva el espaciado de banda o deshabilita la opción «Mostrar tanque principal y asistente» en Opciones → Interfaz → Marcos de banda"
+L["Please turn off raid spacing or disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] =
+    "Desactiva el espaciado de banda o deshabilita la opción «Mostrar tanque principal y asistente» en Opciones → Interfaz → Marcos de banda"
 
 -- # Log Screen -- #
 L["Log"] = "Registro"
@@ -283,3 +284,22 @@ L["Copy Log"] = "Copiar registro"
 
 -- # Notifications -- #
 L["Can't do that during combat."] = "No puedes hacer eso durante el combate."
+
+-- # Nameplates screen #
+L["Nameplates"] = "Placas de nombre"
+L["Friendly Nameplates"] = "Placas de nombre amistosas"
+L["Enemy Nameplates"] = "Placas de nombre enemigas"
+L["NameplatesBlurb"] = [[
+Reemplaza el texto de las placas de nombre de Blizzard con variables de FrameSort.
+\n
+Variables compatibles:
+  - $framenumber
+  - $name
+  - $unit
+  - $spec
+\n
+Ejemplos:
+  - Frame - $framenumber
+  - $framenumber - $spec
+  - $name - $spec
+]]

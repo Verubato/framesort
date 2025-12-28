@@ -8,7 +8,7 @@ local config = {
 		"FrameSortApi",
 		"SLASH_FRAMESORT1",
 		"SLASH_FRAMESORT2",
-		"BINDING_HEADER_FRAMESORT_TARGET"
+		"BINDING_HEADER_FRAMESORT_TARGET",
 	},
 
 	read_globals = {
@@ -63,6 +63,7 @@ local config = {
 		"GladiusButtonFramearena5",
 		"Gladius2DB",
 		"GladiusButtonBackground",
+		"CompactUnitFrame_UpdateName",
 	},
 
 	ignore = {

@@ -91,7 +91,8 @@ L["Spec query note"] = [[
 -- # Auto Leader screen #
 L["Auto Leader"] = "自动队长"
 L["Auto promote healers to leader in solo shuffle."] = "在单人乱斗中自动将治疗提升为队长。"
-L["Why? So healers can configure target marker icons and re-order party1/2 to their preference."] = "为什么？这样治疗可以设置目标标记图标，并按自己的喜好重新排列 party1/2。"
+L["Why? So healers can configure target marker icons and re-order party1/2 to their preference."] =
+    "为什么？这样治疗可以设置目标标记图标，并按自己的喜好重新排列 party1/2。"
 L["Enabled"] = "启用"
 
 -- # Blizzard Keybindings screen (FrameSort's section) #
@@ -268,10 +269,11 @@ L["Traditional mode can't sort your other frame addons: '%s'"] = "传统模式�
 L["Using Secure sorting mode when spacing is being used"] = "使用了间距时采用了安全排序模式"
 L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method"] = "传统模式无法应用间距，建议移除间距或改用安全排序方式"
 L["Blizzard sorting functions not tampered with"] = "暴雪排序函数未被篡改"
-L['"%s" may cause conflicts, consider disabling it'] = '“%s”可能导致冲突，建议将其禁用'
+L['"%s" may cause conflicts, consider disabling it'] = "“%s”可能导致冲突，建议将其禁用"
 L["No conflicting addons"] = "没有冲突的插件"
 L["Main tank and assist setting disabled when spacing used"] = "使用间距时将禁用主坦克和助理坦克设置"
-L["Please turn off raid spacing or disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] = "请关闭团队间距，或在 选项 → 界面 → 团队框架 中禁用“显示主坦克和助理坦克”选项"
+L["Please turn off raid spacing or disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] =
+    "请关闭团队间距，或在 选项 → 界面 → 团队框架 中禁用“显示主坦克和助理坦克”选项"
 
 -- # Log Screen -- #
 L["Log"] = "日志"
@@ -280,3 +282,22 @@ L["Copy Log"] = "复制日志"
 
 -- # Notifications -- #
 L["Can't do that during combat."] = "战斗中无法执行该操作。"
+
+-- # Nameplates screen #
+L["Nameplates"] = "姓名板"
+L["Friendly Nameplates"] = "友方姓名板"
+L["Enemy Nameplates"] = "敌方姓名板"
+L["NameplatesBlurb"] = [[
+使用 FrameSort 变量替换暴雪姓名板文本。
+\n
+支持的变量：
+  - $framenumber
+  - $name
+  - $unit
+  - $spec
+\n
+示例：
+  - Frame - $framenumber
+  - $framenumber - $spec
+  - $name - $spec
+]]

@@ -23,6 +23,7 @@ TestSortedUnits = require("Modules\\SortedUnitsTest")
 TestSortedFrames = require("Modules\\SortedFramesTest")
 TestSorting = require("Modules\\SortingTest")
 TestSpacing = require("Modules\\SpacingTest")
+TestNameplates = require("Modules\\NameplatesTest")
 TestAddon = require("Modules\\AddonTest")
 
 TestFrameChain = require("Frame\\FrameChainTest")

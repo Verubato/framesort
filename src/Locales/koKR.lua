@@ -91,7 +91,8 @@ L["Spec query note"] = [[
 -- # Auto Leader screen #
 L["Auto Leader"] = "자동 파티장"
 L["Auto promote healers to leader in solo shuffle."] = "솔로 셔플에서 힐러를 자동으로 파티장으로 승급합니다."
-L["Why? So healers can configure target marker icons and re-order party1/2 to their preference."] = "이유: 힐러가 대상 징표 아이콘을 설정하고 party1/2 순서를 원하는 대로 재정렬할 수 있도록 하기 위함입니다."
+L["Why? So healers can configure target marker icons and re-order party1/2 to their preference."] =
+    "이유: 힐러가 대상 징표 아이콘을 설정하고 party1/2 순서를 원하는 대로 재정렬할 수 있도록 하기 위함입니다."
 L["Enabled"] = "사용"
 
 -- # Blizzard Keybindings screen (FrameSort's section) #
@@ -153,7 +154,8 @@ FrameSort 단축키는 파티 번호가 아니라 화면상의 프레임 위치�
 L["Macros"] = "매크로"
 -- "|4macro:macros;" is a special command to pluralise the word "macro" to "macros" when %d is greater than 1
 L["FrameSort has found %d |4macro:macros; to manage."] = "FrameSort가 관리할 매크로 %d개를 찾았습니다."
-L['FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.'] = '"#FrameSort" 헤더가 포함된 매크로의 변수는 FrameSort가 동적으로 업데이트합니다.'
+L['FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.'] =
+    '"#FrameSort" 헤더가 포함된 매크로의 변수는 FrameSort가 동적으로 업데이트합니다.'
 L["Below are some examples on how to use this."] = "사용 예시는 아래와 같습니다."
 
 L["Macro_Example1"] = [[#showtooltip
@@ -182,9 +184,10 @@ FrameSort 디스코드 서버로 오셔서 AI 기반 매크로 봇을 이용해 
 L["Macro Variables"] = "매크로 변수"
 L["The first DPS that's not you."] = "자신이 아닌 첫 번째 DPS."
 L["Add a number to choose the Nth target, e.g., DPS2 selects the 2nd DPS."] = "숫자를 붙여 N번째 대상을 선택할 수 있습니다. 예: DPS2는 두 번째 DPS를 선택합니다."
-L["Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work."] = "변수는 대소문자를 구분하지 않으므로 'fRaMe1', 'Dps', 'enemyhealer' 등도 모두 동작합니다."
+L["Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work."] =
+    "변수는 대소문자를 구분하지 않으므로 'fRaMe1', 'Dps', 'enemyhealer' 등도 모두 동작합니다."
 L["Need to save on macro characters? Use abbreviations to shorten them:"] = "매크로 글자 수를 아끼고 싶다면 약어를 사용해 줄이세요:"
-L['Use "X" to tell FrameSort to ignore an @unit selector:'] = "\"X\"를 사용하면 FrameSort가 @unit 선택자를 무시하도록 할 수 있습니다:"
+L['Use "X" to tell FrameSort to ignore an @unit selector:'] = '"X"를 사용하면 FrameSort가 @unit 선택자를 무시하도록 할 수 있습니다:'
 L["Skip_Example"] = [[
 #FS X X EnemyHealer
 /cast [mod:shift,@focus][@mouseover,harm][@enemyhealer,exists][] Spell;]]
@@ -266,12 +269,14 @@ L["Disable the 'Keep Groups Together' raid profile setting."] = "공격대 프�
 L["Only using Blizzard frames with Traditional mode"] = "전통적 모드에서는 블리자드 프레임만 사용 중"
 L["Traditional mode can't sort your other frame addons: '%s'"] = "전통적 모드는 다른 프레임 애드온을 정렬할 수 없습니다: '%s'"
 L["Using Secure sorting mode when spacing is being used"] = "간격 사용 시 보안 정렬 모드 사용"
-L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method"] = "전통적 모드는 간격을 적용할 수 없습니다. 간격을 제거하거나 보안 정렬 방식을 사용하세요."
+L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method"] =
+    "전통적 모드는 간격을 적용할 수 없습니다. 간격을 제거하거나 보안 정렬 방식을 사용하세요."
 L["Blizzard sorting functions not tampered with"] = "블리자드 정렬 함수가 변경되지 않음"
-L['"%s" may cause conflicts, consider disabling it'] = "\"%s\"는 충돌을 일으킬 수 있으니 비활성화를 고려하세요"
+L['"%s" may cause conflicts, consider disabling it'] = '"%s"는 충돌을 일으킬 수 있으니 비활성화를 고려하세요'
 L["No conflicting addons"] = "충돌하는 애드온 없음"
 L["Main tank and assist setting disabled when spacing used"] = "간격을 사용할 경우 메인 탱커 및 보조 탱커 설정이 비활성화됩니다"
-L["Please turn off raid spacing or disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] = "공격대 간격을 끄거나 옵션 → 인터페이스 → 공격대 프레임에서 '메인 탱커 및 보조 탱커 표시' 옵션을 비활성화하세요"
+L["Please turn off raid spacing or disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] =
+    "공격대 간격을 끄거나 옵션 → 인터페이스 → 공격대 프레임에서 '메인 탱커 및 보조 탱커 표시' 옵션을 비활성화하세요"
 
 -- # Log Screen -- #
 L["Log"] = "로그"
@@ -280,3 +285,22 @@ L["Copy Log"] = "로그 복사"
 
 -- # Notifications -- #
 L["Can't do that during combat."] = "전투 중에는 할 수 없습니다."
+
+-- # Nameplates screen #
+L["Nameplates"] = "이름표"
+L["Friendly Nameplates"] = "아군 이름표"
+L["Enemy Nameplates"] = "적 이름표"
+L["NameplatesBlurb"] = [[
+블리자드 이름표 텍스트를 FrameSort 변수로 교체합니다.
+\n
+지원되는 변수:
+  - $framenumber
+  - $name
+  - $unit
+  - $spec
+\n
+예시:
+  - Frame - $framenumber
+  - $framenumber - $spec
+  - $name - $spec
+]]

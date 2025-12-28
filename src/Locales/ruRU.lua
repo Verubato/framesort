@@ -10,7 +10,8 @@ end
 -- used in FrameSort - 1.2.3 version header, %s is the version number
 L["FrameSort - %s"] = "FrameSort — %s"
 L["There are some issues that may prevent FrameSort from working correctly."] = "Есть проблемы, которые могут помешать корректной работе FrameSort."
-L["Please go to the Health Check panel to view more details."] = "Перейдите на панель «Проверка работоспособности», чтобы узнать подробности."
+L["Please go to the Health Check panel to view more details."] =
+    "Перейдите на панель «Проверка работоспособности», чтобы узнать подробности."
 L["Role"] = "Роль"
 L["Spec"] = "Спек"
 L["Group"] = "Группа"
@@ -65,7 +66,8 @@ L["Reload"] = "Перезагрузить"
 
 -- # Ordering screen #
 L["Ordering"] = "Порядок"
-L["Specify the ordering you wish to use when sorting by spec."] = "Укажите порядок, который будет использоваться при сортировке по специализации."
+L["Specify the ordering you wish to use when sorting by spec."] =
+    "Укажите порядок, который будет использоваться при сортировке по специализации."
 L["Tanks"] = "Танки"
 L["Healers"] = "Лекари"
 L["Casters"] = "Кастеры"
@@ -75,7 +77,8 @@ L["Melee"] = "Ближний бой"
 -- # Spec Priority screen # --
 L["Spec Priority"] = "Приоритет специализаций"
 L["Spec Type"] = "Тип специализации"
-L["Choose a spec type, then drag and drop to control priority."] = "Выберите тип специализации и измените приоритет с помощью перетаскивания."
+L["Choose a spec type, then drag and drop to control priority."] =
+    "Выберите тип специализации и измените приоритет с помощью перетаскивания."
 L["Tank"] = "Танк"
 L["Healer"] = "Лекарь"
 L["Caster"] = "Заклинатель"
@@ -91,7 +94,8 @@ L["Spec query note"] = [[
 -- # Auto Leader screen #
 L["Auto Leader"] = "Автолидер"
 L["Auto promote healers to leader in solo shuffle."] = "Автоматически назначать лекаря лидером в «Соло потасовке»."
-L["Why? So healers can configure target marker icons and re-order party1/2 to their preference."] = "Зачем? Чтобы лекари могли ставить метки и менять порядок party1/2 по своему усмотрению."
+L["Why? So healers can configure target marker icons and re-order party1/2 to their preference."] =
+    "Зачем? Чтобы лекари могли ставить метки и менять порядок party1/2 по своему усмотрению."
 L["Enabled"] = "Включено"
 
 -- # Blizzard Keybindings screen (FrameSort's section) #
@@ -151,7 +155,8 @@ L["Keybindings_Description"] = [[
 L["Macros"] = "Макросы"
 -- "|4macro:macros;" is a special command to pluralise the word "macro" to "macros" when %d is greater than 1
 L["FrameSort has found %d |4macro:macros; to manage."] = "FrameSort обнаружил %d макрос(ов) для управления."
-L['FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.'] = 'FrameSort будет динамически обновлять переменные в макросах, содержащих заголовок "#FrameSort".'
+L['FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.'] =
+    'FrameSort будет динамически обновлять переменные в макросах, содержащих заголовок "#FrameSort".'
 L["Below are some examples on how to use this."] = "Ниже приведены примеры использования."
 
 L["Macro_Example1"] = [[#showtooltip
@@ -179,8 +184,10 @@ L["Discord Bot Blurb"] = [[
 -- # Macro Variables screen # --
 L["Macro Variables"] = "Переменные макросов"
 L["The first DPS that's not you."] = "Первый ДПС, не вы."
-L["Add a number to choose the Nth target, e.g., DPS2 selects the 2nd DPS."] = "Добавьте номер, чтобы выбрать N-ю цель, например, DPS2 выберет второго ДПС."
-L["Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work."] = "Переменные не чувствительны к регистру, поэтому 'fRaMe1', 'Dps', 'enemyhealer' и т. п. будут работать."
+L["Add a number to choose the Nth target, e.g., DPS2 selects the 2nd DPS."] =
+    "Добавьте номер, чтобы выбрать N-ю цель, например, DPS2 выберет второго ДПС."
+L["Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work."] =
+    "Переменные не чувствительны к регистру, поэтому 'fRaMe1', 'Dps', 'enemyhealer' и т. п. будут работать."
 L["Need to save on macro characters? Use abbreviations to shorten them:"] = "Нужно экономить символы в макросах? Используйте сокращения:"
 L['Use "X" to tell FrameSort to ignore an @unit selector:'] = 'Используйте "X", чтобы сказать FrameSort игнорировать селектор @unit:'
 L["Skip_Example"] = [[
@@ -232,7 +239,8 @@ L["Want to integrate FrameSort into your addons, scripts, and Weak Auras?"] = "�
 L["Here are some examples."] = "Вот несколько примеров."
 L["Retrieved an ordered array of party/raid unit tokens."] = "Получить упорядоченный массив токенов юнитов группы/рейда."
 L["Retrieved an ordered array of arena unit tokens."] = "Получить упорядоченный массив токенов юнитов арены."
-L["Register a callback function to run after FrameSort sorts frames."] = "Зарегистрировать функцию обратного вызова, выполняемую после сортировки рамок FrameSort."
+L["Register a callback function to run after FrameSort sorts frames."] =
+    "Зарегистрировать функцию обратного вызова, выполняемую после сортировки рамок FrameSort."
 L["Retrieve an ordered array of party frames."] = "Получить упорядоченный массив рамок группы."
 L["Change a FrameSort setting."] = "Изменить настройку FrameSort."
 L["Get the frame number of a unit."] = "Получает номер фрейма для юнита."
@@ -246,7 +254,8 @@ L["Talk directly with the developer on Discord."] = "Свяжитесь напр
 -- # Health Check screen -- #
 L["Health Check"] = "Проверка работоспособности"
 L["Try this"] = "Попробуйте это"
-L["Any known issues with configuration or conflicting addons will be shown below."] = "Любые известные проблемы с настройкой или конфликтами аддонов будут показаны ниже."
+L["Any known issues with configuration or conflicting addons will be shown below."] =
+    "Любые известные проблемы с настройкой или конфликтами аддонов будут показаны ниже."
 L["N/A"] = "Н/Д"
 L["Passed!"] = "Пройдено!"
 L["Failed"] = "Не удалось"
@@ -259,17 +268,21 @@ L["FrameSort currently supports frames from these addons: %s"] = "FrameSort в �
 L["Using Raid-Style Party Frames"] = "Используются рамки группы в стиле рейда"
 L["Please enable 'Use Raid-Style Party Frames' in the Blizzard settings"] = "Включите 'Use Raid-Style Party Frames' в настройках Blizzard"
 L["Keep Groups Together setting disabled"] = "Настройка 'Keep Groups Together' отключена"
-L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"] = "Измените режим отображения рейда на один из вариантов 'Combined Groups' через Режим редактирования"
+L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"] =
+    "Измените режим отображения рейда на один из вариантов 'Combined Groups' через Режим редактирования"
 L["Disable the 'Keep Groups Together' raid profile setting."] = "Отключите параметр профиля рейда 'Keep Groups Together'."
 L["Only using Blizzard frames with Traditional mode"] = "Используются только рамки Blizzard в традиционном режиме"
 L["Traditional mode can't sort your other frame addons: '%s'"] = "Традиционный режим не может сортировать рамки других аддонов: '%s'"
 L["Using Secure sorting mode when spacing is being used"] = "Используется безопасный режим сортировки при включённых отступах"
-L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method"] = "Традиционный режим не может применять отступы; уберите отступы или используйте безопасный метод сортировки"
+L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method"] =
+    "Традиционный режим не может применять отступы; уберите отступы или используйте безопасный метод сортировки"
 L["Blizzard sorting functions not tampered with"] = "Функции сортировки Blizzard не изменены"
 L['"%s" may cause conflicts, consider disabling it'] = '"%s" может вызывать конфликты, рассмотрите возможность его отключения'
 L["No conflicting addons"] = "Конфликтующих аддонов нет"
-L["Main tank and assist setting disabled when spacing used"] = "Настройки главного танка и помощника отключаются при использовании интервалов"
-L["Please turn off raid spacing or disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] = "Пожалуйста, отключите интервалы рейда или отключите параметр «Отображать главного танка и помощника» в меню Настройки → Интерфейс → Рейдовые фреймы"
+L["Main tank and assist setting disabled when spacing used"] =
+    "Настройки главного танка и помощника отключаются при использовании интервалов"
+L["Please turn off raid spacing or disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] =
+    "Пожалуйста, отключите интервалы рейда или отключите параметр «Отображать главного танка и помощника» в меню Настройки → Интерфейс → Рейдовые фреймы"
 
 -- # Log Screen -- #
 L["Log"] = "Журнал"
@@ -278,3 +291,22 @@ L["Copy Log"] = "Копировать журнал"
 
 -- # Notifications -- #
 L["Can't do that during combat."] = "Невозможно сделать это в бою."
+
+-- # Nameplates screen #
+L["Nameplates"] = "Индикаторы здоровья"
+L["Friendly Nameplates"] = "Индикаторы союзников"
+L["Enemy Nameplates"] = "Индикаторы врагов"
+L["NameplatesBlurb"] = [[
+Заменяет текст индикаторов здоровья Blizzard переменными FrameSort.
+\n
+Поддерживаемые переменные:
+  - $framenumber
+  - $name
+  - $unit
+  - $spec
+\n
+Примеры:
+  - Frame - $framenumber
+  - $framenumber - $spec
+  - $name - $spec
+]]

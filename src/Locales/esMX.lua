@@ -91,7 +91,8 @@ Esto significa que puede tardar un poco antes de que podamos ordenar correctamen
 -- # Auto Leader screen #
 L["Auto Leader"] = "Líder automático"
 L["Auto promote healers to leader in solo shuffle."] = "Ascender automáticamente a los sanadores a líder en Solo Shuffle."
-L["Why? So healers can configure target marker icons and re-order party1/2 to their preference."] = "¿Por qué? Para que los sanadores puedan configurar los iconos de marcadores de objetivo y reordenar party1/2 a su preferencia."
+L["Why? So healers can configure target marker icons and re-order party1/2 to their preference."] =
+    "¿Por qué? Para que los sanadores puedan configurar los iconos de marcadores de objetivo y reordenar party1/2 a su preferencia."
 L["Enabled"] = "Activado"
 
 -- # Blizzard Keybindings screen (FrameSort's section) #
@@ -153,7 +154,8 @@ Así, apuntar al 'Marco 1' apuntará al Tanque, al 'Marco 2' al Sanador, al 'Mar
 L["Macros"] = "Macros"
 -- "|4macro:macros;" is a special command to pluralise the word "macro" to "macros" when %d is greater than 1
 L["FrameSort has found %d |4macro:macros; to manage."] = "FrameSort ha encontrado %d |4macro:macros; para administrar."
-L['FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.'] = "FrameSort actualizará dinámicamente las variables dentro de las macros que contengan el encabezado \"#FrameSort\"."
+L['FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.'] =
+    'FrameSort actualizará dinámicamente las variables dentro de las macros que contengan el encabezado "#FrameSort".'
 L["Below are some examples on how to use this."] = "A continuación hay algunos ejemplos de cómo usar esto."
 
 L["Macro_Example1"] = [[#showtooltip
@@ -182,9 +184,10 @@ Simplemente escribe '@Macro Bot' con tu pregunta en el canal #macro-bot-channel.
 L["Macro Variables"] = "Variables de macro"
 L["The first DPS that's not you."] = "El primer DPS que no seas tú."
 L["Add a number to choose the Nth target, e.g., DPS2 selects the 2nd DPS."] = "Agrega un número para elegir el enésimo objetivo; p. ej., DPS2 selecciona el 2.º DPS."
-L["Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work."] = "Las variables no distinguen mayúsculas/minúsculas, así que 'fRaMe1', 'Dps', 'enemyhealer', etc., funcionarán."
+L["Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work."] =
+    "Las variables no distinguen mayúsculas/minúsculas, así que 'fRaMe1', 'Dps', 'enemyhealer', etc., funcionarán."
 L["Need to save on macro characters? Use abbreviations to shorten them:"] = "¿Necesitas ahorrar caracteres en la macro? Usa abreviaturas para acortarlas:"
-L['Use "X" to tell FrameSort to ignore an @unit selector:'] = "Usa \"X\" para indicarle a FrameSort que ignore un selector @unit:"
+L['Use "X" to tell FrameSort to ignore an @unit selector:'] = 'Usa "X" para indicarle a FrameSort que ignore un selector @unit:'
 L["Skip_Example"] = [[
 #FS X X EnemyHealer
 /cast [mod:shift,@focus][@mouseover,harm][@enemyhealer,exists][] Spell;]]
@@ -261,17 +264,20 @@ L["FrameSort currently supports frames from these addons: %s"] = "FrameSort actu
 L["Using Raid-Style Party Frames"] = "Usando marcos de grupo con estilo de banda"
 L["Please enable 'Use Raid-Style Party Frames' in the Blizzard settings"] = "Activa 'Use Raid-Style Party Frames' en la configuración de Blizzard"
 L["Keep Groups Together setting disabled"] = "Ajuste 'Keep Groups Together' desactivado"
-L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"] = "Cambia el modo de visualización de banda a una de las opciones 'Combined Groups' mediante el Modo de edición"
+L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"] =
+    "Cambia el modo de visualización de banda a una de las opciones 'Combined Groups' mediante el Modo de edición"
 L["Disable the 'Keep Groups Together' raid profile setting."] = "Desactiva la configuración de perfil de banda 'Keep Groups Together'."
 L["Only using Blizzard frames with Traditional mode"] = "Solo se usan marcos de Blizzard con el modo Tradicional"
 L["Traditional mode can't sort your other frame addons: '%s'"] = "El modo Tradicional no puede ordenar tus otros complementos de marcos: '%s'"
 L["Using Secure sorting mode when spacing is being used"] = "Se usa el modo de ordenamiento Seguro cuando se está usando espaciado"
-L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method"] = "El modo Tradicional no puede aplicar espaciado; considera quitar el espaciado o usar el método de ordenamiento Seguro"
+L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method"] =
+    "El modo Tradicional no puede aplicar espaciado; considera quitar el espaciado o usar el método de ordenamiento Seguro"
 L["Blizzard sorting functions not tampered with"] = "Funciones de ordenamiento de Blizzard sin alteraciones"
-L['"%s" may cause conflicts, consider disabling it'] = "\"%s\" puede causar conflictos; considera desactivarlo"
+L['"%s" may cause conflicts, consider disabling it'] = '"%s" puede causar conflictos; considera desactivarlo'
 L["No conflicting addons"] = "Sin complementos en conflicto"
 L["Main tank and assist setting disabled when spacing used"] = "La configuración de tanque principal y asistente se desactiva cuando se usa el espaciado"
-L["Please turn off raid spacing or disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] = "Desactiva el espaciado de banda o deshabilita la opción «Mostrar tanque principal y asistente» en Opciones → Interfaz → Marcos de banda"
+L["Please turn off raid spacing or disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] =
+    "Desactiva el espaciado de banda o deshabilita la opción «Mostrar tanque principal y asistente» en Opciones → Interfaz → Marcos de banda"
 
 -- # Log Screen -- #
 L["Log"] = "Registro"
@@ -280,3 +286,22 @@ L["Copy Log"] = "Copiar registro"
 
 -- # Notifications -- #
 L["Can't do that during combat."] = "No se puede hacer eso durante el combate."
+
+-- # Nameplates screen #
+L["Nameplates"] = "Placas de nombre"
+L["Friendly Nameplates"] = "Placas de nombre amistosas"
+L["Enemy Nameplates"] = "Placas de nombre enemigas"
+L["NameplatesBlurb"] = [[
+Reemplaza el texto de las placas de nombre de Blizzard con variables de FrameSort.
+\n
+Variables compatibles:
+  - $framenumber
+  - $name
+  - $unit
+  - $spec
+\n
+Ejemplos:
+  - Frame - $framenumber
+  - $framenumber - $spec
+  - $name - $spec
+]]

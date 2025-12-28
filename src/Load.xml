@@ -76,6 +76,7 @@
     <Script file="Modules\HidePlayer.lua"/>
     <Script file="Modules\Targeting.lua"/>
     <Script file="Modules\Macro\Macro.lua"/>
+    <Script file="Modules\Nameplates.lua"/>
     <Script file="Modules\Runner.lua"/>
 
     <!-- requires modules and providers -->
@@ -104,6 +105,7 @@
     <Script file="Configuration\Panels\HealthCheck.lua"/>
     <Script file="Configuration\Panels\Api.lua"/>
     <Script file="Configuration\Panels\Discord.lua"/>
+    <Script file="Configuration\Panels\Nameplates.lua"/>
     <Script file="Configuration\Panels\Log.lua"/>
 
     <!-- Now initialise the addon -->

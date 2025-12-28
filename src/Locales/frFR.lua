@@ -91,7 +91,8 @@ Cela signifie qu’un court délai peut être nécessaire avant que le tri soit 
 -- # Auto Leader screen #
 L["Auto Leader"] = "Chef automatique"
 L["Auto promote healers to leader in solo shuffle."] = "Promouvoir automatiquement les soigneurs au rang de chef en Solo Shuffle."
-L["Why? So healers can configure target marker icons and re-order party1/2 to their preference."] = "Pourquoi ? Pour que les soigneurs puissent configurer les icônes de marqueurs de cible et réorganiser party1/2 selon leur préférence."
+L["Why? So healers can configure target marker icons and re-order party1/2 to their preference."] =
+    "Pourquoi ? Pour que les soigneurs puissent configurer les icônes de marqueurs de cible et réorganiser party1/2 selon leur préférence."
 L["Enabled"] = "Activé"
 
 -- # Blizzard Keybindings screen (FrameSort's section) #
@@ -153,7 +154,8 @@ Ainsi, cibler « Cadre 1 » ciblera le Tank, « Cadre 2 » le soigneur, « Cadre
 L["Macros"] = "Macros"
 -- "|4macro:macros;" is a special command to pluralise the word "macro" to "macros" when %d is greater than 1
 L["FrameSort has found %d |4macro:macros; to manage."] = "FrameSort a trouvé %d |4macro:macros; à gérer."
-L['FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.'] = "FrameSort mettra à jour dynamiquement les variables dans les macros qui contiennent l’en-tête « #FrameSort »."
+L['FrameSort will dynamically update variables within macros that contain the "#FrameSort" header.'] =
+    "FrameSort mettra à jour dynamiquement les variables dans les macros qui contiennent l’en-tête « #FrameSort »."
 L["Below are some examples on how to use this."] = "Voici quelques exemples d’utilisation."
 
 L["Macro_Example1"] = [[#showtooltip
@@ -182,9 +184,10 @@ Mentionnez simplement « @Macro Bot » avec votre question dans le canal #macro-
 L["Macro Variables"] = "Variables de macro"
 L["The first DPS that's not you."] = "Le premier DPS qui n’est pas vous."
 L["Add a number to choose the Nth target, e.g., DPS2 selects the 2nd DPS."] = "Ajoutez un nombre pour choisir la N-ième cible, p. ex., DPS2 sélectionne le 2e DPS."
-L["Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work."] = "Les variables ne sont pas sensibles à la casse, donc « fRaMe1 », « Dps », « enemyhealer », etc., fonctionneront toutes."
+L["Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work."] =
+    "Les variables ne sont pas sensibles à la casse, donc « fRaMe1 », « Dps », « enemyhealer », etc., fonctionneront toutes."
 L["Need to save on macro characters? Use abbreviations to shorten them:"] = "Besoin d’économiser des caractères dans vos macros ? Utilisez des abréviations pour les raccourcir :"
-L['Use "X" to tell FrameSort to ignore an @unit selector:'] = 'Utilisez « X » pour indiquer à FrameSort d’ignorer un sélecteur @unit :'
+L['Use "X" to tell FrameSort to ignore an @unit selector:'] = "Utilisez « X » pour indiquer à FrameSort d’ignorer un sélecteur @unit :"
 L["Skip_Example"] = [[
 #FS X X EnemyHealer
 /cast [mod:shift,@focus][@mouseover,harm][@enemyhealer,exists][] Spell;]]
@@ -266,12 +269,14 @@ L["Disable the 'Keep Groups Together' raid profile setting."] = "Désactivez le 
 L["Only using Blizzard frames with Traditional mode"] = "Utilisation uniquement des cadres Blizzard avec le mode Traditionnel"
 L["Traditional mode can't sort your other frame addons: '%s'"] = "Le mode Traditionnel ne peut pas trier vos autres addons de cadres : « %s »"
 L["Using Secure sorting mode when spacing is being used"] = "Mode de tri Sécurisé utilisé alors que l’espacement est activé"
-L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method"] = "Le mode Traditionnel ne peut pas appliquer d’espacement ; envisagez de le retirer ou d’utiliser la méthode de tri Sécurisée"
+L["Traditional mode can't apply spacing, consider removing spacing or using the Secure sorting method"] =
+    "Le mode Traditionnel ne peut pas appliquer d’espacement ; envisagez de le retirer ou d’utiliser la méthode de tri Sécurisée"
 L["Blizzard sorting functions not tampered with"] = "Fonctions de tri Blizzard non altérées"
 L['"%s" may cause conflicts, consider disabling it'] = "« %s » peut provoquer des conflits, envisagez de le désactiver"
 L["No conflicting addons"] = "Aucun addon en conflit"
 L["Main tank and assist setting disabled when spacing used"] = "Les paramètres de tank principal et d’assistant sont désactivés lorsque l’espacement est utilisé"
-L["Please turn off raid spacing or disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] = "Veuillez désactiver l’espacement du raid ou l’option « Afficher le tank principal et l’assistant » dans Options → Interface → Cadres de raid"
+L["Please turn off raid spacing or disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] =
+    "Veuillez désactiver l’espacement du raid ou l’option « Afficher le tank principal et l’assistant » dans Options → Interface → Cadres de raid"
 
 -- # Log Screen -- #
 L["Log"] = "Journal"
@@ -280,3 +285,22 @@ L["Copy Log"] = "Copier le journal"
 
 -- # Notifications -- #
 L["Can't do that during combat."] = "Impossible de faire cela en combat."
+
+-- # Nameplates screen #
+L["Nameplates"] = "Barres de nom"
+L["Friendly Nameplates"] = "Barres de nom amicales"
+L["Enemy Nameplates"] = "Barres de nom ennemies"
+L["NameplatesBlurb"] = [[
+Remplace le texte des barres de nom de Blizzard par des variables FrameSort.
+\n
+Variables prises en charge :
+  - $framenumber
+  - $name
+  - $unit
+  - $spec
+\n
+Exemples :
+  - Frame - $framenumber
+  - $framenumber - $spec
+  - $name - $spec
+]]
