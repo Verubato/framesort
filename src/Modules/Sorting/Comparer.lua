@@ -18,7 +18,6 @@ local M = {
 addon.Modules.Sorting.Comparer = M
 
 local cachedRoleLookup, cachedSpecLookup, cachedClassLookup
-local mockInInstance, mockInstanceType
 
 ---@return { [string]: number } roleOrderLookup
 ---@return { [number]: number } specOrderLookup
@@ -139,18 +138,16 @@ local function PrecomputeGlobalMetadata()
     return meta
 end
 
-local function PrecomputeUnitMetadata(unit, meta)
+local function PrecomputeUnitMetadata(unit, meta, isEnemy)
     local data = {}
 
     data.IsPet = fsUnit:IsPet(unit)
-    data.IsEnemy = unit:sub(1, 5) == "arena" or fsUnit:IsEnemyUnit(unit)
     data.IsPlayer = not data.IsPet and fsUnit:IsPlayer(unit)
     data.UnitNumber = tonumber(string.match(unit, "%d+"))
 
-    if data.IsEnemy then
-        data.Exists = fsUnit:EnemyUnitExists(unit)
-
-        if not data.IsPet and data.Exists then
+    if isEnemy then
+        -- don't need to check for exists here, because it's a pre-condition of how the enemy unit was generated in the first place
+        if not data.IsPet then
             data.SpecId = fsInspector:EnemyUnitSpec(unit)
             data.Role = wow.GetSpecializationInfoByID and data.SpecId and select(5, wow.GetSpecializationInfoByID(data.SpecId))
 
@@ -172,7 +169,7 @@ local function PrecomputeUnitMetadata(unit, meta)
         end
     end
 
-    if not data.IsPet and data.Exists then
+    if not data.IsPet and not isEnemy and data.Exists then
         if not data.Role then
             fsLog:Warning("Failed to determine role for unit %s.", unit)
         end
@@ -184,7 +181,7 @@ local function PrecomputeUnitMetadata(unit, meta)
     return data
 end
 
-local function PrecomputeMetadata(units)
+local function PrecomputeMetadata(units, isEnemy)
     if #units == 0 then
         return {}
     end
@@ -193,7 +190,7 @@ local function PrecomputeMetadata(units)
     local meta = PrecomputeGlobalMetadata()
 
     for _, unit in ipairs(units) do
-        local data = PrecomputeUnitMetadata(unit, meta)
+        local data = PrecomputeUnitMetadata(unit, meta, isEnemy)
         meta[unit] = data
     end
 
@@ -229,7 +226,7 @@ local function CompareGroup(leftToken, rightToken, meta)
         return leftMeta.UnitNumber < rightMeta.UnitNumber
     end
 
-    -- could be "player" or "pet"
+    -- could be "player" or "pet" or their unit name if in a bg
     return leftToken < rightToken
 end
 
@@ -344,8 +341,8 @@ local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, rev
 
     if not leftMeta or not rightMeta then
         -- this is either a bug, or we're in traditional mode where we don't get a chance to precompute the units
-        leftMeta = leftMeta or PrecomputeUnitMetadata(leftToken, meta)
-        rightMeta = rightMeta or PrecomputeUnitMetadata(rightToken, meta)
+        leftMeta = leftMeta or PrecomputeUnitMetadata(leftToken, meta, false)
+        rightMeta = rightMeta or PrecomputeUnitMetadata(rightToken, meta, false)
 
         meta[leftToken] = leftMeta
         meta[rightToken] = rightMeta
@@ -492,7 +489,7 @@ function M:SortFunction(units)
     end
 
     units = units or fsUnit:FriendlyUnits()
-    local meta = PrecomputeMetadata(units)
+    local meta = PrecomputeMetadata(units, false)
 
     if playerSortMode ~= fsConfig.PlayerSortMode.Middle then
         return function(x, y)
@@ -543,9 +540,9 @@ function M:EnemySortFunction(units)
         return nil
     end
 
-    units = units or fsUnit:ArenaUnits()
+    units = units or fsUnit:EnemyUnits()
 
-    local meta = PrecomputeMetadata(units)
+    local meta = PrecomputeMetadata(units, true)
     return function(x, y)
         return EnemyCompare(x, y, groupSortMode, reverse, meta)
     end
@@ -557,15 +554,7 @@ end
 ---@return string? groupMode the group sort mode.
 ---@return boolean? reverse whether the sorting is reversed.
 function M:FriendlySortMode()
-    local inInstance, instanceType
-
-    if mockInInstance and mockInstanceType then
-        inInstance = mockInInstance
-        instanceType = mockInstanceType
-    else
-        inInstance, instanceType = wow.IsInInstance()
-    end
-
+    local inInstance, instanceType = wowEx.IsInInstance()
     local config = addon.DB.Options.Sorting
 
     if inInstance and instanceType == "arena" then
@@ -589,24 +578,12 @@ end
 ---@return string? groupMode the group sort mode.
 ---@return boolean? reverse whether the sorting is reversed.
 function M:EnemySortMode()
-    if wowEx.IsInstanceArena() or wowEx.IsInstanceBrawl() or (mockInInstance and mockInstanceType == "arena") then
+    if wowEx.IsInstanceArena() or wowEx.IsInstanceBrawl() or wowEx.IsInstanceBattleground() then
         local config = addon.DB.Options.Sorting.EnemyArena
         return config.Enabled, config.GroupSortMode, config.Reverse
     end
 
     return false, nil, false
-end
-
----Pretend we're in an instance for testing purposes.
-function M:MockInstance(inInstance, instanceType)
-    mockInInstance = inInstance
-    mockInstanceType = instanceType
-end
-
----Clears the current mocked instance.
-function M:ClearMockInstance()
-    mockInInstance = nil
-    mockInstanceType = nil
 end
 
 ---Returns true if the left frame is "earlier" than the right frame.

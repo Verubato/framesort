@@ -971,6 +971,12 @@ function M:test_arena_3v3()
 
         return 0, "", "", 0, role, "", ""
     end
+    addon.WoW.Capabilities.HasSpecializations = function()
+        return true
+    end
+    addon.WoW.Api.IsInInstance = function()
+        return true, "arena"
+    end
 
     local macroText = [[
         #showtooltip
@@ -1005,6 +1011,12 @@ function M:test_arena_3v3_abbreviated()
 
         return 0, "", "", 0, role, "", ""
     end
+    addon.WoW.Capabilities.HasSpecializations = function()
+        return true
+    end
+    addon.WoW.Api.IsInInstance = function()
+        return true, "arena"
+    end
 
     local macroText = [[
         #showtooltip
@@ -1038,6 +1050,12 @@ function M:test_arena_3v3_order()
         end
 
         return 0, "", "", 0, role, "", ""
+    end
+    addon.WoW.Capabilities.HasSpecializations = function()
+        return true
+    end
+    addon.WoW.Api.IsInInstance = function()
+        return true, "arena"
     end
 
     local macroText = [[
@@ -1075,6 +1093,12 @@ function M:test_arena_5v5()
         end
 
         return 0, "", "", 0, role, "", ""
+    end
+    addon.WoW.Capabilities.HasSpecializations = function()
+        return true
+    end
+    addon.WoW.Api.IsInInstance = function()
+        return true, "arena"
     end
 
     local macroText = [[
@@ -1188,7 +1212,7 @@ function M:test_syntax_combination()
     expected = [[
         #showtooltip
         #framesort   f1, Frame2, Frame3, player
-        /cast [target=player, @party1, @party2, target=@player] Spell;
+        /cast [target=player, @party1, @party2, target=player] Spell;
     ]]
 
     assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
@@ -1323,6 +1347,73 @@ function M:test_crlf_input()
     local macroText = "#showtooltip\r\n#framesort Frame1 Frame2\r\n/cast [@a][@b] Spell\r\n"
     local expected = "#showtooltip\r\n#framesort Frame1 Frame2\r\n/cast [@player][@party1] Spell\r\n"
 
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
+end
+
+function M:test_unit_names_with_server()
+    local units = { "bob-dath'remar", "alice-khaz'modan" }
+
+    local macroText = [[
+        #showtooltip
+        #framesort Frame1 Frame2 Frame3 Frame4
+        /cast [@a-servera][@b-serverb][@c-serverc][@d-serverd] Spell
+    ]]
+    local expected = [[
+        #showtooltip
+        #framesort Frame1 Frame2 Frame3 Frame4
+        /cast [@bob-dath'remar][@alice-khaz'modan][@none][@none] Spell
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
+
+    macroText = [[
+        #showtooltip
+        #framesort Frame1 Frame2 Frame3 Frame4
+        /cast [@a-server'a][@b-server'b][@c-server'c][@d-server'd] Spell
+    ]]
+    expected = [[
+        #showtooltip
+        #framesort Frame1 Frame2 Frame3 Frame4
+        /cast [@bob-dath'remar][@alice-khaz'modan][@none][@none] Spell
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
+end
+
+function M:test_unit_names_with_utf8()
+    local units = {
+        "Äm-Tichondrius",
+        "Zoë-Kazzak",
+    }
+
+    -- hyphen only in selector placeholders
+    local macroText = [[
+        #showtooltip
+        #framesort Frame1 Frame2 Frame3 Frame4
+        /cast [@a-server'a][@b-server'b][@c-server'c][@d-server'd] Spell
+    ]]
+
+    local expected = [[
+        #showtooltip
+        #framesort Frame1 Frame2 Frame3 Frame4
+        /cast [@Äm-Tichondrius][@Zoë-Kazzak][@none][@none] Spell
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
+
+    macroText = [[
+        #showtooltip
+        #framesort Frame1 Frame2 Frame3 Frame4
+        /cast [@Äm-Tichondrius][@Zoë-Kazzak][@none][@none] Spell
+    ]]
+
+    expected = [[
+        #showtooltip
+        #framesort Frame1 Frame2 Frame3 Frame4
+        /cast [@Äm-Tichondrius][@Zoë-Kazzak][@none][@none] Spell
+    ]]
+
+    -- check that the macro didn't change and it handled the existing non-utf8 characters
     assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 

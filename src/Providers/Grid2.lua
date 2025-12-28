@@ -73,7 +73,7 @@ function M:Containers()
             Type = fsFrame.ContainerType.Party,
             LayoutType = fsFrame.LayoutType.NameList,
             ShowUnit = function(_, unitId)
-                if not wow.IsInInstance() then
+                if not wowEx.IsInInstance() then
                     return true
                 end
 

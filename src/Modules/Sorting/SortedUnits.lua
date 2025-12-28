@@ -112,16 +112,16 @@ local function FriendlyUnits()
 end
 
 local function EnemyUnits()
-    local units = fsUnit:ArenaUnits()
+    local units, type = fsUnit:EnemyUnits()
 
     if #units == 0 then
-        return units
+        return units, type
     end
 
     local sortEnabled = fsCompare:EnemySortMode()
 
     if not sortEnabled then
-        return units
+        return units, type
     end
 
     local start = wow.GetTimePreciseSec()
@@ -129,7 +129,7 @@ local function EnemyUnits()
     local stop = wow.GetTimePreciseSec()
     fsLog:Debug("Enemy units table.sort() took %fms.", (stop - start) * 1000)
 
-    return units
+    return units, type
 end
 
 local function LogStatsTick()
@@ -185,19 +185,21 @@ end
 function M:EnemyUnits()
     local hit = false
     local units
+    local unitsType
 
     if cacheEnabled and enemyCacheValid then
         hit = true
         units = cachedEnemyUnits
     else
-        units = EnemyUnits()
+        units, unitsType = EnemyUnits()
     end
 
-    -- don't try fallback from arena frames as this seems to cause issues with things like arena4 popping up
+    -- don't try fallback from arena frames as this seems to cause issues with erroneous units popping up
     -- so just retry EnemyUnits() on next attempt
     if cacheEnabled then
         cachedEnemyUnits = units
-        enemyCacheValid = #units > 0
+        -- there's no event we can use to invalidate bg units, so don't cache them
+        enemyCacheValid = #units > 0 and unitsType ~= "bg"
 
         if hit then
             enemyCacheHits = enemyCacheHits + 1

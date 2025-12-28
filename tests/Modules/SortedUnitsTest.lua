@@ -78,7 +78,7 @@ function M:setup()
     fsUnit.FriendlyUnits = function()
         return {}
     end
-    fsUnit.ArenaUnits = function()
+    fsUnit.EnemyUnits = function()
         return {}
     end
 
@@ -177,7 +177,7 @@ function M:test_unit_pet_friendly_owner_invalidates_friendly_only()
     fsUnit.FriendlyUnits = function()
         return { "party2", "party1" }
     end
-    fsUnit.ArenaUnits = function()
+    fsUnit.EnemyUnits = function()
         return { "arena2", "arena1" }
     end
 
@@ -190,7 +190,7 @@ function M:test_unit_pet_friendly_owner_invalidates_friendly_only()
     fsUnit.FriendlyUnits = function()
         return { "party9" }
     end
-    fsUnit.ArenaUnits = function()
+    fsUnit.EnemyUnits = function()
         return { "arena9" }
     end
 
@@ -209,7 +209,7 @@ function M:test_unit_pet_enemy_owner_invalidates_enemy_only()
     fsUnit.FriendlyUnits = function()
         return { "party2", "party1" }
     end
-    fsUnit.ArenaUnits = function()
+    fsUnit.EnemyUnits = function()
         return { "arena2", "arena1" }
     end
 
@@ -220,7 +220,7 @@ function M:test_unit_pet_enemy_owner_invalidates_enemy_only()
     fsUnit.FriendlyUnits = function()
         return { "party9" }
     end
-    fsUnit.ArenaUnits = function()
+    fsUnit.EnemyUnits = function()
         return { "arena9" }
     end
 
@@ -236,7 +236,7 @@ function M:test_unit_pet_enemy_owner_invalidates_enemy_only()
 end
 
 function M:test_enemy_cache_invalidated_by_arena_events()
-    fsUnit.ArenaUnits = function()
+    fsUnit.EnemyUnits = function()
         return { "arena2", "arena1" }
     end
 
@@ -244,7 +244,7 @@ function M:test_enemy_cache_invalidated_by_arena_events()
     local b = fsSortedUnits:EnemyUnits()
     assert(b == a)
 
-    fsUnit.ArenaUnits = function()
+    fsUnit.EnemyUnits = function()
         return { "arena3" }
     end
 
@@ -253,7 +253,7 @@ function M:test_enemy_cache_invalidated_by_arena_events()
     assertListEquals(c, { "arena3" })
     assert(c ~= a)
 
-    fsUnit.ArenaUnits = function()
+    fsUnit.EnemyUnits = function()
         return { "arena5", "arena4" }
     end
 

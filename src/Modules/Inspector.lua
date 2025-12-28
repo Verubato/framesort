@@ -259,6 +259,72 @@ local function PurgeOldEntries()
     end
 end
 
+local function BgSpecFromGuid(unit, guid)
+    local cacheEntry = unitGuidToSpec[guid]
+
+    if cacheEntry and cacheEntry.SpecId and cacheEntry.SpecId > 0 then
+        return cacheEntry.SpecId
+    end
+
+    if not capabilities.HasC_PvP() or not wow.C_PvP or not wow.C_PvP.GetScoreInfoByPlayerGuid then
+        return nil
+    end
+
+    local info = wow.C_PvP.GetScoreInfoByPlayerGuid(guid)
+
+    if not info then
+        return nil
+    end
+
+    if not info.classToken or not info.talentSpec then
+        return nil
+    end
+
+    local specId = fsSpec:SpecIdFromName(info.classToken, info.talentSpec)
+
+    if not specId then
+        return nil
+    end
+
+    cacheEntry = EnsureCacheEntry(unit)
+
+    if not cacheEntry then
+        return specId
+    end
+
+    cacheEntry.SpecId = specId
+    cacheEntry.LastSeen = wow.GetTimePreciseSec()
+
+    return specId
+end
+
+local function BgSpec(unit)
+    local guid = wow.UnitGUID(unit)
+
+    if guid then
+        if wow.issecretvalue(guid) then
+            fsLog:Warning("Encountered secret guid for unit '%s'.", unit)
+            return nil
+        end
+
+        return BgSpecFromGuid(unit, guid)
+    end
+
+    -- we might be dealing with a unit name token
+    local count = wow.GetNumBattlefieldScores()
+
+    for i = 1, count do
+        local name, _, _, _, _, _, _, _, classToken, _, _, _, _, _, _, talentSpec = wow.GetBattlefieldScore(i)
+
+        if name == unit then
+            local specId = fsSpec:SpecIdFromName(classToken, talentSpec)
+            return specId
+        end
+    end
+
+    return nil
+end
+
 local function RunLoop()
     -- schedule the next run
     fsScheduler:RunAfter(inspectInterval, RunLoop)
@@ -356,59 +422,17 @@ function M:EnemyUnitSpec(unit)
         return nil
     end
 
-    local isArena = unit:match("^arena%d+$")
-    local unitNumber = tonumber(string.match(unit, "%d+"))
-    local specId = isArena and unitNumber and wowEx.GetArenaOpponentSpecSafe(unitNumber)
+    if wowEx.IsInstanceArena() then
+        local unitNumber = tonumber(string.match(unit, "%d+"))
+        local specId = unitNumber and wowEx.GetArenaOpponentSpecSafe(unitNumber)
 
-    if specId then
-        return specId
-    end
-
-    local guid = wow.UnitGUID(unit)
-
-    if not guid then
-        fsLog:Warning("Encountered nil guid for unit '%s'.", unit)
-        return nil
-    end
-
-    if wow.issecretvalue(guid) then
-        fsLog:Warning("Encountered secret guid for unit '%s'.", unit)
-        return nil
-    end
-
-    local cacheEntry = unitGuidToSpec[guid]
-
-    if cacheEntry and cacheEntry.SpecId and cacheEntry.SpecId > 0 then
-        return cacheEntry.SpecId
-    end
-
-    if not capabilities.HasC_PvP() or not wow.C_PvP or not wow.C_PvP.GetScoreInfoByPlayerGuid then
-        return nil
-    end
-
-    -- fallback: query the scoreboard by GUID (works in BGs/brawls/arena when the scoreboard is shown)
-    local info = wow.C_PvP.GetScoreInfoByPlayerGuid(guid)
-
-    if not info then
-        return nil
-    end
-
-    if info.classToken and info.talentSpec then
-        specId = fsSpec:SpecIdFromName(info.classToken, info.talentSpec)
-
-        if not specId then
-            return nil
-        end
-
-        cacheEntry = EnsureCacheEntry(unit)
-
-        if not cacheEntry then
+        if specId then
             return specId
         end
+    end
 
-        cacheEntry.SpecId = specId
-        cacheEntry.LastSeen = wow.GetTimePreciseSec()
-
+    if wowEx.IsInstanceBattleground() then
+        local specId = BgSpec(unit)
         return specId
     end
 

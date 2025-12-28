@@ -51,6 +51,7 @@
 ---@field UnitIsGroupLeader fun(unit: string, partyCategory: number?): boolean
 ---@field UnitIsConnected fun(unit: string): boolean
 ---@field UnitGroupRolesAssigned fun(unit: string): role: string
+---@field UnitFactionGroup fun(unit: string): englishFaction: string, localisedFaction: string
 ---@field GetRaidRosterInfo fun(id: number): ...
 ---@field GetArenaOpponentSpec fun(id: number): specId: number, gender: number
 ---@field GetSpecializationInfoByID fun(specIndex: number): id: number, name: string, description: string, icon: number, role: string, classFile: string, className: string
