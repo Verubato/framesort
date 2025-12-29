@@ -38,8 +38,8 @@ end
 
 ---Initialises the addon.
 function addon:Init()
-    fsLog:Debug("--- Initialising ---")
     fsLog:Init()
+    fsLog:Debug("--- Initialising ---")
 
     addon:InitDB()
 

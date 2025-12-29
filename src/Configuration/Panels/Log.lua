@@ -191,6 +191,11 @@ function M:Build(parent)
         UpdateScrollbar()
     end)
 
+    logFrame:SetScript("OnShow", function()
+        UpdateScrollbar()
+        scrollbar:Show()
+    end)
+
     -- load the saved log entries from db
     fsLog:IterateLog(function(entry)
         if entry.Message and entry.Level and entry.Timestamp then
