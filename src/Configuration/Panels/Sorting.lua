@@ -36,6 +36,7 @@ local function BuiltTitle(panel)
 
     local onShow = function()
         local healthy = fsHealth:IsHealthy()
+
         unhealthy:SetShown(not healthy)
         unhealthyGoto:SetShown(not healthy)
 
@@ -46,11 +47,7 @@ local function BuiltTitle(panel)
         end
     end
 
-    panel:SetScript("OnShow", onShow)
-
-    local loader = wow.CreateFrame("Frame", nil, panel)
-    loader:SetScript("OnEvent", onShow)
-    loader:RegisterEvent("PLAYER_ENTERING_WORLD")
+    title:SetScript("OnShow", onShow)
 
     return dynamicAnchor
 end
