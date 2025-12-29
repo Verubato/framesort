@@ -1299,23 +1299,26 @@ secureMethods["HardArrange"] = [[
     for _, frame in ipairs(frames) do
         local to = frame and pointsByFrame[frame]
 
-        if frame and to and frame.GetPoint and frame.ClearAllPoints then
-            local point, relativeTo, relativePoint, xOffset, yOffset = frame:GetPoint()
-            local xOffsetRounded = math.floor((xOffset or 0) * mult + 0.5) / mult
-            local yOffsetRounded = math.floor((yOffset or 0) * mult + 0.5) / mult
-            local toXOffsetRounded = math.floor((to.XOffset or 0) * mult + 0.5) / mult
-            local toYOffsetRounded = math.floor((to.YOffset or 0) * mult + 0.5) / mult
+        if to and frame.GetPoint and frame.GetNumPoints and frame.ClearAllPoints and frame.SetPoint then
+            local different = frame:GetNumPoints() ~= 1
 
-            local different =
-                point ~= to.Point or
-                relativeTo ~= to.RelativeTo or
-                relativePoint ~= to.RelativePoint or
-                xOffsetRounded ~= toXOffsetRounded or
-                yOffsetRounded ~= toYOffsetRounded
+            if not different then
+                local point, relativeTo, relativePoint, xOffset, yOffset = frame:GetPoint(1)
+                local xOffsetRounded = math.floor((xOffset or 0) * mult + 0.5) / mult
+                local yOffsetRounded = math.floor((yOffset or 0) * mult + 0.5) / mult
+                local toXOffsetRounded = math.floor((to.XOffset or 0) * mult + 0.5) / mult
+                local toYOffsetRounded = math.floor((to.YOffset or 0) * mult + 0.5) / mult
+
+                different =
+                    point ~= to.Point or
+                    relativeTo ~= to.RelativeTo or
+                    relativePoint ~= to.RelativePoint or
+                    xOffsetRounded ~= toXOffsetRounded or
+                    yOffsetRounded ~= toYOffsetRounded
+            end
 
             if different then
                 framesToMove[#framesToMove + 1] = frame
-                frame:ClearAllPoints()
             end
         end
     end
@@ -1326,7 +1329,7 @@ secureMethods["HardArrange"] = [[
         -- thankfully we can use a magic string to default it to the parent even if it's not protected
         local newRelativeTo = to and to.RelativeTo
 
-        if to and frame and frame.SetPoint then
+        if to and frame.ClearAllPoints and frame.SetPoint then
             if not newRelativeTo then
                 newRelativeTo = "$parent"
             else
@@ -1339,7 +1342,8 @@ secureMethods["HardArrange"] = [[
                 end
             end
 
-            frame:SetPoint(to.Point, newRelativeTo, to.RelativePoint, to.XOffset, to.YOffset)
+            frame:ClearAllPoints()
+            frame:SetPoint(to.Point, newRelativeTo, to.RelativePoint, to.XOffset or 0, to.YOffset or 0)
         end
     end
 

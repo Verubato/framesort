@@ -118,38 +118,51 @@ end
 ---@param points table<table, Point>
 local function Move(frames, points)
     local framesToMove = {}
-    -- first clear their existing point
+
+    local function round(v)
+        return fsMath:Round(v or 0, fsCompare.DecimalSanity)
+    end
+
     for _, frame in ipairs(frames) do
         local to = frame and points[frame]
 
-        if to and frame and frame.GetPoint and frame.ClearAllPoints then
-            local point, relativeTo, relativePoint, xOffset, yOffset = frame:GetPoint()
-            local different = point ~= to.Point
-                or relativeTo ~= to.RelativeTo
-                or relativePoint ~= to.RelativePoint
-                -- don't move frames if they are have minuscule position differences
-                -- it's just a rounding error and makes no visual impact
-                -- this helps preventing spam on our callbacks
-                or fsMath:Round(xOffset or 0, fsCompare.DecimalSanity) ~= fsMath:Round(to.XOffset or 0, fsCompare.DecimalSanity)
-                or fsMath:Round(yOffset or 0, fsCompare.DecimalSanity) ~= fsMath:Round(to.YOffset or 0, fsCompare.DecimalSanity)
+        if to and frame.GetPoint and frame.GetNumPoints and frame.ClearAllPoints and frame.SetPoint then
+            local different = frame:GetNumPoints() ~= 1
+
+            if not different then
+                local point, relativeTo, relativePoint, xOffset, yOffset = frame:GetPoint(1)
+                different = point ~= to.Point
+                    or relativeTo ~= to.RelativeTo
+                    or relativePoint ~= to.RelativePoint
+                    -- don't move frames if they are have minuscule position differences
+                    -- it's just a rounding error and makes no visual impact
+                    -- this helps preventing spam on our callbacks
+                    or round(xOffset) ~= round(to.XOffset)
+                    or round(yOffset) ~= round(to.YOffset)
+            end
 
             if different then
                 framesToMove[#framesToMove + 1] = frame
-                frame:ClearAllPoints()
             end
         end
     end
 
-    -- now move them
+    local moved = #framesToMove
+
+    if moved == 0 then
+        return false, 0
+    end
+
     for _, frame in ipairs(framesToMove) do
         local to = points[frame]
 
-        if frame and to and frame.SetPoint then
-            frame:SetPoint(to.Point, to.RelativeTo, to.RelativePoint, to.XOffset, to.YOffset)
+        if to then
+            frame:ClearAllPoints()
+            frame:SetPoint(to.Point, to.RelativeTo, to.RelativePoint, to.XOffset or 0, to.YOffset or 0)
         end
     end
 
-    return #framesToMove > 0, #framesToMove
+    return moved > 0, moved
 end
 
 ---Applies spacing on a set of points (slots) in-place.
