@@ -457,7 +457,9 @@ function M:IsForbidden(frame)
     local forbidden = frame:IsForbidden()
 
     if forbidden then
-        fsLog:Warning("Detected forbidden frame.")
+        -- (Get/Set)Attribute is allowed on forbidden frames
+        local unit = frame:GetAttribute("unit")
+        fsLog:Warning("Detected forbidden frame, unit: %s.", unit or "unknown")
     end
 
     return forbidden
