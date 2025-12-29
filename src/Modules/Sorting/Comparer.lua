@@ -123,18 +123,6 @@ local function PrecomputeGlobalMetadata()
     meta.SpecOrderLookup = specOrderLookup
     meta.ClassTypeOrderLookup = classTypeOrderLookup
 
-    if not wow.GetArenaOpponentSpec then
-        fsLog:WarnOnce("Your wow client is missing the GetArenaOpponentSpec API.")
-    end
-
-    if not wow.GetSpecializationInfoByID then
-        fsLog:WarnOnce("Your wow client is missing the GetSpecializationInfoByID API.")
-    end
-
-    if not wow.UnitGroupRolesAssigned then
-        fsLog:WarnOnce("Your wow client is missing the UnitGroupRolesAssigned API.")
-    end
-
     return meta
 end
 
@@ -166,15 +154,6 @@ local function PrecomputeUnitMetadata(unit, meta, isEnemy)
 
             data.ClassId = wow.UnitClass and select(3, wow.UnitClass(unit))
             data.SpecId = fsInspector:FriendlyUnitSpec(unit)
-        end
-    end
-
-    if not data.IsPet and (isEnemy or data.Exists) then
-        if not data.Role then
-            fsLog:Warning("Failed to determine role for unit %s.", unit)
-        end
-        if not data.ClassId then
-            fsLog:Warning("Failed to determine class for unit %s.", unit)
         end
     end
 
