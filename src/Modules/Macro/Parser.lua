@@ -21,12 +21,6 @@ local unitToken = "([^%s,%]]+)"
 local shortPattern = shortSyntax .. unitToken
 local longPattern = longSyntax .. unitToken
 
-local WowRole = {
-    Tank = "TANK",
-    Healer = "HEALER",
-    DPS = "DAMAGER",
-}
-
 ---Returns the start and end index of the nth target selector, e.g. raid1, player, placeholder, target=player
 ---@param str string
 ---@param occurrence number? the nth occurrence to find
@@ -162,7 +156,7 @@ local function UnitForSelector(selector, friendlyUnits, enemyUnits)
         end
 
         return fsEnumerable:From(friendlyUnits):Nth(number or 1, function(x)
-            return wow.UnitGroupRolesAssigned(x) == WowRole.DPS and not wow.UnitIsUnit(x, "player")
+            return wow.UnitGroupRolesAssigned(x) == wowEx.Role.Dps and not wow.UnitIsUnit(x, "player")
         end) or "none"
     end
 
@@ -193,7 +187,7 @@ local function UnitForSelector(selector, friendlyUnits, enemyUnits)
             end
 
             local _, _, _, _, role, _, _ = wow.GetSpecializationInfoByID(specId)
-            return (enemyTank and role == WowRole.Tank) or (enemyHealer and role == WowRole.Healer) or (enemyDps and role == WowRole.DPS)
+            return (enemyTank and role == wowEx.Role.Tank) or (enemyHealer and role == wowEx.Role.Healer) or (enemyDps and role == wowEx.Role.Dps)
         end) or "none"
     end
 
@@ -209,7 +203,7 @@ local function UnitForSelector(selector, friendlyUnits, enemyUnits)
 
         return fsEnumerable:From(friendlyUnits):Nth(number or 1, function(x)
             local role = wow.UnitGroupRolesAssigned(x)
-            return (tank and role == WowRole.Tank) or (healer and role == WowRole.Healer) or (dps and role == WowRole.DPS)
+            return (tank and role == wowEx.Role.Tank) or (healer and role == wowEx.Role.Healer) or (dps and role == wowEx.Role.Dps)
         end) or "none"
     end
 

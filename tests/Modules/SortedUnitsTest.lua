@@ -115,6 +115,7 @@ function M:teardown()
     fsSortedFrames = nil
     fsFrame = nil
     wow = nil
+    wowEx = nil
     events = nil
     capabilities = nil
     fsInspector = nil
@@ -329,6 +330,145 @@ function M:test_sort_disabled_returns_units_unmodified_and_still_caches_pointer(
 
     local b = fsSortedUnits:FriendlyUnits()
     assert(b == a)
+end
+
+
+function M:test_cycle_friendly_dps_rotates_only_dps_slots()
+    -- roles:
+    -- player = HEALER
+    -- party1 = DPS
+    -- party2 = TANK
+    -- party3 = DPS
+    -- party4 = DPS
+    wow.UnitGroupRolesAssigned = function(unit)
+        if unit == "player" then return "HEALER" end
+        if unit == "party2" then return "TANK" end
+        if unit == "party1" or unit == "party3" or unit == "party4" then return "DAMAGER" end
+        return "NONE"
+    end
+
+    capabilities.HasRoleAssignments = function()
+        return true
+    end
+
+    fsUnit.FriendlyUnits = function()
+        -- unsorted on purpose; comparer sorts ascending
+        return { "party4", "party3", "party2", "party1", "player" }
+    end
+
+    -- Prime: sorted but not cycled yet
+    local a = fsSortedUnits:FriendlyUnits()
+    assertListEquals(a, { "party1", "party2", "party3", "party4", "player" })
+
+    -- Enable cycling + invalidation
+    fsSortedUnits:CycleFriendlyDps()
+
+    local b = fsSortedUnits:FriendlyUnits()
+    -- DPS indices in sorted list are [1,3,4] => party1, party3, party4
+    -- rotate down: [party4, party1, party3] in those slots
+    assertListEquals(b, { "party4", "party2", "party1", "party3", "player" })
+    assert(b ~= a)
+end
+
+function M:test_cycle_friendly_dps_does_nothing_with_0_or_1_dps()
+    capabilities.HasRoleAssignments = function()
+        return true
+    end
+
+    -- Case 1: 0 DPS
+    wow.UnitGroupRolesAssigned = function(unit)
+        if unit == "player" then return "HEALER" end
+        if unit == "party1" then return "TANK" end
+        return "NONE"
+    end
+
+    fsUnit.FriendlyUnits = function()
+        return { "party1", "player" }
+    end
+
+    fsSortedUnits:InvalidateCache()
+    local a = fsSortedUnits:FriendlyUnits()
+    assertListEquals(a, { "party1", "player" })
+
+    fsSortedUnits:CycleFriendlyDps()
+    local b = fsSortedUnits:FriendlyUnits()
+    assertListEquals(b, { "party1", "player" })
+
+    -- Case 2: 1 DPS
+    wow.UnitGroupRolesAssigned = function(unit)
+        if unit == "party1" then return "DAMAGER" end
+        return "HEALER"
+    end
+
+    fsUnit.FriendlyUnits = function()
+        return { "party1", "player" }
+    end
+
+    fsSortedUnits:InvalidateCache()
+    local c = fsSortedUnits:FriendlyUnits()
+    assertListEquals(c, { "party1", "player" })
+
+    fsSortedUnits:CycleFriendlyDps()
+    local d = fsSortedUnits:FriendlyUnits()
+    assertListEquals(d, { "party1", "player" })
+end
+
+function M:test_cycle_enemy_dps_rotates_only_dps_slots()
+    capabilities.HasEnemySpecSupport = function()
+        return true
+    end
+
+    -- Map arena unit -> specId
+    fsInspector.EnemyUnitSpec = function(_, unit)
+        if unit == "arena1" then return 101 end -- DPS
+        if unit == "arena2" then return 202 end -- HEALER
+        if unit == "arena3" then return 303 end -- DPS
+        return nil
+    end
+
+    -- specId -> role (5th return value)
+    wow.GetSpecializationInfoByID = function(specId)
+        if specId == 101 then return nil, nil, nil, nil, "DAMAGER" end
+        if specId == 202 then return nil, nil, nil, nil, "HEALER" end
+        if specId == 303 then return nil, nil, nil, nil, "DAMAGER" end
+        return nil, nil, nil, nil, "NONE"
+    end
+
+    fsUnit.ArenaUnits = function()
+        return { "arena3", "arena2", "arena1" }
+    end
+
+    -- Prime: sorted ascending (arena1, arena2, arena3)
+    local a = fsSortedUnits:ArenaUnits()
+    assertListEquals(a, { "arena1", "arena2", "arena3" })
+
+    fsSortedUnits:CycleEnemyDps()
+
+    local b = fsSortedUnits:ArenaUnits()
+    -- DPS indices [1,3] => arena1, arena3 rotate => arena3, arena1
+    assertListEquals(b, { "arena3", "arena2", "arena1" })
+    assert(b ~= a)
+end
+
+function M:test_cycle_enemy_dps_noop_when_enemy_spec_support_missing()
+    -- Force feature off
+    capabilities.HasEnemySpecSupport = function()
+        return false
+    end
+
+    fsUnit.ArenaUnits = function()
+        return { "arena2", "arena1" }
+    end
+
+    fsSortedUnits:InvalidateCache()
+    local a = fsSortedUnits:ArenaUnits()
+    assertListEquals(a, { "arena1", "arena2" })
+
+    fsSortedUnits:CycleEnemyDps()
+
+    local b = fsSortedUnits:ArenaUnits()
+    -- still sorted, not cycled
+    assertListEquals(b, { "arena1", "arena2" })
 end
 
 return M
