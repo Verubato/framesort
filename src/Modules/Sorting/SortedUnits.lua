@@ -13,9 +13,6 @@ local wowEx = addon.WoW.WowEx
 local capabilities = addon.WoW.Capabilities
 local events = addon.WoW.Events
 
-local cycleFriendlyDps = false
-local cycleEnemyDps = false
-
 ---@class SortedUnits: IInitialise, IProcessEvents
 local M = {}
 addon.Modules.Sorting.SortedUnits = M
@@ -30,6 +27,7 @@ local enemyCacheValid = false
 -- the amount of times we returned a cached value
 local friendlyCacheHits = 0
 local enemyCacheHits = 0
+
 -- the amount of times we returned a non-cached value
 local friendlyCacheMisses = 0
 local enemyCacheMisses = 0
@@ -41,6 +39,10 @@ local cachedFriendlyUnits = {}
 -- log stats ever X hits/misses
 local currentStatsTick = 0
 local logStatsInterval = 10
+
+-- the number of times to cycle/shift dps units down
+local cycleFriendlyDps = 0
+local cycleEnemyDps = 0
 
 local function InvalidateFriendlyCache()
     friendlyCacheValid = false
@@ -137,7 +139,12 @@ local function ArenaUnits()
     return units
 end
 
-local function CycleDps(units, isFriendly)
+local function CycleDps(units, isFriendly, cycles)
+    cycles = tonumber(cycles) or 1
+    if cycles <= 0 then
+        return
+    end
+
     if isFriendly and not capabilities.HasRoleAssignments() then
         return
     end
@@ -156,7 +163,6 @@ local function CycleDps(units, isFriendly)
             role = wow.UnitGroupRolesAssigned(unit)
         else
             local specId = fsInspector:EnemyUnitSpec(unit)
-
             if specId then
                 -- GetSpecializationInfoByID returns role as 5th return value
                 local _, _, _, _, specRole = wow.GetSpecializationInfoByID(specId)
@@ -169,22 +175,35 @@ local function CycleDps(units, isFriendly)
         end
     end
 
-    -- nothing to do
     local n = #dpsIdx
     if n <= 1 then
         return
     end
 
-    -- rotate the DPS units down by 1 within their own slots
-    -- example DPS units at indices [2,5,7]:
-    -- units[2] moves to 5
-    -- units[5] moves to 7
-    -- units[7] moves to 2
-    local lastUnit = units[dpsIdx[n]]
-    for k = n, 2, -1 do
-        units[dpsIdx[k]] = units[dpsIdx[k - 1]]
+    -- reduce cycles to the minimum required rotations
+    cycles = cycles % n
+    if cycles == 0 then
+        return
     end
-    units[dpsIdx[1]] = lastUnit
+
+    -- snapshot current DPS units in order
+    local temp = {}
+    for i = 1, n do
+        temp[i] = units[dpsIdx[i]]
+    end
+
+    -- rotate DPS units within their own slots
+    for i = 1, n do
+        -- move backwards by `cycles`
+        local sourceIndex = i - cycles
+
+        -- wrap around if we go below 1
+        while sourceIndex <= 0 do
+            sourceIndex = sourceIndex + n
+        end
+
+        units[dpsIdx[i]] = temp[sourceIndex]
+    end
 end
 
 local function LogStatsTick()
@@ -210,8 +229,8 @@ function M:FriendlyUnits()
     else
         units = FriendlyUnits()
 
-        if cycleFriendlyDps and #units > 0 then
-            CycleDps(units, true)
+        if cycleFriendlyDps > 0 and #units > 0 then
+            CycleDps(units, true, cycleFriendlyDps)
         end
     end
 
@@ -221,8 +240,8 @@ function M:FriendlyUnits()
         units = FriendlyUnitsFromFrames()
         cache = false
 
-        if cycleFriendlyDps and #units > 0 then
-            CycleDps(units, true)
+        if cycleFriendlyDps > 0 and #units > 0 then
+            CycleDps(units, true, cycleFriendlyDps)
         end
     end
 
@@ -255,8 +274,8 @@ function M:ArenaUnits()
     else
         units = ArenaUnits()
 
-        if cycleEnemyDps and #units > 0 then
-            CycleDps(units, false)
+        if cycleEnemyDps > 0 and #units > 0 then
+            CycleDps(units, false, cycleEnemyDps)
         end
     end
 
@@ -283,13 +302,33 @@ function M:InvalidateCache()
     InvalidateEnemyCache()
 end
 
-function M:CycleFriendlyDps()
-    cycleFriendlyDps = not cycleFriendlyDps
+function M:CycleFriendlyDps(cycles)
+    if type(cycles) == "number" then
+        cycleFriendlyDps = cycleFriendlyDps + cycles
+    else
+        cycleFriendlyDps = cycleFriendlyDps + 1
+    end
+
     InvalidateFriendlyCache()
 end
 
-function M:CycleEnemyDps()
-    cycleEnemyDps = not cycleEnemyDps
+function M:CycleEnemyDps(cycles)
+    if type(cycles) == "number" then
+        cycleEnemyDps = cycleEnemyDps + cycles
+    else
+        cycleEnemyDps = cycleEnemyDps + 1
+    end
+
+    InvalidateEnemyCache()
+end
+
+function M:ResetFriendlyDpsCycles()
+    cycleFriendlyDps = 0
+    InvalidateFriendlyCache()
+end
+
+function M:ResetEnemyDpsCycles()
+    cycleEnemyDps = 0
     InvalidateEnemyCache()
 end
 
@@ -314,9 +353,9 @@ function M:ProcessEvent(event, ...)
         local unit = select(1, ...)
         OnPetEvent(event, unit)
     elseif event == events.PLAYER_ENTERING_WORLD then
-        -- reset flags after loading screen
-        cycleFriendlyDps = false
-        cycleEnemyDps = false
+        -- reset cycles after loading screen
+        cycleFriendlyDps = 0
+        cycleEnemyDps = 0
     end
 end
 
