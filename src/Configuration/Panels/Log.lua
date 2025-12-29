@@ -191,13 +191,13 @@ function M:Build(parent)
         UpdateScrollbar()
     end)
 
-    -- get the log entries that happened before we got here
-    local cachedLogEntries = fsLog:GetCachedEntries()
-    for _, entry in ipairs(cachedLogEntries) do
-        OnLogEntry(entry.Message, entry.Level, entry.Timestamp)
-    end
+    -- load the saved log entries from db
+    fsLog:IterateLog(function(entry)
+        if entry.Message and entry.Level and entry.Timestamp then
+            OnLogEntry(entry.Message, entry.Level, entry.Timestamp)
+        end
+    end)
 
-    fsLog:ClearAndDisableCache()
     fsLog:AddLogCallback(OnLogEntry)
 
     CreateCopyWindow()

@@ -30,7 +30,8 @@
 
 ---@class DB
 ---@field Options Options
----@field SpecCache any
+---@field SpecCache table
+---@field Log table
 
 ---@class Logging
 ---@field Log Log

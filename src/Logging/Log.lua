@@ -17,9 +17,6 @@ local M = {
 addon.Logging.Log = M
 
 local started = wow.GetTimePreciseSec()
-local cache = {}
-local enableCache = true
-local maxCacheSize = 100
 local warningsNotified = {}
 local errorsNotified = {}
 local bugsNotified = {}
@@ -31,19 +28,34 @@ local function NotifyCallbacks(msg, level, timestamp)
     end
 end
 
+local function LogPush(db, entry)
+    db.Buffer = db.Buffer or {}
+    db.Max = db.Max or addon.Configuration.DbDefaults.Log.Max
+    db.Head = db.Head or 1
+    db.Size = db.Size or 0
+
+    local buf = db.Buffer
+    local max = db.Max
+
+    buf[db.Head] = entry
+    db.Head = db.Head % max + 1
+    db.Size = math.min(db.Size + 1, max)
+end
+
 local function Write(msg, level)
     NotifyCallbacks(msg, level, wow.GetTimePreciseSec() - started)
 
-    if enableCache then
-        if #cache >= maxCacheSize then
-            table.remove(cache, 1)
-        end
+    -- addon.DB may not have been inititalised yet, so use the global
+    if FrameSortDB then
+        FrameSortDB.Log = FrameSortDB.Log or wow.CopyTable(addon.Configuration.DbDefaults.Log)
 
-        cache[#cache + 1] = {
+        local entry = {
             Message = msg,
             Level = level,
             Timestamp = wow.GetTimePreciseSec() - started,
         }
+
+        LogPush(FrameSortDB.Log, entry)
     end
 
     if level == M.Level.Notify then
@@ -63,6 +75,48 @@ local function OnAddonError(_, eventName, errorAddon, error)
     end
 
     Write(error, M.Level.Error)
+end
+
+---Iterates over the database log entries and invokes the callback for each log entry.
+---@param fn function()
+function M:IterateLog(fn)
+    if not FrameSortDB then
+        return
+    end
+
+    if not FrameSortDB.Log then
+        return
+    end
+
+    local db = FrameSortDB.Log
+    local buffer = db.Buffer
+    local count = db.Size
+    local head = db.Head
+    local max = db.Max
+
+    if not buffer or not count or not head or not max then
+        return
+    end
+
+    if count == 0 then
+        return
+    end
+
+    -- Oldest entry is count steps behind the current head
+    local firstIndex = head - count
+
+    if firstIndex <= 0 then
+        firstIndex = firstIndex + max
+    end
+
+    for offset = 0, count - 1 do
+        local index = firstIndex + offset
+        if index > max then
+            index = index - max
+        end
+
+        fn(buffer[index])
+    end
 end
 
 ---Returns a text representation of the log level.
@@ -177,17 +231,6 @@ end
 ---@param callback function
 function M:AddLogCallback(callback)
     callbacks[#callbacks + 1] = callback
-end
-
----Removes all cached log entries and prevents futher caching.
-function M:ClearAndDisableCache()
-    cache = {}
-    enableCache = false
-end
-
----Returns a collection of { Message, Level, Timestamp } cached log entries.
-function M:GetCachedEntries()
-    return cache
 end
 
 function M:Init()

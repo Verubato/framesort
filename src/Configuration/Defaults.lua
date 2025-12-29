@@ -4,7 +4,16 @@ local fsConfig = addon.Configuration
 
 ---@class DbDefaults
 fsConfig.DbDefaults = {
+    -- lookup of player guids to spec ids
     SpecCache = {},
+
+    -- saved log entries to persist through reloads
+    Log = {
+        Buffer = {},
+        Head = 1,
+        Size = 0,
+        Max = 5000,
+    },
 
     ---@class Options
     Options = {
