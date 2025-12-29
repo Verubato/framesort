@@ -16,34 +16,73 @@ local M = {
 }
 addon.Logging.Log = M
 
+local defaultMax = 5000
 local started = wow.GetTimePreciseSec()
 local warningsNotified = {}
 local errorsNotified = {}
 local bugsNotified = {}
 local callbacks = {}
 
+local levelText = {
+    [M.Level.Debug] = "Debug",
+    [M.Level.Notify] = "Notify",
+    [M.Level.Warning] = "Warning",
+    [M.Level.Error] = "Error",
+    [M.Level.Critical] = "Critical",
+    [M.Level.Bug] = "Bug",
+}
+
 local function NotifyCallbacks(msg, level, timestamp)
-    for _, callback in ipairs(callbacks) do
-        callback(msg, level, timestamp)
+    for i = 1, #callbacks do
+        local cb = callbacks[i]
+
+        if cb then
+            local ok, err = pcall(cb, msg, level, timestamp)
+
+            if not ok then
+                -- avoid infinite recursion: don't call Write() here
+                print(("|cFFFF0000FrameSort - Log callback error: %s.|r"):format(err or "Unknown"))
+            end
+        end
     end
 end
 
 local function LogPush(db, entry)
+    local fallbackMax = addon.Configuration.DbDefaults.Log.Max or defaultMax
+
     db.Buffer = db.Buffer or {}
-    db.Max = db.Max or addon.Configuration.DbDefaults.Log.Max
-    db.Head = db.Head or 1
-    db.Size = db.Size or 0
+    db.Max = tonumber(db.Max) or fallbackMax
+    db.Head = tonumber(db.Head) or 1
+    db.Size = tonumber(db.Size) or 0
+
+    -- the below shouldn't happen unless someone corrupts our saved variables
+    if db.Max < 1 then
+        db.Max = fallbackMax
+    end
+    if db.Head < 1 then
+        db.Head = 1
+    end
+    if db.Size < 0 then
+        db.Size = 0
+    end
+    if db.Head > db.Max then
+        db.Head = 1
+    end
+    if db.Size > db.Max then
+        db.Size = db.Max
+    end
 
     local buf = db.Buffer
     local max = db.Max
 
     buf[db.Head] = entry
-    db.Head = db.Head % max + 1
+    db.Head = (db.Head % max) + 1
     db.Size = math.min(db.Size + 1, max)
 end
 
 local function Write(msg, level)
-    NotifyCallbacks(msg, level, wow.GetTimePreciseSec() - started)
+    local ts = wow.GetTimePreciseSec() - started
+    NotifyCallbacks(msg, level, ts)
 
     -- addon.DB may not have been inititalised yet, so use the global
     if FrameSortDB then
@@ -52,7 +91,7 @@ local function Write(msg, level)
         local entry = {
             Message = msg,
             Level = level,
-            Timestamp = wow.GetTimePreciseSec() - started,
+            Timestamp = ts,
         }
 
         LogPush(FrameSortDB.Log, entry)
@@ -74,7 +113,9 @@ local function OnAddonError(_, eventName, errorAddon, error)
         return
     end
 
-    Write(error, M.Level.Error)
+    local errorText = ("%s: %s"):format(eventName or "Unknown", tostring(error))
+
+    Write(errorText, M.Level.Error)
 end
 
 ---Iterates over the database log entries and invokes the callback for each log entry.
@@ -90,9 +131,9 @@ function M:IterateLog(fn)
 
     local db = FrameSortDB.Log
     local buffer = db.Buffer
-    local count = db.Size
-    local head = db.Head
-    local max = db.Max
+    local count = tonumber(db.Size)
+    local head = tonumber(db.Head)
+    local max = tonumber(db.Max)
 
     if not buffer or not count or not head or not max then
         return
@@ -100,6 +141,20 @@ function M:IterateLog(fn)
 
     if count == 0 then
         return
+    end
+
+    -- protect against saved variables corruption
+    if max < 1 then
+        max = defaultMax
+    end
+    if head < 1 or head > max then
+        head = 1
+    end
+    if count < 0 then
+        count = 0
+    end
+    if count > max then
+        count = max
     end
 
     -- Oldest entry is count steps behind the current head
@@ -115,27 +170,17 @@ function M:IterateLog(fn)
             index = index - max
         end
 
-        fn(buffer[index])
+        local entry = buffer[index]
+
+        if entry then
+            fn(entry)
+        end
     end
 end
 
 ---Returns a text representation of the log level.
 function M:LevelText(level)
-    if level == M.Level.Debug then
-        return "Debug"
-    elseif level == M.Level.Notify then
-        return "Notify"
-    elseif level == M.Level.Warning then
-        return "Warning"
-    elseif level == M.Level.Error then
-        return "Error"
-    elseif level == M.Level.Critical then
-        return "Critical"
-    elseif level == M.Level.Bug then
-        return "Bug"
-    end
-
-    return "Unknown"
+    return levelText[level] or "Unknown"
 end
 
 ---Logs a debug message.
@@ -209,7 +254,7 @@ end
 ---Logs and prints a critical error bug message.
 ---@param msg string
 function M:Bug(msg, ...)
-    local formatted = string.format(msg, ...) .. " Please notify the developer about this."
+    local formatted = string.format(msg, ...)
 
     if bugsNotified[formatted] then
         return
@@ -217,7 +262,7 @@ function M:Bug(msg, ...)
 
     bugsNotified[formatted] = true
 
-    Write(formatted, M.Level.Bug)
+    Write(formatted .. " Please notify the developer about this.", M.Level.Bug)
 end
 
 ---Logs a message.
