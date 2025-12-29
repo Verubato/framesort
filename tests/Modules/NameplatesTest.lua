@@ -58,7 +58,7 @@ local function setSortedUnits(friendlyUnits, enemyUnits)
     fsSortedUnits.FriendlyUnits = function()
         return friendlyUnits
     end
-    fsSortedUnits.EnemyUnits = function()
+    fsSortedUnits.ArenaUnits = function()
         return enemyUnits
     end
 end

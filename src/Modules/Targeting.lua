@@ -117,7 +117,7 @@ local function UpdateTargets()
         end
     end
 
-    local enemyUnits = FilterPets(fsSortedUnits:EnemyUnits())
+    local enemyUnits = FilterPets(fsSortedUnits:ArenaUnits())
 
     for i, btn in ipairs(targetEnemyFrames) do
         local new = enemyUnits[i] or "none"

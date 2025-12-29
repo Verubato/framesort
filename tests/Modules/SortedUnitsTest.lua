@@ -78,7 +78,7 @@ function M:setup()
     fsUnit.FriendlyUnits = function()
         return {}
     end
-    fsUnit.EnemyUnits = function()
+    fsUnit.ArenaUnits = function()
         return {}
     end
 
@@ -177,12 +177,12 @@ function M:test_unit_pet_friendly_owner_invalidates_friendly_only()
     fsUnit.FriendlyUnits = function()
         return { "party2", "party1" }
     end
-    fsUnit.EnemyUnits = function()
+    fsUnit.ArenaUnits = function()
         return { "arena2", "arena1" }
     end
 
     local f0 = fsSortedUnits:FriendlyUnits()
-    local e0 = fsSortedUnits:EnemyUnits()
+    local e0 = fsSortedUnits:ArenaUnits()
     assertListEquals(f0, { "party1", "party2" })
     assertListEquals(e0, { "arena1", "arena2" })
 
@@ -190,7 +190,7 @@ function M:test_unit_pet_friendly_owner_invalidates_friendly_only()
     fsUnit.FriendlyUnits = function()
         return { "party9" }
     end
-    fsUnit.EnemyUnits = function()
+    fsUnit.ArenaUnits = function()
         return { "arena9" }
     end
 
@@ -198,7 +198,7 @@ function M:test_unit_pet_friendly_owner_invalidates_friendly_only()
     fsSortedUnits:ProcessEvent(events.UNIT_PET, "party1")
 
     local f1 = fsSortedUnits:FriendlyUnits()
-    local e1 = fsSortedUnits:EnemyUnits()
+    local e1 = fsSortedUnits:ArenaUnits()
 
     assertListEquals(f1, { "party9" }) -- recomputed
     assert(e1 == e0) -- enemy cache still valid (same table instance)
@@ -209,18 +209,18 @@ function M:test_unit_pet_enemy_owner_invalidates_enemy_only()
     fsUnit.FriendlyUnits = function()
         return { "party2", "party1" }
     end
-    fsUnit.EnemyUnits = function()
+    fsUnit.ArenaUnits = function()
         return { "arena2", "arena1" }
     end
 
     local f0 = fsSortedUnits:FriendlyUnits()
-    local e0 = fsSortedUnits:EnemyUnits()
+    local e0 = fsSortedUnits:ArenaUnits()
 
     -- Change sources
     fsUnit.FriendlyUnits = function()
         return { "party9" }
     end
-    fsUnit.EnemyUnits = function()
+    fsUnit.ArenaUnits = function()
         return { "arena9" }
     end
 
@@ -228,7 +228,7 @@ function M:test_unit_pet_enemy_owner_invalidates_enemy_only()
     fsSortedUnits:ProcessEvent(events.UNIT_PET, "arena1")
 
     local f1 = fsSortedUnits:FriendlyUnits()
-    local e1 = fsSortedUnits:EnemyUnits()
+    local e1 = fsSortedUnits:ArenaUnits()
 
     assert(f1 == f0) -- friendly cache still valid
     assertListEquals(e1, { "arena9" }) -- enemy recomputed
@@ -236,29 +236,29 @@ function M:test_unit_pet_enemy_owner_invalidates_enemy_only()
 end
 
 function M:test_enemy_cache_invalidated_by_arena_events()
-    fsUnit.EnemyUnits = function()
+    fsUnit.ArenaUnits = function()
         return { "arena2", "arena1" }
     end
 
-    local a = fsSortedUnits:EnemyUnits()
-    local b = fsSortedUnits:EnemyUnits()
+    local a = fsSortedUnits:ArenaUnits()
+    local b = fsSortedUnits:ArenaUnits()
     assert(b == a)
 
-    fsUnit.EnemyUnits = function()
+    fsUnit.ArenaUnits = function()
         return { "arena3" }
     end
 
     fsSortedUnits:ProcessEvent(events.ARENA_OPPONENT_UPDATE)
-    local c = fsSortedUnits:EnemyUnits()
+    local c = fsSortedUnits:ArenaUnits()
     assertListEquals(c, { "arena3" })
     assert(c ~= a)
 
-    fsUnit.EnemyUnits = function()
+    fsUnit.ArenaUnits = function()
         return { "arena5", "arena4" }
     end
 
     fsSortedUnits:ProcessEvent(events.ARENA_PREP_OPPONENT_SPECIALIZATIONS)
-    local d = fsSortedUnits:EnemyUnits()
+    local d = fsSortedUnits:ArenaUnits()
     assertListEquals(d, { "arena4", "arena5" })
 end
 
