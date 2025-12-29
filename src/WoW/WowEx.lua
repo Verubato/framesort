@@ -21,7 +21,14 @@ local expansionNames = {
 }
 
 ---@class WowEx
-local M = {}
+local M = {
+    Role = {
+        None = "NONE",
+        Tank = "TANK",
+        Healer = "HEALER",
+        Dps = "DAMAGER",
+    },
+}
 addon.WoW.WowEx = M
 
 M.IsInInstance = function()

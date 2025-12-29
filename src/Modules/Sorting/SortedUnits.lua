@@ -7,9 +7,14 @@ local fsEnumerable = addon.Collections.Enumerable
 local fsInspector = addon.Modules.Inspector
 local fsConfig = addon.Configuration
 local fsSortedFrames = addon.Modules.Sorting.SortedFrames
-local wow = addon.WoW.Api
-local events = addon.WoW.Events
 local fsLog = addon.Logging.Log
+local wow = addon.WoW.Api
+local wowEx = addon.WoW.WowEx
+local capabilities = addon.WoW.Capabilities
+local events = addon.WoW.Events
+
+local cycleFriendlyDps = false
+local cycleEnemyDps = false
 
 ---@class SortedUnits: IInitialise, IProcessEvents
 local M = {}
@@ -132,6 +137,56 @@ local function ArenaUnits()
     return units
 end
 
+local function CycleDps(units, isFriendly)
+    if isFriendly and not capabilities.HasRoleAssignments() then
+        return
+    end
+
+    if not isFriendly and (not capabilities.HasEnemySpecSupport() or not wow.GetSpecializationInfoByID) then
+        return
+    end
+
+    -- collect indices of DPS units (in current order)
+    local dpsIdx = {}
+    for i = 1, #units do
+        local unit = units[i]
+        local role
+
+        if isFriendly then
+            role = wow.UnitGroupRolesAssigned(unit)
+        else
+            local specId = fsInspector:EnemyUnitSpec(unit)
+
+            if specId then
+                -- GetSpecializationInfoByID returns role as 5th return value
+                local _, _, _, _, specRole = wow.GetSpecializationInfoByID(specId)
+                role = specRole
+            end
+        end
+
+        if role == wowEx.Role.Dps then
+            dpsIdx[#dpsIdx + 1] = i
+        end
+    end
+
+    -- nothing to do
+    local n = #dpsIdx
+    if n <= 1 then
+        return
+    end
+
+    -- rotate the DPS units down by 1 within their own slots
+    -- example DPS units at indices [2,5,7]:
+    -- units[2] moves to 5
+    -- units[5] moves to 7
+    -- units[7] moves to 2
+    local lastUnit = units[dpsIdx[n]]
+    for k = n, 2, -1 do
+        units[dpsIdx[k]] = units[dpsIdx[k - 1]]
+    end
+    units[dpsIdx[1]] = lastUnit
+end
+
 local function LogStatsTick()
     currentStatsTick = currentStatsTick + 1
 
@@ -154,6 +209,10 @@ function M:FriendlyUnits()
         units = cachedFriendlyUnits
     else
         units = FriendlyUnits()
+
+        if cycleFriendlyDps and #units > 0 then
+            CycleDps(units, true)
+        end
     end
 
     if not units or #units == 0 then
@@ -161,6 +220,10 @@ function M:FriendlyUnits()
         -- as frames can change without us knowing
         units = FriendlyUnitsFromFrames()
         cache = false
+
+        if cycleFriendlyDps and #units > 0 then
+            CycleDps(units, true)
+        end
     end
 
     if cacheEnabled then
@@ -191,6 +254,10 @@ function M:ArenaUnits()
         units = cachedEnemyUnits
     else
         units = ArenaUnits()
+
+        if cycleEnemyDps and #units > 0 then
+            CycleDps(units, false)
+        end
     end
 
     -- don't try fallback from arena frames as this seems to cause issues with erroneous units popping up
@@ -216,6 +283,16 @@ function M:InvalidateCache()
     InvalidateEnemyCache()
 end
 
+function M:CycleFriendlyDps()
+    cycleFriendlyDps = not cycleFriendlyDps
+    InvalidateFriendlyCache()
+end
+
+function M:CycleEnemyDps()
+    cycleEnemyDps = not cycleEnemyDps
+    InvalidateEnemyCache()
+end
+
 function M:LogStats()
     fsLog:Debug("Friendly cache %d hits %d misses, enemy cache %d hits %d misses.", friendlyCacheHits, friendlyCacheMisses, enemyCacheHits, enemyCacheMisses)
 end
@@ -236,6 +313,10 @@ function M:ProcessEvent(event, ...)
     elseif event == events.UNIT_PET then
         local unit = select(1, ...)
         OnPetEvent(event, unit)
+    elseif event == events.PLAYER_ENTERING_WORLD then
+        -- reset flags after loading screen
+        cycleFriendlyDps = false
+        cycleEnemyDps = false
     end
 end
 

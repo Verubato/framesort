@@ -72,9 +72,9 @@ local function Ordering()
         specOrdering = specOrdering:Concat(priority)
 
         if item.Type == fsSpec.Type.Tank then
-            roleLookup["TANK"] = item.Order
+            roleLookup[wowEx.Role.Tank] = item.Order
         elseif item.Type == fsSpec.Type.Healer then
-            roleLookup["HEALER"] = item.Order
+            roleLookup[wowEx.Role.Healer] = item.Order
         end
     end
 
@@ -262,8 +262,8 @@ local function CompareSpec(leftToken, rightToken, meta)
     local leftClass = leftMeta.ClassId
     local rightClass = rightMeta.ClassId
 
-    local leftHasRole = leftRole ~= nil and leftRole ~= "NONE"
-    local rightHasRole = rightRole ~= nil and rightRole ~= "NONE"
+    local leftHasRole = leftRole ~= nil and leftRole ~= wowEx.Role.None
+    local rightHasRole = rightRole ~= nil and rightRole ~= wowEx.Role.None
 
     if leftHasRole ~= rightHasRole then
         -- prefer those with a role

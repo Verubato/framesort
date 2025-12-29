@@ -603,6 +603,34 @@ function M.Frame:FrameForUnit(unit)
     end, "Frame:FrameForUnit")
 end
 
+---Shifts the friendly dps frames down by 1 for each dps role.
+function M.Frame:CycleFriendlyDps()
+    if wow.InCombatLockdown() then
+        fsLog:NotifyCombatLockdown()
+        return false
+    end
+
+    return SafeCall(function()
+        fsSortedUnits:CycleFriendlyDps()
+        fsRun:Run()
+        return true
+    end, "Frame:CycleFriendlyDps") or false
+end
+
+---Shifts the enemy dps frames down by 1 for each dps role.
+function M.Frame:CycleEnemyDps()
+    if wow.InCombatLockdown() then
+        fsLog:NotifyCombatLockdown()
+        return false
+    end
+
+    return SafeCall(function()
+        fsSortedUnits:CycleEnemyDps()
+        fsRun:Run()
+        return true
+    end, "Frame:CycleFriendlyDps") or false
+end
+
 ---Invalidates the unit cache.
 function M.Caching:Invalidate()
     return SafeCall(function()

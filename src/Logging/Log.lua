@@ -2,6 +2,7 @@
 local addonName, addon = ...
 local wow = addon.WoW.Api
 local events = addon.WoW.Events
+local L = addon.Locale
 ---@class Log
 local M = {
     Level = {
@@ -95,6 +96,11 @@ end
 function M:Notify(msg, ...)
     local formatted = string.format(msg, ...)
     Write(formatted, M.Level.Notify)
+end
+
+---Logs and prints the combat lockdown notification message.
+function M:NotifyCombatLockdown()
+    self:Notify(L["Can't do that during combat."])
 end
 
 ---Logs a warning message.
