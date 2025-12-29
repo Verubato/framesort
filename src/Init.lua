@@ -38,15 +38,16 @@ end
 
 ---Initialises the addon.
 function addon:Init()
+    fsLog:Debug("--- Initialising ---")
     fsLog:Init()
-    fsLog:Debug("Initialising.")
+
+    addon:InitDB()
 
     local fsVersion = wow.GetAddOnMetadata(addonName, "Version")
     local expansionName, buildVersion = wowEx.ExpansionAndBuildInfo()
     fsLog:Debug("We are version %s running on %s build %s.", fsVersion, expansionName, buildVersion)
 
     addon:InitLocale()
-    addon:InitDB()
     addon.Configuration.Specs:Init()
     addon.Configuration:Init()
     addon.Modules:Init()
@@ -55,7 +56,7 @@ function addon:Init()
     addon.Modules.EventDispatcher:Init()
 
     addon.Loaded = true
-    fsLog:Debug("Initialisation finished.")
+    fsLog:Debug("--- Initialisation finished ---")
 end
 
 ---Listens for our to be loaded and then initialises it.
