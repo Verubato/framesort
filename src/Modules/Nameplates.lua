@@ -97,12 +97,36 @@ local function OnUpdateName(frame)
     end
 end
 
+local function RefreshNameplates()
+    if not wow.C_NamePlate or not wow.C_NamePlate.GetNamePlates then
+        return
+    end
+
+    for _, plate in ipairs(wow.C_NamePlate.GetNamePlates()) do
+        local unitFrame = plate.UnitFrame
+        if unitFrame then
+            OnUpdateName(unitFrame)
+        end
+    end
+end
+
+function M:CanRun()
+    return CompactUnitFrame_UpdateName ~= nil or (wow.C_NamePlate and wow.C_NamePlate.GetNamePlates) ~= nil
+end
+
+function M:Run()
+    RefreshNameplates()
+end
+
 function M:Init()
-    if not CompactUnitFrame_UpdateName then
+    if not M:CanRun() then
         fsLog:Warning("Nameplates module unable to run.")
         return
     end
 
-    wow.hooksecurefunc("CompactUnitFrame_UpdateName", OnUpdateName)
+    if CompactUnitFrame_UpdateName then
+        wow.hooksecurefunc("CompactUnitFrame_UpdateName", OnUpdateName)
+    end
+
     fsLog:Debug("Initialised the nameplates module.")
 end
