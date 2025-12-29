@@ -604,31 +604,63 @@ function M.Frame:FrameForUnit(unit)
 end
 
 ---Shifts the friendly dps frames down by 1 for each dps role.
-function M.Frame:CycleFriendlyDps()
+---@param cycles number|nil
+---@return boolean cycled
+function M.Frame:CycleFriendlyDps(cycles)
     if wow.InCombatLockdown() then
         fsLog:NotifyCombatLockdown()
         return false
     end
 
     return SafeCall(function()
-        fsSortedUnits:CycleFriendlyDps()
+        fsSortedUnits:CycleFriendlyDps(cycles)
         fsRun:Run()
         return true
     end, "Frame:CycleFriendlyDps") or false
 end
 
 ---Shifts the enemy dps frames down by 1 for each dps role.
-function M.Frame:CycleEnemyDps()
+---@param cycles number|nil
+---@return boolean cycled
+function M.Frame:CycleEnemyDps(cycles)
     if wow.InCombatLockdown() then
         fsLog:NotifyCombatLockdown()
         return false
     end
 
     return SafeCall(function()
-        fsSortedUnits:CycleEnemyDps()
+        fsSortedUnits:CycleEnemyDps(cycles)
         fsRun:Run()
         return true
     end, "Frame:CycleFriendlyDps") or false
+end
+
+---Resets the friendly dps frame cycling.
+function M.Frame:ResetFriendlyDpsCycles()
+    if wow.InCombatLockdown() then
+        fsLog:NotifyCombatLockdown()
+        return false
+    end
+
+    return SafeCall(function()
+        fsSortedUnits:ResetFriendlyDpsCycles()
+        fsRun:Run()
+        return true
+    end, "Frame:ResetFriendlyDpsCycles") or false
+end
+
+---Resets the enemy dps frame cycling.
+function M.Frame:ResetEnemyDpsCycles()
+    if wow.InCombatLockdown() then
+        fsLog:NotifyCombatLockdown()
+        return false
+    end
+
+    return SafeCall(function()
+        fsSortedUnits:ResetEnemyDpsCycles()
+        fsRun:Run()
+        return true
+    end, "Frame:ResetEnemyDpsCycles") or false
 end
 
 ---Invalidates the unit cache.

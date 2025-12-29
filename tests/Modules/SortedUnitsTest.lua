@@ -39,6 +39,48 @@ local function assertListEquals(actual, expected)
     end
 end
 
+local function SetupEnemySpecs()
+    capabilities.HasEnemySpecSupport = function()
+        return true
+    end
+
+    fsInspector.EnemyUnitSpec = function(_, unit)
+        if unit == "arena1" then
+            return 101
+        end
+
+        if unit == "arena2" then
+            return 202
+        end
+
+        if unit == "arena3" then
+            return 303
+        end
+
+        return nil
+    end
+
+    wow.GetSpecializationInfoByID = function(specId)
+        if specId == 101 then
+            return nil, nil, nil, nil, "DAMAGER"
+        end
+
+        if specId == 202 then
+            return nil, nil, nil, nil, "HEALER"
+        end
+
+        if specId == 303 then
+            return nil, nil, nil, nil, "DAMAGER"
+        end
+
+        return nil, nil, nil, nil, "NONE"
+    end
+
+    fsUnit.ArenaUnits = function()
+        return { "arena3", "arena2", "arena1" }
+    end
+end
+
 function M:setup()
     local addonFactory = require("TestHarness\\AddonFactory")
     addon = addonFactory:Create()
@@ -115,7 +157,6 @@ function M:teardown()
     fsSortedFrames = nil
     fsFrame = nil
     wow = nil
-    wowEx = nil
     events = nil
     capabilities = nil
     fsInspector = nil
@@ -332,7 +373,6 @@ function M:test_sort_disabled_returns_units_unmodified_and_still_caches_pointer(
     assert(b == a)
 end
 
-
 function M:test_cycle_friendly_dps_rotates_only_dps_slots()
     -- roles:
     -- player = HEALER
@@ -341,9 +381,15 @@ function M:test_cycle_friendly_dps_rotates_only_dps_slots()
     -- party3 = DPS
     -- party4 = DPS
     wow.UnitGroupRolesAssigned = function(unit)
-        if unit == "player" then return "HEALER" end
-        if unit == "party2" then return "TANK" end
-        if unit == "party1" or unit == "party3" or unit == "party4" then return "DAMAGER" end
+        if unit == "player" then
+            return "HEALER"
+        end
+        if unit == "party2" then
+            return "TANK"
+        end
+        if unit == "party1" or unit == "party3" or unit == "party4" then
+            return "DAMAGER"
+        end
         return "NONE"
     end
 
@@ -377,8 +423,12 @@ function M:test_cycle_friendly_dps_does_nothing_with_0_or_1_dps()
 
     -- Case 1: 0 DPS
     wow.UnitGroupRolesAssigned = function(unit)
-        if unit == "player" then return "HEALER" end
-        if unit == "party1" then return "TANK" end
+        if unit == "player" then
+            return "HEALER"
+        end
+        if unit == "party1" then
+            return "TANK"
+        end
         return "NONE"
     end
 
@@ -396,7 +446,9 @@ function M:test_cycle_friendly_dps_does_nothing_with_0_or_1_dps()
 
     -- Case 2: 1 DPS
     wow.UnitGroupRolesAssigned = function(unit)
-        if unit == "party1" then return "DAMAGER" end
+        if unit == "party1" then
+            return "DAMAGER"
+        end
         return "HEALER"
     end
 
@@ -420,17 +472,29 @@ function M:test_cycle_enemy_dps_rotates_only_dps_slots()
 
     -- Map arena unit -> specId
     fsInspector.EnemyUnitSpec = function(_, unit)
-        if unit == "arena1" then return 101 end -- DPS
-        if unit == "arena2" then return 202 end -- HEALER
-        if unit == "arena3" then return 303 end -- DPS
+        if unit == "arena1" then
+            return 101
+        end -- DPS
+        if unit == "arena2" then
+            return 202
+        end -- HEALER
+        if unit == "arena3" then
+            return 303
+        end -- DPS
         return nil
     end
 
     -- specId -> role (5th return value)
     wow.GetSpecializationInfoByID = function(specId)
-        if specId == 101 then return nil, nil, nil, nil, "DAMAGER" end
-        if specId == 202 then return nil, nil, nil, nil, "HEALER" end
-        if specId == 303 then return nil, nil, nil, nil, "DAMAGER" end
+        if specId == 101 then
+            return nil, nil, nil, nil, "DAMAGER"
+        end
+        if specId == 202 then
+            return nil, nil, nil, nil, "HEALER"
+        end
+        if specId == 303 then
+            return nil, nil, nil, nil, "DAMAGER"
+        end
         return nil, nil, nil, nil, "NONE"
     end
 
@@ -469,6 +533,232 @@ function M:test_cycle_enemy_dps_noop_when_enemy_spec_support_missing()
     local b = fsSortedUnits:ArenaUnits()
     -- still sorted, not cycled
     assertListEquals(b, { "arena1", "arena2" })
+end
+
+function M:test_cycle_friendly_dps_cycles_2()
+    -- roles:
+    -- player = HEALER
+    -- party1 = DPS
+    -- party2 = TANK
+    -- party3 = DPS
+    -- party4 = DPS
+    wow.UnitGroupRolesAssigned = function(unit)
+        if unit == "player" then
+            return "HEALER"
+        end
+        if unit == "party2" then
+            return "TANK"
+        end
+        if unit == "party1" or unit == "party3" or unit == "party4" then
+            return "DAMAGER"
+        end
+        return "NONE"
+    end
+
+    capabilities.HasRoleAssignments = function()
+        return true
+    end
+
+    fsUnit.FriendlyUnits = function()
+        -- unsorted on purpose; comparer sorts ascending
+        return { "party4", "party3", "party2", "party1", "player" }
+    end
+
+    -- Prime: sorted baseline
+    local base = fsSortedUnits:FriendlyUnits()
+    assertListEquals(base, { "party1", "party2", "party3", "party4", "player" })
+
+    -- DPS indices in sorted list are [1,3,4] => [party1, party3, party4]
+    -- cycles=2 => rotate down by 2: [party3, party4, party1] in those slots
+    fsSortedUnits:CycleFriendlyDps(2)
+
+    local out = fsSortedUnits:FriendlyUnits()
+    assertListEquals(out, { "party3", "party2", "party4", "party1", "player" })
+end
+
+function M:test_cycle_friendly_dps_cycles_3_is_noop_when_three_dps()
+    wow.UnitGroupRolesAssigned = function(unit)
+        if unit == "player" then
+            return "HEALER"
+        end
+        if unit == "party2" then
+            return "TANK"
+        end
+        if unit == "party1" or unit == "party3" or unit == "party4" then
+            return "DAMAGER"
+        end
+        return "NONE"
+    end
+
+    capabilities.HasRoleAssignments = function()
+        return true
+    end
+
+    fsUnit.FriendlyUnits = function()
+        return { "party4", "party3", "party2", "party1", "player" }
+    end
+
+    local base = fsSortedUnits:FriendlyUnits()
+    assertListEquals(base, { "party1", "party2", "party3", "party4", "player" })
+
+    -- 3 DPS => cycles=3 => 3 % 3 == 0 => no-op
+    fsSortedUnits:CycleFriendlyDps(3)
+
+    local out = fsSortedUnits:FriendlyUnits()
+    assertListEquals(out, { "party1", "party2", "party3", "party4", "player" })
+end
+
+function M:test_cycle_friendly_dps_cycles_10_wraps_to_1_when_three_dps()
+    wow.UnitGroupRolesAssigned = function(unit)
+        if unit == "player" then
+            return "HEALER"
+        end
+        if unit == "party2" then
+            return "TANK"
+        end
+        if unit == "party1" or unit == "party3" or unit == "party4" then
+            return "DAMAGER"
+        end
+        return "NONE"
+    end
+
+    capabilities.HasRoleAssignments = function()
+        return true
+    end
+
+    fsUnit.FriendlyUnits = function()
+        return { "party4", "party3", "party2", "party1", "player" }
+    end
+
+    local base = fsSortedUnits:FriendlyUnits()
+    assertListEquals(base, { "party1", "party2", "party3", "party4", "player" })
+
+    -- 3 DPS => 10 % 3 == 1 => same as single cycle
+    fsSortedUnits:CycleFriendlyDps(10)
+
+    local out = fsSortedUnits:FriendlyUnits()
+    assertListEquals(out, { "party4", "party2", "party1", "party3", "player" })
+end
+
+function M:test_cycle_friendly_dps_cycles_multiple_calls()
+    wow.UnitGroupRolesAssigned = function(unit)
+        return "DAMAGER"
+    end
+
+    capabilities.HasRoleAssignments = function()
+        return true
+    end
+
+    fsUnit.FriendlyUnits = function()
+        return { "party4", "party3", "party2", "party1", "player" }
+    end
+
+    local base = fsSortedUnits:FriendlyUnits()
+    assertListEquals(base, { "party1", "party2", "party3", "party4", "player" })
+
+    fsSortedUnits:CycleFriendlyDps()
+    fsSortedUnits:CycleFriendlyDps()
+    fsSortedUnits:CycleFriendlyDps()
+
+    local out = fsSortedUnits:FriendlyUnits()
+    assertListEquals(out, { "party3", "party4", "player", "party1", "party2" })
+end
+
+function M:test_cycle_friendly_dps_reset_cycles()
+    wow.UnitGroupRolesAssigned = function(unit)
+        return "DAMAGER"
+    end
+
+    capabilities.HasRoleAssignments = function()
+        return true
+    end
+
+    fsUnit.FriendlyUnits = function()
+        return { "party4", "party3", "party2", "party1", "player" }
+    end
+
+    local base = fsSortedUnits:FriendlyUnits()
+    assertListEquals(base, { "party1", "party2", "party3", "party4", "player" })
+
+    fsSortedUnits:CycleFriendlyDps()
+    fsSortedUnits:CycleFriendlyDps()
+    fsSortedUnits:CycleFriendlyDps()
+
+    local out = fsSortedUnits:FriendlyUnits()
+    assertListEquals(out, { "party3", "party4", "player", "party1", "party2" })
+
+    fsSortedUnits:ResetFriendlyDpsCycles()
+
+    out = fsSortedUnits:FriendlyUnits()
+
+    assertListEquals(base, { "party1", "party2", "party3", "party4", "player" })
+end
+
+function M:test_cycle_enemy_dps_cycles()
+    SetupEnemySpecs()
+
+    local base = fsSortedUnits:ArenaUnits()
+    assertListEquals(base, { "arena1", "arena2", "arena3" })
+
+    fsSortedUnits:CycleEnemyDps()
+
+    local out = fsSortedUnits:ArenaUnits()
+    assertListEquals(out, { "arena3", "arena2", "arena1" })
+end
+
+function M:test_cycle_enemy_dps_cycles_2_is_noop_when_two_dps()
+    SetupEnemySpecs()
+
+    local base = fsSortedUnits:ArenaUnits()
+    assertListEquals(base, { "arena1", "arena2", "arena3" })
+
+    fsSortedUnits:CycleEnemyDps(2)
+
+    local out = fsSortedUnits:ArenaUnits()
+    assertListEquals(out, { "arena1", "arena2", "arena3" })
+end
+
+function M:test_cycle_enemy_dps_cycles_5_wraps_to_1_when_three_dps()
+    SetupEnemySpecs()
+
+    local base = fsSortedUnits:ArenaUnits()
+    assertListEquals(base, { "arena1", "arena2", "arena3" })
+
+    fsSortedUnits:CycleEnemyDps(5)
+
+    local out = fsSortedUnits:ArenaUnits()
+    assertListEquals(out, { "arena3", "arena2", "arena1" })
+end
+
+function M:test_cycle_enemy_dps_cycles_multiple_calls()
+    SetupEnemySpecs()
+
+    local base = fsSortedUnits:ArenaUnits()
+    assertListEquals(base, { "arena1", "arena2", "arena3" })
+
+    fsSortedUnits:CycleEnemyDps()
+    fsSortedUnits:CycleEnemyDps()
+    fsSortedUnits:CycleEnemyDps()
+
+    local out = fsSortedUnits:ArenaUnits()
+    assertListEquals(out, { "arena3", "arena2", "arena1" })
+end
+
+function M:test_cycle_enemy_dps_reset_cycles()
+    SetupEnemySpecs()
+
+    local base = fsSortedUnits:ArenaUnits()
+    assertListEquals(base, { "arena1", "arena2", "arena3" })
+
+    fsSortedUnits:CycleEnemyDps()
+
+    local out = fsSortedUnits:ArenaUnits()
+    assertListEquals(out, { "arena3", "arena2", "arena1" })
+
+    fsSortedUnits:ResetEnemyDpsCycles()
+
+    out = fsSortedUnits:ArenaUnits()
+    assertListEquals(out, { "arena1", "arena2", "arena3" })
 end
 
 return M
