@@ -170,6 +170,7 @@ function M:Run(providers)
 
         addon.Modules.Targeting:Run()
         addon.Modules.Macro:Run()
+        addon.Modules.Nameplates:Run()
 
         local stop = wow.GetTimePreciseSec()
         fsLog:Debug("Run time took %fms.", (stop - start) * 1000)

@@ -5,6 +5,7 @@
 ---@field C_Map? C_Map
 ---@field C_Timer? C_Timer
 ---@field C_AddOns? C_AddOns
+---@field C_NamePlate? C_NamePlate
 -- constants
 ---@field MAX_RAID_MEMBERS number
 ---@field MAX_PARTY_MEMBERS number
@@ -137,6 +138,9 @@
 
 ---@class C_AddOns
 ---@field GetAddOnEnableState fun(name: string, character: string?): number
+
+---@class C_NamePlate
+---@field GetNamePlates fun(): table[]
 
 ---@class PVPScoreInfo
 ---@field name string
