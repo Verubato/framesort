@@ -1,36 +1,36 @@
 ---@meta
 ---@class WowApi
 -- fields
----@field C_PvP C_PvP
----@field C_Map C_Map
----@field C_Timer C_Timer
----@field C_AddOns C_AddOns
+---@field C_PvP? C_PvP
+---@field C_Map? C_Map
+---@field C_Timer? C_Timer
+---@field C_AddOns? C_AddOns
 -- constants
 ---@field MAX_RAID_MEMBERS number
 ---@field MAX_PARTY_MEMBERS number
 ---@field MEMBERS_PER_RAID_GROUP number
 ---@field RAID_CLASS_COLORS table
--- frames
+-- frames (may be nil until Blizzard loads UI modules)
 ---@field CreateFrame fun(frameType: string, name: string?, parent: table?, template: string?, id: number?): frame: table
----@field UIParent table
----@field CompactPartyFrame table
----@field PartyFrame table
----@field CompactRaidFrameContainer table
----@field CompactArenaFrame table
+---@field UIParent table?
+---@field CompactPartyFrame table?
+---@field PartyFrame table?
+---@field CompactRaidFrameContainer table?
+---@field CompactArenaFrame table?
+---@field EditModeManagerFrame table?
 ---@field CompactRaidFrameContainer_SetFlowSortFunction fun(container: table, sortFunction: fun(unit1: string, unit2: string): boolean)
 ---@field CompactRaidFrameManager_GetSetting fun(name: string): boolean
----@field EditModeManagerFrame table
 -- mouse
 ---@field GetCursorPosition fun(): x: number, y: number
 -- settings
----@field SlashCmdList table
----@field SettingsPanel table
+---@field SlashCmdList table?
+---@field SettingsPanel table?
 ---@field InterfaceOptions_AddCategory fun(panel: table)
 ---@field InterfaceOptionsFrame_OpenToCategory fun(panel: table)
 ---@field InterfaceOptionsFramePanelContainer table
----@field Enum table
----@field EventRegistry EventRegistry
----@field Settings Settings
+---@field Enum table?
+---@field EventRegistry EventRegistry?
+---@field Settings Settings?
 -- cvars
 ---@field GetCVarBool fun(name: string): boolean?
 ---@field GetCVar fun(name: string): any?
@@ -109,7 +109,7 @@
 -- secrets
 ---@field issecretvalue fun(value: any): boolean
 -- client info
----@field GetBuildInfo fun(): buildVersion: string, buildNumber: number, buidlDate: string, interfaceVersion: number, localizedVersion: string, buildInfo: string, currentVersion: string
+---@field GetBuildInfo fun(): buildVersion: string, buildNumber: number, buildDate: string, interfaceVersion: number, localizedVersion: string, buildInfo: string, currentVersion: string
 
 ---@class C_PvP
 ---@field IsSoloShuffle fun(): boolean
@@ -143,7 +143,7 @@
 ---@field guid string
 ---@field killingBlows number
 ---@field honorableKills number
----@field death number
+---@field deaths number
 ---@field honorGained number
 ---@field faction  number
 ---@field raceName string
