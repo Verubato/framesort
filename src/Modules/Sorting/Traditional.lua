@@ -20,6 +20,10 @@ function M:TrySort()
     local sorted = false
     local sortFunction = fsCompare:SortFunction()
 
+    if sortFunction == nil then
+        return false
+    end
+
     if wow.CompactRaidFrameContainer and not fsFrame:IsForbidden(wow.CompactRaidFrameContainer) and wow.CompactRaidFrameContainer:IsVisible() and wow.CompactRaidFrameContainer.SetFlowSortFunction then
         wow.CompactRaidFrameContainer:SetFlowSortFunction(sortFunction)
         sorted = true
