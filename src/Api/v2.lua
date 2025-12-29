@@ -156,7 +156,7 @@ end
 
 ---Returns a sorted array of enemy unit tokens.
 function M.Sorting:GetEnemyUnits()
-    return fsSortedUnits:EnemyUnits()
+    return fsSortedUnits:ArenaUnits()
 end
 
 ---Gets the player sort mode.

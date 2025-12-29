@@ -547,7 +547,7 @@ end
 ---@return boolean
 local function SetNameList(container)
     local isFriendly = container.Type == fsFrame.ContainerType.Party or container.Type == fsFrame.ContainerType.Raid
-    local units = isFriendly and fsSortedUnits:FriendlyUnits() or fsSortedUnits:EnemyUnits()
+    local units = isFriendly and fsSortedUnits:FriendlyUnits() or fsSortedUnits:ArenaUnits()
 
     if isFriendly and #units == 0 then
         -- ensure player always exists for friendly units
@@ -700,7 +700,7 @@ local function TrySortContainer(container)
     if container.Type == fsFrame.ContainerType.Party or container.Type == fsFrame.ContainerType.Raid then
         sortedUnits = fsSortedUnits:FriendlyUnits()
     elseif container.Type == fsFrame.ContainerType.EnemyArena then
-        sortedUnits = fsSortedUnits:EnemyUnits()
+        sortedUnits = fsSortedUnits:ArenaUnits()
     else
         fsLog:Bug("Unknown container type: %s.", container.Type or "nil")
         return false, frames

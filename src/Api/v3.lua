@@ -202,7 +202,7 @@ end
 ---Returns a sorted array of enemy unit tokens.
 function M.Sorting:GetEnemyUnits()
     return SafeCall(function()
-        return fsSortedUnits:EnemyUnits()
+        return fsSortedUnits:ArenaUnits()
     end, "Sorting:GetEnemyUnits") or {}
 end
 
@@ -566,7 +566,7 @@ function M.Frame:FrameNumberForUnit(unit)
 
     return SafeCall(function()
         local isFriendly = fsUnit:IsFriendlyUnit(unit)
-        local units = isFriendly and fsSortedUnits:FriendlyUnits() or fsSortedUnits:EnemyUnits()
+        local units = isFriendly and fsSortedUnits:FriendlyUnits() or fsSortedUnits:ArenaUnits()
 
         for index, u in ipairs(units) do
             if u == unit then

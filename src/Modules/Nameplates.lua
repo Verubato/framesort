@@ -77,7 +77,7 @@ local function OnUpdateName(frame)
         return
     end
 
-    local units = friendly and fsSortedUnits:FriendlyUnits() or fsSortedUnits:EnemyUnits()
+    local units = friendly and fsSortedUnits:FriendlyUnits() or fsSortedUnits:ArenaUnits()
 
     if not units or #units == 0 then
         return

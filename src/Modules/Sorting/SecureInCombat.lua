@@ -1923,7 +1923,7 @@ local function LoadUnits()
     assert(manager)
 
     local friendlyUnits = fsSortedUnits:FriendlyUnits()
-    local enemyUnits = fsSortedUnits:EnemyUnits()
+    local enemyUnits = fsSortedUnits:ArenaUnits()
 
     for i, unit in ipairs(friendlyUnits) do
         manager:SetAttributeNoHandler("FriendlyUnit" .. i, unit)

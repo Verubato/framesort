@@ -169,7 +169,7 @@ local function PrecomputeUnitMetadata(unit, meta, isEnemy)
         end
     end
 
-    if not data.IsPet and not isEnemy and data.Exists then
+    if not data.IsPet and (isEnemy or data.Exists) then
         if not data.Role then
             fsLog:Warning("Failed to determine role for unit %s.", unit)
         end
@@ -540,7 +540,7 @@ function M:EnemySortFunction(units)
         return nil
     end
 
-    units = units or fsUnit:EnemyUnits()
+    units = units or fsUnit:ArenaUnits()
 
     local meta = PrecomputeMetadata(units, true)
     return function(x, y)
@@ -578,7 +578,7 @@ end
 ---@return string? groupMode the group sort mode.
 ---@return boolean? reverse whether the sorting is reversed.
 function M:EnemySortMode()
-    if wowEx.IsInstanceArena() or wowEx.IsInstanceBrawl() or wowEx.IsInstanceBattleground() then
+    if wowEx.IsInstanceArena() then
         local config = addon.DB.Options.Sorting.EnemyArena
         return config.Enabled, config.GroupSortMode, config.Reverse
     end

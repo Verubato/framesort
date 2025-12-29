@@ -161,7 +161,7 @@ function M:test_arena_3v3()
         return count
     end
 
-    local units = fsUnit:EnemyUnits()
+    local units = fsUnit:ArenaUnits()
 
     -- don't assert #units == count here because it will also include pets
     for i = 1, count do

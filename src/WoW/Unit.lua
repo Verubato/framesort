@@ -30,51 +30,6 @@ for i = 1, wow.MAX_RAID_MEMBERS do
     allRaidUnitsIds[#allRaidUnitsIds + 1] = "raidpet" .. i
 end
 
----@return string[]
-local function ArenaUnits()
-    local count = wowEx.ArenaOpponentsCount()
-
-    if count == 0 then
-        return {}
-    end
-
-    local units = {}
-
-    for i = 1, count do
-        units[#units + 1] = "arena" .. i
-    end
-
-    for i = 1, count do
-        units[#units + 1] = "arenapet" .. i
-    end
-
-    return units
-end
-
----@return string[]
-local function BgUnits()
-    local count = wow.GetNumBattlefieldScores()
-
-    if count == 0 then
-        return {}
-    end
-
-    local units = {}
-    local playerFaction = wow.UnitFactionGroup("player")
-    local playerFactionId = (playerFaction == "Alliance") and 1 or 0
-
-    for i = 1, count do
-        local name, _, _, _, _, faction = wow.GetBattlefieldScore(i)
-        local isEnemy = faction ~= playerFactionId
-
-        if isEnemy then
-            units[#units + 1] = name
-        end
-    end
-
-    return units
-end
-
 ---Normalises unit tokens, such that party1pet becomes partypet1.
 ---@param unit string
 ---@return string|nil
@@ -113,41 +68,6 @@ function M:NormaliseUnit(unit)
     return unit
 end
 
-function M:BgEnemyUnitExists(unit)
-    if not unit then
-        fsLog:Bug("Unit:BgEnemyUnitExists() - unit must not be nil.")
-        return false
-    end
-
-    local guid = wow.UnitGUID and wow.UnitGUID(unit)
-
-    if guid and not wow.issecretvalue(guid) then
-        local info = wow.C_PvP.GetScoreInfoByPlayerGuid(guid)
-        return info ~= nil and info.name ~= nil
-    end
-
-    local count = wow.GetNumBattlefieldScores()
-
-    if count == 0 then
-        return {}
-    end
-
-    local playerFaction = wow.UnitFactionGroup("player")
-    local playerFactionId = (playerFaction == "Alliance") and 1 or 0
-
-    for i = 1, count do
-        local name, _, _, _, _, faction = wow.GetBattlefieldScore(i)
-        local isEnemy = faction ~= playerFactionId
-
-        if isEnemy and name == unit then
-            print("Found enemy exists from name")
-            return true
-        end
-    end
-
-    return false
-end
-
 function M:ArenaUnitExists(unit)
     if not unit then
         fsLog:Bug("Unit:ArenaEnemyUnitExists() - unit must not be nil.")
@@ -174,23 +94,6 @@ function M:ArenaUnitExists(unit)
     return id <= arenaCount
 end
 
-function M:EnemyUnitExists(unit)
-    if not unit then
-        fsLog:Bug("Unit:EnemyUnitExists() - unit must not be nil.")
-        return false
-    end
-
-    if wowEx.IsInstanceArena() then
-        return M:ArenaUnitExists(unit)
-    end
-
-    if wowEx.IsInstanceBattleground() or wowEx.IsInstanceBrawl() then
-        return M:BgEnemyUnitExists(unit)
-    end
-
-    return false
-end
-
 ---Returns a table of group member unit tokens where the unit exists.
 ---@return string[]
 function M:FriendlyUnits()
@@ -211,17 +114,25 @@ function M:FriendlyUnits()
 end
 
 ---Returns a table of arena unit tokens where the unit exists.
----@return string[],string
-function M:EnemyUnits()
-    if wowEx.IsInstanceArena() then
-        return ArenaUnits(), "arena"
+---@return string[]
+function M:ArenaUnits()
+    local count = wowEx.ArenaOpponentsCount()
+
+    if count == 0 then
+        return {}
     end
 
-    if wowEx.IsInstanceBattleground() then
-        return BgUnits(), "bg"
+    local units = {}
+
+    for i = 1, count do
+        units[#units + 1] = "arena" .. i
     end
 
-    return {}, ""
+    for i = 1, count do
+        units[#units + 1] = "arenapet" .. i
+    end
+
+    return units
 end
 
 ---Returns true if the unit token is a pet.
