@@ -1,9 +1,10 @@
+---@diagnostic disable: assign-type-mismatch
 -- luacheck: ignore 113
 ---@diagnostic disable: undefined-global
 ---@type string, Addon
 local _, addon = ...
 ---@type WowApi
-addon.WoW.Api = {
+local api = {
     -- fields
     C_PvP = C_PvP,
     C_Map = C_Map,
@@ -18,14 +19,8 @@ addon.WoW.Api = {
 
     -- frames
     CreateFrame = CreateFrame,
-    UIParent = UIParent,
-    PartyFrame = PartyFrame,
-    CompactPartyFrame = CompactPartyFrame,
-    CompactRaidFrameContainer = CompactRaidFrameContainer,
-    CompactArenaFrame = CompactArenaFrame,
     CompactRaidFrameContainer_SetFlowSortFunction = CompactRaidFrameContainer_SetFlowSortFunction,
     CompactRaidFrameManager_GetSetting = CompactRaidFrameManager_GetSetting,
-    EditModeManagerFrame = EditModeManagerFrame,
 
     -- mouse
     GetCursorPosition = GetCursorPosition,
@@ -124,7 +119,7 @@ addon.WoW.Api = {
 
     -- addon related
     -- don't fallback to GetAddOnEnableState as we let our shim handle that
-    GetAddOnEnableState = C_AddOns and C_AddOns.GetAddOnEnableState,
+    GetAddOnEnableState = C_AddOns and C_AddOns.GetAddOnEnableState or false,
     GetAddOnMetadata = C_AddOns and C_AddOns.GetAddOnMetadata or GetAddOnMetadata,
 
     -- time related
@@ -136,3 +131,8 @@ addon.WoW.Api = {
     -- client info
     GetBuildInfo = GetBuildInfo,
 }
+
+-- Fall back to _G for anything we didn't explicitly pin in api.
+-- This avoids nil-snapshot issues for load-on-demand Blizzard frames.
+-- note this hasn't ever actually happened, but better safe than sorry
+addon.WoW.Api = setmetatable(api, { __index = _G })
