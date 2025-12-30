@@ -62,7 +62,6 @@
     <Script file="Providers\Grid2.lua"/>
     <Script file="Providers\BattleGroundEnemies.lua"/>
     <Script file="Providers\Gladdy.lua"/>
-    <Script file="Providers\ArenaCore.lua"/>
 
     <!-- Health check requires frame providers -->
     <Script file="Health\HealthCheck.lua"/>

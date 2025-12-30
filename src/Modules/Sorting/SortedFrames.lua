@@ -44,7 +44,7 @@ function M:FriendlyFrames()
 
     if not frames or #frames == 0 then
         local nonBlizzard = fsEnumerable
-            :From(fsProviders:Enabled())
+            :From(fsProviders:EnabledNotSelfManaged())
             :Where(function(provider)
                 return provider ~= fsProviders.Blizzard
             end)
@@ -87,7 +87,7 @@ function M:ArenaFrames()
 
     if not frames or #frames == 0 then
         local nonBlizzard = fsEnumerable
-            :From(fsProviders:Enabled())
+            :From(fsProviders:EnabledNotSelfManaged())
             :Where(function(provider)
                 return provider ~= fsProviders.Blizzard
             end)

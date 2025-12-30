@@ -407,6 +407,11 @@ function M:GetContainer(provider, containerType)
         return nil
     end
 
+    if provider.IsExternal then
+        fsLog:Error("Frame:GetContainer() - can't retrieve frames of an external provider.")
+        return nil
+    end
+
     local containers = type(provider.Containers) == "function" and provider:Containers()
 
     if type(containers) ~= "table" then

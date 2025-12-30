@@ -99,7 +99,7 @@ end
 local function GetFrames(type)
     local frames = {}
 
-    for _, provider in ipairs(fsProviders:Enabled()) do
+    for _, provider in ipairs(fsProviders:EnabledNotSelfManaged()) do
         frames[provider:Name()] = VisualOrder(fsFrame:GetFrames(provider, type))
     end
 
@@ -142,7 +142,7 @@ local function SafeCall(fn, name)
     return unpack(results, 2)
 end
 
----Register a callback to invoke after sorting has been performed.
+---Register a callback to be invoked after sorting has been performed.
 ---@param callback function
 function M.Sorting:RegisterPostSortCallback(callback)
     if not callback then
@@ -154,6 +154,17 @@ function M.Sorting:RegisterPostSortCallback(callback)
         fsSort:RegisterPostSortCallback(callback)
         return true
     end, "Sorting:RegisterPostSortCallback") or false
+end
+
+function M.Sorting:RegisterFrameProvider(provider)
+    if not provider then
+        fsLog:Error("Api.v3.Sorting:RegisterFrameProvider was passed a nil parameter: provider.")
+        return false
+    end
+
+    return SafeCall(function()
+        return fsProviders:RegisterFrameProvider(provider, true)
+    end, "Sorting:RegisterFrameProvider") or false
 end
 
 ---Returns a collection of party frames ordered by their visual representation.

@@ -110,7 +110,7 @@ local function CanSeeFrames()
         return true
     end
 
-    for _, provider in pairs(fsProviders:Enabled()) do
+    for _, provider in pairs(fsProviders:EnabledNotSelfManaged()) do
         local containers = provider:Containers()
 
         for _, container in ipairs(containers) do
@@ -139,6 +139,12 @@ local function CanSeeFrames()
                     return true
                 end
             end
+        end
+    end
+
+    for _, provider in pairs(fsProviders:EnabledSelfManaged()) do
+        if provider:IsVisible() then
+            return true
         end
     end
 
@@ -174,7 +180,7 @@ local function CheckOnlyUsingBlizzard()
     end
 
     local enabledNonBlizzardNames = fsEnumerable
-        :From(fsProviders:Enabled())
+        :From(fsProviders:EnabledNotSelfManaged())
         :Where(function(p)
             return p ~= fsProviders.Blizzard
         end)

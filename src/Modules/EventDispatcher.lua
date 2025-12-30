@@ -38,7 +38,7 @@ local function OnEvent(_, event, ...)
     fsSortedUnits:ProcessEvent(event, ...)
 
     -- now pass to providers
-    local providers = fsProviders:Enabled()
+    local providers = fsProviders:EnabledNotSelfManaged()
 
     for _, provider in ipairs(providers) do
         if provider.ProcessEvent then
