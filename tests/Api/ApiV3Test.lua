@@ -75,6 +75,8 @@ function M:setup()
     addon.WoW.Capabilities.HasSpecializations = function()
         return true
     end
+
+    addon.Locale["Can't do that during combat."] = "a"
 end
 
 function M:test_frame_number_for_unit()
@@ -304,6 +306,270 @@ function M:test_register_external_frame_provider_error_doesnt_propagate()
     local ok = v3.Sorting:RegisterFrameProvider(provider)
 
     assertEquals(ok, false)
+end
+
+
+function M:test_api_cycle_friendly_roles_happy_path_calls_sortedunits_and_run()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+
+    -- ensure not in combat
+    addon.WoW.Api.InCombatLockdown = function()
+        return false
+    end
+
+    local calledCycle = 0
+    local calledRun = 0
+    local gotRoles, gotCycles
+
+    addon.Modules.Sorting.SortedUnits.CycleFriendlyRoles = function(_, roles, cycles)
+        calledCycle = calledCycle + 1
+        gotRoles = roles
+        gotCycles = cycles
+    end
+
+    addon.Modules.Run = function()
+        calledRun = calledRun + 1
+    end
+
+    local roles = { "TANK", "DAMAGER", "HEALER" }
+    local ok = v3.Frame:CycleFriendlyRoles(roles, 2)
+
+    assertEquals(ok, true)
+    assertEquals(calledCycle, 1)
+    assertEquals(calledRun, 1)
+    assert(gotRoles == roles)
+    assertEquals(gotCycles, 2)
+end
+
+function M:test_api_cycle_enemy_roles_happy_path_calls_sortedunits_and_run()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+
+    addon.WoW.Api.InCombatLockdown = function()
+        return false
+    end
+
+    local calledCycle = 0
+    local calledRun = 0
+    local gotRoles, gotCycles
+
+    addon.Modules.Sorting.SortedUnits.CycleEnemyRoles = function(_, roles, cycles)
+        calledCycle = calledCycle + 1
+        gotRoles = roles
+        gotCycles = cycles
+    end
+
+    addon.Modules.Run = function()
+        calledRun = calledRun + 1
+    end
+
+    local roles = { "DAMAGER", "HEALER" }
+    local ok = v3.Frame:CycleEnemyRoles(roles, 1)
+
+    assertEquals(ok, true)
+    assertEquals(calledCycle, 1)
+    assertEquals(calledRun, 1)
+    assert(gotRoles == roles)
+    assertEquals(gotCycles, 1)
+end
+
+function M:test_api_cycle_roles_returns_false_in_combat_and_does_not_call_run_or_cycle()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+
+    addon.WoW.Api.InCombatLockdown = function()
+        return true
+    end
+
+    local friendlyCalled = 0
+    local enemyCalled = 0
+    local runCalled = 0
+
+    addon.Modules.Sorting.SortedUnits.CycleFriendlyRoles = function()
+        friendlyCalled = friendlyCalled + 1
+    end
+    addon.Modules.Sorting.SortedUnits.CycleEnemyRoles = function()
+        enemyCalled = enemyCalled + 1
+    end
+    addon.Modules.Run = function()
+        runCalled = runCalled + 1
+    end
+
+    assertEquals(v3.Frame:CycleFriendlyRoles({ "DAMAGER" }, 1), false)
+    assertEquals(v3.Frame:CycleEnemyRoles({ "DAMAGER" }, 1), false)
+
+    assertEquals(friendlyCalled, 0)
+    assertEquals(enemyCalled, 0)
+    assertEquals(runCalled, 0)
+end
+
+function M:test_api_cycle_friendly_roles_rejects_nil_or_non_table_roles()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+
+    addon.WoW.Api.InCombatLockdown = function()
+        return false
+    end
+
+    local called = 0
+    addon.Modules.Sorting.SortedUnits.CycleFriendlyRoles = function()
+        called = called + 1
+    end
+
+    ---@diagnostic disable-next-line: param-type-mismatch
+    assertEquals(v3.Frame:CycleFriendlyRoles(nil, 1), false)
+    ---@diagnostic disable-next-line: param-type-mismatch
+    assertEquals(v3.Frame:CycleFriendlyRoles("DAMAGER", 1), false)
+
+    assertEquals(called, 0)
+end
+
+function M:test_api_cycle_enemy_roles_rejects_nil_or_non_table_roles()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+
+    addon.WoW.Api.InCombatLockdown = function()
+        return false
+    end
+
+    local called = 0
+    addon.Modules.Sorting.SortedUnits.CycleEnemyRoles = function()
+        called = called + 1
+    end
+
+    ---@diagnostic disable-next-line: param-type-mismatch
+    assertEquals(v3.Frame:CycleEnemyRoles(nil, 1), false)
+    ---@diagnostic disable-next-line: param-type-mismatch
+    assertEquals(v3.Frame:CycleEnemyRoles(123, 1), false)
+
+    assertEquals(called, 0)
+end
+
+function M:test_api_cycle_friendly_roles_swallows_internal_error_and_returns_false()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+
+    addon.WoW.Api.InCombatLockdown = function()
+        return false
+    end
+
+    addon.Modules.Sorting.SortedUnits.CycleFriendlyRoles = function()
+        error("Swallowed error")
+    end
+
+    local runCalled = 0
+    addon.Modules.Run = function()
+        runCalled = runCalled + 1
+    end
+
+    local ok = v3.Frame:CycleFriendlyRoles({ "DAMAGER" }, 1)
+    assertEquals(ok, false)
+    assertEquals(runCalled, 0)
+end
+
+function M:test_api_cycle_enemy_roles_swallows_internal_error_and_returns_false()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+
+    addon.WoW.Api.InCombatLockdown = function()
+        return false
+    end
+
+    addon.Modules.Sorting.SortedUnits.CycleEnemyRoles = function()
+        error("Swallowed error")
+    end
+
+    local runCalled = 0
+    addon.Modules.Run = function()
+        runCalled = runCalled + 1
+    end
+
+    local ok = v3.Frame:CycleEnemyRoles({ "DAMAGER" }, 1)
+    assertEquals(ok, false)
+    assertEquals(runCalled, 0)
+end
+
+function M:test_api_reset_friendly_cycles_calls_sortedunits_and_run()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+
+    addon.WoW.Api.InCombatLockdown = function()
+        return false
+    end
+
+    local calledReset = 0
+    local calledRun = 0
+
+    addon.Modules.Sorting.SortedUnits.ResetFriendlyCycles = function()
+        calledReset = calledReset + 1
+    end
+
+    addon.Modules.Run = function()
+        calledRun = calledRun + 1
+    end
+
+    local ok = v3.Frame:ResetFriendlyCycles()
+
+    assertEquals(ok, true)
+    assertEquals(calledReset, 1)
+    assertEquals(calledRun, 1)
+end
+
+function M:test_api_reset_enemy_cycles_calls_sortedunits_and_run()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+
+    addon.WoW.Api.InCombatLockdown = function()
+        return false
+    end
+
+    local calledReset = 0
+    local calledRun = 0
+
+    addon.Modules.Sorting.SortedUnits.ResetEnemyCycles = function()
+        calledReset = calledReset + 1
+    end
+
+    addon.Modules.Run = function()
+        calledRun = calledRun + 1
+    end
+
+    local ok = v3.Frame:ResetEnemyCycles()
+
+    assertEquals(ok, true)
+    assertEquals(calledReset, 1)
+    assertEquals(calledRun, 1)
+end
+
+function M:test_api_reset_cycles_returns_false_in_combat_and_does_not_call_run()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+
+    addon.WoW.Api.InCombatLockdown = function()
+        return true
+    end
+
+    local friendlyCalled = 0
+    local enemyCalled = 0
+    local runCalled = 0
+
+    addon.Modules.Sorting.SortedUnits.ResetFriendlyCycles = function()
+        friendlyCalled = friendlyCalled + 1
+    end
+    addon.Modules.Sorting.SortedUnits.ResetEnemyCycles = function()
+        enemyCalled = enemyCalled + 1
+    end
+    addon.Modules.Run = function()
+        runCalled = runCalled + 1
+    end
+
+    assertEquals(v3.Frame:ResetFriendlyCycles(), false)
+    assertEquals(v3.Frame:ResetEnemyCycles(), false)
+
+    assertEquals(friendlyCalled, 0)
+    assertEquals(enemyCalled, 0)
+    assertEquals(runCalled, 0)
 end
 
 return M

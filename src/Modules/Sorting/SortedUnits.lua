@@ -9,7 +9,6 @@ local fsConfig = addon.Configuration
 local fsSortedFrames = addon.Modules.Sorting.SortedFrames
 local fsLog = addon.Logging.Log
 local wow = addon.WoW.Api
-local wowEx = addon.WoW.WowEx
 local capabilities = addon.WoW.Capabilities
 local events = addon.WoW.Events
 
@@ -40,9 +39,16 @@ local cachedFriendlyUnits = {}
 local currentStatsTick = 0
 local logStatsInterval = 10
 
--- the number of times to cycle/shift dps units down
-local cycleFriendlyDps = 0
-local cycleEnemyDps = 0
+---@class CycleInstruction
+---@field Roles table
+---@field Cycles number
+
+-- instructions to apply in-order
+---@type CycleInstruction[]|nil
+local friendlyCycleInstructions = nil
+
+---@type CycleInstruction[]|nil
+local enemyCycleInstructions = nil
 
 local function InvalidateFriendlyCache()
     friendlyCacheValid = false
@@ -139,9 +145,17 @@ local function ArenaUnits()
     return units
 end
 
-local function CycleDps(units, isFriendly, cycles)
+local function CycleRoles(units, isFriendly, cycles, roles)
     cycles = tonumber(cycles) or 1
+
     if cycles <= 0 then
+        return
+    end
+
+    -- roles can be:
+    -- 1) array: { "DAMAGER", "HEALER" }
+    -- 2) map/set: { ["DAMAGER"] = true, ["HEALER"] = true }
+    if not roles then
         return
     end
 
@@ -153,8 +167,23 @@ local function CycleDps(units, isFriendly, cycles)
         return
     end
 
-    -- collect indices of DPS units (in current order)
-    local dpsIdx = {}
+    -- normalize roles into a set for O(1) lookups
+    local roleSet = {}
+    if roles[1] ~= nil then
+        -- array form
+        for i = 1, #roles do
+            local r = roles[i]
+            if r ~= nil then
+                roleSet[r] = true
+            end
+        end
+    else
+        -- already a set/map form
+        roleSet = roles
+    end
+
+    -- collect indices of units that match any of the desired roles (in current order)
+    local matchIdx = {}
     for i = 1, #units do
         local unit = units[i]
         local role
@@ -170,12 +199,12 @@ local function CycleDps(units, isFriendly, cycles)
             end
         end
 
-        if role == wowEx.Role.Dps then
-            dpsIdx[#dpsIdx + 1] = i
+        if role and roleSet[role] then
+            matchIdx[#matchIdx + 1] = i
         end
     end
 
-    local n = #dpsIdx
+    local n = #matchIdx
     if n <= 1 then
         return
     end
@@ -186,15 +215,15 @@ local function CycleDps(units, isFriendly, cycles)
         return
     end
 
-    -- snapshot current DPS units in order
+    -- snapshot current matching units in order
     local temp = {}
     for i = 1, n do
-        temp[i] = units[dpsIdx[i]]
+        temp[i] = units[matchIdx[i]]
     end
 
-    -- rotate DPS units within their own slots
+    -- rotate matching units within their own slots
     for i = 1, n do
-        -- move backwards by `cycles`
+        -- move backwards by cycles
         local sourceIndex = i - cycles
 
         -- wrap around if we go below 1
@@ -202,7 +231,20 @@ local function CycleDps(units, isFriendly, cycles)
             sourceIndex = sourceIndex + n
         end
 
-        units[dpsIdx[i]] = temp[sourceIndex]
+        units[matchIdx[i]] = temp[sourceIndex]
+    end
+end
+
+local function ApplyCycleInstructions(units, isFriendly, instructions)
+    if not instructions or #instructions == 0 then
+        return
+    end
+
+    for i = 1, #instructions do
+        local inst = instructions[i]
+        if inst and inst.Roles and inst.Cycles and inst.Cycles > 0 then
+            CycleRoles(units, isFriendly, inst.Cycles, inst.Roles)
+        end
     end
 end
 
@@ -229,8 +271,8 @@ function M:FriendlyUnits()
     else
         units = FriendlyUnits()
 
-        if cycleFriendlyDps > 0 and #units > 0 then
-            CycleDps(units, true, cycleFriendlyDps)
+        if #units > 0 then
+            ApplyCycleInstructions(units, true, friendlyCycleInstructions)
         end
     end
 
@@ -240,8 +282,8 @@ function M:FriendlyUnits()
         units = FriendlyUnitsFromFrames()
         cache = false
 
-        if cycleFriendlyDps > 0 and #units > 0 then
-            CycleDps(units, true, cycleFriendlyDps)
+        if #units > 0 then
+            ApplyCycleInstructions(units, true, friendlyCycleInstructions)
         end
     end
 
@@ -274,8 +316,8 @@ function M:ArenaUnits()
     else
         units = ArenaUnits()
 
-        if cycleEnemyDps > 0 and #units > 0 then
-            CycleDps(units, false, cycleEnemyDps)
+        if #units > 0 then
+            ApplyCycleInstructions(units, false, enemyCycleInstructions)
         end
     end
 
@@ -302,33 +344,59 @@ function M:InvalidateCache()
     InvalidateEnemyCache()
 end
 
-function M:CycleFriendlyDps(cycles)
-    if type(cycles) == "number" then
-        cycleFriendlyDps = cycleFriendlyDps + cycles
-    else
-        cycleFriendlyDps = cycleFriendlyDps + 1
+function M:CycleFriendlyRoles(roles, cycles)
+    if not roles then
+        fsLog:Error("SortedUnits:CycleFriendlyRoles() - roles must not be nil.")
+        return
     end
+
+    local n = tonumber(cycles) or 1
+    if n <= 0 then
+        return
+    end
+
+    if not friendlyCycleInstructions then
+        friendlyCycleInstructions = {}
+    end
+
+    friendlyCycleInstructions[#friendlyCycleInstructions + 1] = {
+        Roles = roles,
+        Cycles = n,
+    }
 
     InvalidateFriendlyCache()
 end
 
-function M:CycleEnemyDps(cycles)
-    if type(cycles) == "number" then
-        cycleEnemyDps = cycleEnemyDps + cycles
-    else
-        cycleEnemyDps = cycleEnemyDps + 1
+function M:CycleEnemyRoles(roles, cycles)
+    if not roles then
+        fsLog:Error("SortedUnits:CycleEnemyRoles() - roles must not be nil.")
+        return
     end
+
+    local n = tonumber(cycles) or 1
+    if n <= 0 then
+        return
+    end
+
+    if not enemyCycleInstructions then
+        enemyCycleInstructions = {}
+    end
+
+    enemyCycleInstructions[#enemyCycleInstructions + 1] = {
+        Roles = roles,
+        Cycles = n,
+    }
 
     InvalidateEnemyCache()
 end
 
-function M:ResetFriendlyDpsCycles()
-    cycleFriendlyDps = 0
+function M:ResetFriendlyCycles()
+    friendlyCycleInstructions = nil
     InvalidateFriendlyCache()
 end
 
-function M:ResetEnemyDpsCycles()
-    cycleEnemyDps = 0
+function M:ResetEnemyCycles()
+    enemyCycleInstructions = nil
     InvalidateEnemyCache()
 end
 
@@ -353,9 +421,9 @@ function M:ProcessEvent(event, ...)
         local unit = select(1, ...)
         OnPetEvent(event, unit)
     elseif event == events.PLAYER_ENTERING_WORLD then
-        -- reset cycles after loading screen
-        cycleFriendlyDps = 0
-        cycleEnemyDps = 0
+        -- reset cycle instructions after loading screen
+        friendlyCycleInstructions = nil
+        enemyCycleInstructions = nil
     end
 end
 
