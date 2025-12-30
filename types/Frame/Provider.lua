@@ -6,6 +6,12 @@
 ---@field RegisterRequestSortCallback fun(self: table, callback: fun(provider: FrameProvider)) Registers a callback to be invoked when sorting is required.
 ---@field RegisterContainersChangedCallback fun(self: table, callback: fun(provider: FrameProvider)) Registers a callback to be invoked when container metadata may have changed.
 ---@field Containers fun(self: table): FrameContainer[]
+---@field IsExternal boolean
+
+---@class ExternalFrameProvider : FrameProvider
+---@field Sort fun(self: table): boolean Called when FrameSort wants the external provider to sort their frames. Returns true if frames were sorted, otherwise false.
+---@field IsVisible fun(self: table): boolean Whether the frames are visible.
+---@field IsSelfManaged boolean whether this frame provider performs it's own sorting, or wants FrameSort to sort it
 
 ---@class Providers: IInitialise
 ---@field Blizzard BlizzardFrameProvider
@@ -13,5 +19,9 @@
 ---@field GladiusEx FrameProvider
 ---@field ElvUI FrameProvider
 ---@field Cell FrameProvider
----@field All FrameProvider[]
----@field Enabled fun(self: table): FrameProvider[]
+---@field All FrameProvider[]|ExternalFrameProvider[]
+---@field Enabled fun(self: table): FrameProvider[]|ExternalFrameProvider[]
+---@field EnabledNotSelfManaged fun(self: table): FrameProvider[]
+---@field EnabledSelfManaged fun(self: table): ExternalFrameProvider[]
+---@field RegisterFrameProvider fun(self: table, provider: ExternalFrameProvider, isExternal: boolean): boolean true if added, otherwise false if invalid frame provider.
+---@field RequestSelfManagedProvidersSort fun(self: table): boolean true if any sorted, otherwise false.

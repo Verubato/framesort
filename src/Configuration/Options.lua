@@ -52,7 +52,7 @@ function fsConfig:NotifyChanged()
     for _, callback in ipairs(callbacks) do
         local ok, err = pcall(callback)
         if not ok then
-            fsLog:Error("Configuration changed callback failed: %s", tostring(err))
+            fsLog:Error("Configuration changed callback failed: %s.", tostring(err) or "unknown")
         end
     end
 end

@@ -49,7 +49,7 @@ function M:setup()
     end
 
     local provider = { Name = "TestProvider" }
-    fsProviders.Enabled = function()
+    fsProviders.EnabledNotSelfManaged = function()
         return { provider }
     end
 

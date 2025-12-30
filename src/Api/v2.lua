@@ -103,7 +103,7 @@ end
 local function GetFrames(type)
     local frames = {}
 
-    for _, provider in ipairs(fsProviders:Enabled()) do
+    for _, provider in ipairs(fsProviders:EnabledNotSelfManaged()) do
         frames[provider:Name()] = VisualOrder(fsFrame:GetFrames(provider, type))
     end
 

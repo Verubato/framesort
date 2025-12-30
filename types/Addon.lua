@@ -52,6 +52,7 @@
 ---@field Inspector InspectorModule
 ---@field UnitTracker UnitTrackerModule
 ---@field Nameplates NameplatesModule
+---@field RegisterPostRunCallback fun(self: table, callback: function): boolean
 
 ---@class Scheduling
 ---@field Scheduler Scheduler

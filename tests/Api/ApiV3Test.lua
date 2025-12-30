@@ -224,4 +224,86 @@ function M:test_set_sort_mode()
     assertEquals(config.World.GroupSortMode, "Role")
 end
 
+function M:test_register_external_frame_provider_nil()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+
+    ---@diagnostic disable-next-line: param-type-mismatch
+    local ok = v3.Sorting:RegisterFrameProvider(nil)
+
+    assertEquals(ok, false)
+end
+
+function M:test_register_external_frame_provider_invalid_provider_not_added()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+
+    local beforeCount = #addon.Providers.All
+
+    -- Missing required methods (Name, IsVisible)
+    local invalidProvider = {
+        Enabled = function()
+            return true
+        end,
+    }
+
+    local ok = v3.Sorting:RegisterFrameProvider(invalidProvider)
+
+    assertEquals(ok, false)
+    assertEquals(#addon.Providers.All, beforeCount)
+end
+
+function M:test_register_external_frame_provider_valid_provider_added_and_marked_external()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+
+    local beforeCount = #addon.Providers.All
+
+    local externalProvider = {
+        Enabled = function()
+            return true
+        end,
+        Name = function()
+            return "ExternalTest"
+        end,
+        IsVisible = function()
+            return true
+        end,
+    }
+
+    local ok = v3.Sorting:RegisterFrameProvider(externalProvider)
+
+    assertEquals(ok, true)
+    assertEquals(externalProvider.IsExternal, true)
+    assertEquals(#addon.Providers.All, beforeCount + 1)
+    assertEquals(addon.Providers.All[#addon.Providers.All], externalProvider)
+end
+
+function M:test_register_external_frame_provider_error_doesnt_propagate()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+
+    -- Force an error inside the providers module method to ensure SafeCall swallows it
+    ---@diagnostic disable-next-line: duplicate-set-field
+    addon.Providers.RegisterFrameProvider = function()
+        error("Swallowed error")
+    end
+
+    local provider = {
+        Enabled = function()
+            return true
+        end,
+        Name = function()
+            return "ExternalErrorTest"
+        end,
+        IsVisible = function()
+            return true
+        end,
+    }
+
+    local ok = v3.Sorting:RegisterFrameProvider(provider)
+
+    assertEquals(ok, false)
+end
+
 return M

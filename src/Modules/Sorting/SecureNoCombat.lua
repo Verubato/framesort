@@ -895,7 +895,7 @@ function M:TrySort(provider)
     local sorted = false
     local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
     local enemyEnabled, _, _ = fsCompare:EnemySortMode()
-    local providers = (provider and { provider }) or fsProviders:Enabled() or {}
+    local providers = (provider and { provider }) or fsProviders:EnabledNotSelfManaged() or {}
 
     if not friendlyEnabled or not enemyEnabled then
         sorted = ClearSorting(providers, friendlyEnabled, enemyEnabled)

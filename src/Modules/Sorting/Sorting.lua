@@ -4,6 +4,7 @@ local wow = addon.WoW.Api
 local capabilities = addon.WoW.Capabilities
 local fsLog = addon.Logging.Log
 local fsConfig = addon.Configuration
+local fsProviders = addon.Providers
 local callbacks = {}
 local M = addon.Modules.Sorting
 
@@ -49,6 +50,8 @@ function M:Run(provider)
     elseif addon.DB.Options.Sorting.Method == fsConfig.SortingMethod.Secure then
         sorted = M.Secure:TrySort(provider)
     end
+
+    sorted = fsProviders:RequestSelfManagedProvidersSort() or sorted
 
     if sorted then
         M:NotifySorted()
