@@ -260,8 +260,9 @@ end
 ---@param containerVisible boolean?: if true, skip if container isn't visible
 ---@param visibleOnly boolean?: if true, only include visible child frames
 ---@param requireUnit boolean?: if true, require GetFrameUnit(frame) ~= nil
+---@param includeTarget boolean?: if true (default = true), include target frames regardless of if they are visible or not.
 ---@return table
-function M:ExtractUnitFrames(container, containerVisible, visibleOnly, requireUnit)
+function M:ExtractUnitFrames(container, containerVisible, visibleOnly, requireUnit, includeTarget)
     if not container then
         fsLog:Error("Frame:ExtractUnitFrames() - container must not be nil.")
         return {}
@@ -277,6 +278,10 @@ function M:ExtractUnitFrames(container, containerVisible, visibleOnly, requireUn
 
     if containerVisible == nil then
         containerVisible = true
+    end
+
+    if includeTarget == nil then
+        includeTarget = true
     end
 
     if containerVisible then
@@ -296,8 +301,9 @@ function M:ExtractUnitFrames(container, containerVisible, visibleOnly, requireUn
                 return false
             end
 
+            local unit = M:GetFrameUnit(frame)
+
             if requireUnit then
-                local unit = M:GetFrameUnit(frame)
                 if not unit then
                     return false
                 end
@@ -323,6 +329,10 @@ function M:ExtractUnitFrames(container, containerVisible, visibleOnly, requireUn
                 -- this can happen for example with ElvUI for frames without a unit
                 -- so don't log this as a warning to prevent spam
                 return false
+            end
+
+            if unit and includeTarget and fsUnit:IsRaidTarget(unit) then
+                return true
             end
 
             if visibleOnly and (not frame.IsVisible or not frame:IsVisible()) then

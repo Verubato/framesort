@@ -275,9 +275,6 @@ L["Traditional mode can't apply spacing, consider removing spacing or using the 
 L["Blizzard sorting functions not tampered with"] = "Funciones de ordenamiento de Blizzard sin alteraciones"
 L['"%s" may cause conflicts, consider disabling it'] = '"%s" puede causar conflictos; considera desactivarlo'
 L["No conflicting addons"] = "Sin complementos en conflicto"
-L["Main tank and assist setting disabled when spacing used"] = "La configuración de tanque principal y asistente se desactiva cuando se usa el espaciado"
-L["Please turn off raid spacing or disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] =
-    "Desactiva el espaciado de banda o deshabilita la opción «Mostrar tanque principal y asistente» en Opciones → Interfaz → Marcos de banda"
 
 -- # Log Screen -- #
 L["Log"] = "Registro"

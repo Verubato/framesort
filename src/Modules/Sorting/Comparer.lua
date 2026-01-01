@@ -133,6 +133,11 @@ local function PrecomputeUnitMetadata(unit, meta, isEnemy)
     data.IsPlayer = not data.IsPet and fsUnit:IsPlayer(unit)
     data.UnitNumber = tonumber(string.match(unit, "%d+"))
 
+    local isRaidTarget, targetDepth = fsUnit:IsRaidTarget(unit)
+
+    data.IsRaidTarget = isRaidTarget
+    data.RaidTargetDepth = targetDepth
+
     if isEnemy then
         -- don't need to check for exists here, because it's a pre-condition of how the enemy unit was generated in the first place
         if not data.IsPet then
@@ -334,12 +339,12 @@ local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, rev
     -- TODO: investigate this weirdness
     if leftMeta.IsPet or rightMeta.IsPet then
         -- place players before pets
-        if not leftMeta.IsPet then
-            return true
+        if leftMeta.IsPet then
+            return false
         end
 
-        if not rightMeta.IsPet then
-            return false
+        if rightMeta.IsPet then
+            return true
         end
 
         -- both are pets, compare their owner's
@@ -355,6 +360,17 @@ local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, rev
         end
 
         return Compare(leftOwner, rightOwner, playerSortMode, groupSortMode, reverse, meta)
+    end
+
+    if leftMeta.IsRaidTarget or rightMeta.IsRaidTarget then
+        local leftRoot = fsUnit:TargetOwner(leftToken) or leftToken
+        local rightRoot = fsUnit:TargetOwner(rightToken) or rightToken
+
+        if leftRoot ~= rightRoot then
+            return Compare(leftRoot, rightRoot, playerSortMode, groupSortMode, reverse, meta)
+        end
+
+        return (leftMeta.RaidTargetDepth or 0) < (rightMeta.RaidTargetDepth or 0)
     end
 
     if playerSortMode and playerSortMode ~= "" then

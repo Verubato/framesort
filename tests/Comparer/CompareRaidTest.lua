@@ -240,4 +240,18 @@ function M:test_sort_reverse_group()
     assertEquals(subject, { "raid8", "raid7", "raid6", "raid5", "raid4", "raid3", "raid2", "raid1" })
 end
 
+function M:test_sort_raid_targets()
+    local config = addon.DB.Options.Sorting.World
+    config.Enabled = true
+    config.PlayerSortMode = nil
+    config.GroupSortMode = fsConfig.GroupSortMode.Group
+
+    local subject = { "raid2", "raid4", "raid1", "raid1target", "raid7", "raid1targettarget", "raid3", "raid2target", "raid5", "raid6", "raid2targettarget", "raid8" }
+    local sortFunction = fsCompare:SortFunction(subject)
+
+    table.sort(subject, sortFunction)
+
+    assertEquals(subject, { "raid1", "raid1target", "raid1targettarget", "raid2", "raid2target", "raid2targettarget", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8" })
+end
+
 return M

@@ -171,9 +171,10 @@ secureMethods["ExtractUnitFrames"] = [[
                 run:CallMethod("Log", format("Frame '%s' has no geometry.", child:GetName() or "nil"), LogLevel.Warning)
             end
 
-            if unit and
-                (child:IsVisible() or not visibleOnly) and
-                (hasSize) then
+            local isTarget = unit and strmatch(unit, "^raid%d+target")
+
+            if unit and hasSize and
+                (isTarget or (child:IsVisible() or not visibleOnly)) then
                 unitFrames[#unitFrames + 1] = child
             end
         end

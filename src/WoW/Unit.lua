@@ -2,6 +2,7 @@
 local _, addon = ...
 local wow = addon.WoW.Api
 local wowEx = addon.WoW.WowEx
+local capabilities = addon.WoW.Capabilities
 local fsEnumerable = addon.Collections.Enumerable
 local fsLog = addon.Logging.Log
 ---@class UnitUtil
@@ -102,15 +103,26 @@ function M:FriendlyUnits()
     end
 
     local isRaid = wow.IsInRaid()
+    local isPvp = wowEx.IsInstanceArena() or wowEx.IsInstanceBattleground() or wowEx.IsInstanceBrawl()
     local units = isRaid and allRaidUnitsIds or allPartyUnitsIds
+    local mtaEnabled = capabilities.HasMainTankAndAssistFrames() and wowEx.MainTankAndAssistEnabled()
+    local results = {}
 
-    return fsEnumerable
-        :From(units)
-        :Where(function(unit)
-            local exists = wow.UnitExists(unit)
-            return not wow.issecretvalue(exists) and exists
-        end)
-        :ToTable()
+    for i = 1, #units do
+        local unit = units[i]
+        local exists = wow.UnitExists(unit)
+
+        if not wow.issecretvalue(exists) and exists then
+            results[#results + 1] = unit
+
+            if isRaid and not isPvp and mtaEnabled and M:IsTankOrAssist(unit) then
+                results[#results + 1] = unit .. "target"
+                results[#results + 1] = unit .. "targettarget"
+            end
+        end
+    end
+
+    return results
 end
 
 ---Returns a table of arena unit tokens where the unit exists.
@@ -150,6 +162,63 @@ function M:IsPet(unit)
         or unit:match("^raidpet%d+$") ~= nil
         or unit:match("^arena%d+pet$") ~= nil
         or unit:match("^arenapet%d+$") ~= nil
+end
+
+---Returns the raid target depth for a unit token.
+---Examples:
+---  raid1              -> nil
+---  raid1target        -> 1
+---  raid1targettarget  -> 2
+---@param unit string
+---@return boolean, integer|nil
+function M:IsRaidTarget(unit)
+    if not unit then
+        return false, nil
+    end
+
+    -- Must start with raidN
+    local root = unit:match("^(raid%d+)")
+    if not root then
+        return false, nil
+    end
+
+    local rest = unit:sub(#root + 1)
+    if rest == "" then
+        return false, nil
+    end
+
+    local depth = 0
+
+    -- Count consecutive "target" suffixes
+    while rest:sub(1, 6) == "target" do
+        depth = depth + 1
+        rest = rest:sub(7)
+    end
+
+    -- If anything remains, it's not a pure target chain
+    if rest ~= "" then
+        return false, nil
+    end
+
+    return depth > 0, depth
+end
+
+function M:IsTankOrAssist(unit)
+    local role = wow.UnitGroupRolesAssigned and wow.UnitGroupRolesAssigned(unit)
+    -- note a non-main tank has target frames too
+    return role == "TANK" or role == "MAINTANK" or role == "MAINASSIST"
+end
+
+---Returns the owner of a target unit
+---@param unit string
+---@return string
+function M:TargetOwner(unit)
+    if not unit then
+        return unit
+    end
+
+    local owner = unit:gsub("target", "")
+    return owner
 end
 
 ---Returns the pet unit for the specified unit.

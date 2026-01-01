@@ -212,3 +212,9 @@ M.ExpansionAndBuildInfo = function()
     local expansionName = expansionNames[LE_EXPANSION_LEVEL_CURRENT] or "Unknown"
     return expansionName, buildVersion
 end
+
+---Returns true if main tank and assist frames are enabled.
+---@return boolean
+M.MainTankAndAssistEnabled = function()
+    return wow.GetCVarBool("raidOptionDisplayMainTankAndAssist") or false
+end

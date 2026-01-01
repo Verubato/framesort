@@ -185,6 +185,21 @@ function M:test_is_pet()
     assertEquals(fsUnit:IsPet("raid1pet"), true)
 end
 
+function M:test_is_raid_target()
+    ---@diagnostic disable-next-line: param-type-mismatch
+    assertEquals({ fsUnit:IsRaidTarget(nil) }, { false, nil })
+    assertEquals({ fsUnit:IsRaidTarget("") }, { false, nil })
+    assertEquals({ fsUnit:IsRaidTarget("player") }, { false, nil })
+    assertEquals({ fsUnit:IsRaidTarget("target") }, { false, nil })
+    assertEquals({ fsUnit:IsRaidTarget("raid1") }, { false, nil })
+
+    assertEquals({ fsUnit:IsRaidTarget("raid1target") }, { true, 1 })
+    assertEquals({ fsUnit:IsRaidTarget("raid11target") }, { true, 1 })
+    assertEquals({ fsUnit:IsRaidTarget("raid13targettarget") }, { true, 2 })
+    assertEquals({ fsUnit:IsRaidTarget("raid40target") }, { true, 1 })
+    assertEquals({ fsUnit:IsRaidTarget("raid40targettarget") }, { true, 2 })
+end
+
 function M:test_pet_for()
     ---@diagnostic disable-next-line: param-type-mismatch
     assertEquals(fsUnit:PetFor(nil), "none")
@@ -207,6 +222,15 @@ function M:test_owner_for()
     assertEquals(fsUnit:PetOwner("pet"), "player")
     assertEquals(fsUnit:PetOwner("partypet1"), "party1")
     assertEquals(fsUnit:PetOwner("raidpet1"), "raid1")
+end
+
+function M:test_target_owner()
+    ---@diagnostic disable-next-line: param-type-mismatch
+    assertEquals(fsUnit:TargetOwner("raid1"), "raid1")
+    assertEquals(fsUnit:TargetOwner("raid1target"), "raid1")
+    assertEquals(fsUnit:TargetOwner("raid1targettarget"), "raid1")
+    assertEquals(fsUnit:TargetOwner("raid11target"), "raid11")
+    assertEquals(fsUnit:TargetOwner("raid11targettarget"), "raid11")
 end
 
 function M:test_is_player_when_secret()
