@@ -1,6 +1,7 @@
 ---@type string, Addon
 local addonName, addon = ...
 local wow = addon.WoW.Api
+local wowEx = addon.WoW.WowEx
 local capabilities = addon.WoW.Capabilities
 local fsEnumerable = addon.Collections.Enumerable
 local fsProviders = addon.Providers
@@ -266,19 +267,6 @@ local function CheckKeepGroupTogether()
     }
 end
 
-local function CheckMainTankAssist()
-    local options = addon.DB.Options
-    local hasMA = capabilities.HasMainTankAndAssistFrames()
-    local enabled = wow.GetCVarBool("raidOptionDisplayMainTankAndAssist")
-
-    return {
-        Applicable = hasMA and options.Sorting.Raid.Enabled,
-        Passed = not enabled,
-        Description = L["Main tank and assist setting disabled when spacing used"],
-        Help = L["Please turn off raid spacing or disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"],
-    }
-end
-
 local function CheckCell()
     local passed = false
     local applicable = false
@@ -311,7 +299,6 @@ function M:IsHealthy()
     results[#results + 1] = CheckUsingSpacing()
     results[#results + 1] = CheckSortingFunctionsTampered()
     results[#results + 1] = CheckConflictingAddons()
-    results[#results + 1] = CheckMainTankAssist()
     results[#results + 1] = CheckCell()
 
     local healthy = fsEnumerable:From(results):All(function(x)

@@ -274,9 +274,6 @@ L["Traditional mode can't apply spacing, consider removing spacing or using the 
 L["Blizzard sorting functions not tampered with"] = "Fonctions de tri Blizzard non altérées"
 L['"%s" may cause conflicts, consider disabling it'] = "« %s » peut provoquer des conflits, envisagez de le désactiver"
 L["No conflicting addons"] = "Aucun addon en conflit"
-L["Main tank and assist setting disabled when spacing used"] = "Les paramètres de tank principal et d’assistant sont désactivés lorsque l’espacement est utilisé"
-L["Please turn off raid spacing or disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] =
-    "Veuillez désactiver l’espacement du raid ou l’option « Afficher le tank principal et l’assistant » dans Options → Interface → Cadres de raid"
 
 -- # Log Screen -- #
 L["Log"] = "Journal"

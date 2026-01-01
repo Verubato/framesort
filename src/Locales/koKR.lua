@@ -274,9 +274,6 @@ L["Traditional mode can't apply spacing, consider removing spacing or using the 
 L["Blizzard sorting functions not tampered with"] = "블리자드 정렬 함수가 변경되지 않음"
 L['"%s" may cause conflicts, consider disabling it'] = '"%s"는 충돌을 일으킬 수 있으니 비활성화를 고려하세요'
 L["No conflicting addons"] = "충돌하는 애드온 없음"
-L["Main tank and assist setting disabled when spacing used"] = "간격을 사용할 경우 메인 탱커 및 보조 탱커 설정이 비활성화됩니다"
-L["Please turn off raid spacing or disable the 'Display Main Tank and Assist' option in Options -> Interface -> Raid Frames"] =
-    "공격대 간격을 끄거나 옵션 → 인터페이스 → 공격대 프레임에서 '메인 탱커 및 보조 탱커 표시' 옵션을 비활성화하세요"
 
 -- # Log Screen -- #
 L["Log"] = "로그"
