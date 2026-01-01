@@ -568,6 +568,14 @@ local function SetNameList(container)
         units = { "player" }
     end
 
+    -- namelists don't like target units
+    units = fsEnumerable
+        :From(units)
+        :Where(function(unit)
+            return not fsUnit:IsRaidTarget(unit)
+        end)
+        :ToTable()
+
     if container.ShowUnit then
         units = fsEnumerable
             :From(units)
