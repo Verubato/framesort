@@ -25,10 +25,12 @@ local function BuiltTitle(panel)
     local unhealthy = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
     unhealthy:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -verticalSpacing)
     unhealthy:SetText(L["There are some issues that may prevent FrameSort from working correctly."])
+    unhealthy:SetShown(false)
 
     local unhealthyGoto = panel:CreateFontString(nil, "ARTWORK", "GameFontRed")
     unhealthyGoto:SetPoint("TOPLEFT", unhealthy, "BOTTOMLEFT", 0, -verticalSpacing)
     unhealthyGoto:SetText(L["Please go to the Health Check panel to view more details."])
+    unhealthyGoto:SetShown(false)
 
     local anchor = title
     local dynamicAnchor = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
