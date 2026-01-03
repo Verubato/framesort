@@ -131,6 +131,7 @@ local function PrecomputeUnitMetadata(unit, meta, isEnemy)
 
     data.IsPet = fsUnit:IsPet(unit)
     data.IsPlayer = not data.IsPet and fsUnit:IsPlayer(unit)
+    data.IsTarget = fsUnit:IsRaidTarget(unit)
     data.UnitNumber = tonumber(string.match(unit, "%d+"))
 
     local isRaidTarget, targetDepth = fsUnit:IsRaidTarget(unit)
@@ -140,7 +141,7 @@ local function PrecomputeUnitMetadata(unit, meta, isEnemy)
 
     if isEnemy then
         -- don't need to check for exists here, because it's a pre-condition of how the enemy unit was generated in the first place
-        if not data.IsPet then
+        if not data.IsPet and not data.IsTarget then
             data.SpecId = fsInspector:EnemyUnitSpec(unit)
             data.Role = wow.GetSpecializationInfoByID and data.SpecId and select(5, wow.GetSpecializationInfoByID(data.SpecId))
 
@@ -150,7 +151,7 @@ local function PrecomputeUnitMetadata(unit, meta, isEnemy)
     else
         data.Exists = wow.UnitExists(unit)
 
-        if not data.IsPet and data.Exists then
+        if not data.IsPet and not data.IsTarget and data.Exists then
             data.Name = wow.UnitName and wow.UnitName(unit)
 
             if capabilities.HasRoleAssignments() then
