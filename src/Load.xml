@@ -106,6 +106,7 @@
     <Script file="Configuration\Panels\Api.lua"/>
     <Script file="Configuration\Panels\Discord.lua"/>
     <Script file="Configuration\Panels\Nameplates.lua"/>
+    <Script file="Configuration\Panels\Miscellaneous.lua"/>
     <Script file="Configuration\Panels\Log.lua"/>
 
     <!-- Now initialise the addon -->

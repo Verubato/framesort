@@ -300,3 +300,9 @@ Ejemplos:
   - $framenumber - $spec
   - $name - $spec
 ]]
+
+-- # Miscellaneous screen #
+L["Miscellaneous"] = "Miscelánea"
+L["Various tweaks you can apply."] = "Varios ajustes que puedes aplicar."
+L["Player top of role"] = "Jugador en la parte superior del rol"
+L["Places you at the top of your corresponding role (healer/tank/dps)."] = "Te coloca en la parte superior de tu rol correspondiente (sanador/tanque/DPS)."

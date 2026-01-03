@@ -306,3 +306,9 @@ L["NameplatesBlurb"] = [[
   - $framenumber - $spec
   - $name - $spec
 ]]
+
+-- # Miscellaneous screen #
+L["Miscellaneous"] = "Разное"
+L["Various tweaks you can apply."] = "Различные настройки, которые вы можете применить."
+L["Player top of role"] = "Игрок в начале роли"
+L["Places you at the top of your corresponding role (healer/tank/dps)."] = "Размещает вас в начале вашей соответствующей роли (лекарь/танк/DPS)."

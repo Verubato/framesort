@@ -301,3 +301,9 @@ L["NameplatesBlurb"] = [[
   - $framenumber - $spec
   - $name - $spec
 ]]
+
+-- # Miscellaneous screen #
+L["Miscellaneous"] = "기타"
+L["Various tweaks you can apply."] = "적용할 수 있는 다양한 조정입니다."
+L["Player top of role"] = "역할 상단에 플레이어 배치"
+L["Places you at the top of your corresponding role (healer/tank/dps)."] = "해당 역할(힐러/탱커/DPS)의 최상단에 플레이어를 배치합니다."

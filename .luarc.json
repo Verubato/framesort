@@ -42,6 +42,7 @@
         "CompactRaidFrameContainer_LayoutFrames",
         "LE_EXPANSION_LEVEL_CURRENT",
         "CompactUnitFrame_UpdateName",
+        "GameTooltip",
     ],
     "diagnostics.disable": [
         "inject-field",

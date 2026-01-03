@@ -43,7 +43,7 @@ function M:setup()
         return false
     end
     addon.WoW.Api.UnitIsUnit = function(left, right)
-        return left == right or (left == playerToken and right == "player")
+        return left == right or (left == playerToken and right == "player") or (left == "player" and right == playerToken)
     end
     addon.WoW.Api.IsInRaid = function()
         return true
@@ -56,6 +56,8 @@ function M:teardown()
     world.PlayerSortMode = nil
     world.GroupSortMode = nil
     world.Reverse = false
+
+    addon.DB.Options.Sorting.Miscellaneous.PlayerTopOfRole = false
 
     if fsCompare.InvalidateCache then
         fsCompare:InvalidateCache()
@@ -252,6 +254,131 @@ function M:test_sort_raid_targets()
     table.sort(subject, sortFunction)
 
     assertEquals(subject, { "raid1", "raid1target", "raid1targettarget", "raid2", "raid2target", "raid2targettarget", "raid3", "raid4", "raid5", "raid6", "raid7", "raid8" })
+end
+
+function M:test_player_top_of_role()
+    local config = addon.DB.Options.Sorting.World
+    config.PlayerSortMode = nil
+    config.GroupSortMode = fsConfig.GroupSortMode.Role
+
+    addon.DB.Options.Sorting.Miscellaneous.PlayerRoleSort = "Top"
+
+    local unitToRole = {
+        ["raid1"] = "DAMAGER",
+        -- player
+        ["raid2"] = "DAMAGER",
+        ["raid3"] = "DAMAGER",
+        ["raid4"] = "TANK",
+        ["raid5"] = "DAMAGER",
+        ["raid6"] = "DAMAGER",
+        ["raid7"] = "HEALER",
+        ["raid8"] = "DAMAGER",
+    }
+
+    local unitToClass = {
+        -- Mage
+        ["raid1"] = 8,
+        -- Druid
+        ["raid2"] = 11,
+        -- Death Knight
+        ["raid3"] = 6,
+        -- Warrior
+        ["raid4"] = 1,
+        -- Hunter
+        ["raid5"] = 3,
+        -- Mage
+        ["raid6"] = 8,
+        -- Priest
+        ["raid7"] = 5,
+        -- Rogue
+        ["raid8"] = 4,
+    }
+
+    addon.WoW.Api.UnitGroupRolesAssigned = function(unit)
+        return unitToRole[unit]
+    end
+    addon.WoW.Api.UnitClass = function(unit)
+        return "", "", unitToClass[unit]
+    end
+
+    local ordering = addon.DB.Options.Sorting.Ordering
+    ordering.Tanks = 1
+    ordering.Healers = 2
+    ordering.Hunters = 3
+    ordering.Casters = 4
+    ordering.Melee = 5
+
+    local subject = { "raid8", "raid7", "raid6", "raid5", "raid4", "raid3", "raid2", "raid1" }
+    local sortFunction = fsCompare:SortFunction(subject)
+
+    table.sort(subject, sortFunction)
+
+    assertEquals(subject, { "raid4", "raid7", "raid2", "raid5", "raid1", "raid6", "raid8", "raid3" })
+end
+
+function M:test_strict_ordering()
+    local config = addon.DB.Options.Sorting.World
+    config.PlayerSortMode = nil
+    config.GroupSortMode = fsConfig.GroupSortMode.Role
+
+    addon.DB.Options.Sorting.Miscellaneous.PlayerRoleSort = "Top"
+
+    local unitToRole = {
+        ["raid1"] = "DAMAGER",
+        -- player
+        ["raid2"] = "DAMAGER",
+        ["raid3"] = "DAMAGER",
+        ["raid4"] = "TANK",
+        ["raid5"] = "DAMAGER",
+        ["raid6"] = "DAMAGER",
+        ["raid7"] = "HEALER",
+        ["raid8"] = "DAMAGER",
+    }
+
+    local unitToClass = {
+        -- Mage
+        ["raid1"] = 8,
+        -- Druid
+        ["raid2"] = 11,
+        -- Death Knight
+        ["raid3"] = 6,
+        -- Warrior
+        ["raid4"] = 1,
+        -- Hunter
+        ["raid5"] = 3,
+        -- Mage
+        ["raid6"] = 8,
+        -- Priest
+        ["raid7"] = 5,
+        -- Rogue
+        ["raid8"] = 4,
+    }
+
+    addon.WoW.Api.UnitGroupRolesAssigned = function(unit)
+        return unitToRole[unit]
+    end
+    addon.WoW.Api.UnitClass = function(unit)
+        return "", "", unitToClass[unit]
+    end
+
+    local ordering = addon.DB.Options.Sorting.Ordering
+    ordering.Tanks = 1
+    ordering.Healers = 2
+    ordering.Hunters = 3
+    ordering.Casters = 4
+    ordering.Melee = 5
+
+    local subject = { "raid8", "raid7", "raid6", "raid5", "raid4", "raid3", "raid2", "raid1" }
+    local sortFunction = fsCompare:SortFunction(subject)
+
+    assert(sortFunction)
+
+    table.sort(subject, sortFunction)
+
+    for i = 1, #subject - 1 do
+        -- make sure our sort function maintains transitivity
+        assert(sortFunction(subject[i + 1], subject[i]) == false)
+    end
 end
 
 return M
