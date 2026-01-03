@@ -926,10 +926,6 @@ function M:TrySort(provider)
                     return false
                 end
 
-                if not container.Frame:IsVisible() then
-                    return false
-                end
-
                 if (container.Type == fsFrame.ContainerType.Party or container.Type == fsFrame.ContainerType.Raid) and not friendlyEnabled then
                     return false
                 end
@@ -939,6 +935,19 @@ function M:TrySort(provider)
                 end
 
                 if container.EnableInBattlegrounds ~= nil and not container.EnableInBattlegrounds and wowEx.IsInstanceBattleground() then
+                    return false
+                end
+
+                if type(container.Frame.IsShown) ~= "function" then
+                    fsLog:WarnOnce("Invalid container frame for provider %s.", p:Name() or "nil")
+                    return false
+                end
+
+                if not container.Frame:IsShown() then
+                    -- check IsShown() here instead of IsVisible() to fix a bug on TBC
+                    -- where when the user joins an arena the party frame is invisible but wants to be shown
+                    -- which means IsVisible is false but IsShown is true
+                    fsLog:Debug("Container %s is not shown so not sorting it.", container.Frame:GetName() or "nil")
                     return false
                 end
 
