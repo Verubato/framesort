@@ -113,43 +113,47 @@ local function GetNextTarget()
 
     -- first attempt to find someone we don't have any information for
     for _, unit in ipairs(units) do
-        local guid = wow.UnitGUID(unit)
+        if not fsUnit:IsRaidTarget(unit) and not fsUnit:IsPet(unit) then
+            local guid = wow.UnitGUID(unit)
 
-        if not guid then
-            fsLog:Warning("Unable to request spec information for unit '%s' because their GUID is nil.", unit)
-        -- this shouldn't be possible, but it does happen for some reason
-        elseif not wow.issecretvalue(guid) then
-            local cacheEntry = unitGuidToSpec[guid]
+            if not guid then
+                fsLog:Warning("Unable to request spec information for unit '%s' because their GUID is nil.", unit)
+            -- this shouldn't be possible, but it does happen for some reason
+            elseif not wow.issecretvalue(guid) then
+                local cacheEntry = unitGuidToSpec[guid]
 
-            if not wow.UnitIsUnit(unit, "player") and not cacheEntry and wow.CanInspect(unit) and wow.UnitIsConnected(unit) then
-                return unit
+                if not wow.UnitIsUnit(unit, "player") and not cacheEntry and wow.CanInspect(unit) and wow.UnitIsConnected(unit) then
+                    return unit
+                end
+            else
+                fsLog:Warning("Unable to request spec information for unit '%s' because their GUID is a secret.", unit)
             end
-        else
-            fsLog:Warning("Unable to request spec information for unit '%s' because their GUID is a secret.", unit)
         end
     end
 
     -- now attempt to find someone we have stale information for
     for _, unit in ipairs(units) do
-        local guid = wow.UnitGUID(unit)
+        if not fsUnit:IsRaidTarget(unit) and not fsUnit:IsPet(unit) then
+            local guid = wow.UnitGUID(unit)
 
-        if not guid then
-            fsLog:Warning("Unable to request spec information for unit '%s' because their GUID is nil.", unit)
-        -- this shouldn't be possible, but it does happen for some reason
-        elseif not wow.issecretvalue(guid) then
-            local cacheEntry = unitGuidToSpec[guid]
+            if not guid then
+                fsLog:Warning("Unable to request spec information for unit '%s' because their GUID is nil.", unit)
+            -- this shouldn't be possible, but it does happen for some reason
+            elseif not wow.issecretvalue(guid) then
+                local cacheEntry = unitGuidToSpec[guid]
 
-            if
-                cacheEntry
-                and (not cacheEntry.SpecId or cacheEntry.SpecId == 0)
-                and wow.CanInspect(unit)
-                and wow.UnitIsConnected(unit)
-                and (not cacheEntry.LastAttempt or (wow.GetTimePreciseSec() - cacheEntry.LastAttempt > cacheTimeout))
-            then
-                return unit
+                if
+                    cacheEntry
+                    and (not cacheEntry.SpecId or cacheEntry.SpecId == 0)
+                    and wow.CanInspect(unit)
+                    and wow.UnitIsConnected(unit)
+                    and (not cacheEntry.LastAttempt or (wow.GetTimePreciseSec() - cacheEntry.LastAttempt > cacheTimeout))
+                then
+                    return unit
+                end
+            else
+                fsLog:Warning("Unable to request spec information for unit '%s' because their GUID is a secret.", unit)
             end
-        else
-            fsLog:Warning("Unable to request spec information for unit '%s' because their GUID is a secret.", unit)
         end
     end
 
@@ -385,6 +389,14 @@ function M:FriendlyUnitSpec(unit)
         local index = wow.GetSpecialization()
         local id = wow.GetSpecializationInfo(index)
         return id
+    end
+
+    if fsUnit:IsPet(unit) then
+        return nil
+    end
+
+    if fsUnit:IsRaidTarget(unit) then
+        return nil
     end
 
     local guid = wow.UnitGUID(unit)
