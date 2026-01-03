@@ -185,7 +185,7 @@ local function PrecomputeMetadata(units, isEnemy)
 end
 
 local function RoleOrClassTypeOrder(role, class, meta)
-    local roleOrder = meta.RoleOrderLookup[role]
+    local roleOrder = role and meta.RoleOrderLookup[role]
 
     if roleOrder then
         return roleOrder
@@ -259,13 +259,22 @@ local function CompareSpec(leftToken, rightToken, meta)
     -- we do this before checking their spec, because in some expansions spec doesn't map to role 1:1
     -- e.g. in retail a guardian druid is always a tank, but in classic a feral druid can be tank or dps
     -- also in SoD demo warlocks can tank, and mages can heal
-    if leftRole and rightRole then
-        local leftOrder = RoleOrClassTypeOrder(leftRole, leftClass, meta)
-        local rightOrder = RoleOrClassTypeOrder(rightRole, rightClass, meta)
-
-        if leftOrder and rightOrder and leftOrder ~= rightOrder then
-            return leftOrder < rightOrder
+    -- place player in front of everyone else
+    if addon.DB.Options.Sorting.Miscellaneous.PlayerRoleSort == fsConfig.PlayerSortMode.Top and leftHasRole and rightHasRole and leftRole == rightRole then
+        if leftMeta.IsPlayer then
+            return true
         end
+
+        if rightMeta.IsPlayer then
+            return false
+        end
+    end
+
+    local leftOrder = RoleOrClassTypeOrder(leftRole, leftClass, meta)
+    local rightOrder = RoleOrClassTypeOrder(rightRole, rightClass, meta)
+
+    if leftOrder and rightOrder and leftOrder ~= rightOrder then
+        return leftOrder < rightOrder
     end
 
     -- next check their spec
@@ -321,6 +330,10 @@ end
 ---@param meta table
 ---@return boolean
 local function Compare(leftToken, rightToken, playerSortMode, groupSortMode, reverse, meta)
+    if leftToken == rightToken then
+        return false
+    end
+
     local leftMeta, rightMeta = meta[leftToken], meta[rightToken]
 
     if not leftMeta or not rightMeta then
@@ -418,6 +431,10 @@ end
 ---@param meta table
 ---@return boolean
 local function EnemyCompare(leftToken, rightToken, groupSortMode, reverse, meta)
+    if leftToken == rightToken then
+        return false
+    end
+
     local leftMeta, rightMeta = meta[leftToken], meta[rightToken]
 
     if not leftMeta or not rightMeta then

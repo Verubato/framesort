@@ -295,3 +295,9 @@ L["NameplatesBlurb"] = [[
   - $framenumber - $spec
   - $name - $spec
 ]]
+
+-- # Miscellaneous screen #
+L["Miscellaneous"] = "雜項"
+L["Various tweaks you can apply."] = "你可以套用的各種調整。"
+L["Player top of role"] = "玩家置於角色頂端"
+L["Places you at the top of your corresponding role (healer/tank/dps)."] = "將你置於對應角色（治療/坦克/DPS）的最前位置。"

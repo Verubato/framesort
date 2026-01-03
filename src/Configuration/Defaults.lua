@@ -17,7 +17,7 @@ fsConfig.DbDefaults = {
 
     ---@class Options
     Options = {
-        Version = 23,
+        Version = 24,
         Sorting = {
             Ordering = {
                 Tanks = 1,
@@ -70,6 +70,9 @@ fsConfig.DbDefaults = {
                 PlayerSortMode = fsConfig.PlayerSortMode.Top,
                 GroupSortMode = fsConfig.GroupSortMode.Role,
                 Reverse = false,
+            },
+            Miscellaneous = {
+                PlayerRoleSort = fsConfig.PlayerSortMode.None,
             },
         },
         AutoLeader = {

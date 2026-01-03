@@ -633,6 +633,19 @@ function M:UpgradeToVersion23(options)
     return true
 end
 
+function M:UpgradeToVersion24(options)
+    if options.Version ~= 23 then
+        return false
+    end
+
+    options.Sorting.Miscellaneous = {
+        PlayerRoleSort = "None",
+    }
+    options.Version = 24
+
+    return true
+end
+
 ---Upgrades saved variables database to the current version.
 function M:UpgradeDb(db)
     local options = db.Options

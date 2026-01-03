@@ -292,3 +292,9 @@ Examples:
   - $framenumber - $spec
   - $name - $spec
 ]]
+
+-- # Miscellaneous screen #
+L["Miscellaneous"] = nil
+L["Various tweaks you can apply."] = nil
+L["Player top of role"] = nil
+L["Places you at the top of your corresponding role (healer/tank/dps)."] = nil

@@ -2311,6 +2311,156 @@ function M:test_upgrade_options_version23()
     assertEquals(options, expected)
 end
 
+function M:test_upgrade_options_version24()
+    local options = {
+        Sorting = {
+            Ordering = {
+                Tanks = 1,
+                Healers = 2,
+                Casters = 3,
+                Hunters = 4,
+                Melee = 5,
+            },
+            Method = "Secure",
+            Arena = {
+                Twos = {
+                    Enabled = true,
+                    PlayerSortMode = "Top",
+                    GroupSortMode = "Group",
+                    Reverse = false,
+                },
+                Default = {
+                    Enabled = true,
+                    PlayerSortMode = "Top",
+                    GroupSortMode = "Group",
+                    Reverse = false,
+                },
+            },
+            EnemyArena = {
+                Enabled = false,
+                GroupSortMode = "Group",
+                Reverse = false,
+            },
+            Dungeon = {
+                Enabled = true,
+                PlayerSortMode = "Top",
+                GroupSortMode = "Group",
+                Reverse = false,
+            },
+            World = {
+                Enabled = true,
+                PlayerSortMode = "Top",
+                GroupSortMode = "Group",
+                Reverse = false,
+            },
+            Raid = {
+                Enabled = false,
+                PlayerSortMode = "Top",
+                GroupSortMode = "Role",
+                Reverse = false,
+            },
+        },
+        Spacing = {
+            Party = {
+                Horizontal = 0,
+                Vertical = 0,
+            },
+            Raid = {
+                Horizontal = 0,
+                Vertical = 0,
+            },
+            EnemyArena = {
+                Horizontal = 0,
+                Vertical = 0,
+            },
+        },
+        Nameplates = {
+            FriendlyEnabled = false,
+            EnemyEnabled = false,
+            FriendlyFormat = "$framenumber",
+            EnemyFormat = "$framenumber",
+        },
+        Version = 23,
+    }
+    local expected = {
+        Sorting = {
+            Ordering = {
+                Tanks = 1,
+                Healers = 2,
+                Casters = 3,
+                Hunters = 4,
+                Melee = 5,
+            },
+            Method = "Secure",
+            Arena = {
+                Twos = {
+                    Enabled = true,
+                    PlayerSortMode = "Top",
+                    GroupSortMode = "Group",
+                    Reverse = false,
+                },
+                Default = {
+                    Enabled = true,
+                    PlayerSortMode = "Top",
+                    GroupSortMode = "Group",
+                    Reverse = false,
+                },
+            },
+            EnemyArena = {
+                Enabled = false,
+                GroupSortMode = "Group",
+                Reverse = false,
+            },
+            Dungeon = {
+                Enabled = true,
+                PlayerSortMode = "Top",
+                GroupSortMode = "Group",
+                Reverse = false,
+            },
+            World = {
+                Enabled = true,
+                PlayerSortMode = "Top",
+                GroupSortMode = "Group",
+                Reverse = false,
+            },
+            Raid = {
+                Enabled = false,
+                PlayerSortMode = "Top",
+                GroupSortMode = "Role",
+                Reverse = false,
+            },
+            Miscellaneous = {
+                PlayerRoleSort = "None",
+            },
+        },
+        Spacing = {
+            Party = {
+                Horizontal = 0,
+                Vertical = 0,
+            },
+            Raid = {
+                Horizontal = 0,
+                Vertical = 0,
+            },
+            EnemyArena = {
+                Horizontal = 0,
+                Vertical = 0,
+            },
+        },
+        Nameplates = {
+            FriendlyEnabled = false,
+            EnemyEnabled = false,
+            FriendlyFormat = "$framenumber",
+            EnemyFormat = "$framenumber",
+        },
+        Version = 24,
+    }
+    local success = upgrader:UpgradeToVersion24(options)
+
+    assertEquals(success, true)
+    assertEquals(options, expected)
+end
+
 function M:test_upgrade_options_version1_to_latest()
     local options = {
         PlayerSortMode = "Top",
@@ -2374,6 +2524,9 @@ function M:test_upgrade_options_version1_to_latest()
                 GroupSortMode = "Role",
                 Reverse = false,
             },
+            Miscellaneous = {
+                PlayerRoleSort = "None",
+            },
         },
         AutoLeader = {
             Enabled = true,
@@ -2398,7 +2551,7 @@ function M:test_upgrade_options_version1_to_latest()
             FriendlyFormat = "$framenumber",
             EnemyFormat = "$framenumber",
         },
-        Version = 23,
+        Version = 24,
     }
 
     local db = {
@@ -2461,6 +2614,9 @@ function M:test_upgrade_options_latest_to_latest_passes()
                 GroupSortMode = "Role",
                 Reverse = false,
             },
+            Miscellaneous = {
+                PlayerRoleSort = "None",
+            },
         },
         AutoLeader = {
             Enabled = true,
@@ -2485,7 +2641,7 @@ function M:test_upgrade_options_latest_to_latest_passes()
             FriendlyFormat = "$framenumber",
             EnemyFormat = "$framenumber",
         },
-        Version = 23,
+        Version = 24,
     }
 
     local db = {
@@ -2494,6 +2650,7 @@ function M:test_upgrade_options_latest_to_latest_passes()
     local success = upgrader:UpgradeDb(db)
 
     assertEquals(success, true)
+    assertEquals(options, options)
 end
 
 function M:test_upgrade_options_higher_than_current_fails()
