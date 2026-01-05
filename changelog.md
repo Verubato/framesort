@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.7.3
+
+Fix for very rare and weird bug (Blizzard shenanigans) happening in solo shuffle where frames become unsorted during combat.
+
 ## 7.7.2
 
 Potential caching issue bug fix.
