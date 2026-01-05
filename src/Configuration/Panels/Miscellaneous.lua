@@ -59,7 +59,6 @@ function M:Build(parent)
     }
 
     local checkboxesPerLine = 4
-    local settingsWidth, _ = fsConfig:SettingsSize()
     local checkboxWidth = 150
     local start = verticalSpacing
     local yOffset = verticalSpacing * 5

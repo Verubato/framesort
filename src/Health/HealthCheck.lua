@@ -1,7 +1,6 @@
 ---@type string, Addon
 local addonName, addon = ...
 local wow = addon.WoW.Api
-local wowEx = addon.WoW.WowEx
 local capabilities = addon.WoW.Capabilities
 local fsEnumerable = addon.Collections.Enumerable
 local fsProviders = addon.Providers

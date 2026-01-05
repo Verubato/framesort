@@ -3,7 +3,6 @@ local _, addon = ...
 local wow = addon.WoW.Api
 local wowEx = addon.WoW.WowEx
 local capabilities = addon.WoW.Capabilities
-local fsEnumerable = addon.Collections.Enumerable
 local fsLog = addon.Logging.Log
 ---@class UnitUtil
 local M = {}

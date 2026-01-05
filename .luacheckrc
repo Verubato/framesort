@@ -64,6 +64,7 @@ local config = {
 		"Gladius2DB",
 		"GladiusButtonBackground",
 		"CompactUnitFrame_UpdateName",
+		"GameTooltip",
 	},
 
 	ignore = {
