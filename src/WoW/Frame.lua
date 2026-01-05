@@ -285,7 +285,7 @@ function M:ExtractUnitFrames(container, containerVisible, visibleOnly, requireUn
     end
 
     if containerVisible then
-        if type(container.IsShown) ~= "function" or not container:IsShown() then
+        if type(container.IsVisible) ~= "function" or not container:IsVisible() then
             return {}
         end
     end
@@ -358,11 +358,11 @@ function M:ExtractGroups(container, visibleOnly)
         return {}
     end
 
-    if type(container.GetChildren) ~= "function" or type(container.IsShown) ~= "function" then
+    if type(container.GetChildren) ~= "function" or type(container.IsVisible) ~= "function" then
         return {}
     end
 
-    if not container:IsShown() then
+    if not container:IsVisible() then
         return {}
     end
 
