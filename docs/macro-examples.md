@@ -77,6 +77,15 @@ Innervate your target if friendly, default to healer:
 /cast [@target,help][@none,help] Innervate
 ```
 
+Entangling roots and solar beam the healer:
+
+```
+#showtooltip Solar Beam
+#FrameSort EnemyHealer EnemyHealer
+/cast [@none,harm] Entangling Roots
+/cast [@none,harm] Solar Beam
+```
+
 ## Warrior Macros
 
 Intervene your healer:
