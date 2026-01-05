@@ -14,5 +14,6 @@
 ## SavedVariables: FrameSortDB
 ## IconTexture: Interface\AddOns\FrameSort\Media\icon.blp
 ## OptionalDeps: BattleGroundEnemies, Cell, ElvUI, Gladdy, Gladius, GladiusEx, Grid2, ShadowedUnitFrames
+## X-Curse-Project-ID: 709847
 
 Load.xml
