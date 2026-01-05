@@ -1,3 +1,4 @@
+---@diagnostic disable: duplicate-set-field
 ---@type Addon
 local addon
 ---@type Comparer
@@ -212,6 +213,38 @@ function M:test_ordering_cache_invalidation_required_with_specs()
     table.sort(subject2, f2)
 
     assertEquals(subject2, { "party3", "party4", "party1", "player", "party2" })
+end
+
+function M:test_sorted_units_doesnt_cache_player()
+    local config = addon.DB.Options.Sorting.World
+    config.PlayerSortMode = fsConfig.PlayerSortMode.Top
+    config.GroupSortMode = fsConfig.GroupSortMode.Group
+
+    addon.WoW.Api.UnitExists = function(unit)
+        return unit == "player"
+    end
+
+    local fsSortedUnits = addon.Modules.Sorting.SortedUnits
+    local units = fsSortedUnits:FriendlyUnits()
+
+    assertEquals(units, { "player" })
+
+    addon.WoW.Api.UnitExists = function(unit)
+        return unit == "player" or unit == "pet"
+    end
+
+    units = fsSortedUnits:FriendlyUnits()
+
+    assertEquals(units, { "player", "pet" })
+
+    addon.WoW.Api.UnitExists = function(unit)
+        return unit == "player" or unit == "pet" or unit == "party1" or unit == "party2"
+    end
+
+    -- without invalidating the cache, it shouldn't have cached player and pet
+    units = fsSortedUnits:FriendlyUnits()
+
+    assertEquals(units, { "player", "party1", "party2", "pet" })
 end
 
 return M

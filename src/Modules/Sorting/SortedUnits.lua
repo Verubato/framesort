@@ -248,6 +248,25 @@ local function ApplyCycleInstructions(units, isFriendly, instructions)
     end
 end
 
+local function ShouldCache(units)
+    if #units == 0 then
+        return false
+    end
+
+    -- I'm trying to fix a bug where sometimes in the TBC arena prep room the units aren't in the right order until the gates open (timer sort)
+    -- and I think the same bug is causing ElvUI on rare occurrence to show only the player frame in solo shuffle until you /reload
+    -- this shouldn't be necessary, but I don't know what's causing the bug so I'm grasping at straws here
+    for i = 1, #units do
+        local unit = units[i]
+
+        if unit ~= "player" and unit ~= "pet" and unit ~= "target" then
+            return true
+        end
+    end
+
+    return false
+end
+
 local function LogStatsTick()
     currentStatsTick = currentStatsTick + 1
 
@@ -290,7 +309,7 @@ function M:FriendlyUnits()
     if cacheEnabled then
         if cache then
             cachedFriendlyUnits = units
-            friendlyCacheValid = #units > 0
+            friendlyCacheValid = #units > 0 and ShouldCache(units)
         end
 
         if hit then
