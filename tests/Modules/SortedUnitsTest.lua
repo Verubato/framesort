@@ -322,38 +322,25 @@ function M:test_invalidate_cache_forces_recompute_next_call()
     assert(c ~= a)
 end
 
-function M:test_friendly_fallback_from_frames_when_units_empty_and_does_not_cache_fallback()
-    -- Unit source returns empty -> triggers frames fallback and cache=false
-    fsUnit.FriendlyUnits = function()
-        return {}
-    end
-
+function M:test_friendly_from_frames_caches()
     local frameA = { Unit = "party2" }
     local frameB = { Unit = "party1" }
+
     fsSortedFrames.FriendlyFrames = function()
         return { frameA, frameB }
     end
 
-    -- sort enabled
     fsCompare.FriendlySortMode = function()
         return true
     end
 
     local first = fsSortedUnits:FriendlyUnits()
-    -- note: FriendlyUnitsFromFrames() sorts too, so we expect sorted units
+
     assertListEquals(first, { "party1", "party2" })
 
-    -- Change frames; since fallback result is NOT cached, we should see new values immediately
-    local frameC = { Unit = "party9" }
-    fsSortedFrames.FriendlyFrames = function()
-        return { frameC }
-    end
-
     local second = fsSortedUnits:FriendlyUnits()
-    assertListEquals(second, { "party9" })
 
-    -- Also ensure it is not returning the same table instance as prior fallback
-    assert(second ~= first)
+    assert(first == second)
 end
 
 function M:test_sort_disabled_returns_units_unmodified_and_still_caches_pointer()
@@ -761,7 +748,6 @@ function M:test_cycle_enemy_dps_reset_cycles()
     assertListEquals(out, { "arena1", "arena2", "arena3" })
 end
 
-
 function M:test_cycle_friendly_multiple_roles_dps_and_healer_rotates_both_roles_together()
     -- roles:
     -- player = HEALER
@@ -977,7 +963,6 @@ function M:test_cycle_friendly_multiple_roles_array_and_set_forms_match()
 
     assertListEquals(outArray, outSet)
 end
-
 
 function M:test_cycle_friendly_all_three_roles_rotates_everyone_except_none()
     -- roles:
@@ -1250,8 +1235,8 @@ function M:test_cycle_friendly_and_enemy_multiple_instruction_queues_are_indepen
     assertListEquals(eBase, { "arena1", "arena2", "arena3" })
 
     -- Queue instructions on both sides
-    fsSortedUnits:CycleFriendlyRoles({ "DAMAGER" })             -- affects friendly only
-    fsSortedUnits:CycleEnemyRoles({ "DAMAGER", "HEALER" }, 2)   -- affects enemy only
+    fsSortedUnits:CycleFriendlyRoles({ "DAMAGER" }) -- affects friendly only
+    fsSortedUnits:CycleEnemyRoles({ "DAMAGER", "HEALER" }, 2) -- affects enemy only
 
     local fOut = fsSortedUnits:FriendlyUnits()
     -- 3 units, rotate down by 1 => [player, party1, party2]

@@ -1,9 +1,13 @@
 EXPORT_ASSERT_TO_GLOBALS = true
 
 local luaunit = require("luaunit")
-local lu = luaunit.LuaUnit
 
-lu:setOutputType("text")
+-- backwards compatibile support
+local lu = luaunit.LuaUnit or luaunit
+
+if lu.setOutputType then
+    lu:setOutputType("text")
+end
 
 TestPartyMembers = require("Comparer\\ComparePartyTest")
 TestRaidMembers = require("Comparer\\CompareRaidTest")

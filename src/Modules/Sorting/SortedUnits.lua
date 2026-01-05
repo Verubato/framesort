@@ -77,7 +77,7 @@ local function OnConfigChanged()
 end
 
 local function FriendlyUnitsFromFrames()
-    local frames = fsSortedFrames:FriendlyFrames()
+    local frames = fsSortedFrames:FriendlyFrames(false)
     local units = fsEnumerable
         :From(frames)
         :Map(function(x)
@@ -256,6 +256,7 @@ local function ShouldCache(units)
     -- I'm trying to fix a bug where sometimes in the TBC arena prep room the units aren't in the right order until the gates open (timer sort)
     -- and I think the same bug is causing ElvUI on rare occurrence to show only the player frame in solo shuffle until you /reload
     -- this shouldn't be necessary, but I don't know what's causing the bug so I'm grasping at straws here
+    -- TODO: I think I fixed this now in FriendlyUnits() by getting units from frames first before falling back, needs testing to confirm
     for i = 1, #units do
         local unit = units[i]
 
@@ -288,7 +289,14 @@ function M:FriendlyUnits()
         hit = true
         units = cachedFriendlyUnits
     else
-        units = FriendlyUnits()
+        -- very important:
+        -- historically we used to get units from fsUnit:FriendlyUnits() here first then fallback to frames
+        -- but there is this ridiculous bug in solo shuffle where on rare occurrence it seems IsInRaid() returns false for blizzard, but true for me
+        -- which means blizzard have party frame units but I get raid frame units
+        -- this causes sorting to fail in the restricted environment as it can't map the units (there is no UnitIsUnit in RE)
+        -- so to fix/avoid this, always get units from frames first and it's fairly safe to cache the result but not perfect
+        -- as frames can change without us knowing, but for most cases it's safe enough to cache
+        units = FriendlyUnitsFromFrames()
 
         if #units > 0 then
             ApplyCycleInstructions(units, true, friendlyCycleInstructions)
@@ -296,10 +304,8 @@ function M:FriendlyUnits()
     end
 
     if not units or #units == 0 then
-        -- try from frames but don't cache the result
-        -- as frames can change without us knowing
-        units = FriendlyUnitsFromFrames()
-        cache = false
+        -- fallback to reliable method
+        units = FriendlyUnits()
 
         if #units > 0 then
             ApplyCycleInstructions(units, true, friendlyCycleInstructions)
