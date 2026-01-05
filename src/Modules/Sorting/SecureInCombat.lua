@@ -1943,6 +1943,8 @@ local function LoadUnits()
 
     -- flag that the units need to be reloaded
     manager:SetAttributeNoHandler("LoadedUnits", false)
+
+    fsLog:Debug("Loaded %d friendly and %d enemy units to the restricted environment.", #friendlyUnits, #enemyUnits)
 end
 
 local function LoadSortMode()

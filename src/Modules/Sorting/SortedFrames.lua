@@ -34,7 +34,11 @@ end
 ---Returns an array of friendly frames sorted by their visual order.
 ---Prefers blizzard frames over other providers.
 ---@return table
-function M:FriendlyFrames()
+function M:FriendlyFrames(sort)
+    if sort == nil then
+        sort = true
+    end
+
     local frames = nil
 
     -- prefer Blizzard frames
@@ -63,7 +67,7 @@ function M:FriendlyFrames()
         return {}
     end
 
-    return VisualOrder(frames)
+    return sort and VisualOrder(frames) or frames
 end
 
 ---Returns an array of arena frames sorted by their visual order.

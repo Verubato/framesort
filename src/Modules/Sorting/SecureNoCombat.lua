@@ -717,17 +717,34 @@ local function TrySortContainer(container)
         return false, frames
     end
 
-    local sortedUnits
+    -- important: don't use fsSortedUnits:FriendlyUnits() here as it contains a cached view
+    -- and frames may have changed, so get the units from the actual frames we're sorting
+    local units = {}
+    for _, frame in ipairs(frames) do
+        local unit = fsFrame:GetFrameUnit(frame)
+
+        if unit then
+            units[#units + 1] = unit
+        end
+    end
+
+    local sortFunction
     if container.Type == fsFrame.ContainerType.Party or container.Type == fsFrame.ContainerType.Raid then
-        sortedUnits = fsSortedUnits:FriendlyUnits()
+        sortFunction = fsCompare:SortFunction(units)
     elseif container.Type == fsFrame.ContainerType.EnemyArena then
-        sortedUnits = fsSortedUnits:ArenaUnits()
+        sortFunction = fsCompare:EnemySortFunction(units)
     else
         fsLog:Bug("Unknown container type: %s.", container.Type or "nil")
         return false, frames
     end
 
-    SortFramesByUnits(frames, sortedUnits)
+    if not sortFunction then
+        return false, frames
+    end
+
+    table.sort(units, sortFunction)
+
+    SortFramesByUnits(frames, units)
 
     local spacing = nil
 
