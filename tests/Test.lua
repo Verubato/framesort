@@ -1,4 +1,9 @@
+EXPORT_ASSERT_TO_GLOBALS = true
+
 local luaunit = require("luaunit")
+local lu = luaunit.LuaUnit
+
+lu:setOutputType("text")
 
 TestPartyMembers = require("Comparer\\ComparePartyTest")
 TestRaidMembers = require("Comparer\\CompareRaidTest")
@@ -28,4 +33,4 @@ TestAddon = require("Modules\\AddonTest")
 
 TestFrameChain = require("Frame\\FrameChainTest")
 
-os.exit(luaunit:run())
+os.exit(lu.run())
