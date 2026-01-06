@@ -728,21 +728,17 @@ local function TrySortContainer(container)
         end
     end
 
-    local sortFunction
+    local isFriendly
     if container.Type == fsFrame.ContainerType.Party or container.Type == fsFrame.ContainerType.Raid then
-        sortFunction = fsCompare:SortFunction(units)
+        isFriendly = true
     elseif container.Type == fsFrame.ContainerType.EnemyArena then
-        sortFunction = fsCompare:EnemySortFunction(units)
+        isFriendly = false
     else
         fsLog:Bug("Unknown container type: %s.", container.Type or "nil")
         return false, frames
     end
 
-    if not sortFunction then
-        return false, frames
-    end
-
-    table.sort(units, sortFunction)
+    fsSortedUnits:Sort(units, isFriendly)
 
     SortFramesByUnits(frames, units)
 
