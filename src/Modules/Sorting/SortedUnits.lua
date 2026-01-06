@@ -37,7 +37,7 @@ local cachedFriendlyUnits = {}
 
 -- log stats ever X hits/misses
 local currentStatsTick = 0
-local logStatsInterval = 10
+local logStatsInterval = 50
 
 ---@class CycleInstruction
 ---@field Roles table
