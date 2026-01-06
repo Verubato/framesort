@@ -85,63 +85,6 @@ local function FriendlyUnitsFromFrames()
         end)
         :ToTable()
 
-    if #units == 0 then
-        return units
-    end
-
-    local sortEnabled = fsCompare:FriendlySortMode()
-
-    if not sortEnabled then
-        return units
-    end
-
-    local start = wow.GetTimePreciseSec()
-    table.sort(units, fsCompare:SortFunction(units))
-    local stop = wow.GetTimePreciseSec()
-    fsLog:Debug("Friendly units table.sort() took %fms.", (stop - start) * 1000)
-
-    return units
-end
-
-local function FriendlyUnits()
-    local units = fsUnit:FriendlyUnits()
-
-    if #units == 0 then
-        return units
-    end
-
-    local sortEnabled = fsCompare:FriendlySortMode()
-
-    if not sortEnabled then
-        return units
-    end
-
-    local start = wow.GetTimePreciseSec()
-    table.sort(units, fsCompare:SortFunction(units))
-    local stop = wow.GetTimePreciseSec()
-    fsLog:Debug("Friendly units table.sort() took %fms.", (stop - start) * 1000)
-
-    return units
-end
-
-local function ArenaUnits()
-    local units = fsUnit:ArenaUnits()
-
-    if #units == 0 then
-        return units
-    end
-
-    local sortEnabled = fsCompare:EnemySortMode()
-
-    if not sortEnabled then
-        return units
-    end
-
-    local start = wow.GetTimePreciseSec()
-    table.sort(units, fsCompare:EnemySortFunction(units))
-    local stop = wow.GetTimePreciseSec()
-    fsLog:Debug("Arena units table.sort() took %fms.", (stop - start) * 1000)
-
     return units
 end
 
@@ -169,6 +112,8 @@ local function CycleRoles(units, isFriendly, cycles, roles)
 
     -- normalize roles into a set for O(1) lookups
     local roleSet = {}
+    local roleArray = {}
+
     if roles[1] ~= nil then
         -- array form
         for i = 1, #roles do
@@ -177,10 +122,19 @@ local function CycleRoles(units, isFriendly, cycles, roles)
                 roleSet[r] = true
             end
         end
+
+        roleArray = roles
     else
         -- already a set/map form
         roleSet = roles
+
+        for role, _ in pairs(roles) do
+            roleArray[#roleArray+1] = role
+        end
     end
+
+    local rolesString = table.concat(roleArray)
+    fsLog:Debug("Cycling %s units %d time(s) for %s roles.", isFriendly and "friendly" or "enemy", cycles, rolesString)
 
     -- collect indices of units that match any of the desired roles (in current order)
     local matchIdx = {}
@@ -240,6 +194,8 @@ local function ApplyCycleInstructions(units, isFriendly, instructions)
         return
     end
 
+    fsLog:Debug("Applying %d cycle instructions for %s units.", #instructions, isFriendly and "friendly" or "enemy")
+
     for i = 1, #instructions do
         local inst = instructions[i]
         if inst and inst.Roles and inst.Cycles and inst.Cycles > 0 then
@@ -297,19 +253,13 @@ function M:FriendlyUnits()
         -- so to fix/avoid this, always get units from frames first and it's fairly safe to cache the result but not perfect
         -- as frames can change without us knowing, but for most cases it's safe enough to cache
         units = FriendlyUnitsFromFrames()
-
-        if #units > 0 then
-            ApplyCycleInstructions(units, true, friendlyCycleInstructions)
-        end
+        M:Sort(units, true)
     end
 
     if not units or #units == 0 then
         -- fallback to reliable method
-        units = FriendlyUnits()
-
-        if #units > 0 then
-            ApplyCycleInstructions(units, true, friendlyCycleInstructions)
-        end
+        units = fsUnit:FriendlyUnits()
+        M:Sort(units, true)
     end
 
     if cacheEnabled then
@@ -339,11 +289,8 @@ function M:ArenaUnits()
         hit = true
         units = cachedEnemyUnits
     else
-        units = ArenaUnits()
-
-        if #units > 0 then
-            ApplyCycleInstructions(units, false, enemyCycleInstructions)
-        end
+        units = fsUnit:ArenaUnits()
+        units = M:Sort(units, false)
     end
 
     -- don't try fallback from arena frames as this seems to cause issues with erroneous units popping up
@@ -362,6 +309,31 @@ function M:ArenaUnits()
     end
 
     return units or {}
+end
+
+function M:Sort(units, isFriendly)
+    local sortEnabled
+
+    if isFriendly then
+        sortEnabled = fsCompare:FriendlySortMode()
+    else
+        sortEnabled = fsCompare:EnemySortMode()
+    end
+
+    if sortEnabled then
+        local start = wow.GetTimePreciseSec()
+        table.sort(units, fsCompare:SortFunction(units))
+        local stop = wow.GetTimePreciseSec()
+        fsLog:Debug("%s units table.sort() took %fms.", isFriendly and "Friendly" or "Enemy", (stop - start) * 1000)
+    end
+
+    if isFriendly then
+        ApplyCycleInstructions(units, isFriendly, friendlyCycleInstructions)
+    else
+        ApplyCycleInstructions(units, isFriendly, enemyCycleInstructions)
+    end
+
+    return units
 end
 
 function M:InvalidateCache()
