@@ -129,7 +129,7 @@ local function CycleRoles(units, isFriendly, cycles, roles)
         roleSet = roles
 
         for role, _ in pairs(roles) do
-            roleArray[#roleArray+1] = role
+            roleArray[#roleArray + 1] = role
         end
     end
 
@@ -322,9 +322,13 @@ function M:Sort(units, isFriendly)
 
     if sortEnabled then
         local start = wow.GetTimePreciseSec()
-        table.sort(units, fsCompare:SortFunction(units))
-        local stop = wow.GetTimePreciseSec()
-        fsLog:Debug("%s units table.sort() took %fms.", isFriendly and "Friendly" or "Enemy", (stop - start) * 1000)
+        local sortFunction = isFriendly and fsCompare:SortFunction(units) or fsCompare:EnemySortFunction(units)
+
+        if sortFunction then
+            table.sort(units, sortFunction)
+            local stop = wow.GetTimePreciseSec()
+            fsLog:Debug("%s units table.sort() took %fms.", isFriendly and "Friendly" or "Enemy", (stop - start) * 1000)
+        end
     end
 
     if isFriendly then

@@ -1247,4 +1247,164 @@ function M:test_cycle_friendly_and_enemy_multiple_instruction_queues_are_indepen
     assertListEquals(eOut, { "arena2", "arena3", "arena1" })
 end
 
+function M:test_units_sort_friendly_uses_friendly_mode_and_sort_function()
+    local called = {
+        friendlyMode = 0,
+        enemyMode = 0,
+        friendlyFn = 0,
+        enemyFn = 0,
+    }
+
+    fsCompare.FriendlySortMode = function()
+        called.friendlyMode = called.friendlyMode + 1
+        return true
+    end
+    fsCompare.EnemySortMode = function()
+        called.enemyMode = called.enemyMode + 1
+        return true
+    end
+
+    fsCompare.SortFunction = function(_, _units)
+        called.friendlyFn = called.friendlyFn + 1
+        -- reverse alpha so we can prove the comparator is used
+        return function(a, b)
+            return a > b
+        end
+    end
+
+    fsCompare.EnemySortFunction = function(_, _units)
+        called.enemyFn = called.enemyFn + 1
+        return function(a, b)
+            return a < b
+        end
+    end
+
+    local units = { "party2", "player", "party1" }
+    local out = fsSortedUnits:Sort(units, true)
+
+    -- in-place + return same reference
+    assert(out == units)
+
+    -- sorted using friendly comparator (descending)
+    assertListEquals(out, { "player", "party2", "party1" })
+
+    assert(called.friendlyMode == 1)
+    assert(called.friendlyFn == 1)
+    assert(called.enemyMode == 0)
+    assert(called.enemyFn == 0)
+end
+
+function M:test_units_sort_enemy_uses_enemy_mode_and_enemy_sort_function()
+    local called = {
+        friendlyMode = 0,
+        enemyMode = 0,
+        friendlyFn = 0,
+        enemyFn = 0,
+    }
+
+    fsCompare.FriendlySortMode = function()
+        called.friendlyMode = called.friendlyMode + 1
+        return true
+    end
+    fsCompare.EnemySortMode = function()
+        called.enemyMode = called.enemyMode + 1
+        return true
+    end
+
+    fsCompare.SortFunction = function(_, _units)
+        called.friendlyFn = called.friendlyFn + 1
+        return function(a, b)
+            return a < b
+        end
+    end
+
+    fsCompare.EnemySortFunction = function(_, _units)
+        called.enemyFn = called.enemyFn + 1
+        -- reverse alpha so we can prove the enemy comparator is used
+        return function(a, b)
+            return a > b
+        end
+    end
+
+    local units = { "arena2", "arena1", "arena3" }
+    local out = fsSortedUnits:Sort(units, false)
+
+    assert(out == units)
+    assertListEquals(out, { "arena3", "arena2", "arena1" })
+
+    assert(called.enemyMode == 1)
+    assert(called.enemyFn == 1)
+    assert(called.friendlyMode == 0)
+    assert(called.friendlyFn == 0)
+end
+
+function M:test_units_sort_disabled_still_applies_cycle_instructions()
+    -- Make sure cycles start clean
+    if fsSortedUnits and fsSortedUnits.ResetFriendlyCycles then
+        fsSortedUnits:ResetFriendlyCycles()
+    end
+
+    -- Disable sorting; we want to prove cycling still runs
+    fsCompare.FriendlySortMode = function()
+        return false
+    end
+
+    -- Role map: two DPS + one healer
+    capabilities.HasRoleAssignments = function()
+        return true
+    end
+    wow.UnitGroupRolesAssigned = function(unit)
+        if unit == "party1" or unit == "party2" then
+            return "DAMAGER"
+        end
+        if unit == "player" then
+            return "HEALER"
+        end
+        return "NONE"
+    end
+
+    -- Queue a friendly cycle for DAMAGER (rotate down by 1)
+    -- Expected: [party1, party2, player] -> DPS indices [1,2] => [party2, party1]
+    fsSortedUnits:CycleFriendlyRoles({ "DAMAGER" }, 1)
+
+    local units = { "party1", "party2", "player" }
+    local out = fsSortedUnits:Sort(units, true)
+
+    assert(out == units)
+    assertListEquals(out, { "party2", "party1", "player" })
+end
+
+function M:test_units_sort_returns_same_reference_for_enemy_and_friendly()
+    fsCompare.FriendlySortMode = function()
+        return true
+    end
+    fsCompare.EnemySortMode = function()
+        return true
+    end
+
+    fsCompare.SortFunction = function(_, _units)
+        return function(a, b)
+            return a < b
+        end
+    end
+
+    fsCompare.EnemySortFunction = function(_, _units)
+        return function(a, b)
+            return a < b
+        end
+    end
+
+    local f = { "party2", "party1" }
+    local e = { "arena2", "arena1" }
+
+    local fOut = fsSortedUnits:Sort(f, true)
+    local eOut = fsSortedUnits:Sort(e, false)
+
+    assert(fOut == f)
+    assert(eOut == e)
+
+    assertListEquals(fOut, { "party1", "party2" })
+    assertListEquals(eOut, { "arena1", "arena2" })
+end
+
 return M
