@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.7.5
+
+Fixed regression bug causing enemy units to sometimes not sort properly.
+
 ## 7.7.4
 
 Fixed regression bug with the cycle roles feature (API command).
