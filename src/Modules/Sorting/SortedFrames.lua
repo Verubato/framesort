@@ -21,16 +21,6 @@ local function VisualOrder(frames)
         :ToTable()
 end
 
-local function GetFriendlyFrames(provider)
-    local frames = fsFrame:PartyFrames(provider, true)
-
-    if #frames == 0 then
-        frames = fsFrame:RaidFrames(provider, true)
-    end
-
-    return frames
-end
-
 ---Returns an array of friendly frames sorted by their visual order.
 ---Prefers blizzard frames over other providers.
 ---@return table
@@ -39,35 +29,64 @@ function M:FriendlyFrames(sort)
         sort = true
     end
 
-    local frames = nil
+    local frames
 
     -- prefer Blizzard frames
     if fsProviders.Blizzard:Enabled() then
-        frames = GetFriendlyFrames(fsProviders.Blizzard)
+        frames = fsFrame:RaidFrames(fsProviders.Blizzard, true)
+
+        if not frames or #frames == 0 then
+            frames = fsFrame:PartyFrames(fsProviders.Blizzard, true)
+        end
+
+        if frames and #frames > 0 then
+            return sort and VisualOrder(frames) or frames
+        end
     end
 
-    if not frames or #frames == 0 then
-        local nonBlizzard = fsEnumerable
-            :From(fsProviders:EnabledNotSelfManaged())
-            :Where(function(provider)
-                return provider ~= fsProviders.Blizzard
+    ---@type FrameProvider[]
+    local nonBlizzard = fsEnumerable
+        :From(fsProviders:EnabledNotSelfManaged())
+        :Where(function(provider)
+            return provider ~= fsProviders.Blizzard
+        end)
+        :ToTable()
+
+    for _, provider in ipairs(nonBlizzard) do
+        local containers = provider.Containers and provider:Containers() or {}
+        local raidContainers = fsEnumerable
+            :From(containers)
+            :Where(function(container)
+                -- important: don't use namelists, because they will have been filtered
+                return container.LayoutType ~= fsFrame.LayoutType.NameList and container.Type == fsFrame.ContainerType.Raid
             end)
             :ToTable()
 
-        for _, provider in ipairs(nonBlizzard) do
-            frames = GetFriendlyFrames(provider)
+        for _, raid in ipairs(raidContainers) do
+            frames = fsFrame:ExtractUnitFrames(raid.Frame, true, true, true, true)
 
-            if #frames > 0 then
-                break
+            if frames and #frames > 0 then
+                return sort and VisualOrder(frames) or frames
+            end
+        end
+
+        local partyContainers = fsEnumerable
+            :From(containers)
+            :Where(function(container)
+                return container.LayoutType ~= fsFrame.LayoutType.NameList and container.Type == fsFrame.ContainerType.Party
+            end)
+            :ToTable()
+
+        for _, party in ipairs(partyContainers) do
+            frames = fsFrame:ExtractUnitFrames(party.Frame, true, true, true, true)
+
+            if frames and #frames > 0 then
+                return sort and VisualOrder(frames) or frames
             end
         end
     end
 
-    if not frames or #frames == 0 then
-        return {}
-    end
-
-    return sort and VisualOrder(frames) or frames
+    return {}
 end
 
 ---Returns an array of arena frames sorted by their visual order.

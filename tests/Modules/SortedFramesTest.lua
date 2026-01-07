@@ -1,4 +1,4 @@
----@diagnostic disable: cast-local-type
+---@diagnostic disable: cast-local-type, missing-fields
 ---@type Addon
 local addon
 ---@type SortedFrames
@@ -12,8 +12,9 @@ local frameMock
 local M = {}
 local provider = nil
 local partyContainer = nil
-local raidContainer = nil
-local arenaContainer = nil
+local partyContainerFrame = nil
+local raidContainerFrame = nil
+local arenaContainerFrame = nil
 
 local width, height = 100, 100
 
@@ -75,18 +76,19 @@ function M:setup()
     -- Containers (use real FrameUtil container API)
     local party = fsFrame:GetContainer(provider, fsFrame.ContainerType.Party)
     assert(party)
-    partyContainer = party.Frame
-    partyContainer:SetSize(width, height)
+    partyContainer = party
+    partyContainerFrame = party.Frame
+    partyContainerFrame:SetSize(width, height)
 
     local raid = fsFrame:GetContainer(provider, fsFrame.ContainerType.Raid)
     assert(raid)
-    raidContainer = raid.Frame
-    raidContainer:SetSize(width, height)
+    raidContainerFrame = raid.Frame
+    raidContainerFrame:SetSize(width, height)
 
     local arena = fsFrame:GetContainer(provider, fsFrame.ContainerType.EnemyArena)
     assert(arena)
-    arenaContainer = arena.Frame
-    arenaContainer:SetSize(width, height)
+    arenaContainerFrame = arena.Frame
+    arenaContainerFrame:SetSize(width, height)
 
     wow = addon.WoW.Api
     wow.IsInGroup = function()
@@ -125,9 +127,9 @@ function M:teardown()
     fsFrame = nil
     wow = nil
     provider = nil
-    partyContainer = nil
-    raidContainer = nil
-    arenaContainer = nil
+    partyContainerFrame = nil
+    raidContainerFrame = nil
+    arenaContainerFrame = nil
     originalProviders = nil
     originalBlizzard = nil
 end
@@ -139,14 +141,14 @@ function M:test_FriendlyFrames_prefers_blizzard_party_frames()
     -- Put some frames in Blizzard's party container path by monkeypatching PartyFrames call.
     -- We keep ProviderFactory injection for the non-blizzard provider.
     local blizzFrames = {
-        newFrame(partyContainer, 0, 0, true),
-        newFrame(partyContainer, 0, -100, true),
+        newFrame(partyContainerFrame, 0, 0, true),
+        newFrame(partyContainerFrame, 0, -100, true),
     }
     blizzFrames[1].id = "B1"
     blizzFrames[2].id = "B2"
 
     local testFrames = {
-        newFrame(partyContainer, 50, -50, true),
+        newFrame(partyContainerFrame, 50, -50, true),
     }
     testFrames[1].id = "T1"
 
@@ -171,8 +173,8 @@ function M:test_FriendlyFrames_blizzard_party_empty_uses_blizzard_raid()
     stubBlizzardProvider(true)
 
     local blizzRaidFrames = {
-        newFrame(raidContainer, 0, -100, true),
-        newFrame(raidContainer, 0, 0, true),
+        newFrame(raidContainerFrame, 0, -100, true),
+        newFrame(raidContainerFrame, 0, 0, true),
     }
     blizzRaidFrames[1].id = "R1"
     blizzRaidFrames[2].id = "R2"
@@ -205,49 +207,32 @@ end
 function M:test_friendly_frames_falls_back_to_test_provider_when_blizzard_disabled()
     stubBlizzardProvider(false)
 
+    assert(partyContainerFrame and partyContainerFrame:IsVisible())
+
     local testPartyFrames = {
-        newFrame(partyContainer, 0, -100, true),
-        newFrame(partyContainer, 0, 0, true),
-        newFrame(partyContainer, 0, -50, false), -- invisible filtered
+        newFrame(partyContainerFrame, 0, -100, true),
+        newFrame(partyContainerFrame, 0, 0, true),
+        newFrame(partyContainerFrame, 0, -50, false), -- invisible filtered
     }
     testPartyFrames[1].id = "T1"
     testPartyFrames[2].id = "T2"
     testPartyFrames[3].id = "T_INV"
 
-    local origPartyFrames = fsFrame.PartyFrames
-    fsFrame.PartyFrames = function(_, prov, visibleOnly)
-        if prov == provider then
-            return testPartyFrames
-        end
-        return {}
-    end
+    testPartyFrames[1].unit = "party1"
+    testPartyFrames[2].unit = "party2"
+    testPartyFrames[3].unit = "party3"
 
     local out = fsSortedFrames:FriendlyFrames()
     assertEquals(#out, 2)
     assertIdOrder(out, { "T2", "T1" })
-
-    fsFrame.PartyFrames = origPartyFrames
 end
 
 function M:test_friendly_frames_returns_empty_when_no_frames_anywhere()
     stubBlizzardProvider(false)
 
-    local origPartyFrames = fsFrame.PartyFrames
-    local origRaidFrames = fsFrame.RaidFrames
-
-    fsFrame.PartyFrames = function()
-        return {}
-    end
-    fsFrame.RaidFrames = function()
-        return {}
-    end
-
     local out = fsSortedFrames:FriendlyFrames()
     assertEquals(type(out), "table")
     assertEquals(#out, 0)
-
-    fsFrame.PartyFrames = origPartyFrames
-    fsFrame.RaidFrames = origRaidFrames
 end
 
 function M:test_arena_frames_returns_empty_when_enemy_sort_mode_disabled()
@@ -261,16 +246,16 @@ function M:test_arena_frames_prefers_blizzard_when_enabled()
     stubBlizzardProvider(true)
 
     local blizzArenaFrames = {
-        newFrame(arenaContainer, 0, 0, true),
-        newFrame(arenaContainer, 0, -100, true),
-        newFrame(arenaContainer, 0, -50, false), -- invisible filtered
+        newFrame(arenaContainerFrame, 0, 0, true),
+        newFrame(arenaContainerFrame, 0, -100, true),
+        newFrame(arenaContainerFrame, 0, -50, false), -- invisible filtered
     }
     blizzArenaFrames[1].id = "A1"
     blizzArenaFrames[2].id = "A2"
     blizzArenaFrames[3].id = "A_INV"
 
     local testArenaFrames = {
-        newFrame(arenaContainer, 0, -999, true),
+        newFrame(arenaContainerFrame, 0, -999, true),
     }
     testArenaFrames[1].id = "TA"
 
@@ -297,8 +282,8 @@ function M:test_arena_frames_falls_back_to_test_provider_when_blizzard_empty()
     stubBlizzardProvider(true)
 
     local testArenaFrames = {
-        newFrame(arenaContainer, 0, -100, true),
-        newFrame(arenaContainer, 0, 0, true),
+        newFrame(arenaContainerFrame, 0, -100, true),
+        newFrame(arenaContainerFrame, 0, 0, true),
     }
     testArenaFrames[1].id = "TA1"
     testArenaFrames[2].id = "TA2"

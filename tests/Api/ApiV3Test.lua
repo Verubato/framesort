@@ -91,9 +91,9 @@ function M:test_frame_number_for_unit()
     config.EnemyArena.Enabled = true
     config.EnemyArena.Reverse = true
 
-    assertEquals(v3.Frame:FrameNumberForUnit("party1"), 3)
-    assertEquals(v3.Frame:FrameNumberForUnit("party2"), 2)
-    assertEquals(v3.Frame:FrameNumberForUnit("party3"), 1)
+    assertEquals(v3.Frame:FrameNumberForUnit("raid1"), 6)
+    assertEquals(v3.Frame:FrameNumberForUnit("raid2"), 5)
+    assertEquals(v3.Frame:FrameNumberForUnit("raid3"), 4)
 
     assertEquals(v3.Frame:FrameNumberForUnit("arena1"), 3)
     assertEquals(v3.Frame:FrameNumberForUnit("arena2"), 2)
@@ -144,7 +144,7 @@ end
 function M:test_get_friendly_units()
     local units = FrameSortApi.v3.Sorting:GetFriendlyUnits()
 
-    assertEquals(#units, partyUnitsCount)
+    assertEquals(#units, raidUnitsCount)
 end
 
 function M:test_get_enemy_units()
