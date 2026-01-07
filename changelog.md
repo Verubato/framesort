@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.7.6
+
+Fixed ElvUI only showing the player frame sometimes.
+
 ## 7.7.5
 
 Fixed regression bug causing enemy units to sometimes not sort properly.
