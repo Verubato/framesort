@@ -103,7 +103,7 @@ end
 function M:test_get_friendly_units()
     local units = FrameSortApi.v2.Sorting:GetFriendlyUnits()
 
-    assertEquals(#units, partyUnitsCount)
+    assertEquals(#units, raidUnitsCount)
 end
 
 function M:test_get_enemy_units()
