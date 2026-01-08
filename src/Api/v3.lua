@@ -545,6 +545,26 @@ function M.Inspector:GetUnitSpecId(unit)
     end, "Inspector:GetUnitSpecId")
 end
 
+---Registers a callback to be invoked when new spec information has been found.
+---@param callback function
+---@return number|nil
+function M.Inspector:RegisterCallback(callback)
+    if not callback then
+        fsLog:Error("Api.v3.Inspector:RegisterCallback was passed a nil parameter: callback.")
+        return nil
+    end
+
+    if type(callback) ~= "function" then
+        fsLog:Error("Api.v3.Inspector:RegisterCallback was passed an invalid parameter: callback = %s.", tostring(callback))
+        return nil
+    end
+
+    return SafeCall(function()
+        fsInspector:RegisterCallback(callback)
+        return true
+    end, "Inspector:RegisterSpecInformationCallback") or false
+end
+
 ---Returns the unit token from the given frame.
 ---@param frame table
 function M.Frame:UnitFromFrame(frame)

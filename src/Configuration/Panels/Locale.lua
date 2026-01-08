@@ -2,9 +2,6 @@
 local _, addon = ...
 local fsConfig = addon.Configuration
 local wow = addon.WoW.Api
-local fsLog = addon.Logging.Log
-local modules = addon.Modules
-local fsCompare = addon.Modules.Sorting.Comparer
 local fsEnumerable = addon.Collections.Enumerable
 local L = addon.Locale.Current
 local items = {
