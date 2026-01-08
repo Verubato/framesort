@@ -8,9 +8,9 @@ local events = addon.WoW.Events
 local capabilities = addon.WoW.Capabilities
 local fsUnit = addon.WoW.Unit
 local fsLog = addon.Logging.Log
-local fsConfig = addon.Configuration
 local fsSpec = addon.Configuration.Specs
 local fsScheduler = addon.Scheduling.Scheduler
+local priorityStack = {}
 ---@class InspectorModule : IInitialise, IProcessEvents
 local M = {}
 addon.Modules.Inspector = M
@@ -109,6 +109,22 @@ local function Inspect(unit)
 end
 
 local function GetNextTarget()
+    -- last in first out
+    while #priorityStack > 0 do
+        local unit = priorityStack[#priorityStack]
+        priorityStack[#priorityStack] = nil
+
+        -- these will mostly be nameplate units from minimarkers
+        -- which are temporal units, so don't log if they no longer exist
+        if wow.UnitExists(unit) then
+            local guid = wow.UnitGUID(unit)
+
+            if guid and not wow.issecretvalue(guid) then
+                return unit
+            end
+        end
+    end
+
     local units = fsUnit:FriendlyUnits()
 
     -- first attempt to find someone we don't have any information for
@@ -170,14 +186,6 @@ local function InspectNext()
         return false
     end
 
-    wow.ClearInspectPlayer()
-    wow.NotifyInspect(unit)
-    isOurInspect = true
-
-    inspectStarted = wow.GetTimePreciseSec()
-    requestedUnit = unit
-    currentInspectUnit = unit
-
     -- create a cache entry for this unit so we don't attempt this unit again in the next iteration
     local cacheEntry = EnsureCacheEntry(unit)
 
@@ -187,6 +195,14 @@ local function InspectNext()
     end
 
     cacheEntry.LastAttempt = wow.GetTimePreciseSec()
+
+    wow.ClearInspectPlayer()
+    wow.NotifyInspect(unit)
+    isOurInspect = true
+
+    inspectStarted = wow.GetTimePreciseSec()
+    requestedUnit = unit
+    currentInspectUnit = unit
 
     fsLog:Debug("Requesting inspection for unit '%s'.", unit)
 
@@ -208,23 +224,6 @@ local function InvalidateEntry(unit)
     unitGuidToSpec[guid] = nil
 
     needUpdate = true
-end
-
-local function RoleSortingEnabled()
-    local db = addon.DB
-    local sorting = db.Options.Sorting
-
-    if sorting.Dungeon.Enabled and sorting.Dungeon.GroupSortMode == fsConfig.GroupSortMode.Role then
-        return true
-    end
-    if sorting.World.Enabled and sorting.World.GroupSortMode == fsConfig.GroupSortMode.Role then
-        return true
-    end
-    if sorting.Raid.Enabled and sorting.Raid.GroupSortMode == fsConfig.GroupSortMode.Role then
-        return true
-    end
-
-    return false
 end
 
 local function OnClearInspect()
@@ -333,10 +332,6 @@ local function RunLoop()
     -- schedule the next run
     fsScheduler:RunAfter(inspectInterval, RunLoop)
 
-    if not RoleSortingEnabled() then
-        return
-    end
-
     local timeSinceLastInspect = inspectStarted and (wow.GetTimePreciseSec() - inspectStarted)
 
     -- if we've requested an inspection and we're still within the timeout period
@@ -373,6 +368,9 @@ function M:ProcessEvent(event, ...)
     elseif event == events.PLAYER_SPECIALIZATION_CHANGED then
         local unit = select(1, ...)
         InvalidateEntry(unit)
+    elseif event == events.PLAYER_ENTERING_WORLD then
+        -- they've moved zone, clear the queue
+        priorityStack = {}
     end
 end
 
@@ -414,6 +412,9 @@ function M:FriendlyUnitSpec(unit)
     local cacheEntry = unitGuidToSpec[guid]
 
     if not cacheEntry then
+        -- queue this unit for inspection
+        priorityStack[#priorityStack + 1] = unit
+        needUpdate = true
         return nil
     end
 

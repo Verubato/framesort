@@ -1,6 +1,5 @@
 local _, addon = ...
 local L = addon.Locale.ruRU
-local wow = addon.WoW.Api
 
 -- # Main Options screen #
 -- used in FrameSort - 1.2.3 version header, %s is the version number
