@@ -1,5 +1,10 @@
 # Changelog
 
+## 7.8.1
+
+- Unit inspection performance improvements.
+- Added new API method for external addons such as MiniMarkers to use.
+
 ## 7.8.0
 
 - Added feature to manually change the language.
