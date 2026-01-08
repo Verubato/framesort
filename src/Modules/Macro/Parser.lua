@@ -95,7 +95,7 @@ local function GetSelectors(body)
     return selectors
 end
 
-local function UnitForSelector(selector, friendlyUnits, enemyUnits)
+function M:UnitForSelector(selector, friendlyUnits, enemyUnits)
     local lowercase = string.lower(selector)
 
     -- tanktarget, healertarget, etc
@@ -103,7 +103,7 @@ local function UnitForSelector(selector, friendlyUnits, enemyUnits)
         local withoutTarget = string.gsub(lowercase, "target", "")
         withoutTarget = string.gsub(withoutTarget, "tg", "")
 
-        local unit = UnitForSelector(withoutTarget, friendlyUnits, enemyUnits)
+        local unit = M:UnitForSelector(withoutTarget, friendlyUnits, enemyUnits)
 
         if unit and unit ~= "none" then
             unit = unit .. "target"
@@ -240,7 +240,7 @@ function M:GetNewBody(body, friendlyUnits, enemyUnits)
 
     for i, selector in ipairs(selectors) do
         if string.lower(selector) ~= skipSelector then
-            local unit = UnitForSelector(selector, friendlyUnits, enemyUnits)
+            local unit = M:UnitForSelector(selector, friendlyUnits, enemyUnits)
             local tmp = ReplaceSelector(newBody, unit, i)
 
             if tmp then
