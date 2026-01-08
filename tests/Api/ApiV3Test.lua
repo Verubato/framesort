@@ -11,6 +11,7 @@ function M:setup()
     local providerFactory = require("TestHarness\\ProviderFactory")
 
     addon = addonFactory:Create()
+    addon.Locale:Init()
     addon.Api:Init()
     addon.Modules:Init()
 

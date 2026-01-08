@@ -35,7 +35,5 @@ function M:Init()
         locale = "enUS"
     end
 
-    print(locale)
-
     setmetatable(M.Current, { __index = DefaultIndex })
 end

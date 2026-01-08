@@ -295,6 +295,10 @@ function M:Create()
 end
 
 -- so that capabilities.HasDropdown() returns true
-WowStyle1DropdownTemplate = "asdf"
+MenuUtil = {
+    CreateRadioMenu = function()
+        return false
+    end,
+}
 
 return M

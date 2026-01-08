@@ -2471,6 +2471,7 @@ function M:test_upgrade_options_version1_to_latest()
     }
 
     local expected = {
+        Locale = "",
         Sorting = {
             SpecPriority = {
                 Tanks = {},
@@ -2565,6 +2566,7 @@ end
 
 function M:test_upgrade_options_latest_to_latest_passes()
     local options = {
+        Locale = "",
         Sorting = {
             Ordering = {
                 Tanks = 1,

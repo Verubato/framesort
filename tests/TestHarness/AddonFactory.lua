@@ -60,13 +60,34 @@ function factory:Create()
             Api = wowFactory:Create(),
         },
         DB = {},
-        Locale = {},
+        Locale = {
+            Current = {},
+            enUS = {},
+            deDE = {},
+            esES = {},
+            esMX = {},
+            frFR = {},
+            koKR = {},
+            ruRU = {},
+            zhCN = {},
+            zhTW = {},
+        },
     }
 
     local dependencies = DependenciesFromXml()
     LoadDependencies(addon, dependencies)
 
     addon.DB = addon.WoW.Api.CopyTable(addon.Configuration.DbDefaults)
+
+    -- silence logging
+    addon.Logging.Log.Log = function() end
+    addon.Logging.Log.Debug = function() end
+    addon.Logging.Log.Notify = function() end
+    addon.Logging.Log.Warning = function() end
+    addon.Logging.Log.Error = function() end
+    addon.Logging.Log.Critical = function() end
+    addon.Logging.Log.WarnOnce = function() end
+    addon.Logging.Log.ErrorOnce = function() end
 
     return addon
 end
