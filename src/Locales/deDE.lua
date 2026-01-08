@@ -1,10 +1,6 @@
 local _, addon = ...
-local L = addon.Locale
+local L = addon.Locale.deDE
 local wow = addon.WoW.Api
-
-if wow.GetLocale() ~= "deDE" then
-    return
-end
 
 -- # Main Options screen #
 -- used in FrameSort - 1.2.3 version header, %s is the version number
@@ -306,3 +302,7 @@ L["Miscellaneous"] = "Verschiedenes"
 L["Various tweaks you can apply."] = "Verschiedene Anpassungen, die du vornehmen kannst."
 L["Player top of role"] = "Spieler an oberster Position der Rolle"
 L["Places you at the top of your corresponding role (healer/tank/dps)."] = "Platziert dich an die oberste Position deiner entsprechenden Rolle (Heiler/Tank/DPS)."
+
+-- # Language screen #
+L["Language"] = "Sprache"
+L["Specify the language we use."] = "Lege die verwendete Sprache fest."

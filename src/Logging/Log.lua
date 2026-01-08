@@ -2,7 +2,7 @@
 local addonName, addon = ...
 local wow = addon.WoW.Api
 local events = addon.WoW.Events
-local L = addon.Locale
+local L = addon.Locale.Current
 ---@class Log
 local M = {
     Level = {

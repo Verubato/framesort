@@ -6,7 +6,7 @@
 ---@field Collections Collections
 ---@field DB DB
 ---@field Health Health
----@field Locale table<string, string>
+---@field Locale Locales
 ---@field Logging Logging
 ---@field Modules Modules
 ---@field Numerics Numerics
@@ -99,3 +99,15 @@
 
 ---@class IProcessEvents
 ---@field ProcessEvent fun(self: table, event: string, ...)
+
+---@class Locales : IInitialise
+---@field Current table
+---@field enUS table
+---@field deDE table
+---@field esES table
+---@field esMX table
+---@field frFR table
+---@field koKR table
+---@field ruRU table
+---@field zhCN table
+---@field zhTW table

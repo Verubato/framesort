@@ -4,21 +4,6 @@ local wow = addon.WoW.Api
 local wowEx = addon.WoW.WowEx
 local fsLog = addon.Logging.Log
 
-function addon:InitLocale()
-    local function DefaultIndex(_, key)
-        -- if there is no translation specified, then use the the key itself
-        local locale = wow.GetLocale()
-
-        if locale ~= "enUS" then
-            fsLog:WarnOnce("Missing translation for key '%s' and locale '%s'", key, locale)
-        end
-
-        return key
-    end
-
-    setmetatable(addon.Locale, { __index = DefaultIndex })
-end
-
 function addon:InitDB()
     fsLog:Debug("Loading saved variables.")
 
@@ -42,12 +27,12 @@ function addon:Init()
     fsLog:Debug("--- Initialising ---")
 
     addon:InitDB()
+    addon.Locale:Init()
 
     local fsVersion = wow.GetAddOnMetadata(addonName, "Version")
     local expansionName, buildVersion = wowEx.ExpansionAndBuildInfo()
     fsLog:Debug("We are version %s running on %s build %s.", fsVersion, expansionName, buildVersion)
 
-    addon:InitLocale()
     addon.Configuration.Specs:Init()
     addon.Configuration:Init()
     addon.Modules:Init()

@@ -1,10 +1,6 @@
 local _, addon = ...
-local L = addon.Locale
+local L = addon.Locale.zhCN
 local wow = addon.WoW.Api
-
-if wow.GetLocale() ~= "zhCN" then
-    return
-end
 
 -- # Main Options screen #
 -- used in FrameSort - 1.2.3 version header, %s is the version number
@@ -304,3 +300,7 @@ L["Miscellaneous"] = "杂项"
 L["Various tweaks you can apply."] = "你可以应用的各种调整。"
 L["Player top of role"] = "玩家置于角色顶部"
 L["Places you at the top of your corresponding role (healer/tank/dps)."] = "将你置于对应角色（治疗/坦克/DPS）的最前位置。"
+
+-- # Language screen #
+L["Language"] = "语言"
+L["Specify the language we use."] = "指定要使用的语言。"

@@ -1,10 +1,6 @@
 local _, addon = ...
-local L = addon.Locale
+local L = addon.Locale.ruRU
 local wow = addon.WoW.Api
-
-if wow.GetLocale() ~= "ruRU" then
-    return
-end
 
 -- # Main Options screen #
 -- used in FrameSort - 1.2.3 version header, %s is the version number
@@ -312,3 +308,7 @@ L["Miscellaneous"] = "Разное"
 L["Various tweaks you can apply."] = "Различные настройки, которые вы можете применить."
 L["Player top of role"] = "Игрок в начале роли"
 L["Places you at the top of your corresponding role (healer/tank/dps)."] = "Размещает вас в начале вашей соответствующей роли (лекарь/танк/DPS)."
+
+-- # Language screen #
+L["Language"] = "Язык"
+L["Specify the language we use."] = "Укажите используемый язык."

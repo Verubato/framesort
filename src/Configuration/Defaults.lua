@@ -18,6 +18,7 @@ fsConfig.DbDefaults = {
     ---@class Options
     Options = {
         Version = 24,
+        Locale = "",
         Sorting = {
             Ordering = {
                 Tanks = 1,

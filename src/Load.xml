@@ -35,6 +35,7 @@
     <Script file="Locales\ruRU.lua"/>
     <Script file="Locales\zhCN.lua"/>
     <Script file="Locales\zhTW.lua"/>
+    <Script file="Locales\Locale.lua"/>
 
     <!-- requires core wow files -->
     <Script file="Scheduling\Scheduler.lua"/>
@@ -92,6 +93,7 @@
     <Script file="Configuration\Options.lua"/>
     <Script file="Configuration\Defaults.lua"/>
     <Script file="Configuration\Upgrader.lua"/>
+    <Script file="Configuration\Panels\Locale.lua"/>
     <Script file="Configuration\Panels\Ordering.lua"/>
     <Script file="Configuration\Panels\SpecPriority.lua"/>
     <Script file="Configuration\Panels\AutoLeader.lua"/>
