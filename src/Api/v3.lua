@@ -11,6 +11,7 @@ local fsSortedUnits = addon.Modules.Sorting.SortedUnits
 local fsProviders = addon.Providers
 local fsEnumerable = addon.Collections.Enumerable
 local fsCompare = addon.Modules.Sorting.Comparer
+local fsMacroParser = addon.Modules.Macro.Parser
 local fsLog = addon.Logging.Log
 local wow = addon.WoW.Api
 
@@ -21,6 +22,7 @@ local M = {
     Inspector = {},
     Frame = {},
     Caching = {},
+    Unit = {},
 }
 addon.Api.v3 = M
 
@@ -700,4 +702,14 @@ function M.Caching:Invalidate()
         fsSortedUnits:InvalidateCache()
         return true
     end, "Caching:Invalidate") or false
+end
+
+---Returns the unit for the specified FrameSort variable
+function M.Unit:ResolveVariable(variable)
+    return SafeCall(function()
+        local friendlyUnits = fsSortedUnits:FriendlyUnits()
+        local enemyUnits = fsSortedUnits:ArenaUnits()
+
+        return fsMacroParser:UnitForSelector(variable, friendlyUnits, enemyUnits)
+    end, "Unit:ResolveVariable") or nil
 end
