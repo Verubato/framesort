@@ -2552,7 +2552,7 @@ function M:test_upgrade_options_version1_to_latest()
             FriendlyFormat = "$framenumber",
             EnemyFormat = "$framenumber",
         },
-        Version = 24,
+        Version = 25,
     }
 
     local db = {
@@ -2643,7 +2643,7 @@ function M:test_upgrade_options_latest_to_latest_passes()
             FriendlyFormat = "$framenumber",
             EnemyFormat = "$framenumber",
         },
-        Version = 24,
+        Version = 25,
     }
 
     local db = {
