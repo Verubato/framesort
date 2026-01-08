@@ -10,7 +10,7 @@ local M = {}
 addon.WoW.Capabilities = M
 
 function M.HasModernDropdown()
-    return WowStyle1DropdownTemplate ~= nil
+    return MenuUtil and MenuUtil.CreateRadioMenu
 end
 
 function M.HasEnemySpecSupport()
