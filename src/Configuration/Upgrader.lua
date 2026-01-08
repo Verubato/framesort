@@ -646,6 +646,17 @@ function M:UpgradeToVersion24(options)
     return true
 end
 
+function M:UpgradeToVersion25(options)
+    if options.Version ~= 24 then
+        return false
+    end
+
+    options.Locale = ""
+    options.Version = 25
+
+    return true
+end
+
 ---Upgrades saved variables database to the current version.
 function M:UpgradeDb(db)
     local options = db.Options
