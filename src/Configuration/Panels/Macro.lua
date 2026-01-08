@@ -3,7 +3,7 @@ local _, addon = ...
 local wow = addon.WoW.Api
 local fsMacro = addon.Modules.Macro.Parser
 local fsConfig = addon.Configuration
-local L = addon.Locale
+local L = addon.Locale.Current
 local M = {}
 fsConfig.Panels.Macro = M
 

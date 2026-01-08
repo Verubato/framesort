@@ -7,7 +7,7 @@ local fsProviders = addon.Providers
 local fsConfig = addon.Configuration
 local fsFrame = addon.WoW.Frame
 local fsLuaEx = addon.Language.LuaEx
-local L = addon.Locale
+local L = addon.Locale.Current
 ---@class HealthChecker
 local M = {}
 addon.Health.HealthCheck = M

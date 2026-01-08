@@ -1,5 +1,5 @@
 local _, addon = ...
-local L = addon.Locale
+local L = addon.Locale.enUS
 
 -- # Main Options screen #
 -- used in FrameSort - 1.2.3 version header, %s is the version number
@@ -298,3 +298,7 @@ L["Miscellaneous"] = nil
 L["Various tweaks you can apply."] = nil
 L["Player top of role"] = nil
 L["Places you at the top of your corresponding role (healer/tank/dps)."] = nil
+
+-- # Language screen #
+L["Language"] = nil
+L["Specify the language we use."] = nil

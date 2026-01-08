@@ -6,7 +6,7 @@ local fsConfig = addon.Configuration
 local fsSpecs = addon.Configuration.Specs
 local fsLog = addon.Logging.Log
 local fsCompare = addon.Modules.Sorting.Comparer
-local L = addon.Locale
+local L = addon.Locale.Current
 
 local M = {}
 fsConfig.Panels.SpecPriority = M

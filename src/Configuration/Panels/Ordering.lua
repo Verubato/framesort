@@ -5,7 +5,7 @@ local wow = addon.WoW.Api
 local fsLog = addon.Logging.Log
 local modules = addon.Modules
 local fsCompare = addon.Modules.Sorting.Comparer
-local L = addon.Locale
+local L = addon.Locale.Current
 local M = {}
 fsConfig.Panels.SpecOrdering = M
 

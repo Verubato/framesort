@@ -8,7 +8,7 @@ local wow = addon.WoW.Api
 local minSpacing = 0
 local maxSpacing = 100
 local systemChange = false
-local L = addon.Locale
+local L = addon.Locale.Current
 local M = {}
 fsConfig.Panels.Spacing = M
 

@@ -1,10 +1,6 @@
 local _, addon = ...
-local L = addon.Locale
+local L = addon.Locale.koKR
 local wow = addon.WoW.Api
-
-if wow.GetLocale() ~= "koKR" then
-    return
-end
 
 -- # Main Options screen #
 -- used in FrameSort - 1.2.3 version header, %s is the version number
@@ -307,3 +303,7 @@ L["Miscellaneous"] = "기타"
 L["Various tweaks you can apply."] = "적용할 수 있는 다양한 조정입니다."
 L["Player top of role"] = "역할 상단에 플레이어 배치"
 L["Places you at the top of your corresponding role (healer/tank/dps)."] = "해당 역할(힐러/탱커/DPS)의 최상단에 플레이어를 배치합니다."
+
+-- # Language screen #
+L["Language"] = "언어"
+L["Specify the language we use."] = "사용할 언어를 지정합니다."

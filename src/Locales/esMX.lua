@@ -1,10 +1,6 @@
 local _, addon = ...
-local L = addon.Locale
+local L = addon.Locale.esMX
 local wow = addon.WoW.Api
-
-if wow.GetLocale() ~= "esMX" then
-    return
-end
 
 -- # Main Options screen #
 -- used in FrameSort - 1.2.3 version header, %s is the version number
@@ -308,3 +304,7 @@ L["Miscellaneous"] = "Miscelánea"
 L["Various tweaks you can apply."] = "Varios ajustes que puedes aplicar."
 L["Player top of role"] = "Jugador en la parte superior del rol"
 L["Places you at the top of your corresponding role (healer/tank/dps)."] = "Te coloca en la parte superior de tu rol correspondiente (sanador/tanque/DPS)."
+
+-- # Language screen #
+L["Language"] = "Idioma"
+L["Specify the language we use."] = "Especifica el idioma que usamos."

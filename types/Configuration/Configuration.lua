@@ -34,5 +34,6 @@
 ---@field Nameplates OptionsPanel
 ---@field Api OptionsPanel
 ---@field Discord OptionsPanel
+---@field Locale OptionsPanel
 ---@field Miscellaneous OptionsPanel
 ---@field Log OptionsPanel
