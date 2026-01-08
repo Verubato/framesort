@@ -240,7 +240,7 @@ local function CheckUsingRaidStyleFrames()
     end
 
     return {
-        Applicable = true,
+        Applicable = fsProviders.Blizzard:Enabled(),
         Passed = usingRaidStyle,
         Description = L["Using Raid-Style Party Frames"],
         Help = L["Please enable 'Use Raid-Style Party Frames' in the Blizzard settings"],
