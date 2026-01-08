@@ -1,5 +1,11 @@
 # Changelog
 
+## 7.8.0
+
+- Added feature to manually change the language.
+- Added API method to get the unit for a FrameSort variable.
+- Fixed dropdowns not using the modern UI style (retail).
+
 ## 7.7.6
 
 Fixed ElvUI only showing the player frame sometimes.
