@@ -436,6 +436,8 @@ function M:EnemyUnitSpec(unit)
     end
 
     if wowEx.IsInstanceArena() then
+        -- convert nameplate units into arena units
+        unit = fsUnit:ResolveUnit(unit)
         local unitNumber = tonumber(string.match(unit, "%d+"))
         local specId = unitNumber and wowEx.GetArenaOpponentSpecSafe(unitNumber)
 
