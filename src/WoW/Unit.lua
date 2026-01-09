@@ -325,3 +325,39 @@ function M:IsEnemyUnit(unit)
     local isEnemyOrSecret = wow.UnitIsEnemy("player", unit)
     return not wow.issecretvalue(isEnemyOrSecret) and isEnemyOrSecret
 end
+
+---Converts a nameplate unit into arena123
+---@param unit string
+function M:ResolveUnit(unit)
+    if not string.find(unit, "nameplate") then
+        return unit
+    end
+
+    if not wowEx.IsInstanceArena() then
+        return unit
+    end
+
+    local count = wowEx.ArenaOpponentsCount()
+
+    if count <= 0 then
+        return unit
+    end
+
+    for i = 1, count do
+        local resolvedUnit = "arena" .. i
+        local resolvedPetUnit = "arena" .. i
+        local isUnit = wow.UnitIsUnit(unit, resolvedUnit)
+
+        if not wow.issecretvalue(isUnit) and isUnit then
+            return resolvedUnit
+        end
+
+        local isPetUnit = wow.UnitIsUnit(unit, resolvedPetUnit)
+
+        if not wow.issecretvalue(isPetUnit) and isPetUnit then
+            return resolvedUnit
+        end
+    end
+
+    return unit
+end
