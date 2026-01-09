@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.8.2
+
+Spec detection fix for external addons (MiniMarkers).
+
 ## 7.8.1
 
 - Unit inspection performance improvements.
