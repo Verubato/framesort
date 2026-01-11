@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.9.0
+
+Faster spec detection.
+
 ## 7.8.2
 
 Spec detection fix for external addons (MiniMarkers).
