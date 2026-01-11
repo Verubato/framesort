@@ -54,6 +54,10 @@ function M.HasBrawl()
     return M.HasC_PvP() and type(wow.C_PvP.IsInBrawl) == "function"
 end
 
+function M.HasC_TooltipInfo()
+    return type(wow.C_TooltipInfo) == "table" and type(wow.C_TooltipInfo.GetUnit) == "function"
+end
+
 function M.HasEditMode()
     return wow.EditModeManagerFrame ~= nil and wow.EditModeManagerFrame.UseRaidStylePartyFrames ~= nil and wow.EditModeManagerFrame.GetSettingValue ~= nil and wow.EventRegistry ~= nil
 end

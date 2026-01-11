@@ -107,6 +107,8 @@ M.Specs = {
 -- this is because annoyingly GetBattlefieldScore returns the spec name and not the id
 M.SpecNameLookup = {}
 
+M.TooltipLookup = {}
+
 ---@type { [number]: SpecInfo }
 M.SpecIdLookup = fsEnumerable:From(M.Specs):ToDictionary(function(item)
     return item.SpecId
@@ -126,6 +128,13 @@ function M:SpecIdFromName(classToken, specName)
     end
 
     return classLookup[specName]
+end
+
+---Returns the spec id for a given tooltip text class/spec combination.
+---@param tooltipText string
+---@return number|nil
+function M:SpecIdFromTooltip(tooltipText)
+    return M.TooltipLookup[tooltipText]
 end
 
 ---@return SpecInfo|nil
@@ -168,7 +177,7 @@ function M:Init()
     local maxClass = 13
 
     for classID = 1, maxClass do
-        local _, classToken = wow.GetClassInfo(classID)
+        local className, classToken = wow.GetClassInfo(classID)
 
         if classToken then
             M.SpecNameLookup[classToken] = M.SpecNameLookup[classToken] or {}
@@ -177,10 +186,11 @@ function M:Init()
             local numSpecs = wow.GetNumSpecializationsForClassID and wow.GetNumSpecializationsForClassID(classID) or 5
 
             for index = 1, numSpecs do
-                local specID, specName = wow.GetSpecializationInfoForClassID(classID, index)
+                local specId, specName = wow.GetSpecializationInfoForClassID(classID, index)
 
-                if specID and specName and specName ~= "" then
-                    M.SpecNameLookup[classToken][specName] = specID
+                if specId and specName and specName ~= "" then
+                    M.SpecNameLookup[classToken][specName] = specId
+                    M.TooltipLookup[specName .. " " .. className] = specId
                 end
             end
         end
