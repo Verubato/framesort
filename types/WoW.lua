@@ -6,6 +6,7 @@
 ---@field C_Timer? C_Timer
 ---@field C_AddOns? C_AddOns
 ---@field C_NamePlate? C_NamePlate
+---@field C_TooltipInfo? C_TooltipInfo
 -- constants
 ---@field MAX_RAID_MEMBERS number
 ---@field MAX_PARTY_MEMBERS number
@@ -142,6 +143,9 @@
 ---@class C_NamePlate
 ---@field GetNamePlates fun(): table[]
 
+---@class C_TooltipInfo
+---@field GetUnit fun(unit: string, hideStatus: boolean?): TooltipData
+
 ---@class PVPScoreInfo
 ---@field name string
 ---@field guid string
@@ -163,3 +167,14 @@
 ---@field talentSpec string
 ---@field honorLevel number
 ---@field roleAssigned number
+
+---@class TooltipData
+---@field type number?	
+---@field id number?
+---@field dataInstanceID number
+---@field lines TooltipDataLine[]
+
+---@class TooltipDataLine
+---@field type number
+---@field leftText string
+---@field rightText string?

@@ -328,6 +328,26 @@ local function BgSpec(unit)
     return nil
 end
 
+local function SpecFromTooltip(unit)
+    if not capabilities.HasC_TooltipInfo() then
+        return nil
+    end
+
+    local tooltipData = wow.C_TooltipInfo.GetUnit(unit)
+
+    if tooltipData then
+        for _, line in ipairs(tooltipData.lines) do
+            if line and line.type == wow.Enum.TooltipDataLineType.None and line.leftText and line.leftText ~= "" then
+                local specId = fsSpec:SpecIdFromTooltip(line.leftText)
+
+                if specId then
+                    return specId
+                end
+            end
+        end
+    end
+end
+
 local function RunLoop()
     -- schedule the next run
     fsScheduler:RunAfter(inspectInterval, RunLoop)
@@ -412,6 +432,23 @@ function M:FriendlyUnitSpec(unit)
     local cacheEntry = unitGuidToSpec[guid]
 
     if not cacheEntry then
+        local specId = SpecFromTooltip(unit)
+
+        if specId then
+            fsLog:Debug("Found spec information from tooltip for unit '%s' spec id %s.", unit, specId)
+
+            cacheEntry = EnsureCacheEntry(unit)
+
+            if not cacheEntry then
+                return nil
+            end
+
+            cacheEntry.SpecId = specId
+            cacheEntry.LastSeen = wow.GetTimePreciseSec()
+
+            return specId
+        end
+
         -- queue this unit for inspection
         priorityStack[#priorityStack + 1] = unit
         needUpdate = true

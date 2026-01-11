@@ -10,6 +10,7 @@ local api = {
     C_Map = C_Map,
     C_Timer = C_Timer,
     C_AddOns = C_AddOns,
+    C_TooltipInfo = C_TooltipInfo,
 
     -- constants
     MAX_RAID_MEMBERS = MAX_RAID_MEMBERS or 40,
