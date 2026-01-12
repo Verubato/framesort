@@ -545,7 +545,7 @@ function M.Inspector:GetUnitSpecId(unit)
     end, "Inspector:GetUnitSpecId")
 end
 
----Registers a callback to be invoked when new spec information has been found.
+---Registers a callback to be invoked when spec information changes.
 ---@param callback function
 ---@return number|nil
 function M.Inspector:RegisterCallback(callback)
@@ -563,6 +563,15 @@ function M.Inspector:RegisterCallback(callback)
         fsInspector:RegisterCallback(callback)
         return true
     end, "Inspector:RegisterSpecInformationCallback") or false
+end
+
+---Purges the spec cache.
+---@return boolean
+function M.Inspector:PurgeCache()
+    return SafeCall(function()
+        fsInspector:PurgeCache()
+        return true
+    end, "Inspector:PurgeCache") or false
 end
 
 ---Returns the unit token from the given frame.

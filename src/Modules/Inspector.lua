@@ -48,11 +48,11 @@ local cacheExpiry = 60 * 60 * 24 * 3
 
 local callbacks = {}
 
-local function OnNewSpecInformation()
+local function OnSpecInformationChanged()
     for _, callback in ipairs(callbacks) do
         local ok, err = pcall(callback)
         if not ok then
-            fsLog:Error("OnNewSpecInformation callback failed: %s", tostring(err))
+            fsLog:Error("OnSpecInformationChanged callback failed: %s", tostring(err))
         end
     end
 end
@@ -94,7 +94,7 @@ local function Inspect(unit)
 
         if before ~= after then
             fsLog:Debug("Found spec information for unit '%s' spec id %s.", unit, specId)
-            OnNewSpecInformation()
+            OnSpecInformationChanged()
         end
     else
         fsLog:Debug("Failed to determine spec for unit '%s'.", unit)
@@ -446,6 +446,9 @@ function M:FriendlyUnitSpec(unit)
             cacheEntry.SpecId = specId
             cacheEntry.LastSeen = wow.GetTimePreciseSec()
 
+            -- purposively not calling OnSpecInformationChanged() here
+            -- because we might run into loop issues
+            -- where someone calls FriendlyUnitSpec(unit) -> OnSpecInformationChanged() -> FriendlyUnitSpec() -> OnSpecInformationChanged() -> etc.
             return specId
         end
 
@@ -519,9 +522,11 @@ function M:PurgeCache()
     local db = addon.DB
     db.SpecCache = {}
     unitGuidToSpec = db.SpecCache
+
+    OnSpecInformationChanged()
 end
 
----Registers a callback to be invoked when new spec information has been found.
+---Registers a callback to be invoked when spec information has changed.
 ---@param callback function
 function M:RegisterCallback(callback)
     if not callback then
