@@ -1,5 +1,10 @@
 # Changelog
 
+## 7.9.1
+
+- Potential fix for Blizzard enemy pet frames being pushed too far down.
+- Added API method to clear spec cache.
+
 ## 7.9.0
 
 Faster spec detection.
