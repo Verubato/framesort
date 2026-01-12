@@ -7,6 +7,7 @@ local fsMath = addon.Numerics.Math
 local fsLog = addon.Logging.Log
 local fsConfig = addon.Configuration
 local wow = addon.WoW.Api
+local wowEx = addon.WoW.WowEx
 local events = addon.WoW.Events
 local capabilities = addon.WoW.Capabilities
 ---@class BlizzardFrameProvider: FrameProvider, IProcessEvents
@@ -331,6 +332,22 @@ function M:Containers()
         ---@type FrameContainer
         local arena = {
             Frame = wow.CompactArenaFrame,
+            Frames = function()
+                local count = wowEx.ArenaOpponentsCount()
+                local frames = {}
+
+                for i = 1, count do
+                    local frame = _G["CompactArenaFrameMember" .. i]
+                    frames[#frames + 1] = frame
+                end
+
+                for i = 1, count do
+                    local frame = _G["CompactArenaFramePet" .. i]
+                    frames[#frames + 1] = frame
+                end
+
+                return frames
+            end,
             Type = fsFrame.ContainerType.EnemyArena,
             LayoutType = fsFrame.LayoutType.Hard,
             -- in the prep room, and for invisible units, they hide behind a "prep" frame
