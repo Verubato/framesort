@@ -119,10 +119,12 @@ L["Target enemy frame 3's pet"] = "Выбрать питомца рамки вр
 L["Focus enemy frame 1"] = "Взять в фокус рамку врага 1"
 L["Focus enemy frame 2"] = "Взять в фокус рамку врага 2"
 L["Focus enemy frame 3"] = "Взять в фокус рамку врага 3"
-L["Cycle to the next frame"] = "Прокрутить к следующей рамке"
-L["Cycle to the previous frame"] = "Прокрутить к предыдущей рамке"
 L["Target the next frame"] = "Выбрать следующую рамку"
 L["Target the previous frame"] = "Выбрать предыдущую рамку"
+L["Cycle to the next frame"] = "Прокрутить к следующей рамке"
+L["Cycle to the previous frame"] = "Прокрутить к предыдущей рамке"
+L["Cycle to the next dps"] = "Переключиться на следующего бойца"
+L["Cycle to the previous dps"] = "Переключиться на предыдущего бойца"
 
 -- # Keybindings screen #
 L["Keybindings"] = "Назначения клавиш"

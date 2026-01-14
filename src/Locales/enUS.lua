@@ -115,10 +115,12 @@ L["Target enemy frame 3's pet"] = nil
 L["Focus enemy frame 1"] = nil
 L["Focus enemy frame 2"] = nil
 L["Focus enemy frame 3"] = nil
-L["Cycle to the next frame"] = nil
-L["Cycle to the previous frame"] = nil
 L["Target the next frame"] = nil
 L["Target the previous frame"] = nil
+L["Cycle to the next frame"] = nil
+L["Cycle to the previous frame"] = nil
+L["Cycle to the next dps"] = nil
+L["Cycle to the previous dps"] = nil
 
 -- # Keybindings screen #
 L["Keybindings"] = nil
