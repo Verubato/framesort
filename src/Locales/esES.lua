@@ -116,10 +116,12 @@ L["Target enemy frame 3's pet"] = "Fijar objetivo de la mascota del marco enemig
 L["Focus enemy frame 1"] = "Enfocar marco enemigo 1"
 L["Focus enemy frame 2"] = "Enfocar marco enemigo 2"
 L["Focus enemy frame 3"] = "Enfocar marco enemigo 3"
-L["Cycle to the next frame"] = "Cambiar al siguiente marco"
-L["Cycle to the previous frame"] = "Cambiar al marco anterior"
 L["Target the next frame"] = "Fijar objetivo del siguiente marco"
 L["Target the previous frame"] = "Fijar objetivo del marco anterior"
+L["Cycle to the next frame"] = "Cambiar al siguiente marco"
+L["Cycle to the previous frame"] = "Cambiar al marco anterior"
+L["Cycle to the next dps"] = "Cambiar al siguiente DPS"
+L["Cycle to the previous dps"] = "Cambiar al DPS anterior"
 
 -- # Keybindings screen #
 L["Keybindings"] = "Atajos de teclado"

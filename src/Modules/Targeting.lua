@@ -1,6 +1,7 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
+local wowEx = addon.WoW.WowEx
 local fsUnit = addon.WoW.Unit
 local fsSortedUnits = addon.Modules.Sorting.SortedUnits
 local fsSortedFrames = addon.Modules.Sorting.SortedFrames
@@ -19,6 +20,8 @@ local targetNextFrame = nil
 local targetPreviousFrame = nil
 local cycleNextFrame = nil
 local cyclePreviousFrame = nil
+local cycleNextDpsFrame = nil
+local cyclePreviousDpsFrame = nil
 
 ---@class TargetingModule: IInitialise
 local M = {}
@@ -47,6 +50,8 @@ local function UpdateAdjacentTargets(friendlyUnits)
     assert(cyclePreviousFrame)
     assert(targetNextFrame)
     assert(targetPreviousFrame)
+    assert(cycleNextDpsFrame)
+    assert(cyclePreviousDpsFrame)
 
     cycleNextFrame:SetAttribute("FSUnitsCount", #friendlyUnits)
     cyclePreviousFrame:SetAttribute("FSUnitsCount", #friendlyUnits)
@@ -59,6 +64,21 @@ local function UpdateAdjacentTargets(friendlyUnits)
         cyclePreviousFrame:SetAttribute("FSUnit" .. index, unit)
         targetNextFrame:SetAttribute("FSUnit" .. index, unit)
         targetPreviousFrame:SetAttribute("FSUnit" .. index, unit)
+    end
+
+    local dpsUnits = fsEnumerable
+        :From(friendlyUnits)
+        :Where(function(unit)
+            return wow.UnitGroupRolesAssigned(unit) == wowEx.Role.Dps
+        end)
+        :ToTable()
+
+    cycleNextDpsFrame:SetAttribute("FSUnitsCount", #dpsUnits)
+    cyclePreviousDpsFrame:SetAttribute("FSUnitsCount", #dpsUnits)
+
+    for index, unit in ipairs(dpsUnits) do
+        cycleNextDpsFrame:SetAttribute("FSUnit" .. index, unit)
+        cyclePreviousDpsFrame:SetAttribute("FSUnit" .. index, unit)
     end
 end
 
@@ -156,16 +176,20 @@ local function UpdateTargets()
 end
 
 local function InitAdjacentTargeting()
-    cycleNextFrame = wow.CreateFrame("Button", "FSCycleNextFrame", wow.UIParent, "SecureActionButtonTemplate")
-    cyclePreviousFrame = wow.CreateFrame("Button", "FSCyclePreviousFrame", wow.UIParent, "SecureActionButtonTemplate")
     targetNextFrame = wow.CreateFrame("Button", "FSTargetNextFrame", wow.UIParent, "SecureActionButtonTemplate")
     targetPreviousFrame = wow.CreateFrame("Button", "FSTargetPreviousFrame", wow.UIParent, "SecureActionButtonTemplate")
+    cycleNextFrame = wow.CreateFrame("Button", "FSCycleNextFrame", wow.UIParent, "SecureActionButtonTemplate")
+    cyclePreviousFrame = wow.CreateFrame("Button", "FSCyclePreviousFrame", wow.UIParent, "SecureActionButtonTemplate")
+    cycleNextDpsFrame = wow.CreateFrame("Button", "FSCycleNextDpsFrame", wow.UIParent, "SecureActionButtonTemplate")
+    cyclePreviousDpsFrame = wow.CreateFrame("Button", "FSCyclePreviousDpsFrame", wow.UIParent, "SecureActionButtonTemplate")
 
     local buttons = {
-        cycleNextFrame,
-        cyclePreviousFrame,
         targetNextFrame,
         targetPreviousFrame,
+        cycleNextFrame,
+        cyclePreviousFrame,
+        cycleNextDpsFrame,
+        cyclePreviousDpsFrame,
     }
 
     local downOrUp = wow.GetCVarBool("ActionButtonUseKeyDown") and "AnyDown" or "AnyUp"
@@ -200,7 +224,12 @@ local function InitAdjacentTargeting()
         "OnClick",
         cycleNextFrame,
         [[
-            local maxUnits = self:GetAttribute("FSUnitsCount")
+            local maxUnits = self:GetAttribute("FSUnitsCount") or 0
+
+            if maxUnits == 0 then
+                return
+            end
+
             local index = (self:GetAttribute("FSIndex") or 0) + 1
 
             -- if we've reached the end, then start from the beginning
@@ -220,7 +249,12 @@ local function InitAdjacentTargeting()
         "OnClick",
         cyclePreviousFrame,
         [[
-            local maxUnits = self:GetAttribute("FSUnitsCount")
+            local maxUnits = self:GetAttribute("FSUnitsCount") or 0
+
+            if maxUnits == 0 then
+                return
+            end
+
             local index = (self:GetAttribute("FSIndex") or 0) - 1
 
             if index <= 0 then
@@ -239,7 +273,12 @@ local function InitAdjacentTargeting()
         "OnClick",
         targetNextFrame,
         [[
-            local maxUnits = self:GetAttribute("FSUnitsCount")
+            local maxUnits = self:GetAttribute("FSUnitsCount") or 0
+
+            if maxUnits == 0 then
+                return
+            end
+
             local index = min((self:GetAttribute("FSIndex") or 0) + 1, maxUnits)
 
             self:RunAttribute("SetIndex", index)
@@ -254,8 +293,62 @@ local function InitAdjacentTargeting()
         "OnClick",
         targetPreviousFrame,
         [[
-            local maxUnits = self:GetAttribute("FSUnitsCount")
+            local maxUnits = self:GetAttribute("FSUnitsCount") or 0
+
+            if maxUnits == 0 then
+                return
+            end
+
             local index = max((self:GetAttribute("FSIndex") or 0) - 1, 1)
+
+            self:RunAttribute("SetIndex", index)
+
+            local unit = self:GetAttribute("FSUnit" .. index) or "none"
+            self:SetAttribute("unit", unit)
+        ]]
+    )
+
+    wow.SecureHandlerWrapScript(
+        cycleNextDpsFrame,
+        "OnClick",
+        cycleNextDpsFrame,
+        [[
+            local maxUnits = self:GetAttribute("FSUnitsCount") or 0
+
+            if maxUnits == 0 then
+                return
+            end
+
+            local index = (self:GetAttribute("FSIndex") or 0) + 1
+
+            -- if we've reached the end, then start from the beginning
+            if index > maxUnits then
+                index = 1
+            end
+
+            self:RunAttribute("SetIndex", index)
+
+            local unit = self:GetAttribute("FSUnit" .. index) or "none"
+            self:SetAttribute("unit", unit)
+        ]]
+    )
+
+    wow.SecureHandlerWrapScript(
+        cyclePreviousDpsFrame,
+        "OnClick",
+        cyclePreviousDpsFrame,
+        [[
+            local maxUnits = self:GetAttribute("FSUnitsCount") or 0
+
+            if maxUnits == 0 then
+                return
+            end
+
+            local index = (self:GetAttribute("FSIndex") or 0) - 1
+
+            if index <= 0 then
+                index = maxUnits
+            end
 
             self:RunAttribute("SetIndex", index)
 
