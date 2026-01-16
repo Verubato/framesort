@@ -1,5 +1,10 @@
 # Changelog
 
+## 7.9.2
+
+- Added cycle friendly dps keybinding.
+- Potential fix for Grid2 units dissappearing in dungeons.
+
 ## 7.9.1
 
 - Potential fix for Blizzard enemy pet frames being pushed too far down.
