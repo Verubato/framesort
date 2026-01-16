@@ -3,7 +3,7 @@
 ## 7.9.2
 
 - Added cycle friendly dps keybinding.
-- Potential fix for Grid2 units dissappearing in dungeons.
+- Potential fix for Grid2 units disappearing in dungeons.
 
 ## 7.9.1
 
