@@ -73,7 +73,14 @@ function M:Containers()
             Type = fsFrame.ContainerType.Party,
             LayoutType = fsFrame.LayoutType.NameList,
             ShowUnit = function(_, unitId)
-                if not wowEx.IsInInstance() then
+                local inInstance, instanceType = wowEx.IsInInstance()
+
+                if not inInstance then
+                    return true
+                end
+
+                if instanceType ~= "raid" then
+                    -- ignore dungeons as the map/zone can change quite a lot inside and we'd end up hiding players
                     return true
                 end
 
