@@ -54,7 +54,7 @@
 ---@field UnitIsConnected fun(unit: string): boolean
 ---@field UnitGroupRolesAssigned fun(unit: string): role: string
 ---@field UnitFactionGroup fun(unit: string): englishFaction: string, localisedFaction: string
----@field GetRaidRosterInfo fun(id: number): ...
+---@field GetRaidRosterInfo fun(id: number): name: string, rank: number, subgroup: number, level: number, class: string, filename: string, zone: string?, online: boolean, isDead: boolean, role: string, isML: boolean, combatRole: string
 ---@field GetArenaOpponentSpec fun(id: number): specId: number, gender: number
 ---@field GetSpecializationInfoByID fun(specIndex: number): id: number, name: string, description: string, icon: number, role: string, classFile: string, className: string
 ---@field GetInspectSpecialization fun(unit: string): specId: number
@@ -76,6 +76,7 @@
 ---@field IsInGroup fun(): boolean
 ---@field IsInRaid fun(): boolean
 ---@field InCombatLockdown fun(): boolean
+---@field GetInstanceInfo fun(): name: string, instanceType: string, difficultyId: string, difficultyName: string, maxPlayers: number, dynamicDifficulty: number, isDynamic: boolean, instanceId: number, instanceGroupSize: number, lfgDungeonId: number
 -- utility
 ---@field wipe fun(table: table): table
 ---@field CopyTable fun(table: table): table
