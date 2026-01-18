@@ -91,14 +91,18 @@ function M:Containers()
                     return true
                 end
 
-                if not wow.C_Map or not wow.C_Map.GetBestMapForUnit then
+                local mythicRaidDifficulty = 16
+                local _, _, difficultyId = wow.GetInstanceInfo()
+
+                if difficultyId ~= mythicRaidDifficulty then
                     return true
                 end
 
-                local instanceId = wow.C_Map.GetBestMapForUnit("player")
-                local unitInstanceId = wow.C_Map.GetBestMapForUnit(unitId)
+                local unitIndex = string.match(unitId, "%d+")
+                local _, _, subgroup = wow.GetRaidRosterInfo(unitIndex)
+                local include = subgroup >= 1 and subgroup <= 4
 
-                return instanceId == unitInstanceId
+                return include
             end,
         }
 

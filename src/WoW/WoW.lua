@@ -77,6 +77,7 @@ local api = {
     IsInGroup = IsInGroup,
     IsInRaid = IsInRaid,
     InCombatLockdown = InCombatLockdown,
+    GetInstanceInfo = GetInstanceInfo,
 
     -- group size functions
     GetNumGroupMembers = GetNumGroupMembers,
