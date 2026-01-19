@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.9.4
+
+Fixed issue with resolving arena pet nameplate units.
+
 ## 7.9.3
 
 Grid2 - better logic for filtering out benched players for mythic raids.
