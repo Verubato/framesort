@@ -345,7 +345,7 @@ function M:ResolveUnit(unit)
 
     for i = 1, count do
         local resolvedUnit = "arena" .. i
-        local resolvedPetUnit = "arena" .. i
+        local resolvedPetUnit = "arenapet" .. i
         local isUnit = wow.UnitIsUnit(unit, resolvedUnit)
 
         if not wow.issecretvalue(isUnit) and isUnit then
