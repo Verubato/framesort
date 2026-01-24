@@ -101,6 +101,8 @@ M.Specs = {
     { ClassId = 10, SpecId = 269, Type = M.Type.Melee },
     -- havoc dh
     { ClassId = 12, SpecId = 577, Type = M.Type.Melee },
+    -- devourer dh
+    { ClassId = 12, SpecId = 1480, Type = M.Type.Melee },
 }
 
 -- reverse lookup of a spec's name to it's id
