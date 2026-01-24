@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.9.5
+
+Added support for the new DH Devourer spec.
+
 ## 7.9.4
 
 Fixed issue with resolving arena pet nameplate units.
