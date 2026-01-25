@@ -227,26 +227,6 @@ local function CheckUsingSpacing()
     }
 end
 
-local function CheckUsingRaidStyleFrames()
-    local usingRaidStyle
-
-    if capabilities.HasEditMode() then
-        usingRaidStyle = wow.EditModeManagerFrame:UseRaidStylePartyFrames()
-    elseif CUF_CVar and CUF_CVar.GetCVarBool then
-        -- for wotlk private
-        usingRaidStyle = CUF_CVar:GetCVarBool("useCompactPartyFrames") or false
-    else
-        usingRaidStyle = wow.GetCVarBool("useCompactPartyFrames") or false
-    end
-
-    return {
-        Applicable = fsProviders.Blizzard:Enabled(),
-        Passed = usingRaidStyle,
-        Description = L["Using Raid-Style Party Frames"],
-        Help = L["Please enable 'Use Raid-Style Party Frames' in the Blizzard settings"],
-    }
-end
-
 local function CheckKeepGroupTogether()
     local keepGroupTogether = false
 
@@ -292,7 +272,6 @@ function M:IsHealthy()
     local results = {}
 
     results[#results + 1] = CheckCanSeeFrames()
-    results[#results + 1] = CheckUsingRaidStyleFrames()
     results[#results + 1] = CheckKeepGroupTogether()
     results[#results + 1] = CheckOnlyUsingBlizzard()
     results[#results + 1] = CheckUsingSpacing()
