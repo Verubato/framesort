@@ -154,6 +154,7 @@ function M:Enabled()
         wow.CompactPartyFrame,
         wow.CompactRaidFrameContainer,
         wow.CompactArenaFrame,
+        wow.PartyFrame,
     }
 
     for _, frame in pairs(frames) do
@@ -389,6 +390,23 @@ function M:Containers()
         }
 
         containers[#containers + 1] = arena
+    end
+
+    if wow.PartyFrame then
+        ---@type FrameContainer
+        local classicParty = {
+            Frame = wow.PartyFrame,
+            Type = fsFrame.ContainerType.Party,
+            LayoutType = fsFrame.LayoutType.Hard,
+            VisibleOnly = true,
+            SupportsSpacing = true,
+            InCombatSortingRequired = true,
+            IsGrouped = function()
+                return false
+            end,
+        }
+
+        containers[#containers + 1] = classicParty
     end
 
     return containers
