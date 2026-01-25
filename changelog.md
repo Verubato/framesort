@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.11.0
+
+Added support for classic style non-compact party frames.
+
 ## 7.10.0
 
 Fixed arena123 not resolving since Midnight for external addons such as MiniMarkers and ArenaCore.
