@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.10.0
+
+Fixed arena123 not resolving since Midnight for external addons such as MiniMarkers and ArenaCore.
+
 ## 7.9.5
 
 Added support for the new DH Devourer spec.
