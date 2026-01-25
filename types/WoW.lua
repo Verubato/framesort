@@ -143,6 +143,7 @@
 
 ---@class C_NamePlate
 ---@field GetNamePlates fun(): table[]
+---@field GetNamePlateForUnit fun(unit: string, issecure: boolean?): table
 
 ---@class C_TooltipInfo
 ---@field GetUnit fun(unit: string, hideStatus: boolean?): TooltipData
