@@ -343,6 +343,15 @@ function M:ResolveUnit(unit)
         return unit
     end
 
+    local function MatchesNameplate(toFind, nameplateToken)
+        local nameplate = wow.C_NamePlate.GetNamePlateForUnit(toFind)
+        local u = nameplate and (nameplate.unitToken or nameplate.namePlateUnitToken)
+
+        if u == nameplateToken then
+            return u
+        end
+    end
+
     for i = 1, count do
         local resolvedUnit = "arena" .. i
         local resolvedPetUnit = "arenapet" .. i
@@ -356,6 +365,16 @@ function M:ResolveUnit(unit)
 
         if not wow.issecretvalue(isPetUnit) and isPetUnit then
             return resolvedUnit
+        end
+
+        if wow.C_NamePlate then
+            if MatchesNameplate(resolvedUnit, unit) then
+                return resolvedUnit
+            end
+
+            if MatchesNameplate(resolvedPetUnit, unit) then
+                return resolvedPetUnit
+            end
         end
     end
 
