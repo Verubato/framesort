@@ -13,7 +13,6 @@ addon.Modules.Nameplates = M
 local function FrameText(unit, friendly, frameNumber)
     local config = addon.DB.Options.Nameplates
     local text = (friendly and config.FriendlyFormat or config.EnemyFormat) or "$framenumber"
-
     local name = (wow.UnitName and wow.UnitName(unit)) or "unknown"
 
     local specText = nil
@@ -77,24 +76,15 @@ local function OnUpdateName(frame)
         return
     end
 
-    local units = friendly and fsSortedUnits:FriendlyUnits() or fsSortedUnits:ArenaUnits()
+    local frameNumber, resolvedUnit = fsSortedUnits:FrameNumberForUnit(unit)
 
-    if not units or #units == 0 then
+    if not frameNumber or not resolvedUnit then
         return
     end
 
-    for frameNumber = 1, #units do
-        -- convert nameplateX to (party/raid/arena)X
-        local resolvedUnit = units[frameNumber]
-        local isUnitOrSecret = wow.UnitIsUnit(unit, resolvedUnit)
+    local text = FrameText(resolvedUnit, friendly, frameNumber)
 
-        if not wow.issecretvalue(isUnitOrSecret) and isUnitOrSecret then
-            local text = FrameText(resolvedUnit, friendly, frameNumber)
-
-            frame.name:SetText(text)
-            return
-        end
-    end
+    frame.name:SetText(text)
 end
 
 local function RefreshNameplates()

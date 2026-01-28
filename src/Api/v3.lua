@@ -607,22 +607,7 @@ function M.Frame:FrameNumberForUnit(unit)
     end
 
     return SafeCall(function()
-        local isFriendly = fsUnit:IsFriendlyUnit(unit)
-        local units = isFriendly and fsSortedUnits:FriendlyUnits() or fsSortedUnits:ArenaUnits()
-
-        for index, u in ipairs(units) do
-            if u == unit then
-                return index
-            end
-
-            local isUnitOrSecret = wow.UnitIsUnit(u, unit)
-
-            if not wow.issecretvalue(isUnitOrSecret) and isUnitOrSecret then
-                return index
-            end
-        end
-
-        return nil
+        return fsSortedUnits:FrameNumberForUnit(unit)
     end, "Frame:FrameNumberForUnit")
 end
 
