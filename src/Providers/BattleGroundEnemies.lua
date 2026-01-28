@@ -66,6 +66,10 @@ function M:Containers()
         return containers
     end
 
+    if not BattleGroundEnemies then
+        return containers
+    end
+
     local arenaFrame = BattleGroundEnemies.Enemies
     local allyFrame = BattleGroundEnemies.Allies
     local charKey = wow.UnitName("player") .. " - " .. wow.GetRealmName()

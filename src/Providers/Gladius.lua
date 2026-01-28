@@ -64,6 +64,10 @@ function M:Containers()
         return containers
     end
 
+    if not Gladius then
+        return
+    end
+
     local function getFrames()
         -- in test mode, get the number of frames shown
         local isTest = fsLuaEx:SafeGet(Gladius, { "test" })
@@ -147,7 +151,11 @@ function M:Init()
         return
     end
 
-    if Gladius and Gladius.UpdateUnit then
+    if not Gladius then
+        return
+    end
+
+    if Gladius.UpdateUnit then
         wow.hooksecurefunc(Gladius, "UpdateUnit", OnUpdateUnit)
     else
         fsLog:Bug("Gladius:UpdateUnit is nil.")
