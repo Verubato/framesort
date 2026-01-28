@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.11.1
+
+Fixed errors happening when BattleGroundEnemies and Gladius are enabled but haven't loaded properly.
+
 ## 7.11.0
 
 Added support for classic style non-compact party frames.
