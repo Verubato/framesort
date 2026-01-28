@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.11.2
+
+Enemy nameplate frame number fix.
+
 ## 7.11.1
 
 Fixed errors happening when BattleGroundEnemies and Gladius are enabled but haven't loaded properly.
