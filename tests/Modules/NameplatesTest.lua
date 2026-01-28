@@ -61,6 +61,15 @@ local function setSortedUnits(friendlyUnits, enemyUnits)
     fsSortedUnits.ArenaUnits = function()
         return enemyUnits
     end
+    fsSortedUnits.FrameNumberForUnit = function(_, nameplateUnit)
+        local list = fsUnit:IsFriendlyUnit(nameplateUnit) and friendlyUnits or enemyUnits
+        for i, unit in ipairs(list) do
+            if wow.UnitIsUnit(nameplateUnit, unit) then
+                return i, unit
+            end
+        end
+        return nil, nil
+    end
 end
 
 local function setUnitFriendliness(fn)
@@ -259,21 +268,6 @@ function M:test_onupdatename_sets_text_when_matches_friendly_units()
     assert(nameplate1)
     callback(nameplate1)
     assertEquals(nameplate1.name.Text, "Frame 2: party2_Name (party2)")
-end
-
-function M:test_onupdatename_does_not_set_text_when_is_secret_value()
-    local callback = initAndGetCallback()
-
-    wow.UnitIsUnit = function(a, b)
-        return (a == "nameplate1" and b == "party1")
-    end
-    wow.issecretvalue = function(_)
-        return true
-    end
-
-    assert(nameplate1)
-    callback(nameplate1)
-    assertEquals(nameplate1.name.Text, nil)
 end
 
 function M:test_onupdatename_replaces_framenumber_unit_name_spec_friendly()

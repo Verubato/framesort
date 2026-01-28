@@ -405,6 +405,30 @@ function M:LogStats()
     fsLog:Debug("Friendly cache %d hits %d misses, enemy cache %d hits %d misses.", friendlyCacheHits, friendlyCacheMisses, enemyCacheHits, enemyCacheMisses)
 end
 
+---Returns the frame number for the given unit.
+---@param unit string unit token
+---@return integer? frameNumber
+---@return string? resolvedUnit
+function M:FrameNumberForUnit(unit)
+    local isFriendly = fsUnit:IsFriendlyUnit(unit)
+    local units = isFriendly and M:FriendlyUnits() or M:ArenaUnits()
+    local resolvedUnit = fsUnit:ResolveUnit(unit) or unit
+
+    for index, u in ipairs(units) do
+        if u == resolvedUnit then
+            return index, resolvedUnit
+        end
+
+        local isUnitOrSecret = wow.UnitIsUnit(u, resolvedUnit)
+
+        if not wow.issecretvalue(isUnitOrSecret) and isUnitOrSecret then
+            return index, resolvedUnit
+        end
+    end
+
+    return nil, nil
+end
+
 function M:ProcessEvent(event, ...)
     if not cacheEnabled then
         return
