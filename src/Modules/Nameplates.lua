@@ -76,8 +76,14 @@ local function RestoreNames()
         local unitFrame = plate.UnitFrame
 
         if unitFrame and unitFrame.unit and wow.UnitExists(unitFrame.unit) then
+            local isFriendly = fsUnit:IsFriendlyUnit(unitFrame.unit)
             local name = wow.UnitName(unitFrame.unit)
-            SetNameplateText(unitFrame, unitFrame.unit, name)
+
+            if isFriendly and not addon.DB.Options.Nameplates.FriendlyEnabled then
+                SetNameplateText(unitFrame, unitFrame.unit, name)
+            elseif not isFriendly and not addon.DB.Options.Nameplates.EnemyEnabled then
+                SetNameplateText(unitFrame, unitFrame.unit, name)
+            end
         end
     end
 end
