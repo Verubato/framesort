@@ -285,7 +285,7 @@ L["Nameplates"] = "이름표"
 L["Friendly Nameplates"] = "아군 이름표"
 L["Enemy Nameplates"] = "적 이름표"
 L["NameplatesBlurb"] = [[
-블리자드 이름표 텍스트를 FrameSort 변수로 교체합니다.
+Blizzard 및 Platynator 이름표 텍스트를 FrameSort 변수로 대체합니다.
 \n
 지원되는 변수:
   - $framenumber
@@ -294,7 +294,7 @@ L["NameplatesBlurb"] = [[
   - $spec
 \n
 예시:
-  - Frame - $framenumber
+  - 프레임 - $framenumber
   - $framenumber - $spec
   - $name - $spec
 ]]

@@ -285,7 +285,7 @@ L["Nameplates"] = "Barres de nom"
 L["Friendly Nameplates"] = "Barres de nom amicales"
 L["Enemy Nameplates"] = "Barres de nom ennemies"
 L["NameplatesBlurb"] = [[
-Remplace le texte des barres de nom de Blizzard par des variables FrameSort.
+Remplace le texte des plaques de nom Blizzard et Platynator par des variables FrameSort.
 \n
 Variables prises en charge :
   - $framenumber
@@ -294,7 +294,7 @@ Variables prises en charge :
   - $spec
 \n
 Exemples :
-  - Frame - $framenumber
+  - Cadre - $framenumber
   - $framenumber - $spec
   - $name - $spec
 ]]

@@ -43,6 +43,7 @@
         "LE_EXPANSION_LEVEL_CURRENT",
         "CompactUnitFrame_UpdateName",
         "GameTooltip",
+        "Platynator",
     ],
     "diagnostics.disable": [
         "inject-field",

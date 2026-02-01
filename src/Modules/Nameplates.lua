@@ -1,14 +1,29 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
+local wowEx = addon.WoW.WowEx
 local capabilities = addon.WoW.Capabilities
 local fsLog = addon.Logging.Log
 local fsSortedUnits = addon.Modules.Sorting.SortedUnits
 local fsUnit = addon.WoW.Unit
 local fsInspector = addon.Modules.Inspector
+local events = addon.WoW.Events
+local hasPlatynator = wowEx.IsAddOnEnabled("Platynator")
+local eventsFrame
+local wasFriendlyEnabled = false
+local wasEnemyEnabled = false
 ---@class NameplatesModule : IInitialise
 local M = {}
 addon.Modules.Nameplates = M
+
+local function SetPlatynatorText(nameplateUnit, text)
+    if type(Platynator) ~= "table" or type(Platynator.API) ~= "table" or type(Platynator.API.SetUnitTextOverride) ~= "function" then
+        return false
+    end
+
+    Platynator.API.SetUnitTextOverride(nameplateUnit, text, nil)
+    return true
+end
 
 local function FrameText(unit, friendly, frameNumber)
     local config = addon.DB.Options.Nameplates
@@ -40,19 +55,46 @@ local function FrameText(unit, friendly, frameNumber)
     return text
 end
 
-local function OnUpdateName(frame)
-    if not frame then
+local function SetNameplateText(unitFrame, unit, text)
+    if hasPlatynator then
+        if not SetPlatynatorText(unit, text) then
+            fsLog:WarnOnce("Failed to set Platynator nameplate text for unit %s.", unit)
+        end
+    elseif unitFrame.name and type(unitFrame.name.SetText) == "function" then
+        unitFrame.name:SetText(text)
+    else
+        fsLog:WarnOnce("Failed to set nameplate text for unit %s.", unit)
+    end
+end
+
+local function RestoreNames()
+    if not wow.C_NamePlate or not wow.C_NamePlate.GetNamePlates then
         return
     end
 
-    local unit = frame.unit
+    for _, plate in ipairs(wow.C_NamePlate.GetNamePlates()) do
+        local unitFrame = plate.UnitFrame
+
+        if unitFrame and unitFrame.unit and wow.UnitExists(unitFrame.unit) then
+            local name = wow.UnitName(unitFrame.unit)
+            SetNameplateText(unitFrame, unitFrame.unit, name)
+        end
+    end
+end
+
+local function OnUpdateName(unitFrame)
+    if not unitFrame then
+        return
+    end
+
+    local unit = unitFrame.unit
 
     if not unit then
         return
     end
 
     -- ignore pets and npcs
-    if not wow.UnitIsPlayer(frame.unit) then
+    if not wow.UnitIsPlayer(unitFrame.unit) then
         return
     end
 
@@ -61,18 +103,29 @@ local function OnUpdateName(frame)
         return
     end
 
-    if not frame.name then
-        fsLog:WarnOnce("No name for frame %s.", frame:GetName() or "nil")
+    if not unitFrame.name then
+        fsLog:WarnOnce("No name for frame %s.", unitFrame:GetName() or "nil")
         return
     end
 
     local friendly = fsUnit:IsFriendlyUnit(unit)
 
     if friendly and not addon.DB.Options.Nameplates.FriendlyEnabled then
+        if wasFriendlyEnabled then
+            -- User has disabled the option, restore unit names
+            RestoreNames()
+        end
+
+        wasFriendlyEnabled = false
         return
     end
 
     if not friendly and not addon.DB.Options.Nameplates.EnemyEnabled then
+        if wasEnemyEnabled then
+            RestoreNames()
+        end
+
+        wasEnemyEnabled = false
         return
     end
 
@@ -84,7 +137,10 @@ local function OnUpdateName(frame)
 
     local text = FrameText(resolvedUnit, friendly, frameNumber)
 
-    frame.name:SetText(text)
+    SetNameplateText(unitFrame, unit, text)
+
+    wasFriendlyEnabled = addon.DB.Options.Nameplates.FriendlyEnabled
+    wasEnemyEnabled = addon.DB.Options.Nameplates.EnemyEnabled
 end
 
 local function RefreshNameplates()
@@ -97,6 +153,19 @@ local function RefreshNameplates()
         if unitFrame then
             OnUpdateName(unitFrame)
         end
+    end
+end
+
+local function OnNameplateAdded(_, event, unit)
+    local nameplate = unit and wow.C_NamePlate.GetNamePlateForUnit(unit)
+
+    if not nameplate then
+        return
+    end
+
+    local unitFrame = nameplate.UnitFrame
+    if unitFrame then
+        OnUpdateName(unitFrame)
     end
 end
 
@@ -116,6 +185,12 @@ function M:Init()
 
     if CompactUnitFrame_UpdateName then
         wow.hooksecurefunc("CompactUnitFrame_UpdateName", OnUpdateName)
+    end
+
+    if hasPlatynator then
+        eventsFrame = wow.CreateFrame("Frame")
+        eventsFrame:RegisterEvent(events.NAME_PLATE_UNIT_ADDED)
+        eventsFrame:SetScript("OnEvent", OnNameplateAdded)
     end
 
     fsLog:Debug("Initialised the nameplates module.")
