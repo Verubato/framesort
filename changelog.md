@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.13.0
+
+Removed enemy nameplate support on 12.0.1 as it's no longer possible.
+
 ## 7.12.1
 
 Fixed minor issue with restoring nameplate names for both friendly and enemy nameplates when only one of those options are disabled.
