@@ -103,11 +103,6 @@ local function OnUpdateName(unitFrame)
         return
     end
 
-    if not unitFrame.name then
-        fsLog:WarnOnce("No name for frame %s.", unitFrame:GetName() or "nil")
-        return
-    end
-
     local friendly = fsUnit:IsFriendlyUnit(unit)
 
     if friendly and not addon.DB.Options.Nameplates.FriendlyEnabled then
