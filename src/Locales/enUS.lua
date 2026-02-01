@@ -281,7 +281,7 @@ L["Nameplates"] = "Nameplates"
 L["Friendly Nameplates"] = "Friendly Nameplates"
 L["Enemy Nameplates"] = "Enemy Nameplates"
 L["NameplatesBlurb"] = [[
-Replace blizzard nameplate text with FrameSort variables.
+Replace Blizzard and Platynator nameplate text with FrameSort variables.
 \n
 Supported variables:
   - $framenumber

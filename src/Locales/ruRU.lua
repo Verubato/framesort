@@ -290,7 +290,7 @@ L["Nameplates"] = "Индикаторы здоровья"
 L["Friendly Nameplates"] = "Индикаторы союзников"
 L["Enemy Nameplates"] = "Индикаторы врагов"
 L["NameplatesBlurb"] = [[
-Заменяет текст индикаторов здоровья Blizzard переменными FrameSort.
+Заменяет текст индикаторов имён Blizzard и Platynator на переменные FrameSort.
 \n
 Поддерживаемые переменные:
   - $framenumber
@@ -299,7 +299,7 @@ L["NameplatesBlurb"] = [[
   - $spec
 \n
 Примеры:
-  - Frame - $framenumber
+  - Фрейм - $framenumber
   - $framenumber - $spec
   - $name - $spec
 ]]

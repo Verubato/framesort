@@ -2,6 +2,7 @@
 local _, addon = ...
 local fsConfig = addon.Configuration
 local wow = addon.WoW.Api
+local fsRun = addon.Modules
 local L = addon.Locale.Current
 local M = {}
 fsConfig.Panels.Nameplates = M
@@ -39,6 +40,11 @@ function M:Build(parent)
     local blurb = L["NameplatesBlurb"]
     local blurbControl = fsConfig:MultilineTextBlock(blurb, panel, title)
 
+    local function Update()
+        fsConfig:NotifyChanged()
+        fsRun:Run()
+    end
+
     local friendlyEnabled = wow.CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
     friendlyEnabled:SetPoint("TOPLEFT", blurbControl, "BOTTOMLEFT", 0, -verticalSpacing)
     friendlyEnabled.Text:SetText(L["Friendly Nameplates"])
@@ -47,6 +53,7 @@ function M:Build(parent)
 
     local function OnFriendlyClick(box)
         addon.DB.Options.Nameplates.FriendlyEnabled = box:GetChecked()
+        Update()
     end
 
     friendlyEnabled:SetScript("OnClick", OnFriendlyClick)
@@ -56,6 +63,7 @@ function M:Build(parent)
     friendlyFormat:SetText(addon.DB.Options.Nameplates.FriendlyFormat)
     friendlyFormat:SetScript("OnEditFocusLost", function()
         addon.DB.Options.Nameplates.FriendlyFormat = friendlyFormat:GetText()
+        Update()
     end)
 
     ConfigureEditBox(friendlyFormat)
@@ -68,6 +76,7 @@ function M:Build(parent)
 
     local function OnEnemyClick(box)
         addon.DB.Options.Nameplates.EnemyEnabled = box:GetChecked()
+        Update()
     end
 
     enemyEnabled:SetScript("OnClick", OnEnemyClick)
@@ -77,6 +86,7 @@ function M:Build(parent)
     enemyFormat:SetText(addon.DB.Options.Nameplates.EnemyFormat)
     enemyFormat:SetScript("OnEditFocusLost", function()
         addon.DB.Options.Nameplates.EnemyFormat = enemyFormat:GetText()
+        Update()
     end)
 
     ConfigureEditBox(enemyFormat)

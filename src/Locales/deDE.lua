@@ -284,7 +284,7 @@ L["Nameplates"] = "Namensplaketten"
 L["Friendly Nameplates"] = "Freundliche Namensplaketten"
 L["Enemy Nameplates"] = "Feindliche Namensplaketten"
 L["NameplatesBlurb"] = [[
-Ersetzt den Text der Blizzard-Namensplaketten durch FrameSort-Variablen.
+Ersetzt den Nameplate-Text von Blizzard und Platynator durch FrameSort-Variablen.
 \n
 Unterstützte Variablen:
   - $framenumber

@@ -282,7 +282,7 @@ L["Nameplates"] = "姓名板"
 L["Friendly Nameplates"] = "友方姓名板"
 L["Enemy Nameplates"] = "敌方姓名板"
 L["NameplatesBlurb"] = [[
-使用 FrameSort 变量替换暴雪姓名板文本。
+将 Blizzard 和 Platynator 的姓名板文本替换为 FrameSort 变量。
 \n
 支持的变量：
   - $framenumber
@@ -291,7 +291,7 @@ L["NameplatesBlurb"] = [[
   - $spec
 \n
 示例：
-  - Frame - $framenumber
+  - 框架 - $framenumber
   - $framenumber - $spec
   - $name - $spec
 ]]
