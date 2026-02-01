@@ -538,9 +538,14 @@ function M.Inspector:GetUnitSpecId(unit)
 
     return SafeCall(function()
         if fsUnit:IsEnemyUnit(unit) then
-            return fsInspector:EnemyUnitSpec(unit)
+            local specId = fsInspector:EnemyUnitSpec(unit)
+
+            if specId then
+                return specId
+            end
         end
 
+        -- attempt friendly even if the unit is an enemy, because they may have previously been friendly and we've cached their spec
         return fsInspector:FriendlyUnitSpec(unit)
     end, "Inspector:GetUnitSpecId")
 end
