@@ -1,6 +1,7 @@
 ---@type string, Addon
 local _, addon = ...
 local fsConfig = addon.Configuration
+local capabilities = addon.WoW.Capabilities
 local wow = addon.WoW.Api
 local fsRun = addon.Modules
 local L = addon.Locale.Current
@@ -68,28 +69,30 @@ function M:Build(parent)
 
     ConfigureEditBox(friendlyFormat)
 
-    local enemyEnabled = wow.CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
-    enemyEnabled:SetPoint("TOPLEFT", friendlyFormat, "BOTTOMLEFT", 0, -verticalSpacing)
-    enemyEnabled.Text:SetText(L["Enemy Nameplates"])
-    enemyEnabled.Text:SetFontObject("GameFontNormal")
-    enemyEnabled:SetChecked(addon.DB.Options.Nameplates.EnemyEnabled or false)
+    if capabilities:CanGetArenaNameplates() then
+        local enemyEnabled = wow.CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
+        enemyEnabled:SetPoint("TOPLEFT", friendlyFormat, "BOTTOMLEFT", 0, -verticalSpacing)
+        enemyEnabled.Text:SetText(L["Enemy Nameplates"])
+        enemyEnabled.Text:SetFontObject("GameFontNormal")
+        enemyEnabled:SetChecked(addon.DB.Options.Nameplates.EnemyEnabled or false)
 
-    local function OnEnemyClick(box)
-        addon.DB.Options.Nameplates.EnemyEnabled = box:GetChecked()
-        Update()
+        local function OnEnemyClick(box)
+            addon.DB.Options.Nameplates.EnemyEnabled = box:GetChecked()
+            Update()
+        end
+
+        enemyEnabled:SetScript("OnClick", OnEnemyClick)
+
+        local enemyFormat = wow.CreateFrame("EditBox", nil, panel)
+        enemyFormat:SetPoint("TOPLEFT", enemyEnabled, "BOTTOMLEFT", 0, -verticalSpacing)
+        enemyFormat:SetText(addon.DB.Options.Nameplates.EnemyFormat)
+        enemyFormat:SetScript("OnEditFocusLost", function()
+            addon.DB.Options.Nameplates.EnemyFormat = enemyFormat:GetText()
+            Update()
+        end)
+
+        ConfigureEditBox(enemyFormat)
     end
-
-    enemyEnabled:SetScript("OnClick", OnEnemyClick)
-
-    local enemyFormat = wow.CreateFrame("EditBox", nil, panel)
-    enemyFormat:SetPoint("TOPLEFT", enemyEnabled, "BOTTOMLEFT", 0, -verticalSpacing)
-    enemyFormat:SetText(addon.DB.Options.Nameplates.EnemyFormat)
-    enemyFormat:SetScript("OnEditFocusLost", function()
-        addon.DB.Options.Nameplates.EnemyFormat = enemyFormat:GetText()
-        Update()
-    end)
-
-    ConfigureEditBox(enemyFormat)
 
     return panel
 end

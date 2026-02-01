@@ -82,3 +82,9 @@ end
 function M.HasPvPMatchState()
     return M.HasC_PvP() and type(wow.Enum) == "table" and wow.Enum.PvPMatchState ~= nil and type(wow.C_PvP.GetActiveMatchState) == "function"
 end
+
+function M.CanGetArenaNameplates()
+    -- since 12.0.1 you can no longer do C_NamePlate:GetNamePlateForUnit("arenaX")
+    local _, _, _, build = GetBuildInfo()
+    return build < 120001
+end

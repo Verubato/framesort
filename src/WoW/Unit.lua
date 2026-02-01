@@ -367,7 +367,7 @@ function M:ResolveUnit(unit)
             return resolvedUnit
         end
 
-        if wow.C_NamePlate then
+        if wow.C_NamePlate and capabilities:CanGetArenaNameplates() then
             if MatchesNameplate(resolvedUnit, unit) then
                 return resolvedUnit
             end
