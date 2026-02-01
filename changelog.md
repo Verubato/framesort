@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.12.0
+
+Added Platynator support for nameplate numbering.
+
 ## 7.11.2
 
 Enemy nameplate frame number fix.
