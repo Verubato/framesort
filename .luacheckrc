@@ -65,6 +65,7 @@ local config = {
 		"GladiusButtonBackground",
 		"CompactUnitFrame_UpdateName",
 		"GameTooltip",
+        "Platynator",
 	},
 
 	ignore = {
