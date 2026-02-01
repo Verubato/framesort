@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.12.1
+
+Fixed minor issue with restoring nameplate names for both friendly and enemy nameplates when only one of those options are disabled.
+
 ## 7.12.0
 
 Added Platynator support for nameplate numbering.
