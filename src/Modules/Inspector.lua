@@ -337,11 +337,13 @@ local function SpecFromTooltip(unit)
 
     if tooltipData then
         for _, line in ipairs(tooltipData.lines) do
-            if line and line.type == wow.Enum.TooltipDataLineType.None and line.leftText and line.leftText ~= "" then
-                local specId = fsSpec:SpecIdFromTooltip(line.leftText)
+            if line and line.type == wow.Enum.TooltipDataLineType.None and line.leftText then
+                if not wow.issecretvalue(line.leftText) then
+                    local specId = fsSpec:SpecIdFromTooltip(line.leftText)
 
-                if specId then
-                    return specId
+                    if specId then
+                        return specId
+                    end
                 end
             end
         end
