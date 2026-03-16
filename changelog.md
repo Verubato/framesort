@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.13.1
+
+Fixed tooltips sometimes disappearing in player inspections after a few seconds.
+
 ## 7.13.0
 
 Removed enemy nameplate support on 12.0.1 as it's no longer possible.
