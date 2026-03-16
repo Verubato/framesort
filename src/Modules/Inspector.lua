@@ -365,12 +365,12 @@ local function RunLoop()
     if requestedUnit ~= nil and timeSinceLastInspect >= inspectTimeout then
         if isOurInspect then
             fsLog:Debug("Inspect timeout for unit '%s'.", requestedUnit)
+            wow.ClearInspectPlayer()
         end
 
         requestedUnit = nil
         currentInspectUnit = nil
         isOurInspect = false
-        wow.ClearInspectPlayer()
     end
 
     if not needUpdate then
