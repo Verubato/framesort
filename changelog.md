@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.13.2
+
+Fix for bizarre taint issue when running ElvUI + sArena + FrameSort in combination.
+
 ## 7.13.1
 
 Fixed tooltips sometimes disappearing in player inspections after a few seconds.
