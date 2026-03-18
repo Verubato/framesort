@@ -157,14 +157,25 @@ function M:Enabled()
         wow.PartyFrame,
     }
 
-    for _, frame in pairs(frames) do
-        -- frame addons will usually disable blizzard via unsubscribing group update events
-        if frame and (frame:IsVisible() or frame:IsEventRegistered("GROUP_ROSTER_UPDATE")) then
-            return true
+    -- for some bizarre reason, when running in combination sArena + ElvUI + FrameSort
+    -- either IsVisible or IsEventRegistered here returns a secret boolean and thus crashes with an error as you can't perform logic on secret values
+    -- this shouldn't happen, as these methods should't return secret values
+    -- the last theory was some sort of taint issue originating from sArena which moves and re-parents Blizzard's DR frames
+    -- and I guess some sort of Blizzardism happens and we get taint and a secret boolean
+    -- so to workaround this wrap the whole thing in a pcall
+    -- note that it is possible to run ElvUI and still have Blizzard frames enabled
+    local ok, result = pcall(function()
+        for _, frame in pairs(frames) do
+            -- frame addons will usually disable blizzard via unsubscribing group update events
+            if frame and (frame:IsVisible() or frame:IsEventRegistered("GROUP_ROSTER_UPDATE")) then
+                return true
+            end
         end
-    end
 
-    return false
+        return false
+    end)
+
+    return ok and result
 end
 
 function M:RegisterRequestSortCallback(callback)
