@@ -93,6 +93,11 @@ local function OnUpdateName(unitFrame)
         return
     end
 
+    -- not sure why, but it happens at the end of a shuffle round
+    if issecretvalue and issecretvalue(unitFrame) then
+        return
+    end
+
     local unit = unitFrame.unit
 
     if not unit then
