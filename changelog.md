@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.13.3
+
+Fixed secret value error happening at the end of each solo shuffle round.
+
 ## 7.13.2
 
 Fix for bizarre taint issue when running ElvUI + sArena + FrameSort in combination.
