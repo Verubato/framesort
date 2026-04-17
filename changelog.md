@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.13.4
+
+12.0.5 TOC support.
+
 ## 7.13.3
 
 Fixed secret value error happening at the end of each solo shuffle round.
