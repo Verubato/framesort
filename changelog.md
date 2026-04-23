@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.13.5
+
+Secret value handling fix when sorting external frame addons.
+
 ## 7.13.4
 
 12.0.5 TOC support.
