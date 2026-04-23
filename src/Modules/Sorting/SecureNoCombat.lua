@@ -602,6 +602,7 @@ local function SetNameList(container)
             return wow.GetUnitName(unit, true)
         end)
         :Where(function(name)
+            if wow.issecretvalue(name) then return false end
             return name and name ~= ""
         end)
         :Distinct()
