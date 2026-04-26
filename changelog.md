@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.14.2
+
+Another regression bug fix from previous release, sorry.
+
 ## 7.14.1
 
 Regression bug fix from previous release.
