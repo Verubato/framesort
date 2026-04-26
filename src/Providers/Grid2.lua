@@ -130,11 +130,11 @@ function M:Init()
     end
 
     if canHook then
+        local eventHooked = false
         wow.hooksecurefunc(Grid2Layout, "LoadLayout", function()
-            if Grid2LayoutHeader1 then
+            if not eventHooked and Grid2LayoutHeader1 then
                 Grid2LayoutHeader1:HookScript("OnEvent", OnEvent)
-            else
-                fsLog:Bug("Grid2LayoutHeader1 is nil.")
+                eventHooked = true
             end
         end)
     else
