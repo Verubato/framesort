@@ -187,6 +187,11 @@ function M:LevelText(level)
     return levelText[level] or "Unknown"
 end
 
+---Returns true if logging is currently enabled.
+function M:IsEnabled()
+    return LoggingEnabled() == true
+end
+
 ---Logs a debug message.
 ---@param msg string
 function M:Debug(msg, ...)

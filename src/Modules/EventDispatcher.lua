@@ -18,17 +18,19 @@ local M = {}
 addon.Modules.EventDispatcher = M
 
 local function OnEvent(_, event, ...)
-    local args = { ... }
+    if fsLog:IsEnabled() then
+        local args = { ... }
 
-    if #args > 0 then
-        for i = 1, #args do
-            args[i] = tostring(args[i])
+        if #args > 0 then
+            for i = 1, #args do
+                args[i] = tostring(args[i])
+            end
+
+            local argsString = table.concat(args, ", ")
+            fsLog:Debug("Event: %s %s.", event, argsString)
+        else
+            fsLog:Debug("Event: %s.", event)
         end
-
-        local argsString = table.concat(args, ", ")
-        fsLog:Debug("Event: %s %s.", event, argsString)
-    else
-        fsLog:Debug("Event: %s.", event)
     end
 
     -- prioritise the scheduler
