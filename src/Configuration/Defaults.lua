@@ -17,7 +17,7 @@ fsConfig.DbDefaults = {
 
     ---@class Options
     Options = {
-        Version = 25,
+        Version = 26,
         Locale = "",
         Sorting = {
             Ordering = {
@@ -75,6 +75,9 @@ fsConfig.DbDefaults = {
             Miscellaneous = {
                 PlayerRoleSort = fsConfig.PlayerSortMode.None,
             },
+        },
+        Logging = {
+            Enabled = false,
         },
         AutoLeader = {
             Enabled = true,

@@ -279,6 +279,7 @@ L["No conflicting addons"] = "Конфликтующих аддонов нет"
 
 -- # Log Screen -- #
 L["Log"] = "Журнал"
+L["Enable Logging"] = "Включить ведение журнала"
 L["FrameSort log to help with diagnosing issues."] = "Журнал FrameSort для диагностики проблем."
 L["Copy Log"] = "Копировать журнал"
 

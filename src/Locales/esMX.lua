@@ -275,6 +275,7 @@ L["No conflicting addons"] = "Sin complementos en conflicto"
 
 -- # Log Screen -- #
 L["Log"] = "Registro"
+L["Enable Logging"] = "Activar registro"
 L["FrameSort log to help with diagnosing issues."] = "Registro de FrameSort para ayudar a diagnosticar problemas."
 L["Copy Log"] = "Copiar registro"
 

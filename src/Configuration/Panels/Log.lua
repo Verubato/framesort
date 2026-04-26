@@ -138,17 +138,27 @@ function M:Build(parent)
         ShowCopyWindow()
     end)
 
+    local enabledCheck = wow.CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
+    enabledCheck:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -verticalSpacing)
+    enabledCheck.Text:SetText(L["Enable Logging"])
+    enabledCheck:SetChecked(addon.DB.Options.Logging and addon.DB.Options.Logging.Enabled or false)
+    enabledCheck:SetScript("OnClick", function(box)
+        addon.DB.Options.Logging.Enabled = box:GetChecked()
+        fsLog:Debug("Logging enabled.")
+    end)
+
     local intro = {
         L["FrameSort log to help with diagnosing issues."],
     }
 
-    local anchor = fsConfig:TextBlock(intro, panel, title)
+    local anchor = fsConfig:TextBlock(intro, panel, enabledCheck)
     logFrame = wow.CreateFrame("ScrollingMessageFrame", nil, panel)
 
     local panelWidth, panelHeight = fsConfig:SettingsSize()
     local margin = 100
+    local checkboxHeight = 26
     local width = panelWidth - margin
-    local height = panelHeight - margin
+    local height = panelHeight - margin - checkboxHeight - verticalSpacing
 
     logFrame:SetSize(width, height)
     logFrame:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, -verticalSpacing)

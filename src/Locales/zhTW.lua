@@ -268,6 +268,7 @@ L["No conflicting addons"] = "沒有衝突的插件"
 
 -- # Log Screen -- #
 L["Log"] = "日誌"
+L["Enable Logging"] = "啟用日誌"
 L["FrameSort log to help with diagnosing issues."] = "FrameSort 日誌，用於協助診斷問題。"
 L["Copy Log"] = "複製日誌"
 

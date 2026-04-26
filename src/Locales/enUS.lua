@@ -270,6 +270,7 @@ L["No conflicting addons"] = nil
 
 -- # Log Screen -- #
 L["Log"] = nil
+L["Enable Logging"] = nil
 L["FrameSort log to help with diagnosing issues."] = nil
 L["Copy Log"] = nil
 

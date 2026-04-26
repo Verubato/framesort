@@ -274,6 +274,7 @@ L["No conflicting addons"] = "충돌하는 애드온 없음"
 
 -- # Log Screen -- #
 L["Log"] = "로그"
+L["Enable Logging"] = "로그 활성화"
 L["FrameSort log to help with diagnosing issues."] = "문제 진단을 돕는 FrameSort 로그."
 L["Copy Log"] = "로그 복사"
 

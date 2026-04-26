@@ -32,6 +32,10 @@ local levelText = {
     [M.Level.Bug] = "Bug",
 }
 
+local function LoggingEnabled()
+    return addon.DB and addon.DB.Options and addon.DB.Options.Logging and addon.DB.Options.Logging.Enabled
+end
+
 local function NotifyCallbacks(msg, level, timestamp)
     for i = 1, #callbacks do
         local cb = callbacks[i]
@@ -82,11 +86,11 @@ end
 
 local function Write(msg, level)
     local ts = wow.GetTimePreciseSec() - started
-    NotifyCallbacks(msg, level, ts)
 
-    -- addon.DB may not have been inititalised yet, so use the global
-    if FrameSortDB then
-        FrameSortDB.Log = FrameSortDB.Log or wow.CopyTable(addon.Configuration.DbDefaults.Log)
+    if LoggingEnabled() then
+        NotifyCallbacks(msg, level, ts)
+
+        addon.DB.Log = addon.DB.Log or wow.CopyTable(addon.Configuration.DbDefaults.Log)
 
         local entry = {
             Message = msg,
@@ -94,7 +98,7 @@ local function Write(msg, level)
             Timestamp = ts,
         }
 
-        LogPush(FrameSortDB.Log, entry)
+        LogPush(addon.DB.Log, entry)
     end
 
     if level == M.Level.Notify then
@@ -121,15 +125,15 @@ end
 ---Iterates over the database log entries and invokes the callback for each log entry.
 ---@param fn function()
 function M:IterateLog(fn)
-    if not FrameSortDB then
+    if not addon.DB then
         return
     end
 
-    if not FrameSortDB.Log then
+    if not addon.DB.Log then
         return
     end
 
-    local db = FrameSortDB.Log
+    local db = addon.DB.Log
     local buffer = db.Buffer
     local count = tonumber(db.Size)
     local head = tonumber(db.Head)
@@ -186,6 +190,7 @@ end
 ---Logs a debug message.
 ---@param msg string
 function M:Debug(msg, ...)
+    if not LoggingEnabled() then return end
     local formatted = string.format(msg, ...)
     Write(formatted, M.Level.Debug)
 end
@@ -205,6 +210,7 @@ end
 ---Logs a warning message.
 ---@param msg string
 function M:Warning(msg, ...)
+    if not LoggingEnabled() then return end
     local formatted = string.format(msg, ...)
     Write(formatted, M.Level.Warning)
 end
@@ -212,6 +218,7 @@ end
 ---Logs a warning message if one hasn't already been logged with the same message.
 ---@param msg string
 function M:WarnOnce(msg, ...)
+    if not LoggingEnabled() then return end
     local formatted = string.format(msg, ...)
 
     if warningsNotified[formatted] then
@@ -226,6 +233,7 @@ end
 ---Logs an error message if one hasn't already been logged with the same message.
 ---@param msg string
 function M:ErrorOnce(msg, ...)
+    if not LoggingEnabled() then return end
     local formatted = string.format(msg, ...)
 
     if errorsNotified[formatted] then
@@ -240,6 +248,7 @@ end
 ---Logs an error message.
 ---@param msg string
 function M:Error(msg, ...)
+    if not LoggingEnabled() then return end
     local formatted = string.format(msg, ...)
     Write(formatted, M.Level.Error)
 end
@@ -268,6 +277,8 @@ end
 ---Logs a message.
 ---@param msg string
 function M:Log(msg, level, ...)
+    local chatLevel = level == M.Level.Notify or level == M.Level.Critical or level == M.Level.Bug
+    if not chatLevel and not LoggingEnabled() then return end
     local formatted = string.format(msg, ...)
     Write(formatted, level)
 end
@@ -276,6 +287,18 @@ end
 ---@param callback function
 function M:AddLogCallback(callback)
     callbacks[#callbacks + 1] = callback
+end
+
+function M:ClearBufferIfDisabled()
+    if LoggingEnabled() then
+        return
+    end
+
+    if addon.DB.Log then
+        addon.DB.Log.Buffer = {}
+        addon.DB.Log.Head = 1
+        addon.DB.Log.Size = 0
+    end
 end
 
 function M:Init()

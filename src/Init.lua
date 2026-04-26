@@ -27,6 +27,7 @@ function addon:Init()
     fsLog:Debug("--- Initialising ---")
 
     addon:InitDB()
+    fsLog:ClearBufferIfDisabled()
     addon.Locale:Init()
 
     local fsVersion = wow.GetAddOnMetadata(addonName, "Version")

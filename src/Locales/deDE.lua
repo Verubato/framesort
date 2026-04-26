@@ -273,6 +273,7 @@ L["No conflicting addons"] = "Keine in Konflikt stehenden Addons"
 
 -- # Log Screen -- #
 L["Log"] = "Protokoll"
+L["Enable Logging"] = "Protokollierung aktivieren"
 L["FrameSort log to help with diagnosing issues."] = "FrameSort-Protokoll zur Unterstützung bei der Fehlerdiagnose."
 L["Copy Log"] = "Protokoll kopieren"
 

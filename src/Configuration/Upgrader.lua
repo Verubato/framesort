@@ -657,6 +657,19 @@ function M:UpgradeToVersion25(options)
     return true
 end
 
+function M:UpgradeToVersion26(options)
+    if options.Version ~= 25 then
+        return false
+    end
+
+    options.Logging = {
+        Enabled = false,
+    }
+    options.Version = 26
+
+    return true
+end
+
 ---Upgrades saved variables database to the current version.
 function M:UpgradeDb(db)
     local options = db.Options
