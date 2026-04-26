@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.14.1
+
+Regression bug fix from previous release.
+
 ## 7.14.0
 
 - Added option to enable/disable logging (disabled by default).
