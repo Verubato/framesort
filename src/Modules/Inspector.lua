@@ -215,6 +215,14 @@ local function InspectNext()
     return true
 end
 
+local RunLoop
+
+local function ScheduleLoop()
+    if not initialized or loopRunning then return end
+    loopRunning = true
+    fsScheduler:RunAfter(inspectInterval, RunLoop)
+end
+
 local function InvalidateEntry(unit)
     -- could flag it as stale, but might as well just remove it entirely
     local guid = wow.UnitGUID(unit)
@@ -355,14 +363,6 @@ local function SpecFromTooltip(unit)
             end
         end
     end
-end
-
-local RunLoop
-
-local function ScheduleLoop()
-    if not initialized or loopRunning then return end
-    loopRunning = true
-    fsScheduler:RunAfter(inspectInterval, RunLoop)
 end
 
 RunLoop = function()
