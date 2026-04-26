@@ -36,6 +36,9 @@ local needUpdate = true
 -- true if the loop is already scheduled to prevent double-scheduling
 local loopRunning = false
 
+-- true once Init() has successfully run
+local initialized = false
+
 -- when we started out last inspect
 local inspectStarted
 
@@ -354,13 +357,15 @@ local function SpecFromTooltip(unit)
     end
 end
 
+local RunLoop
+
 local function ScheduleLoop()
-    if loopRunning then return end
+    if not initialized or loopRunning then return end
     loopRunning = true
     fsScheduler:RunAfter(inspectInterval, RunLoop)
 end
 
-local function RunLoop()
+RunLoop = function()
     loopRunning = false
 
     local timeSinceLastInspect = inspectStarted and (wow.GetTimePreciseSec() - inspectStarted)
@@ -576,6 +581,7 @@ function M:Init()
     wow.hooksecurefunc("NotifyInspect", OnNotifyInspect)
     wow.hooksecurefunc("ClearInspectPlayer", OnClearInspect)
 
+    initialized = true
     RunLoop()
 
     fsLog:Debug("Initialised the spec inspector module.")
