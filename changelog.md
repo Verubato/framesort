@@ -1,5 +1,10 @@
 # Changelog
 
+## 7.14.0
+
+- Added option to enable/disable logging (disabled by default).
+- Some minor performance improvements.
+
 ## 7.13.5
 
 Secret value handling fix when sorting external frame addons.
