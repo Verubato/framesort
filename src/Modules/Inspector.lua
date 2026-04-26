@@ -33,6 +33,9 @@ local isOurInspect
 -- true if we need to run and update spec information
 local needUpdate = true
 
+-- true if the loop is already scheduled to prevent double-scheduling
+local loopRunning = false
+
 -- when we started out last inspect
 local inspectStarted
 
@@ -224,6 +227,7 @@ local function InvalidateEntry(unit)
     unitGuidToSpec[guid] = nil
 
     needUpdate = true
+    ScheduleLoop()
 end
 
 local function OnClearInspect()
@@ -350,18 +354,24 @@ local function SpecFromTooltip(unit)
     end
 end
 
-local function RunLoop()
-    -- schedule the next run
+local function ScheduleLoop()
+    if loopRunning then return end
+    loopRunning = true
     fsScheduler:RunAfter(inspectInterval, RunLoop)
+end
+
+local function RunLoop()
+    loopRunning = false
 
     local timeSinceLastInspect = inspectStarted and (wow.GetTimePreciseSec() - inspectStarted)
 
-    -- if we've requested an inspection and we're still within the timeout period
+    -- if we've requested an inspection and we're still within the timeout period, keep waiting
     if requestedUnit ~= nil and timeSinceLastInspect < inspectTimeout then
+        ScheduleLoop()
         return
     end
 
-    -- Timeout occurred - reset state
+    -- timeout occurred - reset state
     if requestedUnit ~= nil and timeSinceLastInspect >= inspectTimeout then
         if isOurInspect then
             fsLog:Debug("Inspect timeout for unit '%s'.", requestedUnit)
@@ -378,6 +388,10 @@ local function RunLoop()
     end
 
     needUpdate = InspectNext()
+
+    if needUpdate or requestedUnit ~= nil then
+        ScheduleLoop()
+    end
 end
 
 function M:ProcessEvent(event, ...)
@@ -387,6 +401,7 @@ function M:ProcessEvent(event, ...)
         end
     elseif event == events.GROUP_ROSTER_UPDATE then
         needUpdate = true
+        ScheduleLoop()
     elseif event == events.PLAYER_SPECIALIZATION_CHANGED then
         local unit = select(1, ...)
         InvalidateEntry(unit)
@@ -457,6 +472,7 @@ function M:FriendlyUnitSpec(unit)
         -- queue this unit for inspection
         priorityStack[#priorityStack + 1] = unit
         needUpdate = true
+        ScheduleLoop()
         return nil
     end
 
