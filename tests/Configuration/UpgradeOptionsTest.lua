@@ -2532,6 +2532,9 @@ function M:test_upgrade_options_version1_to_latest()
         AutoLeader = {
             Enabled = true,
         },
+        Logging = {
+            Enabled = false,
+        },
         Spacing = {
             Party = {
                 Horizontal = 0,
@@ -2552,7 +2555,7 @@ function M:test_upgrade_options_version1_to_latest()
             FriendlyFormat = "$framenumber",
             EnemyFormat = "$framenumber",
         },
-        Version = 25,
+        Version = 26,
     }
 
     local db = {

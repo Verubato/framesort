@@ -85,6 +85,6 @@ end
 
 function M.CanGetArenaNameplates()
     -- since 12.0.1 you can no longer do C_NamePlate:GetNamePlateForUnit("arenaX")
-    local _, _, _, build = GetBuildInfo()
+    local _, _, _, build = wow.GetBuildInfo()
     return build < 120001
 end

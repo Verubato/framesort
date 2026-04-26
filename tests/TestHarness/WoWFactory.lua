@@ -167,6 +167,10 @@ function M:Create()
             return "test"
         end,
 
+        GetBuildInfo = function()
+            return "1", "0", "0", 10000
+        end,
+
         -- time related
         GetTimePreciseSec = function()
             return os.time()
