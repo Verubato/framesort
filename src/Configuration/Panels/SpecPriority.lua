@@ -453,6 +453,7 @@ function M:Build(parent)
     dragGhost:SetFrameStrata("TOOLTIP")
     dragGhost:SetSize(260, 22)
     dragGhost:Hide()
+    dragGhost:SetScript("OnUpdate", UpdateDragVisuals)
 
     dragGhost.Text = dragGhost:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
     dragGhost.Text:SetPoint("LEFT", 8, 0)
@@ -466,12 +467,6 @@ function M:Build(parent)
     insertLine.Text = insertLine:CreateTexture(nil, "OVERLAY")
     insertLine.Text:SetAllPoints(true)
     insertLine.Text:SetColorTexture(1, 1, 1, 0.9)
-
-    panel:SetScript("OnUpdate", function()
-        if dragIndex then
-            UpdateDragVisuals()
-        end
-    end)
 
     local ddType = fsConfig:Dropdown(panel, types, function()
         return selectedType
