@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.14.3
+
+Minor performance improvement.
+
 ## 7.14.2
 
 Another regression bug fix from previous release, sorry.
