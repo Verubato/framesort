@@ -7,9 +7,11 @@ local fsLog = addon.Logging.Log
 local fsSortedUnits = addon.Modules.Sorting.SortedUnits
 local fsUnit = addon.WoW.Unit
 local fsInspector = addon.Modules.Inspector
+local fsConfig = addon.Configuration
 local events = addon.WoW.Events
 local hasPlatynator = wowEx.IsAddOnEnabled("Platynator")
 local eventsFrame
+local hooked = false
 local wasFriendlyEnabled = false
 local wasEnemyEnabled = false
 ---@class NameplatesModule : IInitialise
@@ -204,11 +206,9 @@ function M:Run()
     RefreshNameplates()
 end
 
-function M:Init()
-    if not M:CanRun() then
-        fsLog:Warning("Nameplates module unable to run.")
-        return
-    end
+local function EnsureHooked()
+    if hooked then return end
+    hooked = true
 
     if CompactUnitFrame_UpdateName then
         wow.hooksecurefunc("CompactUnitFrame_UpdateName", OnUpdateName)
@@ -219,6 +219,25 @@ function M:Init()
         eventsFrame:RegisterEvent(events.NAME_PLATE_UNIT_ADDED)
         eventsFrame:SetScript("OnEvent", OnNameplateAdded)
     end
+end
+
+function M:Init()
+    if not M:CanRun() then
+        fsLog:Warning("Nameplates module unable to run.")
+        return
+    end
+
+    local config = addon.DB.Options.Nameplates
+    if config.FriendlyEnabled or config.EnemyEnabled then
+        EnsureHooked()
+    end
+
+    fsConfig:RegisterConfigurationChangedCallback(function()
+        local cfg = addon.DB.Options.Nameplates
+        if cfg.FriendlyEnabled or cfg.EnemyEnabled then
+            EnsureHooked()
+        end
+    end)
 
     fsLog:Debug("Initialised the nameplates module.")
 end
