@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.15.0
+
+More performance improvements.
+
 ## 7.14.3
 
 Minor performance improvement.
