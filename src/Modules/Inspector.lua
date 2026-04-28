@@ -238,7 +238,10 @@ local function InvalidateEntry(unit)
     unitGuidToSpec[guid] = nil
 
     needUpdate = true
-    ScheduleLoop()
+
+    if M:IsNeeded() then
+        ScheduleLoop()
+    end
 end
 
 local function OnClearInspect()
@@ -406,7 +409,9 @@ function M:ProcessEvent(event, ...)
         end
     elseif event == events.GROUP_ROSTER_UPDATE then
         needUpdate = true
-        ScheduleLoop()
+        if M:IsNeeded() then
+            ScheduleLoop()
+        end
     elseif event == events.PLAYER_SPECIALIZATION_CHANGED then
         local unit = select(1, ...)
         InvalidateEntry(unit)
@@ -564,6 +569,28 @@ function M:CanRun()
     return (wow.CanInspect and wow.NotifyInspect and wow.ClearInspectPlayer and wow.GetInspectSpecialization) ~= nil and capabilities.HasSpecializations()
 end
 
+---Returns true if any active configuration requires friendly spec data from the inspection loop.
+---Enemy specs are obtained synchronously via game APIs and do not need the loop.
+function M:IsNeeded()
+    local sorting = addon.DB.Options.Sorting
+    local role = addon.Configuration.GroupSortMode.Role
+
+    if sorting.Arena.Twos.GroupSortMode == role
+    or sorting.Arena.Default.GroupSortMode == role
+    or sorting.Dungeon.GroupSortMode == role
+    or sorting.World.GroupSortMode == role
+    or sorting.Raid.GroupSortMode == role then
+        return true
+    end
+
+    local nameplates = addon.DB.Options.Nameplates
+    if nameplates.FriendlyEnabled and nameplates.FriendlyFormat and nameplates.FriendlyFormat:find("$spec", 1, true) then
+        return true
+    end
+
+    return false
+end
+
 function M:Init()
     if not M:CanRun() then
         fsLog:Debug("Inspector module not loading because this wow client doesn't have specializations.")
@@ -582,7 +609,10 @@ function M:Init()
     wow.hooksecurefunc("ClearInspectPlayer", OnClearInspect)
 
     initialized = true
-    RunLoop()
+
+    if M:IsNeeded() then
+        RunLoop()
+    end
 
     fsLog:Debug("Initialised the spec inspector module.")
 end
