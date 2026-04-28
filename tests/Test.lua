@@ -26,7 +26,7 @@ TestApiV3 = require("Api\\ApiV3Test")
 TestMacro = require("Modules\\MacroTest")
 TestHidePlayer = require("Modules\\HidePlayerTest")
 TestAutoLeader = require("Modules\\AutoLeaderTest")
-TestUnitTracker = require("Modules\\UnitTrackerTest")
+
 TestTargeting = require("Modules\\TargetingTest")
 TestSortedUnits = require("Modules\\SortedUnitsTest")
 TestSortedFrames = require("Modules\\SortedFramesTest")

@@ -6,7 +6,7 @@ local fsConfig = addon.Configuration
 local fsFrame = addon.WoW.Frame
 local fsInspector = addon.Modules.Inspector
 local fsUnit = addon.WoW.Unit
-local fsUnitTracker = addon.Modules.UnitTracker
+
 local fsSortedUnits = addon.Modules.Sorting.SortedUnits
 local fsProviders = addon.Providers
 local fsEnumerable = addon.Collections.Enumerable
@@ -614,25 +614,6 @@ function M.Frame:FrameNumberForUnit(unit)
     return SafeCall(function()
         return fsSortedUnits:FrameNumberForUnit(unit)
     end, "Frame:FrameNumberForUnit")
-end
-
----Returns the party/raid/arena frame for the given unit.
----@param unit string
----@return table|nil
-function M.Frame:FrameForUnit(unit)
-    if not unit then
-        fsLog:Error("Api.v3.Frame:FrameForUnit was passed a nil parameter: unit.")
-        return nil
-    end
-
-    if type(unit) ~= "string" then
-        fsLog:Error("Api.v3.Frame:FrameForUnit was passed an invalid parameter: unit = %s.", tostring(unit))
-        return nil
-    end
-
-    return SafeCall(function()
-        return fsUnitTracker:GetFrameForUnit(unit)
-    end, "Frame:FrameForUnit")
 end
 
 ---Shifts the friendly frames down by 'cycles' or 1 for each role.

@@ -187,7 +187,7 @@ function M:Init()
     addon.Modules.Targeting:Init()
     addon.Modules.Macro:Init()
     addon.Modules.Inspector:Init()
-    addon.Modules.UnitTracker:Init()
+
     addon.Modules.Nameplates:Init()
 
     for _, provider in ipairs(fsProviders.All) do
