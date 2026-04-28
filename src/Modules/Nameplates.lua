@@ -94,13 +94,24 @@ local function OnUpdateName(unitFrame)
     end
 
     -- not sure why, but it happens at the end of a shuffle round
-    if issecretvalue and issecretvalue(unitFrame) then
+    if wow.issecretvalue and wow.issecretvalue(unitFrame) then
         return
     end
 
     local unit = unitFrame.unit
 
     if not unit then
+        return
+    end
+
+    local config = addon.DB.Options.Nameplates
+
+    if not config.FriendlyEnabled and not config.EnemyEnabled then
+        if wasFriendlyEnabled or wasEnemyEnabled then
+            wasFriendlyEnabled = false
+            wasEnemyEnabled = false
+            RestoreNames()
+        end
         return
     end
 
@@ -116,7 +127,7 @@ local function OnUpdateName(unitFrame)
 
     local friendly = fsUnit:IsFriendlyUnit(unit)
 
-    if friendly and not addon.DB.Options.Nameplates.FriendlyEnabled then
+    if friendly and not config.FriendlyEnabled then
         if wasFriendlyEnabled then
             -- User has disabled the option, restore unit names
             RestoreNames()
@@ -126,7 +137,7 @@ local function OnUpdateName(unitFrame)
         return
     end
 
-    if not friendly and not addon.DB.Options.Nameplates.EnemyEnabled then
+    if not friendly and not config.EnemyEnabled then
         if wasEnemyEnabled then
             RestoreNames()
         end
@@ -145,11 +156,16 @@ local function OnUpdateName(unitFrame)
 
     SetNameplateText(unitFrame, unit, text)
 
-    wasFriendlyEnabled = addon.DB.Options.Nameplates.FriendlyEnabled
-    wasEnemyEnabled = addon.DB.Options.Nameplates.EnemyEnabled
+    wasFriendlyEnabled = config.FriendlyEnabled
+    wasEnemyEnabled = config.EnemyEnabled
 end
 
 local function RefreshNameplates()
+    local config = addon.DB.Options.Nameplates
+    if not config.FriendlyEnabled and not config.EnemyEnabled then
+        return
+    end
+
     if not wow.C_NamePlate or not wow.C_NamePlate.GetNamePlates then
         return
     end
@@ -163,6 +179,11 @@ local function RefreshNameplates()
 end
 
 local function OnNameplateAdded(_, event, unit)
+    local config = addon.DB.Options.Nameplates
+    if not config.FriendlyEnabled and not config.EnemyEnabled then
+        return
+    end
+
     local nameplate = unit and wow.C_NamePlate.GetNamePlateForUnit(unit)
 
     if not nameplate then
