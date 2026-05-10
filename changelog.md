@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.15.1
+
+Fix for ElvUI frames not sorting when zoning into arena.
+
 ## 7.15.0
 
 More performance improvements.
