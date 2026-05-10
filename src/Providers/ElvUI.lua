@@ -178,6 +178,14 @@ function M:Init()
             RequestUpdateContainers()
 
             ElvUF_PartyGroup1:HookScript("OnEvent", OnHook)
+
+            -- parent (ElvUF_Party) owns the state driver; sort when it becomes visible
+            local parentFrame = ElvUF_PartyGroup1:GetParent()
+            if parentFrame then
+                parentFrame:HookScript("OnShow", function()
+                    RequestSort("ElvUF_PartyGroup1 shown")
+                end)
+            end
         end)
     end
 
