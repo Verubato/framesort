@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.15.2
+
+Fixed UnitGUID throwing errors in Midnight from the inspector module.
+
 ## 7.15.1
 
 Fix for ElvUI frames not sorting when zoning into arena.
