@@ -64,9 +64,9 @@ local function OnSpecInformationChanged()
 end
 
 local function EnsureCacheEntry(unit)
-    local guid = wow.UnitGUID(unit)
+    local guid = wowEx.UnitGUIDSafe(unit)
 
-    -- this can happen sometimes if the unit is "mouseover"
+    -- this can happen sometimes if the unit is "mouseover", or a player name
     if not guid then
         return
     end
@@ -123,7 +123,7 @@ local function GetNextTarget()
         -- these will mostly be nameplate units from minimarkers
         -- which are temporal units, so don't log if they no longer exist
         if wow.UnitExists(unit) then
-            local guid = wow.UnitGUID(unit)
+            local guid = wowEx.UnitGUIDSafe(unit)
 
             if guid and not wow.issecretvalue(guid) then
                 return unit
@@ -136,7 +136,7 @@ local function GetNextTarget()
     -- first attempt to find someone we don't have any information for
     for _, unit in ipairs(units) do
         if not fsUnit:IsRaidTarget(unit) and not fsUnit:IsPet(unit) then
-            local guid = wow.UnitGUID(unit)
+            local guid = wowEx.UnitGUIDSafe(unit)
 
             if not guid then
                 fsLog:Warning("Unable to request spec information for unit '%s' because their GUID is nil.", unit)
@@ -156,7 +156,7 @@ local function GetNextTarget()
     -- now attempt to find someone we have stale information for
     for _, unit in ipairs(units) do
         if not fsUnit:IsRaidTarget(unit) and not fsUnit:IsPet(unit) then
-            local guid = wow.UnitGUID(unit)
+            local guid = wowEx.UnitGUIDSafe(unit)
 
             if not guid then
                 fsLog:Warning("Unable to request spec information for unit '%s' because their GUID is nil.", unit)
@@ -225,7 +225,7 @@ end
 
 local function InvalidateEntry(unit)
     -- could flag it as stale, but might as well just remove it entirely
-    local guid = wow.UnitGUID(unit)
+    local guid = wowEx.UnitGUIDSafe(unit)
 
     if not guid then
         return
@@ -320,7 +320,7 @@ local function BgSpecFromGuid(unit, guid)
 end
 
 local function BgSpec(unit)
-    local guid = wow.UnitGUID(unit)
+    local guid = wowEx.UnitGUIDSafe(unit)
 
     if guid then
         if wow.issecretvalue(guid) then
@@ -444,7 +444,7 @@ function M:FriendlyUnitSpec(unit)
         return nil
     end
 
-    local guid = wow.UnitGUID(unit)
+    local guid = wowEx.UnitGUIDSafe(unit)
 
     if not guid then
         fsLog:Warning("Encountered nil guid for unit '%s'.", unit)

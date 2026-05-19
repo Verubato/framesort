@@ -190,6 +190,25 @@ M.GetInspectSpecializationSafe = function(unit)
     return spec
 end
 
+---Wraps UnitGUID() so a player/pet name argument returns nil instead of erroring.
+---@param unit string
+---@return string|nil
+M.UnitGUIDSafe = function(unit)
+    if type(unit) ~= "string" then
+        return nil
+    end
+
+    -- since Midnight, UnitGUID() errors instead of returning nil when passed a
+    -- player/pet name rather than a unit token (e.g. a hooked NotifyInspect call)
+    local ok, guid = pcall(wow.UnitGUID, unit)
+
+    if not ok then
+        return nil
+    end
+
+    return guid
+end
+
 M.IsAddOnEnabled = function(addonName)
     return wow.GetAddOnEnableState(addonName, wow.UnitName("player")) == 2
 end
