@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.16.3
+
+Better hide player implementation to help prevent the player raid frame from re-showing.
+
 ## 7.15.2
 
 Fixed UnitGUID throwing errors in Midnight from the inspector module.
