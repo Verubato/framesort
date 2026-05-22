@@ -8,6 +8,7 @@ local fsRunner = addon.Modules
 local fsProviders = addon.Providers
 local fsInspector = addon.Modules.Inspector
 local fsAutoLeader = addon.Modules.AutoLeader
+local fsHidePlayer = addon.Modules.HidePlayer
 local fsScheduler = addon.Scheduling.Scheduler
 local fsLog = addon.Logging.Log
 local eventsFrame = nil
@@ -53,6 +54,9 @@ local function OnEvent(_, event, ...)
 
     -- now the auto leader
     fsAutoLeader:ProcessEvent(event)
+
+    -- now the hide player module
+    fsHidePlayer:ProcessEvent(event)
 
     -- lastly pass to runner
     fsRunner:ProcessEvent(event, ...)
