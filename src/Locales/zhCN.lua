@@ -204,7 +204,7 @@ FrameSort 支持以下内容：
 \n
   - 暴雪：小队、团队、竞技场。
 \n
-  - ElvUI：小队。
+  - ElvUI：小队、竞技场。
 \n
   - sArena：竞技场。
 \n

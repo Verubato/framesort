@@ -3,6 +3,7 @@ local _, addon = ...
 local fsFrame = addon.WoW.Frame
 local fsProviders = addon.Providers
 local fsLog = addon.Logging.Log
+local fsLuaEx = addon.Language.LuaEx
 local wowEx = addon.WoW.WowEx
 local events = addon.WoW.Events
 local M = {}
@@ -11,6 +12,7 @@ local containersChangedCallbacks = {}
 local sortCallbacks = {}
 local fsPlugin = nil
 local pluginName = "FrameSort"
+local maxArenaFrames = 5
 
 fsProviders.ElvUI = M
 table.insert(fsProviders.All, M)
@@ -92,6 +94,10 @@ function M:ProcessEvent(event)
         RequestSort(event)
     elseif event == events.UNIT_PET then
         RequestSort(event)
+    elseif event == events.ARENA_OPPONENT_UPDATE then
+        RequestSort(event)
+    elseif event == events.ARENA_PREP_OPPONENT_SPECIALIZATIONS then
+        RequestSort(event)
     end
 end
 
@@ -111,6 +117,66 @@ function M:Containers()
         }
 
         containers[#containers + 1] = party
+    end
+
+    -- ElvUI arena frames are individually spawned (ElvUF_Arena1..5) and chain-anchored,
+    -- so this container uses the Hard layout (anchor-based) like sArena, not NameList.
+    local arenaHeader = _G.ArenaHeader
+    if arenaHeader and ElvUF_Arena1 then
+        local growthDirection = function()
+            return fsLuaEx:SafeGet(ElvUI[1], { "db", "unitframe", "units", "arena", "growthDirection" }) or "DOWN"
+        end
+
+        local anchorPointForDirection = {
+            DOWN = "TOPRIGHT",
+            UP = "BOTTOMRIGHT",
+            RIGHT = "LEFT",
+            LEFT = "RIGHT",
+        }
+
+        ---@type FrameContainer
+        local arena = {
+            Frame = arenaHeader,
+            Anchor = (arenaHeader.mover or arenaHeader),
+            AnchorPoint = anchorPointForDirection[growthDirection()] or "TOPRIGHT",
+            Type = fsFrame.ContainerType.EnemyArena,
+            LayoutType = fsFrame.LayoutType.Hard,
+            -- in the prep room, frames are hidden behind prep overlays
+            -- so we still want to sort them regardless of visibility
+            VisibleOnly = false,
+            SupportsSpacing = true,
+            InCombatSortingRequired = true,
+            SubscribeToVisibility = true,
+            Frames = function()
+                local count = wowEx.ArenaOpponentsCount()
+                if count <= 0 then
+                    count = maxArenaFrames
+                end
+
+                local frames = {}
+                for i = 1, count do
+                    local frame = _G["ElvUF_Arena" .. i]
+                    if frame then
+                        frames[#frames + 1] = frame
+                    end
+                end
+
+                return frames
+            end,
+            IsHorizontalLayout = function()
+                local dir = growthDirection()
+                return dir == "LEFT" or dir == "RIGHT"
+            end,
+            Spacing = function()
+                local spacing = fsLuaEx:SafeGet(ElvUI[1], { "db", "unitframe", "units", "arena", "spacing" }) or 3
+                return {
+                    Horizontal = spacing,
+                    Vertical = spacing,
+                }
+            end,
+        }
+
+        containers[#containers + 1] = arena
     end
 
     return containers
@@ -167,8 +233,11 @@ function M:Init()
         EP:RegisterPlugin(pluginName, fsPlugin.InsertOptions)
 
         fsPlugin:SecureHook(UF, "LoadUnits", function()
-            if not ElvUF_PartyGroup1 then
-                fsLog:Bug("Missing ElvUF_PartyGroup1.")
+            local hasParty = ElvUF_PartyGroup1 ~= nil
+            local hasArena = ElvUF_Arena1 ~= nil
+
+            if not hasParty and not hasArena then
+                fsLog:Bug("Missing ElvUF_PartyGroup1 and ElvUF_Arena1.")
 
                 useEvents = true
                 return
@@ -177,14 +246,24 @@ function M:Init()
             fsLog:Debug("ElvUI loaded units, requesting container update.")
             RequestUpdateContainers()
 
-            ElvUF_PartyGroup1:HookScript("OnEvent", OnHook)
+            if hasParty then
+                ElvUF_PartyGroup1:HookScript("OnEvent", OnHook)
 
-            -- parent (ElvUF_Party) owns the state driver; sort when it becomes visible
-            local parentFrame = ElvUF_PartyGroup1:GetParent()
-            if parentFrame then
-                parentFrame:HookScript("OnShow", function()
-                    RequestSort("ElvUF_PartyGroup1 shown")
-                end)
+                -- parent (ElvUF_Party) owns the state driver; sort when it becomes visible
+                local parentFrame = ElvUF_PartyGroup1:GetParent()
+                if parentFrame then
+                    parentFrame:HookScript("OnShow", function()
+                        RequestSort("ElvUF_PartyGroup1 shown")
+                    end)
+                end
+            else
+                useEvents = true
+            end
+
+            if hasArena then
+                ElvUF_Arena1:HookScript("OnEvent", OnHook)
+            else
+                useEvents = true
             end
         end)
     end

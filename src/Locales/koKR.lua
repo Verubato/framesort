@@ -206,7 +206,7 @@ FrameSort는 다음을 지원합니다:
 \n
   - Blizzard: 파티, 공격대, 투기장.
 \n
-  - ElvUI: 파티.
+  - ElvUI: 파티, 투기장.
 \n
   - sArena: 투기장.
 \n

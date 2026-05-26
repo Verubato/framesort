@@ -206,7 +206,7 @@ FrameSort prend en charge les éléments suivants :
 \n
   - Blizzard : groupe, raid, arène.
 \n
-  - ElvUI : groupe.
+  - ElvUI : groupe, arène.
 \n
   - sArena : arène.
 \n

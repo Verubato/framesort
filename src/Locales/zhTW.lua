@@ -201,7 +201,7 @@ FrameSort 支援下列項目：
 \n
   - 暴雪：隊伍、團隊、競技場。
 \n
-  - ElvUI：隊伍。
+  - ElvUI：隊伍、競技場。
 \n
   - sArena：競技場。
 \n

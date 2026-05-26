@@ -203,7 +203,7 @@ FrameSort supports the following:
 \n
   - Blizzard: party, raid, arena.
 \n
-  - ElvUI: party.
+  - ElvUI: party, arena.
 \n
   - sArena: arena.
 \n

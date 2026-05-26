@@ -205,7 +205,7 @@ FrameSort unterstützt Folgendes:
 \n
   - Blizzard: Gruppe, Schlachtzug, Arena.
 \n
-  - ElvUI: Gruppe.
+  - ElvUI: Gruppe, Arena.
 \n
   - sArena: Arena.
 \n

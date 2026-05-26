@@ -206,7 +206,7 @@ FrameSort es compatible con lo siguiente:
 \n
   - Blizzard: grupo, banda, arena.
 \n
-  - ElvUI: grupo.
+  - ElvUI: grupo, arena.
 \n
   - sArena: arena.
 \n
