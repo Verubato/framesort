@@ -6,6 +6,7 @@ local fsScheduler = addon.Scheduling.Scheduler
 local fsMath = addon.Numerics.Math
 local fsLog = addon.Logging.Log
 local fsConfig = addon.Configuration
+local fsCompare = addon.Modules.Sorting.Comparer
 local wow = addon.WoW.Api
 local wowEx = addon.WoW.WowEx
 local events = addon.WoW.Events
@@ -230,6 +231,35 @@ function M:Containers()
             end,
             FramesOffset = function()
                 return GetOffset(wow.CompactPartyFrame)
+            end,
+            PostSort = function()
+                -- CompactPartyFrameBorderFrame is anchored to the original first/last party frame positions,
+                -- so once we sort the frames around the border ends up misaligned
+                local border = CompactPartyFrameBorderFrame
+                if not border or not border.SetPoint then
+                    return
+                end
+
+                if not border:IsVisible() then
+                    return
+                end
+
+                -- unsure if re-anchoring the border is safe during combat lockdown, so skip to be safe
+                if wow.InCombatLockdown() then
+                    return
+                end
+
+                local frames = fsFrame:ExtractUnitFrames(wow.CompactPartyFrame, true, true)
+                if #frames == 0 then
+                    return
+                end
+
+                table.sort(frames, function(x, y)
+                    return fsCompare:CompareTopLeftFuzzy(x, y)
+                end)
+
+                border:SetPoint("TOPLEFT", frames[1], "TOPLEFT", -2, 2)
+                border:SetPoint("BOTTOMRIGHT", frames[#frames], "BOTTOMRIGHT", 2, -3)
             end,
         }
 
