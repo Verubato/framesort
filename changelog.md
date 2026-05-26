@@ -1,5 +1,10 @@
 # Changelog
 
+## 7.17.0
+
+- Added ElvUI arena frames support (untested).
+- Fixed Blizzard party frame borders after sorting.
+
 ## 7.16.3
 
 Better hide player implementation to help prevent the player raid frame from re-showing.
