@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.17.1
+
+Bumped TOC to 12.0.7.
+
 ## 7.17.0
 
 - Added ElvUI arena frames support (untested).
