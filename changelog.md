@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.17.2
+
+Fixed edit mode hanging when the hide player module is enabled.
+
 ## 7.17.1
 
 Bumped TOC to 12.0.7.
