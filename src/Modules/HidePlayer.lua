@@ -1,6 +1,7 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
+local capabilities = addon.WoW.Capabilities
 local fsCompare = addon.Modules.Sorting.Comparer
 local fsConfig = addon.Configuration
 local fsProviders = addon.Providers
@@ -47,6 +48,14 @@ end
 -- encounter end, mind control); re-hide to keep the player hidden, deferring in combat.
 local function OnUpdateVisible(frame)
     if not hidePlayerActive then
+        return
+    end
+
+    -- never hide while edit mode is open: edit mode re-shows the player frame,
+    -- which re-fires CompactUnitFrame_UpdateVisible, which would hide it again,
+    -- producing an infinite show/hide loop that crashes the client.
+    -- the normal run cycle re-hides the player once edit mode exits.
+    if capabilities.HasEditMode() and wow.EditModeManagerFrame and wow.EditModeManagerFrame.editModeActive then
         return
     end
 
@@ -100,6 +109,11 @@ end
 function M:Run()
     if wow.InCombatLockdown() then
         fsLog:Error("Cannot run hide player module during combat.")
+        return
+    end
+
+    if capabilities.HasEditMode() and wow.EditModeManagerFrame and wow.EditModeManagerFrame.editModeActive then
+        fsLog:Debug("Not hiding player while edit mode active.")
         return
     end
 
