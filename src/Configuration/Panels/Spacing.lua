@@ -5,7 +5,7 @@ local fsConfig = addon.Configuration
 local fsScheduler = addon.Scheduling.Scheduler
 local fsLog = addon.Logging.Log
 local wow = addon.WoW.Api
-local minSpacing = 0
+local minSpacing = -1
 local maxSpacing = 100
 local systemChange = false
 local L = addon.Locale.Current
@@ -40,7 +40,6 @@ local function ConfigureEditBox(box, value)
     box:SetText(tostring(value))
     box:SetCursorPosition(0)
     box:SetJustifyH("CENTER")
-    box:SetNumeric(true)
     box:SetCursorPosition(0)
 end
 
