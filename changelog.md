@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.18.0
+
+Updated minimum spacing from 0 to -1.
+
 ## 7.17.2
 
 Fixed edit mode hanging when the hide player module is enabled.
