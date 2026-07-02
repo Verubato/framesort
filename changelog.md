@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.18.1
+
+Hide player forbidden frame guard.
+
 ## 7.18.0
 
 Updated minimum spacing from 0 to -1.
