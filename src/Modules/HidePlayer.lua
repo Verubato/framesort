@@ -59,7 +59,19 @@ local function OnUpdateVisible(frame)
         return
     end
 
-    if not frame or not frame.unit or not frame:IsShown() then
+    if not frame then
+        return
+    end
+
+    -- CompactUnitFrame_UpdateVisible is shared with nameplates, which can be
+    -- forbidden frames (e.g. ForbiddenNamePlate). Calling widget methods like
+    -- IsShown on a forbidden frame from insecure code errors with "bad self",
+    -- so skip them - HidePlayer only cares about party/raid frames anyway.
+    if frame:IsForbidden() then
+        return
+    end
+
+    if not frame.unit or not frame:IsShown() then
         return
     end
 
