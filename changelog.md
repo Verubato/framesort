@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.18.2
+
+12.1 version support
+
 ## 7.18.1
 
 Hide player forbidden frame guard.
