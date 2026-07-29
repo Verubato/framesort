@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.18.3
+
+Fixed localized TOC text encoding.
+
 ## 7.18.2
 
 12.1 version support
