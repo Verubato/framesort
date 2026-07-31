@@ -154,7 +154,46 @@ The literal pass-through means `#FS Focus` produces `@Focus`, and `#FS Bob` prod
 
 If a variable can't be resolved (group too small, no arena opponents, role info unavailable, wrong game version), FrameSort writes the literal unit `none`. `none` is not a real unit, so the clause fails and the macro falls through to the next clause. This is the intended fail-safe.
 
-## 5. Placeholder conventions
+## 5. If no FrameSort variable is used, FrameSort isn't needed
+
+A `#FrameSort` header only earns its place if **at least one** entry is a variable that FrameSort actually resolves — one whose value changes as frames are re-sorted or as the group changes.
+
+**Dynamic — these are FrameSort variables:**
+`Frame1`…`FrameN`, `Frame1Pet`…, `BottomFrame`, `BFM1`…, `Tank`, `Healer`, `DPS`, `OtherDPS`, `EnemyFrame1`…, `EnemyFrame1Pet`…, `EnemyTank`, `EnemyHealer`, `EnemyDPS`, their abbreviations, and any of them with a `Target`/`TG` suffix.
+
+**Not dynamic — these are *not* FrameSort variables:**
+`X` (skip), and any built-in WoW unit written literally: `player`, `target`, `focus`, `mouseover`, `cursor`, `pet`, `targettarget`, `party1`–`party4`, `raid1`–`raid40`, `arena1`–`arena3`, `boss1`…, or a character name.
+
+If **every** header entry is `X` or a literal Blizzard unit, the header does nothing useful. FrameSort will dutifully rewrite text that never changes, and the macro behaves exactly the same with the header deleted. **Drop the header and hand back a plain WoW macro.**
+
+### ❌ Pointless — no dynamic variable
+
+```
+#showtooltip
+#FS X Player
+/cast [@mouseover,help][@none,help] Spell
+```
+
+`X` skips the first selector and `Player` just writes the literal unit `player` into the second. Nothing here depends on frame order.
+
+### ✅ Same behaviour, no FrameSort needed
+
+```
+#showtooltip
+/cast [@mouseover,help][@player,help] Spell
+```
+
+Other headers that do nothing:
+
+- `#FS X X X` — all skips.
+- `#FS Mouseover Target` — both are built-in units; write `@mouseover` and `@target` directly.
+- `#FS Party1 Party2` — party numbers are fixed; FrameSort exists precisely to avoid these.
+
+A header is worthwhile as soon as **one** entry is dynamic. `#FS X OtherDPS Healer` is fine — the `X` is doing its job of protecting a hard-coded `@player`.
+
+When a request genuinely doesn't need FrameSort, say so and give the plain macro rather than adding a header for the sake of it.
+
+## 6. Placeholder conventions
 
 The placeholder text you type after `@` is **irrelevant** — it gets overwritten. `@none`, `@a`, `@doesntmatter`, `@placeholder`, `@healer` are all equivalent as a starting value.
 
@@ -162,7 +201,7 @@ The placeholder text you type after `@` is **irrelevant** — it gets overwritte
 
 Do **not** write `@healer` and assume WoW understands it — it doesn't. It only works because FrameSort replaces the text.
 
-## 6. Header rules
+## 7. Header rules
 
 ```
 #showtooltip
@@ -181,19 +220,19 @@ Do **not** write `@healer` and assume WoW understands it — it doesn't. It only
   #FrameSort: Frame1, Frame2, Frame3
   ```
 - Because of that split, **never put a comment on the header line**. `#FS Healer -- my healer macro` parses as the variables `Healer`, `my`, `healer`, `macro`.
-- Never put an `@` on the header line or in `#showtooltip` — see gotcha 7.2.
+- Never put an `@` on the header line or in `#showtooltip` — see gotcha 8.2.
 
-## 7. Gotchas
+## 8. Gotchas
 
-### 7.1 Selectors are counted across the *whole* macro
+### 8.1 Selectors are counted across the *whole* macro
 
 The counter does not reset per line, per `/cast`, or per clause. A 4-line macro with one `@` per line needs 4 variables.
 
-### 7.2 *Every* `@` in the body counts — including ones you didn't think of
+### 8.2 *Every* `@` in the body counts — including ones you didn't think of
 
 The scan starts at character 1 of the macro and includes the `#showtooltip` line and the header line. If you write `#showtooltip [@none] Spell`, that `@none` becomes selector #1 and shifts every other position by one. Keep `@` out of `#showtooltip` and out of the header.
 
-### 7.3 Both `@unit` and `target=unit` count, and they can be mixed
+### 8.3 Both `@unit` and `target=unit` count, and they can be mixed
 
 ```
 #FS Frame1, Frame2, Frame3
@@ -206,15 +245,15 @@ Write `target=unit` with **no spaces** around the `=`. `target = player` is not 
 
 Likewise no space after `@`: `@ none` is not recognised.
 
-### 7.4 Extra variables are ignored; extra selectors are left alone
+### 8.4 Extra variables are ignored; extra selectors are left alone
 
 Neither is an error, which is exactly why miscounts fail silently. Nothing warns you.
 
-### 7.5 Variables can't contain non-alphanumeric characters
+### 8.5 Variables can't contain non-alphanumeric characters
 
 Hyphens, apostrophes and accented letters break a variable into pieces. `#FS Bob-Ravencrest` parses as **two** variables (`Bob` and `Ravencrest`), which throws off every position after it. Use `Frame1`/`Tank`/`X` rather than character names when a realm name is involved.
 
-### 7.6 Roles and enemy roles are not always available
+### 8.6 Roles and enemy roles are not always available
 
 - `Tank` / `Healer` / `DPS` / `OtherDPS` need role assignments. Where the client has no role system, they resolve to `none`.
 - `EnemyTank` / `EnemyHealer` / `EnemyDPS` need specialization data and only resolve **inside arenas** (MoP and later). Outside arena they are `none`.
@@ -222,23 +261,23 @@ Hyphens, apostrophes and accented letters break a variable into pieces. `#FS Bob
 
 Always give enemy macros a sensible fallback clause, e.g. `[@none,harm][@target,harm]`.
 
-### 7.7 Macros only update out of combat
+### 8.7 Macros only update out of combat
 
 `EditMacro` is protected, so FrameSort defers macro rewrites until combat ends. A macro resolves to whatever the group looked like at the last out-of-combat update. Don't expect `@Healer` to re-point mid-fight if roles change.
 
-### 7.8 FrameSort edits the saved macro text
+### 8.8 FrameSort edits the saved macro text
 
 After the first update your macro literally reads `/cast [@party3,help] Spell`. That is normal. Keep the `#FrameSort` header — it is the only record of your intent.
 
-### 7.9 The 255 character limit
+### 8.9 The 255 character limit
 
 Macro bodies are capped at 255 characters and the header counts toward it. Use `#FS` and the short variable forms (`F1`, `H`, `EH`, `OD`) when tight.
 
-### 7.10 `BF1` is not `Frame1`
+### 8.10 `BF1` is not `Frame1`
 
 Digits are stripped when resolving the variable type, so `BF1`/`BF2` all mean `BottomFrame`. For "one from the bottom" use `BFM1`.
 
-## 8. Validation checklist
+## 9. Validation checklist
 
 Before returning a macro, verify:
 
@@ -246,12 +285,13 @@ Before returning a macro, verify:
 2. **Count** the variables on the header line.
 3. Are they equal, with `X` filling every hard-coded position? If not, fix it.
 4. Is every variable spelled exactly as in section 4?
-5. Do the variables appear in the same order as the selectors (top-to-bottom, left-to-right)?
-6. Is there exactly one header line, and is it not the last line?
-7. Are placeholders `@none` (unless intentionally hard-coded and marked `X`)?
-8. Is the body under 255 characters?
+5. Is **at least one** entry a dynamic FrameSort variable? If they're all `X` or literal Blizzard units, drop the header and return a plain macro (section 5).
+6. Do the variables appear in the same order as the selectors (top-to-bottom, left-to-right)?
+7. Is there exactly one header line, and is it not the last line?
+8. Are placeholders `@none` (unless intentionally hard-coded and marked `X`)?
+9. Is the body under 255 characters?
 
-## 9. Worked example
+## 10. Worked example
 
 Request: *"Cast Blessing of Freedom on my healer, hold shift for the other DPS, hold alt for myself."*
 
