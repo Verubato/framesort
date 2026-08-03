@@ -208,7 +208,7 @@ function M:test_targets_update_after_combat()
     end
 
     wow.State.MockInCombat = false
-    wow:FireEvent(events.PLAYER_REGEN_ENABLED)
+    wow.FireEvent(events.PLAYER_REGEN_ENABLED)
 
     assertEquals(friendlyButtons[1]:GetAttribute("unit"), "player")
     assertEquals(friendlyButtons[2]:GetAttribute("unit"), "party2")

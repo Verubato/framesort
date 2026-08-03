@@ -1,4 +1,10 @@
 ---@diagnostic disable: duplicate-set-field, cast-local-type
+
+-- setup() aliases addon modules into locals so tests can overwrite their methods with
+-- stubs. The code under test reads through addon.*, never the alias, so luacheck only ever
+-- sees these locals written to.
+-- luacheck: ignore 331
+
 ---@type Addon
 local addon
 ---@type SortedUnits
@@ -11,7 +17,6 @@ local wow
 local events
 local capabilities
 local fsInspector
-local fsConfig
 
 local M = {}
 
@@ -94,7 +99,6 @@ function M:setup()
     events = addon.WoW.Events
     capabilities = addon.WoW.Capabilities
     fsInspector = addon.Modules.Inspector
-    fsConfig = addon.Configuration
 
     fsCompare.FriendlySortMode = function()
         return true
@@ -160,7 +164,6 @@ function M:teardown()
     events = nil
     capabilities = nil
     fsInspector = nil
-    fsConfig = nil
 end
 
 function M:test_friendly_returns_sorted_and_caches_pointer()
@@ -678,7 +681,7 @@ function M:test_cycle_friendly_dps_reset_cycles()
 
     out = fsSortedUnits:FriendlyUnits()
 
-    assertListEquals(base, { "party1", "party2", "party3", "party4", "player" })
+    assertListEquals(out, { "party1", "party2", "party3", "party4", "player" })
 end
 
 function M:test_cycle_enemy_dps_cycles()

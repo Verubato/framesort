@@ -2,11 +2,6 @@
 local config = {
 	std = "lua51",
 
-	-- TODO: the suite predates test linting and has ~68 findings, a mix of luaunit's global
-	-- idiom and real smells (a shadowed self, values mutated but never read). Turn this on once
-	-- they are cleaned up.
-	lint_tests = false,
-
 	globals = {
 		"FrameSort",
 		"FrameSortDB",
@@ -14,6 +9,10 @@ local config = {
 		"SLASH_FRAMESORT1",
 		"SLASH_FRAMESORT2",
 		"BINDING_HEADER_FRAMESORT_TARGET",
+		-- published by tests/Test.lua for the harness and any test that loads addon source directly
+		"FS_ADDON_ROOT",
+		-- read by Capabilities to detect the modern dropdown API, written by the test harness
+		"MenuUtil",
 	},
 
 	read_globals = {
@@ -86,8 +85,9 @@ local config = {
 	files = {},
 }
 
--- for some annoying reason this doesn't work
--- I've tried every path pattern combination you can think of
+-- This has no effect: build/Linter.lua hands this table to luacheck.check_strings as an options
+-- table, and per-file patterns are only expanded when luacheck loads the config itself. Use an
+-- inline `-- luacheck: ignore <code>` comment in the file instead, as src/WoW/Capabilities.lua does.
 config.files["**/WoW.lua"] = {
 	ignore = { "113" },
 }

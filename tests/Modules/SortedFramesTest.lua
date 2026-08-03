@@ -1,4 +1,12 @@
 ---@diagnostic disable: cast-local-type, missing-fields
+
+-- setup() aliases addon modules into locals so tests can overwrite their methods with
+-- stubs. The code under test reads through addon.*, never the alias, so luacheck only ever
+-- sees these locals written to.
+-- The same applies to frame fixtures: they are parented into a container the module
+-- discovers on its own, and the local only exists to label them.
+-- luacheck: ignore 241 331
+
 ---@type Addon
 local addon
 ---@type SortedFrames
@@ -11,15 +19,13 @@ local frameMock
 
 local M = {}
 local provider = nil
-local partyContainer = nil
 local partyContainerFrame = nil
 local raidContainerFrame = nil
 local arenaContainerFrame = nil
 
 local width, height = 100, 100
 
--- Keep originals so we can restore between tests
-local originalProviders = nil
+-- Keep the original so we can restore it between tests
 local originalBlizzard = nil
 
 -- ---------------- helpers ----------------
@@ -76,7 +82,6 @@ function M:setup()
     -- Containers (use real FrameUtil container API)
     local party = fsFrame:GetContainer(provider, fsFrame.ContainerType.Party)
     assert(party)
-    partyContainer = party
     partyContainerFrame = party.Frame
     partyContainerFrame:SetSize(width, height)
 
@@ -98,8 +103,7 @@ function M:setup()
         return true
     end
 
-    -- Save/restore Providers table members
-    originalProviders = addon.Providers
+    -- Save the Blizzard provider; teardown restores it
     originalBlizzard = addon.Providers.Blizzard
 end
 
@@ -130,7 +134,6 @@ function M:teardown()
     partyContainerFrame = nil
     raidContainerFrame = nil
     arenaContainerFrame = nil
-    originalProviders = nil
     originalBlizzard = nil
 end
 

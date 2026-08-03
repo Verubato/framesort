@@ -590,16 +590,6 @@ function M:test_tank_n()
         #framesort Tank5
         /cast [@party4] Spell;
     ]]
-    function M:UnitExists(unit, members)
-        for _, x in pairs(members) do
-            if x == unit then
-                return true
-            end
-        end
-
-        return false
-    end
-
     assertEquals(fsMacro:GetNewBody(macroText, units, {}), expected)
 end
 
@@ -962,7 +952,7 @@ function M:test_arena_3v3()
         return 3
     end
     addon.WoW.Api.GetSpecializationInfoByID = function(i)
-        local role = ""
+        local role
         if i == 2 then
             role = "HEALER"
         else
@@ -1002,7 +992,7 @@ function M:test_arena_3v3_abbreviated()
         return 3
     end
     addon.WoW.Api.GetSpecializationInfoByID = function(i)
-        local role = ""
+        local role
         if i == 2 then
             role = "HEALER"
         else
@@ -1042,7 +1032,7 @@ function M:test_arena_3v3_order()
         return 3
     end
     addon.WoW.Api.GetSpecializationInfoByID = function(i)
-        local role = ""
+        local role
         if i == 3 then
             role = "HEALER"
         else
@@ -1083,7 +1073,7 @@ function M:test_arena_5v5()
         return i, 0
     end
     addon.WoW.Api.GetSpecializationInfoByID = function(i)
-        local role = ""
+        local role
         if i == 1 then
             role = "TANK"
         elseif i == 2 then

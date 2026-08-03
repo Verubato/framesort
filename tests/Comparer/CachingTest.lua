@@ -10,7 +10,6 @@ local fsInspector
 local M = {}
 
 local function GenerateUnits(count)
-    local prefix = "party"
     local members = {
         "player",
     }

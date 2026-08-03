@@ -1,4 +1,10 @@
 ---@diagnostic disable: cast-local-type
+
+-- setup() aliases addon modules into locals so tests can overwrite their methods with
+-- stubs. The code under test reads through addon.*, never the alias, so luacheck only ever
+-- sees these locals written to.
+-- luacheck: ignore 331
+
 ---@type Addon
 local addon
 ---@type SortingModule

@@ -19,7 +19,6 @@ function M:setup()
     addon.Providers.Test = provider
     addon.Providers.All[#addon.Providers.All + 1] = provider
 
-    fsFrame = addon.WoW.Frame
     ---@diagnostic disable-next-line: cast-local-type
     wow = addon.WoW.Api
     events = addon.WoW.Events
@@ -61,7 +60,7 @@ function M:test_macro_updates_on_run()
     /cast [@placeholder] Spell
     ]]
 
-    wow:LoadMacro(1, "Test", "Test", macro)
+    wow.LoadMacro(1, "Test", "Test", macro)
 
     addon.Modules.Macro:Run()
 
@@ -81,8 +80,8 @@ function M:test_macro_updates_after_user_edits()
     /cast [@placeholder] Spell
     ]]
 
-    wow:LoadMacro(1, "Test", "Test", macro)
-    wow:InvokeSecureHooks("EditMacro", 1)
+    wow.LoadMacro(1, "Test", "Test", macro)
+    wow.InvokeSecureHooks("EditMacro", 1)
 
     assertEquals(
         wow.State.Macros[1].Body,
@@ -99,7 +98,7 @@ function M:test_macro_updates_for_provider_after_combat()
     /cast [@placeholder] Spell
     ]]
 
-    wow:LoadMacro(1, "Test", nil, macro)
+    wow.LoadMacro(1, "Test", nil, macro)
 
     wow.State.MockInCombat = true
     addon.Modules:Run()
@@ -108,7 +107,7 @@ function M:test_macro_updates_for_provider_after_combat()
     assertEquals(macro, wow.State.Macros[1].Body)
 
     wow.State.MockInCombat = false
-    wow:FireEvent(events.PLAYER_REGEN_ENABLED)
+    wow.FireEvent(events.PLAYER_REGEN_ENABLED)
 
     -- should have changed now that combat dropped
     assertEquals(
@@ -134,7 +133,7 @@ function M:test_macro_updates_for_hook_after_combat()
     assertEquals(macro, wow.State.Macros[1].Body)
 
     wow.State.MockInCombat = false
-    wow:FireEvent(events.PLAYER_REGEN_ENABLED)
+    wow.FireEvent(events.PLAYER_REGEN_ENABLED)
 
     -- should have changed now that combat dropped
     assertEquals(
@@ -155,8 +154,8 @@ function M:test_macro_updates_are_efficient()
     /cast [@placeholder] Spell
     ]]
 
-    wow:LoadMacro(1, "Test", nil, fsMacro)
-    wow:LoadMacro(2, "Test2", nil, notfsMacro)
+    wow.LoadMacro(1, "Test", nil, fsMacro)
+    wow.LoadMacro(2, "Test2", nil, notfsMacro)
 
     local timesToInspect = 5
     for _ = 0, timesToInspect do

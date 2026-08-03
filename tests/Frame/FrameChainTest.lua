@@ -4,7 +4,7 @@ local addon
 ---@type FrameUtil
 local fsFrame
 
-M = {}
+local M = {}
 
 local function chainToNames(root)
     local out = {}
@@ -18,7 +18,6 @@ end
 
 function M:setup()
     local addonFactory = require("TestHarness.AddonFactory")
-    local providerFactory = require("TestHarness.ProviderFactory")
     frameMock = require("TestHarness.FrameMock")
 
     addon = addonFactory:Create()

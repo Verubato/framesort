@@ -1,3 +1,7 @@
+-- luaunit discovers suites by scanning _G for names beginning with "Test", and exports its
+-- assertions the same way, so every assignment in this file is a deliberate global.
+-- luacheck: ignore 111
+
 EXPORT_ASSERT_TO_GLOBALS = true
 
 -- The suite requires its own modules by name (Comparer.ComparePartyTest and friends), so this

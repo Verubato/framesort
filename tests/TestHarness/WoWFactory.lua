@@ -262,12 +262,12 @@ function M:Create()
         macro.Body = body
         macro.TimesRetrieved = 0
 
-        wow:InvokeSecureHooks("EditMacro", id)
+        wow.InvokeSecureHooks("EditMacro", id)
 
         return id
     end
 
-    function wow:FireEvent(event, ...)
+    function wow.FireEvent(event, ...)
         assert(#wow.State.Frames > 0, "No frames have been created")
 
         for _, frame in ipairs(wow.State.Frames) do
@@ -275,7 +275,7 @@ function M:Create()
         end
     end
 
-    function wow:InvokeSecureHooks(name, ...)
+    function wow.InvokeSecureHooks(name, ...)
         assert(#wow.State.SecureHooks > 0, "No secure hooks have been registered")
 
         for _, hook in ipairs(wow.State.SecureHooks) do
@@ -285,7 +285,7 @@ function M:Create()
         end
     end
 
-    function wow:LoadMacro(id, name, icon, body)
+    function wow.LoadMacro(id, name, icon, body)
         wow.State.Macros[id] = {
             Id = id,
             Name = name,

@@ -2,7 +2,8 @@ local frameMock = require("TestHarness.FrameMock")
 ---@class ProviderFactory
 local M = {}
 
-local layoutSoft = 1
+-- mirrors fsFrame.LayoutType; only Hard is needed, as the default for callers that don't
+-- specify a layout
 local layoutHard = 2
 
 local typeParty = 1
