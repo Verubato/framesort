@@ -13,6 +13,7 @@ languages = {
     "Spanish (Mexico)": "esMX",
     "French": "frFR",
     "Korean": "koKR",
+    "Portuguese (Brazil)": "ptBR",
     "Russian": "ruRU",
     "Simplified Chinese": "zhCN",
     "Traditional Chinese": "zhTW"

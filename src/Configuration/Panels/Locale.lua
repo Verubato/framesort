@@ -11,6 +11,7 @@ local items = {
     { Locale = "esMX", Name = "Español (México)" },
     { Locale = "frFR", Name = "Français" },
     { Locale = "koKR", Name = "한국어" },
+    { Locale = "ptBR", Name = "Português (Brasil)" },
     { Locale = "ruRU", Name = "Русский" },
     { Locale = "zhCN", Name = "简体中文" },
     { Locale = "zhTW", Name = "繁體中文" },

@@ -32,6 +32,7 @@
     <Script file="Locales\esMX.lua"/>
     <Script file="Locales\frFR.lua"/>
     <Script file="Locales\koKR.lua"/>
+    <Script file="Locales\ptBR.lua"/>
     <Script file="Locales\ruRU.lua"/>
     <Script file="Locales\zhCN.lua"/>
     <Script file="Locales\zhTW.lua"/>

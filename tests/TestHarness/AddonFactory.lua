@@ -67,6 +67,10 @@ function factory:Create()
             Api = wowFactory:Create(),
         },
         DB = {},
+        -- Mirrors src/Namespace.lua, which DependenciesFromXml deliberately skips - loading it
+        -- would reset addon.WoW and throw away the mock api built above. A locale added there
+        -- has to be added here too, or every test dies as that locale file loads, with
+        -- "attempt to index local 'L' (a nil value)".
         Locale = {
             Current = {},
             enUS = {},
@@ -75,6 +79,7 @@ function factory:Create()
             esMX = {},
             frFR = {},
             koKR = {},
+            ptBR = {},
             ruRU = {},
             zhCN = {},
             zhTW = {},
