@@ -46,8 +46,9 @@ jobs:
         shell: pwsh
         run: ./build/Test.ps1
 
-      # Both of these report rather than fail: a translation backlog and a deliberately pinned
-      # submodule are both normal states, not build breakages.
+      # These three report rather than fail: a translation backlog, a deliberately pinned
+      # submodule and a client patch that landed this morning are all normal states, not build
+      # breakages.
       - name: Check the build submodule is current
         if: always()
         shell: pwsh
@@ -61,4 +62,16 @@ jobs:
           Write-Host $report
           if ($env:GITHUB_STEP_SUMMARY) {
             "## Locales`n`n``````n$report``````" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          }
+
+      # Warns when the TOC's interface numbers have fallen behind a live client, which is what
+      # makes the addon show up greyed out as out of date in the character-select addon list.
+      - name: Client build report
+        if: always()
+        shell: pwsh
+        run: |
+          $report = python ./build/CheckTocVersions.py | Out-String
+          Write-Host $report
+          if ($env:GITHUB_STEP_SUMMARY) {
+            "## Client builds`n`n``````n$report``````" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
           }
