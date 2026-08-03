@@ -196,6 +196,7 @@ L["This only applies to Blizzard frames."] = "블리자드 프레임에만 적�
 L["Party"] = "파티"
 L["Raid"] = "공격대"
 L["Group"] = "그룹"
+L["Enemy Arena"] = "적 투기장"
 L["Horizontal"] = "가로"
 L["Vertical"] = "세로"
 
@@ -262,7 +263,7 @@ L["Using Raid-Style Party Frames"] = "공격대 형식의 파티 프레임 사�
 L["Please enable 'Use Raid-Style Party Frames' in the Blizzard settings"] = "블리자드 설정에서 'Use Raid-Style Party Frames'를 활성화하세요"
 L["Keep Groups Together setting disabled"] = "'Keep Groups Together' 설정이 비활성화됨"
 L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"] = "편집 모드에서 공격대 표시 모드를 'Combined Groups' 옵션 중 하나로 변경하세요"
-L["Disable the 'Keep Groups Together' raid profile setting."] = "공격대 프로필의 'Keep Groups Together' 설정을 비활성화하세요."
+L["Disable the 'Keep Groups Together' raid profile setting"] = "공격대 프로필의 'Keep Groups Together' 설정을 비활성화하세요."
 L["Only using Blizzard frames with Traditional mode"] = "전통적 모드에서는 블리자드 프레임만 사용 중"
 L["Traditional mode can't sort your other frame addons: '%s'"] = "전통적 모드는 다른 프레임 애드온을 정렬할 수 없습니다: '%s'"
 L["Using Secure sorting mode when spacing is being used"] = "간격 사용 시 보안 정렬 모드 사용"

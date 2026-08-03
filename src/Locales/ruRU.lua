@@ -198,6 +198,7 @@ L["This only applies to Blizzard frames."] = "Применяется тольк�
 L["Party"] = "Группа"
 L["Raid"] = "Рейд"
 L["Group"] = "Группа"
+L["Enemy Arena"] = "Вражеская арена"
 L["Horizontal"] = "Горизонтально"
 L["Vertical"] = "Вертикально"
 
@@ -267,7 +268,7 @@ L["Please enable 'Use Raid-Style Party Frames' in the Blizzard settings"] = "В�
 L["Keep Groups Together setting disabled"] = "Настройка 'Keep Groups Together' отключена"
 L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"] =
     "Измените режим отображения рейда на один из вариантов 'Combined Groups' через Режим редактирования"
-L["Disable the 'Keep Groups Together' raid profile setting."] = "Отключите параметр профиля рейда 'Keep Groups Together'."
+L["Disable the 'Keep Groups Together' raid profile setting"] = "Отключите параметр профиля рейда 'Keep Groups Together'."
 L["Only using Blizzard frames with Traditional mode"] = "Используются только рамки Blizzard в традиционном режиме"
 L["Traditional mode can't sort your other frame addons: '%s'"] = "Традиционный режим не может сортировать рамки других аддонов: '%s'"
 L["Using Secure sorting mode when spacing is being used"] = "Используется безопасный режим сортировки при включённых отступах"

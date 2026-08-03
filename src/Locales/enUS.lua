@@ -193,6 +193,7 @@ L["This only applies to Blizzard frames."] = nil
 L["Party"] = nil
 L["Raid"] = nil
 L["Group"] = nil
+L["Enemy Arena"] = nil
 L["Horizontal"] = nil
 L["Vertical"] = nil
 
@@ -259,7 +260,7 @@ L["Using Raid-Style Party Frames"] = nil
 L["Please enable 'Use Raid-Style Party Frames' in the Blizzard settings"] = nil
 L["Keep Groups Together setting disabled"] = nil
 L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"] = nil
-L["Disable the 'Keep Groups Together' raid profile setting."] = nil
+L["Disable the 'Keep Groups Together' raid profile setting"] = nil
 L["Only using Blizzard frames with Traditional mode"] = nil
 L["Traditional mode can't sort your other frame addons: '%s'"] = nil
 L["Using Secure sorting mode when spacing is being used"] = nil

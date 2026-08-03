@@ -196,6 +196,7 @@ L["This only applies to Blizzard frames."] = "S’applique uniquement aux cadres
 L["Party"] = "Groupe"
 L["Raid"] = "Raid"
 L["Group"] = "Groupe"
+L["Enemy Arena"] = "Arène ennemie"
 L["Horizontal"] = "Horizontal"
 L["Vertical"] = "Vertical"
 
@@ -262,7 +263,7 @@ L["Using Raid-Style Party Frames"] = "Utilisation des cadres de groupe style rai
 L["Please enable 'Use Raid-Style Party Frames' in the Blizzard settings"] = "Veuillez activer « Utiliser les cadres de groupe style raid » dans les options Blizzard"
 L["Keep Groups Together setting disabled"] = "Paramètre « Conserver les groupes ensemble » désactivé"
 L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"] = "Changez le mode d’affichage du raid pour l’une des options « Groupes combinés » via le mode Édition"
-L["Disable the 'Keep Groups Together' raid profile setting."] = "Désactivez le paramètre de profil de raid « Conserver les groupes ensemble »."
+L["Disable the 'Keep Groups Together' raid profile setting"] = "Désactivez le paramètre de profil de raid « Conserver les groupes ensemble »."
 L["Only using Blizzard frames with Traditional mode"] = "Utilisation uniquement des cadres Blizzard avec le mode Traditionnel"
 L["Traditional mode can't sort your other frame addons: '%s'"] = "Le mode Traditionnel ne peut pas trier vos autres addons de cadres : « %s »"
 L["Using Secure sorting mode when spacing is being used"] = "Mode de tri Sécurisé utilisé alors que l’espacement est activé"
