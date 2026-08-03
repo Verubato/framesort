@@ -311,4 +311,5 @@ L["Places you at the top of your corresponding role (healer/tank/dps)."] = "Ра
 
 -- # Language screen #
 L["Language"] = "Язык"
+L["Auto"] = "Авто"
 L["Specify the language we use."] = "Укажите используемый язык."

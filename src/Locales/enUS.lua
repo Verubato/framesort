@@ -302,4 +302,5 @@ L["Places you at the top of your corresponding role (healer/tank/dps)."] = nil
 
 -- # Language screen #
 L["Language"] = nil
+L["Auto"] = nil
 L["Specify the language we use."] = nil

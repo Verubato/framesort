@@ -305,4 +305,5 @@ L["Places you at the top of your corresponding role (healer/tank/dps)."] = "Plat
 
 -- # Language screen #
 L["Language"] = "Sprache"
+L["Auto"] = "Automatisch"
 L["Specify the language we use."] = "Lege die verwendete Sprache fest."

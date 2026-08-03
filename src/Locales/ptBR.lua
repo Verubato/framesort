@@ -5,7 +5,7 @@ local L = addon.Locale.ptBR
 -- used in FrameSort - 1.2.3 version header, %s is the version number
 L["FrameSort - %s"] = "FrameSort - %s"
 L["There are some issues that may prevent FrameSort from working correctly."] = "Há alguns problemas que podem impedir o FrameSort de funcionar corretamente."
-L["Please go to the Health Check panel to view more details."] = "Acesse o painel de Verificação de integridade para ver mais detalhes."
+L["Please go to the Health Check panel to view more details."] = "Acesse o painel de Diagnóstico para ver mais detalhes."
 L["Role"] = "Função"
 L["Spec"] = "Espec."
 L["Group"] = "Grupo"
@@ -68,7 +68,7 @@ L["Hunters"] = "Caçadores"
 L["Melee"] = "Corpo a corpo"
 
 -- # Spec Priority screen # --
-L["Spec Priority"] = "Prioridade de especialização"
+L["Spec Priority"] = "Prioridade espec."
 L["Spec Type"] = "Tipo de especialização"
 L["Choose a spec type, then drag and drop to control priority."] = "Escolha um tipo de especialização e arraste e solte para controlar a prioridade."
 L["Tank"] = "Tanque"
@@ -246,7 +246,7 @@ L["Need help with something?"] = "Precisa de ajuda com alguma coisa?"
 L["Talk directly with the developer on Discord."] = "Fale diretamente com o desenvolvedor no Discord."
 
 -- # Health Check screen -- #
-L["Health Check"] = "Verificação de integridade"
+L["Health Check"] = "Diagnóstico"
 L["Try this"] = "Tente isto"
 L["Any known issues with configuration or conflicting addons will be shown below."] = "Qualquer problema conhecido de configuração ou conflito entre addons será mostrado abaixo."
 L["N/A"] = "N/D"
@@ -306,4 +306,5 @@ L["Places you at the top of your corresponding role (healer/tank/dps)."] = "Colo
 
 -- # Language screen #
 L["Language"] = "Idioma"
+L["Auto"] = "Automático"
 L["Specify the language we use."] = "Especifique o idioma que usamos."

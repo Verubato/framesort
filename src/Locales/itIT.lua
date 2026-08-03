@@ -5,7 +5,7 @@ local L = addon.Locale.itIT
 -- used in FrameSort - 1.2.3 version header, %s is the version number
 L["FrameSort - %s"] = "FrameSort - %s"
 L["There are some issues that may prevent FrameSort from working correctly."] = "Ci sono alcuni problemi che potrebbero impedire a FrameSort di funzionare correttamente."
-L["Please go to the Health Check panel to view more details."] = "Vai al pannello Controllo integrità per vedere maggiori dettagli."
+L["Please go to the Health Check panel to view more details."] = "Vai al pannello Diagnostica per vedere maggiori dettagli."
 L["Role"] = "Ruolo"
 L["Spec"] = "Spec."
 L["Group"] = "Gruppo"
@@ -27,7 +27,7 @@ L["Group"] = "Gruppo"
 L["Reverse"] = "Inverti"
 
 -- # Sorting Method screen #
-L["Sorting Method"] = "Metodo di ordinamento"
+L["Sorting Method"] = "Metodo ordinamento"
 L["Secure"] = "Sicuro"
 L["SortingMethod_Secure_Description"] = [[
 Regola la posizione di ogni singolo riquadro e non causa errori, blocchi o taint nell'interfaccia.
@@ -68,7 +68,7 @@ L["Hunters"] = "Cacciatori"
 L["Melee"] = "Corpo a corpo"
 
 -- # Spec Priority screen # --
-L["Spec Priority"] = "Priorità specializzazione"
+L["Spec Priority"] = "Priorità spec."
 L["Spec Type"] = "Tipo di specializzazione"
 L["Choose a spec type, then drag and drop to control priority."] = "Scegli un tipo di specializzazione, poi trascina e rilascia per gestire la priorità."
 L["Tank"] = "Tank"
@@ -84,7 +84,7 @@ Questo significa che potrebbe volerci un momento prima di poter ordinare in modo
 ]]
 
 -- # Auto Leader screen #
-L["Auto Leader"] = "Capogruppo automatico"
+L["Auto Leader"] = "Capogruppo auto."
 L["Auto promote healers to leader in solo shuffle."] = "Promuovi automaticamente i guaritori a capogruppo nel Solo Shuffle."
 L["Why? So healers can configure target marker icons and re-order party1/2 to their preference."] =
     "Perché? Così i guaritori possono configurare le icone dei bersagli e riordinare party1/2 come preferiscono."
@@ -123,7 +123,7 @@ L["Cycle to the next dps"] = "Passa al DPS successivo"
 L["Cycle to the previous dps"] = "Passa al DPS precedente"
 
 -- # Keybindings screen #
-L["Keybindings"] = "Scorciatoie da tastiera"
+L["Keybindings"] = "Scorciatoie"
 L["Keybindings_Description"] = [[
 Puoi trovare le scorciatoie di FrameSort nella sezione standard delle scorciatoie da tastiera di WoW.
 \n
@@ -246,7 +246,7 @@ L["Need help with something?"] = "Ti serve aiuto con qualcosa?"
 L["Talk directly with the developer on Discord."] = "Parla direttamente con lo sviluppatore su Discord."
 
 -- # Health Check screen -- #
-L["Health Check"] = "Controllo integrità"
+L["Health Check"] = "Diagnostica"
 L["Try this"] = "Prova questo"
 L["Any known issues with configuration or conflicting addons will be shown below."] = "Eventuali problemi noti di configurazione o conflitti tra addon verranno mostrati qui sotto."
 L["N/A"] = "N/D"
@@ -306,4 +306,5 @@ L["Places you at the top of your corresponding role (healer/tank/dps)."] = "Ti p
 
 -- # Language screen #
 L["Language"] = "Lingua"
+L["Auto"] = "Automatico"
 L["Specify the language we use."] = "Specifica la lingua da usare."

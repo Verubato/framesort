@@ -300,4 +300,5 @@ L["Places you at the top of your corresponding role (healer/tank/dps)."] = "將�
 
 -- # Language screen #
 L["Language"] = "語言"
+L["Auto"] = "自動"
 L["Specify the language we use."] = "指定要使用的語言。"

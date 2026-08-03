@@ -305,4 +305,5 @@ L["Places you at the top of your corresponding role (healer/tank/dps)."] = "Te c
 
 -- # Language screen #
 L["Language"] = "Idioma"
+L["Auto"] = "Automático"
 L["Specify the language we use."] = "Especifica el idioma que usamos."
