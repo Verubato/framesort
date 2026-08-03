@@ -6,7 +6,7 @@ local fsAutoLeader
 local M = {}
 
 function M:setup()
-    local addonFactory = require("TestHarness\\AddonFactory")
+    local addonFactory = require("TestHarness.AddonFactory")
     addon = addonFactory:Create()
 
     fsAutoLeader = addon.Modules.AutoLeader

@@ -19,7 +19,7 @@ local function GenerateUnits(count)
 end
 
 function M:setup()
-    local addonFactory = require("TestHarness\\AddonFactory")
+    local addonFactory = require("TestHarness.AddonFactory")
     addon = addonFactory:Create()
 
     fsCompare = addon.Modules.Sorting.Comparer

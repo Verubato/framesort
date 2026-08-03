@@ -87,9 +87,9 @@ local function makeNameplateFrame(unit)
 end
 
 function M:setup()
-    local addonFactory = require("TestHarness\\AddonFactory")
-    providerFactory = require("TestHarness\\ProviderFactory")
-    frameMock = require("TestHarness\\FrameMock")
+    local addonFactory = require("TestHarness.AddonFactory")
+    providerFactory = require("TestHarness.ProviderFactory")
+    frameMock = require("TestHarness.FrameMock")
 
     addon = addonFactory:Create()
 

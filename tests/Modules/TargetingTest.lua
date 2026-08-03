@@ -5,8 +5,8 @@ local events
 local M = {}
 
 function M:setup()
-    local addonFactory = require("TestHarness\\AddonFactory")
-    local providerFactory = require("TestHarness\\ProviderFactory")
+    local addonFactory = require("TestHarness.AddonFactory")
+    local providerFactory = require("TestHarness.ProviderFactory")
 
     addon = addonFactory:Create()
     wow = addon.WoW.Api
@@ -29,7 +29,7 @@ function M:setup()
 
     local partyContainer = party.Frame
 
-    local frameMock = require("TestHarness\\FrameMock")
+    local frameMock = require("TestHarness.FrameMock")
     local player = frameMock:New("Frame", nil, partyContainer, nil)
     player.State.Position.Top = 300
     player.unit = "player"

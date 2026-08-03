@@ -1,5 +1,5 @@
-local void = require("TestHarness\\Void")
-local frameMock = require("TestHarness\\FrameMock")
+local void = require("TestHarness.Void")
+local frameMock = require("TestHarness.FrameMock")
 
 ---@class WowApiFactory
 local M = {}

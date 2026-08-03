@@ -2,7 +2,7 @@ local upgrader
 local M = {}
 
 function M:setup()
-    local addonFactory = require("TestHarness\\AddonFactory")
+    local addonFactory = require("TestHarness.AddonFactory")
     local addon = addonFactory:Create()
     upgrader = addon.Configuration.Upgrader
 end

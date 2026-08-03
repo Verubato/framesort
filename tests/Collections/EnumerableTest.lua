@@ -2,13 +2,16 @@
 local fsEnumerable
 local M = {}
 
+-- Test.lua publishes the addon root; see the note in TestHarness/AddonFactory.lua.
+local srcDir = (FS_ADDON_ROOT or "..") .. "/src"
+
 function M:setup()
     local addon = {
         Utils = {},
         Collections = {},
     }
 
-    local module = loadfile("..\\src\\Collections\\Enumerable.lua")
+    local module = loadfile(srcDir .. "/Collections/Enumerable.lua")
     assert(module)
 
     module("UnitTest", addon)

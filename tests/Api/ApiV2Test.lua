@@ -6,9 +6,9 @@ local raidUnitsCount = 6
 local arenaUnitsCount = 3
 
 function M:setup()
-    local addonFactory = require("TestHarness\\AddonFactory")
-    local frameMock = require("TestHarness\\FrameMock")
-    local providerFactory = require("TestHarness\\ProviderFactory")
+    local addonFactory = require("TestHarness.AddonFactory")
+    local frameMock = require("TestHarness.FrameMock")
+    local providerFactory = require("TestHarness.ProviderFactory")
 
     addon = addonFactory:Create()
     addon.Api:Init()

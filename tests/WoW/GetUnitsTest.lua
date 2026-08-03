@@ -28,7 +28,7 @@ local function UnitExists(unit, members)
 end
 
 function M:setup()
-    local addonFactory = require("TestHarness\\AddonFactory")
+    local addonFactory = require("TestHarness.AddonFactory")
     addon = addonFactory:Create()
     fsUnit = addon.WoW.Unit
 

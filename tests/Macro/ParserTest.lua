@@ -5,7 +5,7 @@ local fsMacro
 local M = {}
 
 function M:setup()
-    local addonFactory = require("TestHarness\\AddonFactory")
+    local addonFactory = require("TestHarness.AddonFactory")
     addon = addonFactory:Create()
     fsMacro = addon.Modules.Macro.Parser
 end

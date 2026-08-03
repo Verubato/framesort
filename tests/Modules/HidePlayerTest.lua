@@ -4,9 +4,9 @@ local M = {}
 local player
 
 function M:setup()
-    local addonFactory = require("TestHarness\\AddonFactory")
-    local providerFactory = require("TestHarness\\ProviderFactory")
-    local frameMock = require("TestHarness\\FrameMock")
+    local addonFactory = require("TestHarness.AddonFactory")
+    local providerFactory = require("TestHarness.ProviderFactory")
+    local frameMock = require("TestHarness.FrameMock")
 
     addon = addonFactory:Create()
 

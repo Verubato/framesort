@@ -4,7 +4,7 @@ local fsLuaEx
 local M = {}
 
 function M:setup()
-    local addonFactory = require("TestHarness\\AddonFactory")
+    local addonFactory = require("TestHarness.AddonFactory")
     addon = addonFactory:Create()
     fsLuaEx = addon.Language.LuaEx
 end

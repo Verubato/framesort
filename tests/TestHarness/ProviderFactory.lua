@@ -1,4 +1,4 @@
-local frameMock = require("TestHarness\\FrameMock")
+local frameMock = require("TestHarness.FrameMock")
 ---@class ProviderFactory
 local M = {}
 

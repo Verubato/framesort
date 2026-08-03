@@ -1,15 +1,22 @@
-local wowFactory = require("TestHarness\\WowFactory")
+local wowFactory = require("TestHarness.WowFactory")
 local addonName = "Test"
 local moduleCache = {}
 
+-- Test.lua publishes the addon root, so the suite runs from the repository root (which is what
+-- CI does) as well as from inside tests. Forward slashes throughout: Windows accepts them and
+-- Linux requires them.
+local srcDir = (FS_ADDON_ROOT or "..") .. "/src"
+
 local function DependenciesFromXml()
-    local xmlFilePath = "..\\src\\Load.xml"
     local dependencies = {}
 
-    for line in io.lines(xmlFilePath) do
+    for line in io.lines(srcDir .. "/Load.xml") do
         local file = string.match(line, [[file="(.*)"]])
 
-        if file and file ~= "WoW\\WoW.lua" and file ~= "Namespace.lua" and not string.match(file, "Libs\\.*") then
+        -- The xml spells its paths with backslashes; normalise before comparing or loading.
+        file = file and file:gsub("\\", "/")
+
+        if file and file ~= "WoW/WoW.lua" and file ~= "Namespace.lua" and not string.match(file, "Libs/.*") then
             dependencies[#dependencies + 1] = file
         end
     end
@@ -19,7 +26,7 @@ end
 
 local function LoadDependencies(addonTable, dependencies)
     for _, fileName in ipairs(dependencies) do
-        local path = "..\\src\\" .. fileName
+        local path = srcDir .. "/" .. fileName
         local module = moduleCache[path] or loadfile(path)
 
         moduleCache[path] = module
