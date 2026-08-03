@@ -4,7 +4,13 @@ local fsConfig = addon.Configuration
 local wow = addon.WoW.Api
 local fsEnumerable = addon.Collections.Enumerable
 local L = addon.Locale.Current
+-- An empty locale means "follow the client", which is what Locales/Locale.lua already falls back
+-- to and what Defaults.lua ships. Auto carries no Name: this table is built when the file loads,
+-- before addon.Locale:Init() installs the lookup metatable, so an L[] read here would come back
+-- nil. It is resolved when the dropdown draws instead. Every other entry names its language in
+-- that language, so none of those need translating.
 local items = {
+    { Locale = "" },
     { Locale = "enUS", Name = "English" },
     { Locale = "deDE", Name = "Deutsch" },
     { Locale = "esES", Name = "Español" },
@@ -37,12 +43,12 @@ function M:Build(parent)
 
     local dd = fsConfig:Dropdown(panel, items, function()
         return fsEnumerable:From(items):First(function(item)
-            return item.Locale == (addon.DB.Options.Locale or "enUS")
+            return item.Locale == (addon.DB.Options.Locale or "")
         end)
     end, function(item)
         addon.DB.Options.Locale = item.Locale
     end, function(item)
-        return item.Name
+        return item.Name or L["Auto"]
     end)
 
     dd:SetPoint("TOPLEFT", description, "BOTTOMLEFT", 0, -verticalSpacing)
