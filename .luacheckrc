@@ -2,6 +2,11 @@
 local config = {
 	std = "lua51",
 
+	-- TODO: the suite predates test linting and has ~68 findings, a mix of luaunit's global
+	-- idiom and real smells (a shadowed self, values mutated but never read). Turn this on once
+	-- they are cleaned up.
+	lint_tests = false,
+
 	globals = {
 		"FrameSort",
 		"FrameSortDB",

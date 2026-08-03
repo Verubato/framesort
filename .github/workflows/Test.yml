@@ -45,3 +45,20 @@ jobs:
         if: always()
         shell: pwsh
         run: ./build/Test.ps1
+
+      # Both of these report rather than fail: a translation backlog and a deliberately pinned
+      # submodule are both normal states, not build breakages.
+      - name: Check the build submodule is current
+        if: always()
+        shell: pwsh
+        run: ./build/CheckSubmodule.ps1
+
+      - name: Locale report
+        if: always()
+        shell: pwsh
+        run: |
+          $report = python ./build/CheckLocales.py | Out-String
+          Write-Host $report
+          if ($env:GITHUB_STEP_SUMMARY) {
+            "## Locales`n`n``````n$report``````" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append
+          }
