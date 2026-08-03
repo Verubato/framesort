@@ -78,6 +78,7 @@ function factory:Create()
             esES = {},
             esMX = {},
             frFR = {},
+            itIT = {},
             koKR = {},
             ptBR = {},
             ruRU = {},

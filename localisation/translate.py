@@ -12,6 +12,7 @@ languages = {
     "Spanish (Spain)": "esES",
     "Spanish (Mexico)": "esMX",
     "French": "frFR",
+    "Italian": "itIT",
     "Korean": "koKR",
     "Portuguese (Brazil)": "ptBR",
     "Russian": "ruRU",

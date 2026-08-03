@@ -10,6 +10,7 @@ local items = {
     { Locale = "esES", Name = "Español" },
     { Locale = "esMX", Name = "Español (México)" },
     { Locale = "frFR", Name = "Français" },
+    { Locale = "itIT", Name = "Italiano" },
     { Locale = "koKR", Name = "한국어" },
     { Locale = "ptBR", Name = "Português (Brasil)" },
     { Locale = "ruRU", Name = "Русский" },

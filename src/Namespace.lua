@@ -14,6 +14,7 @@ addon.Locale = {
     esES = {},
     esMX = {},
     frFR = {},
+    itIT = {},
     koKR = {},
     ptBR = {},
     ruRU = {},
