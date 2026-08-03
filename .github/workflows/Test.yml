@@ -1,4 +1,4 @@
-name: Lint
+name: Test
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  lint:
+  test:
     runs-on: ubuntu-latest
 
     steps:
