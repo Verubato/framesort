@@ -1,4 +1,4 @@
-local wowFactory = require("TestHarness.WowFactory")
+local wowFactory = require("TestHarness.WoWFactory")
 local addonName = "Test"
 local moduleCache = {}
 
