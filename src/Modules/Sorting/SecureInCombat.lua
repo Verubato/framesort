@@ -12,6 +12,7 @@ local fsConfig = addon.Configuration
 local fsEnumerable = addon.Collections.Enumerable
 local fsLog = addon.Logging.Log
 local fsFrame = addon.WoW.Frame
+---@class SecureInCombatSorter
 local M = {}
 addon.Modules.Sorting.Secure.InCombat = M
 

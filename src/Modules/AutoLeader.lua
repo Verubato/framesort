@@ -75,15 +75,6 @@ function M:ProcessEvent(event)
     end
 end
 
-function M:Init()
-    if not CanRun() then
-        fsLog:Debug("AutoLeader module not loading because this wow client doesn't have solo shuffle.")
-        return
-    end
-
-    fsLog:Debug("Initialised the auto leader module.")
-end
-
 function M:Run()
     if not addon.DB.Options.AutoLeader.Enabled then
         return
@@ -102,4 +93,13 @@ function M:Run()
     end
 
     Run()
+end
+
+function M:Init()
+    if not CanRun() then
+        fsLog:Debug("AutoLeader module not loading because this wow client doesn't have solo shuffle.")
+        return
+    end
+
+    fsLog:Debug("Initialised the auto leader module.")
 end

@@ -215,7 +215,7 @@ local function InspectNext()
     return true
 end
 
-local RunLoop
+local RunLoop -- luaconv: forward declaration for the mutually recursive loop below
 
 local function ScheduleLoop()
     if not initialized or loopRunning then return end

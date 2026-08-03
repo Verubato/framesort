@@ -10,6 +10,7 @@ local fsMath = addon.Numerics.Math
 local fsLog = addon.Logging.Log
 local wow = addon.WoW.Api
 local wowEx = addon.WoW.WowEx
+---@class SecureNoCombatSorter
 local M = {}
 addon.Modules.Sorting.Secure.NoCombat = M
 

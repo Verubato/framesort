@@ -57,7 +57,7 @@ local function FrameShims(frame)
     frame.SetObeyStepOnDrag = frame.SetObeyStepOnDrag or function() end
 end
 
-local createFrame = wow.CreateFrame
+local createFrame = wow.CreateFrame -- luaconv: captures the original before the shim below replaces it
 
 wow.CreateFrame = function(frameType, name, parent, template, id)
     if not name and isWotlkPrivate then

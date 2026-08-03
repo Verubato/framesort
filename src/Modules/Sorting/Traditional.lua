@@ -4,6 +4,7 @@ local wow = addon.WoW.Api
 local fsCompare = addon.Modules.Sorting.Comparer
 local fsFrame = addon.WoW.Frame
 local fsLog = addon.Logging.Log
+---@class TraditionalSorter
 local M = {}
 addon.Modules.Sorting.Traditional = M
 
