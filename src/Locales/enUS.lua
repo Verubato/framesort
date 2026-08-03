@@ -87,7 +87,6 @@ This means it may take a short while before we can sort accurately.
 L["Auto Leader"] = nil
 L["Auto promote healers to leader in solo shuffle."] = nil
 L["Why? So healers can configure target marker icons and re-order party1/2 to their preference."] = nil
-L["Enabled"] = nil
 
 -- # Blizzard Keybindings screen (FrameSort's section) #
 L["Targeting"] = nil
@@ -256,8 +255,6 @@ L["Using grouped layout for Cell raid frames"] = nil
 L["Please check the 'Combined Groups (Raid)' option in Cell -> Layouts"] = nil
 L["Can detect frames"] = nil
 L["FrameSort currently supports frames from these addons: %s"] = nil
-L["Using Raid-Style Party Frames"] = nil
-L["Please enable 'Use Raid-Style Party Frames' in the Blizzard settings"] = nil
 L["Keep Groups Together setting disabled"] = nil
 L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"] = nil
 L["Disable the 'Keep Groups Together' raid profile setting"] = nil

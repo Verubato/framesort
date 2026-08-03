@@ -88,7 +88,6 @@ L["Auto Leader"] = "Automatischer Anführer"
 L["Auto promote healers to leader in solo shuffle."] = "Heiler im Solo Shuffle automatisch zum Anführer befördern."
 L["Why? So healers can configure target marker icons and re-order party1/2 to their preference."] =
     "Warum? Damit Heiler Zielmarkierungen konfigurieren und party1/2 nach ihren Vorlieben umsortieren können."
-L["Enabled"] = "Aktiviert"
 
 -- # Blizzard Keybindings screen (FrameSort's section) #
 L["Targeting"] = "Anvisieren"
@@ -258,8 +257,6 @@ L["Using grouped layout for Cell raid frames"] = "Gruppiertes Layout für Cell-S
 L["Please check the 'Combined Groups (Raid)' option in Cell -> Layouts"] = "Bitte aktiviere die Option 'Combined Groups (Raid)' in Cell -> Layouts"
 L["Can detect frames"] = "Kann Frames erkennen"
 L["FrameSort currently supports frames from these addons: %s"] = "FrameSort unterstützt derzeit Frames folgender Addons: %s"
-L["Using Raid-Style Party Frames"] = "Gruppen-Frames im Schlachtzugsstil werden verwendet"
-L["Please enable 'Use Raid-Style Party Frames' in the Blizzard settings"] = "Bitte aktiviere 'Use Raid-Style Party Frames' in den Blizzard-Einstellungen"
 L["Keep Groups Together setting disabled"] = "Einstellung 'Gruppen zusammenhalten' deaktiviert"
 L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"] = "Ändere den Schlachtzugs-Anzeigemodus im Bearbeitungsmodus auf eine der Optionen 'Combined Groups'"
 L["Disable the 'Keep Groups Together' raid profile setting"] = "Deaktiviere die Schlachtzugsprofil-Einstellung 'Keep Groups Together'."

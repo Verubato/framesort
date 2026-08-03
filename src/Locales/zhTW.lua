@@ -87,7 +87,6 @@ L["Spec query note"] = [[
 L["Auto Leader"] = "自動隊長"
 L["Auto promote healers to leader in solo shuffle."] = "在單排亂鬥中自動將治療升為隊長。"
 L["Why? So healers can configure target marker icons and re-order party1/2 to their preference."] = "為什麼？讓治療可以設定目標標記圖示，並依喜好調整 party1/2 的順序。"
-L["Enabled"] = "啟用"
 
 -- # Blizzard Keybindings screen (FrameSort's section) #
 L["Targeting"] = "選取目標"
@@ -254,8 +253,6 @@ L["Using grouped layout for Cell raid frames"] = "Cell 團隊框架使用群組�
 L["Please check the 'Combined Groups (Raid)' option in Cell -> Layouts"] = "請在 Cell -> 版面配置 中勾選「合併群組（團隊）」選項"
 L["Can detect frames"] = "可偵測到框架"
 L["FrameSort currently supports frames from these addons: %s"] = "FrameSort 目前支援來自以下插件的框架：%s"
-L["Using Raid-Style Party Frames"] = "使用團隊風格隊伍框架"
-L["Please enable 'Use Raid-Style Party Frames' in the Blizzard settings"] = "請在暴雪設定中啟用「使用團隊風格的隊伍框架」"
 L["Keep Groups Together setting disabled"] = "已停用「保持群組一起」設定"
 L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"] = "請透過編輯模式將團隊顯示模式改為「合併群組」的其中一種選項"
 L["Disable the 'Keep Groups Together' raid profile setting"] = "請停用團隊設定檔中的「保持群組一起」選項。"

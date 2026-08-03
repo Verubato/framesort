@@ -88,7 +88,6 @@ L["Auto Leader"] = "자동 파티장"
 L["Auto promote healers to leader in solo shuffle."] = "솔로 셔플에서 힐러를 자동으로 파티장으로 승급합니다."
 L["Why? So healers can configure target marker icons and re-order party1/2 to their preference."] =
     "이유: 힐러가 대상 징표 아이콘을 설정하고 party1/2 순서를 원하는 대로 재정렬할 수 있도록 하기 위함입니다."
-L["Enabled"] = "사용"
 
 -- # Blizzard Keybindings screen (FrameSort's section) #
 L["Targeting"] = "대상 지정"
@@ -259,8 +258,6 @@ L["Using grouped layout for Cell raid frames"] = "Cell 공격대 프레임에 �
 L["Please check the 'Combined Groups (Raid)' option in Cell -> Layouts"] = "Cell -> Layouts에서 'Combined Groups (Raid)' 옵션을 체크하세요"
 L["Can detect frames"] = "프레임 감지 가능"
 L["FrameSort currently supports frames from these addons: %s"] = "FrameSort는 현재 다음 애드온의 프레임을 지원합니다: %s"
-L["Using Raid-Style Party Frames"] = "공격대 형식의 파티 프레임 사용 중"
-L["Please enable 'Use Raid-Style Party Frames' in the Blizzard settings"] = "블리자드 설정에서 'Use Raid-Style Party Frames'를 활성화하세요"
 L["Keep Groups Together setting disabled"] = "'Keep Groups Together' 설정이 비활성화됨"
 L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"] = "편집 모드에서 공격대 표시 모드를 'Combined Groups' 옵션 중 하나로 변경하세요"
 L["Disable the 'Keep Groups Together' raid profile setting"] = "공격대 프로필의 'Keep Groups Together' 설정을 비활성화하세요."

@@ -88,7 +88,6 @@ L["Auto Leader"] = "Chef automatique"
 L["Auto promote healers to leader in solo shuffle."] = "Promouvoir automatiquement les soigneurs au rang de chef en Solo Shuffle."
 L["Why? So healers can configure target marker icons and re-order party1/2 to their preference."] =
     "Pourquoi ? Pour que les soigneurs puissent configurer les icônes de marqueurs de cible et réorganiser party1/2 selon leur préférence."
-L["Enabled"] = "Activé"
 
 -- # Blizzard Keybindings screen (FrameSort's section) #
 L["Targeting"] = "Ciblage"
@@ -259,8 +258,6 @@ L["Using grouped layout for Cell raid frames"] = "Disposition groupée utilisée
 L["Please check the 'Combined Groups (Raid)' option in Cell -> Layouts"] = "Veuillez cocher l’option « Groupes combinés (Raid) » dans Cell -> Layouts"
 L["Can detect frames"] = "Peut détecter les cadres"
 L["FrameSort currently supports frames from these addons: %s"] = "FrameSort prend actuellement en charge les cadres de ces addons : %s"
-L["Using Raid-Style Party Frames"] = "Utilisation des cadres de groupe style raid"
-L["Please enable 'Use Raid-Style Party Frames' in the Blizzard settings"] = "Veuillez activer « Utiliser les cadres de groupe style raid » dans les options Blizzard"
 L["Keep Groups Together setting disabled"] = "Paramètre « Conserver les groupes ensemble » désactivé"
 L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"] = "Changez le mode d’affichage du raid pour l’une des options « Groupes combinés » via le mode Édition"
 L["Disable the 'Keep Groups Together' raid profile setting"] = "Désactivez le paramètre de profil de raid « Conserver les groupes ensemble »."

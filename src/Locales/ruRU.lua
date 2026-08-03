@@ -91,7 +91,6 @@ L["Auto Leader"] = "Автолидер"
 L["Auto promote healers to leader in solo shuffle."] = "Автоматически назначать лекаря лидером в «Соло потасовке»."
 L["Why? So healers can configure target marker icons and re-order party1/2 to their preference."] =
     "Зачем? Чтобы лекари могли ставить метки и менять порядок party1/2 по своему усмотрению."
-L["Enabled"] = "Включено"
 
 -- # Blizzard Keybindings screen (FrameSort's section) #
 L["Targeting"] = "Выбор цели"
@@ -263,8 +262,6 @@ L["Using grouped layout for Cell raid frames"] = "Используется сг�
 L["Please check the 'Combined Groups (Raid)' option in Cell -> Layouts"] = "Проверьте опцию 'Combined Groups (Raid)' в Cell -> Layouts"
 L["Can detect frames"] = "Рамки обнаружены"
 L["FrameSort currently supports frames from these addons: %s"] = "FrameSort в настоящее время поддерживает рамки из этих аддонов: %s"
-L["Using Raid-Style Party Frames"] = "Используются рамки группы в стиле рейда"
-L["Please enable 'Use Raid-Style Party Frames' in the Blizzard settings"] = "Включите 'Use Raid-Style Party Frames' в настройках Blizzard"
 L["Keep Groups Together setting disabled"] = "Настройка 'Keep Groups Together' отключена"
 L["Change the raid display mode to one of the 'Combined Groups' options via Edit Mode"] =
     "Измените режим отображения рейда на один из вариантов 'Combined Groups' через Режим редактирования"
