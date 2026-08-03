@@ -11,7 +11,7 @@ jobs:
 
     steps:
       - name: Check out the addon
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # The build scripts live in the shared addon-devops repository, which every addon also
       # carries as a submodule. Checking it out separately rather than with submodules: true
@@ -19,7 +19,7 @@ jobs:
       # for it. If addon-devops is private, add a PAT with read access as a repository secret
       # and pass it here as `token: ${{ secrets.DEVOPS_TOKEN }}`.
       - name: Check out the shared build scripts
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: Verubato/addon-devops
           path: build
@@ -36,3 +36,10 @@ jobs:
       - name: Lint
         shell: pwsh
         run: ./build/Lint.ps1
+
+      # always() so a lint failure doesn't hide the test result, and vice versa. Addons with no
+      # suite report "no suite found" and pass.
+      - name: Test
+        if: always()
+        shell: pwsh
+        run: ./build/Test.ps1
