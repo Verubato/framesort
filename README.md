@@ -16,11 +16,11 @@ A simple WoW addon that sorts party/raid/arena frames and places you at the top/
 
 Order raid frames the way you like with your frame on top:
 
-![Player at the top](https://raw.githubusercontent.com/Verubato/framesort/main/assets/Screenshots/3v3-sorting-top.png)
+![Player at the top](https://raw.githubusercontent.com/Verubato/framesort/main/assets/Screenshots/3v3SortingTop.png)
 
 Or on bottom:
 
-![Player at the bottom](https://raw.githubusercontent.com/Verubato/framesort/main/assets/Screenshots/3v3-sorting-bottom.png)
+![Player at the bottom](https://raw.githubusercontent.com/Verubato/framesort/main/assets/Screenshots/3v3SortingBottom.png)
 
 The middle position is also supported.
 
@@ -28,15 +28,15 @@ The middle position is also supported.
 
 Add spacing between frames:
 
-![Party](https://raw.githubusercontent.com/Verubato/framesort/main/assets/Screenshots/party-spacing.png)
+![Party](https://raw.githubusercontent.com/Verubato/framesort/main/assets/Screenshots/PartySpacing.png)
 
-![Battlegrounds](https://raw.githubusercontent.com/Verubato/framesort/main/assets/Screenshots/raid-spacing.png)
+![Battlegrounds](https://raw.githubusercontent.com/Verubato/framesort/main/assets/Screenshots/RaidSpacing.png)
 
 ## Targeting ##
 
 Target frames based on their visual position:
 
-![Keybindings](https://raw.githubusercontent.com/Verubato/framesort/main/assets/Screenshots/f1-f5-keybindings.png)
+![Keybindings](https://raw.githubusercontent.com/Verubato/framesort/main/assets/Screenshots/F1F5Keybindings.png)
 
 ## Example Macros ##
 
