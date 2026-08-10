@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.18.5
+
+Updated help reference to use the new support bot.
+
 ## 7.18.4
 
 Added Italian and Brazilian Portuguese translations, and an Auto option for the language setting.
