@@ -171,9 +171,9 @@ L["Example %d"] = "Ejemplo %d"
 L["Discord Bot Blurb"] = [[
 ¿Necesitas ayuda para crear una macro?
 \n
-¡Ve al servidor de Discord de FrameSort y usa nuestro bot de macros con IA!
+¡Ve al servidor de Discord de FrameSort y usa nuestro bot de ayuda con IA!
 \n
-Simplemente escribe '@Macro Bot' con tu pregunta en el canal #macro-bot-channel.
+Simplemente escribe '@Help' con tu pregunta en el canal #bot.
 ]]
 
 -- # Macro Variables screen # --

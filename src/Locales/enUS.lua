@@ -169,9 +169,9 @@ L["Example %d"] = nil
 L["Discord Bot Blurb"] = [[
 Need help creating a macro?
 \n
-Head over to the FrameSort discord server and use our AI powered macro bot!
+Head over to the FrameSort discord server and use our AI powered help bot!
 \n
-Simply '@Macro Bot' with your question in the #macro-bot-channel.
+Simply '@Help' with your question in the #bot channel.
 ]]
 
 -- # Macro Variables screen # --

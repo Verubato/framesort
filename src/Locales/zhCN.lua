@@ -170,9 +170,9 @@ L["Example %d"] = "示例 %d"
 L["Discord Bot Blurb"] = [[
 需要帮助来创建宏吗？
 \n
-前往 FrameSort 的 Discord 服务器，使用我们的 AI 宏机器人！
+前往 FrameSort 的 Discord 服务器，使用我们的 AI 助手机器人！
 \n
-只需在 #macro-bot-channel 中 '@Macro Bot' 提问即可。
+只需在 #bot 中 '@Help' 提问即可。
 ]]
 
 -- # Macro Variables screen # --

@@ -171,9 +171,9 @@ L["Example %d"] = "예제 %d"
 L["Discord Bot Blurb"] = [[
 매크로를 만드는 데 도움이 필요하신가요?
 \n
-FrameSort 디스코드 서버로 오셔서 AI 기반 매크로 봇을 이용해 보세요!
+FrameSort 디스코드 서버로 오셔서 AI 기반 도우미 봇을 이용해 보세요!
 \n
-#macro-bot-channel에서 '@Macro Bot'을 멘션해 질문을 남기면 됩니다.
+#bot에서 '@Help'을 멘션해 질문을 남기면 됩니다.
 ]]
 
 -- # Macro Variables screen # --
