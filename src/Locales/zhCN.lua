@@ -172,7 +172,7 @@ L["Discord Bot Blurb"] = [[
 \n
 前往 FrameSort 的 Discord 服务器，使用我们的 AI 助手机器人！
 \n
-只需在 #bot 中 '@Help' 提问即可。
+只需在 #bot 中 '@help' 提问即可。
 ]]
 
 -- # Macro Variables screen # --

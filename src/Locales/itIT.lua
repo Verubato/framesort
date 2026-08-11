@@ -173,7 +173,7 @@ Ti serve aiuto per creare una macro?
 \n
 Fai un salto sul server Discord di FrameSort e usa il nostro bot di aiuto basato su IA!
 \n
-Basta menzionare '@Help' con la tua domanda nel canale #bot.
+Basta menzionare '@help' con la tua domanda nel canale #bot.
 ]]
 
 -- # Macro Variables screen # --

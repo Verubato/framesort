@@ -172,7 +172,7 @@ Brauchst du Hilfe beim Erstellen eines Makros?
 \n
 Schau auf dem FrameSort-Discord vorbei und nutze unseren KI-gestützten Hilfe-Bot!
 \n
-Schreibe einfach '@Help' mit deiner Frage im Kanal #bot.
+Schreibe einfach '@help' mit deiner Frage im Kanal #bot.
 ]]
 
 -- # Macro Variables screen # --

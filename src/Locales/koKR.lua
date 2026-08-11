@@ -173,7 +173,7 @@ L["Discord Bot Blurb"] = [[
 \n
 FrameSort 디스코드 서버로 오셔서 AI 기반 도우미 봇을 이용해 보세요!
 \n
-#bot에서 '@Help'을 멘션해 질문을 남기면 됩니다.
+#bot에서 '@help'을 멘션해 질문을 남기면 됩니다.
 ]]
 
 -- # Macro Variables screen # --
