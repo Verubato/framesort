@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.18.6
+
+Corrected the help bot mention to '@help'.
+
 ## 7.18.5
 
 Updated help reference to use the new support bot.
