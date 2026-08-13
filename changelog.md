@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.18.7
+
+Fixed an error when the game hides a player's specialization, which a mouseover of a stranger was enough to trigger.
+
 ## 7.18.6
 
 Corrected the help bot mention to '@help'.
