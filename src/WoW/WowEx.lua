@@ -146,7 +146,7 @@ M.GroupMembersCount = function()
     return 0
 end
 
----Wraps GetArenaOpponentSpec() and returns nil instead of 0
+---Wraps GetArenaOpponentSpec() and returns nil instead of 0 or a secret
 ---@param id number
 ---@return number|nil
 M.GetArenaOpponentSpecSafe = function(id)
@@ -161,14 +161,16 @@ M.GetArenaOpponentSpecSafe = function(id)
 
     local spec = wow.GetArenaOpponentSpec(id)
 
-    if not spec or spec == 0 then
+    -- a secret is dropped here rather than passed on: comparing one errors, so a caller could
+    -- never tell it apart from a real spec id, nor cache it without moving the error
+    if not spec or wow.issecretvalue(spec) or spec == 0 then
         return nil
     end
 
     return spec
 end
 
----Wraps GetInspectSpecialization() and returns nil instead of 0
+---Wraps GetInspectSpecialization() and returns nil instead of 0 or a secret
 ---@param unit string
 ---@return number|nil
 M.GetInspectSpecializationSafe = function(unit)
@@ -183,7 +185,9 @@ M.GetInspectSpecializationSafe = function(unit)
 
     local spec = wow.GetInspectSpecialization(unit)
 
-    if not spec or spec == 0 then
+    -- a unit the client will not let an addon identify answers with a secret spec, and a
+    -- mouseover of a stranger is the everyday way to get one; see GetArenaOpponentSpecSafe
+    if not spec or wow.issecretvalue(spec) or spec == 0 then
         return nil
     end
 
