@@ -16,16 +16,7 @@ local function CreateSettingCheckbox(panel, setting)
         setting.OnChanged(checkbox:GetChecked())
     end)
 
-    checkbox:SetScript("OnEnter", function(self)
-        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-        GameTooltip:SetText(setting.Name, 1, 0.82, 0)
-        GameTooltip:AddLine(setting.Tooltip, 1, 1, 1, true)
-        GameTooltip:Show()
-    end)
-
-    checkbox:SetScript("OnLeave", function()
-        GameTooltip:Hide()
-    end)
+    fsConfig:Tooltip(checkbox, setting.Name, setting.Tooltip)
 
     return checkbox
 end

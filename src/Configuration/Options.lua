@@ -57,6 +57,25 @@ function fsConfig:NotifyChanged()
     end
 end
 
+---Shows a tooltip when the mouse hovers over the frame.
+---@param frame table the frame to attach the tooltip to.
+---@param title string the tooltip heading.
+---@param description string the tooltip body.
+function fsConfig:Tooltip(frame, title, description)
+    frame:HookScript("OnEnter", function()
+        GameTooltip:SetOwner(frame, "ANCHOR_RIGHT")
+        GameTooltip:SetText(title, 1, 0.82, 0)
+        GameTooltip:AddLine(description, 1, 1, 1, true)
+        GameTooltip:Show()
+    end)
+
+    frame:HookScript("OnLeave", function()
+        GameTooltip:Hide()
+    end)
+
+    return frame
+end
+
 function fsConfig:TextLine(line, parent, anchor, font, verticalSpacing)
     local fstring = parent:CreateFontString(nil, "ARTWORK", font or "GameFontWhite")
     fstring:SetSpacing(0)

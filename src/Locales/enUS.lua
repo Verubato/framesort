@@ -25,6 +25,21 @@ L["Bottom"] = nil
 L["Hidden"] = nil
 L["Group"] = nil
 L["Reverse"] = nil
+L["Sort your frames while in 2v2 arena matches."] = nil
+L["Sort your frames while in arena matches larger than 2v2."] = nil
+L["Sort the enemy frames created by supported arena addons."] = nil
+L["Sort your frames while in dungeons, mythic+, and delves."] = nil
+L["Sort your frames while in raids and battlegrounds."] = nil
+L["Sort your frames while in a group out in the world."] = nil
+L["Place your own frame at the top of the group."] = nil
+L["Place your own frame in the middle of the group."] = nil
+L["Place your own frame at the bottom of the group."] = nil
+L["Hide your own frame, leaving only your group members."] = nil
+L["Sort by the unit id, e.g. party1 > party2 > party3."] = nil
+L["Sort by role and spec, using the order from the Ordering panel."] = nil
+L["Sort by role (tank, healer, dps), using the order from the Ordering panel."] = nil
+L["Sort by name in alphabetical order."] = nil
+L["Reverse the sort order, so the last frame becomes the first."] = nil
 
 -- # Sorting Method screen #
 L["Sorting Method"] = nil

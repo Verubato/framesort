@@ -58,11 +58,12 @@ end
 ---@param parentPanel table the parent UI panel.
 ---@param pointOffset table a UI component used as a relative position anchor for the new components.
 ---@param labelText string the text to display on the enabled checkbox.
+---@param labelTooltip string the tooltip to display on the enabled checkbox.
 ---@param options table the configuration table
 ---@param hasPlayer boolean?
 ---@param hasAlpha boolean?
 ---@return table The bottom left most control to use for anchoring subsequent UI components.
-local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, options, hasPlayer, hasAlpha)
+local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, labelTooltip, options, hasPlayer, hasAlpha)
     if hasPlayer == nil then
         hasPlayer = true
     end
@@ -76,6 +77,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
     enabled.Text:SetText(" " .. labelText)
     enabled.Text:SetFontObject("GameFontNormalLarge")
     enabled:SetChecked(options.Enabled)
+    fsConfig:Tooltip(enabled, labelText, labelTooltip)
 
     local dynamicAnchor = parentPanel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
     dynamicAnchor:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4)
@@ -97,21 +99,25 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         top.Text:SetText(L["Top"])
         top:SetPoint("LEFT", playerLabel, "RIGHT", horizontalSpacing / 2, 0)
         top:SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Top)
+        fsConfig:Tooltip(top, L["Top"], L["Place your own frame at the top of the group."])
 
         middle = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
         middle.Text:SetText(L["Middle"])
         middle:SetPoint("LEFT", top, "RIGHT", horizontalSpacing, 0)
         middle:SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Middle)
+        fsConfig:Tooltip(middle, L["Middle"], L["Place your own frame in the middle of the group."])
 
         bottom = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
         bottom.Text:SetText(L["Bottom"])
         bottom:SetPoint("LEFT", middle, "RIGHT", horizontalSpacing, 0)
         bottom:SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Bottom)
+        fsConfig:Tooltip(bottom, L["Bottom"], L["Place your own frame at the bottom of the group."])
 
         hidden = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
         hidden.Text:SetText(L["Hidden"])
         hidden:SetPoint("LEFT", bottom, "RIGHT", horizontalSpacing, 0)
         hidden:SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Hidden)
+        fsConfig:Tooltip(hidden, L["Hidden"], L["Hide your own frame, leaving only your group members."])
 
         local playerModes = {
             [top] = fsConfig.PlayerSortMode.Top,
@@ -159,11 +165,16 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
 
     group.Text:SetText(L["Group"])
     group:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Group)
+    fsConfig:Tooltip(group, L["Group"], L["Sort by the unit id, e.g. party1 > party2 > party3."])
 
     local spec = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     spec:SetPoint("LEFT", group, "RIGHT", horizontalSpacing, 0)
-    spec.Text:SetText(fsInspector:CanRun() and L["Spec"] or L["Role"])
+    local canInspect = fsInspector:CanRun()
+    local specText = canInspect and L["Spec"] or L["Role"]
+    spec.Text:SetText(specText)
     spec:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Role)
+    local specTooltip = canInspect and L["Sort by role and spec, using the order from the Ordering panel."] or L["Sort by role (tank, healer, dps), using the order from the Ordering panel."]
+    fsConfig:Tooltip(spec, specText, specTooltip)
 
     local alpha = nil
     local modes = {
@@ -176,6 +187,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
         alpha:SetPoint("LEFT", spec, "RIGHT", horizontalSpacing, 0)
         alpha.Text:SetText(L["Alphabetical"])
         alpha:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Alphabetical)
+        fsConfig:Tooltip(alpha, L["Alphabetical"], L["Sort by name in alphabetical order."])
 
         modes[alpha] = fsConfig.GroupSortMode.Alphabetical
     end
@@ -184,6 +196,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, opti
     reverse:SetPoint("LEFT", alpha or spec, "RIGHT", horizontalSpacing, 0)
     reverse.Text:SetText(L["Reverse"])
     reverse:SetChecked(options.Reverse)
+    fsConfig:Tooltip(reverse, L["Reverse"], L["Reverse the sort order, so the last frame becomes the first."])
 
     local function onModeClick(sender)
         -- uncheck the others
@@ -283,19 +296,30 @@ function M:Build(panel)
     local config = addon.DB.Options.Sorting
 
     if capabilities.HasArena() then
-        anchor = BuildSortModeCheckboxes(panel, anchor, L["Arena - 2v2"], config.Arena.Twos)
+        anchor = BuildSortModeCheckboxes(panel, anchor, L["Arena - 2v2"], L["Sort your frames while in 2v2 arena matches."], config.Arena.Twos)
 
+        -- the tooltip stays in its own local: the locale checker reads a runtime-built key and a
+        -- literal one on the same line as a single key, and reports it as missing everywhere.
         local otherArenaSizes = capabilities.Has5v5() and "3v3 & 5v5" or "3v3"
-        anchor = BuildSortModeCheckboxes(panel, anchor, L["Arena - " .. otherArenaSizes], config.Arena.Default)
+        local otherArenaTooltip = L["Sort your frames while in arena matches larger than 2v2."]
+        anchor = BuildSortModeCheckboxes(panel, anchor, L["Arena - " .. otherArenaSizes], otherArenaTooltip, config.Arena.Default)
     end
 
     if capabilities.HasEnemySpecSupport() then
-        anchor = BuildSortModeCheckboxes(panel, anchor, L["Enemy Arena (see addons panel for supported addons)"], config.EnemyArena, false, false)
+        anchor = BuildSortModeCheckboxes(
+            panel,
+            anchor,
+            L["Enemy Arena (see addons panel for supported addons)"],
+            L["Sort the enemy frames created by supported arena addons."],
+            config.EnemyArena,
+            false,
+            false
+        )
     end
 
-    anchor = BuildSortModeCheckboxes(panel, anchor, L["Dungeon (mythics, 5-mans, delves)"], config.Dungeon)
-    anchor = BuildSortModeCheckboxes(panel, anchor, L["Raid (battlegrounds, raids)"], config.Raid)
-    BuildSortModeCheckboxes(panel, anchor, L["World (non-instance groups)"], config.World)
+    anchor = BuildSortModeCheckboxes(panel, anchor, L["Dungeon (mythics, 5-mans, delves)"], L["Sort your frames while in dungeons, mythic+, and delves."], config.Dungeon)
+    anchor = BuildSortModeCheckboxes(panel, anchor, L["Raid (battlegrounds, raids)"], L["Sort your frames while in raids and battlegrounds."], config.Raid)
+    BuildSortModeCheckboxes(panel, anchor, L["World (non-instance groups)"], L["Sort your frames while in a group out in the world."], config.World)
 
     return panel
 end
