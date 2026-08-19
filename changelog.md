@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.18.9
+
+Various performance improvements.
+
 ## 7.18.8
 
 Added tooltips to the options screen explaining what each sorting checkbox does.
