@@ -19,6 +19,34 @@ local eventsFrame = nil
 local M = {}
 addon.Modules.EventDispatcher = M
 
+-- Events that can only move frames which exist in an arena. Every provider answers the opponent
+-- events by asking for a sort, and battlegrounds fire them in bursts of one per opponent slot.
+--
+-- A pet is the same story when its owner is nobody the group frames show: blizzard's raid
+-- container leaves the frames where they are, so there is nothing to re-sort.
+local function OnlyMattersInArena(event, ...)
+    if event == events.ARENA_OPPONENT_UPDATE or event == events.ARENA_PREP_OPPONENT_SPECIALIZATIONS then
+        return true
+    end
+
+    if event ~= events.UNIT_PET then
+        return false
+    end
+
+    local owner = select(1, ...)
+
+    -- an owner we can't read is treated as ours, so a sort is never skipped on a guess
+    if type(owner) ~= "string" then
+        return false
+    end
+
+    -- Copied from CompactRaidFrameContainerMixin:OnEvent in Blizzard_CompactRaidFrameContainer.lua:
+    --     if unit == "player" or strsub(unit, 1, 4) == "raid" or strsub(unit, 1, 5) == "party" then
+    -- Their prefixes, so we never skip a pet they act on. Asking whether the owner is friendly
+    -- would be wrong: mind control makes a raid member hostile without moving their frame.
+    return not (owner == "player" or string.sub(owner, 1, 4) == "raid" or string.sub(owner, 1, 5) == "party")
+end
+
 local function OnEvent(_, event, ...)
     if fsLog:IsEnabled() then
         local args = { ... }
@@ -41,12 +69,8 @@ local function OnEvent(_, event, ...)
     -- then pass to our sorted units cache in case it needs to be invalidated
     fsSortedUnits:ProcessEvent(event, ...)
 
-    -- now pass to providers, unless they can only be interested in an arena we're not in.
-    -- every provider answers the arena opponent events by asking for a sort, and battlegrounds
-    -- fire them in bursts of one per opponent slot for frames that don't exist there.
-    local arenaOnly = event == events.ARENA_OPPONENT_UPDATE or event == events.ARENA_PREP_OPPONENT_SPECIALIZATIONS
-
-    if not arenaOnly or wowEx.IsInstanceArena() then
+    -- now pass to providers, unless they could only be interested in an arena we're not in
+    if not OnlyMattersInArena(event, ...) or wowEx.IsInstanceArena() then
         local providers = fsProviders:EnabledNotSelfManaged()
 
         for _, provider in ipairs(providers) do
