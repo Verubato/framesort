@@ -1410,4 +1410,38 @@ function M:test_units_sort_returns_same_reference_for_enemy_and_friendly()
     assertListEquals(eOut, { "arena1", "arena2" })
 end
 
+function M:test_enemy_cache_holds_an_empty_result_outside_arena()
+    local calls = 0
+
+    fsUnit.ArenaUnits = function()
+        calls = calls + 1
+        return {}
+    end
+
+    local a = fsSortedUnits:ArenaUnits()
+    local b = fsSortedUnits:ArenaUnits()
+
+    assertEquals(calls, 1)
+    assert(b == a)
+end
+
+function M:test_enemy_cache_retries_an_empty_result_in_arena()
+    addon.WoW.WowEx.MockInstance(true, "arena")
+
+    local calls = 0
+
+    fsUnit.ArenaUnits = function()
+        calls = calls + 1
+        return {}
+    end
+
+    fsSortedUnits:ArenaUnits()
+    fsSortedUnits:ArenaUnits()
+
+    -- opponents may not exist yet in the prep room, so an empty answer is not worth keeping
+    assertEquals(calls, 2)
+
+    addon.WoW.WowEx.ClearMockInstance()
+end
+
 return M

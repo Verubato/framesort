@@ -3,6 +3,7 @@ local _, addon = ...
 local fsCompare = addon.Modules.Sorting.Comparer
 local fsFrame = addon.WoW.Frame
 local fsUnit = addon.WoW.Unit
+local wowEx = addon.WoW.WowEx
 local fsEnumerable = addon.Collections.Enumerable
 local fsInspector = addon.Modules.Inspector
 local fsConfig = addon.Configuration
@@ -297,7 +298,8 @@ function M:ArenaUnits()
     -- so just retry EnemyUnits() on next attempt
     if cacheEnabled then
         cachedEnemyUnits = units
-        enemyCacheValid = #units > 0
+        -- an empty result is only provisional in an arena, where the opponents may not exist yet
+        enemyCacheValid = #units > 0 or not wowEx.IsInstanceArena()
 
         if hit then
             enemyCacheHits = enemyCacheHits + 1
