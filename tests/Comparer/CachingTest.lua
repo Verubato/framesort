@@ -246,4 +246,51 @@ function M:test_sorted_units_doesnt_cache_player()
     assertEquals(units, { "player", "party1", "party2", "pet" })
 end
 
+function M:test_unit_metadata_reused_within_a_pass()
+    local config = addon.DB.Options.Sorting.World
+    config.PlayerSortMode = nil
+    config.GroupSortMode = fsConfig.GroupSortMode.Role
+
+    local roleCalls = 0
+
+    addon.WoW.Api.UnitGroupRolesAssigned = function(unit)
+        roleCalls = roleCalls + 1
+
+        if unit == "player" then
+            return "HEALER"
+        end
+
+        return "DAMAGER"
+    end
+    addon.WoW.Api.UnitClass = function()
+        return "", "", 1
+    end
+    addon.WoW.Api.UnitGUID = function(unit)
+        return unit .. unit
+    end
+
+    local units = { "player", "party1", "party2", "party3", "party4" }
+
+    fsCompare:BeginPass()
+    fsCompare:SortFunction(units)
+    local afterFirst = roleCalls
+
+    assertEquals(afterFirst, #units)
+
+    -- sorting, targeting and macros each ask for the same units within one pass
+    fsCompare:SortFunction(units)
+
+    assertEquals(roleCalls, afterFirst)
+
+    fsCompare:EndPass()
+    fsCompare:SortFunction(units)
+
+    assertEquals(roleCalls, afterFirst * 2)
+
+    -- outside a pass a role or a spec can land between calls, so nothing is held
+    fsCompare:SortFunction(units)
+
+    assertEquals(roleCalls, afterFirst * 3)
+end
+
 return M

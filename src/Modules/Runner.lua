@@ -3,6 +3,7 @@ local _, addon = ...
 local fsProviders = addon.Providers
 local fsScheduler = addon.Scheduling.Scheduler
 local fsInspector = addon.Modules.Inspector
+local fsCompare = addon.Modules.Sorting.Comparer
 local fsUnit = addon.WoW.Unit
 local fsLog = addon.Logging.Log
 local fsEnumerable = addon.Collections.Enumerable
@@ -148,29 +149,44 @@ function M:ProcessEvent(event)
     end
 end
 
+local function RunModules(providers)
+    -- run auto promotion first
+    addon.Modules.AutoLeader:Run()
+
+    -- run hide player next as it may impact the rest
+    addon.Modules.HidePlayer:Run()
+
+    -- now sort as it affects targeting and macros
+    if providers and #providers > 0 then
+        for _, provider in ipairs(providers) do
+            addon.Modules.Sorting:Run(provider)
+        end
+    else
+        addon.Modules.Sorting:Run()
+    end
+
+    addon.Modules.Targeting:Run()
+    addon.Modules.Macro:Run()
+    addon.Modules.Nameplates:Run()
+end
+
 function M:Run(providers)
     fsScheduler:RunWhenCombatEnds(function()
         local start = wow.GetTimePreciseSec()
         fsLog:Debug("--- Starting run ---")
 
-        -- run auto promotion first
-        addon.Modules.AutoLeader:Run()
+        fsCompare:BeginPass()
 
-        -- run hide player next as it may impact the rest
-        addon.Modules.HidePlayer:Run()
+        -- pcall so the pass always ends. Combat defers this whole body, so a pass can span a
+        -- fight, and the caches must not answer anyone once the client is free to move units
+        -- between frames. This path is outside the runner's own pcall when combat deferred it.
+        local ok, err = pcall(RunModules, providers)
 
-        -- now sort as it affects targeting and macros
-        if providers and #providers > 0 then
-            for _, provider in ipairs(providers) do
-                addon.Modules.Sorting:Run(provider)
-            end
-        else
-            addon.Modules.Sorting:Run()
+        fsCompare:EndPass()
+
+        if not ok then
+            fsLog:Error("Run failed: %s.", tostring(err))
         end
-
-        addon.Modules.Targeting:Run()
-        addon.Modules.Macro:Run()
-        addon.Modules.Nameplates:Run()
 
         local stop = wow.GetTimePreciseSec()
         fsLog:Debug("Run time took %fms.", (stop - start) * 1000)

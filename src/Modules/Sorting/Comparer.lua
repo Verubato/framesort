@@ -19,6 +19,12 @@ addon.Modules.Sorting.Comparer = M
 
 local cachedRoleLookup, cachedSpecLookup, cachedClassLookup
 
+-- Per-unit metadata for one pass of the runner. A pass sorts the frames, then targeting and
+-- macros ask for the same units again, and nothing about a unit can change in between. Outside a
+-- pass a role or a spec can land at any time, so callers there are never served from here.
+local unitMetadata = {}
+local inPass = false
+
 ---@return { [string]: number } roleOrderLookup
 ---@return { [number]: number } specOrderLookup
 ---@return { [number]: number } classTypeOrderLookup
@@ -127,6 +133,12 @@ local function PrecomputeGlobalMetadata()
 end
 
 local function PrecomputeUnitMetadata(unit, meta, isEnemy)
+    local key = (isEnemy and "e" or "f") .. unit
+
+    if inPass and unitMetadata[key] then
+        return unitMetadata[key]
+    end
+
     local data = {}
 
     data.IsPet = fsUnit:IsPet(unit)
@@ -161,6 +173,10 @@ local function PrecomputeUnitMetadata(unit, meta, isEnemy)
             data.ClassId = wow.UnitClass and select(3, wow.UnitClass(unit))
             data.SpecId = fsInspector:FriendlyUnitSpec(unit)
         end
+    end
+
+    if inPass then
+        unitMetadata[key] = data
     end
 
     return data
@@ -488,6 +504,24 @@ function M:InvalidateCache()
     cachedClassLookup = nil
     cachedRoleLookup = nil
     cachedSpecLookup = nil
+    M:InvalidateUnitMetadata()
+end
+
+---Drops the per-unit metadata gathered during a pass.
+function M:InvalidateUnitMetadata()
+    unitMetadata = {}
+end
+
+---Starts a pass, during which per-unit metadata is held.
+function M:BeginPass()
+    inPass = true
+    unitMetadata = {}
+end
+
+---Ends a pass and drops what it held.
+function M:EndPass()
+    inPass = false
+    unitMetadata = {}
 end
 
 ---Returns a function that accepts two parameters of unit tokens and returns true if the left token should be ordered before the right.
