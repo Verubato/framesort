@@ -5,6 +5,7 @@ local fsScheduler = addon.Scheduling.Scheduler
 local fsInspector = addon.Modules.Inspector
 local fsCompare = addon.Modules.Sorting.Comparer
 local fsUnit = addon.WoW.Unit
+local fsFrame = addon.WoW.Frame
 local fsLog = addon.Logging.Log
 local fsEnumerable = addon.Collections.Enumerable
 local wow = addon.WoW.Api
@@ -176,6 +177,7 @@ function M:Run(providers)
         fsLog:Debug("--- Starting run ---")
 
         fsCompare:BeginPass()
+        fsFrame:BeginPass()
 
         -- pcall so the pass always ends. Combat defers this whole body, so a pass can span a
         -- fight, and the caches must not answer anyone once the client is free to move units
@@ -183,6 +185,7 @@ function M:Run(providers)
         local ok, err = pcall(RunModules, providers)
 
         fsCompare:EndPass()
+        fsFrame:EndPass()
 
         if not ok then
             fsLog:Error("Run failed: %s.", tostring(err))

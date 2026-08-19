@@ -30,6 +30,11 @@ for i = 1, wow.MAX_RAID_MEMBERS do
     allRaidUnitsIds[#allRaidUnitsIds + 1] = "raidpet" .. i
 end
 
+-- A token always normalises to the same string, so this never needs clearing for correctness.
+local normalised = {}
+local normalisedCount = 0
+local normalisedLimit = 1000
+
 ---Normalises unit tokens, such that party1pet becomes partypet1.
 ---@param unit string
 ---@return string|nil
@@ -38,34 +43,42 @@ function M:NormaliseUnit(unit)
         return nil
     end
 
-    unit = string.lower(unit)
+    local cached = normalised[unit]
 
-    -- already canonical (party1, partypet1, raidpet13, arena3, arenapet2, etc)
-    if unit:match("^partypet%d+$") or unit:match("^raidpet%d+$") or unit:match("^arenapet%d+$") then
-        return unit
+    if cached then
+        return cached
     end
 
-    local n
-
-    n = unit:match("^party(%d+)pet$")
+    local lower = string.lower(unit)
+    local result = lower
+    local n = lower:match("^party(%d+)pet$")
 
     if n then
-        return "partypet" .. n
+        result = "partypet" .. n
+    else
+        n = lower:match("^raid(%d+)pet$")
+
+        if n then
+            result = "raidpet" .. n
+        else
+            n = lower:match("^arena(%d+)pet$")
+
+            if n then
+                result = "arenapet" .. n
+            end
+        end
     end
 
-    n = unit:match("^raid(%d+)pet$")
-
-    if n then
-        return "raidpet" .. n
+    -- name list containers hand us player names, so the keys are not bounded by the token set
+    if normalisedCount >= normalisedLimit then
+        normalised = {}
+        normalisedCount = 0
     end
 
-    n = unit:match("^arena(%d+)pet$")
+    normalised[unit] = result
+    normalisedCount = normalisedCount + 1
 
-    if n then
-        return "arenapet" .. n
-    end
-
-    return unit
+    return result
 end
 
 function M:ArenaUnitExists(unit)

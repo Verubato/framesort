@@ -24,6 +24,28 @@ local M = {
 
 addon.WoW.Frame = M
 
+-- Frame to unit, and forbidden state, for one pass of the runner. A pass runs start to finish
+-- without yielding, so nothing it holds can go stale inside one, and each of the sort, targeting
+-- and macro steps asks the same frames again. Outside a pass these answers change whenever the
+-- client feels like it, so callers there are never served from here.
+local passUnits = {}
+local passForbidden = {}
+local inPass = false
+
+---Starts a pass, during which per-frame answers are held.
+function M:BeginPass()
+    inPass = true
+    passUnits = {}
+    passForbidden = {}
+end
+
+---Ends a pass and drops what it held.
+function M:EndPass()
+    inPass = false
+    passUnits = {}
+    passForbidden = {}
+end
+
 ---@param provider FrameProvider
 ---@param containerType number
 ---@param visibleOnly boolean? override the default container visibility filter
@@ -228,7 +250,20 @@ function M:GetFrameUnit(frame)
         return nil
     end
 
+    if inPass then
+        -- false rather than nil, so a frame with no unit is still a hit
+        local cached = passUnits[frame]
+
+        if cached ~= nil then
+            return cached or nil
+        end
+    end
+
     if M:IsForbidden(frame) then
+        if inPass then
+            passUnits[frame] = false
+        end
+
         return nil
     end
 
@@ -238,21 +273,29 @@ function M:GetFrameUnit(frame)
     -- frame.unit = "raid13"
     -- frame:GetAttribute("unit") = "raid13pet"
     -- where possible we want the underlying unit
-    if frame.unit then
-        return fsUnit:NormaliseUnit(frame.unit) or frame.unit
-    end
+    local result = nil
 
-    if frame.GetAttribute then
+    if frame.unit then
+        result = fsUnit:NormaliseUnit(frame.unit) or frame.unit
+    elseif frame.GetAttribute then
         local unit = frame:GetAttribute("unit")
 
         if unit then
-            return fsUnit:NormaliseUnit(unit) or unit
+            result = fsUnit:NormaliseUnit(unit) or unit
         end
     end
 
-    local name = frame.GetName and frame:GetName() or ""
-    local arena = string.match(name, "arena%d")
-    return arena and (fsUnit:NormaliseUnit(arena) or arena) or nil
+    if not result then
+        local name = frame.GetName and frame:GetName() or ""
+        local arena = string.match(name, "arena%d")
+        result = arena and (fsUnit:NormaliseUnit(arena) or arena) or nil
+    end
+
+    if inPass then
+        passUnits[frame] = result or false
+    end
+
+    return result
 end
 
 ---Returns a collection of unit frames from the specified container.
@@ -464,6 +507,10 @@ function M:IsForbidden(frame)
         return false
     end
 
+    if inPass and passForbidden[frame] ~= nil then
+        return passForbidden[frame]
+    end
+
     -- wotlk 3.3.5 doesn't have this function
     if not frame.IsForbidden then
         return false
@@ -475,6 +522,10 @@ function M:IsForbidden(frame)
         -- (Get/Set)Attribute is allowed on forbidden frames
         local unit = frame:GetAttribute("unit")
         fsLog:Warning("Detected forbidden frame, unit: %s.", unit or "unknown")
+    end
+
+    if inPass then
+        passForbidden[frame] = forbidden
     end
 
     return forbidden

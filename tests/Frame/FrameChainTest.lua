@@ -110,4 +110,34 @@ function M:test_invalid_disconnected()
     assertEquals(root.Valid, false)
 end
 
+function M:test_frame_unit_cached_for_a_pass()
+    local frame = frameMock:New("Frame", "A")
+    frame.unit = "raid1"
+
+    fsFrame:BeginPass()
+
+    assertEquals(fsFrame:GetFrameUnit(frame), "raid1")
+
+    -- the sort, targeting and macro steps all ask the same frame within one pass
+    frame.unit = "raid2"
+
+    assertEquals(fsFrame:GetFrameUnit(frame), "raid1")
+
+    fsFrame:EndPass()
+
+    assertEquals(fsFrame:GetFrameUnit(frame), "raid2")
+end
+
+function M:test_frame_unit_not_cached_outside_a_pass()
+    local frame = frameMock:New("Frame", "A")
+    frame.unit = "raid1"
+
+    -- combat defers a run, so anything asking mid fight must reach the client
+    assertEquals(fsFrame:GetFrameUnit(frame), "raid1")
+
+    frame.unit = "raid2"
+
+    assertEquals(fsFrame:GetFrameUnit(frame), "raid2")
+end
+
 return M
