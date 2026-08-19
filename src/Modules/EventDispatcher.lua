@@ -2,6 +2,7 @@
 local _, addon = ...
 local wow = addon.WoW.Api
 local events = addon.WoW.Events
+local wowEx = addon.WoW.WowEx
 local capabilities = addon.WoW.Capabilities
 local fsSortedUnits = addon.Modules.Sorting.SortedUnits
 local fsRunner = addon.Modules
@@ -40,12 +41,18 @@ local function OnEvent(_, event, ...)
     -- then pass to our sorted units cache in case it needs to be invalidated
     fsSortedUnits:ProcessEvent(event, ...)
 
-    -- now pass to providers
-    local providers = fsProviders:EnabledNotSelfManaged()
+    -- now pass to providers, unless they can only be interested in an arena we're not in.
+    -- every provider answers the arena opponent events by asking for a sort, and battlegrounds
+    -- fire them in bursts of one per opponent slot for frames that don't exist there.
+    local arenaOnly = event == events.ARENA_OPPONENT_UPDATE or event == events.ARENA_PREP_OPPONENT_SPECIALIZATIONS
 
-    for _, provider in ipairs(providers) do
-        if provider.ProcessEvent then
-            provider:ProcessEvent(event, ...)
+    if not arenaOnly or wowEx.IsInstanceArena() then
+        local providers = fsProviders:EnabledNotSelfManaged()
+
+        for _, provider in ipairs(providers) do
+            if provider.ProcessEvent then
+                provider:ProcessEvent(event, ...)
+            end
         end
     end
 

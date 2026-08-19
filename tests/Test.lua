@@ -46,6 +46,7 @@ TestAutoLeader = require("Modules.AutoLeaderTest")
 
 TestTargeting = require("Modules.TargetingTest")
 TestSortedUnits = require("Modules.SortedUnitsTest")
+TestEventDispatcher = require("Modules.EventDispatcherTest")
 TestSortedFrames = require("Modules.SortedFramesTest")
 TestSorting = require("Modules.SortingTest")
 TestSpacing = require("Modules.SpacingTest")
