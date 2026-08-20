@@ -61,10 +61,10 @@ local api = {
     UnitFactionGroup = UnitFactionGroup,
     GetRaidRosterInfo = GetRaidRosterInfo,
     GetArenaOpponentSpec = GetArenaOpponentSpec,
-    GetSpecializationInfoByID = GetSpecializationInfoByID,
-    GetSpecialization = GetSpecialization,
-    GetInspectSpecialization = GetInspectSpecialization,
-    GetSpecializationInfo = GetSpecializationInfo,
+    GetSpecializationInfoByID = C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfoByID or GetSpecializationInfoByID,
+    GetSpecialization = C_SpecializationInfo and C_SpecializationInfo.GetSpecialization or GetSpecialization,
+    GetInspectSpecialization = C_SpecializationInfo and C_SpecializationInfo.GetInspectSpecialization or GetInspectSpecialization,
+    GetSpecializationInfo = C_SpecializationInfo and C_SpecializationInfo.GetSpecializationInfo or GetSpecializationInfo,
     PromoteToLeader = PromoteToLeader,
 
     -- inspect functions
