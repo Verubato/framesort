@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.18.11
+
+Fixed the 7.18.10 zip not extracting into a folder on macOS and Linux.
+
 ## 7.18.10
 
 Fixed spec based sorting, spec priority, nameplate spec names and macro role parsing all failing on 12.1, which moved the specialization functions the addon reads.
