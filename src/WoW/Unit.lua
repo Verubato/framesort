@@ -216,9 +216,9 @@ function M:IsRaidTarget(unit)
 end
 
 function M:IsTankOrAssist(unit)
-    local role = wow.UnitGroupRolesAssigned and wow.UnitGroupRolesAssigned(unit)
+    local role = wowEx.UnitGroupRolesAssignedSafe(unit)
     -- note a non-main tank has target frames too
-    return role == "TANK" or role == "MAINTANK" or role == "MAINASSIST"
+    return role == wowEx.Role.Tank or role == "MAINTANK" or role == "MAINASSIST"
 end
 
 ---Returns the owner of a target unit

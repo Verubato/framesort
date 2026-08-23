@@ -1,6 +1,7 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
+local wowEx = addon.WoW.WowEx
 local events = addon.WoW.Events
 local capabilities = addon.WoW.Capabilities
 local fsUnit = addon.WoW.Unit
@@ -22,8 +23,8 @@ local function Run()
 
     local units = fsUnit:FriendlyUnits()
     local healer = fsEnumerable:From(units):First(function(unit)
-        local role = wow.UnitGroupRolesAssigned(unit)
-        return role == "HEALER"
+        local role = wowEx.UnitGroupRolesAssignedSafe(unit)
+        return role == wowEx.Role.Healer
     end)
 
     if not healer then

@@ -156,7 +156,7 @@ function M:UnitForSelector(selector, friendlyUnits, enemyUnits)
         end
 
         return fsEnumerable:From(friendlyUnits):Nth(number or 1, function(x)
-            return wow.UnitGroupRolesAssigned(x) == wowEx.Role.Dps and not wow.UnitIsUnit(x, "player")
+            return wowEx.UnitGroupRolesAssignedSafe(x) == wowEx.Role.Dps and not wow.UnitIsUnit(x, "player")
         end) or "none"
     end
 
@@ -202,7 +202,7 @@ function M:UnitForSelector(selector, friendlyUnits, enemyUnits)
         end
 
         return fsEnumerable:From(friendlyUnits):Nth(number or 1, function(x)
-            local role = wow.UnitGroupRolesAssigned(x)
+            local role = wowEx.UnitGroupRolesAssignedSafe(x)
             return (tank and role == wowEx.Role.Tank) or (healer and role == wowEx.Role.Healer) or (dps and role == wowEx.Role.Dps)
         end) or "none"
     end

@@ -167,7 +167,7 @@ local function PrecomputeUnitMetadata(unit, meta, isEnemy)
             data.Name = wow.UnitName and wow.UnitName(unit)
 
             if capabilities.HasRoleAssignments() then
-                data.Role = wow.UnitGroupRolesAssigned(unit)
+                data.Role = wowEx.UnitGroupRolesAssignedSafe(unit)
             end
 
             data.ClassId = wow.UnitClass and select(3, wow.UnitClass(unit))

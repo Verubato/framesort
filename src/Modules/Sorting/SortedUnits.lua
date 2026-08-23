@@ -144,7 +144,7 @@ local function CycleRoles(units, isFriendly, cycles, roles)
         local role
 
         if isFriendly then
-            role = wow.UnitGroupRolesAssigned(unit)
+            role = wowEx.UnitGroupRolesAssignedSafe(unit)
         else
             local specId = fsInspector:EnemyUnitSpec(unit)
             if specId then

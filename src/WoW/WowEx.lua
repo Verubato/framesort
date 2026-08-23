@@ -194,6 +194,30 @@ M.GetInspectSpecializationSafe = function(unit)
     return spec
 end
 
+---Wraps UnitGroupRolesAssigned() and returns nil instead of a secret role.
+---@param unit string
+---@return string|nil
+M.UnitGroupRolesAssignedSafe = function(unit)
+    if type(unit) ~= "string" then
+        fsLog:Error("WowEx:UnitGroupRolesAssignedSafe() - unit must be a string, instead received %s.", type(unit))
+        return nil
+    end
+
+    if not wow.UnitGroupRolesAssigned then
+        return nil
+    end
+
+    local role = wow.UnitGroupRolesAssigned(unit)
+
+    -- once we've tainted execution the client answers with a secret role, and comparing
+    -- one errors, so it's dropped here; see GetArenaOpponentSpecSafe
+    if not role or wow.issecretvalue(role) then
+        return nil
+    end
+
+    return role
+end
+
 ---Wraps UnitGUID() so a player/pet name argument returns nil instead of erroring.
 ---@param unit string
 ---@return string|nil

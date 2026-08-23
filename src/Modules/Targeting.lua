@@ -69,7 +69,7 @@ local function UpdateAdjacentTargets(friendlyUnits)
     local dpsUnits = fsEnumerable
         :From(friendlyUnits)
         :Where(function(unit)
-            return wow.UnitGroupRolesAssigned(unit) == wowEx.Role.Dps
+            return wowEx.UnitGroupRolesAssignedSafe(unit) == wowEx.Role.Dps
         end)
         :ToTable()
 
