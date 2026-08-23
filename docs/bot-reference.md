@@ -31,7 +31,7 @@ where they want it (top, middle, bottom, or hidden). Around that core it provide
 
 | Fact | Value |
 | --- | --- |
-| Addon version | 7.18.11 |
+| Addon version | 7.18.12 |
 | Author | Verz |
 | Interface versions (TOC) | 120100, 120007, 50504, 40402, 38002, 38001, 30405, 30300, 20506, 11509 (retail, MoP classic, Cata classic, wrath, TBC, and classic era clients) |
 | Saved variables | `FrameSortDB` |
@@ -726,7 +726,7 @@ Hyphens, apostrophes and accented letters break a variable into pieces. `#FS Bob
 
 ### 8.6 Roles and enemy roles are not always available
 
-- `Tank` / `Healer` / `DPS` / `OtherDPS` need role assignments. Where the client has no role system, they resolve to `none`.
+- `Tank` / `Healer` / `DPS` / `OtherDPS` need role assignments. Where the client has no role system, they resolve to `none`. On 12.x the game also hides a role once an addon has tainted execution, which resolves to `none` until the next clean update.
 - `EnemyTank` / `EnemyHealer` / `EnemyDPS` need specialization data and only resolve **inside arenas** (MoP and later). Outside arena they are `none`.
 - Enemy specs come from inspection, so right at the arena gates they may briefly be `none`.
 

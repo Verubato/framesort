@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.18.12
+
+Fixed a secret handling error for retail.
+
 ## 7.18.11
 
 Fixed the 7.18.10 zip not extracting into a folder on macOS and Linux.
