@@ -102,8 +102,12 @@ end
 M.ArenaOpponentsCount = function()
     -- prefer GetNumArenaOpponentSpecs as it seems reliable
     if capabilities.HasSpecializations() and capabilities.HasEnemySpecSupport() and wow.GetNumArenaOpponentSpecs then
-        -- event if 0 is returned, still use it without fallback as it means spec information isn't available anyway
-        return wow.GetNumArenaOpponentSpecs()
+        local specCount = wow.GetNumArenaOpponentSpecs()
+
+        -- a bot arena hands back no specs at all
+        if specCount > 0 then
+            return specCount
+        end
     end
 
     if wow.GetNumArenaOpponents then
@@ -114,6 +118,11 @@ M.ArenaOpponentsCount = function()
 
         -- compare our friendly group size to get a somewhat reasonable guestimate
         local allyCount = addon.WoW.WowEx.GroupMembersCount()
+
+        -- clamping against a group size of zero would report an empty enemy team
+        if allyCount == 0 then
+            return enemyCount
+        end
 
         return math.min(allyCount, enemyCount)
     end

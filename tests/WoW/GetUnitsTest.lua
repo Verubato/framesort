@@ -245,4 +245,134 @@ function M:test_is_player_when_secret()
     assertEquals(isPlayer, false)
 end
 
+function M:test_arena_3v3_bots()
+    local count = 3
+
+    addon.WoW.Api.IsInInstance = function()
+        return true, "arena"
+    end
+
+    -- a bot arena knows of no opponent specs
+    addon.WoW.Api.GetNumArenaOpponentSpecs = function()
+        return 0
+    end
+    addon.WoW.Api.GetNumArenaOpponents = function()
+        return count
+    end
+    addon.WoW.Api.GetNumGroupMembers = function()
+        return count
+    end
+
+    local units = fsUnit:ArenaUnits()
+
+    for i = 1, count do
+        assertEquals(units[i], "arena" .. i)
+    end
+
+    -- the rest are pets
+    assertEquals(#units, count * 2)
+end
+
+function M:test_arena_3v3_ignores_opponents_when_specs_known()
+    local count = 3
+    local opponentsCalled = false
+
+    addon.WoW.Api.IsInInstance = function()
+        return true, "arena"
+    end
+    addon.WoW.Api.GetNumArenaOpponentSpecs = function()
+        return count
+    end
+    addon.WoW.Api.GetNumArenaOpponents = function()
+        opponentsCalled = true
+        return 0
+    end
+    addon.WoW.Api.GetNumGroupMembers = function()
+        return count
+    end
+
+    local units = fsUnit:ArenaUnits()
+
+    assertEquals(opponentsCalled, false)
+    assertEquals(#units, count * 2)
+
+    for i = 1, count do
+        assertEquals(units[i], "arena" .. i)
+    end
+end
+
+function M:test_arena_3v3_bots_with_over_reported_opponents()
+    local count = 3
+
+    addon.WoW.Api.IsInInstance = function()
+        return true, "arena"
+    end
+    addon.WoW.Api.GetNumArenaOpponentSpecs = function()
+        return 0
+    end
+
+    -- an ally pet counted as an enemy
+    addon.WoW.Api.GetNumArenaOpponents = function()
+        return count + 1
+    end
+    addon.WoW.Api.GetNumGroupMembers = function()
+        return count
+    end
+
+    local units = fsUnit:ArenaUnits()
+
+    assertEquals(#units, count * 2)
+
+    for i = 1, count do
+        assertEquals(units[i], "arena" .. i)
+    end
+end
+
+function M:test_arena_none_when_no_counts()
+    addon.WoW.Api.IsInInstance = function()
+        return true, "arena"
+    end
+
+    assertEquals(#fsUnit:ArenaUnits(), 0)
+
+    addon.WoW.Api.GetNumArenaOpponentSpecs = function()
+        return 0
+    end
+    addon.WoW.Api.GetNumArenaOpponents = function()
+        return 0
+    end
+    addon.WoW.Api.GetNumGroupMembers = function()
+        return 0
+    end
+
+    assertEquals(#fsUnit:ArenaUnits(), 0)
+end
+
+function M:test_arena_3v3_bots_when_not_grouped()
+    local count = 3
+
+    addon.WoW.Api.IsInInstance = function()
+        return true, "arena"
+    end
+    addon.WoW.Api.GetNumArenaOpponentSpecs = function()
+        return 0
+    end
+    addon.WoW.Api.GetNumArenaOpponents = function()
+        return count
+    end
+
+    -- bot teammates may not register as group members
+    addon.WoW.Api.GetNumGroupMembers = function()
+        return 0
+    end
+
+    local units = fsUnit:ArenaUnits()
+
+    assertEquals(#units, count * 2)
+
+    for i = 1, count do
+        assertEquals(units[i], "arena" .. i)
+    end
+end
+
 return M
