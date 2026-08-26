@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.18.13
+
+Fixed macros and enemy arena sorting doing nothing in the new bot arena mode, where the game reports no opponent specs. Role based enemy variables such as EnemyHealer still cannot work there, as the game provides no spec information for bots.
+
 ## 7.18.12
 
 Fixed a secret handling error for retail.

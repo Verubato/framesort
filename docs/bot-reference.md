@@ -31,7 +31,7 @@ where they want it (top, middle, bottom, or hidden). Around that core it provide
 
 | Fact | Value |
 | --- | --- |
-| Addon version | 7.18.12 |
+| Addon version | 7.18.13 |
 | Author | Verz |
 | Interface versions (TOC) | 120100, 120007, 50504, 40402, 38002, 38001, 30405, 30300, 20506, 11509 (retail, MoP classic, Cata classic, wrath, TBC, and classic era clients) |
 | Saved variables | `FrameSortDB` |
@@ -119,7 +119,8 @@ The Enemy Arena section sorts enemy arena frames (Blizzard's arena frames or a
 supported arena addon; see section 7). It has Group and Spec/Role modes plus Reverse,
 no Alphabetical, and no Player row. It only operates inside arena instances. Enemy
 roles come from arena opponent spec information, which requires a MoP+ client and may
-be briefly unavailable at the start of a match.
+be briefly unavailable at the start of a match. The bot arena mode reports no specs at
+all, so Spec/Role mode has nothing to order by there and Group mode should be used.
 
 ### 3.5 The Ordering panel
 
@@ -596,6 +597,8 @@ Variables are **case-insensitive** (`fRaMe1`, `Dps`, `enemyhealer` all work).
 | `EnemyTank`, `EnemyHealer`, `EnemyDPS` | `ET`, `EH`, `ED` | First enemy with that role |
 
 > The in-game settings panel lists `DP` as the abbreviation for `EnemyDPS`. That is a typo in the UI text - the parser only accepts **`ED`**.
+
+> In the bot arena mode the game reports no opponent specs, so `EnemyTank`, `EnemyHealer`, and `EnemyDPS` resolve to `none`. `EnemyFrame1` and the other positional enemy variables work normally.
 
 ### Target-of
 
