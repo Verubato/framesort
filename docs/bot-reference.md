@@ -33,7 +33,7 @@ where they want it (top, middle, bottom, or hidden). Around that core it provide
 | --- | --- |
 | Addon version | 7.18.13 |
 | Author | Verz |
-| Interface versions (TOC) | 120100, 120007, 50504, 40402, 38002, 38001, 30405, 30300, 20506, 11509 (retail, MoP classic, Cata classic, wrath, TBC, and classic era clients) |
+| Interface versions (TOC) | 120100, 16001, 120007, 50504, 40402, 38002, 38001, 30405, 30300, 20506, 11509 (retail, MoP classic, Cata classic, wrath, TBC, and classic era clients) |
 | Saved variables | `FrameSortDB` |
 | Slash commands | `/fs` and `/framesort` - both open the FrameSort options panel |
 | Options location | WoW Settings -> AddOns -> FrameSort (a category with sub-panels) |
