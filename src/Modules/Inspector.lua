@@ -54,11 +54,23 @@ local cacheExpiry = 60 * 60 * 24 * 3
 
 local callbacks = {}
 
+-- listeners that only clear caches, never query specs, so firing this can't loop back here
+local cacheInvalidationCallbacks = {}
+
 local function OnSpecInformationChanged()
     for _, callback in ipairs(callbacks) do
         local ok, err = pcall(callback)
         if not ok then
             fsLog:Error("OnSpecInformationChanged callback failed: %s", tostring(err))
+        end
+    end
+end
+
+local function OnSpecCacheInvalidated()
+    for _, callback in ipairs(cacheInvalidationCallbacks) do
+        local ok, err = pcall(callback)
+        if not ok then
+            fsLog:Error("OnSpecCacheInvalidated callback failed: %s", tostring(err))
         end
     end
 end
@@ -476,6 +488,8 @@ function M:FriendlyUnitSpec(unit)
             -- purposively not calling OnSpecInformationChanged() here
             -- because we might run into loop issues
             -- where someone calls FriendlyUnitSpec(unit) -> OnSpecInformationChanged() -> FriendlyUnitSpec() -> OnSpecInformationChanged() -> etc.
+            OnSpecCacheInvalidated()
+
             return specId
         end
 
@@ -563,6 +577,17 @@ function M:RegisterCallback(callback)
     end
 
     callbacks[#callbacks + 1] = callback
+end
+
+---Fires on the tooltip spec path too, so the callback must never query a spec itself.
+---@param callback function
+function M:RegisterCacheInvalidationCallback(callback)
+    if not callback then
+        fsLog:ErrorOnce("Inspector:RegisterCacheInvalidationCallback() - callback must not be nil.")
+        return
+    end
+
+    cacheInvalidationCallbacks[#cacheInvalidationCallbacks + 1] = callback
 end
 
 function M:CanRun()

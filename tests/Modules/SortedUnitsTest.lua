@@ -217,6 +217,45 @@ function M:test_friendly_cache_invalidated_by_player_roles_assigned()
     assert(b ~= a)
 end
 
+function M:test_friendly_cache_invalidated_by_tooltip_spec_found()
+    fsUnit.FriendlyUnits = function()
+        return { "party2", "party1" }
+    end
+
+    local a = fsSortedUnits:FriendlyUnits()
+    assertListEquals(a, { "party1", "party2" })
+
+    capabilities.HasC_TooltipInfo = function()
+        return true
+    end
+
+    wow.Enum.TooltipDataLineType = { None = 0 }
+    wow.C_TooltipInfo = {
+        GetUnit = function(_)
+            return {
+                lines = {
+                    { type = wow.Enum.TooltipDataLineType.None, leftText = "Some Spec" },
+                },
+            }
+        end,
+    }
+
+    addon.Configuration.Specs.SpecIdFromTooltip = function(_, _text)
+        return 105
+    end
+
+    -- the tooltip path found a spec for party1, so the friendly cache must go stale too
+    fsInspector:FriendlyUnitSpec("party1")
+
+    fsUnit.FriendlyUnits = function()
+        return { "party4", "party3" }
+    end
+
+    local b = fsSortedUnits:FriendlyUnits()
+    assertListEquals(b, { "party3", "party4" })
+    assert(b ~= a)
+end
+
 function M:test_unit_pet_friendly_owner_invalidates_friendly_only()
     -- Prime both caches
     fsUnit.FriendlyUnits = function()

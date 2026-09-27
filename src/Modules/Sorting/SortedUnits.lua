@@ -460,6 +460,7 @@ function M:Init()
     end
 
     fsInspector:RegisterCallback(OnInspectorInfo)
+    fsInspector:RegisterCacheInvalidationCallback(OnInspectorInfo)
     fsConfig:RegisterConfigurationChangedCallback(OnConfigChanged)
 
     fsLog:Debug("Initialised the sorted units caching module.")
