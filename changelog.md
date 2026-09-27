@@ -1,5 +1,10 @@
 # Changelog
 
+## 7.18.14
+
+* Fixed party frames sometimes sorting to the wrong order during combat, such as when a priest mind controls an enemy.
+* Added the 1.60 Classic Beta client to the supported interface versions.
+
 ## 7.18.13
 
 Fixed macros and enemy arena sorting doing nothing in the new bot arena mode, where the game reports no opponent specs. Role based enemy variables such as EnemyHealer still cannot work there, as the game provides no spec information for bots.
