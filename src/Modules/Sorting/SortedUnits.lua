@@ -347,6 +347,10 @@ function M:InvalidateCache()
     InvalidateEnemyCache()
 end
 
+function M:InvalidateFriendlyCache()
+    InvalidateFriendlyCache()
+end
+
 function M:CycleFriendlyRoles(roles, cycles)
     if not roles then
         fsLog:Error("SortedUnits:CycleFriendlyRoles() - roles must not be nil.")

@@ -46,6 +46,7 @@ TestHidePlayer = require("Modules.HidePlayerTest")
 TestAutoLeader = require("Modules.AutoLeaderTest")
 
 TestTargeting = require("Modules.TargetingTest")
+TestSecureInCombat = require("Modules.SecureInCombatTest")
 TestSortedUnits = require("Modules.SortedUnitsTest")
 TestEventDispatcher = require("Modules.EventDispatcherTest")
 TestSortedFrames = require("Modules.SortedFramesTest")

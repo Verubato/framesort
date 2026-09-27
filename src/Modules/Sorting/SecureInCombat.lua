@@ -1928,6 +1928,9 @@ end
 local function LoadUnits()
     assert(manager)
 
+    -- the cached order can predate spec information, and combat freezes whatever we load here
+    fsSortedUnits:InvalidateFriendlyCache()
+
     local friendlyUnits = fsSortedUnits:FriendlyUnits()
     local enemyUnits = fsSortedUnits:ArenaUnits()
 
