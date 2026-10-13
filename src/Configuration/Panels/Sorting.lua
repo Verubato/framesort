@@ -317,7 +317,7 @@ function M:Build(panel)
                 false
             )
         else
-            anchor = fsConfig:TextLine(L["Enemy frame sorting is no longer possible in 12.1.5 due to Blizzard restrictions. Your arena addon's default order is used."], panel, anchor, "GameFontRed", -verticalSpacing)
+            anchor = fsConfig:TextLine(L["Enemy frame sorting is no longer possible from 12.1.5 onward due to Blizzard restrictions. Your arena addon's default order is used."], panel, anchor, "GameFontRed", -verticalSpacing)
         end
     end
 

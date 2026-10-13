@@ -48,7 +48,7 @@ function M:Build(parent)
 
     if wow.GetArenaOpponentSpec and not capabilities.CanReadEnemySpecs() then
         anchor = fsConfig:TextLine(
-            L["Enemy spec variables (EnemyTank, EnemyHealer, EnemyDPS, and their abbreviations) no longer work in 12.1.5 due to Blizzard restrictions."],
+            L["Enemy spec variables (EnemyTank, EnemyHealer, EnemyDPS, and their abbreviations) no longer work from 12.1.5 onward due to Blizzard restrictions."],
             panel,
             anchor,
             "GameFontRed",
