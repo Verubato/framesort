@@ -982,6 +982,47 @@ function M:test_arena_3v3()
     assertEquals(fsMacro:GetNewBody(macroText, {}, units), expected)
 end
 
+function M:test_arena_3v3_marked_roles_when_specs_are_unreadable()
+    local units = { "arena1", "arena2", "arena3" }
+    local marks = addon.Modules.EnemyAssignments
+
+    addon.WoW.Capabilities.HasEnemySpecSupport = function()
+        return true
+    end
+    addon.WoW.Capabilities.HasSpecializations = function()
+        return true
+    end
+    addon.WoW.Api.GetBuildInfo = function()
+        return "x", "0", "0", 120105
+    end
+    addon.WoW.Api.IsInInstance = function()
+        return true, "arena"
+    end
+    -- the run would re-sort real frames, which this test has none of
+    addon.Modules.Run = function() end
+
+    local macroText = [[
+        #framesort EnemyHealer EH EnemyDPS2 EnemyHealerTarget
+        /cast [@a, exists][@b, exists][@c, exists][@d] Spell
+    ]]
+    local unmarked = [[
+        #framesort EnemyHealer EH EnemyDPS2 EnemyHealerTarget
+        /cast [@none, exists][@none, exists][@none, exists][@none] Spell
+    ]]
+    local marked = [[
+        #framesort EnemyHealer EH EnemyDPS2 EnemyHealerTarget
+        /cast [@arena2, exists][@arena2, exists][@arena3, exists][@arena2target] Spell
+    ]]
+
+    assertEquals(fsMacro:GetNewBody(macroText, {}, units), unmarked)
+
+    marks:Set(1, "DAMAGER")
+    marks:Set(2, "HEALER")
+    marks:Set(3, "DAMAGER")
+
+    assertEquals(fsMacro:GetNewBody(macroText, {}, units), marked)
+end
+
 function M:test_arena_3v3_abbreviated()
     local units = { "arena1", "arena2", "arena3" }
 

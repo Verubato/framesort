@@ -411,9 +411,9 @@ function M:test_sorts_enemies_when_specs_are_readable()
     assertEquals(sortEnemies(), { "arena2", "arena3", "arena1" })
 end
 
-function M:test_does_not_sort_enemies_when_specs_are_unreadable()
+function M:test_does_not_sort_enemies_when_specs_are_unreadable_and_sorting_is_off()
     local config = addon.DB.Options.Sorting.EnemyArena
-    config.Enabled = true
+    config.Enabled = false
     config.GroupSortMode = fsConfig.GroupSortMode.Role
     addon.DB.Options.Spacing.EnemyArena.Horizontal = 0
     addon.DB.Options.Spacing.EnemyArena.Vertical = 0
@@ -424,12 +424,11 @@ function M:test_does_not_sort_enemies_when_specs_are_unreadable()
 
     assertEquals(enabled, false)
     assertEquals(fsCompare:EnemySortFunction({ "arena1", "arena2", "arena3" }), nil)
-    assertEquals(config.Enabled, true)
 end
 
-function M:test_lays_enemies_out_in_arena_order_when_specs_are_unreadable_and_spacing_is_set()
+function M:test_lays_enemies_out_in_arena_order_when_specs_are_unreadable_sorting_is_off_and_spacing_is_set()
     local config = addon.DB.Options.Sorting.EnemyArena
-    config.Enabled = true
+    config.Enabled = false
     config.GroupSortMode = fsConfig.GroupSortMode.Role
     config.Reverse = true
     addon.DB.Options.Spacing.EnemyArena.Vertical = 5
@@ -456,9 +455,9 @@ function M:test_does_not_report_spacing_only_when_specs_are_readable()
     assertEquals(spacingOnly, false)
 end
 
-function M:test_enemy_frame_variables_follow_arena_order_when_specs_are_unreadable()
+function M:test_enemy_frame_variables_follow_arena_order_when_specs_are_unreadable_and_sorting_is_off()
     local config = addon.DB.Options.Sorting.EnemyArena
-    config.Enabled = true
+    config.Enabled = false
     config.GroupSortMode = fsConfig.GroupSortMode.Role
     setBuild(120105)
     useMeleeHealerCasterSpecs()
@@ -473,6 +472,138 @@ function M:test_enemy_frame_variables_follow_arena_order_when_specs_are_unreadab
     assertEquals(parser:UnitForSelector("EnemyFrame1", {}, enemies), "arena1")
     assertEquals(parser:UnitForSelector("EnemyFrame2", {}, enemies), "arena2")
     assertEquals(parser:UnitForSelector("EnemyFrame3", {}, enemies), "arena3")
+end
+
+local function useManualRoles()
+    local config = addon.DB.Options.Sorting.EnemyArena
+    config.Enabled = true
+    config.GroupSortMode = fsConfig.GroupSortMode.Role
+    setBuild(120105)
+
+    -- the run would re-sort real frames, which this test has none of
+    addon.Modules.Run = function() end
+    addon.WoW.Api.GetNumArenaOpponentSpecs = function()
+        return 3
+    end
+    addon.WoW.Api.GetSpecializationInfoByID = function(specId)
+        local role = addon.Modules.EnemyAssignments:RoleForSpec(specId)
+        return specId, "", "", 0, role, "", ""
+    end
+    addon.Modules.Sorting.SortedUnits:InvalidateCache()
+end
+
+function M:test_manual_roles_sort_by_the_ordering_panel_when_specs_are_unreadable()
+    local marks = addon.Modules.EnemyAssignments
+    useManualRoles()
+    marks:Set(1, "DAMAGER")
+    marks:Set(2, "HEALER")
+    marks:Set(3, "TANK")
+
+    assertEquals(sortEnemies(), { "arena3", "arena2", "arena1" })
+
+    addon.DB.Options.Sorting.Ordering.Healers = 1
+    addon.DB.Options.Sorting.Ordering.Tanks = 2
+    fsCompare:InvalidateCache()
+
+    assertEquals(sortEnemies(), { "arena2", "arena3", "arena1" })
+end
+
+function M:test_manual_specs_follow_spec_priority_within_a_role()
+    local marks = addon.Modules.EnemyAssignments
+    useManualRoles()
+    -- arms and fury are both melee, and the user prefers fury first
+    addon.DB.Options.Sorting.SpecPriority.Melee = { 72, 71 }
+    fsCompare:InvalidateCache()
+    marks:Set(1, nil, 71)
+    marks:Set(2, nil, 72)
+
+    local subject = { "arena1", "arena2" }
+    table.sort(subject, fsCompare:EnemySortFunction(subject))
+
+    assertEquals(subject, { "arena2", "arena1" })
+end
+
+function M:test_a_healer_sorts_ahead_of_a_dps_marked_without_a_spec_which_has_no_class()
+    local marks = addon.Modules.EnemyAssignments
+    useManualRoles()
+    marks:Set(1, "DAMAGER")
+    marks:Set(2, "HEALER")
+
+    local subject = { "arena1", "arena2" }
+    table.sort(subject, fsCompare:EnemySortFunction(subject))
+
+    assertEquals(subject, { "arena2", "arena1" })
+end
+
+function M:test_a_friendly_dps_without_a_class_gets_no_order_from_the_dps_fallback()
+    local world = addon.DB.Options.Sorting.World
+    world.PlayerSortMode = nil
+    world.GroupSortMode = fsConfig.GroupSortMode.Role
+    local ordering = addon.DB.Options.Sorting.Ordering
+    ordering.Healers = 1
+    ordering.Casters = 2
+    ordering.Hunters = 2
+    ordering.Melee = 2
+    addon.WoW.Api.UnitExists = function()
+        return true
+    end
+    addon.WoW.Api.IsInGroup = function()
+        return true
+    end
+    addon.WoW.Api.IsInInstance = function()
+        return false, ""
+    end
+    addon.WoW.Api.UnitGroupRolesAssigned = function(unit)
+        return unit == "party2" and "HEALER" or "DAMAGER"
+    end
+    addon.WoW.Api.UnitClass = nil
+    addon.WoW.Capabilities.HasRoleAssignments = function()
+        return true
+    end
+
+    local subject = { "party1", "party2" }
+    table.sort(subject, fsCompare:SortFunction(subject))
+
+    assertEquals(subject, { "party1", "party2" })
+end
+
+function M:test_unmarked_enemies_keep_arena_order_when_sorting_is_on_and_specs_are_unreadable()
+    useManualRoles()
+    addon.Modules.EnemyAssignments:Set(2, "HEALER")
+
+    local subject = { "arena3", "arena1", "arena2" }
+    table.sort(subject, fsCompare:EnemySortFunction(subject))
+
+    assertEquals(subject, { "arena2", "arena1", "arena3" })
+end
+
+function M:test_sort_mode_is_not_spacing_only_when_specs_are_unreadable_and_sorting_is_on()
+    useManualRoles()
+    addon.DB.Options.Spacing.EnemyArena.Vertical = 5
+    addon.Modules.EnemyAssignments:Set(1, "TANK")
+
+    local enabled, groupMode, reverse, spacingOnly = fsCompare:EnemySortMode()
+
+    assertEquals(enabled, true)
+    assertEquals(groupMode, fsConfig.GroupSortMode.Role)
+    assertEquals(reverse, false)
+    assertEquals(spacingOnly, false)
+end
+
+function M:test_reverse_applies_only_once_an_enemy_is_marked_when_specs_are_unreadable()
+    useManualRoles()
+    addon.DB.Options.Sorting.EnemyArena.Reverse = true
+
+    local enabled, _, reverse = fsCompare:EnemySortMode()
+
+    assertEquals(enabled, false)
+    assertEquals(reverse, false)
+
+    addon.Modules.EnemyAssignments:Set(1, "TANK")
+    enabled, _, reverse = fsCompare:EnemySortMode()
+
+    assertEquals(enabled, true)
+    assertEquals(reverse, true)
 end
 
 return M

@@ -2461,6 +2461,40 @@ function M:test_upgrade_options_version24()
     assertEquals(options, expected)
 end
 
+function M:test_upgrade_options_version27_offers_the_popup_when_enemy_arena_sorting_is_on()
+    local options = {
+        Sorting = { EnemyArena = { Enabled = true } },
+        Version = 26,
+    }
+
+    local success = upgrader:UpgradeToVersion27(options)
+
+    assertEquals(success, true)
+    assertEquals(options.EnemyAssignments, { PopupEnabled = true })
+    assertEquals(options.Version, 27)
+end
+
+function M:test_upgrade_options_version27_hides_the_popup_when_enemy_arena_sorting_is_off()
+    local options = {
+        Sorting = { EnemyArena = { Enabled = false } },
+        Version = 26,
+    }
+
+    local success = upgrader:UpgradeToVersion27(options)
+
+    assertEquals(success, true)
+    assertEquals(options.EnemyAssignments, { PopupEnabled = false })
+    assertEquals(options.Version, 27)
+end
+
+function M:test_upgrade_options_version27_rejects_the_wrong_version()
+    local options = {
+        Version = 25,
+    }
+
+    assertEquals(upgrader:UpgradeToVersion27(options), false)
+end
+
 function M:test_upgrade_options_version1_to_latest()
     local options = {
         PlayerSortMode = "Top",
@@ -2555,7 +2589,10 @@ function M:test_upgrade_options_version1_to_latest()
             FriendlyFormat = "$framenumber",
             EnemyFormat = "$framenumber",
         },
-        Version = 26,
+        EnemyAssignments = {
+            PopupEnabled = false,
+        },
+        Version = 27,
     }
 
     local db = {

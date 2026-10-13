@@ -17,6 +17,9 @@ local runAll = false
 ---@type { [FrameProvider]: boolean }
 local runProviders = {}
 
+---@type fun()[]
+local afterRunCallbacks = {}
+
 local function Run(forceRunAll)
     local ok, result = pcall(function()
         local all = runAll or forceRunAll
@@ -191,10 +194,42 @@ function M:Run(providers)
             fsLog:Error("Run failed: %s.", tostring(err))
         end
 
+        local callbacks = afterRunCallbacks
+        afterRunCallbacks = {}
+
+        for _, callback in ipairs(callbacks) do
+            local callbackOk, callbackErr = pcall(callback)
+
+            if not callbackOk then
+                fsLog:Error("After run callback failed: %s.", tostring(callbackErr))
+            end
+        end
+
         local stop = wow.GetTimePreciseSec()
         fsLog:Debug("Run time took %fms.", (stop - start) * 1000)
         fsLog:Debug("--- Finished run ---")
     end, "Runner")
+end
+
+---Invokes the callback once the run that was just requested has applied.
+---Outside of combat that is already the case, so it is invoked straight away.
+---@param callback fun()
+function M:AfterRun(callback)
+    if not wow.InCombatLockdown() then
+        callback()
+        return
+    end
+
+    for _, existing in ipairs(afterRunCallbacks) do
+        if existing == callback then
+            return
+        end
+    end
+
+    afterRunCallbacks[#afterRunCallbacks + 1] = callback
+
+    -- the flush happens in a run, so make sure one is queued
+    M:Run()
 end
 
 ---Initialises all modules.

@@ -1483,4 +1483,49 @@ function M:test_enemy_cache_retries_an_empty_result_in_arena()
     addon.WoW.WowEx.ClearMockInstance()
 end
 
+local function UseManualEnemyRoles()
+    capabilities.HasEnemySpecSupport = function()
+        return true
+    end
+    wow.GetBuildInfo = function()
+        return "x", "0", "0", 120105
+    end
+    addon.WoW.WowEx.MockInstance(true, "arena")
+
+    -- the run would re-sort real frames, which this test has none of
+    addon.Modules.Run = function() end
+end
+
+function M:test_marking_an_enemy_invalidates_the_enemy_cache()
+    UseManualEnemyRoles()
+    fsUnit.ArenaUnits = function()
+        return { "arena2", "arena1" }
+    end
+    assertListEquals(fsSortedUnits:ArenaUnits(), { "arena1", "arena2" })
+
+    fsUnit.ArenaUnits = function()
+        return { "arena3", "arena2", "arena1" }
+    end
+    assertListEquals(fsSortedUnits:ArenaUnits(), { "arena1", "arena2" })
+
+    addon.Modules.EnemyAssignments:Set(1, "TANK")
+
+    assertListEquals(fsSortedUnits:ArenaUnits(), { "arena1", "arena2", "arena3" })
+end
+
+function M:test_cycle_enemy_roles_rotates_marked_roles()
+    UseManualEnemyRoles()
+    local marks = addon.Modules.EnemyAssignments
+    fsUnit.ArenaUnits = function()
+        return { "arena3", "arena2", "arena1" }
+    end
+    marks:Set(1, "DAMAGER")
+    marks:Set(2, "HEALER")
+    marks:Set(3, "DAMAGER")
+
+    fsSortedUnits:CycleEnemyRoles({ "DAMAGER" })
+
+    assertListEquals(fsSortedUnits:ArenaUnits(), { "arena3", "arena2", "arena1" })
+end
+
 return M

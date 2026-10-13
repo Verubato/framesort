@@ -46,6 +46,7 @@
     <Script file="WoW\Frame.lua"/>
 
     <!-- Common Modules -->
+    <Script file="Modules\EnemyAssignments.lua"/>
     <Script file="Modules\Inspector.lua"/>
     <Script file="Modules\Macro\Parser.lua"/>
 

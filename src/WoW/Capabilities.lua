@@ -95,3 +95,9 @@ function M.CanReadEnemySpecs()
     local _, _, _, build = wow.GetBuildInfo()
     return build <= 120100
 end
+
+---True where the client offers enemy specs but does not let us read them, so the user marks enemies instead.
+---@return boolean
+function M.NeedsManualEnemyRoles()
+    return M.HasEnemySpecSupport() and not M.CanReadEnemySpecs()
+end

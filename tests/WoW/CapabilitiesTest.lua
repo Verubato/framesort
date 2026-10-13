@@ -42,4 +42,31 @@ function M:test_enemy_specs_readable_on_classic()
     assertEquals(capabilities.CanReadEnemySpecs(), true)
 end
 
+function M:test_manual_enemy_roles_needed_on_12_1_5()
+    setBuild(120105)
+    capabilities.HasEnemySpecSupport = function()
+        return true
+    end
+
+    assertEquals(capabilities.NeedsManualEnemyRoles(), true)
+end
+
+function M:test_manual_enemy_roles_not_needed_on_12_1_0()
+    setBuild(120100)
+    capabilities.HasEnemySpecSupport = function()
+        return true
+    end
+
+    assertEquals(capabilities.NeedsManualEnemyRoles(), false)
+end
+
+function M:test_manual_enemy_roles_not_needed_without_enemy_spec_support()
+    setBuild(120105)
+    capabilities.HasEnemySpecSupport = function()
+        return false
+    end
+
+    assertEquals(capabilities.NeedsManualEnemyRoles(), false)
+end
+
 return M

@@ -6,6 +6,7 @@ local fsUnit = addon.WoW.Unit
 local wowEx = addon.WoW.WowEx
 local fsEnumerable = addon.Collections.Enumerable
 local fsInspector = addon.Modules.Inspector
+local fsEnemyAssignments = addon.Modules.EnemyAssignments
 local fsConfig = addon.Configuration
 local fsSortedFrames = addon.Modules.Sorting.SortedFrames
 local fsLog = addon.Logging.Log
@@ -107,7 +108,7 @@ local function CycleRoles(units, isFriendly, cycles, roles)
         return
     end
 
-    if not isFriendly and (not capabilities.HasEnemySpecSupport() or not wow.GetSpecializationInfoByID) then
+    if not isFriendly and not capabilities.HasEnemySpecSupport() then
         return
     end
 
@@ -146,12 +147,7 @@ local function CycleRoles(units, isFriendly, cycles, roles)
         if isFriendly then
             role = wowEx.UnitGroupRolesAssignedSafe(unit)
         else
-            local specId = fsInspector:EnemyUnitSpec(unit)
-            if specId then
-                -- GetSpecializationInfoByID returns role as 5th return value
-                local _, _, _, _, specRole = wow.GetSpecializationInfoByID(specId)
-                role = specRole
-            end
+            role = fsInspector:EnemyUnitRole(unit)
         end
 
         if role and roleSet[role] then
@@ -465,6 +461,7 @@ function M:Init()
 
     fsInspector:RegisterCallback(OnInspectorInfo)
     fsInspector:RegisterCacheInvalidationCallback(OnInspectorInfo)
+    fsEnemyAssignments:RegisterCallback(InvalidateEnemyCache)
     fsConfig:RegisterConfigurationChangedCallback(OnConfigChanged)
 
     fsLog:Debug("Initialised the sorted units caching module.")

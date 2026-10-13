@@ -8,6 +8,7 @@ local fsMath = addon.Numerics.Math
 local fsEnumerable = addon.Collections.Enumerable
 local fsConfig = addon.Configuration
 local fsInspector = addon.Modules.Inspector
+local fsEnemyAssignments = addon.Modules.EnemyAssignments
 local fsSpec = addon.Configuration.Specs
 local fsLog = addon.Logging.Log
 
@@ -129,6 +130,9 @@ local function PrecomputeGlobalMetadata()
     meta.SpecOrderLookup = specOrderLookup
     meta.ClassTypeOrderLookup = classTypeOrderLookup
 
+    local config = addon.DB.Options.Sorting.Ordering
+    meta.DpsOrder = math.min(config.Casters, config.Hunters, config.Melee)
+
     return meta
 end
 
@@ -155,7 +159,8 @@ local function PrecomputeUnitMetadata(unit, meta, isEnemy)
         -- don't need to check for exists here, because it's a pre-condition of how the enemy unit was generated in the first place
         if not data.IsPet and not data.IsTarget then
             data.SpecId = fsInspector:EnemyUnitSpec(unit)
-            data.Role = wow.GetSpecializationInfoByID and data.SpecId and select(5, wow.GetSpecializationInfoByID(data.SpecId))
+            data.Role = fsInspector:EnemyUnitRole(unit)
+            data.IsMarkedRole = data.Role ~= nil and not data.SpecId and fsEnemyAssignments:IsActive()
 
             local specInfo = data.SpecId and fsSpec:GetSpecInfo(data.SpecId)
             data.ClassId = specInfo and specInfo.ClassId
@@ -201,7 +206,7 @@ local function PrecomputeMetadata(units, isEnemy)
     return meta
 end
 
-local function RoleOrClassTypeOrder(role, class, meta)
+local function RoleOrClassTypeOrder(role, class, meta, markedRole)
     local roleOrder = role and meta.RoleOrderLookup[role]
 
     if roleOrder then
@@ -211,6 +216,11 @@ local function RoleOrClassTypeOrder(role, class, meta)
     if class then
         local order = meta.ClassTypeOrderLookup[class]
         return order
+    end
+
+    -- a marked enemy dps has no spec to give a class
+    if markedRole and role == wowEx.Role.Dps then
+        return meta.DpsOrder
     end
 
     return nil
@@ -287,8 +297,8 @@ local function CompareSpec(leftToken, rightToken, meta)
         end
     end
 
-    local leftOrder = RoleOrClassTypeOrder(leftRole, leftClass, meta)
-    local rightOrder = RoleOrClassTypeOrder(rightRole, rightClass, meta)
+    local leftOrder = RoleOrClassTypeOrder(leftRole, leftClass, meta, leftMeta.IsMarkedRole)
+    local rightOrder = RoleOrClassTypeOrder(rightRole, rightClass, meta, rightMeta.IsMarkedRole)
 
     if leftOrder and rightOrder and leftOrder ~= rightOrder then
         return leftOrder < rightOrder
@@ -631,9 +641,15 @@ function M:EnemySortMode()
     end
 
     -- the saved options are kept so they apply again on builds where specs can be read
+    local config = addon.DB.Options.Sorting.EnemyArena
+
     if capabilities.CanReadEnemySpecs() then
-        local config = addon.DB.Options.Sorting.EnemyArena
         return config.Enabled, config.GroupSortMode, config.Reverse, false
+    end
+
+    -- the user marks the roles on these builds, so there is something to sort by
+    if config.Enabled and fsEnemyAssignments:IsActive() and fsEnemyAssignments:HasAny() then
+        return true, config.GroupSortMode, config.Reverse, false
     end
 
     -- group order is arena order, so this only applies spacing

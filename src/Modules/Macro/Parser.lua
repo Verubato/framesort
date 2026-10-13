@@ -180,13 +180,7 @@ function M:UnitForSelector(selector, friendlyUnits, enemyUnits)
         end
 
         return fsEnumerable:From(enemyUnits):Nth(number or 1, function(x)
-            local specId = fsInspector:EnemyUnitSpec(x)
-
-            if not specId then
-                return false
-            end
-
-            local _, _, _, _, role, _, _ = wow.GetSpecializationInfoByID(specId)
+            local role = fsInspector:EnemyUnitRole(x)
             return (enemyTank and role == wowEx.Role.Tank) or (enemyHealer and role == wowEx.Role.Healer) or (enemyDps and role == wowEx.Role.Dps)
         end) or "none"
     end

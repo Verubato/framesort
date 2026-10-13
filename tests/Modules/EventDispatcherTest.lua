@@ -126,4 +126,16 @@ function M:test_pet_owner_prefixes_match_blizzards_rule()
     assertEquals(#seen, 6)
 end
 
+function M:test_events_reach_enemy_assignments()
+    local seen = {}
+
+    addon.Modules.EnemyAssignments.ProcessEvent = function(_, event)
+        seen[#seen + 1] = event
+    end
+
+    wow.FireEvent(events.GROUP_ROSTER_UPDATE)
+
+    assertEquals(seen, { events.GROUP_ROSTER_UPDATE })
+end
+
 return M

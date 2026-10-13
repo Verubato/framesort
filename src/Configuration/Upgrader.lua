@@ -670,6 +670,22 @@ function M:UpgradeToVersion26(options)
     return true
 end
 
+function M:UpgradeToVersion27(options)
+    if options.Version ~= 26 then
+        return false
+    end
+
+    -- only offer the window to users who already sort enemy arena frames
+    local enemyArena = options.Sorting and options.Sorting.EnemyArena
+
+    options.EnemyAssignments = {
+        PopupEnabled = enemyArena ~= nil and enemyArena.Enabled == true,
+    }
+    options.Version = 27
+
+    return true
+end
+
 ---Upgrades saved variables database to the current version.
 function M:UpgradeDb(db)
     local options = db.Options

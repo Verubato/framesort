@@ -8,6 +8,7 @@ local fsSortedUnits = addon.Modules.Sorting.SortedUnits
 local fsRunner = addon.Modules
 local fsProviders = addon.Providers
 local fsInspector = addon.Modules.Inspector
+local fsEnemyAssignments = addon.Modules.EnemyAssignments
 local fsAutoLeader = addon.Modules.AutoLeader
 local fsHidePlayer = addon.Modules.HidePlayer
 local fsScheduler = addon.Scheduling.Scheduler
@@ -82,6 +83,9 @@ local function OnEvent(_, event, ...)
 
     -- now the inspector
     fsInspector:ProcessEvent(event, ...)
+
+    -- now the enemy roles the user marked
+    fsEnemyAssignments:ProcessEvent(event)
 
     -- now the auto leader
     fsAutoLeader:ProcessEvent(event)

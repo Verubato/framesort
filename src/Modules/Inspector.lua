@@ -9,6 +9,7 @@ local capabilities = addon.WoW.Capabilities
 local fsUnit = addon.WoW.Unit
 local fsLog = addon.Logging.Log
 local fsSpec = addon.Configuration.Specs
+local fsEnemyAssignments = addon.Modules.EnemyAssignments
 local fsScheduler = addon.Scheduling.Scheduler
 local priorityStack = {}
 ---@class InspectorModule : IInitialise, IProcessEvents
@@ -503,6 +504,36 @@ function M:FriendlyUnitSpec(unit)
     return cacheEntry.SpecId
 end
 
+-- a nameplate that did not resolve to an arena unit must not read someone else's mark
+local function MarkedSlot(resolved)
+    return tonumber(string.match(resolved, "^arena(%d+)$"))
+end
+
+---@param unit string
+---@param resolved string the unit with nameplates converted into arena units
+local function SpecOf(unit, resolved)
+    if wowEx.IsInstanceArena() then
+        local unitNumber = tonumber(string.match(resolved, "%d+"))
+        local specId = unitNumber and wowEx.GetArenaOpponentSpecSafe(unitNumber)
+
+        if specId then
+            return specId
+        end
+
+        if fsEnemyAssignments:IsActive() then
+            local markedSlot = MarkedSlot(resolved)
+            return markedSlot and fsEnemyAssignments:Spec(markedSlot)
+        end
+    end
+
+    if wowEx.IsInstanceBattleground() then
+        local specId = BgSpec(unit)
+        return specId
+    end
+
+    return nil
+end
+
 ---Returns the spec id of an enemy unit.
 ---@param unit string
 ---@return number|nil
@@ -517,20 +548,35 @@ function M:EnemyUnitSpec(unit)
         return nil
     end
 
-    if wowEx.IsInstanceArena() then
-        -- convert nameplate units into arena units
-        unit = fsUnit:ResolveUnit(unit)
-        local unitNumber = tonumber(string.match(unit, "%d+"))
-        local specId = unitNumber and wowEx.GetArenaOpponentSpecSafe(unitNumber)
+    return SpecOf(unit, fsUnit:ResolveUnit(unit))
+end
 
-        if specId then
-            return specId
+---Returns the role of an enemy unit, from its spec or else from a role the user marked.
+---@param unit string
+---@return string|nil
+function M:EnemyUnitRole(unit)
+    if not unit then
+        fsLog:Error("Inspector:EnemyUnitRole() - unit must not be nil.")
+        return nil
+    end
+
+    if unit:match("^arenapet%d+$") then
+        return nil
+    end
+
+    local specId = M:EnemyUnitSpec(unit)
+
+    if specId and wow.GetSpecializationInfoByID then
+        local role = select(5, wow.GetSpecializationInfoByID(specId))
+
+        if role then
+            return role
         end
     end
 
-    if wowEx.IsInstanceBattleground() then
-        local specId = BgSpec(unit)
-        return specId
+    if wowEx.IsInstanceArena() and fsEnemyAssignments:IsActive() then
+        local markedSlot = MarkedSlot(fsUnit:ResolveUnit(unit))
+        return markedSlot and fsEnemyAssignments:Role(markedSlot)
     end
 
     return nil

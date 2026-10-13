@@ -136,4 +136,27 @@ function M:test_spacing_is_not_applied_without_sorting_when_specs_are_readable()
     assertEquals(yOffsets(), before)
 end
 
+function M:test_marked_roles_sort_providers_other_than_blizzard_when_enemy_sorting_is_on()
+    provider.Name = function()
+        return "ElvUI"
+    end
+    addon.WoW.Capabilities.HasEnemySpecSupport = function()
+        return true
+    end
+    -- the run would sort twice, and this test calls it itself
+    addon.Modules.Run = function() end
+    local config = addon.DB.Options.Sorting.EnemyArena
+    config.Enabled = true
+    config.GroupSortMode = addon.Configuration.GroupSortMode.Role
+    local marks = addon.Modules.EnemyAssignments
+    marks:Set(1, "DAMAGER")
+    marks:Set(2, "DAMAGER")
+    marks:Set(3, "TANK")
+
+    fsSort:Run()
+
+    local step = frameHeight + 10
+    assertEquals(yOffsets(), { -step, -2 * step, 0 })
+end
+
 return M
