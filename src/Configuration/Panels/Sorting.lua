@@ -295,6 +295,10 @@ function M:Build(panel)
     local anchor = BuiltTitle(panel)
     local config = addon.DB.Options.Sorting
 
+    if capabilities.HasEnemySpecSupport() and not capabilities.CanReadEnemySpecs() then
+        anchor = fsConfig:TextLine(L["Enemy frame sorting is no longer possible from 12.1.5 onward due to Blizzard restrictions. Your arena addon's default order is used."], panel, anchor, "GameFontRed", -verticalSpacing)
+    end
+
     if capabilities.HasArena() then
         anchor = BuildSortModeCheckboxes(panel, anchor, L["Arena - 2v2"], L["Sort your frames while in 2v2 arena matches."], config.Arena.Twos)
 
@@ -305,20 +309,16 @@ function M:Build(panel)
         anchor = BuildSortModeCheckboxes(panel, anchor, L["Arena - " .. otherArenaSizes], otherArenaTooltip, config.Arena.Default)
     end
 
-    if capabilities.HasEnemySpecSupport() then
-        if capabilities.CanReadEnemySpecs() then
-            anchor = BuildSortModeCheckboxes(
-                panel,
-                anchor,
-                L["Enemy Arena (see addons panel for supported addons)"],
-                L["Sort the enemy frames created by supported arena addons."],
-                config.EnemyArena,
-                false,
-                false
-            )
-        else
-            anchor = fsConfig:TextLine(L["Enemy frame sorting is no longer possible from 12.1.5 onward due to Blizzard restrictions. Your arena addon's default order is used."], panel, anchor, "GameFontRed", -verticalSpacing)
-        end
+    if capabilities.HasEnemySpecSupport() and capabilities.CanReadEnemySpecs() then
+        anchor = BuildSortModeCheckboxes(
+            panel,
+            anchor,
+            L["Enemy Arena (see addons panel for supported addons)"],
+            L["Sort the enemy frames created by supported arena addons."],
+            config.EnemyArena,
+            false,
+            false
+        )
     end
 
     anchor = BuildSortModeCheckboxes(panel, anchor, L["Dungeon (mythics, 5-mans, delves)"], L["Sort your frames while in dungeons, mythic+, and delves."], config.Dungeon)
