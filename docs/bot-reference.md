@@ -92,8 +92,8 @@ The Enemy Arena section has no Player row.
 Each area has a "Sort" row: Group, Spec (labelled "Role" on clients without spec
 inspection), Alphabetical, and a separate Reverse checkbox. Exactly one mode can be
 checked. Defaults: Group for Arena and World, Spec/Role for Dungeon and Raid,
-Group for Enemy Arena. From patch 12.1.5 onward Enemy Arena has no Spec/Role mode and
-always sorts by group, because Blizzard restricts `GetArenaOpponentSpec`.
+Group for Enemy Arena. From patch 12.1.5 onward Enemy Arena sorting is disabled and the arena
+addon's own order is used, because Blizzard restricts `GetArenaOpponentSpec`.
 
 - Group: orders by unit number (party1 < party2 < ... / raid1 < raid2 < ...), i.e.
   Blizzard's natural group order.
@@ -122,10 +122,11 @@ no Alphabetical, and no Player row. It only operates inside arena instances. Ene
 roles come from arena opponent spec information, which requires a MoP+ client and may
 be briefly unavailable at the start of a match. The bot arena mode reports no specs at
 all, so Spec/Role mode has nothing to order by there and Group mode should be used.
-From patch 12.1.5 onward the Spec/Role checkbox is removed and a message is shown
-instead, because Blizzard restricts `GetArenaOpponentSpec`. Enemy Arena then always
-sorts by group, even if Spec/Role was saved earlier. The saved choice is kept and
-applies again on builds where specs can be read.
+From patch 12.1.5 onward the whole Enemy Arena row is replaced by a message, because
+Blizzard restricts `GetArenaOpponentSpec`. FrameSort then does not move or reorder enemy
+frames, and the arena addon's own order is used. Your saved settings are kept and apply
+again on builds where specs can be read. `EnemyFrame1`, `EnemyFrame2`, and the other
+`EnemyFrameN` variables still work, and follow arena order (`arena1`, `arena2`, `arena3`).
 
 ### 3.5 The Ordering panel
 
@@ -418,7 +419,7 @@ Enemy Arena sorting is off by default. It only works in arena, only on MoP+ clie
 and only with Blizzard arena frames or a supported arena addon (sArena, Gladius,
 GladiusEx, Gladdy, ElvUI, BattleGroundEnemies, Arena Core). Enemy spec info comes
 from the server and can be missing for the first moments at the gates. From patch
-12.1.5 onward enemy specs are unavailable, so Enemy Arena always sorts by group.
+12.1.5 onward Enemy Arena sorting is disabled, so FrameSort does not reorder enemy frames.
 
 **"Spec/role sorting puts people in the wrong order."**
 
@@ -603,7 +604,7 @@ Variables are **case-insensitive** (`fRaMe1`, `Dps`, `enemyhealer` all work).
 | `EnemyFrame1Pet`, ... | `EF1P`, ... | Pet of the Nth enemy |
 | `EnemyTank`, `EnemyHealer`, `EnemyDPS` | `ET`, `EH`, `ED` | First enemy with that role. Not working from patch 12.1.5 onward, see below |
 
-> From patch 12.1.5 onward `EnemyTank`, `EnemyHealer`, `EnemyDPS`, and their abbreviations `ET`, `EH`, and `ED` no longer work. Blizzard made `GetArenaOpponentSpec` return secret values, so addons cannot read enemy specs and these variables resolve to `none`. The same restriction means the Enemy Arena sort mode can no longer sort by spec or role. `EnemyFrame1` and the other positional enemy variables still work.
+> From patch 12.1.5 onward `EnemyTank`, `EnemyHealer`, `EnemyDPS`, and their abbreviations `ET`, `EH`, and `ED` no longer work. Blizzard made `GetArenaOpponentSpec` return secret values, so addons cannot read enemy specs and these variables resolve to `none`. The same restriction disables Enemy Arena sorting, so the arena addon's own order is used. `EnemyFrame1` and the other positional enemy variables still work, in arena order.
 
 > The in-game settings panel lists `DP` as the abbreviation for `EnemyDPS`. That is a typo in the UI text - the parser only accepts **`ED`**.
 
