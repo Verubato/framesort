@@ -5,6 +5,7 @@ local fsConfig = addon.Configuration
 local fsScheduler = addon.Scheduling.Scheduler
 local fsLog = addon.Logging.Log
 local wow = addon.WoW.Api
+local capabilities = addon.WoW.Capabilities
 local minSpacing = -1
 local maxSpacing = 100
 local systemChange = false
@@ -218,7 +219,8 @@ function M:Build(parent)
     local title = wow.CompactRaidFrameContainer and "Raid" or "Group"
     anchor = BuildSpacingOptions(panel, anchor, L[title], title, config.Raid, true, true, verticalSpacing)
 
-    if wow.CompactArenaFrame then
+    -- enemy spacing is only applied by the enemy sort path, which is off when specs can't be read
+    if wow.CompactArenaFrame and capabilities.CanReadEnemySpecs() then
         BuildSpacingOptions(panel, anchor, L["Enemy Arena"], "Enemy Arena", config.EnemyArena, true, true, verticalSpacing)
     end
 
