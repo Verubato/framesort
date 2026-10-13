@@ -949,8 +949,8 @@ function M:TrySort(provider)
                     return false
                 end
 
-                -- third party arena frames must not be moved when only spacing is applied
-                if container.Type == fsFrame.ContainerType.EnemyArena and enemySpacingOnly and not container.SupportsSpacing then
+                -- only Blizzard's frames take FrameSort's enemy spacing, other providers keep their own layout
+                if container.Type == fsFrame.ContainerType.EnemyArena and enemySpacingOnly and p:Name() ~= "Blizzard" then
                     return false
                 end
 

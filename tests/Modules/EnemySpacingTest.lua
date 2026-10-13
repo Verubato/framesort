@@ -45,6 +45,9 @@ function M:setup()
     fsFrame = addon.WoW.Frame
 
     provider = providerFactory:Create()
+    provider.Name = function()
+        return "Blizzard"
+    end
     addon.Providers.Test = provider
     addon.Providers.All[#addon.Providers.All + 1] = provider
 
@@ -113,9 +116,10 @@ function M:test_nothing_moves_when_enemy_spacing_is_zero()
     assertEquals(yOffsets(), before)
 end
 
-function M:test_containers_that_do_not_support_spacing_are_not_moved()
-    local arena = provider:Containers()[3]
-    arena.SupportsSpacing = false
+function M:test_providers_other_than_blizzard_are_not_moved_even_if_they_support_spacing()
+    provider.Name = function()
+        return "ElvUI"
+    end
 
     local before = yOffsets()
     fsSort:Run()

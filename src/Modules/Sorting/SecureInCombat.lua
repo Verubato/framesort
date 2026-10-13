@@ -1736,7 +1736,7 @@ secureMethods["TrySort"] = [[
                                     shouldAdd = false
                                 elseif (container.Type == ContainerType.Party or container.Type == ContainerType.Raid) and friendlyEnabled then
                                     shouldAdd = true
-                                elseif container.Type == ContainerType.EnemyArena and enemyEnabled and (not enemySpacingOnly or container.SupportsSpacing) then
+                                elseif container.Type == ContainerType.EnemyArena and enemyEnabled and (not enemySpacingOnly or provider.Name == "Blizzard") then
                                     shouldAdd = true
                                 end
 
