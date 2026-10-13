@@ -88,3 +88,10 @@ function M.CanGetArenaNameplates()
     local _, _, _, build = wow.GetBuildInfo()
     return build < 120001
 end
+
+---Since 12.1.5 GetArenaOpponentSpec returns secret values, so enemy specs can no longer be read.
+---@return boolean
+function M.CanReadEnemySpecs()
+    local _, _, _, build = wow.GetBuildInfo()
+    return build <= 120100
+end

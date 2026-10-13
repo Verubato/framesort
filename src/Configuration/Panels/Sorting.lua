@@ -62,13 +62,17 @@ end
 ---@param options table the configuration table
 ---@param hasPlayer boolean?
 ---@param hasAlpha boolean?
+---@param hasSpec boolean?
 ---@return table The bottom left most control to use for anchoring subsequent UI components.
-local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, labelTooltip, options, hasPlayer, hasAlpha)
+local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, labelTooltip, options, hasPlayer, hasAlpha, hasSpec)
     if hasPlayer == nil then
         hasPlayer = true
     end
     if hasAlpha == nil then
         hasAlpha = true
+    end
+    if hasSpec == nil then
+        hasSpec = true
     end
 
     local enabled = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
@@ -167,24 +171,29 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, labe
     group:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Group)
     fsConfig:Tooltip(group, L["Group"], L["Sort by the unit id, e.g. party1 > party2 > party3."])
 
-    local spec = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-    spec:SetPoint("LEFT", group, "RIGHT", horizontalSpacing, 0)
-    local canInspect = fsInspector:CanRun()
-    local specText = canInspect and L["Spec"] or L["Role"]
-    spec.Text:SetText(specText)
-    spec:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Role)
-    local specTooltip = canInspect and L["Sort by role and spec, using the order from the Ordering panel."] or L["Sort by role (tank, healer, dps), using the order from the Ordering panel."]
-    fsConfig:Tooltip(spec, specText, specTooltip)
-
-    local alpha = nil
+    local spec = nil
     local modes = {
         [group] = fsConfig.GroupSortMode.Group,
-        [spec] = fsConfig.GroupSortMode.Role,
     }
+
+    if hasSpec then
+        spec = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
+        spec:SetPoint("LEFT", group, "RIGHT", horizontalSpacing, 0)
+        local canInspect = fsInspector:CanRun()
+        local specText = canInspect and L["Spec"] or L["Role"]
+        spec.Text:SetText(specText)
+        spec:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Role)
+        local specTooltip = canInspect and L["Sort by role and spec, using the order from the Ordering panel."] or L["Sort by role (tank, healer, dps), using the order from the Ordering panel."]
+        fsConfig:Tooltip(spec, specText, specTooltip)
+
+        modes[spec] = fsConfig.GroupSortMode.Role
+    end
+
+    local alpha = nil
 
     if hasAlpha then
         alpha = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-        alpha:SetPoint("LEFT", spec, "RIGHT", horizontalSpacing, 0)
+        alpha:SetPoint("LEFT", spec or group, "RIGHT", horizontalSpacing, 0)
         alpha.Text:SetText(L["Alphabetical"])
         alpha:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Alphabetical)
         fsConfig:Tooltip(alpha, L["Alphabetical"], L["Sort by name in alphabetical order."])
@@ -193,7 +202,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, labe
     end
 
     local reverse = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
-    reverse:SetPoint("LEFT", alpha or spec, "RIGHT", horizontalSpacing, 0)
+    reverse:SetPoint("LEFT", alpha or spec or group, "RIGHT", horizontalSpacing, 0)
     reverse.Text:SetText(L["Reverse"])
     reverse:SetChecked(options.Reverse)
     fsConfig:Tooltip(reverse, L["Reverse"], L["Reverse the sort order, so the last frame becomes the first."])
@@ -233,7 +242,10 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, labe
         end
 
         group:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Group)
-        spec:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Role)
+
+        if hasSpec then
+            assert(spec):SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Role)
+        end
 
         if hasAlpha then
             assert(alpha):SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Alphabetical)
@@ -306,6 +318,7 @@ function M:Build(panel)
     end
 
     if capabilities.HasEnemySpecSupport() then
+        local canSortBySpec = capabilities.CanReadEnemySpecs()
         anchor = BuildSortModeCheckboxes(
             panel,
             anchor,
@@ -313,8 +326,13 @@ function M:Build(panel)
             L["Sort the enemy frames created by supported arena addons."],
             config.EnemyArena,
             false,
-            false
+            false,
+            canSortBySpec
         )
+
+        if not canSortBySpec then
+            anchor = fsConfig:TextLine(L["Enemy spec sorting is no longer possible in 12.1.5 due to Blizzard restrictions."], panel, anchor, "GameFontRed", -verticalSpacing)
+        end
     end
 
     anchor = BuildSortModeCheckboxes(panel, anchor, L["Dungeon (mythics, 5-mans, delves)"], L["Sort your frames while in dungeons, mythic+, and delves."], config.Dungeon)

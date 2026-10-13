@@ -1,6 +1,7 @@
 ---@type string, Addon
 local _, addon = ...
 local wow = addon.WoW.Api
+local capabilities = addon.WoW.Capabilities
 local fsConfig = addon.Configuration
 local L = addon.Locale.Current
 local M = {}
@@ -44,6 +45,16 @@ function M:Build(parent)
     notes[#notes + 1] = " - " .. L["Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work."]
 
     local anchor = fsConfig:TextBlock(notes, panel, title)
+
+    if wow.GetArenaOpponentSpec and not capabilities.CanReadEnemySpecs() then
+        anchor = fsConfig:TextLine(
+            L["Enemy spec variables (EnemyTank, EnemyHealer, EnemyDPS, and their abbreviations) no longer work in 12.1.5 due to Blizzard restrictions."],
+            panel,
+            anchor,
+            "GameFontRed",
+            -verticalSpacing
+        )
+    end
 
     local abbreviations = {
         L["Need to save on macro characters? Use abbreviations to shorten them:"],
