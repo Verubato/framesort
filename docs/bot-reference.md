@@ -31,9 +31,9 @@ where they want it (top, middle, bottom, or hidden). Around that core it provide
 
 | Fact | Value |
 | --- | --- |
-| Addon version | 7.18.14 |
+| Addon version | 7.19.0 |
 | Author | Verz |
-| Interface versions (TOC) | 120100, 16001, 120007, 50504, 40402, 38002, 38001, 30405, 30300, 20506, 11509 (retail, MoP classic, Cata classic, wrath, TBC, and classic era clients) |
+| Interface versions (TOC) | 120105, 120100, 16001, 120007, 50504, 40402, 38002, 38001, 30405, 30300, 20506, 11509 (retail, MoP classic, Cata classic, wrath, TBC, and classic era clients) |
 | Saved variables | `FrameSortDB` |
 | Slash commands | `/fs` and `/framesort` - both open the FrameSort options panel |
 | Options location | WoW Settings -> AddOns -> FrameSort (a category with sub-panels) |
@@ -123,10 +123,12 @@ roles come from arena opponent spec information, which requires a MoP+ client an
 be briefly unavailable at the start of a match. The bot arena mode reports no specs at
 all, so Spec/Role mode has nothing to order by there and Group mode should be used.
 From patch 12.1.5 onward the whole Enemy Arena row is replaced by a message, because
-Blizzard restricts `GetArenaOpponentSpec`. FrameSort then does not move or reorder enemy
-frames, and the arena addon's own order is used. Your saved settings are kept and apply
-again on builds where specs can be read. `EnemyFrame1`, `EnemyFrame2`, and the other
-`EnemyFrameN` variables still work, and follow arena order (`arena1`, `arena2`, `arena3`).
+Blizzard restricts `GetArenaOpponentSpec`. FrameSort then does not reorder enemy frames,
+and the arena addon's own order is used. The only exception is Enemy Arena spacing, which
+still lays out Blizzard arena frames in arena order when it is set. Your saved
+settings are kept and apply again on builds where specs can be read. `EnemyFrame1`,
+`EnemyFrame2`, and the other `EnemyFrameN` variables still work, and follow arena order
+(`arena1`, `arena2`, `arena3`).
 
 ### 3.5 The Ordering panel
 
@@ -280,8 +282,9 @@ This only applies to Blizzard frames."
 Each slider has an edit box for typing an exact value. Spacing requires the Secure
 sorting method; Traditional mode cannot apply spacing (the Health Check flags this
 combination). Spacing applies only to Blizzard frames, not to other frame addons.
-From patch 12.1.5 onward the Enemy Arena spacing row is hidden and has no effect,
-because Enemy Arena sorting is disabled, and the Health Check ignores it.
+From patch 12.1.5 onward Enemy Arena sorting is disabled, but the Enemy Arena spacing
+still applies to Blizzard arena frames, which are laid out in arena order. Other
+arena addons are never moved, and the Health Check still counts the spacing.
 
 ### 8.3 Nameplates
 

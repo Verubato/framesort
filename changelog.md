@@ -1,5 +1,15 @@
 # Changelog
 
+## 7.19.0
+
+Patch 12.1.5 stops addons from reading enemy arena specs, so from 12.1.5 onward:
+
+* Enemy arena frame sorting is disabled, and your arena addon's own order is used.
+* Enemy arena spacing still works for Blizzard arena frames, which are laid out in arena order. It now applies even if enemy sorting was turned off.
+* EnemyHealer, EnemyTank, EnemyDPS, and their abbreviations no longer work in macros. EnemyFrame1, EnemyFrame2, and so on still work, in arena order.
+
+Added the 12.1.5 client to the supported interface versions.
+
 ## 7.18.14
 
 * Fixed party frames sometimes sorting to the wrong order during combat, such as when a priest mind controls an enemy.
