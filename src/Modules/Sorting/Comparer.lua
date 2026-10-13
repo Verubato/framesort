@@ -627,7 +627,14 @@ end
 function M:EnemySortMode()
     if wowEx.IsInstanceArena() then
         local config = addon.DB.Options.Sorting.EnemyArena
-        return config.Enabled, config.GroupSortMode, config.Reverse
+        local groupMode = config.GroupSortMode
+
+        -- the saved mode is kept so it returns on builds where specs can be read
+        if groupMode == fsConfig.GroupSortMode.Role and not capabilities.CanReadEnemySpecs() then
+            groupMode = fsConfig.GroupSortMode.Group
+        end
+
+        return config.Enabled, groupMode, config.Reverse
     end
 
     return false, nil, false

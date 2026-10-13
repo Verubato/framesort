@@ -359,4 +359,65 @@ function M:test_hunters_between_casters_and_melee()
     assertEquals(subject, { "arena3", "arena1", "arena2" })
 end
 
+local function useMeleeHealerCasterSpecs()
+    addon.WoW.Api.GetNumArenaOpponentSpecs = function()
+        return 3
+    end
+    addon.WoW.Api.GetArenaOpponentSpec = function(id)
+        if id == 1 then
+            return 72, 0
+        end
+        if id == 2 then
+            return 105, 0
+        end
+        if id == 3 then
+            return 258, 0
+        end
+        return 0, 0
+    end
+    addon.WoW.Api.GetSpecializationInfoByID = function(specId)
+        if specId == 105 then
+            return specId, "Restoration", "", 0, "HEALER", "", ""
+        end
+        return specId, "", "", 0, "DAMAGER", "", ""
+    end
+
+    local ordering = addon.DB.Options.Sorting.Ordering
+    ordering.Healers = 2
+    ordering.Casters = 4
+    ordering.Melee = 5
+    fsCompare:InvalidateCache()
+end
+
+local function sortEnemies()
+    local subject = { "arena1", "arena2", "arena3" }
+    table.sort(subject, fsCompare:EnemySortFunction(subject))
+    return subject
+end
+
+function M:test_role_mode_sorts_by_spec_when_specs_are_readable()
+    local config = addon.DB.Options.Sorting.EnemyArena
+    config.Enabled = true
+    config.GroupSortMode = fsConfig.GroupSortMode.Role
+    addon.WoW.Api.GetBuildInfo = function()
+        return "12.1.0", "0", "0", 120100
+    end
+    useMeleeHealerCasterSpecs()
+
+    assertEquals(sortEnemies(), { "arena2", "arena3", "arena1" })
+end
+
+function M:test_role_mode_sorts_by_group_when_specs_are_unreadable()
+    local config = addon.DB.Options.Sorting.EnemyArena
+    config.Enabled = true
+    config.GroupSortMode = fsConfig.GroupSortMode.Role
+    addon.WoW.Api.GetBuildInfo = function()
+        return "12.1.5", "0", "0", 120105
+    end
+    useMeleeHealerCasterSpecs()
+
+    assertEquals(sortEnemies(), { "arena1", "arena2", "arena3" })
+    assertEquals(config.GroupSortMode, fsConfig.GroupSortMode.Role)
+end
+
 return M

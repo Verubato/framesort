@@ -167,8 +167,13 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, labe
     local group = wow.CreateFrame("CheckButton", nil, parentPanel, "UICheckButtonTemplate")
     group:SetPoint("LEFT", modeLabel, "RIGHT", horizontalSpacing / 2, 0)
 
+    -- without the spec checkbox a saved Role mode is sorted as Group, so show it that way
+    local function isGroupMode()
+        return options.GroupSortMode == fsConfig.GroupSortMode.Group or (not hasSpec and options.GroupSortMode == fsConfig.GroupSortMode.Role)
+    end
+
     group.Text:SetText(L["Group"])
-    group:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Group)
+    group:SetChecked(isGroupMode())
     fsConfig:Tooltip(group, L["Group"], L["Sort by the unit id, e.g. party1 > party2 > party3."])
 
     local spec = nil
@@ -241,7 +246,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, labe
             assert(hidden):SetChecked(options.PlayerSortMode == fsConfig.PlayerSortMode.Hidden)
         end
 
-        group:SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Group)
+        group:SetChecked(isGroupMode())
 
         if hasSpec then
             assert(spec):SetChecked(options.GroupSortMode == fsConfig.GroupSortMode.Role)
