@@ -280,6 +280,8 @@ This only applies to Blizzard frames."
 Each slider has an edit box for typing an exact value. Spacing requires the Secure
 sorting method; Traditional mode cannot apply spacing (the Health Check flags this
 combination). Spacing applies only to Blizzard frames, not to other frame addons.
+From patch 12.1.5 onward the Enemy Arena spacing row is hidden and has no effect,
+because Enemy Arena sorting is disabled, and the Health Check ignores it.
 
 ### 8.3 Nameplates
 
