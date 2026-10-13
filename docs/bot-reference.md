@@ -121,6 +121,8 @@ no Alphabetical, and no Player row. It only operates inside arena instances. Ene
 roles come from arena opponent spec information, which requires a MoP+ client and may
 be briefly unavailable at the start of a match. The bot arena mode reports no specs at
 all, so Spec/Role mode has nothing to order by there and Group mode should be used.
+From patch 12.1.5 onward the Spec/Role checkbox is removed and a message is shown
+instead, because Blizzard restricts `GetArenaOpponentSpec`.
 
 ### 3.5 The Ordering panel
 
@@ -594,7 +596,9 @@ Variables are **case-insensitive** (`fRaMe1`, `Dps`, `enemyhealer` all work).
 | --- | --- | --- |
 | `EnemyFrame1`, `EnemyFrame2`, ... | `EF1`, `EF2` | Nth enemy arena frame in sorted order |
 | `EnemyFrame1Pet`, ... | `EF1P`, ... | Pet of the Nth enemy |
-| `EnemyTank`, `EnemyHealer`, `EnemyDPS` | `ET`, `EH`, `ED` | First enemy with that role |
+| `EnemyTank`, `EnemyHealer`, `EnemyDPS` | `ET`, `EH`, `ED` | First enemy with that role. Not working from patch 12.1.5 onward, see below |
+
+> From patch 12.1.5 onward `EnemyTank`, `EnemyHealer`, `EnemyDPS`, and their abbreviations `ET`, `EH`, and `ED` no longer work. Blizzard made `GetArenaOpponentSpec` return secret values, so addons cannot read enemy specs and these variables resolve to `none`. The same restriction means the Enemy Arena sort mode can no longer sort by spec or role. `EnemyFrame1` and the other positional enemy variables still work.
 
 > The in-game settings panel lists `DP` as the abbreviation for `EnemyDPS`. That is a typo in the UI text - the parser only accepts **`ED`**.
 
@@ -730,7 +734,7 @@ Hyphens, apostrophes and accented letters break a variable into pieces. `#FS Bob
 ### 8.6 Roles and enemy roles are not always available
 
 - `Tank` / `Healer` / `DPS` / `OtherDPS` need role assignments. Where the client has no role system, they resolve to `none`. On 12.x the game also hides a role once an addon has tainted execution, which resolves to `none` until the next clean update.
-- `EnemyTank` / `EnemyHealer` / `EnemyDPS` need specialization data and only resolve **inside arenas** (MoP and later). Outside arena they are `none`.
+- `EnemyTank` / `EnemyHealer` / `EnemyDPS` need specialization data and only resolve **inside arenas** (MoP and later). Outside arena they are `none`. From patch 12.1.5 onward they never resolve, because Blizzard restricts `GetArenaOpponentSpec`.
 - Enemy specs come from inspection, so right at the arena gates they may briefly be `none`.
 
 Always give enemy macros a sensible fallback clause, e.g. `[@none,harm][@target,harm]`.

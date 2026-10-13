@@ -9,7 +9,7 @@ A simple WoW addon that sorts party/raid/arena frames and places you at the top/
 * Works with Blizzard, Gladius, GladiusEx, sArena, ElvUI, and Cell.
 * Automatically promote healers to leader in solo shuffle.
 * Keybindings to target frames based on their visual position rather than their party number.
-* Macro variables for @Healer, @EnemyHealer, @Frame, and more.
+* Macro variables for @Healer, @EnemyHealer (not working from patch 12.1.5), @Frame, and more.
 * Add spacing between frames.
 
 ## Sorting ##
@@ -62,6 +62,8 @@ Target frames based on their visual position:
 #FrameSort EnemyHealer
 /cast [@enemyhealer] Death Grip
 ```
+
+Note: from patch 12.1.5 onward EnemyHealer, EnemyDps, and the other enemy spec and role based variables no longer work, due to Blizzard restrictions on GetArenaOpponentSpec.
 
 ### Target whatever the tank is targeting ###
 
