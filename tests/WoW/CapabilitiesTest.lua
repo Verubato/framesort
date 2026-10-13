@@ -30,6 +30,12 @@ function M:test_enemy_specs_unreadable_on_12_1_5()
     assertEquals(capabilities.CanReadEnemySpecs(), false)
 end
 
+function M:test_enemy_specs_unreadable_on_later_builds()
+    setBuild(120200)
+
+    assertEquals(capabilities.CanReadEnemySpecs(), false)
+end
+
 function M:test_enemy_specs_readable_on_classic()
     setBuild(50504)
 

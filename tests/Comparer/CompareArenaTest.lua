@@ -395,29 +395,53 @@ local function sortEnemies()
     return subject
 end
 
-function M:test_role_mode_sorts_by_spec_when_specs_are_readable()
+local function setBuild(build)
+    addon.WoW.Api.GetBuildInfo = function()
+        return "x", "0", "0", build
+    end
+end
+
+function M:test_sorts_enemies_when_specs_are_readable()
     local config = addon.DB.Options.Sorting.EnemyArena
     config.Enabled = true
     config.GroupSortMode = fsConfig.GroupSortMode.Role
-    addon.WoW.Api.GetBuildInfo = function()
-        return "12.1.0", "0", "0", 120100
-    end
+    setBuild(120100)
     useMeleeHealerCasterSpecs()
 
     assertEquals(sortEnemies(), { "arena2", "arena3", "arena1" })
 end
 
-function M:test_role_mode_sorts_by_group_when_specs_are_unreadable()
+function M:test_does_not_sort_enemies_when_specs_are_unreadable()
     local config = addon.DB.Options.Sorting.EnemyArena
     config.Enabled = true
     config.GroupSortMode = fsConfig.GroupSortMode.Role
-    addon.WoW.Api.GetBuildInfo = function()
-        return "12.1.5", "0", "0", 120105
-    end
+    setBuild(120105)
     useMeleeHealerCasterSpecs()
 
-    assertEquals(sortEnemies(), { "arena1", "arena2", "arena3" })
-    assertEquals(config.GroupSortMode, fsConfig.GroupSortMode.Role)
+    local enabled = fsCompare:EnemySortMode()
+
+    assertEquals(enabled, false)
+    assertEquals(fsCompare:EnemySortFunction({ "arena1", "arena2", "arena3" }), nil)
+    assertEquals(config.Enabled, true)
+end
+
+function M:test_enemy_frame_variables_follow_arena_order_when_specs_are_unreadable()
+    local config = addon.DB.Options.Sorting.EnemyArena
+    config.Enabled = true
+    config.GroupSortMode = fsConfig.GroupSortMode.Role
+    setBuild(120105)
+    useMeleeHealerCasterSpecs()
+    addon.WoW.Api.UnitExists = function()
+        return true
+    end
+    addon.Modules.Sorting.SortedUnits:InvalidateCache()
+
+    local parser = addon.Modules.Macro.Parser
+    local enemies = addon.Modules.Sorting.SortedUnits:ArenaUnits()
+
+    assertEquals(parser:UnitForSelector("EnemyFrame1", {}, enemies), "arena1")
+    assertEquals(parser:UnitForSelector("EnemyFrame2", {}, enemies), "arena2")
+    assertEquals(parser:UnitForSelector("EnemyFrame3", {}, enemies), "arena3")
 end
 
 return M
