@@ -92,7 +92,8 @@ The Enemy Arena section has no Player row.
 Each area has a "Sort" row: Group, Spec (labelled "Role" on clients without spec
 inspection), Alphabetical, and a separate Reverse checkbox. Exactly one mode can be
 checked. Defaults: Group for Arena and World, Spec/Role for Dungeon and Raid,
-Group for Enemy Arena.
+Group for Enemy Arena. From patch 12.1.5 onward Enemy Arena has no Spec/Role mode and
+always sorts by group, because Blizzard restricts `GetArenaOpponentSpec`.
 
 - Group: orders by unit number (party1 < party2 < ... / raid1 < raid2 < ...), i.e.
   Blizzard's natural group order.
@@ -122,7 +123,9 @@ roles come from arena opponent spec information, which requires a MoP+ client an
 be briefly unavailable at the start of a match. The bot arena mode reports no specs at
 all, so Spec/Role mode has nothing to order by there and Group mode should be used.
 From patch 12.1.5 onward the Spec/Role checkbox is removed and a message is shown
-instead, because Blizzard restricts `GetArenaOpponentSpec`.
+instead, because Blizzard restricts `GetArenaOpponentSpec`. Enemy Arena then always
+sorts by group, even if Spec/Role was saved earlier. The saved choice is kept and
+applies again on builds where specs can be read.
 
 ### 3.5 The Ordering panel
 
@@ -359,7 +362,8 @@ v3 methods:
   `PurgeCache()`.
 - `Frame`: `UnitFromFrame(frame)`, `FrameNumberForUnit(unit)`,
   `CycleFriendlyRoles(roles, cycles)`, `CycleEnemyRoles(roles, cycles)`,
-  `ResetFriendlyCycles()`, `ResetEnemyCycles()` (cycling is blocked in combat).
+  `ResetFriendlyCycles()`, `ResetEnemyCycles()` (cycling is blocked in combat, and
+  enemy role cycling finds nothing from patch 12.1.5 onward).
 - `Caching`: `Invalidate()`.
 - `Unit`: `ResolveVariable(variable)` - resolves a FrameSort macro variable (e.g.
   `"Healer"`) to a unit token.
@@ -413,7 +417,8 @@ enable "Combined Groups (Raid)" in Cell -> Layouts.
 Enemy Arena sorting is off by default. It only works in arena, only on MoP+ clients,
 and only with Blizzard arena frames or a supported arena addon (sArena, Gladius,
 GladiusEx, Gladdy, ElvUI, BattleGroundEnemies, Arena Core). Enemy spec info comes
-from the server and can be missing for the first moments at the gates.
+from the server and can be missing for the first moments at the gates. From patch
+12.1.5 onward enemy specs are unavailable, so Enemy Arena always sorts by group.
 
 **"Spec/role sorting puts people in the wrong order."**
 
@@ -735,7 +740,7 @@ Hyphens, apostrophes and accented letters break a variable into pieces. `#FS Bob
 
 - `Tank` / `Healer` / `DPS` / `OtherDPS` need role assignments. Where the client has no role system, they resolve to `none`. On 12.x the game also hides a role once an addon has tainted execution, which resolves to `none` until the next clean update.
 - `EnemyTank` / `EnemyHealer` / `EnemyDPS` need specialization data and only resolve **inside arenas** (MoP and later). Outside arena they are `none`. From patch 12.1.5 onward they never resolve, because Blizzard restricts `GetArenaOpponentSpec`.
-- Enemy specs come from inspection, so right at the arena gates they may briefly be `none`.
+- Before patch 12.1.5, enemy specs come from inspection, so right at the arena gates they may briefly be `none`. From 12.1.5 onward enemy specs are always `none`.
 
 Always give enemy macros a sensible fallback clause, e.g. `[@none,harm][@target,harm]`.
 
