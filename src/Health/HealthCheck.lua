@@ -211,7 +211,7 @@ local function CheckUsingSpacing()
         spacings[#spacings + 1] = options.Spacing.Raid
     end
 
-    if options.Sorting.EnemyArena.Enabled and capabilities.CanReadEnemySpecs() then
+    if options.Sorting.EnemyArena.Enabled or not capabilities.CanReadEnemySpecs() then
         spacings[#spacings + 1] = options.Spacing.EnemyArena
     end
 

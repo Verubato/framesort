@@ -917,7 +917,7 @@ function M:TrySort(provider)
 
     local sorted = false
     local friendlyEnabled, _, _, _ = fsCompare:FriendlySortMode()
-    local enemyEnabled, _, _ = fsCompare:EnemySortMode()
+    local enemyEnabled, _, _, enemySpacingOnly = fsCompare:EnemySortMode()
     local providers = (provider and { provider }) or fsProviders:EnabledNotSelfManaged() or {}
 
     if not friendlyEnabled or not enemyEnabled then
@@ -946,6 +946,11 @@ function M:TrySort(provider)
                 end
 
                 if container.Type == fsFrame.ContainerType.EnemyArena and not enemyEnabled then
+                    return false
+                end
+
+                -- third party arena frames must not be moved when only spacing is applied
+                if container.Type == fsFrame.ContainerType.EnemyArena and enemySpacingOnly and not container.SupportsSpacing then
                     return false
                 end
 

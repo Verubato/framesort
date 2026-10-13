@@ -63,7 +63,7 @@ Target frames based on their visual position:
 /cast [@enemyhealer] Death Grip
 ```
 
-Note: from patch 12.1.5 onward EnemyHealer, EnemyDps, and the other enemy spec and role based variables no longer work, due to Blizzard restrictions on GetArenaOpponentSpec. Enemy frame sorting is also disabled and your arena addon's own order is used. EnemyFrame1, EnemyFrame2, and the other EnemyFrame variables still work, in arena order.
+Note: from patch 12.1.5 onward EnemyHealer, EnemyDps, and the other enemy spec and role based variables no longer work, due to Blizzard restrictions on GetArenaOpponentSpec. Enemy frame sorting is also disabled and your arena addon's own order is used, but enemy arena spacing still works for Blizzard arena frames. EnemyFrame1, EnemyFrame2, and the other EnemyFrame variables still work, in arena order.
 
 ### Target whatever the tank is targeting ###
 

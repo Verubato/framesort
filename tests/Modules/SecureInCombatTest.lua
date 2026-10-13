@@ -48,4 +48,31 @@ function M:test_combat_starting_invalidates_the_friendly_cache_before_loading_un
     assert(invalidatedWhenLoaded == 1)
 end
 
+function M:test_combat_starting_loads_enemy_spacing_only_from_the_sort_mode()
+    addon.DB.Options.Sorting.Method = addon.Configuration.SortingMethod.Secure
+    addon.Modules.Sorting.Secure:Init()
+    addon.Modules.Sorting.Comparer.EnemySortMode = function()
+        return true, "Group", false, true
+    end
+
+    local manager
+    for _, frame in ipairs(wow.State.Frames) do
+        if frame:GetAttribute("_onstate-framesort-run") then
+            manager = frame
+        end
+    end
+    assert(manager)
+
+    -- the mock frame ignores this call, so record it
+    local loaded = {}
+    manager.SetAttributeNoHandler = function(_, name, value)
+        loaded[name] = value
+    end
+
+    wow.FireEvent(events.PLAYER_REGEN_DISABLED)
+
+    assertEquals(loaded.EnemySortEnabled, true)
+    assertEquals(loaded.EnemySpacingOnly, true)
+end
+
 return M

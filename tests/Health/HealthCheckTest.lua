@@ -1,5 +1,5 @@
--- Enemy spacing is only applied by the enemy sort path, which is off when enemy specs can't be
--- read, so it must not make the spacing check fail there.
+-- Enemy spacing is applied without Enemy Arena sorting when enemy specs can't be read, so it
+-- counts there whatever the sorting toggle says.
 
 local addon
 local M = {}
@@ -45,9 +45,19 @@ function M:test_enemy_spacing_fails_the_check_when_specs_are_readable()
     assertEquals(spacingResult().Passed, false)
 end
 
-function M:test_enemy_spacing_is_ignored_when_specs_are_unreadable()
+function M:test_enemy_spacing_fails_the_check_when_specs_are_unreadable_and_sorting_is_off()
+    addon.DB.Options.Sorting.EnemyArena.Enabled = false
     addon.WoW.Api.GetBuildInfo = function()
         return "x", "0", "0", 120105
+    end
+
+    assertEquals(spacingResult().Passed, false)
+end
+
+function M:test_enemy_spacing_is_ignored_when_specs_are_readable_and_sorting_is_off()
+    addon.DB.Options.Sorting.EnemyArena.Enabled = false
+    addon.WoW.Api.GetBuildInfo = function()
+        return "x", "0", "0", 120100
     end
 
     assertEquals(spacingResult().Passed, true)

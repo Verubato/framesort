@@ -624,14 +624,22 @@ end
 ---@return boolean enabled whether sorting is enabled.
 ---@return string? groupMode the group sort mode.
 ---@return boolean? reverse whether the sorting is reversed.
+---@return boolean spacingOnly true if the frames are only laid out in arena order to apply spacing.
 function M:EnemySortMode()
-    -- the saved options are kept so they apply again on builds where specs can be read
-    if wowEx.IsInstanceArena() and capabilities.CanReadEnemySpecs() then
-        local config = addon.DB.Options.Sorting.EnemyArena
-        return config.Enabled, config.GroupSortMode, config.Reverse
+    if not wowEx.IsInstanceArena() then
+        return false, nil, false, false
     end
 
-    return false, nil, false
+    -- the saved options are kept so they apply again on builds where specs can be read
+    if capabilities.CanReadEnemySpecs() then
+        local config = addon.DB.Options.Sorting.EnemyArena
+        return config.Enabled, config.GroupSortMode, config.Reverse, false
+    end
+
+    -- group order is arena order, so this only applies spacing
+    local spacing = addon.DB.Options.Spacing.EnemyArena
+    local spaced = spacing.Horizontal ~= 0 or spacing.Vertical ~= 0
+    return spaced, fsConfig.GroupSortMode.Group, false, spaced
 end
 
 ---Returns true if the left frame is "earlier" than the right frame.

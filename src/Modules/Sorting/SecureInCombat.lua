@@ -1696,6 +1696,7 @@ secureMethods["TrySort"] = [[
 
     local friendlyEnabled = self:GetAttribute("FriendlySortEnabled")
     local enemyEnabled = self:GetAttribute("EnemySortEnabled")
+    local enemySpacingOnly = self:GetAttribute("EnemySpacingOnly")
 
     if not friendlyEnabled and not enemyEnabled then return false end
 
@@ -1735,7 +1736,7 @@ secureMethods["TrySort"] = [[
                                     shouldAdd = false
                                 elseif (container.Type == ContainerType.Party or container.Type == ContainerType.Raid) and friendlyEnabled then
                                     shouldAdd = true
-                                elseif container.Type == ContainerType.EnemyArena and enemyEnabled then
+                                elseif container.Type == ContainerType.EnemyArena and enemyEnabled and (not enemySpacingOnly or container.SupportsSpacing) then
                                     shouldAdd = true
                                 end
 
@@ -1955,7 +1956,7 @@ local function LoadSortMode()
     assert(manager)
 
     local friendlyEnabled, friendlyPlayerMode, friendlyGroupMode = fsCompare:FriendlySortMode()
-    local enemyEnabled, enemyGroupMode = fsCompare:EnemySortMode()
+    local enemyEnabled, enemyGroupMode, _, enemySpacingOnly = fsCompare:EnemySortMode()
 
     manager:SetAttributeNoHandler("FriendlySortEnabled", friendlyEnabled)
     manager:SetAttributeNoHandler("FriendlyPlayerSortMode", friendlyPlayerMode)
@@ -1963,6 +1964,7 @@ local function LoadSortMode()
 
     manager:SetAttributeNoHandler("EnemySortEnabled", enemyEnabled)
     manager:SetAttributeNoHandler("EnemyGroupSortMode", enemyGroupMode)
+    manager:SetAttributeNoHandler("EnemySpacingOnly", enemySpacingOnly)
 
     for _, provider in ipairs(fsProviders.All) do
         manager:SetAttributeNoHandler("Provider" .. provider:Name() .. "Enabled", provider:Enabled())

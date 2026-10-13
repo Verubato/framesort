@@ -415,6 +415,8 @@ function M:test_does_not_sort_enemies_when_specs_are_unreadable()
     local config = addon.DB.Options.Sorting.EnemyArena
     config.Enabled = true
     config.GroupSortMode = fsConfig.GroupSortMode.Role
+    addon.DB.Options.Spacing.EnemyArena.Horizontal = 0
+    addon.DB.Options.Spacing.EnemyArena.Vertical = 0
     setBuild(120105)
     useMeleeHealerCasterSpecs()
 
@@ -423,6 +425,35 @@ function M:test_does_not_sort_enemies_when_specs_are_unreadable()
     assertEquals(enabled, false)
     assertEquals(fsCompare:EnemySortFunction({ "arena1", "arena2", "arena3" }), nil)
     assertEquals(config.Enabled, true)
+end
+
+function M:test_lays_enemies_out_in_arena_order_when_specs_are_unreadable_and_spacing_is_set()
+    local config = addon.DB.Options.Sorting.EnemyArena
+    config.Enabled = true
+    config.GroupSortMode = fsConfig.GroupSortMode.Role
+    config.Reverse = true
+    addon.DB.Options.Spacing.EnemyArena.Vertical = 5
+    setBuild(120105)
+    useMeleeHealerCasterSpecs()
+
+    local enabled, groupMode, reverse, spacingOnly = fsCompare:EnemySortMode()
+
+    assertEquals(enabled, true)
+    assertEquals(groupMode, fsConfig.GroupSortMode.Group)
+    assertEquals(reverse, false)
+    assertEquals(spacingOnly, true)
+    assertEquals(sortEnemies(), { "arena1", "arena2", "arena3" })
+end
+
+function M:test_does_not_report_spacing_only_when_specs_are_readable()
+    local config = addon.DB.Options.Sorting.EnemyArena
+    config.Enabled = true
+    addon.DB.Options.Spacing.EnemyArena.Vertical = 5
+    setBuild(120100)
+
+    local _, _, _, spacingOnly = fsCompare:EnemySortMode()
+
+    assertEquals(spacingOnly, false)
 end
 
 function M:test_enemy_frame_variables_follow_arena_order_when_specs_are_unreadable()
