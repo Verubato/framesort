@@ -1,0 +1,8 @@
+---@meta
+---@class EnemyAssignment
+---@field Unit string arena unit token, for example "arena2"
+---@field Slot number arena slot, the number in the unit token
+---@field FrameNumber number 1 based position in the sorted frame order
+---@field Role string|nil "TANK", "HEALER", or "DAMAGER"
+---@field SpecId number|nil class specialization id
+---@field Source "Game"|"Manual"|nil where Role came from, nil when unknown

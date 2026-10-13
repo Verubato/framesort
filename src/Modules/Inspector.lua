@@ -504,11 +504,6 @@ function M:FriendlyUnitSpec(unit)
     return cacheEntry.SpecId
 end
 
--- a nameplate that did not resolve to an arena unit must not read someone else's mark
-local function MarkedSlot(resolved)
-    return tonumber(string.match(resolved, "^arena(%d+)$"))
-end
-
 ---@param unit string
 ---@param resolved string the unit with nameplates converted into arena units
 local function SpecOf(unit, resolved)
@@ -521,7 +516,7 @@ local function SpecOf(unit, resolved)
         end
 
         if fsEnemyAssignments:IsActive() then
-            local markedSlot = MarkedSlot(resolved)
+            local markedSlot = fsEnemyAssignments:SlotForUnit(resolved)
             return markedSlot and fsEnemyAssignments:Spec(markedSlot)
         end
     end
@@ -575,7 +570,7 @@ function M:EnemyUnitRole(unit)
     end
 
     if wowEx.IsInstanceArena() and fsEnemyAssignments:IsActive() then
-        local markedSlot = MarkedSlot(fsUnit:ResolveUnit(unit))
+        local markedSlot = fsEnemyAssignments:SlotForUnit(fsUnit:ResolveUnit(unit))
         return markedSlot and fsEnemyAssignments:Role(markedSlot)
     end
 

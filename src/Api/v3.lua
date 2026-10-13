@@ -5,6 +5,7 @@ local fsRun = addon.Modules
 local fsConfig = addon.Configuration
 local fsFrame = addon.WoW.Frame
 local fsInspector = addon.Modules.Inspector
+local fsEnemyAssignments = addon.Modules.EnemyAssignments
 local fsUnit = addon.WoW.Unit
 
 local fsSortedUnits = addon.Modules.Sorting.SortedUnits
@@ -23,6 +24,7 @@ local M = {
     Frame = {},
     Caching = {},
     Unit = {},
+    Enemy = {},
 }
 addon.Api.v3 = M
 
@@ -712,4 +714,74 @@ function M.Unit:ResolveVariable(variable)
 
         return fsMacroParser:UnitForSelector(variable, friendlyUnits, enemyUnits)
     end, "Unit:ResolveVariable") or nil
+end
+
+---@return EnemyAssignment[]
+local function BuildAssignments()
+    local assignments = {}
+
+    for _, unit in ipairs(fsSortedUnits:ArenaUnits()) do
+        local slot = fsEnemyAssignments:SlotForUnit(unit)
+
+        if slot then
+            local role = fsInspector:EnemyUnitRole(unit)
+            local specId = fsInspector:EnemyUnitSpec(unit)
+            local source = nil
+
+            if fsEnemyAssignments:Role(slot) then
+                source = "Manual"
+            elseif role or specId then
+                source = "Game"
+            end
+
+            assignments[#assignments + 1] = {
+                Unit = unit,
+                Slot = slot,
+                FrameNumber = #assignments + 1,
+                Role = role,
+                SpecId = specId,
+                Source = source,
+            }
+        end
+    end
+
+    return assignments
+end
+
+---Returns the enemy arena units in sorted frame order with their role and spec, or an empty table outside of arenas.
+---In combat this is the order FrameSort will apply when combat ends, which can differ from the frames on screen.
+---@return EnemyAssignment[]
+function M.Enemy:GetAssignments()
+    return SafeCall(function()
+        if not addon.WoW.WowEx.IsInstanceArena() then
+            return {}
+        end
+
+        return BuildAssignments()
+    end, "Enemy:GetAssignments") or {}
+end
+
+---Registers a callback to invoke after the enemy roles or specs have changed and the frames have been sorted.
+---In combat it is invoked once combat ends.
+---@param callback fun(assignments: EnemyAssignment[]) receives a fresh copy of what GetAssignments returns
+---@return boolean registered
+function M.Enemy:RegisterAssignmentsChangedCallback(callback)
+    if type(callback) ~= "function" then
+        fsLog:Error("Api.v3.Enemy:RegisterAssignmentsChangedCallback was passed an invalid parameter: callback = %s.", tostring(callback))
+        return false
+    end
+
+    return SafeCall(function()
+        fsEnemyAssignments:RegisterNotifyCallback(function()
+            -- one consumer's error must not stop the others or FrameSort
+            local ok, err = pcall(function()
+                callback(M.Enemy:GetAssignments())
+            end)
+
+            if not ok then
+                fsLog:Error("Api.v3.Enemy:RegisterAssignmentsChangedCallback - callback error: %s.", tostring(err))
+            end
+        end)
+        return true
+    end, "Enemy:RegisterAssignmentsChangedCallback") or false
 end

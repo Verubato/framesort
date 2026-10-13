@@ -173,6 +173,13 @@ function M:IsActive()
     return capabilities.NeedsManualEnemyRoles()
 end
 
+---Returns the arena slot of an arena unit token, or nil for any other unit.
+---@param unit string
+---@return number|nil
+function M:SlotForUnit(unit)
+    return tonumber(string.match(unit, "^arena(%d+)$"))
+end
+
 ---@param slot number arena slot
 ---@return string|nil role
 function M:Role(slot)

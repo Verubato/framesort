@@ -365,11 +365,14 @@ v3 methods:
   `GetSpacing(spacingArea)` / `SetSpacing(spacingArea, horizontal, vertical)`,
   `RegisterConfigurationChangedCallback(fn)`.
 - `Inspector`: `GetUnitSpecId(unit)`, `RegisterCallback(fn)` (spec info changes),
-  `PurgeCache()`.
+  `PurgeCache()`. From patch 12.1.5 onward `GetUnitSpecId("arenaN")` returns the spec
+  the user marked for that enemy, if any.
+- `Enemy`: `GetAssignments()`, `RegisterAssignmentsChangedCallback(fn)`. Marks are
+  read only. There is no way to set a role or spec through the API.
 - `Frame`: `UnitFromFrame(frame)`, `FrameNumberForUnit(unit)`,
   `CycleFriendlyRoles(roles, cycles)`, `CycleEnemyRoles(roles, cycles)`,
-  `ResetFriendlyCycles()`, `ResetEnemyCycles()` (cycling is blocked in combat, and
-  enemy role cycling finds nothing from patch 12.1.5 onward).
+  `ResetFriendlyCycles()`, `ResetEnemyCycles()` (cycling is blocked in combat). From patch
+  12.1.5 onward enemy role cycling works on the roles the user marked.
 - `Caching`: `Invalidate()`.
 - `Unit`: `ResolveVariable(variable)` - resolves a FrameSort macro variable (e.g.
   `"Healer"`) to a unit token.
@@ -380,6 +383,44 @@ Valid `area` values: `"Arena - 2v2"`, `"Arena - 3v3"`, `"Arena - 5v5"`,
 table. Valid spacing areas: `"Party"`, `"Raid"`, `"EnemyArena"`. Valid player sort
 modes: `"Top"`, `"Middle"`, `"Bottom"`, `"Hidden"`. Valid group sort modes:
 `"Group"`, `"Role"`, `"Alphabetical"`.
+
+`Enemy:GetAssignments()` returns an array with one entry per enemy arena unit (pets
+are left out), in the sorted frame order FrameSort applies. It returns an empty table
+outside of arenas. It can be called in combat, where it returns the order FrameSort
+will apply when combat ends, which can differ from the frames on screen. Each entry is
+a new table with these fields:
+
+| Field | Type | Meaning |
+| --- | --- | --- |
+| `Unit` | string | Arena unit token, such as `"arena2"` |
+| `Slot` | number | The number in `Unit`, which is the arena opponent slot |
+| `FrameNumber` | number | Position in the sorted order, starting at 1 |
+| `Role` | string or nil | `"TANK"`, `"HEALER"`, or `"DAMAGER"`, nil if unknown |
+| `SpecId` | number or nil | Class specialization id, nil if unknown |
+| `Source` | string or nil | `"Game"` if the client reported the spec, `"Manual"` if the user marked the enemy or the solo shuffle healer rule filled it in as dps, nil if unknown |
+
+```lua
+{
+    { Unit = "arena2", Slot = 2, FrameNumber = 1, Role = "HEALER", SpecId = 65, Source = "Manual" },
+    { Unit = "arena1", Slot = 1, FrameNumber = 2, Role = "DAMAGER", SpecId = nil, Source = "Manual" },
+    { Unit = "arena3", Slot = 3, FrameNumber = 3, Role = nil, SpecId = nil, Source = nil },
+}
+```
+
+From patch 12.1.5 onward the client hides enemy specs, so `Source` is normally
+`"Manual"` or nil there. It is `"Game"` on any client that does report the spec.
+
+`Enemy:RegisterAssignmentsChangedCallback(fn)` returns true if `fn` was registered,
+and false (with a logged error) if it is not a function. FrameSort calls
+`fn(assignments)` after the enemy roles or specs changed and the frames were sorted
+to match, so the order in `assignments` is already on screen. The argument has the
+same shape as `GetAssignments()` and is a fresh copy for each callback. It fires on
+every change, including when the marks are cleared at the end of a round, which passes
+a list whose entries have no `Role`, `SpecId`, or `Source`. It can also receive an
+empty table when the player leaves the arena. A change made in combat fires once
+combat ends. The callback only fires on clients where enemy roles are marked by hand
+(patch 12.1.5 onward). An error in one callback is logged and does not stop the others
+or FrameSort.
 
 Examples (shown on the addon's Api panel):
 

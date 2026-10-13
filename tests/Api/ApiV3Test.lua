@@ -80,6 +80,10 @@ function M:setup()
     addon.Locale["Can't do that during combat."] = "a"
 end
 
+function M:teardown()
+    addon.WoW.WowEx.ClearMockInstance()
+end
+
 function M:test_frame_number_for_unit()
     ---@type ApiV3
     local v3 = FrameSortApi.v3
@@ -571,6 +575,228 @@ function M:test_api_reset_cycles_returns_false_in_combat_and_does_not_call_run()
     assertEquals(friendlyCalled, 0)
     assertEquals(enemyCalled, 0)
     assertEquals(runCalled, 0)
+end
+
+local function UseManualEnemyRoles()
+    addon.WoW.Api.GetBuildInfo = function()
+        return "x", "0", "0", 120105
+    end
+    addon.WoW.Api.GetSpecializationInfoByID = function(specId)
+        return specId, "", "", 0, addon.Modules.EnemyAssignments:RoleForSpec(specId), "", ""
+    end
+    addon.WoW.Api.InCombatLockdown = function()
+        return false
+    end
+    addon.WoW.WowEx.MockInstance(true, "arena")
+
+    -- the run would re-sort real frames, which these tests don't care about
+    addon.Modules.Run = function() end
+
+    local config = addon.DB.Options.Sorting.EnemyArena
+    config.Enabled = true
+    config.GroupSortMode = "Role"
+    config.Reverse = false
+end
+
+function M:test_enemy_get_assignments_is_in_sorted_frame_order_with_role_spec_and_source()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+    local marks = addon.Modules.EnemyAssignments
+    UseManualEnemyRoles()
+
+    marks:Set(1, "DAMAGER")
+    marks:Set(2, nil, 65)
+    marks:Set(3, "TANK")
+
+    assertEquals(v3.Enemy:GetAssignments(), {
+        { Unit = "arena3", Slot = 3, FrameNumber = 1, Role = "TANK", SpecId = nil, Source = "Manual" },
+        { Unit = "arena2", Slot = 2, FrameNumber = 2, Role = "HEALER", SpecId = 65, Source = "Manual" },
+        { Unit = "arena1", Slot = 1, FrameNumber = 3, Role = "DAMAGER", SpecId = nil, Source = "Manual" },
+    })
+end
+
+function M:test_enemy_get_assignments_leaves_unmarked_enemies_without_a_role_or_source()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+    UseManualEnemyRoles()
+
+    local assignments = v3.Enemy:GetAssignments()
+
+    assertEquals(#assignments, 3)
+    assertEquals(assignments[1], { Unit = "arena1", Slot = 1, FrameNumber = 1 })
+end
+
+function M:test_enemy_get_assignments_reports_game_specs_as_game()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+    UseManualEnemyRoles()
+    addon.WoW.Api.GetBuildInfo = function()
+        return "x", "0", "0", 120100
+    end
+    addon.WoW.Api.GetArenaOpponentSpec = function(i)
+        return i == 1 and 65 or nil
+    end
+
+    local first = v3.Enemy:GetAssignments()[1]
+
+    assertEquals(first.Unit, "arena1")
+    assertEquals(first.SpecId, 65)
+    assertEquals(first.Role, "HEALER")
+    assertEquals(first.Source, "Game")
+end
+
+function M:test_enemy_get_assignments_is_empty_outside_an_arena()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+    UseManualEnemyRoles()
+    addon.WoW.WowEx.ClearMockInstance()
+    addon.WoW.Api.IsInInstance = function()
+        return false, "none"
+    end
+
+    assertEquals(v3.Enemy:GetAssignments(), {})
+end
+
+function M:test_enemy_get_assignments_reports_game_specs_when_manual_roles_are_inactive()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+    UseManualEnemyRoles()
+    addon.WoW.Api.GetBuildInfo = function()
+        return "x", "0", "0", 120100
+    end
+    addon.WoW.Api.GetArenaOpponentSpec = function()
+        return 65
+    end
+
+    local marks = addon.Modules.EnemyAssignments
+    local entries = v3.Enemy:GetAssignments()
+
+    assertEquals(marks:Set(1, "TANK"), false)
+    assertEquals(#entries, 3)
+
+    for _, entry in ipairs(entries) do
+        assertEquals(entry.Role, "HEALER")
+        assertEquals(entry.Source, "Game")
+    end
+end
+
+function M:test_enemy_get_assignments_swallows_internal_errors()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+    UseManualEnemyRoles()
+    addon.Modules.Sorting.SortedUnits.ArenaUnits = function()
+        error("boom")
+    end
+
+    assertEquals(v3.Enemy:GetAssignments(), {})
+end
+
+function M:test_enemy_callback_receives_assignments_after_a_mark()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+    UseManualEnemyRoles()
+
+    local got
+    local calls = 0
+    local order = {}
+    addon.Modules.Run = function()
+        order[#order + 1] = "run"
+    end
+
+    assertEquals(v3.Enemy:RegisterAssignmentsChangedCallback(function(assignments)
+        calls = calls + 1
+        order[#order + 1] = "callback"
+        got = assignments
+    end), true)
+
+    addon.Modules.EnemyAssignments:Set(2, "HEALER")
+
+    assertEquals(calls, 1)
+    assertEquals(order, { "run", "callback" })
+    assertEquals(got[1].Unit, "arena2")
+    assertEquals(got[1].Role, "HEALER")
+end
+
+function M:test_enemy_callback_gets_a_copy_it_can_mutate()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+    UseManualEnemyRoles()
+
+    v3.Enemy:RegisterAssignmentsChangedCallback(function(assignments)
+        assignments[1].Role = "TANK"
+        assignments[1] = nil
+    end)
+    local seen
+    v3.Enemy:RegisterAssignmentsChangedCallback(function(assignments)
+        seen = assignments
+    end)
+
+    addon.Modules.EnemyAssignments:Set(1, "HEALER")
+
+    assertEquals(seen[1].Role, "HEALER")
+    assertEquals(v3.Enemy:GetAssignments()[1].Role, "HEALER")
+end
+
+function M:test_enemy_callback_is_deferred_in_combat_until_combat_ends()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+    local realRun = addon.Modules.Run
+    UseManualEnemyRoles()
+
+    local calls = 0
+    local state = { combat = true }
+    addon.WoW.Api.InCombatLockdown = function()
+        return state.combat
+    end
+    addon.Modules.Run = realRun
+    addon.Modules.Sorting.Run = function() end
+    v3.Enemy:RegisterAssignmentsChangedCallback(function()
+        calls = calls + 1
+    end)
+
+    addon.Modules.EnemyAssignments:Set(1, "TANK")
+    addon.Modules.EnemyAssignments:Set(2, "HEALER")
+
+    assertEquals(calls, 0)
+    assertEquals(v3.Enemy:GetAssignments()[1].Role, "TANK")
+
+    state.combat = false
+    addon.Scheduling.Scheduler:ProcessEvent(addon.WoW.Events.PLAYER_REGEN_ENABLED)
+
+    assertEquals(calls, 1)
+end
+
+function M:test_enemy_callback_errors_do_not_stop_other_callbacks()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+    UseManualEnemyRoles()
+
+    local called = false
+    local logged = {}
+    addon.Logging.Log.Error = function(_, format, ...)
+        logged[#logged + 1] = string.format(format, ...)
+    end
+    v3.Enemy:RegisterAssignmentsChangedCallback(function()
+        error("bad consumer")
+    end)
+    v3.Enemy:RegisterAssignmentsChangedCallback(function()
+        called = true
+    end)
+
+    addon.Modules.EnemyAssignments:Set(1, "TANK")
+
+    assertEquals(called, true)
+    assertEquals(#logged, 1)
+    assert(logged[1]:find("Api.v3.Enemy:RegisterAssignmentsChangedCallback", 1, true), logged[1])
+    assert(logged[1]:find("bad consumer", 1, true), logged[1])
+end
+
+function M:test_enemy_callback_rejects_non_functions()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+
+    assertEquals(v3.Enemy:RegisterAssignmentsChangedCallback(nil), false)
+    assertEquals(v3.Enemy:RegisterAssignmentsChangedCallback("x"), false)
 end
 
 return M
