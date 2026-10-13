@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.19.1
+
+From 12.1.5 onward, enemy arena spacing now only moves Blizzard arena frames. ElvUI arena frames keep their own layout.
+
 ## 7.19.0
 
 Patch 12.1.5 stops addons from reading enemy arena specs, so from 12.1.5 onward:
