@@ -28,8 +28,6 @@ L["Reverse"] = "反转"
 L["Sort your frames while in 2v2 arena matches."] = "在 2v2 竞技场比赛中排序你的框体。"
 L["Sort your frames while in arena matches larger than 2v2."] = "在大于 2v2 的竞技场比赛中排序你的框体。"
 L["Sort the enemy frames created by supported arena addons."] = "排序由受支持的竞技场插件创建的敌方框体。"
-L["Enemy frame sorting is no longer possible from 12.1.5 onward due to Blizzard restrictions. Your arena addon's default order is used."] = "由于暴雪的限制，从 12.1.5 起无法再排序敌方框体。将使用你的竞技场插件的默认顺序。"
-L["Enemy spec variables (EnemyTank, EnemyHealer, EnemyDPS, and their abbreviations) no longer work from 12.1.5 onward due to Blizzard restrictions."] = "由于暴雪的限制，敌方专精变量（EnemyTank、EnemyHealer、EnemyDPS 及其缩写）从 12.1.5 起不再可用。"
 L["Sort your frames while in dungeons, mythic+, and delves."] = "在地下城、大秘境和深潜中排序你的框体。"
 L["Sort your frames while in raids and battlegrounds."] = "在团队和战场中排序你的框体。"
 L["Sort your frames while in a group out in the world."] = "在野外队伍中排序你的框体。"
@@ -42,6 +40,19 @@ L["Sort by role and spec, using the order from the Ordering panel."] = "按职�
 L["Sort by role (tank, healer, dps), using the order from the Ordering panel."] = "按职责（坦克、治疗、输出）排序，使用“排序”面板中的顺序。"
 L["Sort by name in alphabetical order."] = "按名称的字母顺序排序。"
 L["Reverse the sort order, so the last frame becomes the first."] = "反转排序顺序，最后一个框体变为第一个。"
+L["Enemy roles"] = "Enemy roles"
+L["Enemy roles (preview)"] = "Enemy roles (preview)"
+L["Rows are in arena order, which is how the enemy frames start each round."] = "Rows are in arena order, which is how the enemy frames start each round."
+L["Click the role that matches the spec shown for each enemy."] = "Click the role that matches the spec shown for each enemy."
+L["Enemy %d"] = "Enemy %d"
+L["DPS"] = "DPS"
+L["None"] = "None"
+L["Click a lit role again to clear it. Click a dimmed one to confirm it."] = "Click a lit role again to clear it. Click a dimmed one to confirm it."
+L["Frames update when combat ends."] = "Frames update when combat ends."
+L["Clear"] = "Clear"
+L["Show the enemy roles window at the start of each arena round"] = "Show the enemy roles window at the start of each arena round"
+L["Open enemy roles window"] = "Open enemy roles window"
+L["From 12.1.5 onward FrameSort can't read enemy specs. Mark enemy roles in the enemy roles window, or type /fs enemies."] = "From 12.1.5 onward FrameSort can't read enemy specs. Mark enemy roles in the enemy roles window, or type /fs enemies."
 
 -- # Sorting Method screen #
 L["Sorting Method"] = "排序方式"
@@ -138,6 +149,7 @@ L["Cycle to the next frame"] = "循环到下一个框体"
 L["Cycle to the previous frame"] = "循环到上一个框体"
 L["Cycle to the next dps"] = "切换到下一个输出"
 L["Cycle to the previous dps"] = "切换到上一个输出"
+L["Show or hide the enemy roles window"] = "Show or hide the enemy roles window"
 
 -- # Keybindings screen #
 L["Keybindings"] = "按键绑定"
@@ -197,6 +209,7 @@ L["Macro Variables"] = "宏变量"
 L["The first DPS that's not you."] = "第一个不是你的 DPS。"
 L["Add a number to choose the Nth target, e.g., DPS2 selects the 2nd DPS."] = "添加数字以选择第 N 个目标，例如，DPS2 选择第 2 个 DPS。"
 L["Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work."] = "变量不区分大小写，因此 'fRaMe1'、'Dps'、'enemyhealer' 等都可使用。"
+L["From 12.1.5 onward the enemy role variables (EnemyTank, EnemyHealer, EnemyDPS, and their abbreviations) use the roles you mark in the enemy roles window. Macros only update out of combat."] = "From 12.1.5 onward the enemy role variables (EnemyTank, EnemyHealer, EnemyDPS, and their abbreviations) use the roles you mark in the enemy roles window. Macros only update out of combat."
 L["Need to save on macro characters? Use abbreviations to shorten them:"] = "宏字符不够用？使用缩写来简化："
 L['Use "X" to tell FrameSort to ignore an @unit selector:'] = '使用 "X" 告知 FrameSort 忽略一个 @unit 选择器：'
 L["Skip_Example"] = [[
@@ -253,6 +266,7 @@ L["Register a callback function to run after FrameSort sorts frames."] = "注册
 L["Retrieve an ordered array of party frames."] = "获取按顺序排列的小队框体数组。"
 L["Change a FrameSort setting."] = "更改一个 FrameSort 设置。"
 L["Get the frame number of a unit."] = "获取单位的框体编号。"
+L["Retrieve the enemy roles and specs, in frame order."] = "Retrieve the enemy roles and specs, in frame order."
 L["View a full listing of all API methods on GitHub."] = "在 GitHub 上查看完整的 API 方法列表。"
 
 -- # Discord screen #

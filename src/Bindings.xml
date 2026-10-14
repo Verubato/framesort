@@ -29,4 +29,5 @@
   <Binding name="CLICK FSCyclePreviousFrame:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
   <Binding name="CLICK FSCycleNextDpsFrame:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
   <Binding name="CLICK FSCyclePreviousDpsFrame:LeftButton" description="FrameSort Bindings" category="FrameSort"></Binding>
+  <Binding name="FRAMESORT_ENEMY_ROLES" description="FrameSort Bindings" category="FrameSort" header="FRAMESORT_ENEMY">FrameSort.Modules.EnemyAssignmentsWindow:Toggle()</Binding>
 </Bindings>

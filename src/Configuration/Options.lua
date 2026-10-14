@@ -257,7 +257,20 @@ function fsConfig:Init()
     SLASH_FRAMESORT1 = "/fs"
     SLASH_FRAMESORT2 = "/framesort"
 
-    wow.SlashCmdList.FRAMESORT = function()
+    local enemyRolesWindow = addon.Modules.EnemyAssignmentsWindow
+    enemyRolesWindow:Init()
+
+    wow.SlashCmdList.FRAMESORT = function(msg)
+        if type(msg) == "string" and msg:lower():match("^%s*enemies%s*$") and enemyRolesWindow:IsAvailable() then
+            enemyRolesWindow:Toggle()
+            return
+        end
+
+        if type(msg) == "string" and msg:lower():match("^%s*test%s*$") and enemyRolesWindow:IsAvailable() then
+            enemyRolesWindow:ShowPreview()
+            return
+        end
+
         if wow.Settings then
             assert(category)
 

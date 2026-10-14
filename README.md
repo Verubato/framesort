@@ -9,7 +9,7 @@ A simple WoW addon that sorts party/raid/arena frames and places you at the top/
 * Works with Blizzard, Gladius, GladiusEx, sArena, ElvUI, and Cell.
 * Automatically promote healers to leader in solo shuffle.
 * Keybindings to target frames based on their visual position rather than their party number.
-* Macro variables for @Healer, @EnemyHealer (not working from patch 12.1.5), @Frame, and more.
+* Macro variables for @Healer, @EnemyHealer (from patch 12.1.5 it uses the enemy roles you mark), @Frame, and more.
 * Add spacing between frames.
 
 ## Sorting ##
@@ -63,7 +63,7 @@ Target frames based on their visual position:
 /cast [@enemyhealer] Death Grip
 ```
 
-Note: from patch 12.1.5 onward EnemyHealer, EnemyDps, and the other enemy spec and role based variables no longer work, due to Blizzard restrictions on GetArenaOpponentSpec. Enemy frame sorting is also disabled and your arena addon's own order is used, but enemy arena spacing still works for Blizzard arena frames. EnemyFrame1, EnemyFrame2, and the other EnemyFrame variables still work, in arena order.
+Note: from patch 12.1.5 onward Blizzard restricts GetArenaOpponentSpec, so FrameSort can't read enemy specs. Instead you mark each enemy as tank, healer, or dps in the enemy roles window. It opens at the start of each arena round when its popup option is on, and `/fs enemies` and its keybinding open it at any time. Outside an arena they open a preview with dummy enemies. Your marks restore EnemyHealer, EnemyDps, and the other enemy role variables, and they restore enemy frame sorting when the Enemy Arena toggle is on. Marks reset every round, and a mark made in combat applies once combat ends. EnemyFrame1, EnemyFrame2, and the other EnemyFrame variables still work, and follow arena order until the first mark.
 
 ### Target whatever the tank is targeting ###
 

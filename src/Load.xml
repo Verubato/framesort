@@ -114,6 +114,9 @@
     <Script file="Configuration\Panels\Miscellaneous.lua"/>
     <Script file="Configuration\Panels\Log.lua"/>
 
+    <!-- requires the options dropdown and tooltip -->
+    <Script file="Modules\EnemyAssignmentsWindow.lua"/>
+
     <!-- Now initialise the addon -->
     <Script file="Init.lua"/>
 </Ui>

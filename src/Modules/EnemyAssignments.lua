@@ -5,7 +5,6 @@ local wowEx = addon.WoW.WowEx
 local events = addon.WoW.Events
 local capabilities = addon.WoW.Capabilities
 local fsSpec = addon.Configuration.Specs
-local fsScheduler = addon.Scheduling.Scheduler
 local fsLog = addon.Logging.Log
 
 ---@class EnemyAssignmentsModule : IProcessEvents
@@ -14,11 +13,8 @@ addon.Modules.EnemyAssignments = M
 
 local maxSlots = 5
 
--- every solo shuffle team is three players with exactly one healer
-local shuffleTeamSize = 3
-
--- how long the window stays up after the last enemy is marked, in seconds
-local autoHideDelay = 1
+-- the enemy count when neither the enemy team nor our own group has a size yet
+local defaultCount = 3
 
 local validRoles = {
     [wowEx.Role.Tank] = true,
@@ -27,7 +23,7 @@ local validRoles = {
 }
 
 -- key = arena slot, value = { Role: string, SpecId: number|nil, Filled: boolean|nil }
--- Filled marks a row the shuffle healer rule added rather than the user.
+-- Filled marks a row the healer rule added rather than the user.
 local assignments = {}
 
 local changedCallbacks = {}
@@ -36,9 +32,6 @@ local promptCallbacks = {}
 
 -- true once the prompt has been offered this round
 local promptShown = false
-
--- bumped to cancel an auto hide that is already waiting
-local autoHideToken = 0
 
 local function Invoke(callbacks, name, ...)
     for _, callback in ipairs(callbacks) do
@@ -65,10 +58,6 @@ local function ValidSlot(slot)
     return type(slot) == "number" and slot >= 1 and slot <= maxSlots and slot == math.floor(slot)
 end
 
-local function IsSoloShuffle()
-    return capabilities.HasC_PvP() and type(wow.C_PvP.IsSoloShuffle) == "function" and wow.C_PvP.IsSoloShuffle() == true
-end
-
 ---Returns true if the slot's entry changed.
 local function SetEntry(slot, role, specId)
     local entry = assignments[slot]
@@ -89,20 +78,14 @@ local function SetEntry(slot, role, specId)
 end
 
 ---Returns true if any slot changed.
-local function FillShuffleTeam(slot)
-    if not IsSoloShuffle() or M:Role(slot) ~= wowEx.Role.Healer then
+local function FillAroundHealer(slot)
+    if M:Role(slot) ~= wowEx.Role.Healer then
         return false
-    end
-
-    local count = wowEx.ArenaOpponentsCount()
-
-    if count <= 0 then
-        count = shuffleTeamSize
     end
 
     local changed = false
 
-    for i = 1, math.min(count, maxSlots) do
+    for i = 1, M:EnemyCount() do
         if i ~= slot and not assignments[i] then
             assignments[i] = { Role = wowEx.Role.Dps, Filled = true }
             changed = true
@@ -116,36 +99,6 @@ local function FirePrompt(visible)
     Invoke(promptCallbacks, "EnemyAssignments prompt", visible)
 end
 
--- filled rows still sort, but only rows the user set can close the window
-local function IsSetByUser(count)
-    if not M:IsComplete(count) then
-        return false
-    end
-
-    for i = 1, count do
-        if assignments[i].Filled then
-            return false
-        end
-    end
-
-    return true
-end
-
-local function ScheduleAutoHide()
-    if not IsSetByUser(wowEx.ArenaOpponentsCount()) then
-        return
-    end
-
-    autoHideToken = autoHideToken + 1
-    local token = autoHideToken
-
-    fsScheduler:RunAfter(autoHideDelay, function()
-        if token == autoHideToken and IsSetByUser(wowEx.ArenaOpponentsCount()) then
-            FirePrompt(false)
-        end
-    end)
-end
-
 local function ShowPrompt()
     local options = addon.DB.Options.EnemyAssignments
 
@@ -153,7 +106,7 @@ local function ShowPrompt()
         return
     end
 
-    if M:IsComplete(wowEx.ArenaOpponentsCount()) then
+    if M:IsComplete(M:EnemyCount()) then
         return
     end
 
@@ -194,6 +147,14 @@ function M:Spec(slot)
     return entry and entry.SpecId
 end
 
+---True when the healer rule marked the slot rather than the user.
+---@param slot number arena slot
+---@return boolean
+function M:IsFilled(slot)
+    local entry = assignments[slot]
+    return entry ~= nil and entry.Filled == true
+end
+
 ---@return boolean
 function M:HasAny()
     return next(assignments) ~= nil
@@ -214,6 +175,18 @@ function M:IsComplete(count)
     end
 
     return true
+end
+
+---Returns how many enemies there are to mark, counting our own group because a stealthed enemy can hide from the arena count.
+---@return number
+function M:EnemyCount()
+    local count = math.max(wowEx.ArenaOpponentsCount() or 0, wowEx.GroupMembersCount() or 0)
+
+    if count <= 0 then
+        count = defaultCount
+    end
+
+    return math.min(count, maxSlots)
 end
 
 ---@param specId number
@@ -294,15 +267,13 @@ function M:Set(slot, role, specId)
 
     local changed = SetEntry(slot, newRole, newSpec)
 
-    if FillShuffleTeam(slot) then
+    if FillAroundHealer(slot) then
         changed = true
     end
 
     if changed then
         Commit()
     end
-
-    ScheduleAutoHide()
 
     return true
 end
@@ -327,14 +298,12 @@ function M:Clear()
     end
 
     assignments = {}
-    autoHideToken = autoHideToken + 1
     Commit()
 end
 
 ---Starts a new round.
 function M:Reset()
     promptShown = false
-    autoHideToken = autoHideToken + 1
     FirePrompt(false)
     M:Clear()
 end

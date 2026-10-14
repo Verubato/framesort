@@ -28,8 +28,6 @@ L["Reverse"] = "역순"
 L["Sort your frames while in 2v2 arena matches."] = "2대2 투기장 전투에서 프레임을 정렬합니다."
 L["Sort your frames while in arena matches larger than 2v2."] = "2대2보다 큰 투기장 전투에서 프레임을 정렬합니다."
 L["Sort the enemy frames created by supported arena addons."] = "지원되는 투기장 애드온이 만든 적 프레임을 정렬합니다."
-L["Enemy frame sorting is no longer possible from 12.1.5 onward due to Blizzard restrictions. Your arena addon's default order is used."] = "12.1.5 이후로는 블리자드의 제한으로 인해 적 프레임을 정렬할 수 없습니다. 투기장 애드온의 기본 순서가 사용됩니다."
-L["Enemy spec variables (EnemyTank, EnemyHealer, EnemyDPS, and their abbreviations) no longer work from 12.1.5 onward due to Blizzard restrictions."] = "적 전문화 변수(EnemyTank, EnemyHealer, EnemyDPS 및 그 약어)는 블리자드의 제한으로 인해 12.1.5 이후로 더 이상 작동하지 않습니다."
 L["Sort your frames while in dungeons, mythic+, and delves."] = "던전, 신화+, Delves에서 프레임을 정렬합니다."
 L["Sort your frames while in raids and battlegrounds."] = "공격대와 전장에서 프레임을 정렬합니다."
 L["Sort your frames while in a group out in the world."] = "야외에서 파티에 있을 때 프레임을 정렬합니다."
@@ -42,6 +40,19 @@ L["Sort by role and spec, using the order from the Ordering panel."] = "정렬 �
 L["Sort by role (tank, healer, dps), using the order from the Ordering panel."] = "정렬 패널의 순서를 사용하여 역할(방어 전담, 치유 전담, 공격 전담) 순으로 정렬합니다."
 L["Sort by name in alphabetical order."] = "이름을 알파벳순으로 정렬합니다."
 L["Reverse the sort order, so the last frame becomes the first."] = "정렬 순서를 뒤집어 마지막 프레임이 첫 번째가 되게 합니다."
+L["Enemy roles"] = "Enemy roles"
+L["Enemy roles (preview)"] = "Enemy roles (preview)"
+L["Rows are in arena order, which is how the enemy frames start each round."] = "Rows are in arena order, which is how the enemy frames start each round."
+L["Click the role that matches the spec shown for each enemy."] = "Click the role that matches the spec shown for each enemy."
+L["Enemy %d"] = "Enemy %d"
+L["DPS"] = "DPS"
+L["None"] = "None"
+L["Click a lit role again to clear it. Click a dimmed one to confirm it."] = "Click a lit role again to clear it. Click a dimmed one to confirm it."
+L["Frames update when combat ends."] = "Frames update when combat ends."
+L["Clear"] = "Clear"
+L["Show the enemy roles window at the start of each arena round"] = "Show the enemy roles window at the start of each arena round"
+L["Open enemy roles window"] = "Open enemy roles window"
+L["From 12.1.5 onward FrameSort can't read enemy specs. Mark enemy roles in the enemy roles window, or type /fs enemies."] = "From 12.1.5 onward FrameSort can't read enemy specs. Mark enemy roles in the enemy roles window, or type /fs enemies."
 
 -- # Sorting Method screen #
 L["Sorting Method"] = "정렬 방식"
@@ -138,6 +149,7 @@ L["Cycle to the next frame"] = "다음 프레임으로 순환"
 L["Cycle to the previous frame"] = "이전 프레임으로 순환"
 L["Cycle to the next dps"] = "다음 딜러로 전환"
 L["Cycle to the previous dps"] = "이전 딜러로 전환"
+L["Show or hide the enemy roles window"] = "Show or hide the enemy roles window"
 
 -- # Keybindings screen #
 L["Keybindings"] = "단축키"
@@ -199,6 +211,7 @@ L["The first DPS that's not you."] = "자신이 아닌 첫 번째 DPS."
 L["Add a number to choose the Nth target, e.g., DPS2 selects the 2nd DPS."] = "숫자를 붙여 N번째 대상을 선택할 수 있습니다. 예: DPS2는 두 번째 DPS를 선택합니다."
 L["Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work."] =
     "변수는 대소문자를 구분하지 않으므로 'fRaMe1', 'Dps', 'enemyhealer' 등도 모두 동작합니다."
+L["From 12.1.5 onward the enemy role variables (EnemyTank, EnemyHealer, EnemyDPS, and their abbreviations) use the roles you mark in the enemy roles window. Macros only update out of combat."] = "From 12.1.5 onward the enemy role variables (EnemyTank, EnemyHealer, EnemyDPS, and their abbreviations) use the roles you mark in the enemy roles window. Macros only update out of combat."
 L["Need to save on macro characters? Use abbreviations to shorten them:"] = "매크로 글자 수를 아끼고 싶다면 약어를 사용해 줄이세요:"
 L['Use "X" to tell FrameSort to ignore an @unit selector:'] = '"X"를 사용하면 FrameSort가 @unit 선택자를 무시하도록 할 수 있습니다:'
 L["Skip_Example"] = [[
@@ -255,6 +268,7 @@ L["Register a callback function to run after FrameSort sorts frames."] = "FrameS
 L["Retrieve an ordered array of party frames."] = "파티 프레임의 정렬된 배열을 가져옵니다."
 L["Change a FrameSort setting."] = "FrameSort 설정을 변경합니다."
 L["Get the frame number of a unit."] = "유닛의 프레임 번호를 가져옵니다."
+L["Retrieve the enemy roles and specs, in frame order."] = "Retrieve the enemy roles and specs, in frame order."
 L["View a full listing of all API methods on GitHub."] = "모든 API 메서드 목록은 GitHub에서 확인하세요."
 
 -- # Discord screen #

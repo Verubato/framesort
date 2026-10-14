@@ -569,7 +569,7 @@ end
 
 function M:test_unmarked_enemies_keep_arena_order_when_sorting_is_on_and_specs_are_unreadable()
     useManualRoles()
-    addon.Modules.EnemyAssignments:Set(2, "HEALER")
+    addon.Modules.EnemyAssignments:Set(2, "TANK")
 
     local subject = { "arena3", "arena1", "arena2" }
     table.sort(subject, fsCompare:EnemySortFunction(subject))

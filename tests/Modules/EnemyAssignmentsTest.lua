@@ -92,9 +92,9 @@ local function count(name)
 end
 
 function M:test_set_stores_a_role()
-    assertEquals(marks:Set(2, Healer), true)
+    assertEquals(marks:Set(2, Tank), true)
 
-    assertEquals(marks:Role(2), Healer)
+    assertEquals(marks:Role(2), Tank)
     assertEquals(marks:Spec(2), nil)
     assertEquals(marks:HasAny(), true)
     assertEquals(marks:Role(1), nil)
@@ -183,7 +183,7 @@ end
 
 function M:test_is_complete_needs_every_slot_up_to_the_count()
     marks:Set(1, Tank)
-    marks:Set(2, Healer)
+    marks:Set(2, Dps)
 
     assertEquals(marks:IsComplete(2), true)
     assertEquals(marks:IsComplete(3), false)
@@ -289,10 +289,7 @@ function M:test_a_failing_after_run_callback_does_not_stop_the_others()
     assertEquals(trace, { "second" })
 end
 
-function M:test_shuffle_healer_marks_the_other_enemies_as_dps()
-    wow.C_PvP.IsSoloShuffle = function()
-        return true
-    end
+function M:test_a_healer_mark_marks_the_other_enemies_as_dps()
     marks:Set(1, Tank)
     trace = {}
 
@@ -305,44 +302,88 @@ function M:test_shuffle_healer_marks_the_other_enemies_as_dps()
     assertEquals(trace, { "changed", "run", "notify" })
 end
 
-function M:test_the_prompt_stays_open_after_the_healer_fills_the_other_rows()
-    enterArena()
-    wow.C_PvP.IsSoloShuffle = function()
-        return true
-    end
-
+function M:test_is_filled_marks_only_the_rows_the_healer_rule_added()
     marks:Set(2, Healer)
 
-    assertEquals(marks:IsComplete(3), true)
-    assertEquals(count("hide"), 0)
-end
-
-function M:test_the_prompt_closes_once_the_user_sets_the_filled_rows_themselves()
-    enterArena()
-    wow.C_PvP.IsSoloShuffle = function()
-        return true
-    end
-    marks:Set(2, Healer)
+    assertEquals(marks:IsFilled(1), true)
+    assertEquals(marks:IsFilled(2), false)
 
     marks:Set(1, Dps)
-    assertEquals(count("hide"), 0)
 
-    marks:Set(3, Dps)
-    assertEquals(count("hide"), 1)
+    assertEquals(marks:IsFilled(1), false)
 end
 
-function M:test_shuffle_rule_does_nothing_outside_solo_shuffle()
-    marks:Set(2, Healer)
-
-    assertEquals(marks:Role(1), nil)
-    assertEquals(marks:Role(3), nil)
-end
-
-function M:test_shuffle_rule_does_nothing_for_a_dps_mark()
-    wow.C_PvP.IsSoloShuffle = function()
-        return true
+function M:test_enemy_count_uses_the_group_size_then_three_and_caps_at_five()
+    wow.GetNumArenaOpponentSpecs = function()
+        return 0
+    end
+    wow.GetNumArenaOpponents = function()
+        return 0
+    end
+    wow.GetNumGroupMembers = function()
+        return 2
     end
 
+    assertEquals(marks:EnemyCount(), 2)
+
+    wow.GetNumGroupMembers = function()
+        return 0
+    end
+
+    assertEquals(marks:EnemyCount(), 3)
+
+    wow.GetNumArenaOpponentSpecs = function()
+        return 8
+    end
+
+    assertEquals(marks:EnemyCount(), 5)
+end
+
+function M:test_enemy_count_takes_the_larger_of_the_enemy_team_and_our_group()
+    wow.GetNumArenaOpponentSpecs = function()
+        return 2
+    end
+    wow.GetNumGroupMembers = function()
+        return 3
+    end
+
+    assertEquals(marks:EnemyCount(), 3)
+end
+
+function M:test_a_healer_mark_fills_an_enemy_hidden_from_the_arena_count()
+    wow.GetNumArenaOpponentSpecs = function()
+        return 2
+    end
+    wow.GetNumGroupMembers = function()
+        return 3
+    end
+
+    marks:Set(1, Healer)
+
+    assertEquals(marks:Role(3), Dps)
+end
+
+function M:test_a_3v3_healer_mark_fills_the_other_two_as_dps()
+    marks:Set(2, Healer)
+
+    assertEquals(marks:Role(1), Dps)
+    assertEquals(marks:Role(3), Dps)
+    assertEquals(marks:IsFilled(1), true)
+    assertEquals(marks:IsFilled(3), true)
+end
+
+function M:test_the_healer_fill_leaves_an_assigned_row_alone()
+    marks:Set(3, nil, 73)
+
+    marks:Set(1, Healer)
+
+    assertEquals(marks:Role(2), Dps)
+    assertEquals(marks:Role(3), Tank)
+    assertEquals(marks:Spec(3), 73)
+    assertEquals(marks:IsFilled(3), false)
+end
+
+function M:test_the_healer_rule_does_nothing_for_a_dps_mark()
     marks:Set(2, Dps)
 
     assertEquals(marks:Role(1), nil)
@@ -503,52 +544,23 @@ function M:test_events_are_ignored_on_a_client_without_enemy_specs()
     assertEquals(trace, {})
 end
 
-function M:test_the_prompt_closes_once_every_enemy_has_a_role()
-    enterArena()
-    marks:Set(1, Tank)
-    marks:Set(2, Healer)
-
-    assertEquals(count("hide"), 0)
-
-    marks:Set(3, Dps)
-
-    assertEquals(count("hide"), 1)
-end
-
-function M:test_the_prompt_stays_open_when_the_marks_are_cleared_before_it_would_close()
+function M:test_the_prompt_stays_open_after_every_enemy_is_marked()
     enterArena()
     local pending = {}
     wow.C_Timer.After = function(_, callback)
         pending[#pending + 1] = callback
     end
+
     marks:Set(1, Tank)
     marks:Set(2, Healer)
     marks:Set(3, Dps)
 
-    marks:Clear()
     for _, callback in ipairs(pending) do
         callback()
     end
 
+    assertEquals(marks:IsComplete(3), true)
     assertEquals(count("hide"), 0)
-end
-
-function M:test_an_earlier_close_timer_does_not_close_the_prompt_after_a_mark_changes()
-    enterArena()
-    local pending = {}
-    wow.C_Timer.After = function(_, callback)
-        pending[#pending + 1] = callback
-    end
-    marks:Set(1, Tank)
-    marks:Set(2, Healer)
-    marks:Set(3, Dps)
-    marks:Set(3, Tank)
-
-    pending[1]()
-    assertEquals(count("hide"), 0)
-
-    pending[2]()
-    assertEquals(count("hide"), 1)
 end
 
 return M

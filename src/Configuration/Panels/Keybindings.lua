@@ -38,6 +38,8 @@ local function SetBindingNames()
     _G["BINDING_NAME_CLICK FSCyclePreviousFrame:LeftButton"] = L["Cycle to the previous frame"]
     _G["BINDING_NAME_CLICK FSCycleNextDpsFrame:LeftButton"] = L["Cycle to the next dps"]
     _G["BINDING_NAME_CLICK FSCyclePreviousDpsFrame:LeftButton"] = L["Cycle to the previous dps"]
+    _G["BINDING_HEADER_FRAMESORT_ENEMY"] = L["Enemy Arena"]
+    _G["BINDING_NAME_FRAMESORT_ENEMY_ROLES"] = L["Show or hide the enemy roles window"]
 end
 
 function M:Build(parent)

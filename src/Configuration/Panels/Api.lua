@@ -53,6 +53,10 @@ function M:Build(parent)
             Text = [[/run FrameSortApi.v3.Options:SetPlayerSortMode("Arena - 2v2", "Top")]],
         },
         {
+            Description = L["Retrieve the enemy roles and specs, in frame order."],
+            Text = "/dump FrameSortApi.v3.Enemy:GetAssignments()",
+        },
+        {
             Description = L["Get the frame number of a unit."],
             Text = [[/dump FrameSortApi.v3.Frame:FrameNumberForUnit("arena1")]],
         },

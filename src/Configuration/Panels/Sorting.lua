@@ -6,6 +6,7 @@ local fsHealth = addon.Health.HealthCheck
 local fsConfig = addon.Configuration
 local fsModules = addon.Modules
 local fsInspector = addon.Modules.Inspector
+local fsEnemyAssignments = addon.Modules.EnemyAssignments
 local L = addon.Locale.Current
 local verticalSpacing = fsConfig.VerticalSpacing
 local horizontalSpacing = fsConfig.HorizontalSpacing * 1.5
@@ -291,13 +292,80 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, labe
     return dynamicAnchor
 end
 
+---Adds the note, popup checkbox, and open button for clients where the user marks enemy roles by hand.
+---@param panel table the parent UI panel.
+---@param anchor table a UI component used as a relative position anchor for the new components.
+---@return table The bottom left most control to use for anchoring subsequent UI components.
+local function BuildEnemyRoles(panel, anchor)
+    local options = addon.DB.Options.EnemyAssignments
+    local note = fsConfig:TextLine(L["From 12.1.5 onward FrameSort can't read enemy specs. Mark enemy roles in the enemy roles window, or type /fs enemies."], panel, anchor, "GameFontNormal", -verticalSpacing)
+
+    local popupText = L["Show the enemy roles window at the start of each arena round"]
+    local popup = wow.CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
+    popup:SetPoint("TOPLEFT", note, "BOTTOMLEFT", -4, -verticalSpacing / 2)
+    popup.Text:SetText(" " .. popupText)
+    popup:SetChecked(options.PopupEnabled)
+
+    popup:SetScript("OnClick", function()
+        options.PopupEnabled = popup:GetChecked()
+        fsConfig:NotifyChanged()
+    end)
+
+    local open = wow.CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
+    open:SetPoint("TOPLEFT", popup, "BOTTOMLEFT", 4, -verticalSpacing / 2)
+    open:SetWidth(200)
+    open:SetText(L["Open enemy roles window"])
+    open:SetScript("OnClick", function()
+        -- the window module loads after the options panels
+        addon.Modules.EnemyAssignmentsWindow:OpenForCurrentContext()
+    end)
+
+    local dynamicAnchor = panel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+
+    local function refresh()
+        popup:SetChecked(options.PopupEnabled)
+
+        if M:ShowsEnemyRolesOptions() then
+            note:Show()
+            popup:Show()
+            open:Show()
+            dynamicAnchor:SetPoint("TOPLEFT", open, "BOTTOMLEFT", 0, 0)
+        else
+            note:Hide()
+            popup:Hide()
+            open:Hide()
+            dynamicAnchor:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, 0)
+        end
+    end
+
+    -- the Enemy Arena checkbox notifies a change when clicked, which lands here
+    fsConfig:RegisterConfigurationChangedCallback(refresh)
+    refresh()
+
+    return dynamicAnchor
+end
+
+---True where the client offers enemy specs, whether it reads them or the user marks them.
+---@return boolean
+function M:ShowsEnemyArena()
+    return capabilities.HasEnemySpecSupport()
+end
+
+---True where the user marks enemy roles, so the panel offers the popup option.
+---@return boolean
+function M:ShowsEnemyRoles()
+    return fsEnemyAssignments:IsActive()
+end
+
+---True when the enemy roles controls should show.
+---@return boolean
+function M:ShowsEnemyRolesOptions()
+    return addon.DB.Options.Sorting.EnemyArena.Enabled == true
+end
+
 function M:Build(panel)
     local anchor = BuiltTitle(panel)
     local config = addon.DB.Options.Sorting
-
-    if capabilities.HasEnemySpecSupport() and not capabilities.CanReadEnemySpecs() then
-        anchor = fsConfig:TextLine(L["Enemy frame sorting is no longer possible from 12.1.5 onward due to Blizzard restrictions. Your arena addon's default order is used."], panel, anchor, "GameFontRed", -verticalSpacing)
-    end
 
     if capabilities.HasArena() then
         anchor = BuildSortModeCheckboxes(panel, anchor, L["Arena - 2v2"], L["Sort your frames while in 2v2 arena matches."], config.Arena.Twos)
@@ -309,7 +377,7 @@ function M:Build(panel)
         anchor = BuildSortModeCheckboxes(panel, anchor, L["Arena - " .. otherArenaSizes], otherArenaTooltip, config.Arena.Default)
     end
 
-    if capabilities.HasEnemySpecSupport() and capabilities.CanReadEnemySpecs() then
+    if M:ShowsEnemyArena() then
         anchor = BuildSortModeCheckboxes(
             panel,
             anchor,
@@ -319,6 +387,10 @@ function M:Build(panel)
             false,
             false
         )
+    end
+
+    if M:ShowsEnemyRoles() then
+        anchor = BuildEnemyRoles(panel, anchor)
     end
 
     anchor = BuildSortModeCheckboxes(panel, anchor, L["Dungeon (mythics, 5-mans, delves)"], L["Sort your frames while in dungeons, mythic+, and delves."], config.Dungeon)

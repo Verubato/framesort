@@ -35,7 +35,7 @@ where they want it (top, middle, bottom, or hidden). Around that core it provide
 | Author | Verz |
 | Interface versions (TOC) | 120105, 120100, 16001, 120007, 50504, 40402, 38002, 38001, 30405, 30300, 20506, 11509 (retail, MoP classic, Cata classic, wrath, TBC, and classic era clients) |
 | Saved variables | `FrameSortDB` |
-| Slash commands | `/fs` and `/framesort` - both open the FrameSort options panel |
+| Slash commands | `/fs` and `/framesort` - both open the FrameSort options panel. On retail 12.1.5 and later `/fs enemies` shows or hides the enemy roles window, which opens as the preview outside an arena, and `/fs test` opens a preview of it with dummy enemies that never touches real marks (section 3.4) |
 | Options location | WoW Settings -> AddOns -> FrameSort (a category with sub-panels) |
 | Languages | Auto (follows the client) plus English, Deutsch, Espanol, Espanol (Mexico), Francais, Italiano, Korean, Portugues (Brasil), Russian, Simplified Chinese, Traditional Chinese |
 | Install sources | CurseForge, Wago.io, WowUp, GitHub releases |
@@ -92,8 +92,8 @@ The Enemy Arena section has no Player row.
 Each area has a "Sort" row: Group, Spec (labelled "Role" on clients without spec
 inspection), Alphabetical, and a separate Reverse checkbox. Exactly one mode can be
 checked. Defaults: Group for Arena and World, Spec/Role for Dungeon and Raid,
-Group for Enemy Arena. From patch 12.1.5 onward Enemy Arena sorting is disabled and the arena
-addon's own order is used, because Blizzard restricts `GetArenaOpponentSpec`.
+Group for Enemy Arena. From patch 12.1.5 onward Enemy Arena sorting follows the enemy roles
+you mark, because Blizzard restricts `GetArenaOpponentSpec` (section 3.4).
 
 - Group: orders by unit number (party1 < party2 < ... / raid1 < raid2 < ...), i.e.
   Blizzard's natural group order.
@@ -122,13 +122,37 @@ no Alphabetical, and no Player row. It only operates inside arena instances. Ene
 roles come from arena opponent spec information, which requires a MoP+ client and may
 be briefly unavailable at the start of a match. The bot arena mode reports no specs at
 all, so Spec/Role mode has nothing to order by there and Group mode should be used.
-From patch 12.1.5 onward the whole Enemy Arena row is replaced by a message, because
-Blizzard restricts `GetArenaOpponentSpec`. FrameSort then does not reorder enemy frames,
-and the arena addon's own order is used. The only exception is Enemy Arena spacing, which
-still lays out Blizzard arena frames in arena order when it is set. Your saved
-settings are kept and apply again on builds where specs can be read. `EnemyFrame1`,
-`EnemyFrame2`, and the other `EnemyFrameN` variables still work, and follow arena order
-(`arena1`, `arena2`, `arena3`).
+From patch 12.1.5 onward Blizzard restricts `GetArenaOpponentSpec`, so FrameSort cannot read
+enemy specs. Instead you mark each enemy in the enemy roles window. It has one row per enemy
+in arena order (`arena1` first). Before the gates open the game gives addons no enemy names, so
+rows read "Enemy 1", "Enemy 2", and so on. The names fill in as the gates open. Where the game
+offers Blizzard's spec display, each row also shows the enemy's spec icon, spec and class, and
+role icon, even before the gates open, so you can click the role it shows. Each row has tank,
+healer, and dps buttons, and an optional spec dropdown. When the game hides the enemy's class,
+the dropdown lists every spec of the marked role. Picking a spec sets the role as well, and
+clicking the lit role again clears the row. In any arena, marking an enemy as healer marks every
+unmarked enemy as dps, and rows you already marked keep their role. The rows it fills show their
+role dimmed until you click it to confirm.
+
+Marks restore Enemy Arena sorting in Group or Spec/Role mode, using the Ordering and Spec
+Priority panels, while the Enemy Arena toggle is on. Until the first mark the enemy frames stay
+in arena order, and Reverse only applies once a mark exists. Marks reset at the end of every
+round and on reload. A mark made in combat is stored at once, but frames, macros, and
+keybindings only update when combat ends. The window says so while you are in combat.
+
+The window opens at the start of each arena round when "Show the enemy roles window at the
+start of each arena round" is ticked. That checkbox sits under the Enemy Arena row on the
+Sorting panel and at the bottom of the window. It starts ticked only for users who already had
+Enemy Arena sorting enabled. The note, the checkbox, and the open button on the Sorting panel
+hide while Enemy Arena is unticked. The window stays open after you mark every enemy, and closes when
+the round ends or you leave the arena. Escape, the close button, `/fs enemies`, and the "Show or
+hide the enemy roles window" keybinding work at any time, including in combat. `/fs test` opens a
+preview of the window with dummy enemies, and marks made there never touch the real marks. The
+"Open enemy roles window" button on the Sorting panel, under the popup option, opens the real
+window in an arena and the preview anywhere else. `/fs enemies` and its keybinding do the same
+when they open the window. The window, its option, and the command exist only on retail 12.1.5 and
+later. `EnemyFrame1`, `EnemyFrame2`, and the other `EnemyFrameN` variables still work, and
+follow the enemy frame order, which is arena order until the first mark.
 
 ### 3.5 The Ordering panel
 
@@ -187,7 +211,8 @@ pending when combat starts, FrameSort attempts one final sort just before lockdo
 ## 6. Keybindings
 
 FrameSort's keybindings are set in the standard WoW Key Bindings UI, under
-FrameSort's "Targeting" section. There is no default key for any of them.
+FrameSort's "Targeting" section, plus one under "Enemy Arena". There is no default key for
+any of them.
 
 Purpose: target players by their visually ordered frame position rather than their
 party number. Example: in a role-sorted dungeon group the tank might be party3;
@@ -206,6 +231,7 @@ hits the top frame (the tank).
 | Target the next / previous frame | Step down/up through friendly frames (stops at the ends) |
 | Cycle to the next / previous frame | Step through friendly frames, wrapping around |
 | Cycle to the next / previous dps | Step through friendly DPS players only, wrapping around |
+| Show or hide the enemy roles window | Opens or closes the enemy roles window (section 3.4), in or out of combat. It does nothing before retail 12.1.5 |
 
 Details worth knowing:
 
@@ -214,7 +240,8 @@ Details worth knowing:
   `FSTargetEnemy1`-`3`, `FSTargetEnemyPet1`-`3`, `FSFocusEnemy1`-`3`,
   `FSTargetNextFrame`, `FSTargetPreviousFrame`, `FSCycleNextFrame`,
   `FSCyclePreviousFrame`, `FSCycleNextDpsFrame`, `FSCyclePreviousDpsFrame`.
-  They can be used in macros as `/click FSTarget1` etc.
+  They can be used in macros as `/click FSTarget1` etc. The enemy roles binding is the
+  exception. It is a plain binding, because the window is not a secure frame.
 - The units behind the bindings are updated out of combat only. Mid-combat changes to
   the group or frame order are not reflected until combat ends.
 - If sorting is disabled for the current area, the bindings follow the actual visual
@@ -282,9 +309,10 @@ This only applies to Blizzard frames."
 Each slider has an edit box for typing an exact value. Spacing requires the Secure
 sorting method; Traditional mode cannot apply spacing (the Health Check flags this
 combination). Spacing applies only to Blizzard frames, not to other frame addons.
-From patch 12.1.5 onward Enemy Arena sorting is disabled, but the Enemy Arena spacing
-still applies to Blizzard arena frames, which are laid out in arena order. Other
-arena addons are never moved, and the Health Check still counts the spacing.
+From patch 12.1.5 onward, until marked enemy roles sort the enemy frames, the Enemy Arena
+spacing still applies to Blizzard arena frames, which are laid out in arena order. Other
+arena addons are only moved once marks sort them, and the Health Check still counts the
+spacing.
 
 ### 8.3 Nameplates
 
@@ -397,7 +425,7 @@ a new table with these fields:
 | `FrameNumber` | number | Position in the sorted order, starting at 1 |
 | `Role` | string or nil | `"TANK"`, `"HEALER"`, or `"DAMAGER"`, nil if unknown |
 | `SpecId` | number or nil | Class specialization id, nil if unknown |
-| `Source` | string or nil | `"Game"` if the client reported the spec, `"Manual"` if the user marked the enemy or the solo shuffle healer rule filled it in as dps, nil if unknown |
+| `Source` | string or nil | `"Game"` if the client reported the spec, `"Manual"` if the user marked the enemy or the healer rule filled it in as dps, nil if unknown |
 
 ```lua
 {
@@ -430,6 +458,7 @@ Examples (shown on the addon's Api panel):
 /run FrameSortApi.v3.Sorting:RegisterPostSortCallback(function() print("FrameSort has sorted frames.") end)
 /dump FrameSortApi.v3.Sorting:GetPartyFrames()
 /run FrameSortApi.v3.Options:SetPlayerSortMode("Arena - 2v2", "Top")
+/dump FrameSortApi.v3.Enemy:GetAssignments()
 /dump FrameSortApi.v3.Frame:FrameNumberForUnit("arena1")
 ```
 
@@ -465,7 +494,9 @@ Enemy Arena sorting is off by default. It only works in arena, only on MoP+ clie
 and only with Blizzard arena frames or a supported arena addon (sArena, Gladius,
 GladiusEx, Gladdy, ElvUI, BattleGroundEnemies, Arena Core). Enemy spec info comes
 from the server and can be missing for the first moments at the gates. From patch
-12.1.5 onward Enemy Arena sorting is disabled, so FrameSort does not reorder enemy frames.
+12.1.5 onward FrameSort cannot read enemy specs, so enemy frames only sort once you mark
+enemy roles in the enemy roles window (`/fs enemies`, section 3.4). Marks alone do not sort,
+so check that the Enemy Arena toggle on the Sorting panel is on too.
 
 **"Spec/role sorting puts people in the wrong order."**
 
@@ -648,9 +679,9 @@ Variables are **case-insensitive** (`fRaMe1`, `Dps`, `enemyhealer` all work).
 | --- | --- | --- |
 | `EnemyFrame1`, `EnemyFrame2`, ... | `EF1`, `EF2` | Nth enemy arena frame in sorted order |
 | `EnemyFrame1Pet`, ... | `EF1P`, ... | Pet of the Nth enemy |
-| `EnemyTank`, `EnemyHealer`, `EnemyDPS` | `ET`, `EH`, `ED` | First enemy with that role. Not working from patch 12.1.5 onward, see below |
+| `EnemyTank`, `EnemyHealer`, `EnemyDPS` | `ET`, `EH`, `ED` | First enemy with that role. From patch 12.1.5 onward the role comes from your marks, see below |
 
-> From patch 12.1.5 onward `EnemyTank`, `EnemyHealer`, `EnemyDPS`, and their abbreviations `ET`, `EH`, and `ED` no longer work. Blizzard made `GetArenaOpponentSpec` return secret values, so addons cannot read enemy specs and these variables resolve to `none`. The same restriction disables Enemy Arena sorting, so the arena addon's own order is used. `EnemyFrame1` and the other positional enemy variables still work, in arena order.
+> From patch 12.1.5 onward Blizzard made `GetArenaOpponentSpec` return secret values, so addons cannot read enemy specs. `EnemyTank`, `EnemyHealer`, `EnemyDPS`, and their abbreviations `ET`, `EH`, and `ED` resolve to the enemies you mark in the enemy roles window (Part 1, section 3.4), and they are `none` until you mark them. Macros only update out of combat, so a mark made in combat reaches them when combat ends. `EnemyFrame1` and the other positional enemy variables still work, and follow the enemy frame order, which is arena order until the first mark.
 
 > The in-game settings panel lists `DP` as the abbreviation for `EnemyDPS`. That is a typo in the UI text - the parser only accepts **`ED`**.
 
@@ -786,8 +817,8 @@ Hyphens, apostrophes and accented letters break a variable into pieces. `#FS Bob
 ### 8.6 Roles and enemy roles are not always available
 
 - `Tank` / `Healer` / `DPS` / `OtherDPS` need role assignments. Where the client has no role system, they resolve to `none`. On 12.x the game also hides a role once an addon has tainted execution, which resolves to `none` until the next clean update.
-- `EnemyTank` / `EnemyHealer` / `EnemyDPS` need specialization data and only resolve **inside arenas** (MoP and later). Outside arena they are `none`. From patch 12.1.5 onward they never resolve, because Blizzard restricts `GetArenaOpponentSpec`.
-- Before patch 12.1.5, enemy specs come from inspection, so right at the arena gates they may briefly be `none`. From 12.1.5 onward enemy specs are always `none`.
+- `EnemyTank` / `EnemyHealer` / `EnemyDPS` need specialization data and only resolve **inside arenas** (MoP and later). Outside arena they are `none`. From patch 12.1.5 onward they use the roles you mark in the enemy roles window, and they are `none` until you mark them.
+- Before patch 12.1.5, enemy specs come from inspection, so right at the arena gates they may briefly be `none`. From 12.1.5 onward an enemy has a role only once you mark it, and the marks reset every round.
 
 Always give enemy macros a sensible fallback clause, e.g. `[@none,harm][@target,harm]`.
 

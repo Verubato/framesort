@@ -28,8 +28,6 @@ L["Reverse"] = nil
 L["Sort your frames while in 2v2 arena matches."] = nil
 L["Sort your frames while in arena matches larger than 2v2."] = nil
 L["Sort the enemy frames created by supported arena addons."] = nil
-L["Enemy frame sorting is no longer possible from 12.1.5 onward due to Blizzard restrictions. Your arena addon's default order is used."] = nil
-L["Enemy spec variables (EnemyTank, EnemyHealer, EnemyDPS, and their abbreviations) no longer work from 12.1.5 onward due to Blizzard restrictions."] = nil
 L["Sort your frames while in dungeons, mythic+, and delves."] = nil
 L["Sort your frames while in raids and battlegrounds."] = nil
 L["Sort your frames while in a group out in the world."] = nil
@@ -42,6 +40,19 @@ L["Sort by role and spec, using the order from the Ordering panel."] = nil
 L["Sort by role (tank, healer, dps), using the order from the Ordering panel."] = nil
 L["Sort by name in alphabetical order."] = nil
 L["Reverse the sort order, so the last frame becomes the first."] = nil
+L["Enemy roles"] = nil
+L["Enemy roles (preview)"] = nil
+L["Rows are in arena order, which is how the enemy frames start each round."] = nil
+L["Click the role that matches the spec shown for each enemy."] = nil
+L["Enemy %d"] = nil
+L["DPS"] = nil
+L["None"] = nil
+L["Click a lit role again to clear it. Click a dimmed one to confirm it."] = nil
+L["Frames update when combat ends."] = nil
+L["Clear"] = nil
+L["Show the enemy roles window at the start of each arena round"] = nil
+L["Open enemy roles window"] = nil
+L["From 12.1.5 onward FrameSort can't read enemy specs. Mark enemy roles in the enemy roles window, or type /fs enemies."] = nil
 
 -- # Sorting Method screen #
 L["Sorting Method"] = nil
@@ -137,6 +148,7 @@ L["Cycle to the next frame"] = nil
 L["Cycle to the previous frame"] = nil
 L["Cycle to the next dps"] = nil
 L["Cycle to the previous dps"] = nil
+L["Show or hide the enemy roles window"] = nil
 
 -- # Keybindings screen #
 L["Keybindings"] = nil
@@ -196,6 +208,7 @@ L["Macro Variables"] = nil
 L["The first DPS that's not you."] = nil
 L["Add a number to choose the Nth target, e.g., DPS2 selects the 2nd DPS."] = nil
 L["Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work."] = nil
+L["From 12.1.5 onward the enemy role variables (EnemyTank, EnemyHealer, EnemyDPS, and their abbreviations) use the roles you mark in the enemy roles window. Macros only update out of combat."] = nil
 L["Need to save on macro characters? Use abbreviations to shorten them:"] = nil
 L['Use "X" to tell FrameSort to ignore an @unit selector:'] = nil
 L["Skip_Example"] = [[
@@ -252,6 +265,7 @@ L["Register a callback function to run after FrameSort sorts frames."] = nil
 L["Retrieve an ordered array of party frames."] = nil
 L["Change a FrameSort setting."] = nil
 L["Get the frame number of a unit."] = nil
+L["Retrieve the enemy roles and specs, in frame order."] = nil
 L["View a full listing of all API methods on GitHub."] = nil
 
 -- # Discord screen #

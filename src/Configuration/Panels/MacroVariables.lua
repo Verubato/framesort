@@ -46,12 +46,12 @@ function M:Build(parent)
 
     local anchor = fsConfig:TextBlock(notes, panel, title)
 
-    if wow.GetArenaOpponentSpec and not capabilities.CanReadEnemySpecs() then
+    if capabilities.NeedsManualEnemyRoles() then
         anchor = fsConfig:TextLine(
-            L["Enemy spec variables (EnemyTank, EnemyHealer, EnemyDPS, and their abbreviations) no longer work from 12.1.5 onward due to Blizzard restrictions."],
+            L["From 12.1.5 onward the enemy role variables (EnemyTank, EnemyHealer, EnemyDPS, and their abbreviations) use the roles you mark in the enemy roles window. Macros only update out of combat."],
             panel,
             anchor,
-            "GameFontRed",
+            "GameFontNormal",
             -verticalSpacing
         )
     end

@@ -28,8 +28,6 @@ L["Reverse"] = "Inverti"
 L["Sort your frames while in 2v2 arena matches."] = "Ordina i tuoi riquadri durante le partite in arena 2c2."
 L["Sort your frames while in arena matches larger than 2v2."] = "Ordina i tuoi riquadri durante le partite in arena più grandi di 2c2."
 L["Sort the enemy frames created by supported arena addons."] = "Ordina i riquadri nemici creati dagli addon per arena supportati."
-L["Enemy frame sorting is no longer possible from 12.1.5 onward due to Blizzard restrictions. Your arena addon's default order is used."] = "Ordinare i riquadri nemici non è più possibile dalla 12.1.5 in poi a causa delle restrizioni di Blizzard. Viene usato l'ordine predefinito del tuo addon per arena."
-L["Enemy spec variables (EnemyTank, EnemyHealer, EnemyDPS, and their abbreviations) no longer work from 12.1.5 onward due to Blizzard restrictions."] = "Le variabili di specializzazione nemica (EnemyTank, EnemyHealer, EnemyDPS e le relative abbreviazioni) non funzionano più dalla 12.1.5 in poi a causa delle restrizioni di Blizzard."
 L["Sort your frames while in dungeons, mythic+, and delves."] = "Ordina i tuoi riquadri in spedizioni, mitiche+ e anfratti."
 L["Sort your frames while in raids and battlegrounds."] = "Ordina i tuoi riquadri nelle incursioni e nei campi di battaglia."
 L["Sort your frames while in a group out in the world."] = "Ordina i tuoi riquadri quando sei in un gruppo fuori dalle istanze."
@@ -42,6 +40,19 @@ L["Sort by role and spec, using the order from the Ordering panel."] = "Ordina p
 L["Sort by role (tank, healer, dps), using the order from the Ordering panel."] = "Ordina per ruolo (tank, guaritore, dps), usando l’ordine del pannello Ordinamento."
 L["Sort by name in alphabetical order."] = "Ordina per nome in ordine alfabetico."
 L["Reverse the sort order, so the last frame becomes the first."] = "Inverte l’ordinamento: l’ultimo riquadro diventa il primo."
+L["Enemy roles"] = "Enemy roles"
+L["Enemy roles (preview)"] = "Enemy roles (preview)"
+L["Rows are in arena order, which is how the enemy frames start each round."] = "Rows are in arena order, which is how the enemy frames start each round."
+L["Click the role that matches the spec shown for each enemy."] = "Click the role that matches the spec shown for each enemy."
+L["Enemy %d"] = "Enemy %d"
+L["DPS"] = "DPS"
+L["None"] = "None"
+L["Click a lit role again to clear it. Click a dimmed one to confirm it."] = "Click a lit role again to clear it. Click a dimmed one to confirm it."
+L["Frames update when combat ends."] = "Frames update when combat ends."
+L["Clear"] = "Clear"
+L["Show the enemy roles window at the start of each arena round"] = "Show the enemy roles window at the start of each arena round"
+L["Open enemy roles window"] = "Open enemy roles window"
+L["From 12.1.5 onward FrameSort can't read enemy specs. Mark enemy roles in the enemy roles window, or type /fs enemies."] = "From 12.1.5 onward FrameSort can't read enemy specs. Mark enemy roles in the enemy roles window, or type /fs enemies."
 
 -- # Sorting Method screen #
 L["Sorting Method"] = "Metodo ordinamento"
@@ -138,6 +149,7 @@ L["Cycle to the next frame"] = "Passa al riquadro successivo"
 L["Cycle to the previous frame"] = "Passa al riquadro precedente"
 L["Cycle to the next dps"] = "Passa al DPS successivo"
 L["Cycle to the previous dps"] = "Passa al DPS precedente"
+L["Show or hide the enemy roles window"] = "Show or hide the enemy roles window"
 
 -- # Keybindings screen #
 L["Keybindings"] = "Scorciatoie"
@@ -199,6 +211,7 @@ L["The first DPS that's not you."] = "Il primo DPS che non sei tu."
 L["Add a number to choose the Nth target, e.g., DPS2 selects the 2nd DPS."] = "Aggiungi un numero per scegliere l'ennesimo bersaglio, ad es. DPS2 seleziona il 2° DPS."
 L["Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work."] =
     "Le variabili non fanno distinzione tra maiuscole e minuscole, quindi 'fRaMe1', 'Dps', 'enemyhealer', ecc. funzionano tutte."
+L["From 12.1.5 onward the enemy role variables (EnemyTank, EnemyHealer, EnemyDPS, and their abbreviations) use the roles you mark in the enemy roles window. Macros only update out of combat."] = "From 12.1.5 onward the enemy role variables (EnemyTank, EnemyHealer, EnemyDPS, and their abbreviations) use the roles you mark in the enemy roles window. Macros only update out of combat."
 L["Need to save on macro characters? Use abbreviations to shorten them:"] = "Devi risparmiare caratteri nella macro? Usa le abbreviazioni per accorciarle:"
 L['Use "X" to tell FrameSort to ignore an @unit selector:'] = 'Usa "X" per dire a FrameSort di ignorare un selettore @unit:'
 L["Skip_Example"] = [[
@@ -255,6 +268,7 @@ L["Register a callback function to run after FrameSort sorts frames."] = "Regist
 L["Retrieve an ordered array of party frames."] = "Restituisce un elenco ordinato di riquadri del gruppo."
 L["Change a FrameSort setting."] = "Modifica un'impostazione di FrameSort."
 L["Get the frame number of a unit."] = "Ottieni il numero di riquadro di un'unità."
+L["Retrieve the enemy roles and specs, in frame order."] = "Retrieve the enemy roles and specs, in frame order."
 L["View a full listing of all API methods on GitHub."] = "Consulta l'elenco completo di tutti i metodi API su GitHub."
 
 -- # Discord screen #
