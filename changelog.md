@@ -1,5 +1,15 @@
 # Changelog
 
+## 7.20.0
+
+From 12.1.5 onward you can mark each enemy's role by hand, which brings back enemy arena sorting and the EnemyHealer, EnemyTank, and EnemyDPS macro variables.
+
+* A new enemy roles window shows each enemy's spec icon, spec, and class. Click the role that matches, and optionally pick a spec.
+* Marking a healer fills in the other enemies as dps, which you can confirm or change.
+* Turn on the popup option on the Sorting panel to open it at the start of each arena round, or open it any time with the Sorting panel button, /fs enemies, or its keybinding.
+* /fs test opens a preview with dummy enemies.
+* Other addons can read the marks and be told when they change through FrameSortApi.v3.Enemy.
+
 ## 7.19.1
 
 From 12.1.5 onward, enemy arena spacing now only moves Blizzard arena frames. ElvUI arena frames keep their own layout.
