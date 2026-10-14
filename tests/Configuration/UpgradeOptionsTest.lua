@@ -2495,6 +2495,27 @@ function M:test_upgrade_options_version27_rejects_the_wrong_version()
     assertEquals(upgrader:UpgradeToVersion27(options), false)
 end
 
+function M:test_upgrade_options_version28_leaves_the_spec_picker_off()
+    local options = {
+        EnemyAssignments = { PopupEnabled = true },
+        Version = 27,
+    }
+
+    local success = upgrader:UpgradeToVersion28(options)
+
+    assertEquals(success, true)
+    assertEquals(options.EnemyAssignments, { PopupEnabled = true, SpecPickerEnabled = false })
+    assertEquals(options.Version, 28)
+end
+
+function M:test_upgrade_options_version28_rejects_the_wrong_version()
+    local options = {
+        Version = 26,
+    }
+
+    assertEquals(upgrader:UpgradeToVersion28(options), false)
+end
+
 function M:test_upgrade_options_version1_to_latest()
     local options = {
         PlayerSortMode = "Top",
@@ -2591,8 +2612,9 @@ function M:test_upgrade_options_version1_to_latest()
         },
         EnemyAssignments = {
             PopupEnabled = false,
+            SpecPickerEnabled = false,
         },
-        Version = 27,
+        Version = 28,
     }
 
     local db = {

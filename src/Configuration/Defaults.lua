@@ -17,7 +17,7 @@ fsConfig.DbDefaults = {
 
     ---@class Options
     Options = {
-        Version = 27,
+        Version = 28,
         Locale = "",
         Sorting = {
             Ordering = {
@@ -104,6 +104,7 @@ fsConfig.DbDefaults = {
         },
         EnemyAssignments = {
             PopupEnabled = false,
+            SpecPickerEnabled = false,
         },
     },
 }

@@ -63,8 +63,9 @@ end
 ---@param options table the configuration table
 ---@param hasPlayer boolean?
 ---@param hasAlpha boolean?
+---@param note table? an unanchored text line to place under the title, shown with the other controls.
 ---@return table The bottom left most control to use for anchoring subsequent UI components.
-local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, labelTooltip, options, hasPlayer, hasAlpha)
+local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, labelTooltip, options, hasPlayer, hasAlpha, note)
     if hasPlayer == nil then
         hasPlayer = true
     end
@@ -83,6 +84,13 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, labe
     local dynamicAnchor = parentPanel:CreateFontString(nil, "ARTWORK", "GameFontWhite")
     dynamicAnchor:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4)
 
+    local belowTitle = enabled
+
+    if note then
+        note:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, -verticalSpacing)
+        belowTitle = note
+    end
+
     local playerLabel = nil
     local top = nil
     local middle = nil
@@ -91,7 +99,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, labe
 
     if hasPlayer then
         playerLabel = parentPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-        playerLabel:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, -verticalSpacing)
+        playerLabel:SetPoint("TOPLEFT", belowTitle, "BOTTOMLEFT", note and 0 or 4, -verticalSpacing)
         playerLabel:SetText(L["Player"] .. ":")
         playerLabel:SetJustifyH("LEFT")
         playerLabel:SetWidth(labelWidth)
@@ -150,7 +158,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, labe
     if hasPlayer then
         modeLabel:SetPoint("TOPLEFT", playerLabel, "BOTTOMLEFT", 0, -verticalSpacing * 1.5)
     else
-        modeLabel:SetPoint("TOPLEFT", enabled, "BOTTOMLEFT", 4, -verticalSpacing)
+        modeLabel:SetPoint("TOPLEFT", belowTitle, "BOTTOMLEFT", note and 0 or 4, -verticalSpacing)
     end
 
     modeLabel:SetText(L["Sort"] .. ":")
@@ -244,7 +252,6 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, labe
     end
 
     parentPanel:SetScript("OnShow", refresh)
-    fsConfig:RegisterConfigurationChangedCallback(refresh)
 
     local controls = {
         playerLabel,
@@ -257,6 +264,7 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, labe
         spec,
         alpha,
         reverse,
+        note,
     }
 
     local function showHide(show)
@@ -287,22 +295,29 @@ local function BuildSortModeCheckboxes(parentPanel, pointOffset, labelText, labe
         end
     end)
 
+    -- an api change to Enabled must hide the note with the rows
+    fsConfig:RegisterConfigurationChangedCallback(function()
+        refresh()
+
+        if note then
+            showHide(options.Enabled)
+        end
+    end)
+
     showHide(options.Enabled)
 
     return dynamicAnchor
 end
 
----Adds the note, popup checkbox, and open button for clients where the user marks enemy roles by hand.
+---Adds the popup checkbox and open button for clients where the user marks enemy roles by hand.
 ---@param panel table the parent UI panel.
 ---@param anchor table a UI component used as a relative position anchor for the new components.
 ---@return table The bottom left most control to use for anchoring subsequent UI components.
 local function BuildEnemyRoles(panel, anchor)
     local options = addon.DB.Options.EnemyAssignments
-    local note = fsConfig:TextLine(L["From 12.1.5 onward FrameSort can't read enemy specs. Mark enemy roles in the enemy roles window, or type /fs enemies."], panel, anchor, "GameFontNormal", -verticalSpacing)
-
     local popupText = L["Show the enemy roles window at the start of each arena round"]
     local popup = wow.CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
-    popup:SetPoint("TOPLEFT", note, "BOTTOMLEFT", -4, -verticalSpacing / 2)
+    popup:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", -4, -verticalSpacing)
     popup.Text:SetText(" " .. popupText)
     popup:SetChecked(options.PopupEnabled)
 
@@ -311,8 +326,18 @@ local function BuildEnemyRoles(panel, anchor)
         fsConfig:NotifyChanged()
     end)
 
+    local specPicker = wow.CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
+    specPicker:SetPoint("TOPLEFT", popup, "BOTTOMLEFT", 0, -verticalSpacing / 2)
+    specPicker.Text:SetText(" " .. L["Also pick enemy specs (used by other addons)"])
+    specPicker:SetChecked(options.SpecPickerEnabled)
+
+    specPicker:SetScript("OnClick", function()
+        options.SpecPickerEnabled = specPicker:GetChecked()
+        fsConfig:NotifyChanged()
+    end)
+
     local open = wow.CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-    open:SetPoint("TOPLEFT", popup, "BOTTOMLEFT", 4, -verticalSpacing / 2)
+    open:SetPoint("TOPLEFT", specPicker, "BOTTOMLEFT", 4, -verticalSpacing / 2)
     open:SetWidth(200)
     open:SetText(L["Open enemy roles window"])
     open:SetScript("OnClick", function()
@@ -324,15 +349,16 @@ local function BuildEnemyRoles(panel, anchor)
 
     local function refresh()
         popup:SetChecked(options.PopupEnabled)
+        specPicker:SetChecked(options.SpecPickerEnabled)
 
         if M:ShowsEnemyRolesOptions() then
-            note:Show()
             popup:Show()
+            specPicker:Show()
             open:Show()
             dynamicAnchor:SetPoint("TOPLEFT", open, "BOTTOMLEFT", 0, 0)
         else
-            note:Hide()
             popup:Hide()
+            specPicker:Hide()
             open:Hide()
             dynamicAnchor:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 0, 0)
         end
@@ -378,6 +404,12 @@ function M:Build(panel)
     end
 
     if M:ShowsEnemyArena() then
+        local note = nil
+
+        if M:ShowsEnemyRoles() then
+            note = fsConfig:TextLine(L["From 12.1.5 onwards addons can't read enemy specs, so we've implemented a manual workaround."], panel, nil, "GameFontRed")
+        end
+
         anchor = BuildSortModeCheckboxes(
             panel,
             anchor,
@@ -385,7 +417,8 @@ function M:Build(panel)
             L["Sort the enemy frames created by supported arena addons."],
             config.EnemyArena,
             false,
-            false
+            false,
+            note
         )
     end
 

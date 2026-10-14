@@ -42,17 +42,19 @@ L["Sort by name in alphabetical order."] = nil
 L["Reverse the sort order, so the last frame becomes the first."] = nil
 L["Enemy roles"] = nil
 L["Enemy roles (preview)"] = nil
-L["Rows are in arena order, which is how the enemy frames start each round."] = nil
-L["Click the role that matches the spec shown for each enemy."] = nil
+L["Click the role for each enemy below."] = nil
 L["Enemy %d"] = nil
 L["DPS"] = nil
 L["None"] = nil
+L["Spec (optional)"] = nil
+L["Specs are used by %s."] = nil
 L["Click a lit role again to clear it. Click a dimmed one to confirm it."] = nil
 L["Frames update when combat ends."] = nil
 L["Clear"] = nil
 L["Show the enemy roles window at the start of each arena round"] = nil
+L["Also pick enemy specs (used by other addons)"] = nil
 L["Open enemy roles window"] = nil
-L["From 12.1.5 onward FrameSort can't read enemy specs. Mark enemy roles in the enemy roles window, or type /fs enemies."] = nil
+L["From 12.1.5 onwards addons can't read enemy specs, so we've implemented a manual workaround."] = nil
 
 -- # Sorting Method screen #
 L["Sorting Method"] = nil
@@ -266,6 +268,7 @@ L["Retrieve an ordered array of party frames."] = nil
 L["Change a FrameSort setting."] = nil
 L["Get the frame number of a unit."] = nil
 L["Retrieve the enemy roles and specs, in frame order."] = nil
+L["Ask FrameSort to show the enemy spec dropdown, for addons that read the specs."] = nil
 L["View a full listing of all API methods on GitHub."] = nil
 
 -- # Discord screen #

@@ -785,3 +785,19 @@ function M.Enemy:RegisterAssignmentsChangedCallback(callback)
         return true
     end, "Enemy:RegisterAssignmentsChangedCallback") or false
 end
+
+---Asks FrameSort to show the spec dropdown in its enemy roles window, so the user can pick specs for your addon to read.
+---Safe to call at any time, including at load.
+---@param addonName string the name shown to the user as a reader of the picked specs
+---@return boolean recorded
+function M.Enemy:RequestSpecPicker(addonName)
+    if type(addonName) ~= "string" or addonName == "" then
+        fsLog:Error("Api.v3.Enemy:RequestSpecPicker was passed an invalid parameter: addonName = %s.", tostring(addonName))
+        return false
+    end
+
+    return SafeCall(function()
+        addon.Modules.EnemyAssignmentsWindow:RequestSpecPicker(addonName)
+        return true
+    end, "Enemy:RequestSpecPicker") or false
+end

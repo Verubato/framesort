@@ -57,6 +57,10 @@ function M:Build(parent)
             Text = "/dump FrameSortApi.v3.Enemy:GetAssignments()",
         },
         {
+            Description = L["Ask FrameSort to show the enemy spec dropdown, for addons that read the specs."],
+            Text = [[/run FrameSortApi.v3.Enemy:RequestSpecPicker("MyAddon")]],
+        },
+        {
             Description = L["Get the frame number of a unit."],
             Text = [[/dump FrameSortApi.v3.Frame:FrameNumberForUnit("arena1")]],
         },

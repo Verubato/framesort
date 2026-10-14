@@ -31,6 +31,11 @@ local specWidth = 170
 local specMenuHeight = 400
 local clearHeight = 22
 local checkboxHeight = 26
+local usedByHeight = 14
+local clearWidth = 80
+
+-- the combat note wraps to two lines beside the clear button when a translation is long
+local minInnerWidth = 300
 
 -- the checkbox art has a few pixels of empty border
 local checkboxInset = 4
@@ -55,6 +60,9 @@ local roles = { wowEx.Role.Tank, wowEx.Role.Healer, wowEx.Role.Dps }
 
 local window = nil
 local rows = {}
+
+-- the addons that asked for the spec dropdown, in the order they asked
+local specRequesters = {}
 
 -- true when the window was built with Blizzard's spec display
 local hasSpecDisplay = false
@@ -130,14 +138,28 @@ local function SpecX()
     return ButtonsX() + roleButtonSize * 3 + roleButtonGap * 2 + spacing
 end
 
+local function ShowsSpecPicker()
+    local options = OptionsTable()
+
+    return (options ~= nil and options.SpecPickerEnabled == true) or #specRequesters > 0
+end
+
 local function RowWidth()
-    return SpecX() + specWidth
+    if ShowsSpecPicker() then
+        return SpecX() + specWidth
+    end
+
+    return SpecX() - spacing
+end
+
+local function InnerWidth()
+    return math.max(RowWidth(), minInnerWidth)
 end
 
 local function FrameHeight(count)
-    local hints = hasSpecDisplay and 2 or 1
-    local header = padding + titleHeight + titleGap + hints * hintHeight + fsConfig.VerticalSpacing
-    return header + count * rowHeight + (count - 1) * rowGap + footerHeight
+    local header = padding + titleHeight + titleGap + hintHeight + fsConfig.VerticalSpacing
+    local usedBy = #specRequesters > 0 and count > 0 and rowGap + usedByHeight or 0
+    return header + count * rowHeight + (count - 1) * rowGap + usedBy + footerHeight
 end
 
 local function SpecText(specId)
@@ -432,14 +454,16 @@ local function BuildRow(parent, slot, anchor)
             if item.Heading then
                 rootDescription:CreateTitle(item.Text)
             else
+                -- None is never selected so the dropdown shows its placeholder when no spec is picked
                 rootDescription:CreateRadio(item.Text, function(specId)
-                    return specId == (Store():Spec(slot) or noSpec)
+                    return specId == Store():Spec(slot)
                 end, function(specId)
                     M:OnSpecSelected(slot, specId)
                 end, item.SpecId)
             end
         end
     end)
+    row.Spec:SetDefaultText(L["Spec (optional)"])
     row.Spec:SetPoint("LEFT", row, "LEFT", SpecX(), 0)
     row.Spec:SetWidth(specWidth)
 
@@ -470,7 +494,7 @@ end
 local function Build()
     hasSpecDisplay = SpecDisplay() ~= nil
 
-    local frameWidth = padding * 2 + RowWidth()
+    local frameWidth = padding * 2 + InnerWidth()
     local frame = wow.CreateFrame("Frame", "FrameSortEnemyRoles", wow.UIParent, "BackdropTemplate")
     frame:SetFrameStrata("DIALOG")
     frame:SetSize(frameWidth, FrameHeight(fsEnemyAssignments:EnemyCount()))
@@ -523,15 +547,10 @@ local function Build()
     frame.Title = title
 
     -- fixed heights keep the frame height sum exact
-    local hint = fsConfig:TextLine(L["Rows are in arena order, which is how the enemy frames start each round."], frame, title, "GameFontHighlightSmall", -titleGap)
+    local hint = fsConfig:TextLine(L["Click the role for each enemy below."], frame, title, "GameFontHighlightSmall", -titleGap)
     hint:SetWidth(frameWidth - padding * 2)
     hint:SetHeight(hintHeight)
-
-    if hasSpecDisplay then
-        hint = fsConfig:TextLine(L["Click the role that matches the spec shown for each enemy."], frame, hint, "GameFontHighlightSmall", 0)
-        hint:SetWidth(frameWidth - padding * 2)
-        hint:SetHeight(hintHeight)
-    end
+    frame.Hint = hint
 
     local anchor = hint
 
@@ -540,6 +559,12 @@ local function Build()
         rows[slot] = row
         anchor = row
     end
+
+    local usedBy = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    usedBy:SetHeight(usedByHeight)
+    usedBy:SetJustifyH("LEFT")
+    usedBy:SetWordWrap(false)
+    frame.UsedBy = usedBy
 
     local popup = wow.CreateFrame("CheckButton", nil, frame, "UICheckButtonTemplate")
     popup:SetSize(checkboxHeight, checkboxHeight)
@@ -557,7 +582,7 @@ local function Build()
 
     -- sits on the line above the checkbox so a long label cannot run into it
     local clear = wow.CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-    clear:SetSize(80, clearHeight)
+    clear:SetSize(clearWidth, clearHeight)
     clear:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -padding, padding + checkboxHeight)
     clear:SetText(L["Clear"])
     clear:SetScript("OnClick", function()
@@ -566,6 +591,9 @@ local function Build()
 
     local combatNote = frame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
     combatNote:SetPoint("LEFT", frame, "BOTTOMLEFT", padding, padding + checkboxHeight + clearHeight / 2)
+    combatNote:SetJustifyH("LEFT")
+    combatNote:SetWordWrap(true)
+    combatNote:SetMaxLines(2)
     combatNote:SetText(L["Frames update when combat ends."])
     frame.CombatNote = combatNote
 
@@ -770,8 +798,22 @@ function M:Refresh(inCombat)
     end
 
     local count = M:RowCount()
+    local showSpec = ShowsSpecPicker()
+    local innerWidth = InnerWidth()
+
+    window:SetWidth(padding * 2 + innerWidth)
+
+    window.Hint:SetWidth(innerWidth)
+
+    -- stops short of the clear button so a long translation wraps instead of running under it
+    window.CombatNote:SetWidth(innerWidth - clearWidth - spacing)
+
+    -- the label wraps instead of running past the narrower window
+    window.Popup.Text:SetWidth(innerWidth - checkboxHeight)
 
     for i, row in ipairs(rows) do
+        row:SetWidth(RowWidth())
+        row.Spec:SetShown(showSpec)
         row:SetShown(i <= count)
 
         if i <= count then
@@ -785,6 +827,37 @@ function M:Refresh(inCombat)
     window.Popup:SetChecked(options ~= nil and options.PopupEnabled == true)
     window.CombatNote:SetShown(inCombat)
     window:SetHeight(FrameHeight(count))
+
+    local listed = #specRequesters > 0 and count > 0
+    window.UsedBy:SetShown(listed)
+
+    if listed then
+        window.UsedBy:ClearAllPoints()
+        window.UsedBy:SetPoint("TOPLEFT", rows[count], "BOTTOMLEFT", 0, -rowGap)
+        window.UsedBy:SetWidth(innerWidth)
+        window.UsedBy:SetText(string.format(L["Specs are used by %s."], table.concat(specRequesters, ", ")))
+    end
+end
+
+---Makes the window show the spec dropdown, for an addon that reads the picked specs.
+---@param addonName string
+function M:RequestSpecPicker(addonName)
+    for _, name in ipairs(specRequesters) do
+        if name == addonName then
+            return
+        end
+    end
+
+    specRequesters[#specRequesters + 1] = addonName
+
+    if window and window:IsShown() then
+        M:Refresh()
+    end
+end
+
+---@return string[] names the addons that asked for the spec dropdown, in the order they asked
+function M:SpecPickerRequesters()
+    return { unpack(specRequesters) }
 end
 
 ---Shows the window, building it on first use.

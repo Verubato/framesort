@@ -395,8 +395,9 @@ v3 methods:
 - `Inspector`: `GetUnitSpecId(unit)`, `RegisterCallback(fn)` (spec info changes),
   `PurgeCache()`. From patch 12.1.5 onward `GetUnitSpecId("arenaN")` returns the spec
   the user marked for that enemy, if any.
-- `Enemy`: `GetAssignments()`, `RegisterAssignmentsChangedCallback(fn)`. Marks are
-  read only. There is no way to set a role or spec through the API.
+- `Enemy`: `GetAssignments()`, `RegisterAssignmentsChangedCallback(fn)`,
+  `RequestSpecPicker(addonName)`. Marks are read only. There is no way to set a role or
+  spec through the API.
 - `Frame`: `UnitFromFrame(frame)`, `FrameNumberForUnit(unit)`,
   `CycleFriendlyRoles(roles, cycles)`, `CycleEnemyRoles(roles, cycles)`,
   `ResetFriendlyCycles()`, `ResetEnemyCycles()` (cycling is blocked in combat). From patch
@@ -450,6 +451,16 @@ combat ends. The callback only fires on clients where enemy roles are marked by 
 (patch 12.1.5 onward). An error in one callback is logged and does not stop the others
 or FrameSort.
 
+`Enemy:RequestSpecPicker(addonName)` makes the enemy roles window show its spec
+dropdown, which is hidden by default because FrameSort only needs the role. Call it if
+your addon reads `SpecId` from `GetAssignments()`. The window then lists `addonName`
+under the rows ("Specs are used by ...") so the user knows why. It returns true once
+the name is recorded, and false (with a logged error) if `addonName` is not a non-empty
+string. Repeat calls with the same name change nothing. It is safe to call at any time,
+including at load, and on clients without the window it only records the name. The
+request lasts until the UI reloads, so call it on every load. The user can also turn the
+dropdown on for everyone with the "Also pick enemy specs" option.
+
 Examples (shown on the addon's Api panel):
 
 ```
@@ -459,6 +470,7 @@ Examples (shown on the addon's Api panel):
 /dump FrameSortApi.v3.Sorting:GetPartyFrames()
 /run FrameSortApi.v3.Options:SetPlayerSortMode("Arena - 2v2", "Top")
 /dump FrameSortApi.v3.Enemy:GetAssignments()
+/run FrameSortApi.v3.Enemy:RequestSpecPicker("MyAddon")
 /dump FrameSortApi.v3.Frame:FrameNumberForUnit("arena1")
 ```
 

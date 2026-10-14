@@ -55,6 +55,7 @@ local function shownRecorder()
         SetShown = function(self, shown)
             self.Shown = shown
         end,
+        SetWidth = function() end,
     }
 end
 
@@ -106,6 +107,43 @@ local function menuRecorder()
                 self.Generated = self.Generated + 1
             end
         end
+
+        return frame
+    end
+end
+
+-- keeps what the window does to its frames, since the mock drops sizing and visibility calls
+local function layoutRecorder()
+    local void = require("TestHarness.Void")
+    local create = wow.CreateFrame
+
+    local function fontString()
+        return setmetatable({
+            SetText = function(self, text)
+                self.Text = text
+            end,
+            SetShown = function(self, shown)
+                self.Shown = shown
+            end,
+            SetWidth = function(self, width)
+                self.Width = width
+            end,
+        }, { __index = void })
+    end
+
+    wow.CreateFrame = function(frameType, ...)
+        local frame = create(frameType, ...)
+
+        frame.SetShown = function(self, shown)
+            self.Shown = shown
+        end
+        frame.SetWidth = function(self, width)
+            self.Width = width
+        end
+        frame.SetDefaultText = function(self, text)
+            self.DefaultText = text
+        end
+        frame.CreateFontString = fontString
 
         return frame
     end
@@ -458,7 +496,8 @@ function M:test_the_spec_menu_checks_the_marked_spec_and_marks_a_pick()
     window:Show()
     local marks = addon.Modules.EnemyAssignments
 
-    assertEquals(selectedValues(openMenu(1)), { 0 })
+    -- None stays unchecked so the dropdown shows its placeholder
+    assertEquals(selectedValues(openMenu(1)), {})
 
     for _, entry in ipairs(openMenu(1)) do
         if entry.Value == holyPaladin then
@@ -747,6 +786,129 @@ function M:test_a_window_built_while_settings_are_open_waits_to_close_on_escape(
     window:OpenForCurrentContext()
 
     assertEquals(closesOnEscape(), false)
+end
+
+function M:test_the_spec_dropdown_is_hidden_by_default()
+    layoutRecorder()
+
+    window:Show()
+
+    for slot = 1, 3 do
+        assertEquals(rowFrame(slot).Spec.Shown, false)
+    end
+end
+
+function M:test_the_spec_dropdown_shows_when_the_setting_is_on()
+    layoutRecorder()
+    addon.DB.Options.EnemyAssignments.SpecPickerEnabled = true
+
+    window:Show()
+
+    assertEquals(rowFrame(1).Spec.Shown, true)
+end
+
+function M:test_changing_the_setting_updates_an_open_window()
+    layoutRecorder()
+    window:Show()
+
+    addon.DB.Options.EnemyAssignments.SpecPickerEnabled = true
+    addon.Configuration:NotifyChanged()
+    assertEquals(rowFrame(1).Spec.Shown, true)
+
+    addon.DB.Options.EnemyAssignments.SpecPickerEnabled = false
+    addon.Configuration:NotifyChanged()
+    assertEquals(rowFrame(1).Spec.Shown, false)
+end
+
+function M:test_the_spec_dropdown_shows_when_an_addon_requests_it()
+    layoutRecorder()
+    window:Show()
+
+    window:RequestSpecPicker("Shackled")
+
+    assertEquals(rowFrame(1).Spec.Shown, true)
+end
+
+function M:test_a_request_made_before_the_window_exists_shows_the_dropdown()
+    layoutRecorder()
+    window:RequestSpecPicker("Shackled")
+
+    window:Show()
+
+    assertEquals(rowFrame(1).Spec.Shown, true)
+end
+
+function M:test_the_preview_follows_the_same_spec_dropdown_rules()
+    layoutRecorder()
+
+    window:ShowPreview()
+    assertEquals(rowFrame(1).Spec.Shown, false)
+
+    window:RequestSpecPicker("Shackled")
+    assertEquals(rowFrame(1).Spec.Shown, true)
+end
+
+function M:test_the_window_narrows_when_the_spec_dropdown_is_hidden()
+    layoutRecorder()
+    window:Show()
+    local narrow = windowFrame().Width
+
+    window:RequestSpecPicker("Shackled")
+
+    assertEquals(narrow < windowFrame().Width, true)
+end
+
+function M:test_the_spec_dropdown_placeholder_asks_for_an_optional_spec()
+    layoutRecorder()
+
+    window:Show()
+
+    assertEquals(rowFrame(1).Spec.DefaultText, "Spec (optional)")
+end
+
+function M:test_the_used_by_line_is_hidden_without_requests()
+    layoutRecorder()
+
+    window:Show()
+
+    assertEquals(windowFrame().UsedBy.Shown, false)
+end
+
+function M:test_the_used_by_line_names_the_requesting_addons()
+    layoutRecorder()
+    window:Show()
+
+    window:RequestSpecPicker("Shackled")
+    window:RequestSpecPicker("Other")
+    window:RequestSpecPicker("Shackled")
+
+    assertEquals(windowFrame().UsedBy.Shown, true)
+    assertEquals(windowFrame().UsedBy.Text, "Specs are used by Shackled, Other.")
+end
+
+function M:test_the_setting_alone_adds_no_used_by_line()
+    layoutRecorder()
+    addon.DB.Options.EnemyAssignments.SpecPickerEnabled = true
+
+    window:Show()
+
+    assertEquals(windowFrame().UsedBy.Shown, false)
+end
+
+function M:test_the_window_keeps_a_minimum_width_when_the_spec_dropdown_is_hidden()
+    layoutRecorder()
+
+    window:Show()
+
+    assertEquals(windowFrame().Width, 300 + 16 * 2)
+end
+
+function M:test_the_combat_note_stops_short_of_the_clear_button()
+    layoutRecorder()
+
+    window:Show()
+
+    assertEquals(windowFrame().CombatNote.Width, 300 - 80 - 8)
 end
 
 function M:test_the_real_prompt_leaves_the_preview()

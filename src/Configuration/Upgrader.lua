@@ -686,6 +686,20 @@ function M:UpgradeToVersion27(options)
     return true
 end
 
+function M:UpgradeToVersion28(options)
+    if options.Version ~= 27 then
+        return false
+    end
+
+    if options.EnemyAssignments then
+        options.EnemyAssignments.SpecPickerEnabled = false
+    end
+
+    options.Version = 28
+
+    return true
+end
+
 ---Upgrades saved variables database to the current version.
 function M:UpgradeDb(db)
     local options = db.Options

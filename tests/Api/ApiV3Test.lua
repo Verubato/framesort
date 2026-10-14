@@ -680,6 +680,48 @@ function M:test_enemy_get_assignments_reports_game_specs_when_manual_roles_are_i
     end
 end
 
+function M:test_enemy_request_spec_picker_records_the_addon_in_order()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+
+    assertEquals(v3.Enemy:RequestSpecPicker("Shackled"), true)
+    assertEquals(v3.Enemy:RequestSpecPicker("Other"), true)
+
+    assertEquals(addon.Modules.EnemyAssignmentsWindow:SpecPickerRequesters(), { "Shackled", "Other" })
+end
+
+function M:test_enemy_request_spec_picker_ignores_a_repeated_name()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+
+    v3.Enemy:RequestSpecPicker("Shackled")
+    v3.Enemy:RequestSpecPicker("Shackled")
+
+    assertEquals(addon.Modules.EnemyAssignmentsWindow:SpecPickerRequesters(), { "Shackled" })
+end
+
+function M:test_enemy_request_spec_picker_ignores_bad_input()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+
+    assertEquals(v3.Enemy:RequestSpecPicker(nil), false)
+    assertEquals(v3.Enemy:RequestSpecPicker(""), false)
+    assertEquals(v3.Enemy:RequestSpecPicker(123), false)
+    assertEquals(v3.Enemy:RequestSpecPicker({}), false)
+
+    assertEquals(addon.Modules.EnemyAssignmentsWindow:SpecPickerRequesters(), {})
+end
+
+function M:test_enemy_request_spec_picker_swallows_internal_errors()
+    ---@type ApiV3
+    local v3 = FrameSortApi.v3
+    addon.Modules.EnemyAssignmentsWindow.RequestSpecPicker = function()
+        error("boom")
+    end
+
+    assertEquals(v3.Enemy:RequestSpecPicker("Shackled"), false)
+end
+
 function M:test_enemy_get_assignments_swallows_internal_errors()
     ---@type ApiV3
     local v3 = FrameSortApi.v3

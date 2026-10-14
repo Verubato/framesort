@@ -41,19 +41,21 @@ L["Sort by role and spec, using the order from the Ordering panel."] = "Сорт
 L["Sort by role (tank, healer, dps), using the order from the Ordering panel."] = "Сортирует по роли (танк, лекарь, ДД) в порядке из панели «Порядок»."
 L["Sort by name in alphabetical order."] = "Сортирует по имени в алфавитном порядке."
 L["Reverse the sort order, so the last frame becomes the first."] = "Обращает порядок сортировки: последняя рамка становится первой."
-L["Enemy roles"] = "Enemy roles"
-L["Enemy roles (preview)"] = "Enemy roles (preview)"
-L["Rows are in arena order, which is how the enemy frames start each round."] = "Rows are in arena order, which is how the enemy frames start each round."
-L["Click the role that matches the spec shown for each enemy."] = "Click the role that matches the spec shown for each enemy."
-L["Enemy %d"] = "Enemy %d"
-L["DPS"] = "DPS"
-L["None"] = "None"
-L["Click a lit role again to clear it. Click a dimmed one to confirm it."] = "Click a lit role again to clear it. Click a dimmed one to confirm it."
-L["Frames update when combat ends."] = "Frames update when combat ends."
-L["Clear"] = "Clear"
-L["Show the enemy roles window at the start of each arena round"] = "Show the enemy roles window at the start of each arena round"
-L["Open enemy roles window"] = "Open enemy roles window"
-L["From 12.1.5 onward FrameSort can't read enemy specs. Mark enemy roles in the enemy roles window, or type /fs enemies."] = "From 12.1.5 onward FrameSort can't read enemy specs. Mark enemy roles in the enemy roles window, or type /fs enemies."
+L["Enemy roles"] = "Роли врагов"
+L["Enemy roles (preview)"] = "Роли врагов (просмотр)"
+L["Click the role for each enemy below."] = "Нажмите на роль каждого врага ниже."
+L["Enemy %d"] = "Враг %d"
+L["DPS"] = "ДД"
+L["None"] = "Нет"
+L["Spec (optional)"] = "Специализация (необязательно)"
+L["Specs are used by %s."] = "Специализации используются: %s."
+L["Click a lit role again to clear it. Click a dimmed one to confirm it."] = "Нажмите на выделенную роль ещё раз, чтобы сбросить её. Нажмите на затемнённую, чтобы подтвердить."
+L["Frames update when combat ends."] = "Рамки обновятся после боя."
+L["Clear"] = "Сбросить"
+L["Show the enemy roles window at the start of each arena round"] = "Показывать окно ролей врагов в начале каждого раунда арены"
+L["Also pick enemy specs (used by other addons)"] = "Также выбирать специализации врагов (используются другими аддонами)"
+L["Open enemy roles window"] = "Открыть окно ролей врагов"
+L["From 12.1.5 onwards addons can't read enemy specs, so we've implemented a manual workaround."] = "Начиная с 12.1.5 аддоны не могут определять специализации врагов, поэтому мы реализовали ручной обходной путь."
 
 -- # Sorting Method screen #
 L["Sorting Method"] = "Метод сортировки"
@@ -152,7 +154,7 @@ L["Cycle to the next frame"] = "Прокрутить к следующей ра�
 L["Cycle to the previous frame"] = "Прокрутить к предыдущей рамке"
 L["Cycle to the next dps"] = "Переключиться на следующего бойца"
 L["Cycle to the previous dps"] = "Переключиться на предыдущего бойца"
-L["Show or hide the enemy roles window"] = "Show or hide the enemy roles window"
+L["Show or hide the enemy roles window"] = "Показать или скрыть окно ролей врагов"
 
 -- # Keybindings screen #
 L["Keybindings"] = "Назначения клавиш"
@@ -213,7 +215,7 @@ L["Add a number to choose the Nth target, e.g., DPS2 selects the 2nd DPS."] =
     "Добавьте номер, чтобы выбрать N-ю цель, например, DPS2 выберет второго ДПС."
 L["Variables are case-insensitive so 'fRaMe1', 'Dps', 'enemyhealer', etc., will all work."] =
     "Переменные не чувствительны к регистру, поэтому 'fRaMe1', 'Dps', 'enemyhealer' и т. п. будут работать."
-L["From 12.1.5 onward the enemy role variables (EnemyTank, EnemyHealer, EnemyDPS, and their abbreviations) use the roles you mark in the enemy roles window. Macros only update out of combat."] = "From 12.1.5 onward the enemy role variables (EnemyTank, EnemyHealer, EnemyDPS, and their abbreviations) use the roles you mark in the enemy roles window. Macros only update out of combat."
+L["From 12.1.5 onward the enemy role variables (EnemyTank, EnemyHealer, EnemyDPS, and their abbreviations) use the roles you mark in the enemy roles window. Macros only update out of combat."] = "Начиная с 12.1.5 переменные ролей врагов (EnemyTank, EnemyHealer, EnemyDPS и их сокращения) используют роли, которые вы отметили в окне ролей врагов. Макросы обновляются только вне боя."
 L["Need to save on macro characters? Use abbreviations to shorten them:"] = "Нужно экономить символы в макросах? Используйте сокращения:"
 L['Use "X" to tell FrameSort to ignore an @unit selector:'] = 'Используйте "X", чтобы сказать FrameSort игнорировать селектор @unit:'
 L["Skip_Example"] = [[
@@ -271,7 +273,8 @@ L["Register a callback function to run after FrameSort sorts frames."] =
 L["Retrieve an ordered array of party frames."] = "Получить упорядоченный массив рамок группы."
 L["Change a FrameSort setting."] = "Изменить настройку FrameSort."
 L["Get the frame number of a unit."] = "Получает номер фрейма для юнита."
-L["Retrieve the enemy roles and specs, in frame order."] = "Retrieve the enemy roles and specs, in frame order."
+L["Retrieve the enemy roles and specs, in frame order."] = "Получить роли и специализации врагов в порядке рамок."
+L["Ask FrameSort to show the enemy spec dropdown, for addons that read the specs."] = "Попросить FrameSort показать список специализаций врагов для аддонов, которые их читают."
 L["View a full listing of all API methods on GitHub."] = "Полный список методов API доступен на GitHub."
 
 -- # Discord screen #
