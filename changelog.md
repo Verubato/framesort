@@ -1,5 +1,10 @@
 # Changelog
 
+## 7.20.1
+
+* Enemy roles text is now translated into every supported language.
+* The enemy roles window only asks for roles by default. The spec dropdown is hidden unless you tick "Also pick enemy specs" on the Sorting panel, or an addon such as Shackled asks for it.
+
 ## 7.20.0
 
 From 12.1.5 onward you can mark each enemy's role by hand, which brings back enemy arena sorting and the EnemyHealer, EnemyTank, and EnemyDPS macro variables.
