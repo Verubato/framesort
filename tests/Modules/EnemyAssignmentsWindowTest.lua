@@ -79,6 +79,76 @@ local function specDisplayRecorder()
     return calls
 end
 
+-- reduces menu items to spec ids, and headings to "H" plus their text
+local function menuShape(items)
+    local shape = {}
+
+    for _, item in ipairs(items) do
+        shape[#shape + 1] = item.Heading and "H" .. item.Text or item.SpecId
+    end
+
+    return shape
+end
+
+-- keeps the generator each spec dropdown is given, since the mock never runs it
+local function menuRecorder()
+    local create = wow.CreateFrame
+
+    wow.CreateFrame = function(frameType, ...)
+        local frame = create(frameType, ...)
+
+        if frameType == "DropdownButton" then
+            frame.Generated = 0
+            frame.SetupMenu = function(self, generator)
+                self.Generator = generator
+            end
+            frame.GenerateMenu = function(self)
+                self.Generated = self.Generated + 1
+            end
+        end
+
+        return frame
+    end
+end
+
+local function openMenu(slot)
+    local entries = {}
+    local root = {
+        SetScrollMode = function(_, height)
+            entries.ScrollHeight = height
+        end,
+        CreateTitle = function(_, text)
+            entries[#entries + 1] = { Title = text }
+        end,
+        CreateRadio = function(_, text, isSelected, select, value)
+            entries[#entries + 1] = {
+                Text = text,
+                Value = value,
+                Selected = isSelected(value),
+                Select = function()
+                    select(value)
+                end,
+            }
+        end,
+    }
+
+    rowFrame(slot).Spec.Generator(nil, root)
+
+    return entries
+end
+
+local function selectedValues(entries)
+    local values = {}
+
+    for _, entry in ipairs(entries) do
+        if entry.Selected then
+            values[#values + 1] = entry.Value
+        end
+    end
+
+    return values
+end
+
 local function windowFrames()
     local found = 0
 
@@ -152,6 +222,58 @@ function M:test_spec_choices_list_every_spec_of_the_role_when_the_class_is_secre
 
     assertEquals(choices, addon.Modules.EnemyAssignments:SpecChoices("HEALER"))
     assertEquals(#choices > 1, true)
+end
+
+function M:test_spec_menu_lists_none_then_each_class_in_class_id_order()
+    assertEquals(menuShape(window:SpecMenuItems("HEALER")), {
+        0,
+        "H2", holyPaladin,
+        "H5", 256, 257,
+        "H7", 264,
+        "H10", 270,
+        "H11", restoDruid,
+        "H13", 1468,
+    })
+end
+
+function M:test_spec_menu_heads_only_the_classes_it_lists()
+    local headings = {}
+
+    for _, item in ipairs(window:SpecMenuItems("TANK")) do
+        if item.Heading then
+            headings[#headings + 1] = item.Text
+        end
+    end
+
+    assertEquals(headings, { "1", "2", "6", "10", "11", "12" })
+end
+
+function M:test_spec_menu_sorts_a_class_by_spec_id()
+    assertEquals(menuShape(window:SpecMenuItems(nil, paladin)), { 0, "H2", holyPaladin, 66, 70 })
+end
+
+function M:test_spec_menu_for_a_readable_class_has_one_group()
+    assertEquals(menuShape(window:SpecMenuItems("HEALER", paladin)), { 0, "H2", holyPaladin })
+end
+
+function M:test_spec_menu_lists_a_picked_spec_outside_the_class()
+    assertEquals(menuShape(window:SpecMenuItems("HEALER", paladin, restoDruid)), { 0, "H2", holyPaladin, "H11", restoDruid })
+end
+
+function M:test_spec_menu_colours_headings_and_shows_spec_icons()
+    wow.GetClassInfo = function()
+        return "Paladin", "PALADIN", paladin
+    end
+    wow.RAID_CLASS_COLORS = { PALADIN = { r = 1, g = 0.5, b = 0 } }
+    wow.GetSpecializationInfoByID = function(specId)
+        return specId, "Holy", "", 135920
+    end
+
+    local items = window:SpecMenuItems("HEALER", paladin)
+
+    assertEquals(items[1].Text, "None")
+    assertEquals(items[2].Text, "|cffff7f00Paladin|r")
+    assertEquals(items[3].Text, "|T135920:16:16|t Holy")
 end
 
 function M:test_readable_class_hides_a_secret_class()
@@ -286,7 +408,66 @@ function M:test_the_dropdown_lists_a_picked_spec_outside_the_readable_class()
     window:Refresh()
 
     local items = rowFrame(1).SpecItems
-    assertEquals(items[#items], restoDruid)
+    assertEquals(items[#items].SpecId, restoDruid)
+end
+
+function M:test_the_spec_menu_shows_headings_as_titles_and_scrolls()
+    secrets[paladin] = true
+    menuRecorder()
+    window:Show()
+    local headings = 0
+
+    for _, item in ipairs(rowFrame(1).SpecItems) do
+        if item.Heading then
+            headings = headings + 1
+        end
+    end
+
+    local entries = openMenu(1)
+    local titles = 0
+
+    for _, entry in ipairs(entries) do
+        if entry.Title then
+            titles = titles + 1
+        else
+            assertEquals(entry.Value ~= nil, true)
+        end
+    end
+
+    assertEquals(headings > 1, true)
+    assertEquals(titles, headings)
+    assertEquals(entries.ScrollHeight, 400)
+end
+
+function M:test_the_spec_menu_regenerates_only_when_its_entries_change()
+    menuRecorder()
+    window:Show()
+    local dropdown = rowFrame(1).Spec
+    local before = dropdown.Generated
+
+    window:Refresh()
+    assertEquals(dropdown.Generated, before)
+
+    addon.Modules.EnemyAssignments:Set(1, nil, holyPaladin)
+    window:Refresh()
+    assertEquals(dropdown.Generated, before + 1)
+end
+
+function M:test_the_spec_menu_checks_the_marked_spec_and_marks_a_pick()
+    menuRecorder()
+    window:Show()
+    local marks = addon.Modules.EnemyAssignments
+
+    assertEquals(selectedValues(openMenu(1)), { 0 })
+
+    for _, entry in ipairs(openMenu(1)) do
+        if entry.Value == holyPaladin then
+            entry.Select()
+        end
+    end
+
+    assertEquals(marks:Spec(1), holyPaladin)
+    assertEquals(selectedValues(openMenu(1)), { holyPaladin })
 end
 
 function M:test_the_combat_note_shows_as_combat_starts()
@@ -427,18 +608,13 @@ function M:test_opening_outside_an_arena_shows_the_preview()
 end
 
 function M:test_the_preview_dropdown_reads_the_preview_spec()
-    local getters = {}
-    local dropdown = addon.Configuration.Dropdown
-    addon.Configuration.Dropdown = function(config, parent, items, getValue, ...)
-        getters[#getters + 1] = getValue
-        return dropdown(config, parent, items, getValue, ...)
-    end
+    menuRecorder()
     addon.Modules.EnemyAssignments:Set(1, nil, holyPaladin)
 
     window:ShowPreview()
     window:OnSpecSelected(1, restoDruid)
 
-    assertEquals(getters[1](), restoDruid)
+    assertEquals(selectedValues(openMenu(1)), { restoDruid })
 end
 
 function M:test_the_preview_shows_the_spec_elements_it_fills()
@@ -494,6 +670,83 @@ function M:test_the_window_height_follows_the_row_count()
 
     assertEquals(two < three, true)
     assertEquals(height, three)
+end
+
+local function fireHooks(frame, event)
+    for _, hook in ipairs(frame.State.ScriptHooks) do
+        if hook.Event == event then
+            hook.Callback(frame)
+        end
+    end
+end
+
+local function closesOnEscape()
+    for _, name in ipairs(wow.UISpecialFrames) do
+        if name == "FrameSortEnemyRoles" then
+            return true
+        end
+    end
+
+    return false
+end
+
+function M:test_escape_leaves_the_window_open_while_settings_are_open()
+    local pending = {}
+    wow.C_Timer.After = function(_, callback)
+        pending[#pending + 1] = callback
+    end
+    wow.UISpecialFrames = {}
+    wow.SettingsPanel = wow.CreateFrame("Frame")
+    wow.SettingsPanel:Hide()
+    window:Show()
+
+    assertEquals(closesOnEscape(), true)
+
+    wow.SettingsPanel:Show()
+    fireHooks(wow.SettingsPanel, "OnShow")
+    assertEquals(closesOnEscape(), false)
+
+    wow.SettingsPanel:Hide()
+    fireHooks(wow.SettingsPanel, "OnHide")
+    assertEquals(closesOnEscape(), false)
+
+    for _, callback in ipairs(pending) do
+        callback()
+    end
+
+    assertEquals(closesOnEscape(), true)
+end
+
+function M:test_settings_reopened_before_the_next_frame_keep_the_window_off_the_list()
+    local pending = {}
+    wow.C_Timer.After = function(_, callback)
+        pending[#pending + 1] = callback
+    end
+    wow.UISpecialFrames = {}
+    wow.SettingsPanel = wow.CreateFrame("Frame")
+    wow.SettingsPanel:Show()
+    window:Show()
+
+    wow.SettingsPanel:Hide()
+    fireHooks(wow.SettingsPanel, "OnHide")
+    wow.SettingsPanel:Show()
+    fireHooks(wow.SettingsPanel, "OnShow")
+
+    for _, callback in ipairs(pending) do
+        callback()
+    end
+
+    assertEquals(closesOnEscape(), false)
+end
+
+function M:test_a_window_built_while_settings_are_open_waits_to_close_on_escape()
+    wow.UISpecialFrames = {}
+    wow.SettingsPanel = wow.CreateFrame("Frame")
+    wow.SettingsPanel:Show()
+
+    window:OpenForCurrentContext()
+
+    assertEquals(closesOnEscape(), false)
 end
 
 function M:test_the_real_prompt_leaves_the_preview()

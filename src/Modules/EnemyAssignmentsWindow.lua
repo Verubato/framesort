@@ -7,6 +7,7 @@ local capabilities = addon.WoW.Capabilities
 local fsConfig = addon.Configuration
 local fsEnemyAssignments = addon.Modules.EnemyAssignments
 local fsSpec = addon.Configuration.Specs
+local fsScheduler = addon.Scheduling.Scheduler
 local L = addon.Locale.Current
 
 ---@class EnemyAssignmentsWindow
@@ -27,6 +28,7 @@ local roleIconSize = 15
 local roleButtonSize = 26
 local roleButtonGap = 2
 local specWidth = 170
+local specMenuHeight = 400
 local clearHeight = 22
 local checkboxHeight = 26
 
@@ -143,13 +145,42 @@ local function SpecText(specId)
         return L["None"]
     end
 
-    local _, name, _, _, _, _, className = wow.GetSpecializationInfoByID(specId)
+    local _, name, _, icon = wow.GetSpecializationInfoByID(specId)
 
     if not name then
         return tostring(specId)
     end
 
-    return className and string.format("%s %s", name, className) or name
+    return icon and string.format("|T%s:16:16|t %s", tostring(icon), name) or name
+end
+
+local function MenuKey(items, picked)
+    local ids = {}
+
+    for _, item in ipairs(items) do
+        if item.SpecId then
+            ids[#ids + 1] = item.SpecId
+        end
+    end
+
+    return table.concat(ids, ",") .. "|" .. tostring(picked or noSpec)
+end
+
+local function ClassHeading(classId)
+    local className, classFile
+
+    if wow.GetClassInfo then
+        className, classFile = wow.GetClassInfo(classId)
+    end
+
+    className = className or tostring(classId)
+    local color = classFile and wow.RAID_CLASS_COLORS and wow.RAID_CLASS_COLORS[classFile]
+
+    if not color then
+        return className
+    end
+
+    return string.format("|cff%02x%02x%02x%s|r", math.floor(color.r * 255), math.floor(color.g * 255), math.floor(color.b * 255), className)
 end
 
 local function SetLit(button, lit, filled)
@@ -231,26 +262,15 @@ local function RefreshRow(row)
         SetLit(button, buttonRole == role, filled)
     end
 
-    -- the dropdown holds this table and reads it each time it opens
-    for i = #row.SpecItems, 1, -1 do
-        row.SpecItems[i] = nil
+    local items = M:SpecMenuItems(role, classId, spec)
+    local key = MenuKey(items, spec)
+
+    -- regenerating rebuilds the menu even while it is open
+    if key ~= row.SpecKey then
+        row.SpecItems = items
+        row.SpecKey = key
+        row.Spec:GenerateMenu()
     end
-
-    row.SpecItems[1] = noSpec
-
-    local listed = false
-
-    for _, specId in ipairs(M:SpecChoices(role, classId)) do
-        row.SpecItems[#row.SpecItems + 1] = specId
-        listed = listed or specId == spec
-    end
-
-    -- the dropdown only shows a value it lists
-    if spec and not listed then
-        row.SpecItems[#row.SpecItems + 1] = spec
-    end
-
-    row.Spec:FrameSortRefresh()
 
     RefreshSpecDisplay(row, enemy)
 end
@@ -398,16 +418,53 @@ local function BuildRow(parent, slot, anchor)
         buttonAnchor, anchorPoint, x = button, "RIGHT", roleButtonGap
     end
 
-    row.SpecItems = { noSpec }
-    row.Spec = fsConfig:Dropdown(row, row.SpecItems, function()
-        return Store():Spec(slot) or noSpec
-    end, function(specId)
-        M:OnSpecSelected(slot, specId)
-    end, SpecText)
+    row.SpecItems = {}
+    row.SpecKey = false
+
+    -- the shared dropdown cannot show class headings
+    row.Spec = wow.CreateFrame("DropdownButton", nil, row, "WowStyle1DropdownTemplate")
+    row.Spec:SetupMenu(function(_, rootDescription)
+        if rootDescription.SetScrollMode then
+            rootDescription:SetScrollMode(specMenuHeight)
+        end
+
+        for _, item in ipairs(row.SpecItems) do
+            if item.Heading then
+                rootDescription:CreateTitle(item.Text)
+            else
+                rootDescription:CreateRadio(item.Text, function(specId)
+                    return specId == (Store():Spec(slot) or noSpec)
+                end, function(specId)
+                    M:OnSpecSelected(slot, specId)
+                end, item.SpecId)
+            end
+        end
+    end)
     row.Spec:SetPoint("LEFT", row, "LEFT", SpecX(), 0)
     row.Spec:SetWidth(specWidth)
 
     return row
+end
+
+-- Escape works in combat this way because the frame is not protected
+local function SetClosesOnEscape(frame, closes)
+    local list = wow.UISpecialFrames
+
+    if type(list) ~= "table" then
+        return
+    end
+
+    local name = frame:GetName()
+
+    for i = #list, 1, -1 do
+        if list[i] == name then
+            table.remove(list, i)
+        end
+    end
+
+    if closes then
+        list[#list + 1] = name
+    end
 end
 
 local function Build()
@@ -438,9 +495,23 @@ local function Build()
     end)
     RestorePoint(frame)
 
-    -- lets Escape close the window, which works in combat because the frame is not protected
-    if type(wow.UISpecialFrames) == "table" then
-        table.insert(wow.UISpecialFrames, frame:GetName())
+    -- one Escape closes every special frame, so the window leaves the list while settings are open
+    local settings = wow.SettingsPanel
+    local canWatchSettings = settings and settings.HookScript and settings.IsVisible
+    SetClosesOnEscape(frame, not (canWatchSettings and settings:IsVisible()))
+
+    if canWatchSettings then
+        settings:HookScript("OnShow", function()
+            SetClosesOnEscape(frame, false)
+        end)
+        -- the Escape pass that hid settings goes on to hide the listed frames
+        settings:HookScript("OnHide", function()
+            fsScheduler:RunNextFrame(function()
+                if not settings:IsVisible() then
+                    SetClosesOnEscape(frame, true)
+                end
+            end)
+        end)
     end
 
     local close = wow.CreateFrame("Button", nil, frame, "UIPanelCloseButton")
@@ -573,6 +644,58 @@ function M:SpecChoices(role, classId)
     classId = Readable(classId)
 
     return fsEnemyAssignments:SpecChoices(role, type(classId) == "number" and classId or nil)
+end
+
+---Returns the spec dropdown's entries, with None first and each class's specs under a heading.
+---@param role string? only specs of this role
+---@param classId number? only specs of this class
+---@param picked number? a spec to list even when the filters leave it out
+---@return table[] items each { SpecId, Text } for a choice or { Heading, Text } for a class heading
+function M:SpecMenuItems(role, classId, picked)
+    local items = { { SpecId = noSpec, Text = L["None"] } }
+    local groups = {}
+    local classIds = {}
+
+    local function Add(specId)
+        local info = fsSpec.SpecIdLookup[specId]
+
+        if not info or (groups[info.ClassId] and groups[info.ClassId][specId]) then
+            return
+        end
+
+        if not groups[info.ClassId] then
+            groups[info.ClassId] = {}
+            classIds[#classIds + 1] = info.ClassId
+        end
+
+        local group = groups[info.ClassId]
+        group[specId] = true
+        group[#group + 1] = specId
+    end
+
+    for _, specId in ipairs(M:SpecChoices(role, classId)) do
+        Add(specId)
+    end
+
+    -- the radio check only shows on a value the menu lists
+    if picked and picked ~= noSpec then
+        Add(picked)
+    end
+
+    -- class ids keep the same order in every locale
+    table.sort(classIds)
+
+    for _, id in ipairs(classIds) do
+        local group = groups[id]
+        table.sort(group)
+        items[#items + 1] = { Heading = true, Text = ClassHeading(id) }
+
+        for _, specId in ipairs(group) do
+            items[#items + 1] = { SpecId = specId, Text = SpecText(specId) }
+        end
+    end
+
+    return items
 end
 
 ---@return number rows the number of enemies the window lists
