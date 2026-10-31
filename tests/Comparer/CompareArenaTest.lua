@@ -590,13 +590,35 @@ function M:test_sort_mode_is_not_spacing_only_when_specs_are_unreadable_and_sort
     assertEquals(spacingOnly, false)
 end
 
+function M:test_frames_are_laid_out_in_arena_order_again_once_marks_are_cleared_when_specs_are_unreadable()
+    useManualRoles()
+    addon.DB.Options.Spacing.EnemyArena.Horizontal = 0
+    addon.DB.Options.Spacing.EnemyArena.Vertical = 0
+    addon.Modules.EnemyAssignments:Set(3, "HEALER")
+
+    assertEquals(sortEnemies(), { "arena3", "arena1", "arena2" })
+
+    addon.Modules.EnemyAssignments:Reset()
+    local enabled, groupMode, reverse, spacingOnly = fsCompare:EnemySortMode()
+
+    assertEquals(enabled, true)
+    assertEquals(groupMode, fsConfig.GroupSortMode.Group)
+    assertEquals(reverse, false)
+    assertEquals(spacingOnly, false)
+
+    local subject = { "arena3", "arena1", "arena2" }
+    table.sort(subject, fsCompare:EnemySortFunction(subject))
+
+    assertEquals(subject, { "arena1", "arena2", "arena3" })
+end
+
 function M:test_reverse_applies_only_once_an_enemy_is_marked_when_specs_are_unreadable()
     useManualRoles()
     addon.DB.Options.Sorting.EnemyArena.Reverse = true
 
     local enabled, _, reverse = fsCompare:EnemySortMode()
 
-    assertEquals(enabled, false)
+    assertEquals(enabled, true)
     assertEquals(reverse, false)
 
     addon.Modules.EnemyAssignments:Set(1, "TANK")

@@ -647,9 +647,13 @@ function M:EnemySortMode()
         return config.Enabled, config.GroupSortMode, config.Reverse, false
     end
 
-    -- the user marks the roles on these builds, so there is something to sort by
-    if config.Enabled and fsEnemyAssignments:IsActive() and fsEnemyAssignments:HasAny() then
-        return true, config.GroupSortMode, config.Reverse, false
+    if config.Enabled and fsEnemyAssignments:IsActive() then
+        if fsEnemyAssignments:HasAny() then
+            return true, config.GroupSortMode, config.Reverse, false
+        end
+
+        -- frames keep the places last round's marks gave them until something lays them out again
+        return true, fsConfig.GroupSortMode.Group, false, false
     end
 
     -- group order is arena order, so this only applies spacing

@@ -159,4 +159,38 @@ function M:test_marked_roles_sort_providers_other_than_blizzard_when_enemy_sorti
     assertEquals(yOffsets(), { -step, -2 * step, 0 })
 end
 
+local function sortThenClearMarks()
+    addon.WoW.Capabilities.HasEnemySpecSupport = function()
+        return true
+    end
+    -- the run would sort twice, and this test calls it itself
+    addon.Modules.Run = function() end
+    local config = addon.DB.Options.Sorting.EnemyArena
+    config.Enabled = true
+    config.GroupSortMode = addon.Configuration.GroupSortMode.Role
+    local marks = addon.Modules.EnemyAssignments
+    marks:Set(3, "HEALER")
+    fsSort:Run()
+
+    marks:Reset()
+    fsSort:Run()
+end
+
+function M:test_frames_return_to_arena_order_once_marks_are_cleared()
+    addon.DB.Options.Spacing.EnemyArena.Vertical = 0
+    sortThenClearMarks()
+
+    assertEquals(yOffsets(), { 0, -frameHeight, -2 * frameHeight })
+end
+
+function M:test_frames_of_providers_other_than_blizzard_return_to_arena_order_once_marks_are_cleared()
+    provider.Name = function()
+        return "ElvUI"
+    end
+    sortThenClearMarks()
+
+    local step = frameHeight + 10
+    assertEquals(yOffsets(), { 0, -step, -2 * step })
+end
+
 return M
