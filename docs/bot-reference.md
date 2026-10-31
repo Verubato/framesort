@@ -31,7 +31,7 @@ where they want it (top, middle, bottom, or hidden). Around that core it provide
 
 | Fact | Value |
 | --- | --- |
-| Addon version | 7.20.1 |
+| Addon version | 7.20.2 |
 | Author | Verz |
 | Interface versions (TOC) | 120105, 120100, 16001, 120007, 50504, 40402, 38002, 38001, 30405, 30300, 20506, 11509 (retail, MoP classic, Cata classic, wrath, TBC, and classic era clients) |
 | Saved variables | `FrameSortDB` |
@@ -135,9 +135,9 @@ unmarked enemy as dps, and rows you already marked keep their role. The rows it 
 role dimmed until you click it to confirm.
 
 Marks restore Enemy Arena sorting in Group or Spec/Role mode, using the Ordering and Spec
-Priority panels, while the Enemy Arena toggle is on. Until the first mark the enemy frames stay
-in arena order, and Reverse only applies once a mark exists. Marks reset at the end of every
-round and on reload. A mark made in combat is stored at once, but frames, macros, and
+Priority panels, while the Enemy Arena toggle is on. Until the first mark, and again once the
+marks reset, the enemy frames are laid out in arena order, so frames and macros agree. Reverse
+only applies once a mark exists. Marks reset at the end of every round and on reload. A mark made in combat is stored at once, but frames, macros, and
 keybindings only update when combat ends. The window says so while you are in combat.
 
 The window opens at the start of each arena round when "Show the enemy roles window at the
@@ -311,8 +311,8 @@ sorting method; Traditional mode cannot apply spacing (the Health Check flags th
 combination). Spacing applies only to Blizzard frames, not to other frame addons.
 From patch 12.1.5 onward, until marked enemy roles sort the enemy frames, the Enemy Arena
 spacing still applies to Blizzard arena frames, which are laid out in arena order. Other
-arena addons are only moved once marks sort them, and the Health Check still counts the
-spacing.
+arena addons are only moved while the Enemy Arena toggle is on, where they are laid out in
+arena order until the first mark. The Health Check still counts the spacing.
 
 ### 8.3 Nameplates
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.20.2
+
+Fixed enemy macros sometimes targeting the wrong enemy after the first round or match until a /reload.
+
 ## 7.20.1
 
 * Enemy roles text is now translated into every supported language.
