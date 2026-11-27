@@ -237,20 +237,24 @@ function M:Containers()
                 -- so once we sort the frames around the border ends up misaligned
                 local border = CompactPartyFrameBorderFrame
                 if not border or not border.SetPoint then
+                    fsLog:Debug("Party border PostSort: border is missing.")
                     return
                 end
 
                 if not border:IsVisible() then
+                    fsLog:Debug("Party border PostSort: border is not visible.")
                     return
                 end
 
                 -- unsure if re-anchoring the border is safe during combat lockdown, so skip to be safe
                 if wow.InCombatLockdown() then
+                    fsLog:Debug("Party border PostSort: in combat lockdown.")
                     return
                 end
 
                 local frames = fsFrame:ExtractUnitFrames(wow.CompactPartyFrame, true, true)
                 if #frames == 0 then
+                    fsLog:Debug("Party border PostSort: no frames.")
                     return
                 end
 
@@ -258,8 +262,24 @@ function M:Containers()
                     return fsCompare:CompareTopLeftFuzzy(x, y)
                 end)
 
+                fsLog:Debug(
+                    "Party border PostSort: anchoring to %d frames, first %s, last %s.",
+                    #frames,
+                    frames[1].GetName and frames[1]:GetName() or "nil",
+                    frames[#frames].GetName and frames[#frames]:GetName() or "nil"
+                )
+
                 border:SetPoint("TOPLEFT", frames[1], "TOPLEFT", -2, 2)
                 border:SetPoint("BOTTOMRIGHT", frames[#frames], "BOTTOMRIGHT", 2, -3)
+
+                local left, bottom, width, height = border:GetRect()
+                fsLog:Debug(
+                    "Party border PostSort: border rect left %s, bottom %s, width %s, height %s.",
+                    tostring(left),
+                    tostring(bottom),
+                    tostring(width),
+                    tostring(height)
+                )
             end,
         }
 
