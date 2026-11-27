@@ -31,7 +31,7 @@ where they want it (top, middle, bottom, or hidden). Around that core it provide
 
 | Fact | Value |
 | --- | --- |
-| Addon version | 7.20.2 |
+| Addon version | 7.20.3 |
 | Author | Verz |
 | Interface versions (TOC) | 120105, 120100, 16001, 120007, 50504, 40402, 38002, 38001, 30405, 30300, 20506, 11509 (retail, MoP classic, Cata classic, wrath, TBC, and classic era clients) |
 | Saved variables | `FrameSortDB` |
@@ -538,6 +538,12 @@ Traditional sorting mode causes Lua errors by design; the addon's own descriptio
 says these are normal and can be ignored. If the errors bother you, use Secure mode.
 Otherwise capture them and report on Discord/GitHub, ideally with the Log panel's
 "Copy Log" output (enable logging first).
+
+**"The border around my Blizzard party frames disappeared."**
+
+This is a known issue under investigation. Ask the player to enable logging on the
+Log panel, wait for the border to go missing again, then send the "Copy Log" output
+on Discord/GitHub along with their FrameSort sorting settings.
 
 **"My keybind stopped working / targets the wrong player."**
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.20.3
+
+Added logging to help track down the Blizzard party frame border going missing. If it happens to you, turn on logging and send us the log.
+
 ## 7.20.2
 
 Fixed enemy macros sometimes targeting the wrong enemy after the first round or match until a /reload.
