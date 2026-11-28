@@ -462,4 +462,44 @@ function M:test_soft_sort_disabled_does_not_move_points()
     assertPointsUnchanged(before)
 end
 
+function M:test_post_sort_in_combat_container_runs_post_sort_when_nothing_moved()
+    setPartyLayoutType(fsFrame.LayoutType.Hard)
+
+    local config = addon.DB.Options.Sorting.World
+    config.Enabled = true
+    config.PlayerSortMode = "Top"
+    config.GroupSortMode = "Group"
+    config.Reverse = false
+
+    layoutTopDown({ p2, player, p1 })
+
+    -- the mock has no GetNumPoints, which makes every frame look moved
+    for _, frame in ipairs({ player, p1, p2 }) do
+        frame.GetNumPoints = function()
+            return 1
+        end
+    end
+
+    local party = fsFrame:GetContainer(provider, fsFrame.ContainerType.Party)
+    assert(party)
+
+    local postSorted = 0
+    party.PostSortInCombat = true
+    party.PostSort = function()
+        postSorted = postSorted + 1
+    end
+
+    fsSort:Run()
+    assertEquals(postSorted, 1)
+
+    -- the frames are now in order, so the second pass moves nothing
+    local before = snapshotPoints()
+    postSorted = 0
+
+    fsSort:Run()
+
+    assertPointsUnchanged(before)
+    assertEquals(postSorted, 1)
+end
+
 return M

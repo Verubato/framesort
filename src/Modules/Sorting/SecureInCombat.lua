@@ -21,6 +21,7 @@ local memberHeader = nil
 local petHeader = nil
 local headers = {}
 local secureMethods = {}
+local postSortContainers = {}
 
 -- Findings:
 -- * Calling RunAttribute has a massive overhead.
@@ -1772,6 +1773,10 @@ secureMethods["TrySort"] = [[
 
         local message = format("In-combat sort for %s took %sms, result: %s.", Provider and Provider.Name or "nil", "%f", providerSorted and "sorted" or "not sorted")
         run:CallMethod("StopTimer", "TrySortContainer", message)
+
+        if providerSorted and Container and Container.PostSortInCombat and Provider and Provider.Name then
+            run:CallMethod("PostSort", Provider.Name, Container.Index)
+        end
         Provider = nil
         Container = nil
 
@@ -1830,6 +1835,8 @@ secureMethods["LoadProvider"] = [[
         container.IsHorizontalLayout = self:GetAttribute(prefix .. "IsHorizontalLayout")
         container.FramesPerLine = self:GetAttribute(prefix .. "FramesPerLine")
         container.EnableInBattlegrounds = self:GetAttribute(prefix .. "EnableInBattlegrounds")
+        container.PostSortInCombat = self:GetAttribute(prefix .. "PostSortInCombat")
+        container.Index = i
 
         if not container.Frame then
             run:CallMethod("Log", format("LoadProvider: missing FrameRef for %s.", prefix), LogLevel.Bug)
@@ -2017,6 +2024,7 @@ local function LoadProvider(provider)
         manager:SetAttributeNoHandler(containerPrefix .. "GroupOffsetX", groupOffset and groupOffset.X)
         manager:SetAttributeNoHandler(containerPrefix .. "GroupOffsetY", groupOffset and groupOffset.Y)
         manager:SetAttributeNoHandler(containerPrefix .. "EnableInBattlegrounds", container.EnableInBattlegrounds)
+        manager:SetAttributeNoHandler(containerPrefix .. "PostSortInCombat", (container.PostSortInCombat and container.PostSort ~= nil) or false)
 
         local spacing = container.Spacing and container:Spacing()
         manager:SetAttributeNoHandler(containerPrefix .. "SpacingHorizontal", spacing and spacing.Horizontal)
@@ -2032,6 +2040,8 @@ local function LoadProvider(provider)
         end
     end
 
+    -- the secure side only knows a container by its index, so keep the Lua object to call PostSort on
+    postSortContainers[provider:Name()] = containers
     manager:SetAttributeNoHandler(provider:Name() .. "ContainersCount", #containers)
     manager:Execute([[
         local run = control or self
@@ -2308,6 +2318,24 @@ function M:Init()
 
     function manager.NotifySorted()
         fsSorting:NotifySorted()
+    end
+
+    function manager.PostSort(_, providerName, index)
+        local containers = providerName and postSortContainers[providerName]
+        local container = containers and index and containers[index]
+
+        if not container then
+            fsLog:Bug("PostSort called for unknown container %s of provider %s.", tostring(index), tostring(providerName))
+            return
+        end
+
+        if not container.PostSortInCombat or not container.PostSort then
+            fsLog:Bug("PostSort called for container %s of provider %s which has not opted in to in-combat PostSort.", tostring(index), tostring(providerName))
+            return
+        end
+
+        fsLog:Debug("Running in-combat PostSort for container %s.", (container.Frame and container.Frame.GetName and container.Frame:GetName()) or "nil")
+        container:PostSort()
     end
 
     function manager.Log(_, msg, level)

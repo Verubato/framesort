@@ -772,6 +772,10 @@ local function TrySortContainer(container)
 
     if sorted and container.PostSort then
         container:PostSort()
+    elseif container.PostSortInCombat and container.PostSort then
+        -- an in-combat layout change may have left work for PostSort even though the frames are already in place
+        fsLog:Debug("Running PostSort for container %s although nothing moved.", (container.Frame and container.Frame.GetName and container.Frame:GetName()) or "nil")
+        container:PostSort()
     end
 
     return sorted, frames

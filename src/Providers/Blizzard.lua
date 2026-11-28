@@ -215,6 +215,8 @@ function M:Containers()
             VisibleOnly = true,
             SupportsSpacing = true,
             InCombatSortingRequired = true,
+            -- a roster update in combat re-runs Blizzard's layout, which breaks the border until the next real move
+            PostSortInCombat = true,
             IsGrouped = function()
                 return false
             end,
@@ -246,12 +248,6 @@ function M:Containers()
                     return
                 end
 
-                -- unsure if re-anchoring the border is safe during combat lockdown, so skip to be safe
-                if wow.InCombatLockdown() then
-                    fsLog:Debug("Party border PostSort: in combat lockdown.")
-                    return
-                end
-
                 local frames = fsFrame:ExtractUnitFrames(wow.CompactPartyFrame, true, true)
                 if #frames == 0 then
                     fsLog:Debug("Party border PostSort: no frames.")
@@ -263,10 +259,11 @@ function M:Containers()
                 end)
 
                 fsLog:Debug(
-                    "Party border PostSort: anchoring to %d frames, first %s, last %s.",
+                    "Party border PostSort: anchoring to %d frames, first %s, last %s, in combat %s.",
                     #frames,
                     frames[1].GetName and frames[1]:GetName() or "nil",
-                    frames[#frames].GetName and frames[#frames]:GetName() or "nil"
+                    frames[#frames].GetName and frames[#frames]:GetName() or "nil",
+                    tostring(wow.InCombatLockdown())
                 )
 
                 border:SetPoint("TOPLEFT", frames[1], "TOPLEFT", -2, 2)

@@ -126,4 +126,113 @@ function M:test_combat_starting_loads_the_marked_enemy_order_and_role_sort_mode(
     assertEquals(loaded.EnemyUnit3, "arena1")
 end
 
+local function findManager()
+    for _, frame in ipairs(wow.State.Frames) do
+        if frame:GetAttribute("_onstate-framesort-run") then
+            return frame
+        end
+    end
+
+    return nil
+end
+
+function M:test_in_combat_post_sort_runs_only_for_opted_in_containers()
+    addon.DB.Options.Sorting.Method = addon.Configuration.SortingMethod.Secure
+    addon.Modules.Sorting.Secure:Init()
+
+    local manager = findManager()
+    assert(manager)
+
+    local provider = require("TestHarness.ProviderFactory"):Create()
+    local party, raid = provider.State.Containers[1], provider.State.Containers[2]
+    provider.State.Containers = { party, raid }
+
+    local partyPostSorted = 0
+    party.InCombatSortingRequired = true
+    party.PostSortInCombat = true
+    party.PostSort = function()
+        partyPostSorted = partyPostSorted + 1
+    end
+
+    local raidPostSorted = 0
+    raid.InCombatSortingRequired = true
+    raid.PostSort = function()
+        raidPostSorted = raidPostSorted + 1
+    end
+
+    addon.Providers.All[#addon.Providers.All + 1] = provider
+
+    -- the mock frame ignores this call, so record it
+    local loaded = {}
+    manager.SetAttributeNoHandler = function(_, name, value)
+        loaded[name] = value
+    end
+
+    -- providers are loaded into the secure environment once the world is entered
+    addon.Scheduling.Scheduler:ProcessEvent(events.PLAYER_ENTERING_WORLD)
+
+    assertEquals(loaded.TestContainer1PostSortInCombat, true)
+    assertEquals(loaded.TestContainer2PostSortInCombat, false)
+
+    -- the secure in-combat run calls back by provider name and container index once a container moved
+    manager:PostSort("Test", 1)
+    manager:PostSort("Test", 2)
+
+    assertEquals(partyPostSorted, 1)
+    assertEquals(raidPostSorted, 0)
+end
+
+function M:test_party_post_sort_anchors_the_border_in_combat()
+    local frameMock = require("TestHarness.FrameMock")
+    local fsFrame = addon.WoW.Frame
+    local party = fsFrame:GetContainer(addon.Providers.Blizzard, fsFrame.ContainerType.Party)
+    assert(party and party.PostSort)
+
+    local units = { "player", "party1" }
+    wow.UnitExists = function(unit)
+        return unit == "player" or unit == "party1"
+    end
+
+    local previous
+    for i, unit in ipairs(units) do
+        local frame = frameMock:New("Frame", "CompactPartyFrameMember" .. i, wow.CompactPartyFrame)
+        frame.unit = unit
+        frame:SetSize(100, 100)
+
+        if previous then
+            frame:SetPoint("TOPLEFT", previous, "BOTTOMLEFT", 0, 0)
+        else
+            frame:SetPoint("TOPLEFT", wow.CompactPartyFrame, "TOPLEFT", 0, 0)
+        end
+
+        previous = frame
+    end
+
+    local anchored = {}
+    local border = {
+        SetPoint = function(_, point)
+            anchored[point] = true
+        end,
+        IsVisible = function()
+            return true
+        end,
+        GetRect = function()
+            return 0, 0, 0, 0
+        end,
+    }
+
+    local originalBorder = _G.CompactPartyFrameBorderFrame
+    _G.CompactPartyFrameBorderFrame = border
+    wow.State.MockInCombat = true
+
+    local ok, err = pcall(party.PostSort, party)
+
+    wow.State.MockInCombat = false
+    _G.CompactPartyFrameBorderFrame = originalBorder
+
+    assert(ok, err)
+    assertEquals(anchored.TOPLEFT, true)
+    assertEquals(anchored.BOTTOMRIGHT, true)
+end
+
 return M
